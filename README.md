@@ -39,3 +39,5 @@ Actualmente en desarrollo activo. MVP planificado para Q1 2024.
 ## Licencia 📄
 
 [Pendiente de definir] 
+
+xx
