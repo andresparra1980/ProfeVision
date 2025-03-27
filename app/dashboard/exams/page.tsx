@@ -1,17 +1,43 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FileText, Clock, Check } from "lucide-react";
+import { Plus, FileText, Clock, Check, Printer, Camera, Users, FileOutput } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+interface Exam {
+  id: string;
+  titulo: string;
+  descripcion?: string | null;
+  estado: string;
+  duracion_minutos: number;
+  created_at: string;
+  materias: {
+    nombre: string;
+  };
+  examen_grupo: Array<{
+    grupo: {
+      id: string;
+      nombre: string;
+    };
+    fecha_aplicacion: string;
+    estado: string;
+  }>;
+}
 
 export default function ExamsPage() {
   const router = useRouter();
-  const [exams, setExams] = useState<any[]>([]);
+  const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -24,7 +50,15 @@ export default function ExamsPage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("examenes")
-        .select("*, materias(nombre)")
+        .select(`
+          *,
+          materias(nombre),
+          examen_grupo(
+            grupo:grupo_id(id, nombre),
+            fecha_aplicacion,
+            estado
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -104,6 +138,7 @@ export default function ExamsPage() {
                   <TableRow>
                     <TableHead>Título</TableHead>
                     <TableHead>Materia</TableHead>
+                    <TableHead>Grupos Asignados</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead>Duración</TableHead>
                     <TableHead>Creado</TableHead>
@@ -115,28 +150,148 @@ export default function ExamsPage() {
                     <TableRow key={exam.id} className="cursor-pointer" onClick={() => handleExamClick(exam.id)}>
                       <TableCell className="font-medium">{exam.titulo}</TableCell>
                       <TableCell>{exam.materias?.nombre || "Sin materia"}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {exam.examen_grupo?.map((asignacion) => (
+                            <span
+                              key={asignacion.grupo.id}
+                              className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
+                            >
+                              {asignacion.grupo.nombre}
+                            </span>
+                          ))}
+                          {(!exam.examen_grupo || exam.examen_grupo.length === 0) && (
+                            <span className="text-xs text-muted-foreground">Sin grupos asignados</span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>{getStatusBadge(exam.estado)}</TableCell>
                       <TableCell>{exam.duracion_minutos} min</TableCell>
                       <TableCell>{new Date(exam.created_at).toLocaleDateString()}</TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <div className="flex space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 w-8 p-0"
-                            onClick={() => router.push(`/dashboard/exams/${exam.id}/edit`)}
-                          >
-                            <FileText className="h-4 w-4" />
-                            <span className="sr-only">Editar</span>
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Clock className="h-4 w-4" />
-                            <span className="sr-only">Programar aplicación</span>
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Check className="h-4 w-4" />
-                            <span className="sr-only">Calificar</span>
-                          </Button>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/edit`)}
+                                >
+                                  <FileText className="h-4 w-4" />
+                                  <span className="sr-only">Editar</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Editar examen</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <Clock className="h-4 w-4" />
+                                  <span className="sr-only">Programar aplicación</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Programar aplicación</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <Check className="h-4 w-4" />
+                                  <span className="sr-only">Calificar</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Calificar examen</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/export`)}
+                                >
+                                  <Printer className="h-4 w-4" />
+                                  <span className="sr-only">Exportar formatos</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Exportar hojas de preguntas</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/responses`)}
+                                >
+                                  <FileOutput className="h-4 w-4" />
+                                  <span className="sr-only">Hojas de respuesta</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Generar hojas de respuesta</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/scan`)}
+                                >
+                                  <Camera className="h-4 w-4" />
+                                  <span className="sr-only">Escanear respuestas</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Escanear respuestas de examen</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/assign`)}
+                                >
+                                  <Users className="h-4 w-4" />
+                                  <span className="sr-only">Asignar grupos</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Asignar grupos al examen</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -22,6 +22,30 @@ const nextConfig = {
   },
 
   // Explicitly enabling App Router is not necessary in Next.js 14+
+
+  transpilePackages: ['@react-pdf/renderer'],
+  webpack: (config, { isServer }) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'canvas': false,
+      'pdfkit': false,
+    };
+
+    // Agregar fallbacks para módulos de Node
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      crypto: false,
+    };
+
+    // Excluir opencv-js del bundle del servidor
+    if (isServer) {
+      config.externals = [...(config.externals || []), "@techstark/opencv-js"];
+    }
+
+    return config;
+  },
 };
 
 module.exports = nextConfig;
