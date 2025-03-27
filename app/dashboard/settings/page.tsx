@@ -32,7 +32,7 @@ export default function SettingsPage() {
         const { data, error } = await supabase
           .from("profesores")
           .select("*")
-          .eq("user_id", session.user.id)
+          .eq("id", session.user.id)
           .single();
 
         if (error) throw error;
@@ -40,7 +40,7 @@ export default function SettingsPage() {
         if (data) {
           setProfileData({
             nombre_completo: data.nombre_completo || "",
-            email: data.email || "",
+            email: session.user.email || "",
             telefono: data.telefono || "",
             biografia: data.biografia || "",
           });
@@ -48,6 +48,11 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo cargar la información del perfil",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -74,7 +79,7 @@ export default function SettingsPage() {
           telefono: profileData.telefono,
           biografia: profileData.biografia,
         })
-        .eq("user_id", session.user.id);
+        .eq("id", session.user.id);
 
       if (error) throw error;
 

@@ -1,274 +1,381 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Plus, Edit, Trash2, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase } from "@/lib/supabase";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
+import { PlusCircle, Pencil, Trash2, School } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useProfesor } from "@/lib/hooks/useProfesor";
+import type { Database } from "@/lib/types/database";
+
+type Materia = Database["public"]["Tables"]["materias"]["Row"];
+type EntidadEducativa = Database["public"]["Tables"]["entidades_educativas"]["Row"];
+
+const materiaSchema = z.object({
+  nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
+  descripcion: z.string().optional(),
+  entidad_id: z.string().optional(),
+});
+
+type MateriaFormValues = z.infer<typeof materiaSchema>;
 
 export default function SubjectsPage() {
-  const router = useRouter();
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [materias, setMaterias] = useState<Materia[]>([]);
+  const [entidades, setEntidades] = useState<EntidadEducativa[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hasEntities, setHasEntities] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editingMateria, setEditingMateria] = useState<Materia | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const { profesor } = useProfesor();
+  
+  const form = useForm<MateriaFormValues>({
+    resolver: zodResolver(materiaSchema),
+    defaultValues: {
+      nombre: "",
+      descripcion: "",
+      entidad_id: "none",
+    },
+  });
 
   useEffect(() => {
-    checkEntities();
-    fetchSubjects();
-  }, []);
-
-  async function checkEntities() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push("/auth/login");
-        return;
-      }
-
-      // Verificar si el profesor tiene entidades educativas asociadas
-      const { data, error } = await supabase
-        .from("profesor_entidad")
-        .select("id")
-        .eq("profesor_id", session.user.id);
-
-      if (error) {
-        console.error("Error al verificar entidades:", error);
-        return;
-      }
-
-      // Si no tiene entidades, setHasEntities será false
-      setHasEntities(data && data.length > 0);
-    } catch (error) {
-      console.error("Error inesperado al verificar entidades:", error);
+    if (profesor) {
+      loadMaterias();
+      loadEntidades();
     }
-  }
+  }, [profesor]);
 
-  async function fetchSubjects() {
+  useEffect(() => {
+    if (editingMateria) {
+      form.reset({
+        nombre: editingMateria.nombre,
+        descripcion: editingMateria.descripcion || "",
+        entidad_id: editingMateria.entidad_id || "none",
+      });
+    } else {
+      form.reset({
+        nombre: "",
+        descripcion: "",
+        entidad_id: "none",
+      });
+    }
+  }, [editingMateria, form]);
+
+  const loadMaterias = async () => {
+    if (!profesor) return;
+    
     try {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push("/auth/login");
-        return;
-      }
-
       const { data, error } = await supabase
         .from("materias")
-        .select("*, entidades_educativas(nombre)")
-        .eq("profesor_id", session.user.id)
-        .order("nombre", { ascending: true });
+        .select(`
+          *,
+          entidades_educativas (
+            id,
+            nombre
+          )
+        `)
+        .eq("profesor_id", profesor.id)
+        .order("nombre");
 
-      if (error) {
-        console.error("Error al cargar materias:", error);
-        toast({
-          title: "Error",
-          description: "No se pudieron cargar las materias",
-          variant: "destructive",
-        });
-        return;
-      }
-      setSubjects(data || []);
-    } catch (error) {
-      console.error("Error inesperado al cargar materias:", error);
+      if (error) throw error;
+      setMaterias(data || []);
+    } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Ocurrió un error al cargar las materias",
         variant: "destructive",
+        title: "Error al cargar materias",
+        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  const filteredSubjects = subjects.filter((subject) =>
-    subject.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (subject.descripcion && subject.descripcion.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (subject.entidades_educativas?.nombre && subject.entidades_educativas.nombre.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  const deleteSubject = async (id: string) => {
+  const loadEntidades = async () => {
     try {
-      // Verificar si la materia tiene exámenes asociados
-      const { data: exams, error: examsError } = await supabase
-        .from("examenes")
-        .select("id")
-        .eq("materia_id", id);
-
-      if (examsError) throw examsError;
-
-      if (exams && exams.length > 0) {
-        toast({
-          title: "Error",
-          description: "No se puede eliminar la materia porque tiene exámenes asociados",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Verificar si la materia tiene grupos asociados
-      const { data: groups, error: groupsError } = await supabase
-        .from("grupos")
-        .select("id")
-        .eq("materia_id", id);
-
-      if (groupsError) throw groupsError;
-
-      if (groups && groups.length > 0) {
-        toast({
-          title: "Error",
-          description: "No se puede eliminar la materia porque tiene grupos asociados",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Eliminar la materia
-      const { error } = await supabase
-        .from("materias")
-        .delete()
-        .eq("id", id);
+      const { data, error } = await supabase
+        .from("entidades_educativas")
+        .select("*")
+        .order("nombre");
 
       if (error) throw error;
-
+      setEntidades(data || []);
+    } catch (error: any) {
       toast({
-        title: "Éxito",
-        description: "Materia eliminada correctamente",
-      });
-
-      fetchSubjects();
-    } catch (error) {
-      console.error("Error deleting subject:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar la materia",
         variant: "destructive",
+        title: "Error al cargar instituciones",
+        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     }
   };
 
-  // Si no hay entidades educativas, mostrar un mensaje y redirigir
-  if (!loading && !hasEntities) {
-    return (
-      <div className="space-y-4">
+  const onSubmit = async (data: MateriaFormValues) => {
+    if (!profesor) return;
+    
+    try {
+      const entidad_id = data.entidad_id === "none" ? null : data.entidad_id;
+      
+      if (editingMateria) {
+        // Update
+        const { error } = await supabase
+          .from("materias")
+          .update({
+            nombre: data.nombre,
+            descripcion: data.descripcion || null,
+            entidad_id: entidad_id,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", editingMateria.id);
+
+        if (error) throw error;
+        toast({
+          title: "Materia actualizada",
+          description: "La materia ha sido actualizada correctamente.",
+        });
+      } else {
+        // Create new
+        const { error } = await supabase
+          .from("materias")
+          .insert({
+            nombre: data.nombre,
+            descripcion: data.descripcion || null,
+            entidad_id: entidad_id,
+            profesor_id: profesor.id,
+          });
+
+        if (error) throw error;
+        toast({
+          title: "Materia creada",
+          description: "La materia ha sido creada correctamente.",
+        });
+      }
+      
+      setOpenDialog(false);
+      setEditingMateria(null);
+      form.reset();
+      loadMaterias();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error al guardar materia",
+        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+      });
+    }
+  };
+
+  const handleEdit = (materia: Materia) => {
+    setEditingMateria(materia);
+    setOpenDialog(true);
+  };
+
+  const confirmDeleteMateria = async () => {
+    if (!deletingId) return;
+    
+    try {
+      const { error } = await supabase
+        .from("materias")
+        .delete()
+        .eq("id", deletingId);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Materia eliminada",
+        description: "La materia ha sido eliminada correctamente.",
+      });
+      
+      loadMaterias();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error al eliminar materia",
+        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+      });
+    } finally {
+      setDeletingId(null);
+      setConfirmDelete(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Materias</h2>
+          <h1 className="text-3xl font-bold tracking-tight">Materias</h1>
           <p className="text-muted-foreground">
             Administra las materias que impartes
           </p>
         </div>
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setEditingMateria(null)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Nueva materia
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[525px]">
+            <DialogHeader>
+              <DialogTitle>{editingMateria ? "Editar materia" : "Nueva materia"}</DialogTitle>
+              <DialogDescription>
+                {editingMateria 
+                  ? "Actualiza la información de la materia." 
+                  : "Ingresa los datos de la nueva materia."}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="nombre">Nombre*</Label>
+                <Input
+                  id="nombre"
+                  {...form.register("nombre")}
+                />
+                {form.formState.errors.nombre && (
+                  <p className="text-sm text-destructive">{form.formState.errors.nombre.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="descripcion">Descripción</Label>
+                <Textarea
+                  id="descripcion"
+                  placeholder="Breve descripción de la materia"
+                  {...form.register("descripcion")}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="entidad">Institución educativa</Label>
+                <Select
+                  onValueChange={(value: string) => form.setValue("entidad_id", value)}
+                  value={form.watch("entidad_id")}
+                >
+                  <SelectTrigger id="entidad">
+                    <SelectValue placeholder="Selecciona una institución" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Ninguna</SelectItem>
+                    {entidades.map((entidad) => (
+                      <SelectItem key={entidad.id} value={entidad.id}>
+                        {entidad.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Si no asocias la materia con una institución, se considerará como privada.
+                </p>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setOpenDialog(false);
+                    setEditingMateria(null);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit">
+                  {editingMateria ? "Actualizar" : "Crear"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
 
+      {loading ? (
+        <div className="flex h-40 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+        </div>
+      ) : materias.length === 0 ? (
         <Card>
-          <CardContent className="pt-6 text-center flex flex-col items-center justify-center space-y-4">
-            <Building2 className="h-16 w-16 text-muted-foreground" />
-            <h3 className="text-xl font-semibold">Entidad Educativa Requerida</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Debes crear o unirte a al menos una entidad educativa antes de poder crear materias. 
-              Las materias deben estar asociadas a una entidad educativa.
+          <CardContent className="flex flex-col items-center justify-center p-10">
+            <p className="mb-4 text-center text-muted-foreground">
+              No hay materias registradas.
             </p>
-            <Button 
-              onClick={() => router.push("/dashboard/entities")}
-              className="mt-2"
-            >
-              <Plus className="mr-2 h-4 w-4" /> Crear Entidad Educativa
+            <Button onClick={() => setOpenDialog(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Agregar materia
             </Button>
           </CardContent>
         </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Materias</h2>
-          <p className="text-muted-foreground">
-            Administra las materias que impartes
-          </p>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {materias.map((materia) => (
+            <Card key={materia.id}>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between">
+                  <CardTitle className="text-xl">{materia.nombre}</CardTitle>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEdit(materia)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => {
+                        setDeletingId(materia.id);
+                        setConfirmDelete(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                {/* @ts-ignore */}
+                {materia.entidades_educativas && (
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <School className="mr-1 h-3 w-3" />
+                    {/* @ts-ignore */}
+                    <span>{materia.entidades_educativas.nombre}</span>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent>
+                {materia.descripcion && (
+                  <p className="text-sm text-muted-foreground">{materia.descripcion}</p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        <Button onClick={() => router.push("/dashboard/subjects/create")}>
-          <Plus className="mr-2 h-4 w-4" /> Crear Materia
-        </Button>
-      </div>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Todas las Materias</CardTitle>
-          <CardDescription>
-            Lista de todas las materias creadas
-          </CardDescription>
-          <div className="mt-4">
-            <Input
-              placeholder="Buscar materia..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-            </div>
-          ) : filteredSubjects.length === 0 ? (
-            <div className="py-8 text-center">
-              <p className="text-muted-foreground">No hay materias disponibles</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Entidad Educativa</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSubjects.map((subject) => (
-                    <TableRow key={subject.id}>
-                      <TableCell className="font-medium">{subject.nombre}</TableCell>
-                      <TableCell>{subject.descripcion || "Sin descripción"}</TableCell>
-                      <TableCell>{subject.entidades_educativas?.nombre || "Sin entidad"}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 w-8 p-0"
-                            onClick={() => router.push(`/dashboard/subjects/${subject.id}/edit`)}
-                          >
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Editar</span>
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 w-8 p-0 text-destructive"
-                            onClick={() => deleteSubject(subject.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Eliminar</span>
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Delete confirmation dialog */}
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirmar eliminación</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar esta materia? Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteMateria}>
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

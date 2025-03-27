@@ -18,7 +18,7 @@ export default function CreateSubjectPage() {
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
-    entidad_educativa_id: "",
+    entidad_id: "",
   });
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function CreateSubjectPage() {
       // Obtener las entidades educativas a las que pertenece el profesor
       const { data, error } = await supabase
         .from("profesor_entidad")
-        .select("entidad_educativa_id, entidades_educativas(id, nombre)")
+        .select("entidad_id, entidades_educativas(id, nombre)")
         .eq("profesor_id", session.user.id);
 
       if (error) {
@@ -89,7 +89,7 @@ export default function CreateSubjectPage() {
         return;
       }
 
-      if (!formData.entidad_educativa_id || formData.entidad_educativa_id === 'none') {
+      if (!formData.entidad_id || formData.entidad_id === 'none') {
         toast({
           title: "Error",
           description: "Debes seleccionar una entidad educativa",
@@ -112,7 +112,7 @@ export default function CreateSubjectPage() {
           nombre: formData.nombre,
           descripcion: formData.descripcion,
           profesor_id: session.user.id,
-          entidad_educativa_id: formData.entidad_educativa_id,
+          entidad_id: formData.entidad_id,
         })
         .select()
         .single();
@@ -222,10 +222,10 @@ export default function CreateSubjectPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="entidad_educativa_id">Entidad Educativa *</Label>
+              <Label htmlFor="entidad_id">Entidad Educativa *</Label>
               <Select
-                value={formData.entidad_educativa_id}
-                onValueChange={(value) => handleSelectChange("entidad_educativa_id", value)}
+                value={formData.entidad_id}
+                onValueChange={(value) => handleSelectChange("entidad_id", value)}
                 required
               >
                 <SelectTrigger>

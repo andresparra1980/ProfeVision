@@ -140,7 +140,7 @@ export default function CreateExamPage() {
           materia_id: formData.materia_id,
           profesor_id: session.user.id,
           estado: "borrador",
-          duracion: formData.duracion,
+          duracion_minutos: formData.duracion,
           puntaje_total: formData.puntaje_total,
         })
         .select()

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 
-export default function EditSubjectPage({ params }: { params: { id: string } }) {
+export default function EditSubjectPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const subjectId = resolvedParams.id;
+  
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -21,13 +24,13 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
-    entidad_educativa_id: "",
+    entidad_id: "",
   });
 
   useEffect(() => {
     fetchSubject();
     fetchEntities();
-  }, [params.id]);
+  }, [subjectId]);
 
   async function fetchSubject() {
     try {
@@ -42,7 +45,7 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
       const { data, error } = await supabase
         .from("materias")
         .select("*, entidades_educativas(nombre)")
-        .eq("id", params.id)
+        .eq("id", subjectId)
         .eq("profesor_id", session.user.id)
         .single();
 
@@ -57,7 +60,7 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
       }
 
       // Verificar si hay una entidad educativa asociada
-      if (!data.entidad_educativa_id) {
+      if (!data.entidad_id) {
         toast({
           title: "Actualización requerida",
           description: "Esta materia necesita ser actualizada con una entidad educativa",
@@ -69,7 +72,7 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
       setFormData({
         nombre: data.nombre || "",
         descripcion: data.descripcion || "",
-        entidad_educativa_id: data.entidad_educativa_id || "",
+        entidad_id: data.entidad_id || "",
       });
     } catch (error) {
       console.error("Error fetching subject:", error);
@@ -96,7 +99,7 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
       // Obtener las entidades educativas a las que pertenece el profesor
       const { data, error } = await supabase
         .from("profesor_entidad")
-        .select("entidad_educativa_id, entidades_educativas(id, nombre)")
+        .select("entidad_id, entidades_educativas(id, nombre)")
         .eq("profesor_id", session.user.id);
 
       if (error) {
@@ -109,12 +112,6 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
         return;
       }
       
-      // Si no hay error pero tampoco datos, simplemente establecemos un array vacío
-      if (!data || data.length === 0) {
-        setEntities([]);
-        return;
-      }
-      
       // Transformar el resultado para tener un array de entidades
       const entitiesList = data.map((item: any) => ({
         id: item.entidades_educativas.id,
@@ -123,13 +120,14 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
 
       setEntities(entitiesList || []);
     } catch (error) {
-      // Solo mostramos el toast si es un error inesperado
-      console.error("Error inesperado al cargar entidades:", error);
+      console.error("Error inesperado:", error);
       toast({
         title: "Error",
-        description: "Ocurrió un error inesperado al cargar las entidades",
+        description: "Ocurrió un error inesperado",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -148,7 +146,7 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
         return;
       }
 
-      if (!formData.entidad_educativa_id || formData.entidad_educativa_id === 'none') {
+      if (!formData.entidad_id || formData.entidad_id === 'none') {
         toast({
           title: "Error",
           description: "Debes seleccionar una entidad educativa",
@@ -170,9 +168,9 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
         .update({
           nombre: formData.nombre,
           descripcion: formData.descripcion,
-          entidad_educativa_id: formData.entidad_educativa_id,
+          entidad_id: formData.entidad_id,
         })
-        .eq("id", params.id)
+        .eq("id", subjectId)
         .eq("profesor_id", session.user.id);
 
       if (error) {
@@ -310,10 +308,10 @@ export default function EditSubjectPage({ params }: { params: { id: string } }) 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="entidad_educativa_id">Entidad Educativa *</Label>
+              <Label htmlFor="entidad_id">Entidad Educativa *</Label>
               <Select
-                value={formData.entidad_educativa_id}
-                onValueChange={(value) => handleSelectChange("entidad_educativa_id", value)}
+                value={formData.entidad_id}
+                onValueChange={(value) => handleSelectChange("entidad_id", value)}
                 required
               >
                 <SelectTrigger>

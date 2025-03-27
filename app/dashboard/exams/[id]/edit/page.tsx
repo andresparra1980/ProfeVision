@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Save, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 
-export default function EditExamPage({ params }: { params: { id: string } }) {
+export default function EditExamPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const examId = resolvedParams.id;
+  
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,7 +40,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
     fetchExamDetails();
     fetchQuestions();
     fetchQuestionTypes();
-  }, [params.id]);
+  }, [examId]);
 
   async function fetchExamDetails() {
     try {
@@ -45,7 +48,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
       const { data, error } = await supabase
         .from("examenes")
         .select("*, materias(nombre)")
-        .eq("id", params.id)
+        .eq("id", examId)
         .single();
 
       if (error) throw error;
@@ -68,7 +71,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
       const { data, error } = await supabase
         .from("preguntas")
         .select(`*, opciones_respuesta(*)`)
-        .eq("examen_id", params.id)
+        .eq("examen_id", examId)
         .order("orden", { ascending: true });
 
       if (error) throw error;
@@ -196,7 +199,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
       const { data: questionData, error: questionError } = await supabase
         .from("preguntas")
         .insert({
-          examen_id: params.id,
+          examen_id: examId,
           texto: currentQuestion.texto,
           tipo_id: currentQuestion.tipo_id,
           puntaje: currentQuestion.puntaje,
@@ -322,7 +325,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
       const { error } = await supabase
         .from("examenes")
         .update({ estado: "publicado" })
-        .eq("id", params.id);
+        .eq("id", examId);
 
       if (error) throw error;
 

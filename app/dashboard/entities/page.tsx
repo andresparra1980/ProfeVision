@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function EntitiesPage() {
   const router = useRouter();
@@ -186,13 +187,19 @@ export default function EntitiesPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="tipo">Tipo de Institución</Label>
-                  <Input
-                    id="tipo"
-                    name="tipo"
+                  <Select
                     value={formData.tipo}
-                    onChange={handleChange}
-                    placeholder="Ej. Universidad, Colegio, Instituto"
-                  />
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo: value }))}
+                  >
+                    <SelectTrigger id="tipo">
+                      <SelectValue placeholder="Selecciona un tipo de institución" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Universidad">Universidad</SelectItem>
+                      <SelectItem value="Instituto">Instituto</SelectItem>
+                      <SelectItem value="Colegio">Colegio</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <DialogFooter>

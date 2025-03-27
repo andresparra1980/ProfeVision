@@ -116,7 +116,7 @@ export default function ExamsPage() {
                       <TableCell className="font-medium">{exam.titulo}</TableCell>
                       <TableCell>{exam.materias?.nombre || "Sin materia"}</TableCell>
                       <TableCell>{getStatusBadge(exam.estado)}</TableCell>
-                      <TableCell>{exam.duracion} min</TableCell>
+                      <TableCell>{exam.duracion_minutos} min</TableCell>
                       <TableCell>{new Date(exam.created_at).toLocaleDateString()}</TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <div className="flex space-x-2">

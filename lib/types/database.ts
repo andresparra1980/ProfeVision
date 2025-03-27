@@ -234,6 +234,7 @@ export interface Database {
       grupos: {
         Row: {
           año_escolar: string | null
+          periodo_escolar: string | null
           created_at: string
           descripcion: string | null
           id: string
@@ -244,6 +245,7 @@ export interface Database {
         }
         Insert: {
           año_escolar?: string | null
+          periodo_escolar?: string | null
           created_at?: string
           descripcion?: string | null
           id?: string
@@ -254,6 +256,7 @@ export interface Database {
         }
         Update: {
           año_escolar?: string | null
+          periodo_escolar?: string | null
           created_at?: string
           descripcion?: string | null
           id?: string

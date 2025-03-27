@@ -13,6 +13,7 @@ import {
   X,
   BookOpen,
   Building2,
+  Folders,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,11 @@ const navItems = [
     title: "Materias",
     href: "/dashboard/subjects",
     icon: BookOpen,
+  },
+  {
+    title: "Grupos",
+    href: "/dashboard/groups",
+    icon: Folders,
   },
   {
     title: "Exámenes",
