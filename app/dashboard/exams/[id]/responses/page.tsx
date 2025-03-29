@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import dynamic from 'next/dynamic';
-import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 // Importar el componente PDF completo de forma dinámica
@@ -64,12 +63,19 @@ const AllAnswerSheets = ({ exam, group, paperSize }: { exam: Exam; group: Group;
       exam={exam}
       group={group}
       paperSize={paperSize}
+      fileName={`hojas-respuesta-${exam.titulo}-${group.nombre}.pdf`}
     />
   );
 };
 
-export default function ResponseSheetsPage() {
-  const params = useParams();
+interface PageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default function ResponseSheetsPage({ params }: PageProps) {
+  const { id } = use(params);
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [paperSize, setPaperSize] = useState<'LETTER' | 'A4'>('LETTER');
   const [exam, setExam] = useState<Exam | null>(null);
@@ -86,7 +92,7 @@ export default function ResponseSheetsPage() {
     try {
       setLoading(true);
       
-      console.log('Fetching exam with ID:', params.id);
+      console.log('Fetching exam with ID:', id);
       
       // Obtener detalles del examen
       const { data: examData, error: examError } = await supabase
@@ -106,7 +112,7 @@ export default function ResponseSheetsPage() {
             )
           )
         `)
-        .eq('id', params.id)
+        .eq('id', id)
         .single();
 
       if (examError) {
@@ -135,7 +141,7 @@ export default function ResponseSheetsPage() {
             )
           )
         `)
-        .eq('examen_id', params.id);
+        .eq('examen_id', id);
 
       if (groupsError) {
         console.error('Error fetching groups:', groupsError);
@@ -169,7 +175,7 @@ export default function ResponseSheetsPage() {
       console.error('Error loading exam and groups:', error);
       // Mostrar un mensaje de error más descriptivo
       if ((error as any)?.code === 'PGRST116') {
-        console.error('No se encontró el examen con ID:', params.id);
+        console.error('No se encontró el examen con ID:', id);
       }
     } finally {
       setLoading(false);
@@ -179,7 +185,7 @@ export default function ResponseSheetsPage() {
   // Cargar datos al montar el componente
   useEffect(() => {
     loadExamAndGroups();
-  }, [params.id]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -248,15 +254,20 @@ export default function ResponseSheetsPage() {
         {selectedGroupId && exam && (
           <Card>
             <CardHeader>
-              <CardTitle>Descargar hojas de respuesta</CardTitle>
+              <CardTitle>Generar PDF</CardTitle>
             </CardHeader>
             <CardContent>
-              <PDFGenerator
-                exam={exam}
-                group={groups.find(g => g.id === selectedGroupId)!}
-                paperSize={paperSize}
-                fileName={`hojas-respuesta-${exam.titulo}-${selectedGroupId}.pdf`}
-              />
+              <p className="mb-4">
+                Se generará un PDF con hojas de respuesta para todos los estudiantes de {selectedGroup?.nombre}.
+              </p>
+              
+              {selectedGroup && (
+                <AllAnswerSheets 
+                  exam={exam} 
+                  group={selectedGroup}
+                  paperSize={paperSize}
+                />
+              )}
             </CardContent>
           </Card>
         )}

@@ -3,6 +3,7 @@
 import { ThemeProvider } from '@/components/shared/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from "sonner";
+import { UploadThingProvider } from '@/components/providers/uploadthing-provider';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,9 +13,11 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
-      <Toaster />
-      <SonnerToaster />
+      <UploadThingProvider>
+        {children}
+        <Toaster />
+        <SonnerToaster />
+      </UploadThingProvider>
     </ThemeProvider>
   );
 } 

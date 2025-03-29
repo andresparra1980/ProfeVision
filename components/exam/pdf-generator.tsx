@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Circle, Svg, Path, Rect, Image } from '@react-pdf/renderer';
-import QRCode from 'qrcode';
+import { generateLMarkerPath, calculateMarkerDimensions, generateMarkerContainerStyle } from '@/lib/utils/corner-markers';
+import { generateOptimizedQRCode, generateOptimizedQRData } from '@/lib/utils/qr-code';
 
 interface Student {
   id: string;
@@ -48,104 +49,174 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#ffffff',
-    padding: 30,
+    padding: 0,
+    height: '100%',
+    border: '3pt solid black', // Aumentado a 3pt (triple de grosor original)
   },
   container: {
-    border: '1pt solid black',
-    height: '100%',
+    margin: calculateMarkerDimensions().margin * 2, // Doble del margen de los marcadores
+    minHeight: 720,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
   },
   headerSection: {
-    borderBottom: '1pt solid black',
-    padding: 10,
+    padding: '5 10',
+    height: 120,
+    marginBottom: 8,
   },
   mainTitle: {
     fontSize: 16,
     textAlign: 'center',
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 3,
   },
   infoContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    height: 100,
+    paddingTop: 0,
   },
   qrCode: {
     width: 100,
     height: 100,
+    marginTop: -8,
+    marginLeft: -5,
   },
   studentInfo: {
     width: '65%',
-    border: '1pt solid black',
-    padding: 10,
+    border: '3pt solid black', // Aumentado a 3pt (triple de grosor original)
+    padding: 8,
   },
   infoTitle: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 4,
   },
   infoText: {
-    fontSize: 10,
+    fontSize: 8,
     marginBottom: 3,
+    lineHeight: 1.2,
   },
   answersSection: {
-    padding: 20,
+    padding: 15,
     position: 'relative',
     flexGrow: 1,
+    height: 'calc(100% - 140px)',
+    border: '3pt solid black', // Aumentado a 3pt (triple de grosor original)
+    margin: '8 8 15 8',
   },
   columnsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
+    flexGrow: 1,
   },
   column: {
     width: '48%',
+    borderRight: '1.5pt solid #cccccc', // Aumentado a 1.5pt (triple de grosor original)
+    paddingRight: 8,
+    '&:last-child': {
+      borderRight: 'none',
+      paddingRight: 0,
+    },
   },
   questionRow: {
     flexDirection: 'row',
     marginBottom: 12,
     alignItems: 'center',
+    minHeight: 22,
+    borderBottom: '1.5pt solid #cccccc', // Aumentado a 1.5pt (triple de grosor original)
+    paddingBottom: 5,
+  },
+  questionNumberContainer: {
+    width: 24,
+    height: 24,
+    border: '2pt solid black', // Aumentado a 2pt (doble de grosor original)
+    marginRight: 10,
+    backgroundColor: '#ffffff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   questionNumber: {
-    width: 25,
     fontSize: 10,
-    textAlign: 'right',
-    marginRight: 8,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   optionsRow: {
     flexDirection: 'row',
-    gap: 20,
+    gap: 24,
+    flex: 1,
+    paddingLeft: 4,
   },
   optionBubble: {
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
     position: 'relative',
+    backgroundColor: '#ffffff',
   },
   instructions: {
     fontSize: 8,
     fontStyle: 'italic',
-    marginTop: 15,
     textAlign: 'center',
     paddingHorizontal: 20,
     position: 'absolute',
-    bottom: 10,
-    left: 0,
-    right: 0,
+    bottom: calculateMarkerDimensions().margin + 5,
+    left: calculateMarkerDimensions().margin * 2,
+    right: calculateMarkerDimensions().margin * 2,
+    color: '#000000',
   },
 });
 
-// Componente para las marcas de alineación
-const AlignmentMark = ({ style }: { style: any }) => (
-  <Svg width={12} height={12} style={style}>
-    <Path d="M0,6 H12 M6,0 V12" stroke="#000000" strokeWidth={0.5} />
-    <Circle cx={6} cy={6} r={2} fill="#000000" />
-  </Svg>
-);
+// Componente para los marcadores en forma de L
+const CornerMarker = ({ position, paperSize = 'LETTER' }: { position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'; paperSize?: 'LETTER' | 'A4' }) => {
+  const { size, margin } = calculateMarkerDimensions(paperSize);
+  const containerStyle = generateMarkerContainerStyle(position, margin);
+  const path = generateLMarkerPath(size);
+  
+  return (
+    <View style={containerStyle}>
+      <Svg width={size} height={size}>
+        <Path d={path} fill="#000000" />
+      </Svg>
+    </View>
+  );
+};
 
-// Componente para una burbuja de opción
+// Componente para una burbuja de opción mejorada
 const OptionBubble = ({ letter }: { letter: string }) => (
   <View style={styles.optionBubble}>
-    <Svg width={20} height={20}>
-      <Circle cx={10} cy={10} r={8} stroke="#000000" strokeWidth={0.5} fill="none" />
-      <Text x={letter.length > 1 ? 4 : 7} y={13} style={{ fontSize: 9 }}>{letter}</Text>
+    <Svg width={24} height={24}>
+      {/* Círculo exterior más grueso para mejor detección */}
+      <Circle 
+        cx={12} 
+        cy={12} 
+        r={9} 
+        stroke="#000000" 
+        strokeWidth={2} // Aumentado a 2 (doble de grosor original)
+        fill="none" 
+      />
+      {/* Círculo interior para guía visual */}
+      <Circle 
+        cx={12} 
+        cy={12} 
+        r={8} 
+        stroke="#cccccc" 
+        strokeWidth={0.5} 
+        fill="none" 
+      />
+      {/* Letra centrada */}
+      <Text 
+        x={letter.length > 1 ? 6 : 9} 
+        y={15} 
+        style={{ 
+          fontSize: 10,
+          fontWeight: 'bold',
+        }}
+      >
+        {letter}
+      </Text>
     </Svg>
   </View>
 );
@@ -171,7 +242,9 @@ const QuestionRow = ({ pregunta, number }: { pregunta: Exam['preguntas'][0]; num
   
   return (
     <View style={styles.questionRow}>
-      <Text style={styles.questionNumber}>{number}.</Text>
+      <View style={styles.questionNumberContainer}>
+        <Text style={styles.questionNumber}>{number}</Text>
+      </View>
       <View style={styles.optionsRow}>
         {options.map((letter, index) => (
           <OptionBubble 
@@ -202,15 +275,7 @@ const QRCodeComponent = ({ data }: { data: string }) => {
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
   useEffect(() => {
-    QRCode.toDataURL(data, {
-      margin: 1,
-      width: 200,
-      errorCorrectionLevel: 'H',
-      color: {
-        dark: '#000000',
-        light: '#ffffff'
-      }
-    }).then(url => {
+    generateOptimizedQRCode(data).then(url => {
       setQrDataUrl(url);
     });
   }, [data]);
@@ -226,28 +291,33 @@ const QRCodeComponent = ({ data }: { data: string }) => {
 
 // Componente para una hoja de respuestas individual
 const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; group: Group }) => {
-  const qrData = JSON.stringify({
+  const qrData = generateOptimizedQRData({
     examId: exam.id,
     studentId: student.id,
-    groupId: group.id,
-    timestamp: new Date().toISOString(),
+    groupId: group.id
   });
 
-  // Dividir las preguntas en grupos de 30 máximo
+  // Dividir las preguntas en grupos de 20 máximo (antes 24)
   const paginasPreguntas = [];
-  for (let i = 0; i < exam.preguntas.length; i += 30) {
-    paginasPreguntas.push(exam.preguntas.slice(i, i + 30));
+  for (let i = 0; i < exam.preguntas.length; i += 20) {
+    paginasPreguntas.push(exam.preguntas.slice(i, i + 20));
   }
 
   return (
     <>
       {paginasPreguntas.map((preguntasPagina, pageIndex) => {
-        // Dividir en columnas de 15 preguntas cada una
-        const preguntasCol1 = preguntasPagina.slice(0, 15);
-        const preguntasCol2 = preguntasPagina.slice(15, 30);
+        // Dividir en columnas de 10 preguntas cada una (antes 12)
+        const preguntasCol1 = preguntasPagina.slice(0, 10);
+        const preguntasCol2 = preguntasPagina.slice(10, 20);
 
         return (
           <Page key={pageIndex} size="LETTER" style={styles.page}>
+            {/* Marcadores en forma de L externos */}
+            <CornerMarker position="top-left" />
+            <CornerMarker position="top-right" />
+            <CornerMarker position="bottom-left" />
+            <CornerMarker position="bottom-right" />
+
             <View style={styles.container}>
               <View style={styles.headerSection}>
                 <Text style={styles.mainTitle}>HOJA DE RESPUESTAS</Text>
@@ -273,31 +343,26 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
               </View>
 
               <View style={styles.answersSection}>
-                {/* Marcas de alineación en las esquinas */}
-                <AlignmentMark style={{ position: 'absolute', top: 5, left: 5 }} />
-                <AlignmentMark style={{ position: 'absolute', top: 5, right: 5 }} />
-                <AlignmentMark style={{ position: 'absolute', bottom: 5, left: 5 }} />
-                <AlignmentMark style={{ position: 'absolute', bottom: 5, right: 5 }} />
-
                 <View style={styles.columnsContainer}>
                   <QuestionsColumn 
                     preguntas={preguntasCol1} 
-                    startIndex={pageIndex * 30}
+                    startIndex={pageIndex * 20}
                   />
                   {preguntasCol2.length > 0 && (
                     <QuestionsColumn 
                       preguntas={preguntasCol2}
-                      startIndex={pageIndex * 30 + 15}
+                      startIndex={pageIndex * 20 + 10}
                     />
                   )}
                 </View>
-
-                <Text style={styles.instructions}>
-                  Instrucciones: Rellene completamente el círculo que corresponda a la respuesta correcta.
-                  Use lápiz negro o azul. No use bolígrafo rojo. Asegúrese de borrar completamente si necesita cambiar una respuesta.
-                </Text>
               </View>
             </View>
+
+            {/* Instrucciones fuera del contenedor */}
+            <Text style={styles.instructions}>
+              Instrucciones: Rellene completamente el círculo que corresponda a la respuesta correcta.
+              Use lápiz negro o azul. No use bolígrafo rojo. Asegúrese de borrar completamente si necesita cambiar una respuesta.
+            </Text>
           </Page>
         );
       })}

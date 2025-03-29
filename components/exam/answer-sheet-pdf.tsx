@@ -1,9 +1,10 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Document, Page, Text, View, StyleSheet, Svg, Path, Image, Font } from "@react-pdf/renderer";
-import QRCode from "qrcode";
+import { Document, Page, Text, View, StyleSheet, Svg, Path, Image, Font, Circle } from "@react-pdf/renderer";
 import CryptoJS from "crypto-js";
 import { useState, useEffect } from 'react';
+import { generateLMarkerPath, calculateMarkerDimensions, generateMarkerContainerStyle } from '@/lib/utils/corner-markers';
+import { generateOptimizedQRCode, generateOptimizedQRData } from '@/lib/utils/qr-code';
 
 // Definir tamaños de papel en puntos (1 punto = 1/72 pulgadas)
 const PAPER_SIZES = {
@@ -26,63 +27,116 @@ const generateValidationHash = (studentId: string, examId: string) => {
 
 // Generar QR code de forma asíncrona
 const generateQRCode = async (studentId: string, examId: string): Promise<string> => {
-  const hash = generateValidationHash(studentId, examId);
-  const data = JSON.stringify({
-    studentId,
-    examId,
-    hash,
-  });
-  return await QRCode.toDataURL(data);
+  const data = generateOptimizedQRData({ studentId, examId });
+  return await generateOptimizedQRCode(data);
 };
 
 // Estilos para el PDF
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    padding: 0,
     backgroundColor: '#ffffff',
+    height: '100%',
+    border: '3pt solid black',
+  },
+  container: {
+    margin: calculateMarkerDimensions().margin * 2,
+    minHeight: 720,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
   },
   header: {
     flexDirection: 'row',
     marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#000000',
-    paddingBottom: 10,
+    height: 130,
+    padding: '5 10',
   },
   qrCode: {
-    width: 100,
-    height: 100,
+    width: 112,
+    height: 112,
+    marginTop: -10,
+    marginLeft: -5,
   },
   headerInfo: {
     flex: 1,
     marginLeft: 20,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  studentInfo: {
-    fontSize: 12,
     marginBottom: 5,
   },
-  alignmentMark: {
+  studentInfo: {
+    fontSize: 8,
+    marginBottom: 4,
+    lineHeight: 1.2,
+  },
+  alignmentMarkExternal: {
     position: 'absolute',
-    width: 10,
-    height: 10,
-    backgroundColor: '#000000',
+    width: 36,
+    height: 36,
+    backgroundColor: 'transparent',
+  },
+  alignmentMarkInternal: {
+    position: 'absolute',
+    width: 24,
+    height: 24,
+    backgroundColor: 'transparent',
   },
   answerSection: {
-    marginTop: 20,
+    marginTop: 10,
+    position: 'relative',
+    padding: 20,
+    flexGrow: 1,
+    height: 'calc(100% - 150px)',
+    border: '3pt solid black',
+    margin: '10 10 20 10',
+  },
+  instructions: {
+    fontSize: 8,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    position: 'absolute',
+    bottom: calculateMarkerDimensions().margin + 5,
+    left: calculateMarkerDimensions().margin * 2,
+    right: calculateMarkerDimensions().margin * 2,
+    color: '#000000',
   },
   questionRow: {
     flexDirection: 'row',
-    marginBottom: 10,
+    marginBottom: 12,
+    minHeight: 24,
+    alignItems: 'center',
+    borderBottom: '1.5pt solid #cccccc',
+    paddingBottom: 8,
   },
-  optionBox: {
-    width: 20,
-    height: 20,
-    border: '1px solid black',
-    marginRight: 10,
+  questionNumberContainer: {
+    width: 24,
+    height: 24,
+    border: '2pt solid black',
+    marginRight: 12,
+    backgroundColor: '#ffffff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  questionNumber: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  optionsContainer: {
+    flexDirection: 'row',
+    gap: 24,
+    flex: 1,
+    paddingLeft: 4,
+  },
+  optionBubble: {
+    width: 24,
+    height: 24,
+    position: 'relative',
   },
 });
 
@@ -124,6 +178,49 @@ interface AnswerSheetPDFProps {
   paperSize?: PaperSize;
 }
 
+// Componente para los marcadores en forma de L
+const CornerMarker = ({ position, paperSize = 'LETTER' }: { position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'; paperSize?: 'LETTER' | 'A4' }) => {
+  const { size, margin } = calculateMarkerDimensions(paperSize);
+  const containerStyle = generateMarkerContainerStyle(position, margin);
+  const path = generateLMarkerPath(size);
+  
+  return (
+    <View style={containerStyle}>
+      <Svg width={size} height={size}>
+        <Path d={path} fill="#000000" />
+      </Svg>
+    </View>
+  );
+};
+
+// Componente para una burbuja de opción
+const OptionBubble = ({ letter }: { letter: string }) => (
+  <View style={styles.optionBubble}>
+    <Svg width={24} height={24}>
+      {/* Círculo exterior más grueso para mejor detección */}
+      <Circle 
+        cx={12} 
+        cy={12} 
+        r={9} 
+        stroke="#000000" 
+        strokeWidth={2}
+        fill="none" 
+      />
+      {/* Letra centrada */}
+      <Text 
+        x={letter.length > 1 ? 6 : 9} 
+        y={15} 
+        style={{ 
+          fontSize: 10,
+          fontWeight: 'bold',
+        }}
+      >
+        {letter}
+      </Text>
+    </Svg>
+  </View>
+);
+
 export const AnswerSheetPDF = ({ exam, student, group, paperSize = 'LETTER' }: AnswerSheetPDFProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const dimensions = PAPER_SIZES[paperSize];
@@ -139,48 +236,63 @@ export const AnswerSheetPDF = ({ exam, student, group, paperSize = 'LETTER' }: A
   return (
     <Document>
       <Page size={paperSize} style={styles.page}>
-        {/* Marcas de alineación */}
-        <View style={[styles.alignmentMark, { top: 0, left: 0 }]} />
-        <View style={[styles.alignmentMark, { top: 0, right: 0 }]} />
-        <View style={[styles.alignmentMark, { bottom: 0, left: 0 }]} />
-        <View style={[styles.alignmentMark, { bottom: 0, right: 0 }]} />
+        {/* Marcadores en forma de L externos */}
+        <CornerMarker position="top-left" paperSize={paperSize} />
+        <CornerMarker position="top-right" paperSize={paperSize} />
+        <CornerMarker position="bottom-left" paperSize={paperSize} />
+        <CornerMarker position="bottom-right" paperSize={paperSize} />
 
-        {/* Encabezado con QR e información */}
-        <View style={styles.header}>
-          <View style={styles.qrCode}>
-            <Image src={qrCodeUrl} />
-          </View>
-          <View style={styles.headerInfo}>
-            <Text style={styles.title}>{exam.titulo}</Text>
-            <Text style={styles.studentInfo}>
-              Estudiante: {student.nombre} {student.apellido}
-            </Text>
-            <Text style={styles.studentInfo}>
-              Identificación: {student.identificacion}
-            </Text>
-            <Text style={styles.studentInfo}>
-              Grupo: {group.nombre} - {group.materia.nombre}
-            </Text>
-            <Text style={styles.studentInfo}>
-              Universidad Tecnológica de Pereira
-            </Text>
-            <Text style={styles.studentInfo}>
-              Fecha: {format(new Date(), 'PPP', { locale: es })}
-            </Text>
-          </View>
-        </View>
-
-        {/* Sección de respuestas */}
-        <View style={styles.answerSection}>
-          {exam.preguntas.map((pregunta, index) => (
-            <View key={pregunta.id} style={styles.questionRow}>
-              <Text>{index + 1}. </Text>
-              {pregunta.opciones_respuesta.map((opcion) => (
-                <View key={opcion.id} style={styles.optionBox} />
-              ))}
+        <View style={styles.container}>
+          {/* Encabezado con QR e información */}
+          <View style={styles.header}>
+            <View style={styles.qrCode}>
+              <Image src={qrCodeUrl} style={{ width: 112, height: 112 }} />
             </View>
-          ))}
+            <View style={styles.headerInfo}>
+              <Text style={styles.title}>{exam.titulo}</Text>
+              <Text style={styles.studentInfo}>
+                Estudiante: {student.nombre} {student.apellido}
+              </Text>
+              <Text style={styles.studentInfo}>
+                Identificación: {student.identificacion}
+              </Text>
+              <Text style={styles.studentInfo}>
+                Grupo: {group.nombre} - {group.materia.nombre}
+              </Text>
+              <Text style={styles.studentInfo}>
+                Universidad Tecnológica de Pereira
+              </Text>
+              <Text style={styles.studentInfo}>
+                Fecha: {format(new Date(), 'PPP', { locale: es })}
+              </Text>
+            </View>
+          </View>
+
+          {/* Sección de respuestas */}
+          <View style={styles.answerSection}>
+            {exam.preguntas.map((pregunta, index) => (
+              <View key={pregunta.id} style={styles.questionRow}>
+                <View style={styles.questionNumberContainer}>
+                  <Text style={styles.questionNumber}>{index + 1}</Text>
+                </View>
+                <View style={styles.optionsContainer}>
+                  {pregunta.opciones_respuesta.map((opcion, optIndex) => (
+                    <OptionBubble 
+                      key={opcion.id} 
+                      letter={String.fromCharCode(65 + optIndex)} 
+                    />
+                  ))}
+                </View>
+              </View>
+            ))}
+          </View>
         </View>
+
+        {/* Instrucciones fuera del contenedor */}
+        <Text style={styles.instructions}>
+          Instrucciones: Rellene completamente el círculo que corresponda a la respuesta correcta.
+          Use lápiz negro o azul. No use bolígrafo rojo. Asegúrese de borrar completamente si necesita cambiar una respuesta.
+        </Text>
       </Page>
     </Document>
   );

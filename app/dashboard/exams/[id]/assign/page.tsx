@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,9 @@ interface Asignacion {
   duracion_minutos: number;
 }
 
-export default function AssignExamPage({ params }: { params: { id: string } }) {
+export default function AssignExamPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: examId } = use(params);
   const router = useRouter();
-  const [examId] = useState<string>(params.id);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [exam, setExam] = useState<any>(null);
