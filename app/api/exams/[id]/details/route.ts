@@ -6,6 +6,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Manejar correctamente los parámetros en Next.js 14
+    params = await Promise.resolve(params);
     const examId = params.id;
     
     if (!examId) {
@@ -15,84 +17,70 @@ export async function GET(
       );
     }
     
-    console.log(`API: Obteniendo detalles del examen ${examId}`);
-    
-    // Configurar cliente de Supabase con rol de servicio
+    // Configuración de Supabase
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Variables de entorno Supabase faltantes');
       return NextResponse.json(
         { error: 'Error de configuración del servidor' },
         { status: 500 }
       );
     }
     
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    // Crear cliente de Supabase
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
       }
     });
     
-    // Registramos las variables para debugging
-    console.log(`API URL: ${supabaseUrl.substring(0, 15)}...`);
-    console.log(`API Service Key presente: ${supabaseServiceKey ? 'Sí' : 'No'}`);
-    
-    // Obtener examen sin usar .single() para evitar errores
-    const { data: examArray, error: examError } = await supabaseAdmin
+    // Consultar el examen
+    const { data: exams, error: examError } = await supabase
       .from('examenes')
       .select('*')
       .eq('id', examId);
     
     if (examError) {
-      console.error('Error al obtener examen:', examError);
       return NextResponse.json(
-        { error: `Error al obtener examen: ${examError.message}` },
+        { error: `Error en la consulta: ${examError.message}` },
         { status: 500 }
       );
     }
     
-    // Verificar si tenemos resultados
-    if (!examArray || examArray.length === 0) {
-      console.error(`No se encontró examen con ID: ${examId}`);
+    if (!exams || exams.length === 0) {
       return NextResponse.json(
         { error: `Examen no encontrado con ID: ${examId}` },
         { status: 404 }
       );
     }
     
-    // Tomar el primer resultado (debería ser único por ID)
-    const examData = examArray[0];
-    console.log('Examen encontrado:', examData?.id, examData?.titulo);
+    // Obtener datos del examen
+    const examData = exams[0];
     
-    // Si el examen tiene materia_id, obtener detalles de la materia
+    // Obtener datos de la materia si existe
     if (examData.materia_id) {
-      console.log(`Buscando materia con ID: ${examData.materia_id}`);
-      
-      // Obtener materia sin usar .single()
-      const { data: materiaArray, error: materiaError } = await supabaseAdmin
+      const { data: materias, error: materiaError } = await supabase
         .from('materias')
         .select('id, nombre')
         .eq('id', examData.materia_id);
       
-      if (materiaError) {
-        console.error('Error al obtener materia:', materiaError);
-      } else if (materiaArray && materiaArray.length > 0) {
-        const materiaData = materiaArray[0];
-        console.log('Materia encontrada:', materiaData?.id, materiaData?.nombre);
-        examData.materia = materiaData;
+      if (!materiaError && materias && materias.length > 0) {
+        examData.materia = materias[0];
       } else {
-        console.log('No se encontró la materia relacionada');
+        examData.materia = { 
+          id: examData.materia_id, 
+          nombre: materiaError ? 'Error al cargar materia' : 'Materia no encontrada' 
+        };
       }
     }
     
     return NextResponse.json(examData);
+    
   } catch (error) {
-    console.error('Error en API de detalles de examen:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: `Error interno del servidor: ${error instanceof Error ? error.message : 'Error desconocido'}` },
       { status: 500 }
     );
   }

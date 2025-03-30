@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { decodeQRData, DecodedQRData } from '@/lib/utils/qr-code';
 
 // Función para imprimir partes de una clave de manera segura (solo para debugging)
 function safeLogKey(key: string | undefined): string {
@@ -40,12 +41,14 @@ async function validateServiceRole(supabaseUrl: string, serviceKey: string) {
 export async function POST(request: Request) {
   try {
     // Obtener datos del escaneo
-    const { 
+    let { 
       jobId, 
       imagePath, 
       examId = null,
       studentId = null, 
-      groupId = null 
+      groupId = null,
+      qrData = null,  // Nuevo campo para datos del QR raw
+      omrResult = null // Resultado completo del OMR para almacenar
     } = await request.json();
 
     // Validar datos mínimos requeridos
@@ -56,7 +59,66 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log('Registrando escaneo:', { jobId, imagePath, examId, studentId, groupId });
+    console.log('Registrando escaneo:', { 
+      jobId, 
+      imagePath, 
+      examId, 
+      studentId, 
+      groupId,
+      qrDataPresent: !!qrData
+    });
+
+    // Procesar datos del QR si están disponibles
+    let decodedQR: DecodedQRData | null = null;
+    let qrMetadata = null;
+    
+    if (qrData) {
+      decodedQR = decodeQRData(qrData);
+      
+      if (decodedQR) {
+        console.log('QR decodificado correctamente:', {
+          isValid: decodedQR.isValid,
+          examId: decodedQR.examId,
+          studentId: decodedQR.studentId,
+          groupId: decodedQR.groupId || 'N/A'
+        });
+        
+        // Usar los datos del QR si no se proveyeron explícitamente
+        if (!examId && decodedQR.examId) examId = decodedQR.examId;
+        if (!studentId && decodedQR.studentId) studentId = decodedQR.studentId;
+        if (!groupId && decodedQR.groupId) groupId = decodedQR.groupId;
+        
+        qrMetadata = {
+          raw: qrData,
+          decoded: {
+            isValid: decodedQR.isValid,
+            examId: decodedQR.examId,
+            studentId: decodedQR.studentId,
+            groupId: decodedQR.groupId,
+            hash: decodedQR.hash
+          }
+        };
+      } else {
+        console.warn('No se pudo decodificar el QR:', qrData);
+        qrMetadata = {
+          raw: qrData,
+          decoded: null,
+          error: 'Formato QR no reconocido'
+        };
+      }
+    }
+
+    // Preparar metadata para almacenar
+    const metadata = {
+      source: 'web_scanner_sql',
+      qr: qrMetadata,
+      omr: omrResult ? {
+        success: omrResult.success,
+        total_questions: omrResult.total_questions,
+        answered_questions: omrResult.answered_questions,
+        timestamp: new Date().toISOString()
+      } : null
+    };
 
     // ======== MÉTODO DIRECTO CON SQL ========
     // Probar inserción directa con SQL para evitar RLS
@@ -98,7 +160,7 @@ export async function POST(request: Request) {
           p_exam_id: examId,
           p_student_id: studentId,
           p_group_id: groupId,
-          p_metadata: JSON.stringify({ source: 'web_scanner_sql' })
+          p_metadata: JSON.stringify(metadata)
         });
         
         if (sqlError) {
@@ -119,6 +181,7 @@ export async function POST(request: Request) {
             scanId: sqlData.id || sqlData,
             jobId: jobId,
             status: 'in_queue',
+            qrValid: decodedQR?.isValid
           });
         }
       } catch (sqlRpcError) {
@@ -141,9 +204,7 @@ export async function POST(request: Request) {
             student_id: studentId,
             group_id: groupId,
             status: 'pending',
-            metadata: {
-              source: 'web_scanner_bypass'
-            }
+            metadata: metadata
           })
           .select('id, job_id');
           
@@ -161,9 +222,7 @@ export async function POST(request: Request) {
               student_id: studentId,
               group_id: groupId,
               status: 'pending',
-              metadata: {
-                source: 'web_scanner_standard'
-              }
+              metadata: metadata
             })
             .select('id, job_id')
             .single();
@@ -178,7 +237,11 @@ export async function POST(request: Request) {
               .insert({
                 job_id: jobId,
                 image_path: imagePath,
-                status: 'pending'
+                status: 'pending',
+                metadata: {
+                  source: 'web_scanner_minimal',
+                  qr: qrMetadata
+                }
               })
               .select('id, job_id')
               .single();
@@ -197,6 +260,7 @@ export async function POST(request: Request) {
               scanId: minimalData.id,
               jobId: minimalData.job_id,
               status: 'pending',
+              qrValid: decodedQR?.isValid
             });
           }
           
@@ -206,6 +270,7 @@ export async function POST(request: Request) {
             scanId: standardData.id,
             jobId: standardData.job_id,
             status: 'pending',
+            qrValid: decodedQR?.isValid
           });
         }
         
@@ -226,6 +291,7 @@ export async function POST(request: Request) {
           scanId: bypassData[0]?.id,
           jobId: jobId,
           status: 'in_queue',
+          qrValid: decodedQR?.isValid
         });
       } catch (bypassError: any) {
         console.error('Error grave al intentar bypass:', bypassError);

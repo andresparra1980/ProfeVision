@@ -59,6 +59,13 @@ class StandaloneOMRProcessor:
                 
             # Step 2: Extract QR code if present
             qr_data = self._extract_qr_code(warped)
+            
+            # Validar que exista un código QR
+            if not qr_data:
+                return {
+                    "success": False,
+                    "error": "No QR code found or QR code data is empty"
+                }
                 
             # Step 3: Detect and process bubbles
             questions = self._detect_bubbles(warped)

@@ -63,6 +63,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Solo aplicar a rutas de API
+  if (!request.nextUrl.pathname.startsWith('/api/')) {
+    return response;
+  }
+  
+  // Permitir la solicitud
   return response;
 }
 
@@ -72,5 +78,7 @@ export const config = {
     '/dashboard/:path*',
     '/auth/login',
     '/auth/register',
+    '/api/exams/:path*',
+    '/api/:path*',
   ],
 }; 

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
-import { ImagePlus, Upload, AlertTriangle, Camera, Loader2, Check, X, RefreshCw, AlertCircle, FileText } from 'lucide-react';
+import { ImagePlus, Upload, AlertTriangle, Camera, Loader2, Check, X, RefreshCw, AlertCircle, FileText, QrCode, User, UserCheck, UsersRound, CheckCircle2, XCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { UploadButton } from '@/components/ui/upload-button';
 import { UploadDropzone } from '@uploadthing/react';
@@ -12,6 +12,7 @@ import { OurFileRouter } from '@/app/api/uploadthing/core';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
+import { decodeQRData, DecodedQRData, getReadableQRContent, isValidQRForExam } from '@/lib/utils/qr-code';
 
 // Función para generar un ID único compatible con navegadores antiguos
 function generateUniqueId(): string {
@@ -29,19 +30,34 @@ interface OMRAnswer {
 
 interface OMRResult {
   success: boolean;
-  qr_data: string;
-  total_questions: number;
-  answered_questions: number;
   answers: OMRAnswer[];
+  qr_data: any;  // Cambiado de string a any para aceptar tanto string como objeto
+  original_image?: string;
+  processed_image?: string;
+  publicUrl?: string;
+  total_questions?: number;
+  answered_questions?: number;
+  confidence?: number;  // Añadido para compatibilidad
+  message?: string;     // Añadido para mensajes de error
+  error_code?: string;  // Añadido para códigos de error
+  error?: string;       // Mensaje de error detallado
+  error_details?: {
+    type: string;
+    code: string;
+    message: string;
+    recommendations: string[];
+  };
 }
 
 // Expandir las propiedades del componente para incluir callbacks adicionales
-interface ExamScannerProps {
+export interface ExamScannerProps {
   examId?: string;
   studentId?: string;
   groupId?: string;
   onScanComplete?: (result: OMRResult, imageUrl: string) => void;
   allowMultipleScans?: boolean;
+  disableRegistration?: boolean;
+  onConnectionError?: () => void;
 }
 
 // Función para obtener el tamaño aproximado de una imagen base64
@@ -92,12 +108,99 @@ function compressImage(base64Image: string, quality = 0.8, maxWidth = 1280): Pro
   });
 }
 
+// Componente para mostrar información detallada del QR de forma visual
+const QRInfo = ({ qrData, examId }: { qrData: string; examId?: string }) => {
+  const decodedData = decodeQRData(qrData);
+  
+  if (!decodedData) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error en el código QR</AlertTitle>
+        <AlertDescription>El formato del código QR no es reconocido.</AlertDescription>
+      </Alert>
+    );
+  }
+  
+  // Verificar si el QR pertenece al examen actual (si se proporciona un examId)
+  const matchesExam = examId ? decodedData.examId === examId : true;
+  
+  return (
+    <Card className="p-4 mt-4">
+      <div className="flex items-center space-x-2 mb-3">
+        <QrCode className="h-5 w-5 text-primary" />
+        <h3 className="font-semibold">Información del código QR</h3>
+        <Badge variant={decodedData.isValid ? "success" : "destructive"}>
+          {decodedData.isValid ? "Válido" : "Inválido"}
+        </Badge>
+        {examId && (
+          <Badge variant={matchesExam ? "outline" : "destructive"}>
+            {matchesExam ? "Coincide con examen" : "No coincide con examen"}
+          </Badge>
+        )}
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="flex items-center space-x-2 p-2 rounded-md bg-muted/40">
+          <FileText className="h-4 w-4 text-primary" />
+          <div>
+            <div className="text-xs text-muted-foreground">Examen</div>
+            <div className="text-sm font-medium">{decodedData.examId}</div>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2 p-2 rounded-md bg-muted/40">
+          <User className="h-4 w-4 text-primary" />
+          <div>
+            <div className="text-xs text-muted-foreground">Estudiante</div>
+            <div className="text-sm font-medium">{decodedData.studentId}</div>
+          </div>
+        </div>
+        
+        {decodedData.groupId && (
+          <div className="flex items-center space-x-2 p-2 rounded-md bg-muted/40">
+            <UsersRound className="h-4 w-4 text-primary" />
+            <div>
+              <div className="text-xs text-muted-foreground">Grupo</div>
+              <div className="text-sm font-medium">{decodedData.groupId}</div>
+            </div>
+          </div>
+        )}
+        
+        {!decodedData.isValid && (
+          <Alert variant="destructive" className="col-span-1 md:col-span-2 mt-2">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Código QR inválido</AlertTitle>
+            <AlertDescription>
+              El hash de verificación no coincide con los datos esperados.
+              Esto puede indicar una hoja de respuestas manipulada o un error en el procesamiento.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {examId && !matchesExam && (
+          <Alert variant="destructive" className="col-span-1 md:col-span-2 mt-2">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Examen incorrecto</AlertTitle>
+            <AlertDescription>
+              Este código QR corresponde a un examen diferente al actual.
+              Verifica que estés escaneando la hoja de respuestas correcta.
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+    </Card>
+  );
+};
+
 export function ExamScanner({
   examId,
   studentId,
   groupId,
   onScanComplete,
-  allowMultipleScans = false
+  allowMultipleScans = false,
+  disableRegistration = false,
+  onConnectionError
 }: ExamScannerProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [useAlternativeMethod, setUseAlternativeMethod] = useState(false);
@@ -113,6 +216,9 @@ export function ExamScanner({
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'completed' | 'error'>('idle');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [fileUploadMode, setFileUploadMode] = useState<boolean>(true);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [progress, setProgress] = useState({ status: 'idle', percent: 0 });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Iniciar la cámara cuando el componente se monta, si estamos en modo cámara
   useEffect(() => {
@@ -290,7 +396,7 @@ export function ExamScanner({
   // Subir usando método alternativo (archivo local)
   const uploadAlternativeMethod = async (file: File) => {
     try {
-      setIsProcessing(true);
+    setIsProcessing(true);
       // Implementación del método alternativo...
     } catch (error) {
       console.error('Error en método alternativo:', error);
@@ -319,192 +425,463 @@ export function ExamScanner({
     setRegistrationError(`Error al subir la imagen: ${error.message}`);
   };
   
+  // Función para procesar errores de conexión
+  const handleConnectionError = useCallback((error: any) => {
+    console.error('Error de conexión detectado:', error);
+    setErrorMessage('Se detectó un problema de conexión con el servidor');
+    if (onConnectionError) {
+      onConnectionError();
+    }
+  }, [onConnectionError]);
+  
   // Función para subir la imagen capturada
-  const uploadImage = async () => {
-    if (!capturedImage) return;
-    
-    setUploading(true);
-    setUploadError(null);
-    setProcessingStatus('processing');
-    
+  const uploadImage = async (file: File): Promise<void> => {
     try {
-      // Mensajes de progreso
-      toast('Preparando imagen', {
-        description: 'Procesando imagen en calidad original para análisis...'
+      setIsProcessing(true);
+      setErrorMessage(null);
+      setProgress({ status: 'uploading', percent: 0 });
+      
+      // Preparar FormData para subir la imagen
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('examId', examId);
+      
+      // Realizar la carga con seguimiento de progreso
+      const xhr = new XMLHttpRequest();
+      
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          setProgress({ status: 'uploading', percent: percentComplete });
+        }
       });
       
-      // Usar la imagen original sin compresión
-      const imageData = capturedImage;
-      
-      // Extraer parte de datos de base64
-      const base64Data = imageData.split(',')[1];
-      
-      // Preparar payload
-      const payload = {
-        imageData: base64Data,
-        contentType: 'image/png',
-        examId,
-        studentId,
-        groupId
+      xhr.onload = async function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          // Carga exitosa, procesar respuesta
+          try {
+            const response = JSON.parse(xhr.responseText);
+            console.log('Respuesta del servidor:', response);
+            
+            if (response.success) {
+              setProgress({ status: 'processing', percent: 100 });
+              
+              if (response.processInBackground) {
+                // El servidor procesará la imagen en segundo plano
+                const taskId = response.taskId;
+                await processInBackground(taskId);
+              } else {
+                // Procesamiento inmediato, mostrar resultados
+                const omrResult: OMRResult = {
+                  success: true,
+                  answers: response.answers || [],
+                  confidence: response.confidence || 0,
+                  qr_data: response.qr_data || response.qrData || null,
+                  original_image: response.originalImage || null,
+                  processed_image: response.processedImage || null,
+                  publicUrl: response.publicUrl || null
+                };
+                
+                setOmrResult(omrResult);
+                
+                // Usar la URL pública si está disponible, o la imagen procesada/original como fallback
+                const imageToDisplay = response.publicUrl || response.processedImage || response.originalImage || null;
+                setCapturedImage(imageToDisplay);
+                
+                if (onScanComplete) {
+                  onScanComplete(omrResult, imageToDisplay || '');
+                }
+              }
+            } else {
+              // Error en el procesamiento
+              setErrorMessage(response.message || 'Error al procesar la imagen');
+              const omrResult: OMRResult = {
+                success: false,
+                message: response.message || 'Error al procesar la imagen',
+                error_code: response.errorCode || 'unknown_error',
+                error_details: response.error_details || null,
+                error: response.error || null,
+                publicUrl: response.publicUrl || null,
+                answers: [], // Inicializar answers como array vacío
+                qr_data: response.qr_data || null, // Añadir qr_data para cumplir con la interfaz
+              };
+              setOmrResult(omrResult);
+              
+              // Usar URL pública si está disponible, incluso en caso de error
+              const imageToDisplay = response.publicUrl || response.originalImage || '';
+              
+              if (onScanComplete) {
+                onScanComplete(omrResult, imageToDisplay);
+              }
+            }
+          } catch (parseError) {
+            console.error('Error al procesar respuesta del servidor:', parseError);
+            setErrorMessage('Error al procesar la respuesta del servidor');
+            
+            // Verificar si es un error de conexión o de formato
+            if (xhr.responseText.includes('<!DOCTYPE html>') || xhr.responseText.trim() === '') {
+              handleConnectionError(new Error('Respuesta del servidor en formato incorrecto'));
+            }
+          }
+        } else {
+          // Error HTTP
+          console.error('Error HTTP:', xhr.status, xhr.statusText);
+          
+          let errorMessage = `Error del servidor: ${xhr.status} ${xhr.statusText}`;
+          let parsedError = null;
+          
+          try {
+            parsedError = JSON.parse(xhr.responseText);
+            errorMessage = parsedError.message || errorMessage;
+          } catch (e) {
+            // No es JSON, usar el mensaje genérico
+          }
+          
+          setErrorMessage(errorMessage);
+          
+          // Si el error es 5xx, probablemente sea un problema de conexión o del servidor
+          if (xhr.status >= 500) {
+            handleConnectionError(new Error(`Error del servidor: ${xhr.status}`));
+          }
+          
+          const omrResult: OMRResult = {
+            success: false,
+            message: errorMessage,
+            error_code: `http_${xhr.status}`,
+            error_details: parsedError || null,
+            error: null,
+            publicUrl: null,
+            answers: [], // Inicializar answers como array vacío
+            qr_data: null, // Añadir qr_data para cumplir con la interfaz
+          };
+          
+          setOmrResult(omrResult);
+          
+          if (onScanComplete) {
+            onScanComplete(omrResult, '');
+          }
+        }
       };
       
-      // Mensaje de subida
-      toast('Subiendo imagen', {
-        description: 'Enviando imagen al servidor para procesamiento OMR...'
-      });
-      
-      // Enviar a API
-      const response = await fetch('/api/exams/upload-scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        let errorText = 'Error al procesar la imagen';
-        try {
-          const errorData = await response.json();
-          errorText = errorData.error || errorText;
-        } catch (e) {
-          // Si no podemos parsear la respuesta, usar mensaje genérico
-          errorText = `Error del servidor (${response.status})`;
+      xhr.onerror = function() {
+        console.error('Error de red al subir la imagen');
+        setErrorMessage('Error de conexión al subir la imagen');
+        
+        // Claro error de conexión
+        handleConnectionError(new Error('Error de red al subir la imagen'));
+        
+        const omrResult: OMRResult = {
+          success: false,
+          message: 'Error de conexión al subir la imagen',
+          error_code: 'network_error',
+          error_details: null,
+          error: null,
+          publicUrl: null,
+          answers: [], // Inicializar answers como array vacío
+          qr_data: null, // Añadir qr_data para cumplir con la interfaz
+        };
+        
+        setOmrResult(omrResult);
+        
+        if (onScanComplete) {
+          onScanComplete(omrResult, '');
         }
-        throw new Error(errorText);
+      };
+      
+      xhr.timeout = 60000; // 60 segundos de timeout
+      xhr.ontimeout = function() {
+        console.error('Timeout al subir la imagen');
+        setErrorMessage('La solicitud ha excedido el tiempo límite');
+        
+        // También es un tipo de error de conexión
+        handleConnectionError(new Error('Timeout al subir la imagen'));
+        
+        const omrResult: OMRResult = {
+          success: false,
+          message: 'La solicitud ha excedido el tiempo límite',
+          error_code: 'timeout',
+          error_details: null,
+          error: null,
+          publicUrl: null,
+          answers: [], // Inicializar answers como array vacío
+          qr_data: null, // Añadir qr_data para cumplir con la interfaz
+        };
+        
+        setOmrResult(omrResult);
+        
+        if (onScanComplete) {
+          onScanComplete(omrResult, '');
+        }
+      };
+      
+      xhr.open('POST', '/api/exams/process-scan', true);
+      xhr.send(formData);
+      
+      } catch (error) {
+      console.error('Error al subir la imagen:', error);
+      setErrorMessage('Error al iniciar la carga de la imagen');
+      
+      // Error general, podría ser de conexión o local
+      if (error instanceof Error && 
+          (error.message.includes('network') || error.message.includes('connection'))) {
+        handleConnectionError(error);
       }
       
-      const data = await response.json();
+      const omrResult: OMRResult = {
+        success: false,
+        message: 'Error al iniciar la carga de la imagen',
+        error_code: 'upload_init_error',
+        error_details: error instanceof Error ? error.message : String(error),
+        error: null,
+        publicUrl: null,
+        answers: [], // Inicializar answers como array vacío
+        qr_data: null, // Añadir qr_data para cumplir con la interfaz
+      };
       
-      // Procesar los resultados del OMR si están disponibles
-      if (data.omrResult) {
-        setOmrResult(data.omrResult.result);
-        setProcessingStatus(data.omrResult.success ? 'completed' : 'error');
-        
-        // Llamar al callback si existe
-        if (onScanComplete && data.omrResult.result) {
-          onScanComplete(data.omrResult.result, data.fileUrl);
-        }
-        
-        toast(
-          data.omrResult.success ? 'Procesamiento completado' : 'Procesamiento con advertencias', 
-          {
-            description: `Se identificaron ${data.omrResult.result.answered_questions} respuestas de ${data.omrResult.result.total_questions} preguntas.`
-          }
-        );
-      } else if (data.omrError) {
-        setProcessingStatus('error');
-        setUploadError('Error en el procesamiento OMR: ' + data.omrError);
-        
-        toast('Error en procesamiento OMR', {
-          description: data.omrError || 'No se pudo procesar correctamente la imagen'
-        });
-      } else {
-        // Si no hay resultados ni error, mostrar un mensaje genérico
-        setProcessingStatus('processing');
-        toast('Imagen subida correctamente', {
-          description: 'La imagen se ha subido, pero aún se está procesando. Los resultados se mostrarán pronto.'
-        });
+      setOmrResult(omrResult);
+      
+      if (onScanComplete) {
+        onScanComplete(omrResult, '');
       }
-      
-      setUploading(false);
-    } catch (error) {
-      console.error('Error de subida:', error);
-      setUploading(false);
-      setUploadError(error instanceof Error ? error.message : 'Error desconocido');
-      setProcessingStatus('error');
-      
-      toast('Error al procesar la imagen', {
-        description: error instanceof Error ? error.message : 'Error desconocido al procesar la imagen',
-        duration: 5000,
-      });
+    } finally {
+      setIsProcessing(false);
     }
   };
   
-  // Resetear el escáner
-  const resetScanner = () => {
-    setCapturedImage(null);
-    setOmrResult(null);
-    setProcessingStatus('idle');
-    setUploadError(null);
-    startCamera();
+  // Función para procesar en segundo plano
+  const processInBackground = async (taskId: string): Promise<void> => {
+    try {
+      setProgress({ status: 'processing', percent: 0 });
+      
+      // Inicio del polling
+      let completed = false;
+      let attempts = 0;
+      const maxAttempts = 30; // 30 intentos, 1 cada 2 segundos = 1 minuto máximo
+      
+      while (!completed && attempts < maxAttempts) {
+        attempts++;
+        
+        // Actualizar progreso proporcional a los intentos
+        const progressPercent = Math.min(90, Math.round((attempts / maxAttempts) * 100));
+        setProgress({ status: 'processing', percent: progressPercent });
+        
+        try {
+          const response = await fetch(`/api/exams/scan-status?taskId=${taskId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+      });
+
+      if (!response.ok) {
+            // Error HTTP
+            const statusText = response.statusText;
+            console.error(`Error al verificar estado (${response.status}): ${statusText}`);
+            
+            // Si es un error 5xx, podría ser un problema de conexión o del servidor
+            if (response.status >= 500) {
+              handleConnectionError(new Error(`Error del servidor al verificar estado: ${response.status}`));
+              throw new Error(`Error del servidor: ${response.status} ${statusText}`);
+            }
+            
+            const errorData = await response.json().catch(() => ({ 
+              message: `Error HTTP: ${response.status} ${statusText}` 
+            }));
+            
+            throw new Error(errorData.message || `Error ${response.status}: ${statusText}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.status === 'completed') {
+            completed = true;
+            setProgress({ status: 'processing', percent: 100 });
+            
+            if (data.result.success) {
+              const omrResult: OMRResult = {
+                success: true,
+                answers: data.result.answers || [],
+                confidence: data.result.confidence || 0,
+                qr_data: data.result.qrData || null,
+                original_image: data.result.originalImage || null,
+                processed_image: data.result.processedImage || null,
+                publicUrl: data.result.publicUrl || null
+              };
+              
+              setOmrResult(omrResult);
+              
+              // Usar la URL pública si está disponible, o la imagen procesada/original como fallback
+              const imageToDisplay = data.result.publicUrl || data.result.processedImage || data.result.originalImage || null;
+              setCapturedImage(imageToDisplay);
+              
+              if (onScanComplete) {
+                onScanComplete(omrResult, imageToDisplay || '');
+              }
+            } else {
+              // Procesamiento completado pero con error
+              setErrorMessage(data.result.message || 'Error al procesar la imagen');
+              
+              const omrResult: OMRResult = {
+                success: false,
+                message: data.result.message || 'Error al procesar la imagen',
+                error_code: data.result.errorCode || 'processing_error',
+                error_details: data.result.errorDetails || null,
+                error: data.result.error || null,
+                publicUrl: data.result.publicUrl || null,
+                answers: [], // Inicializar answers como array vacío
+                qr_data: data.result.qrData || null, // Añadir qr_data para cumplir con la interfaz
+              };
+              
+              setOmrResult(omrResult);
+              
+              if (onScanComplete) {
+                onScanComplete(omrResult, data.result.originalImage || '');
+              }
+            }
+          } else if (data.status === 'failed') {
+            completed = true;
+            throw new Error(data.error || 'El procesamiento ha fallado');
+          } else {
+            // Aún procesando, esperar 2 segundos antes del siguiente intento
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        } catch (pollError) {
+          console.error('Error en el polling:', pollError);
+          
+          // Si después de varios intentos seguimos teniendo errores, podría ser un problema de conexión
+          if (attempts > maxAttempts / 2) {
+            handleConnectionError(new Error('Errores continuos al verificar el estado del procesamiento'));
+          }
+          
+          // Reintentar en el siguiente ciclo, a menos que sea el último intento
+          if (attempts >= maxAttempts) {
+            throw pollError;
+          }
+          
+          // Esperar antes del siguiente intento
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+      
+      // Si llegamos aquí sin completar, es un timeout
+      if (!completed) {
+        throw new Error('Se agotó el tiempo de espera para el procesamiento');
+      }
+      
+    } catch (error) {
+      console.error('Error en processInBackground:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'Error desconocido en el procesamiento');
+      
+      // Determinar si es un error de conexión
+      if (error instanceof Error && 
+          (error.message.includes('conexión') || 
+           error.message.includes('network') || 
+           error.message.includes('servidor'))) {
+        handleConnectionError(error);
+      }
+      
+      const omrResult: OMRResult = {
+        success: false,
+        message: error instanceof Error ? error.message : 'Error desconocido en el procesamiento',
+        error_code: 'background_processing_error',
+        error_details: error instanceof Error ? error.stack : null,
+        error: null,
+        publicUrl: null,
+        answers: [], // Inicializar answers como array vacío
+        qr_data: null, // Añadir qr_data para cumplir con la interfaz
+      };
+      
+      setOmrResult(omrResult);
+      
+      if (onScanComplete) {
+        onScanComplete(omrResult, '');
+      }
+    } finally {
+      setIsProcessing(false);
+    }
   };
-  
-  // Renderizar los resultados del OMR
+
+  // Función para renderizar los resultados del OMR
   const renderOMRResults = () => {
     if (!omrResult) return null;
     
     return (
-      <div className="mt-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Resultados del Escaneo</h3>
-          <Badge variant={omrResult.success ? "success" : "destructive"}>
-            {omrResult.success ? "Exitoso" : "Error"}
-          </Badge>
-        </div>
-        
-        {omrResult.qr_data && (
-          <Alert>
-            <FileText className="h-4 w-4" />
-            <AlertTitle>Datos QR</AlertTitle>
-            <AlertDescription>{omrResult.qr_data}</AlertDescription>
-          </Alert>
+      <div className="space-y-4">
+        {omrResult.success && omrResult.answers && omrResult.answers.length > 0 ? (
+          <>
+            <h3 className="font-medium text-lg flex items-center gap-2">
+              <CheckCircle2 className="text-green-500 h-5 w-5" />
+              Resultados detectados
+            </h3>
+            <div className="grid grid-cols-5 gap-2">
+              {omrResult.answers.map((answer, index) => (
+                <div key={index} className="bg-muted rounded-md p-2 text-center">
+                  <div className="text-xs text-muted-foreground">Pregunta {answer.number}</div>
+                  <div className="font-bold">{answer.value}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {Math.round(answer.confidence * 100)}% confianza
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-4">
+            <AlertTriangle className="h-8 w-8 mx-auto text-yellow-500 mb-2" />
+            <h3 className="font-medium text-lg">No se detectaron respuestas</h3>
+            <p className="text-muted-foreground mt-1">
+              {omrResult.success 
+                ? 'No se pudieron detectar las marcas en la hoja. Intenta mejorar las condiciones de iluminación y asegúrate de que las marcas sean claras.'
+                : 'No se pudieron procesar las respuestas debido a un error. Verifica la calidad de la imagen y asegúrate de que toda la hoja sea visible.'}
+            </p>
+          </div>
         )}
         
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-          <div className="rounded-md border p-2">
-            <div className="text-xs text-muted-foreground">Total Preguntas</div>
-            <div className="text-xl font-semibold">{omrResult.total_questions}</div>
-          </div>
-          
-          <div className="rounded-md border p-2">
-            <div className="text-xs text-muted-foreground">Respondidas</div>
-            <div className="text-xl font-semibold">{omrResult.answered_questions}</div>
-          </div>
-          
-          <div className="rounded-md border p-2">
-            <div className="text-xs text-muted-foreground">Completitud</div>
-            <div className="text-xl font-semibold">
-              {Math.round((omrResult.answered_questions / omrResult.total_questions) * 100)}%
+        {/* Mostrar información del QR si existe */}
+        {omrResult.qr_data && (
+          <div className="mt-4 border rounded-md p-3">
+            <h3 className="font-medium text-lg flex items-center gap-2 mb-2">
+              <QrCode className="h-5 w-5" />
+              Datos del código QR
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-muted rounded-md p-2">
+                <span className="text-xs text-muted-foreground">ID Examen</span>
+                <p className="font-medium">{omrResult.qr_data.examId || 'No disponible'}</p>
+              </div>
+              <div className="bg-muted rounded-md p-2">
+                <span className="text-xs text-muted-foreground">ID Estudiante</span>
+                <p className="font-medium">{omrResult.qr_data.studentId || 'No disponible'}</p>
+              </div>
+              {omrResult.qr_data.groupId && (
+                <div className="bg-muted rounded-md p-2">
+                  <span className="text-xs text-muted-foreground">Grupo</span>
+                  <p className="font-medium">{omrResult.qr_data.groupId}</p>
+                </div>
+              )}
+              <div className="bg-muted rounded-md p-2">
+                <span className="text-xs text-muted-foreground">Validación</span>
+                <p className="font-medium flex items-center gap-1">
+                  {omrResult.qr_data.isValid 
+                    ? <><Check className="h-4 w-4 text-green-500" /> Válido</>
+                    : <><XCircle className="h-4 w-4 text-red-500" /> Inválido</>}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <Card className="p-4">
-          <h4 className="mb-2 font-medium">Respuestas detectadas:</h4>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-            {omrResult.answers.map((answer) => (
-              <div key={answer.number} className="flex flex-col items-center rounded-md border p-2 text-center">
-                <div className="text-xs text-muted-foreground">Pregunta {answer.number}</div>
-                <div className="text-xl font-bold">{answer.value}</div>
-                <div className="text-xs text-muted-foreground">
-                  {Math.round(answer.confidence * 100)}% 
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-        
-        {allowMultipleScans && (
-          <Button 
-            className="mt-4 w-full" 
-            onClick={resetScanner} 
-            variant="outline" 
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Escanear otra hoja
-          </Button>
         )}
       </div>
     );
   };
-  
+
   return (
     <div className="flex flex-col space-y-4">
       {/* Input de archivo oculto */}
       <input
         type="file"
-        ref={fileInputRef}
-        accept="image/*"
-        onChange={handleFileUpload}
+          ref={fileInputRef}
+          accept="image/*"
+          onChange={handleFileUpload}
         className="hidden"
       />
       
@@ -538,7 +915,7 @@ export function ExamScanner({
           </Button>
         </Alert>
       )}
-      
+
       {/* Botón para cambiar de modo */}
       <div className="flex justify-end">
         <Button variant="ghost" size="sm" onClick={toggleMode}>
@@ -691,7 +1068,13 @@ export function ExamScanner({
           {!uploading && processingStatus === 'idle' && (
             <>
               <Button
-                onClick={resetScanner}
+                onClick={() => {
+                  setCapturedImage(null);
+                  setOmrResult(null);
+                  setProcessingStatus('idle');
+                  setUploadError(null);
+                  startCamera();
+                }}
                 variant="outline"
                 className="px-6"
               >
@@ -700,7 +1083,11 @@ export function ExamScanner({
               </Button>
               
               <Button
-                onClick={uploadImage}
+                onClick={() => {
+                  if (capturedImage) {
+                    uploadImage(new File([capturedImage], 'image.png'));
+                  }
+                }}
                 variant="default"
                 className="px-6"
               >
@@ -744,11 +1131,30 @@ export function ExamScanner({
           <p className="mt-1 text-center text-sm">
             {uploadError || 'No se pudo procesar la imagen correctamente. Por favor, intenta con otra imagen.'}
           </p>
+          
+          <div className="mt-4 space-y-2 w-full max-w-md p-4 bg-white/80 rounded-md border">
+            <h4 className="text-sm font-medium">Consejos para mejorar la detección:</h4>
+            <ul className="text-xs space-y-1 list-disc pl-4">
+              <li>Asegúrate de que las 4 esquinas de la hoja sean visibles</li>
+              <li>Evita sombras y reflejos sobre la hoja</li>
+              <li>Utiliza un fondo oscuro que contraste con la hoja blanca</li>
+              <li>La hoja debe estar completamente plana, sin dobleces</li>
+              <li>Las marcas deben estar hechas con lápiz oscuro y rellenadas completamente</li>
+              <li>Verifica que el código QR esté claramente visible</li>
+            </ul>
+          </div>
+          
           <div className="mt-4 flex space-x-2">
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={resetScanner}
+              onClick={() => {
+                setCapturedImage(null);
+                setOmrResult(null);
+                setProcessingStatus('idle');
+                setUploadError(null);
+                startCamera();
+              }}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Intentar de nuevo
