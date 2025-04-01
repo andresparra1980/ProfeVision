@@ -152,12 +152,14 @@ interface FinalProcessResult extends OMRProcessResult {
   jobId: string;
   imagePath: string;
   publicUrl: string;
+  processedImageUrl: string;
   message: string;
   debug_info: {
     timestamp: string;
     image_size: number | string;
     full_path: string;
     public_url: string;
+    processed_image_url: string;
   };
 }
 
@@ -792,6 +794,7 @@ export async function POST(req: Request) {
       jobId,
       imagePath: tempFilePath,
       publicUrl: publicPath, // URL pública para acceso desde el frontend
+      processedImageUrl: publicPath.replace(/\.[^.]+$/, 'questions_detected.jpeg'), // URL de la imagen procesada, siempre .jpeg
       message: omrResult.success ? 
         'Imagen procesada correctamente con OMR' : 
         'Error al procesar la imagen',
@@ -799,7 +802,8 @@ export async function POST(req: Request) {
         timestamp: new Date().toISOString(),
         image_size: await fs.stat(tempFilePath).then(stats => stats.size).catch(() => 'unknown'),
         full_path: path.resolve(tempFilePath),
-        public_url: publicPath
+        public_url: publicPath,
+        processed_image_url: publicPath.replace(/\.[^.]+$/, 'questions_detected.jpeg')
       }
     };
     

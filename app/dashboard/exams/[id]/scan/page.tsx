@@ -83,6 +83,7 @@ interface ScanResult {
   answers?: AnswerResult[];
   error_details?: ErrorDetails;
   publicUrl?: string;
+  processedImageUrl?: string;
 }
 
 // Componente para mostrar información detallada del QR en la página de resultados
@@ -704,21 +705,100 @@ export default function ExamScanPage() {
                     
                     <TabsContent value="answers" className="space-y-4">
                       {scanResult.answers && scanResult.answers.length > 0 ? (
-                        <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                          {scanResult.answers.map((answer) => (
-                            <div 
-                              key={answer.number} 
-                              className="flex flex-col items-center rounded-md border p-2 text-center"
-                            >
-                              <div className="text-xs text-muted-foreground">
-                                Pregunta {answer.number}
-                              </div>
-                              <div className="text-xl font-bold">{answer.value}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {Math.round(answer.confidence * 100)}% conf.
-                              </div>
-                            </div>
-                          ))}
+                        <div className="mt-2 grid grid-cols-2 gap-6">
+                          {/* Columna izquierda: Preguntas 1-10 */}
+                          <div className="space-y-2">
+                            {/* Mostrar todas las preguntas del 1-10, con o sin respuesta */}
+                            {[...Array(10)].map((_, idx) => {
+                              const questionNum = idx + 1;
+                              const answer = scanResult.answers?.find(a => a.number === questionNum);
+                              
+                              if (answer) {
+                                // Pregunta con respuesta
+                                return (
+                                  <div 
+                                    key={`question-${questionNum}`} 
+                                    className="flex items-center justify-between rounded-md border p-2"
+                                  >
+                                    <div className="flex items-center">
+                                      <div className="bg-primary/10 rounded-full w-7 h-7 flex items-center justify-center mr-3">
+                                        <span className="text-sm font-medium">{questionNum}</span>
+                                      </div>
+                                      <div className="text-lg font-bold">{answer.value}</div>
+                                    </div>
+                                    <div className="text-xs px-2 py-1 rounded-full bg-muted">
+                                      {Math.round(answer.confidence * 100)}% conf.
+                                    </div>
+                                  </div>
+                                );
+                              } else {
+                                // Pregunta sin respuesta
+                                return (
+                                  <div 
+                                    key={`question-${questionNum}`} 
+                                    className="flex items-center justify-between rounded-md border border-dashed p-2 opacity-70"
+                                  >
+                                    <div className="flex items-center">
+                                      <div className="bg-muted rounded-full w-7 h-7 flex items-center justify-center mr-3">
+                                        <span className="text-sm font-medium">{questionNum}</span>
+                                      </div>
+                                      <div className="text-lg font-medium text-muted-foreground">-</div>
+                                    </div>
+                                    <div className="text-xs px-2 py-1 rounded-full bg-muted/50">
+                                      Sin respuesta
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            })}
+                          </div>
+                          
+                          {/* Columna derecha: Preguntas 11-20 */}
+                          <div className="space-y-2">
+                            {/* Mostrar todas las preguntas del 11-20, con o sin respuesta */}
+                            {[...Array(10)].map((_, idx) => {
+                              const questionNum = idx + 11;
+                              const answer = scanResult.answers?.find(a => a.number === questionNum);
+                              
+                              if (answer) {
+                                // Pregunta con respuesta
+                                return (
+                                  <div 
+                                    key={`question-${questionNum}`} 
+                                    className="flex items-center justify-between rounded-md border p-2"
+                                  >
+                                    <div className="flex items-center">
+                                      <div className="bg-primary/10 rounded-full w-7 h-7 flex items-center justify-center mr-3">
+                                        <span className="text-sm font-medium">{questionNum}</span>
+                                      </div>
+                                      <div className="text-lg font-bold">{answer.value}</div>
+                                    </div>
+                                    <div className="text-xs px-2 py-1 rounded-full bg-muted">
+                                      {Math.round(answer.confidence * 100)}% conf.
+                                    </div>
+                                  </div>
+                                );
+                              } else {
+                                // Pregunta sin respuesta
+                                return (
+                                  <div 
+                                    key={`question-${questionNum}`} 
+                                    className="flex items-center justify-between rounded-md border border-dashed p-2 opacity-70"
+                                  >
+                                    <div className="flex items-center">
+                                      <div className="bg-muted rounded-full w-7 h-7 flex items-center justify-center mr-3">
+                                        <span className="text-sm font-medium">{questionNum}</span>
+                                      </div>
+                                      <div className="text-lg font-medium text-muted-foreground">-</div>
+                                    </div>
+                                    <div className="text-xs px-2 py-1 rounded-full bg-muted/50">
+                                      Sin respuesta
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            })}
+                          </div>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -810,12 +890,15 @@ export default function ExamScanPage() {
                       {scanImageUrl && (
                         <div className="mt-2 overflow-hidden rounded-md border">
                           <img 
-                            src={scanImageUrl} 
-                            alt="Escaneo" 
+                            src={scanResult.processedImageUrl || scanImageUrl.replace(/\.(jpg|jpeg|png)$/, 'questions_detected.jpeg')} 
+                            alt="Escaneo con respuestas detectadas" 
                             className="w-full object-contain"
+                            onError={(e) => {
+                              console.error('Error cargando imagen procesada:', (e.target as HTMLImageElement).src);
+                            }}
                           />
                           <div className="p-2 text-center text-xs text-muted-foreground">
-                            Imagen procesada por el sistema OMR
+                            Imagen procesada por el sistema OMR con overlay de respuestas detectadas
                           </div>
                         </div>
                       )}

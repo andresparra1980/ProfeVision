@@ -1,7 +1,8 @@
 "use client";
 
+import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Circle, Svg, Path, Rect, Image } from '@react-pdf/renderer';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Circle, Svg, Path, Rect, Image, BlobProvider } from '@react-pdf/renderer';
 import { generateLMarkerPath, calculateMarkerDimensions, generateMarkerContainerStyle } from '@/lib/utils/corner-markers';
 import { generateOptimizedQRCode, generateOptimizedQRData } from '@/lib/utils/qr-code';
 
@@ -62,11 +63,11 @@ const styles = StyleSheet.create({
   },
   headerSection: {
     padding: '5 10',
-    height: 120,
+    height: 120, // Restaurado al valor original
     marginBottom: 8,
   },
   mainTitle: {
-    fontSize: 16,
+    fontSize: 16, // Restaurado al valor original
     textAlign: 'center',
     fontWeight: 'bold',
     marginBottom: 3,
@@ -74,12 +75,12 @@ const styles = StyleSheet.create({
   infoContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    height: 100,
+    height: 100, // Restaurado al valor original
     paddingTop: 0,
   },
   qrCode: {
-    width: 100,
-    height: 100,
+    width: 100, // Restaurado al valor original
+    height: 100, // Restaurado al valor original
     marginTop: -8,
     marginLeft: -5,
   },
@@ -89,27 +90,27 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   infoTitle: {
-    fontSize: 10,
+    fontSize: 10, // Restaurado al valor original
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 4, // Restaurado al valor original
   },
   infoText: {
-    fontSize: 8,
-    marginBottom: 3,
+    fontSize: 8, // Restaurado al valor original
+    marginBottom: 3, // Restaurado al valor original
     lineHeight: 1.2,
   },
   answersSection: {
-    padding: 15,
+    padding: 10, // Mantener reducido para ahorrar espacio
     position: 'relative',
     flexGrow: 1,
-    height: 'calc(100% - 140px)',
+    height: 'calc(100% - 140px)', // Restaurado al valor original
     border: '3pt solid black', // Aumentado a 3pt (triple de grosor original)
     margin: '8 8 15 8',
   },
   columnsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    paddingVertical: 5, // Reducido de 10 a 5
     flexGrow: 1,
   },
   column: {
@@ -123,41 +124,40 @@ const styles = StyleSheet.create({
   },
   questionRow: {
     flexDirection: 'row',
-    marginBottom: 12,
+    marginBottom: 5, // Reducido de 12 a 5
     alignItems: 'center',
-    minHeight: 22,
-    borderBottom: '1.5pt solid #cccccc', // Aumentado a 1.5pt (triple de grosor original)
-    paddingBottom: 5,
+    minHeight: 16, // Reducido de 22 a 16
+    borderBottom: '1pt solid #cccccc', // Reducido de 1.5pt a 1pt
+    paddingBottom: 2, // Reducido de 5 a 2
   },
   questionNumberContainer: {
-    width: 24,
-    height: 24,
-    border: '2pt solid black', // Aumentado a 2pt (doble de grosor original)
-    marginRight: 10,
+    width: 18,
+    height: 18,
+    marginRight: 8,
     backgroundColor: '#ffffff',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
   questionNumber: {
-    fontSize: 10,
+    fontSize: 8, // Reducido de 10 a 8
     fontWeight: 'bold',
     textAlign: 'center',
   },
   optionsRow: {
     flexDirection: 'row',
-    gap: 24,
+    gap: 16, // Reducido de 24 a 16
     flex: 1,
-    paddingLeft: 4,
+    paddingLeft: 2, // Reducido de 4 a 2
   },
   optionBubble: {
-    width: 24,
-    height: 24,
+    width: 18, // Reducido de 24 a 18
+    height: 18, // Reducido de 24 a 18
     position: 'relative',
     backgroundColor: '#ffffff',
   },
   instructions: {
-    fontSize: 8,
+    fontSize: 8, // Restaurado al valor original
     fontStyle: 'italic',
     textAlign: 'center',
     paddingHorizontal: 20,
@@ -187,31 +187,31 @@ const CornerMarker = ({ position, paperSize = 'LETTER' }: { position: 'top-left'
 // Componente para una burbuja de opción mejorada
 const OptionBubble = ({ letter }: { letter: string }) => (
   <View style={styles.optionBubble}>
-    <Svg width={24} height={24}>
+    <Svg width={18} height={18}> {/* Reducido de 24 a 18 */}
       {/* Círculo exterior más grueso para mejor detección */}
       <Circle 
-        cx={12} 
-        cy={12} 
-        r={9} 
+        cx={9} /* Reducido de 12 a 9 */
+        cy={9} /* Reducido de 12 a 9 */
+        r={7} /* Reducido de 9 a 7 */
         stroke="#000000" 
-        strokeWidth={2} // Aumentado a 2 (doble de grosor original)
+        strokeWidth={1.5} /* Reducido de 2 a 1.5 */
         fill="none" 
       />
       {/* Círculo interior para guía visual */}
       <Circle 
-        cx={12} 
-        cy={12} 
-        r={8} 
+        cx={9} /* Reducido de 12 a 9 */
+        cy={9} /* Reducido de 12 a 9 */
+        r={6} /* Reducido de 8 a 6 */
         stroke="#cccccc" 
         strokeWidth={0.5} 
         fill="none" 
       />
       {/* Letra centrada */}
       <Text 
-        x={letter.length > 1 ? 6 : 9} 
-        y={15} 
+        x={letter.length > 1 ? 5 : 7} /* Ajustado de 6/9 a 5/7 */
+        y={12} /* Reducido de 15 a 12 */
         style={{ 
-          fontSize: 10,
+          fontSize: 8, /* Reducido de 10 a 8 */
           fontWeight: 'bold',
         }}
       >
@@ -297,18 +297,18 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
     groupId: group.id
   });
 
-  // Dividir las preguntas en grupos de 20 máximo (antes 24)
+  // Dividir las preguntas en grupos de 40 máximo (antes 20)
   const paginasPreguntas = [];
-  for (let i = 0; i < exam.preguntas.length; i += 20) {
-    paginasPreguntas.push(exam.preguntas.slice(i, i + 20));
+  for (let i = 0; i < exam.preguntas.length; i += 40) {
+    paginasPreguntas.push(exam.preguntas.slice(i, i + 40));
   }
 
   return (
     <>
       {paginasPreguntas.map((preguntasPagina, pageIndex) => {
-        // Dividir en columnas de 10 preguntas cada una (antes 12)
-        const preguntasCol1 = preguntasPagina.slice(0, 10);
-        const preguntasCol2 = preguntasPagina.slice(10, 20);
+        // Dividir en columnas de 20 preguntas cada una (antes 10)
+        const preguntasCol1 = preguntasPagina.slice(0, 20);
+        const preguntasCol2 = preguntasPagina.slice(20, 40);
 
         return (
           <Page key={pageIndex} size="LETTER" style={styles.page}>
@@ -346,12 +346,12 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
                 <View style={styles.columnsContainer}>
                   <QuestionsColumn 
                     preguntas={preguntasCol1} 
-                    startIndex={pageIndex * 20}
+                    startIndex={pageIndex * 40}
                   />
                   {preguntasCol2.length > 0 && (
                     <QuestionsColumn 
                       preguntas={preguntasCol2}
-                      startIndex={pageIndex * 20 + 10}
+                      startIndex={pageIndex * 40 + 20}
                     />
                   )}
                 </View>
@@ -385,13 +385,59 @@ const PDFDocument = ({ exam, group }: { exam: Exam; group: Group }) => (
 );
 
 export function PDFGenerator({ exam, group, paperSize, fileName }: PDFGeneratorProps) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <button
+        disabled
+        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+      >
+        Cargando...
+      </button>
+    );
+  }
+
+  // Usar BlobProvider en lugar de PDFDownloadLink para evitar el error
   return (
-    <PDFDownloadLink
-      document={<PDFDocument exam={exam} group={group} />}
-      fileName={fileName}
-      className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-    >
-      {({ loading }) => (loading ? 'Generando PDF...' : 'Descargar PDF')}
-    </PDFDownloadLink>
+    <BlobProvider document={<PDFDocument exam={exam} group={group} />}>
+      {({ url, loading, error }) => {
+        if (loading) {
+          return (
+            <button
+              disabled
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
+              Generando PDF...
+            </button>
+          );
+        }
+
+        if (error) {
+          return (
+            <button
+              disabled
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
+              Error generando PDF
+            </button>
+          );
+        }
+
+        return (
+          <a
+            href={url || '#'}
+            download={fileName}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Descargar PDF
+          </a>
+        );
+      }}
+    </BlobProvider>
   );
 } 
