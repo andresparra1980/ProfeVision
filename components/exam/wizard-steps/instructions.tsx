@@ -6,7 +6,7 @@ interface InstructionsProps {
 
 export function Instructions({ onNext }: InstructionsProps) {
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-4 p-4">
       <h2 className="text-2xl font-bold text-center">Asistente de Calificación</h2>
       
       <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
@@ -22,20 +22,9 @@ export function Instructions({ onNext }: InstructionsProps) {
         </ul>
       </div>
       
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h3 className="font-semibold text-blue-800 mb-2">Recomendaciones</h3>
-        <ul className="space-y-2 text-blue-700 list-disc pl-5">
-          <li>Ten los exámenes diligenciados a la mano</li>
-          <li>Asegúrate de tener una superficie plana sin imágenes de fondo donde colocar la hoja</li>
-          <li>Ubícate en un lugar con buena iluminación, evitando sombras sobre el examen</li>
-          <li>Asegúrate que las cuatro esquinas de la hoja sean visibles en la foto</li>
-          <li>Mantén la cámara paralela a la hoja para evitar distorsiones</li>
-        </ul>
-      </div>
-      
       <Button 
         onClick={onNext} 
-        className="w-full mt-6 bg-primary"
+        className="w-full bg-primary"
       >
         Continuar
       </Button>

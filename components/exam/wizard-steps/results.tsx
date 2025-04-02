@@ -566,20 +566,6 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
         )}
       </div>
       
-      {processedImage && (
-        <div className="rounded-lg border p-4">
-          <h4 className="font-medium mb-2">Imagen Procesada</h4>
-          <div className="flex justify-center">
-            <img
-              src={processedImage}
-              alt="Imagen procesada del examen"
-              className="max-w-full h-auto rounded border"
-              style={{ maxHeight: '300px' }}
-            />
-          </div>
-        </div>
-      )}
-      
       <Separator />
       
       <div className="flex justify-between mt-6 pt-4 border-t">

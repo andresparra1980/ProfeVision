@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, RotateCcw, AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, RotateCcw, AlertCircle, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
 
 interface ProcessingProps {
   imageUrl: string;
@@ -200,7 +200,26 @@ export function Processing({ imageUrl, onComplete, onRetake, onNext }: Processin
     };
   }, [imageUrl]);
 
-  const handleRetake = () => {
+  const handleRetake = async () => {
+    try {
+      // Limpiar archivos temporales antes de retomar la foto
+      const response = await fetch('/api/exams/cleanup-temp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          imageUrl: processedImageUrl || imageUrl
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Error al limpiar archivos temporales:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error al limpiar archivos temporales:', error);
+    }
+
     processingCompleted.current = false;
     onRetake();
   };
@@ -299,19 +318,23 @@ export function Processing({ imageUrl, onComplete, onRetake, onNext }: Processin
           variant="outline"
           onClick={handleRetake}
           disabled={status === 'loading'}
-          className="flex items-center justify-center gap-2"
+          className="flex items-center justify-center gap-2 h-10 px-4 py-2"
         >
-          <RotateCcw className="w-4 h-4" />
-          Volver a capturar
+          <RefreshCw className="w-4 h-4 shrink-0" />
+          <span className="truncate">Volver a capturar</span>
         </Button>
         
         <Button 
           onClick={handleNext}
           disabled={status === 'loading' || status === 'error'}
-          className={`flex items-center justify-center gap-2 ${status === 'duplicate' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-primary'}`}
+          className={`flex items-center justify-center gap-2 h-10 px-4 py-2 whitespace-nowrap ${
+            status === 'duplicate' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-primary'
+          }`}
         >
-          {status === 'duplicate' ? 'Continuar y reemplazar' : 'Continuar'}
-          <ArrowRight className="w-4 h-4" />
+          <span className="truncate">
+            {status === 'duplicate' ? 'Reemplazar' : 'Continuar'}
+          </span>
+          <ArrowRight className="w-4 h-4 shrink-0" />
         </Button>
       </div>
     </div>

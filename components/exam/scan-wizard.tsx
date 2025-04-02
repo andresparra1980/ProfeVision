@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Instructions, ImageCapture, Processing, Results, Confirmation } from './wizard-steps';
 
@@ -92,6 +92,9 @@ export function ScanWizard({ isOpen, onClose }: ScanWizardProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
         <DialogTitle>{getTitleByStep()}</DialogTitle>
+        <DialogDescription className="sr-only">
+          Asistente para calificar exámenes escaneados
+        </DialogDescription>
         <div className="flex-1 overflow-y-auto">
           {step === 1 && <Instructions onNext={handleNext} />}
           {step === 2 && (
