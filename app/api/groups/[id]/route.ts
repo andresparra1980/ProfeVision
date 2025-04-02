@@ -8,16 +8,16 @@ export async function GET(
   try {
     // Manejar correctamente los parámetros en Next.js 14
     params = await Promise.resolve(params);
-    const examId = params.id;
+    const groupId = params.id;
     
-    if (!examId) {
+    if (!groupId) {
       return NextResponse.json(
-        { error: 'ID de examen no proporcionado' },
+        { error: 'ID de grupo no proporcionado' },
         { status: 400 }
       );
     }
     
-    // Configuración de Supabase
+    // Inicializar cliente Supabase
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
@@ -28,55 +28,54 @@ export async function GET(
       );
     }
     
-    // Crear cliente de Supabase
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
-        persistSession: false
+        persistSession: false,
       }
     });
     
-    // Primero, obtener solo el examen para determinar su materia_id
-    const { data: exam, error: examError } = await supabase
-      .from('examenes')
+    // Obtener grupo con todas las columnas para evitar errores
+    const { data: group, error } = await supabase
+      .from('grupos')
       .select('*')
-      .eq('id', examId)
+      .eq('id', groupId)
       .single();
     
-    if (examError) {
-      console.error('Error al obtener examen:', examError);
+    if (error) {
+      console.error('Error al obtener detalles del grupo:', error);
       return NextResponse.json(
-        { error: 'Error al obtener detalles del examen' },
+        { error: 'Error al obtener detalles del grupo' },
         { status: 500 }
       );
     }
     
-    if (!exam) {
+    if (!group) {
       return NextResponse.json(
-        { error: 'Examen no encontrado' },
+        { error: 'Grupo no encontrado' },
         { status: 404 }
       );
     }
     
     // Buscar la materia asociada, si existe una relación
     let subjectData = null;
-    if (exam.materia_id) {
+    if (group.materia_id) {
       const { data: subject, error: subjectError } = await supabase
         .from('materias')
         .select('*')
-        .eq('id', exam.materia_id)
+        .eq('id', group.materia_id)
         .single();
       
       if (!subjectError && subject) {
         subjectData = subject;
       } else if (subjectError) {
-        console.error('Error al obtener materia:', subjectError);
+        console.error('Error al obtener materia del grupo:', subjectError);
       }
     }
     
-    // Preparar respuesta con los datos encontrados
+    // Preparar respuesta
     const response = {
-      ...exam,
+      ...group,
       materia: subjectData
     };
     

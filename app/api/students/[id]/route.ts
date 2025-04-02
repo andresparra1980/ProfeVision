@@ -8,16 +8,16 @@ export async function GET(
   try {
     // Manejar correctamente los parámetros en Next.js 14
     params = await Promise.resolve(params);
-    const examId = params.id;
+    const studentId = params.id;
     
-    if (!examId) {
+    if (!studentId) {
       return NextResponse.json(
-        { error: 'ID de examen no proporcionado' },
+        { error: 'ID de estudiante no proporcionado' },
         { status: 400 }
       );
     }
     
-    // Configuración de Supabase
+    // Inicializar cliente Supabase
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
@@ -28,59 +28,43 @@ export async function GET(
       );
     }
     
-    // Crear cliente de Supabase
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
-        persistSession: false
+        persistSession: false,
       }
     });
     
-    // Primero, obtener solo el examen para determinar su materia_id
-    const { data: exam, error: examError } = await supabase
-      .from('examenes')
-      .select('*')
-      .eq('id', examId)
+    // Consultar el estudiante con las columnas correctas según la estructura real de la tabla
+    const { data: student, error } = await supabase
+      .from('estudiantes')
+      .select('*')  // Seleccionar todas las columnas para evitar errores de columnas inexistentes
+      .eq('id', studentId)
       .single();
     
-    if (examError) {
-      console.error('Error al obtener examen:', examError);
+    if (error) {
+      console.error('Error al obtener detalles del estudiante:', error);
       return NextResponse.json(
-        { error: 'Error al obtener detalles del examen' },
+        { error: 'Error al obtener detalles del estudiante' },
         { status: 500 }
       );
     }
     
-    if (!exam) {
+    if (!student) {
       return NextResponse.json(
-        { error: 'Examen no encontrado' },
+        { error: 'Estudiante no encontrado' },
         { status: 404 }
       );
     }
     
-    // Buscar la materia asociada, si existe una relación
-    let subjectData = null;
-    if (exam.materia_id) {
-      const { data: subject, error: subjectError } = await supabase
-        .from('materias')
-        .select('*')
-        .eq('id', exam.materia_id)
-        .single();
-      
-      if (!subjectError && subject) {
-        subjectData = subject;
-      } else if (subjectError) {
-        console.error('Error al obtener materia:', subjectError);
-      }
-    }
-    
-    // Preparar respuesta con los datos encontrados
-    const response = {
-      ...exam,
-      materia: subjectData
+    // Crear un objeto con la información del estudiante
+    // Adaptando a los nombres de columna que realmente existen
+    const studentInfo = {
+      id: student.id,
+      nombre_completo: student.nombre_completo || student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim() || studentId,
     };
     
-    return NextResponse.json(response);
+    return NextResponse.json(studentInfo);
     
   } catch (error) {
     console.error('Error al procesar la solicitud:', error);

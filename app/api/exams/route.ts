@@ -9,8 +9,7 @@ export async function GET(req: NextRequest) {
     endpoints: [
       { path: '/api/exams', description: 'Endpoint raíz (este)' },
       { path: '/api/exams/[id]', description: 'Endpoint de información básica de examen' },
-      { path: '/api/exams/[id]/details', description: 'Detalles completos de examen' },
-      { path: '/api/exams/simple-details', description: 'Detalles simplificados (fallback)' }
+      { path: '/api/exams/[id]/details', description: 'Detalles completos de examen' }
     ],
     timestamp: new Date().toISOString()
   });

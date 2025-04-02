@@ -6,9 +6,6 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { ImagePlus, Upload, AlertTriangle, Camera, Loader2, Check, X, RefreshCw, AlertCircle, FileText, QrCode, User, UserCheck, UsersRound, CheckCircle2, XCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { UploadButton } from '@/components/ui/upload-button';
-import { UploadDropzone } from '@uploadthing/react';
-import { OurFileRouter } from '@/app/api/uploadthing/core';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
@@ -379,52 +376,6 @@ export function ExamScanner({
     }
   };
 
-  // Verificar en tiempo de ejecución si UploadThing está configurado
-  const isUploadThingConfigured = (): boolean => {
-    // Verificar si process.env.UPLOADTHING_SECRET existe
-    if (!process.env.NEXT_PUBLIC_UPLOADTHING_URL) {
-      return false;
-    }
-    return true;
-  };
-
-  // Limpiar errores
-  const clearError = () => {
-    setRegistrationError(null);
-  };
-
-  // Subir usando método alternativo (archivo local)
-  const uploadAlternativeMethod = async (file: File) => {
-    try {
-    setIsProcessing(true);
-      // Implementación del método alternativo...
-    } catch (error) {
-      console.error('Error en método alternativo:', error);
-      setRegistrationError('Error al procesar la imagen con el método alternativo.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Manejar la finalización de subida con UploadThing
-  const handleUploadComplete = async (fileUrl: string) => {
-    try {
-      // Registro exitoso
-    } catch (error) {
-      console.error('Error registrando scan:', error);
-      setRegistrationError('Error al registrar el escaneo en el sistema.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Manejar errores de UploadThing
-  const handleUploadError = (error: Error) => {
-    console.error('Error subiendo imagen:', error);
-    setIsProcessing(false);
-    setRegistrationError(`Error al subir la imagen: ${error.message}`);
-  };
-  
   // Función para procesar errores de conexión
   const handleConnectionError = useCallback((error: any) => {
     console.error('Error de conexión detectado:', error);
@@ -444,7 +395,7 @@ export function ExamScanner({
       // Preparar FormData para subir la imagen
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('examId', examId);
+      if (examId) formData.append('examId', examId);
       
       // Realizar la carga con seguimiento de progreso
       const xhr = new XMLHttpRequest();
@@ -548,11 +499,16 @@ export function ExamScanner({
             success: false,
             message: errorMessage,
             error_code: `http_${xhr.status}`,
-            error_details: parsedError || null,
-            error: null,
-            publicUrl: null,
+            error_details: parsedError ? {
+              type: 'http_error',
+              code: `http_${xhr.status}`,
+              message: parsedError.message || errorMessage,
+              recommendations: ['Intente nuevamente más tarde']
+            } : undefined,
+            error: undefined,
+            publicUrl: undefined,
             answers: [], // Inicializar answers como array vacío
-            qr_data: null, // Añadir qr_data para cumplir con la interfaz
+            qr_data: undefined // Añadir qr_data para cumplir con la interfaz
           };
           
           setOmrResult(omrResult);
@@ -574,11 +530,16 @@ export function ExamScanner({
           success: false,
           message: 'Error de conexión al subir la imagen',
           error_code: 'network_error',
-          error_details: null,
-          error: null,
-          publicUrl: null,
+          error_details: {
+            type: 'connection_error',
+            code: 'network_error',
+            message: 'Error de conexión al intentar subir la imagen',
+            recommendations: ['Verifique su conexión a internet', 'Intente nuevamente más tarde']
+          },
+          error: undefined,
+          publicUrl: undefined,
           answers: [], // Inicializar answers como array vacío
-          qr_data: null, // Añadir qr_data para cumplir con la interfaz
+          qr_data: undefined // Añadir qr_data para cumplir con la interfaz
         };
         
         setOmrResult(omrResult);
@@ -600,11 +561,16 @@ export function ExamScanner({
           success: false,
           message: 'La solicitud ha excedido el tiempo límite',
           error_code: 'timeout',
-          error_details: null,
-          error: null,
-          publicUrl: null,
+          error_details: {
+            type: 'timeout_error',
+            code: 'timeout',
+            message: 'La solicitud ha excedido el tiempo límite',
+            recommendations: ['Intente con una imagen de menor tamaño', 'Verifique su conexión a internet']
+          },
+          error: undefined,
+          publicUrl: undefined,
           answers: [], // Inicializar answers como array vacío
-          qr_data: null, // Añadir qr_data para cumplir con la interfaz
+          qr_data: undefined // Añadir qr_data para cumplir con la interfaz
         };
         
         setOmrResult(omrResult);
@@ -631,11 +597,16 @@ export function ExamScanner({
         success: false,
         message: 'Error al iniciar la carga de la imagen',
         error_code: 'upload_init_error',
-        error_details: error instanceof Error ? error.message : String(error),
-        error: null,
-        publicUrl: null,
+        error_details: {
+          type: 'upload_error',
+          code: 'upload_init_error',
+          message: error instanceof Error ? error.message : String(error),
+          recommendations: ['Intente con una imagen diferente', 'Verifique su conexión a internet']
+        },
+        error: undefined,
+        publicUrl: undefined,
         answers: [], // Inicializar answers como array vacío
-        qr_data: null, // Añadir qr_data para cumplir con la interfaz
+        qr_data: undefined // Añadir qr_data para cumplir con la interfaz
       };
       
       setOmrResult(omrResult);
@@ -784,11 +755,16 @@ export function ExamScanner({
         success: false,
         message: error instanceof Error ? error.message : 'Error desconocido en el procesamiento',
         error_code: 'background_processing_error',
-        error_details: error instanceof Error ? error.stack : null,
-        error: null,
-        publicUrl: null,
+        error_details: {
+          type: 'processing_error',
+          code: 'background_processing_error',
+          message: error instanceof Error ? error.message : 'Error desconocido en el procesamiento',
+          recommendations: ['Intente con una imagen más clara', 'Verifique que la hoja esté completa en la imagen']
+        },
+        error: undefined,
+        publicUrl: undefined,
         answers: [], // Inicializar answers como array vacío
-        qr_data: null, // Añadir qr_data para cumplir con la interfaz
+        qr_data: undefined // Añadir qr_data para cumplir con la interfaz
       };
       
       setOmrResult(omrResult);
@@ -900,20 +876,23 @@ export function ExamScanner({
       
       {/* Mensaje de error sobre el uso de la cámara */}
       {registrationError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{registrationError}</AlertDescription>
+        <div className="mt-4">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error de registro</AlertTitle>
+            <AlertDescription>
+              {registrationError}
+            </AlertDescription>
+          </Alert>
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={clearError} 
+            onClick={() => setRegistrationError(null)} 
             className="mt-2"
           >
-            <X className="mr-2 h-4 w-4" />
-            Cerrar
+            Cerrar mensaje
           </Button>
-        </Alert>
+        </div>
       )}
 
       {/* Botón para cambiar de modo */}

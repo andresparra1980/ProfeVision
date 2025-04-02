@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
+import { ScanExamFeature } from "@/components/exam/scan-exam-feature";
 
 export default function DashboardLayout({
   children,
@@ -60,6 +61,7 @@ export default function DashboardLayout({
         <DashboardHeader user={user} />
         <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
       </div>
+      <ScanExamFeature />
     </div>
   );
 } 
