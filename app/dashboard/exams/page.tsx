@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FileText, Clock, Check, Printer, Camera, Users, FileOutput } from "lucide-react";
+import { Plus, FileText, Eye, Printer, Users, FileOutput } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -192,34 +192,6 @@ export default function ExamsPage() {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                  <Clock className="h-4 w-4" />
-                                  <span className="sr-only">Programar aplicación</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Programar aplicación</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                  <Check className="h-4 w-4" />
-                                  <span className="sr-only">Calificar</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Calificar examen</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
@@ -262,14 +234,14 @@ export default function ExamsPage() {
                                   variant="ghost" 
                                   size="sm" 
                                   className="h-8 w-8 p-0"
-                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/scan`)}
+                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/assign`)}
                                 >
-                                  <Camera className="h-4 w-4" />
-                                  <span className="sr-only">Escanear respuestas</span>
+                                  <Users className="h-4 w-4" />
+                                  <span className="sr-only">Asignar grupos</span>
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Escanear respuestas de examen</p>
+                                <p>Asignar grupos al examen</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -281,14 +253,14 @@ export default function ExamsPage() {
                                   variant="ghost" 
                                   size="sm" 
                                   className="h-8 w-8 p-0"
-                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/assign`)}
+                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/results`)}
                                 >
-                                  <Users className="h-4 w-4" />
-                                  <span className="sr-only">Asignar grupos</span>
+                                  <Eye className="h-4 w-4" />
+                                  <span className="sr-only">Ver resultados</span>
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Asignar grupos al examen</p>
+                                <p>Ver resultados del examen</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>

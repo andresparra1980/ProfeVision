@@ -3,9 +3,18 @@ const nextConfig = {
   // Disable strict mode in development for demo purposes
   reactStrictMode: false,
   
-  // Enable image optimization from external sources if needed
+  // Enable image optimization from external sources
   images: {
-    domains: [],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'yotzyxxwdzayehazvomi.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+    minimumCacheTTL: 60,
+    dangerouslyAllowSVG: true,
   },
   
   // Ensure trailing slashes are handled properly

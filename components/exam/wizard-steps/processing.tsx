@@ -279,12 +279,12 @@ export function Processing({ imageUrl, onComplete, onRetake, onNext }: Processin
                   <div className="bg-white p-3 rounded-md border border-orange-200 mb-2">
                     <p className="font-medium text-orange-800 mb-1">Calificación anterior:</p>
                     <div className="flex justify-between">
-                      <span>Puntaje obtenido:</span>
-                      <span className="font-medium">{duplicateInfo.puntaje || 0} puntos</span>
+                      <span>Calificación obtenida:</span>
+                      <span className="font-medium">{duplicateInfo.puntaje}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Porcentaje:</span>
-                      <span className="font-medium">{duplicateInfo.porcentaje || 0}%</span>
+                      <span className="font-medium">{duplicateInfo.porcentaje}%</span>
                     </div>
                   </div>
                   <p className="font-medium mt-2">¿Desea continuar y reemplazar la calificación anterior?</p>

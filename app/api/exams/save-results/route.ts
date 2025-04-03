@@ -45,7 +45,9 @@ async function compressImage(imageBase64: string, quality: number = 80, maxSize:
     }
     
     // Utilizar sharp para comprimir la imagen con opciones agresivas
-    const processedImage = sharp(buffer);
+    const processedImage = sharp(buffer)
+      .rotate() // Rotar automáticamente basado en EXIF
+      .withMetadata(); // Mantener metadatos EXIF
     
     // Obtener metadatos para conocer el tamaño original
     const metadata = await processedImage.metadata();
@@ -297,14 +299,34 @@ export async function POST(req: NextRequest) {
       console.log('Error al buscar versión, continuando con version_id = null:', error);
     }
     
+    // Obtener el puntaje total del examen
+    const { data: examenData, error: examenError } = await supabase
+      .from('examenes')
+      .select('puntaje_total')
+      .eq('id', examId)
+      .single();
+    
+    if (examenError) {
+      console.error('Error al obtener puntaje total del examen:', examenError);
+      return NextResponse.json(
+        { error: 'Error al obtener información del examen' },
+        { status: 500 }
+      );
+    }
+
+    // Calcular el puntaje obtenido basado en el porcentaje de respuestas correctas y el puntaje total
+    const puntajeTotal = parseFloat(examenData.puntaje_total);
+    const puntajeObtenido = (examScore.percentage / 100) * puntajeTotal;
+    
     // Crear el resultado del examen
     const { data: resultadoData, error: resultadoError } = await supabase
       .from('resultados_examen')
       .insert({
         id: resultadoId,
+        examen_id: examId,
         estudiante_id: studentId,
         version_id: versionId,
-        puntaje_obtenido: examScore.correctAnswers,
+        puntaje_obtenido: puntajeObtenido.toFixed(2), // Redondear a 2 decimales
         porcentaje: examScore.percentage,
         estado: 'CALIFICADO',
         fecha_calificacion: now,

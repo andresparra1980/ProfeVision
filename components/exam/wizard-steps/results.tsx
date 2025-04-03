@@ -33,6 +33,8 @@ interface ExamScore {
   percentage: number;
   loading: boolean;
   error: string | null;
+  puntajeTotal?: number;
+  puntajeObtenido?: number;
 }
 
 interface Answer {
@@ -210,10 +212,21 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
       try {
         setExamScore(prev => ({ ...prev, loading: true, error: null }));
         
-        // Obtener preguntas del examen
-        const questionsRes = await fetch(`/api/exams/${examId}/questions`);
+        // Obtener preguntas y puntaje total del examen
+        const [questionsRes, examRes] = await Promise.all([
+          fetch(`/api/exams/${examId}/questions`),
+          fetch(`/api/exams/${examId}/details`)
+        ]);
+        
         if (!questionsRes.ok) throw new Error(`Error al obtener preguntas del examen: ${questionsRes.statusText}`);
-        const questions = await questionsRes.json();
+        if (!examRes.ok) throw new Error(`Error al obtener detalles del examen: ${examRes.statusText}`);
+        
+        const [questions, examData] = await Promise.all([
+          questionsRes.json(),
+          examRes.json()
+        ]);
+        
+        const puntajeTotal = parseFloat(examData.puntaje_total);
         
         // Extraer IDs de las preguntas
         const questionIds = questions.map((q: any) => q.id);
@@ -260,14 +273,17 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
           }
         });
         
-        // Calcular porcentaje
+        // Calcular porcentaje y puntaje obtenido
         const totalQuestions = correctAnswersMap.size;
         const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+        const puntajeObtenido = (percentage / 100) * puntajeTotal;
         
         setExamScore({
           correctAnswers: correctCount,
           totalQuestions,
           percentage,
+          puntajeTotal,
+          puntajeObtenido,
           loading: false,
           error: null
         });
@@ -559,7 +575,7 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
             <div className="bg-green-100 rounded-lg inline-flex items-center px-4 py-2">
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
               <span className="text-green-700 font-semibold">
-                Calificación: {examScore.percentage.toFixed(2)}% ({examScore.correctAnswers}/{examScore.totalQuestions})
+                Calificación: {examScore.puntajeObtenido?.toFixed(2)}/{examScore.puntajeTotal?.toFixed(2)} ({examScore.correctAnswers}/{examScore.totalQuestions} correctas)
               </span>
             </div>
           </div>
