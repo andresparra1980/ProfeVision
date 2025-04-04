@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { PlusCircle, Pencil, Trash2, Users, BookOpen, Calendar, Archive, ArchiveRestore } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { PlusCircle, Pencil, Trash2, Users, BookOpen, Calendar, Archive, ArchiveRestore, Calculator, MoreVertical } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +17,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useProfesor } from "@/lib/hooks/useProfesor";
 import Link from "next/link";
 import type { Database } from "@/lib/types/database";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
   materias: {
@@ -581,25 +588,85 @@ export default function GroupsPage() {
           {grupos.map((grupo) => (
             <Card key={grupo.id} className="flex flex-col">
               <CardHeader className="pb-2">
-                <CardTitle>
-                  <span className="truncate block">{grupo.nombre}</span>
-                </CardTitle>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <div className="text-sm">
-                    Materia: {grupo.materias?.nombre || "No asignada"}
-                  </div>
-                  <div className="text-sm">
-                    Entidad: {grupo.materias?.entidades_educativas?.nombre || "No asignada"}
-                  </div>
-                  {grupo.periodo_escolar && (
-                    <div className="text-sm flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      Periodo: {grupo.periodo_escolar}
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle>
+                      <span className="truncate block">{grupo.nombre}</span>
+                    </CardTitle>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <div className="text-sm">
+                        Materia: {grupo.materias?.nombre || "No asignada"}
+                      </div>
+                      <div className="text-sm">
+                        Entidad: {grupo.materias?.entidades_educativas?.nombre || "No asignada"}
+                      </div>
+                      {grupo.periodo_escolar && (
+                        <div className="text-sm flex items-center">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          Periodo: {grupo.periodo_escolar}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">Abrir menú</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(grupo)}>
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Editar grupo
+                      </DropdownMenuItem>
+                      <Link href={`/dashboard/groups/${grupo.id}/students`} className="w-full">
+                        <DropdownMenuItem>
+                          <Users className="h-4 w-4 mr-2" />
+                          Estudiantes
+                        </DropdownMenuItem>
+                      </Link>
+                      <Link href={`/dashboard/groups/${grupo.id}/grades`} className="w-full">
+                        <DropdownMenuItem>
+                          <Calculator className="h-4 w-4 mr-2" />
+                          Calificaciones
+                        </DropdownMenuItem>
+                      </Link>
+                      <Link href={`/dashboard/groups/${grupo.id}/grading-scheme`} className="w-full">
+                        <DropdownMenuItem>
+                          <BookOpen className="h-4 w-4 mr-2" />
+                          Esquema
+                        </DropdownMenuItem>
+                      </Link>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => toggleArchivarGrupo(grupo)}>
+                        {grupo.estado === 'activo' ? (
+                          <>
+                            <Archive className="h-4 w-4 mr-2" />
+                            Archivar
+                          </>
+                        ) : (
+                          <>
+                            <ArchiveRestore className="h-4 w-4 mr-2" />
+                            Activar
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          setDeletingId(grupo.id);
+                          setConfirmDelete(true);
+                        }}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 pb-0">
+              <CardContent className="flex-1">
                 <div className="space-y-2">
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Users className="mr-1 h-4 w-4" />
@@ -616,50 +683,6 @@ export default function GroupsPage() {
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="border-t px-3 py-1.5">
-                <div className="flex flex-wrap gap-1 w-full">
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => handleEdit(grupo)}
-                    className="flex-1 min-w-[100px] h-7"
-                  >
-                    <Pencil className="h-4 w-4 mr-1" /> Editar
-                  </Button>
-                  <Link href={`/dashboard/groups/${grupo.id}/students`} className="flex-1 min-w-[100px]">
-                    <Button size="sm" variant="ghost" className="w-full h-7">
-                      <Users className="h-4 w-4 mr-1" /> Estudiantes
-                    </Button>
-                  </Link>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="flex-1 min-w-[100px] h-7"
-                    onClick={() => toggleArchivarGrupo(grupo)}
-                  >
-                    {grupo.estado === 'activo' ? (
-                      <>
-                        <Archive className="h-4 w-4 mr-1" /> Archivar
-                      </>
-                    ) : (
-                      <>
-                        <ArchiveRestore className="h-4 w-4 mr-1" /> Activar
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 flex-1 min-w-[100px] h-7"
-                    onClick={() => {
-                      setDeletingId(grupo.id);
-                      setConfirmDelete(true);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" /> Eliminar
-                  </Button>
-                </div>
-              </CardFooter>
             </Card>
           ))}
         </div>

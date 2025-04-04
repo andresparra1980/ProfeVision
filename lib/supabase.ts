@@ -1,34 +1,28 @@
-import { createBrowserClient } from '@supabase/ssr';
+import { supabase as clientSupabase } from './supabase/client';
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from './types/database';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL and anonymous key must be defined in environment variables');
-}
+// Re-export the client instance
+export const supabase = clientSupabase;
 
 // Define site URL for callbacks
-const siteUrl = 
+export const siteUrl = 
   typeof window !== 'undefined' 
     ? window.location.origin
     : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
-// Client-side Supabase client with auth configuration
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    flowType: 'pkce',
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    persistSession: true,
-  },
-  global: {
-    fetch: fetch.bind(globalThis),
-    headers: {
-      'X-Client-Info': 'profevision',
-    },
-  },
-});
+// For service/admin operations that need the service key
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
+
+export function getServiceSupabase() {
+  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+}
 
 // Update sign-up options to include redirectTo
 export const signUpWithRedirect = (email: string, password: string, userData: any) => {
@@ -40,15 +34,4 @@ export const signUpWithRedirect = (email: string, password: string, userData: an
       emailRedirectTo: `${siteUrl}/auth/callback`,
     },
   });
-};
-
-// Service role client for server-side operations
-export const getServiceSupabase = () => {
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  
-  if (!supabaseServiceKey) {
-    throw new Error('Supabase service role key must be defined in environment variables for admin operations');
-  }
-  
-  return createClient(supabaseUrl, supabaseServiceKey);
 }; 

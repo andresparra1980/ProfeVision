@@ -1,20 +1,39 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
+import type { Database } from '@/lib/types/database';
 
-export const createClient = (): SupabaseClient => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Faltan variables de entorno de Supabase');
-  }
-  
-  return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+// Singleton instance
+let client: ReturnType<typeof createBrowserClient<Database>> | null = null;
+
+// Get site URL for auth callbacks
+const siteUrl = 
+  typeof window !== 'undefined' 
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+// Function to get Supabase client
+export function getSupabaseClient() {
+  if (client) return client;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  client = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
-      persistSession: true,
+      flowType: 'pkce',
       autoRefreshToken: true,
+      detectSessionInUrl: true,
+      persistSession: true,
+    },
+    global: {
+      fetch: fetch.bind(globalThis),
+      headers: {
+        'X-Client-Info': 'profevision',
+      },
     },
   });
-};
 
-export default createClient; 
+  return client;
+}
+
+// Export a single instance of the client
+export const supabase = getSupabaseClient(); 

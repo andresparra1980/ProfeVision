@@ -6,6 +6,58 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export interface Calificacion {
+  id: string;
+  estudiante_id: string;
+  componente_id: string;
+  valor: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ComponenteCalificacion {
+  id: string;
+  periodo_id: string;
+  nombre: string;
+  porcentaje: number;
+  tipo: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Periodo {
+  id: string;
+  esquema_id: string;
+  nombre: string;
+  porcentaje: number;
+  orden: number;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Estudiante {
+  id: string;
+  nombre_completo: string;
+  identificacion: string;
+  email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EsquemaCalificacion {
+  id: string;
+  grupo_id: string;
+  nombre: string;
+  descripcion: string | null;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  es_activo: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -60,6 +112,12 @@ export interface Database {
           }
         ]
       }
+      calificaciones: {
+        Row: Calificacion;
+      }
+      componentes_calificacion: {
+        Row: ComponenteCalificacion;
+      }
       entidades_educativas: {
         Row: {
           ciudad: string | null
@@ -105,6 +163,9 @@ export interface Database {
         }
         Relationships: []
       }
+      esquemas_calificacion: {
+        Row: EsquemaCalificacion;
+      }
       estudiante_grupo: {
         Row: {
           created_at: string
@@ -145,73 +206,40 @@ export interface Database {
         ]
       }
       estudiantes: {
-        Row: {
-          created_at: string
-          email: string | null
-          id: string
-          identificacion: string
-          nombre_completo: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          identificacion: string
-          nombre_completo: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          identificacion?: string
-          nombre_completo?: string
-          updated_at?: string
-        }
-        Relationships: []
+        Row: Estudiante;
       }
       examenes: {
         Row: {
           created_at: string
           descripcion: string | null
-          duracion_minutos: number | null
           estado: string
-          fecha_creacion: string
           id: string
-          instrucciones: string | null
           materia_id: string
+          nombre: string
           profesor_id: string
-          puntaje_total: number | null
-          titulo: string
+          tiempo_limite: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           descripcion?: string | null
-          duracion_minutos?: number | null
           estado?: string
-          fecha_creacion?: string
           id?: string
-          instrucciones?: string | null
           materia_id: string
+          nombre: string
           profesor_id: string
-          puntaje_total?: number | null
-          titulo: string
+          tiempo_limite?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           descripcion?: string | null
-          duracion_minutos?: number | null
           estado?: string
-          fecha_creacion?: string
           id?: string
-          instrucciones?: string | null
           materia_id?: string
+          nombre?: string
           profesor_id?: string
-          puntaje_total?: number | null
-          titulo?: string
+          tiempo_limite?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -234,38 +262,51 @@ export interface Database {
       grupos: {
         Row: {
           año_escolar: string | null
-          periodo_escolar: string | null
           created_at: string
           descripcion: string | null
+          entidad_id: string
+          estado: string
           id: string
           materia_id: string
           nombre: string
+          periodo_escolar: string | null
           profesor_id: string
           updated_at: string
         }
         Insert: {
           año_escolar?: string | null
-          periodo_escolar?: string | null
           created_at?: string
           descripcion?: string | null
+          entidad_id: string
+          estado?: string
           id?: string
           materia_id: string
           nombre: string
+          periodo_escolar?: string | null
           profesor_id: string
           updated_at?: string
         }
         Update: {
           año_escolar?: string | null
-          periodo_escolar?: string | null
           created_at?: string
           descripcion?: string | null
+          entidad_id?: string
+          estado?: string
           id?: string
           materia_id?: string
           nombre?: string
+          periodo_escolar?: string | null
           profesor_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "grupos_entidad_id_fkey"
+            columns: ["entidad_id"]
+            isOneToOne: false
+            referencedRelation: "entidades_educativas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "grupos_materia_id_fkey"
             columns: ["materia_id"]
@@ -286,7 +327,7 @@ export interface Database {
         Row: {
           created_at: string
           descripcion: string | null
-          entidad_id: string | null
+          entidad_id: string
           id: string
           nombre: string
           profesor_id: string
@@ -295,7 +336,7 @@ export interface Database {
         Insert: {
           created_at?: string
           descripcion?: string | null
-          entidad_id?: string | null
+          entidad_id: string
           id?: string
           nombre: string
           profesor_id: string
@@ -304,7 +345,7 @@ export interface Database {
         Update: {
           created_at?: string
           descripcion?: string | null
-          entidad_id?: string | null
+          entidad_id?: string
           id?: string
           nombre?: string
           profesor_id?: string
@@ -329,28 +370,25 @@ export interface Database {
       }
       opciones_respuesta: {
         Row: {
+          correcta: boolean
           created_at: string
-          es_correcta: boolean
           id: string
-          orden: number
           pregunta_id: string
           texto: string
           updated_at: string
         }
         Insert: {
+          correcta: boolean
           created_at?: string
-          es_correcta?: boolean
           id?: string
-          orden?: number
           pregunta_id: string
           texto: string
           updated_at?: string
         }
         Update: {
+          correcta?: boolean
           created_at?: string
-          es_correcta?: boolean
           id?: string
-          orden?: number
           pregunta_id?: string
           texto?: string
           updated_at?: string
@@ -365,41 +403,44 @@ export interface Database {
           }
         ]
       }
+      periodos_calificacion: {
+        Row: Periodo;
+      }
       preguntas: {
         Row: {
           created_at: string
-          dificultad: string | null
+          descripcion: string | null
           examen_id: string
           id: string
+          imagen_url: string | null
           orden: number
-          puntaje: number
-          retroalimentacion: string | null
+          puntos: number
           texto: string
-          tipo_id: string
+          tipo: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          dificultad?: string | null
+          descripcion?: string | null
           examen_id: string
           id?: string
-          orden?: number
-          puntaje?: number
-          retroalimentacion?: string | null
+          imagen_url?: string | null
+          orden: number
+          puntos: number
           texto: string
-          tipo_id: string
+          tipo: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          dificultad?: string | null
+          descripcion?: string | null
           examen_id?: string
           id?: string
+          imagen_url?: string | null
           orden?: number
-          puntaje?: number
-          retroalimentacion?: string | null
+          puntos?: number
           texto?: string
-          tipo_id?: string
+          tipo?: string
           updated_at?: string
         }
         Relationships: [
@@ -409,140 +450,82 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "examenes"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "preguntas_tipo_id_fkey"
-            columns: ["tipo_id"]
-            isOneToOne: false
-            referencedRelation: "tipos_pregunta"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      profesor_entidad: {
-        Row: {
-          created_at: string
-          departamento: string | null
-          entidad_id: string
-          fecha_fin: string | null
-          fecha_inicio: string | null
-          id: string
-          profesor_id: string
-          rol: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          departamento?: string | null
-          entidad_id: string
-          fecha_fin?: string | null
-          fecha_inicio?: string | null
-          id?: string
-          profesor_id: string
-          rol: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          departamento?: string | null
-          entidad_id?: string
-          fecha_fin?: string | null
-          fecha_inicio?: string | null
-          id?: string
-          profesor_id?: string
-          rol?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profesor_entidad_entidad_id_fkey"
-            columns: ["entidad_id"]
-            isOneToOne: false
-            referencedRelation: "entidades_educativas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profesor_entidad_profesor_id_fkey"
-            columns: ["profesor_id"]
-            isOneToOne: false
-            referencedRelation: "profesores"
-            referencedColumns: ["id"]
           }
         ]
       }
       profesores: {
         Row: {
-          biografia: string | null
-          cargo: string | null
+          apellidos: string
           created_at: string
-          foto_url: string | null
+          email: string
           id: string
-          nombre_completo: string
-          telefono: string | null
+          identificacion: string
+          nombres: string
           updated_at: string
         }
         Insert: {
-          biografia?: string | null
-          cargo?: string | null
+          apellidos: string
           created_at?: string
-          foto_url?: string | null
-          id: string
-          nombre_completo: string
-          telefono?: string | null
+          email: string
+          id?: string
+          identificacion: string
+          nombres: string
           updated_at?: string
         }
         Update: {
-          biografia?: string | null
-          cargo?: string | null
+          apellidos?: string
           created_at?: string
-          foto_url?: string | null
+          email?: string
           id?: string
-          nombre_completo?: string
-          telefono?: string | null
+          identificacion?: string
+          nombres?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      respuestas_estudiante: {
+        Row: {
+          aplicacion_id: string
+          created_at: string
+          estudiante_id: string
+          id: string
+          opcion_id: string | null
+          pregunta_id: string
+          updated_at: string
+        }
+        Insert: {
+          aplicacion_id: string
+          created_at?: string
+          estudiante_id: string
+          id?: string
+          opcion_id?: string | null
+          pregunta_id: string
+          updated_at?: string
+        }
+        Update: {
+          aplicacion_id?: string
+          created_at?: string
+          estudiante_id?: string
+          id?: string
+          opcion_id?: string | null
+          pregunta_id?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "profesores_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
+            foreignKeyName: "respuestas_estudiante_aplicacion_id_fkey"
+            columns: ["aplicacion_id"]
+            isOneToOne: false
+            referencedRelation: "aplicaciones_examen"
             referencedColumns: ["id"]
-          }
-        ]
-      }
-      respuestas_estudiante: {
-        Row: {
-          created_at: string
-          es_correcta: boolean | null
-          id: string
-          opcion_id: string | null
-          pregunta_id: string
-          puntaje_obtenido: number | null
-          resultado_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          es_correcta?: boolean | null
-          id?: string
-          opcion_id?: string | null
-          pregunta_id: string
-          puntaje_obtenido?: number | null
-          resultado_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          es_correcta?: boolean | null
-          id?: string
-          opcion_id?: string | null
-          pregunta_id?: string
-          puntaje_obtenido?: number | null
-          resultado_id?: string
-          updated_at?: string
-        }
-        Relationships: [
+          },
+          {
+            foreignKeyName: "respuestas_estudiante_estudiante_id_fkey"
+            columns: ["estudiante_id"]
+            isOneToOne: false
+            referencedRelation: "estudiantes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "respuestas_estudiante_opcion_id_fkey"
             columns: ["opcion_id"]
@@ -556,55 +539,33 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "preguntas"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "respuestas_estudiante_resultado_id_fkey"
-            columns: ["resultado_id"]
-            isOneToOne: false
-            referencedRelation: "resultados_examen"
-            referencedColumns: ["id"]
           }
         ]
       }
       resultados_examen: {
         Row: {
           aplicacion_id: string
+          calificacion: number
           created_at: string
-          estado: string
           estudiante_id: string
-          fecha_calificacion: string | null
           id: string
-          porcentaje: number | null
-          puntaje_obtenido: number | null
-          tiempo_utilizado: number | null
           updated_at: string
-          version_id: string
         }
         Insert: {
           aplicacion_id: string
+          calificacion: number
           created_at?: string
-          estado?: string
           estudiante_id: string
-          fecha_calificacion?: string | null
           id?: string
-          porcentaje?: number | null
-          puntaje_obtenido?: number | null
-          tiempo_utilizado?: number | null
           updated_at?: string
-          version_id: string
         }
         Update: {
           aplicacion_id?: string
+          calificacion?: number
           created_at?: string
-          estado?: string
           estudiante_id?: string
-          fecha_calificacion?: string | null
           id?: string
-          porcentaje?: number | null
-          puntaje_obtenido?: number | null
-          tiempo_utilizado?: number | null
           updated_at?: string
-          version_id?: string
         }
         Relationships: [
           {
@@ -619,13 +580,6 @@ export interface Database {
             columns: ["estudiante_id"]
             isOneToOne: false
             referencedRelation: "estudiantes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "resultados_examen_version_id_fkey"
-            columns: ["version_id"]
-            isOneToOne: false
-            referencedRelation: "versiones_examen"
             referencedColumns: ["id"]
           }
         ]
@@ -650,30 +604,24 @@ export interface Database {
       }
       versiones_examen: {
         Row: {
-          codigo: string
           created_at: string
           examen_id: string
           id: string
-          orden_opciones: Json | null
-          orden_preguntas: Json | null
+          numero: number
           updated_at: string
         }
         Insert: {
-          codigo: string
           created_at?: string
           examen_id: string
           id?: string
-          orden_opciones?: Json | null
-          orden_preguntas?: Json | null
+          numero: number
           updated_at?: string
         }
         Update: {
-          codigo?: string
           created_at?: string
           examen_id?: string
           id?: string
-          orden_opciones?: Json | null
-          orden_preguntas?: Json | null
+          numero?: number
           updated_at?: string
         }
         Relationships: [
@@ -687,22 +635,27 @@ export interface Database {
         ]
       }
     }
-    Views: {}
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
-      es_miembro_entidad: {
+      is_profesor_of_grupo: {
         Args: {
-          entidad_id: string
-        }
-        Returns: boolean
-      }
-      es_profesor_actual: {
-        Args: {
-          profesor_id: string
+          grupo_id: string
         }
         Returns: boolean
       }
     }
-    Enums: {}
-    CompositeTypes: {}
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
+  calificaciones: Calificacion;
+  componentes_calificacion: ComponenteCalificacion;
+  periodos_calificacion: Periodo;
+  estudiantes: Estudiante;
+  esquemas_calificacion: EsquemaCalificacion;
 } 

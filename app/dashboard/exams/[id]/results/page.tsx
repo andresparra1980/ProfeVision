@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, Image as ImageIcon, FileImage } from 'lucide-react';
+import { ChevronLeft, Image as ImageIcon, FileImage, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -243,144 +243,147 @@ export default function ExamResultsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {resultados.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : resultados.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No hay resultados disponibles para este examen.
+              No hay resultados disponibles para este examen
             </div>
           ) : (
-            <div className="space-y-4">
+            <Accordion type="single" collapsible>
               {resultados.map((resultado) => (
-                <Accordion type="single" collapsible key={resultado.id}>
-                  <AccordionItem value={resultado.id}>
-                    <AccordionTrigger>
-                      <div className="flex flex-col w-full gap-2">
-                        <div className="font-medium text-left">
-                          {resultado.estudiante.nombre_completo}
+                <AccordionItem key={resultado.id} value={resultado.id}>
+                  <AccordionTrigger>
+                    <div className="flex flex-col w-full gap-2">
+                      <div className="font-medium text-left">
+                        {resultado.estudiante.nombre_completo}
+                      </div>
+                      <div className="flex items-center justify-end gap-4 text-sm">
+                        <div>
+                          Calificación: {resultado.puntaje_obtenido.toFixed(2)}/{examDetails.puntaje_total}
                         </div>
-                        <div className="flex items-center justify-end gap-4 text-sm">
-                          <div>
-                            Calificación: {resultado.puntaje_obtenido.toFixed(2)}/{examDetails.puntaje_total}
-                          </div>
-                          <div className="text-muted-foreground">
-                            {resultado.porcentaje.toFixed(1)}%
-                          </div>
+                        <div className="text-muted-foreground">
+                          {resultado.porcentaje.toFixed(1)}%
                         </div>
                       </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <Tabs defaultValue="answers" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
-                          <TabsTrigger value="answers">Respuestas</TabsTrigger>
-                          <TabsTrigger value="original" className="flex items-center gap-2">
-                            <ImageIcon className="h-[16px] w-[16px] md:hidden shrink-0" />
-                            <span className="hidden md:inline">Imagen Original</span>
-                            <span className="md:hidden">Original</span>
-                          </TabsTrigger>
-                          <TabsTrigger value="processed" className="flex items-center gap-2">
-                            <FileImage className="h-[16px] w-[16px] md:hidden shrink-0" />
-                            <span className="hidden md:inline">Imagen Procesada</span>
-                            <span className="md:hidden">Procesada</span>
-                          </TabsTrigger>
-                        </TabsList>
-                        
-                        <TabsContent value="answers">
-                          <div className="pt-4">
-                            <div className="grid grid-cols-2 gap-6">
-                              <div className="space-y-2">
-                                {resultado.respuestas_estudiante
-                                  .filter(r => r.pregunta.orden <= 20)
-                                  .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
-                                  .map((respuesta) => (
-                                    <div key={respuesta.id} className="flex items-center">
-                                      <span className="text-sm font-medium min-w-[25px]">{respuesta.pregunta.orden}.</span>
-                                      <div className="flex items-center space-x-1">
-                                        {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
-                                          const letter = getLetterFromNumber(num);
-                                          const isSelected = respuesta.opcion_respuesta.orden === num;
-                                          return (
-                                            <div 
-                                              key={`bubble-${respuesta.id}-${num}`}
-                                              className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                                ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}`}
-                                            >
-                                              {isSelected ? letter : ''}
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                      <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'}`}>
-                                        {respuesta.es_correcta ? '✓' : '✗'}
-                                      </span>
+                    </div>
+                  </AccordionTrigger>
+
+                  <AccordionContent>
+                    <Tabs defaultValue="answers" className="w-full">
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="answers">Respuestas</TabsTrigger>
+                        <TabsTrigger value="original" className="flex items-center gap-2">
+                          <ImageIcon className="h-[16px] w-[16px] md:hidden shrink-0" />
+                          <span className="hidden md:inline">Imagen Original</span>
+                          <span className="md:hidden">Original</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="processed" className="flex items-center gap-2">
+                          <FileImage className="h-[16px] w-[16px] md:hidden shrink-0" />
+                          <span className="hidden md:inline">Imagen Procesada</span>
+                          <span className="md:hidden">Procesada</span>
+                        </TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="answers">
+                        <div className="pt-4">
+                          <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                              {resultado.respuestas_estudiante
+                                .filter(r => r.pregunta.orden <= 20)
+                                .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
+                                .map((respuesta) => (
+                                  <div key={respuesta.id} className="flex items-center">
+                                    <span className="text-sm font-medium min-w-[25px]">{respuesta.pregunta.orden}.</span>
+                                    <div className="flex items-center space-x-1">
+                                      {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
+                                        const letter = getLetterFromNumber(num);
+                                        const isSelected = respuesta.opcion_respuesta.orden === num;
+                                        return (
+                                          <div 
+                                            key={`bubble-${respuesta.id}-${num}`}
+                                            className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
+                                              ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}`}
+                                          >
+                                            {isSelected ? letter : ''}
+                                          </div>
+                                        );
+                                      })}
                                     </div>
-                                  ))}
-                              </div>
-                              <div className="space-y-2">
-                                {resultado.respuestas_estudiante
-                                  .filter(r => r.pregunta.orden > 20)
-                                  .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
-                                  .map((respuesta) => (
-                                    <div key={respuesta.id} className="flex items-center">
-                                      <span className="text-sm font-medium min-w-[25px]">{respuesta.pregunta.orden}.</span>
-                                      <div className="flex items-center space-x-1">
-                                        {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
-                                          const letter = getLetterFromNumber(num);
-                                          const isSelected = respuesta.opcion_respuesta.orden === num;
-                                          return (
-                                            <div 
-                                              key={`bubble-${respuesta.id}-${num}`}
-                                              className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                                ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}`}
-                                            >
-                                              {isSelected ? letter : ''}
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                      <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'}`}>
-                                        {respuesta.es_correcta ? '✓' : '✗'}
-                                      </span>
+                                    <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'}`}>
+                                      {respuesta.es_correcta ? '✓' : '✗'}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                            <div className="space-y-2">
+                              {resultado.respuestas_estudiante
+                                .filter(r => r.pregunta.orden > 20)
+                                .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
+                                .map((respuesta) => (
+                                  <div key={respuesta.id} className="flex items-center">
+                                    <span className="text-sm font-medium min-w-[25px]">{respuesta.pregunta.orden}.</span>
+                                    <div className="flex items-center space-x-1">
+                                      {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
+                                        const letter = getLetterFromNumber(num);
+                                        const isSelected = respuesta.opcion_respuesta.orden === num;
+                                        return (
+                                          <div 
+                                            key={`bubble-${respuesta.id}-${num}`}
+                                            className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
+                                              ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}`}
+                                          >
+                                            {isSelected ? letter : ''}
+                                          </div>
+                                        );
+                                      })}
                                     </div>
-                                  ))}
-                              </div>
+                                    <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'}`}>
+                                      {respuesta.es_correcta ? '✓' : '✗'}
+                                    </span>
+                                  </div>
+                                ))}
                             </div>
                           </div>
-                        </TabsContent>
+                        </div>
+                      </TabsContent>
 
-                        <TabsContent value="original">
-                          {resultado.examen_escaneado?.ruta_s3_original ? (
-                            <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
-                              <ImageWithSignedUrl
-                                path={resultado.examen_escaneado.ruta_s3_original}
-                                alt="Imagen original del examen"
-                              />
-                            </div>
-                          ) : (
-                            <div className="text-center py-8 text-muted-foreground">
-                              No hay imagen original disponible
-                            </div>
-                          )}
-                        </TabsContent>
+                      <TabsContent value="original">
+                        {resultado.examen_escaneado?.ruta_s3_original ? (
+                          <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
+                            <ImageWithSignedUrl
+                              path={resultado.examen_escaneado.ruta_s3_original}
+                              alt="Imagen original del examen"
+                            />
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-muted-foreground">
+                            No hay imagen original disponible
+                          </div>
+                        )}
+                      </TabsContent>
 
-                        <TabsContent value="processed">
-                          {resultado.examen_escaneado?.ruta_s3_procesado ? (
-                            <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
-                              <ImageWithSignedUrl
-                                path={resultado.examen_escaneado.ruta_s3_procesado}
-                                alt="Imagen procesada del examen"
-                              />
-                            </div>
-                          ) : (
-                            <div className="text-center py-8 text-muted-foreground">
-                              No hay imagen procesada disponible
-                            </div>
-                          )}
-                        </TabsContent>
-                      </Tabs>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                      <TabsContent value="processed">
+                        {resultado.examen_escaneado?.ruta_s3_procesado ? (
+                          <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
+                            <ImageWithSignedUrl
+                              path={resultado.examen_escaneado.ruta_s3_procesado}
+                              alt="Imagen procesada del examen"
+                            />
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-muted-foreground">
+                            No hay imagen procesada disponible
+                          </div>
+                        )}
+                      </TabsContent>
+                    </Tabs>
+                  </AccordionContent>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           )}
         </CardContent>
       </Card>
