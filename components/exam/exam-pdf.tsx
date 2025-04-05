@@ -129,7 +129,8 @@ interface ExamPDFProps {
     materias: {
       nombre: string;
       profesor: {
-        nombre_completo: string;
+        nombres: string;
+        apellidos: string;
         cargo: string;
       };
       entidad: {
@@ -161,6 +162,9 @@ export function ExamPDF({ exam, paperSize = "letter", selectedGroup }: ExamPDFPr
   const formattedDate = format(new Date(exam.created_at), "d 'de' MMMM 'de' yyyy", { 
     locale: es 
   });
+
+  // Formatear el nombre completo del profesor
+  const profesorNombreCompleto = `${exam.materias.profesor.nombres} ${exam.materias.profesor.apellidos}`;
 
   return (
     <Document>

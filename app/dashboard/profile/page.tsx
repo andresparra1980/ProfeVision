@@ -15,7 +15,8 @@ import { useRouter } from "next/navigation";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 
 const profileSchema = z.object({
-  fullName: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
+  nombres: z.string().min(2, { message: "Los nombres deben tener al menos 2 caracteres" }),
+  apellidos: z.string().min(2, { message: "Los apellidos deben tener al menos 2 caracteres" }),
   telefono: z.string().optional(),
   cargo: z.string().optional(),
   biografia: z.string().optional(),
@@ -32,7 +33,8 @@ export default function ProfilePage() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      fullName: "",
+      nombres: "",
+      apellidos: "",
       telefono: "",
       cargo: "",
       biografia: "",
@@ -52,7 +54,8 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profesor) {
-      form.setValue("fullName", profesor.nombre_completo);
+      form.setValue("nombres", profesor.nombres);
+      form.setValue("apellidos", profesor.apellidos);
       form.setValue("telefono", profesor.telefono || "");
       form.setValue("cargo", profesor.cargo || "");
       form.setValue("biografia", profesor.biografia || "");
@@ -65,8 +68,8 @@ export default function ProfilePage() {
       // Actualizar datos de autenticación (display name)
       const { error: authError } = await supabase.auth.updateUser({
         data: {
-          full_name: data.fullName,
-          name: data.fullName,
+          full_name: `${data.nombres} ${data.apellidos}`,
+          name: `${data.nombres} ${data.apellidos}`,
         },
       });
 
@@ -76,7 +79,8 @@ export default function ProfilePage() {
 
       // Actualizar datos específicos del profesor
       const { success, error: profesorError } = await updateProfesor({
-        nombre_completo: data.fullName,
+        nombres: data.nombres,
+        apellidos: data.apellidos,
         telefono: data.telefono || null,
         cargo: data.cargo || null,
         biografia: data.biografia || null,
@@ -143,16 +147,30 @@ export default function ProfilePage() {
               </p>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Nombre completo</Label>
-              <Input
-                id="fullName"
-                {...form.register("fullName")}
-                disabled={isLoading}
-              />
-              {form.formState.errors.fullName && (
-                <p className="text-sm text-destructive">{form.formState.errors.fullName.message}</p>
-              )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nombres">Nombres</Label>
+                <Input
+                  id="nombres"
+                  {...form.register("nombres")}
+                  disabled={isLoading}
+                />
+                {form.formState.errors.nombres && (
+                  <p className="text-sm text-destructive">{form.formState.errors.nombres.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="apellidos">Apellidos</Label>
+                <Input
+                  id="apellidos"
+                  {...form.register("apellidos")}
+                  disabled={isLoading}
+                />
+                {form.formState.errors.apellidos && (
+                  <p className="text-sm text-destructive">{form.formState.errors.apellidos.message}</p>
+                )}
+              </div>
             </div>
             
             <div className="space-y-2">

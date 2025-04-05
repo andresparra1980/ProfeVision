@@ -71,7 +71,8 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
       const formattedData = data.map(item => ({
         id: item.id,
         estudiante_id: item.estudiante_id,
-        nombre_completo: item.estudiantes.nombre_completo,
+        nombres: item.estudiantes.nombres,
+        apellidos: item.estudiantes.apellidos,
         identificacion: item.estudiantes.identificacion,
         email: item.estudiantes.email,
       }));
@@ -98,8 +99,9 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
       const { data, error } = await supabase
         .from("estudiantes")
         .select("*")
-        .or(`nombre_completo.ilike.%${searchQuery}%,identificacion.ilike.%${searchQuery}%`)
-        .order("nombre_completo", { ascending: true })
+        .or(`nombres.ilike.%${searchQuery}%,apellidos.ilike.%${searchQuery}%,identificacion.ilike.%${searchQuery}%`)
+        .order("apellidos", { ascending: true })
+        .order("nombres", { ascending: true })
         .limit(10);
 
       if (error) throw error;
@@ -121,43 +123,33 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  async function addStudentToGroup(studentId: string) {
+  async function addStudentToGroup(student: any) {
     try {
       setIsAdding(true);
-      const { error } = await supabase
-        .from("estudiante_grupo")
-        .insert({
-          estudiante_id: studentId,
-          grupo_id: groupId,
-        });
-
-      if (error) {
-        if (error.code === '23505') {
-          toast({
-            title: "Error",
-            description: "Este estudiante ya está en el grupo",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
-        return;
-      }
-
-      toast({
-        title: "¡Éxito!",
-        description: "Estudiante agregado al grupo correctamente",
-        variant: "default",
+      const { error } = await supabase.rpc('crear_estudiante_en_grupo', {
+        p_nombres: student.nombres,
+        p_apellidos: student.apellidos,
+        p_identificacion: student.identificacion,
+        p_email: student.email,
+        p_grupo_id: groupId
       });
 
+      if (error) throw error;
+
+      // Refresh the list
       fetchGroupStudents();
       setSearchQuery("");
       setSearchResults([]);
-    } catch (error) {
+      
+      toast({
+        title: "Estudiante agregado",
+        description: "El estudiante ha sido agregado al grupo exitosamente",
+      });
+    } catch (error: any) {
       console.error("Error adding student to group:", error);
       toast({
         title: "Error",
-        description: "No se pudo agregar el estudiante al grupo",
+        description: error.message || "No se pudo agregar el estudiante al grupo",
         variant: "destructive",
       });
     } finally {
@@ -165,27 +157,27 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  async function removeStudentFromGroup(estudiante_grupo_id: string) {
+  async function removeStudentFromGroup(studentId: string) {
     try {
       const { error } = await supabase
         .from("estudiante_grupo")
         .delete()
-        .eq("id", estudiante_grupo_id);
+        .eq("id", studentId);
 
       if (error) throw error;
 
+      // Refresh the list
+      fetchGroupStudents();
+      
       toast({
-        title: "¡Éxito!",
-        description: "Estudiante eliminado del grupo correctamente",
-        variant: "default",
+        title: "Estudiante removido",
+        description: "El estudiante ha sido removido del grupo exitosamente",
       });
-
-      setGroupStudents(prev => prev.filter(student => student.id !== estudiante_grupo_id));
     } catch (error) {
       console.error("Error removing student from group:", error);
       toast({
         title: "Error",
-        description: "No se pudo eliminar el estudiante del grupo",
+        description: "No se pudo remover el estudiante del grupo",
         variant: "destructive",
       });
     }
@@ -196,7 +188,7 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
     try {
       toast({
         title: "¡Éxito!",
-        description: "Algunos estudiantes ya estaban en el grupo",
+        description: "Los estudiantes han sido importados exitosamente",
         variant: "default",
       });
       
@@ -277,31 +269,34 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
                 </div>
               </DialogContent>
             </Dialog>
-            
+
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger asChild>
                 <Button>
-                  <Plus className="mr-2 h-4 w-4" /> Agregar Existente
+                  <Plus className="mr-2 h-4 w-4" /> Agregar Estudiante
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
+              <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Agregar Estudiantes Existentes</DialogTitle>
+                  <DialogTitle>Buscar Estudiante</DialogTitle>
                   <DialogDescription>
-                    Busca y agrega estudiantes ya registrados en el sistema
+                    Busca un estudiante por nombre o identificación para agregarlo al grupo
                   </DialogDescription>
                 </DialogHeader>
-                <div className="py-4">
+                
+                <div className="space-y-4">
                   <div className="flex items-center space-x-2">
                     <Input
                       placeholder="Buscar por nombre o identificación..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="flex-1"
                     />
-                    <Button disabled={isSearching} onClick={searchStudents}>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => searchStudents()}
+                      disabled={isSearching}
+                    >
                       <Search className="h-4 w-4" />
-                      <span className="sr-only">Buscar</span>
                     </Button>
                   </div>
 
@@ -310,90 +305,65 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
                       <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
                     </div>
                   ) : searchResults.length > 0 ? (
-                    <div className="mt-4 overflow-y-auto max-h-[300px]">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead>Identificación</TableHead>
-                            <TableHead>Acción</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {searchResults.map((student) => (
-                            <TableRow key={student.id}>
-                              <TableCell className="font-medium">{student.nombre_completo}</TableCell>
-                              <TableCell>{student.identificacion}</TableCell>
-                              <TableCell>
-                                <Button 
-                                  size="sm" 
-                                  disabled={isAdding}
-                                  onClick={() => addStudentToGroup(student.id)}
-                                >
-                                  Agregar
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                    <div className="space-y-2">
+                      {searchResults.map((student) => (
+                        <div
+                          key={student.id}
+                          className="flex items-center justify-between p-2 border rounded"
+                        >
+                          <div>
+                            <p className="font-medium">{student.nombres} {student.apellidos}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {student.identificacion}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => addStudentToGroup(student)}
+                            disabled={isAdding}
+                          >
+                            Agregar
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   ) : searchQuery ? (
-                    <p className="text-center py-4 text-muted-foreground">
-                      No se encontraron estudiantes con ese criterio de búsqueda
+                    <p className="text-center text-muted-foreground py-4">
+                      No se encontraron estudiantes
                     </p>
                   ) : null}
                 </div>
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                    Cerrar
-                  </Button>
-                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
         </CardHeader>
         <CardContent>
-          {groupStudents.length === 0 ? (
-            <div className="text-center py-6">
-              <p className="text-muted-foreground mb-4">
-                No hay estudiantes en este grupo
-              </p>
-              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-                <Button onClick={() => setIsOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" /> Agregar Existente
-                </Button>
-                <Button onClick={() => setIsImportModalOpen(true)} variant="outline">
-                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Importar desde Excel
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+          <div className="space-y-4">
+            <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nombre</TableHead>
                     <TableHead>Identificación</TableHead>
-                    <TableHead>Correo</TableHead>
-                    <TableHead>Acciones</TableHead>
+                    <TableHead>Nombres</TableHead>
+                    <TableHead>Apellidos</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {groupStudents.map((student) => (
                     <TableRow key={student.id}>
-                      <TableCell className="font-medium">{student.nombre_completo}</TableCell>
                       <TableCell>{student.identificacion}</TableCell>
-                      <TableCell>{student.email || "-"}</TableCell>
-                      <TableCell>
+                      <TableCell>{student.nombres}</TableCell>
+                      <TableCell>{student.apellidos}</TableCell>
+                      <TableCell>{student.email}</TableCell>
+                      <TableCell className="text-right">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => removeStudentFromGroup(student.id)}
-                          className="text-destructive hover:text-destructive"
                         >
                           <X className="h-4 w-4" />
-                          <span className="sr-only">Eliminar estudiante</span>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -401,7 +371,7 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
                 </TableBody>
               </Table>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -2,13 +2,16 @@
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profesores (id, nombre_completo, telefono)
+  INSERT INTO public.profesores (
+    id, 
+    nombres,
+    apellidos,
+    telefono
+  )
   VALUES (
     NEW.id, 
-    COALESCE(
-      (NEW.raw_user_meta_data->>'nombre') || ' ' || (NEW.raw_user_meta_data->>'apellido'),
-      NEW.email
-    ),
+    COALESCE(NEW.raw_user_meta_data->>'nombre', SPLIT_PART(NEW.email, '@', 1)),
+    COALESCE(NEW.raw_user_meta_data->>'apellido', ''),
     COALESCE(NEW.raw_user_meta_data->>'telefono', '')
   );
   RETURN NEW;
@@ -33,12 +36,20 @@ BEGIN
       SELECT 1 FROM public.profesores WHERE id = auth.users.id
     )
   LOOP
-    INSERT INTO public.profesores (id, nombre_completo)
+    INSERT INTO public.profesores (
+      id,
+      nombres,
+      apellidos
+    )
     VALUES (
       user_record.id, 
       COALESCE(
-        (user_record.raw_user_meta_data->>'nombre') || ' ' || (user_record.raw_user_meta_data->>'apellido'),
-        user_record.email
+        user_record.raw_user_meta_data->>'nombre',
+        SPLIT_PART(user_record.email, '@', 1)
+      ),
+      COALESCE(
+        user_record.raw_user_meta_data->>'apellido',
+        ''
       )
     );
   END LOOP;

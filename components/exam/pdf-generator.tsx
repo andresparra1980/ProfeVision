@@ -8,8 +8,8 @@ import { generateOptimizedQRCode, generateOptimizedQRData } from '@/lib/utils/qr
 
 interface Student {
   id: string;
-  nombre: string;
-  apellido: string;
+  nombres: string;
+  apellidos: string;
   identificacion: string;
 }
 
@@ -329,7 +329,7 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
                   
                   <View style={styles.studentInfo}>
                     <Text style={styles.infoTitle}>Información del Estudiante</Text>
-                    <Text style={styles.infoText}>Nombre: {student.nombre} {student.apellido}</Text>
+                    <Text style={styles.infoText}>Nombre: {student.nombres} {student.apellidos}</Text>
                     <Text style={styles.infoText}>Identificación: {student.identificacion}</Text>
                     <Text style={styles.infoText}>Grupo: {group.nombre}</Text>
                     <Text style={styles.infoText}>Materia: {group.materia.nombre}</Text>

@@ -45,7 +45,7 @@ export function GradesExcelModal({
 }: GradesExcelModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [preview, setPreview] = useState<{identificacion: string, nombre_completo: string, valor: number}[]>([]);
+  const [preview, setPreview] = useState<{identificacion: string, nombres: string, apellidos: string, valor: number}[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
 
   if ((mode === 'import' || mode === 'export') && !componente) {
@@ -150,8 +150,8 @@ export function GradesExcelModal({
     });
   };
   
-  const validateData = (data: any[]): { valid: {identificacion: string, nombre_completo: string, valor: number}[], errors: string[] } => {
-    const validGrades: {identificacion: string, nombre_completo: string, valor: number}[] = [];
+  const validateData = (data: any[]): { valid: {identificacion: string, nombres: string, apellidos: string, valor: number}[], errors: string[] } => {
+    const validGrades: {identificacion: string, nombres: string, apellidos: string, valor: number}[] = [];
     const errors: string[] = [];
     
     if (data.length === 0) {
@@ -160,7 +160,7 @@ export function GradesExcelModal({
     }
     
     // Validar que el archivo tenga las columnas correctas
-    const requiredColumns = ["Identificación", "Nombre", "Calificación"];
+    const requiredColumns = ["Identificación", "Nombres", "Apellidos", "Calificación"];
     const firstRow = data[0];
     const missingColumns = requiredColumns.filter(col => !(col in firstRow));
     
@@ -175,7 +175,7 @@ export function GradesExcelModal({
     // Validar cada fila
     data.forEach((row, index) => {
       // Verificar que existan las columnas requeridas
-      if (!row['Identificación'] || !row['Nombre'] || row['Calificación'] === undefined) {
+      if (!row['Identificación'] || !row['Nombres'] || !row['Apellidos'] || row['Calificación'] === undefined) {
         errors.push(`Fila ${index + 1}: Faltan columnas requeridas`);
         return;
       }
@@ -195,15 +195,16 @@ export function GradesExcelModal({
       }
       
       // Verificar que el nombre coincida con la identificación
-      if (estudiante.nombre_completo !== row['Nombre']) {
-        errors.push(`Fila ${index + 1}: El nombre '${row['Nombre']}' no coincide con la identificación ${row['Identificación']}`);
+      if (estudiante.nombres !== row['Nombres'] || estudiante.apellidos !== row['Apellidos']) {
+        errors.push(`Fila ${index + 1}: Los nombres '${row['Nombres']} ${row['Apellidos']}' no coinciden con la identificación ${row['Identificación']}`);
         return;
       }
       
       // Si pasó todas las validaciones, agregar a los válidos
       validGrades.push({
         identificacion: row['Identificación'],
-        nombre_completo: row['Nombre'],
+        nombres: row['Nombres'],
+        apellidos: row['Apellidos'],
         valor
       });
     });
@@ -212,6 +213,15 @@ export function GradesExcelModal({
   };
   
   const handleSubmit = async () => {
+    if (!componente) {
+      toast({
+        title: "Error",
+        description: "No se ha seleccionado un componente de calificación",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (preview.length === 0) {
       toast({
         title: "Error",
@@ -280,13 +290,14 @@ export function GradesExcelModal({
 
     // Asegurarnos de que estamos trabajando con calificaciones de un solo componente
     const componentGrades = 'porComponente' in calificaciones 
-      ? (calificaciones.porComponente[componente.id] || {}) as Record<string, number>
+      ? ((calificaciones as unknown as { porComponente: Record<string, Record<string, number>> }).porComponente[componente.id] || {})
       : calificaciones as Record<string, number>;
 
     // Crear array de datos para exportar
     const dataToExport = estudiantes.map(estudiante => ({
       "Identificación": estudiante.identificacion,
-      "Nombre": estudiante.nombre_completo,
+      "Nombres": estudiante.nombres,
+      "Apellidos": estudiante.apellidos,
       "Calificación": componentGrades[estudiante.id] !== undefined ? componentGrades[estudiante.id] : ''
     }));
     
@@ -300,9 +311,7 @@ export function GradesExcelModal({
     XLSX.utils.book_append_sheet(wb, ws, "Calificaciones");
     
     // Generar el archivo y descargarlo
-    if (componente) {
-      XLSX.writeFile(wb, `calificaciones_${componente.nombre.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
-    }
+    XLSX.writeFile(wb, `calificaciones_${componente.nombre.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
   };
 
   const downloadTemplate = () => {
@@ -311,7 +320,8 @@ export function GradesExcelModal({
     // Crear array de datos para la plantilla
     const dataToExport = estudiantes.map(estudiante => ({
       "Identificación": estudiante.identificacion,
-      "Nombre": estudiante.nombre_completo,
+      "Nombres": estudiante.nombres,
+      "Apellidos": estudiante.apellidos,
       "Calificación": ''
     }));
     
@@ -376,7 +386,7 @@ export function GradesExcelModal({
 
       return [
         estudiante.identificacion,
-        estudiante.nombre_completo,
+        estudiante.nombres + ' ' + estudiante.apellidos,
         ...notasComponentes.map(nota => nota || ''),
         notaFinal.toFixed(2)
       ];
@@ -462,7 +472,7 @@ export function GradesExcelModal({
 
       return [
         estudiante.identificacion,
-        estudiante.nombre_completo,
+        estudiante.nombres + ' ' + estudiante.apellidos,
         ...notasPeriodos.map(nota => nota.toFixed(2)),
         notaFinal.toFixed(2)
       ];
@@ -579,7 +589,7 @@ export function GradesExcelModal({
                       {preview.slice(0, 5).map((item, index) => (
                         <tr key={index}>
                           <td className="px-4 py-2 text-xs">{item.identificacion}</td>
-                          <td className="px-4 py-2 text-xs">{item.nombre_completo}</td>
+                          <td className="px-4 py-2 text-xs">{item.nombres} {item.apellidos}</td>
                           <td className="px-4 py-2 text-xs">{item.valor}</td>
                         </tr>
                       ))}

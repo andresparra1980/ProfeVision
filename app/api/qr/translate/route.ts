@@ -61,12 +61,12 @@ export async function POST(request: NextRequest) {
     if (studentId) {
       const studentPromise = supabase
         .from('estudiantes')
-        .select('nombre_completo')
+        .select('nombres, apellidos')
         .eq('id', studentId)
         .single()
         .then(({ data, error }) => {
           if (error) console.error('Error al obtener estudiante:', error);
-          result.studentName = data?.nombre_completo || null;
+          result.studentName = data ? `${data.nombres} ${data.apellidos}`.trim() : null;
         });
       promises.push(studentPromise);
     }

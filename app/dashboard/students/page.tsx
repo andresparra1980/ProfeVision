@@ -16,7 +16,8 @@ import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface FormData {
-  nombre_completo: string;
+  nombres: string;
+  apellidos: string;
   identificacion: string;
   email: string;
   grupo_id: string;
@@ -34,10 +35,11 @@ interface StudentDetails {
 }
 
 const initialFormData: FormData = {
-  nombre_completo: '',
-  identificacion: '',
-  email: '',
-  grupo_id: ''
+  nombres: "",
+  apellidos: "",
+  identificacion: "",
+  email: "",
+  grupo_id: "",
 };
 
 export default function StudentsPage() {
@@ -101,41 +103,39 @@ export default function StudentsPage() {
       }
 
       // Obtener estudiantes que pertenecen a los grupos del profesor
-      const { data, error } = await supabase
-        .from("estudiante_grupo")
+      const { data: estudiantes, error: estudiantesError } = await supabase
+        .from('estudiantes')
         .select(`
-          estudiantes!inner(
-            id, 
-            nombre_completo, 
-            identificacion, 
-            email, 
-            created_at
-          ),
-          grupos!inner(
-            profesor_id
+          id,
+          nombres,
+          apellidos,
+          identificacion,
+          email,
+          created_at,
+          estudiante_grupo!inner(
+            grupos!inner(
+              profesor_id
+            )
           )
         `)
-        .eq("grupos.profesor_id", session.user.id)
-        .order("created_at", { foreignTable: "estudiantes", ascending: false });
+        .eq('estudiante_grupo.grupos.profesor_id', session.user.id)
+        .order('apellidos')
+        .order('nombres');
 
-      if (error) {
-        console.error("Error al consultar estudiantes:", error);
-        throw error;
+      if (estudiantesError) {
+        console.error("Error al consultar estudiantes:", estudiantesError);
+        throw estudiantesError;
       }
       
       // Transformar los datos para obtener un formato más fácil de usar
-      const formattedData = (data as any[]).map(item => ({
-        id: item.estudiantes.id,
-        nombre_completo: item.estudiantes.nombre_completo,
-        identificacion: item.estudiantes.identificacion,
-        email: item.estudiantes.email,
-        created_at: item.estudiantes.created_at
+      const uniqueStudents = estudiantes.map(estudiante => ({
+        id: estudiante.id,
+        nombres: estudiante.nombres,
+        apellidos: estudiante.apellidos,
+        identificacion: estudiante.identificacion,
+        email: estudiante.email,
+        created_at: estudiante.created_at
       }));
-      
-      // Eliminar duplicados (un estudiante puede estar en múltiples grupos)
-      const uniqueStudents = Array.from(
-        new Map(formattedData.map(item => [item.id, item])).values()
-      );
       
       console.log(`Se encontraron ${uniqueStudents.length} estudiantes en los grupos del profesor`);
       setStudents(uniqueStudents);
@@ -182,7 +182,7 @@ export default function StudentsPage() {
     setError('');
 
     try {
-      if (!formData.nombre_completo || !formData.identificacion || !formData.grupo_id) {
+      if (!formData.nombres || !formData.apellidos || !formData.identificacion || !formData.grupo_id) {
         setError('Por favor completa todos los campos requeridos');
         setIsSubmitting(false);
         return;
@@ -212,7 +212,8 @@ export default function StudentsPage() {
       // Crear el estudiante y asignarlo al grupo en una transacción usando RPC
       const { data: result, error: rpcError } = await supabase
         .rpc('crear_estudiante_en_grupo', {
-          p_nombre_completo: formData.nombre_completo,
+          p_nombres: formData.nombres,
+          p_apellidos: formData.apellidos,
           p_identificacion: formData.identificacion,
           p_email: formData.email || null,
           p_grupo_id: formData.grupo_id
@@ -245,7 +246,8 @@ export default function StudentsPage() {
   };
 
   const filteredStudents = students.filter((student) =>
-    student.nombre_completo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.apellidos.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.nombres.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.identificacion.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (student.email && student.email.toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -360,7 +362,8 @@ export default function StudentsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
+              <TableHead>Apellidos</TableHead>
+              <TableHead>Nombres</TableHead>
               <TableHead>Identificación</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Acciones</TableHead>
@@ -369,7 +372,8 @@ export default function StudentsPage() {
           <TableBody>
             {filteredStudents.map((student) => (
               <TableRow key={student.id}>
-                <TableCell className="font-medium">{student.nombre_completo}</TableCell>
+                <TableCell className="font-medium">{student.apellidos}</TableCell>
+                <TableCell>{student.nombres}</TableCell>
                 <TableCell>{student.identificacion}</TableCell>
                 <TableCell>{student.email || "-"}</TableCell>
                 <TableCell>
@@ -456,13 +460,24 @@ export default function StudentsPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nombre_completo">Nombre completo*</Label>
+                  <Label htmlFor="nombres">Nombres*</Label>
                   <Input
-                    id="nombre_completo"
-                    name="nombre_completo"
-                    value={formData.nombre_completo}
+                    id="nombres"
+                    name="nombres"
+                    value={formData.nombres}
                     onChange={handleChange}
-                    placeholder="Nombre completo del estudiante"
+                    placeholder="Nombres del estudiante"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="apellidos">Apellidos*</Label>
+                  <Input
+                    id="apellidos"
+                    name="apellidos"
+                    value={formData.apellidos}
+                    onChange={handleChange}
+                    placeholder="Apellidos del estudiante"
                   />
                 </div>
 

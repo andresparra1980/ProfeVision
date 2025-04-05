@@ -9,9 +9,11 @@ import { supabase } from "@/lib/supabase";
 import * as XLSX from "xlsx";
 
 interface Student {
-  nombre_completo: string;
+  id?: string;
+  nombres: string;
+  apellidos: string;
   identificacion: string;
-  email?: string;
+  email: string;
 }
 
 interface ExcelImportProps {
@@ -35,7 +37,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     }
     
     // Validar que el archivo tenga las columnas correctas
-    const requiredColumns = ["nombre_completo", "identificacion"];
+    const requiredColumns = ["Nombres", "Apellidos", "Identificación"];
     const firstRow = data[0];
     const missingColumns = requiredColumns.filter(col => !(col in firstRow));
     
@@ -45,17 +47,23 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     }
     
     data.forEach((row, index) => {
-      // Asegurarse que todos los valores sean strings o convertirlos
-      const nombreCompleto = row.nombre_completo ? String(row.nombre_completo) : '';
-      const identificacion = row.identificacion ? String(row.identificacion) : '';
-      const email = row.email ? String(row.email) : '';
+      // Asegurarse que todos los valores sean strings y limpiar espacios extra
+      const nombres = (row.Nombres ? String(row.Nombres) : '').trim().replace(/\s+/g, ' ');
+      const apellidos = (row.Apellidos ? String(row.Apellidos) : '').trim().replace(/\s+/g, ' ');
+      const identificacion = (row.Identificación ? String(row.Identificación) : '').trim().replace(/\s+/g, '');
+      const email = (row.Email ? String(row.Email) : '').trim().toLowerCase();
       
-      if (!nombreCompleto.trim()) {
-        errors.push(`Fila ${index + 1}: Falta el nombre completo`);
+      if (!nombres) {
+        errors.push(`Fila ${index + 1}: Faltan los nombres`);
+        return;
+      }
+
+      if (!apellidos) {
+        errors.push(`Fila ${index + 1}: Faltan los apellidos`);
         return;
       }
       
-      if (!identificacion.trim()) {
+      if (!identificacion) {
         errors.push(`Fila ${index + 1}: Falta la identificación`);
         return;
       }
@@ -67,9 +75,10 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       }
       
       validStudents.push({
-        nombre_completo: nombreCompleto.trim(),
-        identificacion: identificacion.trim(),
-        email: email && email.trim() ? email.trim() : undefined
+        nombres: nombres.charAt(0).toUpperCase() + nombres.slice(1), // Primera letra mayúscula
+        apellidos: apellidos.charAt(0).toUpperCase() + apellidos.slice(1), // Primera letra mayúscula
+        identificacion,
+        email: email || ''
       });
     });
     
@@ -84,69 +93,33 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       );
   };
   
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
-    
-    setFile(selectedFile);
-    setErrors([]);
-    setPreview([]);
-    
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
     try {
-      // Validar extensión del archivo
-      const fileExt = selectedFile.name.split('.').pop()?.toLowerCase();
-      if (fileExt !== 'xlsx' && fileExt !== 'xls') {
-        toast({
-          title: "Formato inválido",
-          description: "Por favor, selecciona un archivo Excel (.xlsx o .xls)",
-          variant: "destructive",
-        });
-        return;
-      }
+      setIsLoading(true);
+      const data = await readExcelFile(file);
       
-      // Leer el archivo
-      const data = await readExcelFile(selectedFile);
-      
-      if (!data || data.length === 0) {
-        toast({
-          title: "Archivo vacío",
-          description: "El archivo no contiene datos para importar",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Validar los datos
-      const { valid, errors } = validateData(data);
-      setPreview(valid);
-      setErrors(errors);
-      
-      if (valid.length === 0) {
-        toast({
-          title: "Datos inválidos",
-          description: "No se encontraron registros válidos para importar",
-          variant: "destructive",
-        });
-      } else if (valid.length > 0 && errors.length > 0) {
-        toast({
-          title: "Advertencia",
-          description: `Se encontraron ${valid.length} registros válidos y ${errors.length} con errores`,
-          variant: "destructive",
-        });
-      } else if (valid.length > 0) {
-        toast({
-          title: "Archivo válido",
-          description: `Se encontraron ${valid.length} estudiantes para importar`,
-          variant: "default",
-        });
-      }
+      // Mapear los datos a nuestro formato
+      const mappedData = data.map((row: any) => ({
+        nombres: row.nombres || row.Nombres || '',
+        apellidos: row.apellidos || row.Apellidos || '',
+        identificacion: row.identificacion || row.Identificación || row.ID || '',
+        email: row.email || row.Email || row.Correo || '',
+      }));
+
+      setPreview(mappedData);
+      setFile(file);
     } catch (error) {
-      console.error("Error reading Excel file:", error);
+      console.error('Error reading file:', error);
       toast({
         title: "Error",
-        description: "No se pudo procesar el archivo. Asegúrate de que sea un archivo Excel válido y no esté dañado.",
+        description: "No se pudo leer el archivo. Asegúrate de que sea un archivo Excel válido.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -359,8 +332,18 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     
     // Datos de ejemplo
     const exampleData = [
-      { nombre_completo: "Estudiante Ejemplo 1", identificacion: "12345678", email: "estudiante1@ejemplo.com" },
-      { nombre_completo: "Estudiante Ejemplo 2", identificacion: "87654321", email: "estudiante2@ejemplo.com" },
+      { 
+        Nombres: "Juan Carlos",
+        Apellidos: "Pérez González",
+        Identificación: "12345678",
+        Email: "estudiante1@ejemplo.com"
+      },
+      {
+        Nombres: "María José",
+        Apellidos: "López Ramírez",
+        Identificación: "87654321",
+        Email: "estudiante2@ejemplo.com"
+      },
     ];
     
     // Crear una hoja de trabajo
@@ -429,7 +412,8 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombres</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Apellidos</th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Identificación</th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                   </tr>
@@ -437,14 +421,15 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {preview.slice(0, 5).map((student, index) => (
                     <tr key={index}>
-                      <td className="px-4 py-2 text-xs">{student.nombre_completo}</td>
+                      <td className="px-4 py-2 text-xs">{student.nombres}</td>
+                      <td className="px-4 py-2 text-xs">{student.apellidos}</td>
                       <td className="px-4 py-2 text-xs">{student.identificacion}</td>
                       <td className="px-4 py-2 text-xs">{student.email || "-"}</td>
                     </tr>
                   ))}
                   {preview.length > 5 && (
                     <tr>
-                      <td colSpan={3} className="px-4 py-2 text-xs text-center">
+                      <td colSpan={4} className="px-4 py-2 text-xs text-center">
                         Y {preview.length - 5} más...
                       </td>
                     </tr>

@@ -10,12 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { Student } from "@/lib/types/database";
 
 interface Grupo {
   id: string;
   nombre: string;
   materia_id: string;
   estado: 'activo' | 'archivado';
+  estudiantes: Student[];
 }
 
 interface Asignacion {
@@ -82,12 +84,34 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
     try {
       const { data, error } = await supabase
         .from("grupos")
-        .select("*")
+        .select(`
+          *,
+          estudiantes:estudiante_grupo(
+            estudiante:estudiantes(
+              id,
+              nombres,
+              apellidos,
+              identificacion
+            )
+          )
+        `)
         .eq("materia_id", exam.materia_id)
         .eq("estado", "activo");
 
       if (error) throw error;
-      setGrupos(data || []);
+
+      // Transformar los datos para que coincidan con la interfaz Grupo
+      const gruposFormateados = data.map((grupo: any) => ({
+        ...grupo,
+        estudiantes: grupo.estudiantes.map((e: any) => ({
+          id: e.estudiante.id,
+          nombres: e.estudiante.nombres,
+          apellidos: e.estudiante.apellidos,
+          identificacion: e.estudiante.identificacion
+        }))
+      }));
+
+      setGrupos(gruposFormateados);
     } catch (error) {
       console.error("Error fetching groups:", error);
       toast.error("Error al cargar los grupos");

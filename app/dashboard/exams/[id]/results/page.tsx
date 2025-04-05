@@ -17,7 +17,8 @@ import Image from 'next/image';
 
 interface Estudiante {
   id: string;
-  nombre_completo: string;
+  nombres: string;
+  apellidos: string;
 }
 
 interface RespuestaEstudiante {
@@ -96,7 +97,8 @@ export default function ExamResultsPage() {
           fecha_calificacion,
           estudiante:estudiantes!inner(
             id,
-            nombre_completo
+            nombres,
+            apellidos
           ),
           respuestas_estudiante(
             id,
@@ -168,7 +170,8 @@ export default function ExamResultsPage() {
             id: result.id,
             estudiante: {
               id: result.estudiante.id,
-              nombre_completo: result.estudiante.nombre_completo
+              nombres: result.estudiante.nombres,
+              apellidos: result.estudiante.apellidos
             },
             puntaje_obtenido: result.puntaje_obtenido,
             porcentaje: result.porcentaje,
@@ -258,7 +261,7 @@ export default function ExamResultsPage() {
                   <AccordionTrigger>
                     <div className="flex flex-col w-full gap-2">
                       <div className="font-medium text-left">
-                        {resultado.estudiante.nombre_completo}
+                        {resultado.estudiante.nombres} {resultado.estudiante.apellidos}
                       </div>
                       <div className="flex items-center justify-end gap-4 text-sm">
                         <div>

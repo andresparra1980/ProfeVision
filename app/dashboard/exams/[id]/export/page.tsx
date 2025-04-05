@@ -29,7 +29,8 @@ interface ExamDetails {
     nombre: string;
     profesor: {
       id: string;
-      nombre_completo: string;
+      nombres: string;
+      apellidos: string;
       cargo: string;
     };
     entidad: {
@@ -94,7 +95,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             ),
             profesor:profesor_id (
               id,
-              nombre_completo,
+              nombres,
+              apellidos,
               cargo
             )
           ),

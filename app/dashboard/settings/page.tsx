@@ -13,7 +13,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState({
-    nombre_completo: "",
+    nombres: "",
+    apellidos: "",
     email: "",
     telefono: "",
     biografia: "",
@@ -39,7 +40,8 @@ export default function SettingsPage() {
         
         if (data) {
           setProfileData({
-            nombre_completo: data.nombre_completo || "",
+            nombres: data.nombres || "",
+            apellidos: data.apellidos || "",
             email: session.user.email || "",
             telefono: data.telefono || "",
             biografia: data.biografia || "",
@@ -58,40 +60,49 @@ export default function SettingsPage() {
     }
   }
 
-  async function updateProfile() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    
     try {
-      setSaving(true);
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        toast({
-          title: "Error",
-          description: "Debes iniciar sesión para actualizar tu perfil",
-          variant: "destructive",
-        });
-        return;
+        throw new Error("No hay sesión activa");
       }
 
-      const { error } = await supabase
+      // Actualizar datos de autenticación
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          full_name: `${profileData.nombres} ${profileData.apellidos}`,
+          name: `${profileData.nombres} ${profileData.apellidos}`,
+        },
+      });
+
+      if (authError) throw authError;
+
+      // Actualizar datos del profesor
+      const { error: updateError } = await supabase
         .from("profesores")
         .update({
-          nombre_completo: profileData.nombre_completo,
-          telefono: profileData.telefono,
-          biografia: profileData.biografia,
+          nombres: profileData.nombres,
+          apellidos: profileData.apellidos,
+          telefono: profileData.telefono || null,
+          biografia: profileData.biografia || null,
         })
         .eq("id", session.user.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       toast({
         title: "Perfil actualizado",
-        description: "Tu información ha sido actualizada correctamente",
+        description: "Los cambios han sido guardados correctamente",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile:", error);
       toast({
         title: "Error",
-        description: "No se pudo actualizar el perfil",
+        description: "No se pudieron guardar los cambios",
         variant: "destructive",
       });
     } finally {
@@ -116,16 +127,30 @@ export default function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Nombre Completo</Label>
-            <Input
-              id="fullName"
-              value={profileData.nombre_completo}
-              onChange={(e) =>
-                setProfileData({ ...profileData, nombre_completo: e.target.value })
-              }
-              disabled={loading}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="nombres">Nombres</Label>
+              <Input
+                id="nombres"
+                value={profileData.nombres}
+                onChange={(e) =>
+                  setProfileData({ ...profileData, nombres: e.target.value })
+                }
+                disabled={loading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="apellidos">Apellidos</Label>
+              <Input
+                id="apellidos"
+                value={profileData.apellidos}
+                onChange={(e) =>
+                  setProfileData({ ...profileData, apellidos: e.target.value })
+                }
+                disabled={loading}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -155,25 +180,23 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bio">Biografía</Label>
+            <Label htmlFor="biografia">Biografía</Label>
             <Textarea
-              id="bio"
-              rows={4}
+              id="biografia"
               value={profileData.biografia}
               onChange={(e) =>
                 setProfileData({ ...profileData, biografia: e.target.value })
               }
               disabled={loading}
-              placeholder="Cuéntanos brevemente sobre ti y tu experiencia"
+              className="min-h-[100px]"
             />
           </div>
 
           <Button 
-            onClick={updateProfile} 
-            disabled={saving || loading}
-            className="w-full sm:w-auto"
+            onClick={handleSubmit} 
+            disabled={loading || saving}
           >
-            {saving ? "Guardando..." : "Guardar Cambios"}
+            {saving ? "Guardando..." : "Guardar cambios"}
           </Button>
         </CardContent>
       </Card>

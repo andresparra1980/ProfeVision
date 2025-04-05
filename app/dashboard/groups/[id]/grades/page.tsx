@@ -203,7 +203,8 @@ export default function GradesPage({ params }: GradesPageProps) {
               .eq('grupo_id', groupId)
           ).data?.map(row => row.estudiante_id) || []
           )
-          .order('nombre_completo');
+          .order('apellidos', { ascending: true })
+          .order('nombres', { ascending: true });
 
         if (estudiantesError) throw estudiantesError;
         setEstudiantes(estudiantes || []);

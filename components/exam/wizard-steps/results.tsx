@@ -189,7 +189,7 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
         setEntityNames({
           materia: examData.materia?.nombre || 'No disponible',
           examen: examData.titulo || examData.title || 'No disponible',
-          estudiante: studentData.nombre_completo || `${studentData.nombre || ''} ${studentData.apellido || ''}`.trim() || 'No disponible',
+          estudiante: `${studentData.nombres} ${studentData.apellidos}`.trim() || 'No disponible',
           grupo: groupData?.nombre || 'No asignado',
           loading: false,
           error: null

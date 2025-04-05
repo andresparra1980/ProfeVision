@@ -61,7 +61,10 @@ export async function GET(
     // Adaptando a los nombres de columna que realmente existen
     const studentInfo = {
       id: student.id,
-      nombre_completo: student.nombre_completo || student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim() || studentId,
+      nombres: student.nombres,
+      apellidos: student.apellidos,
+      identificacion: student.identificacion,
+      email: student.email || null
     };
     
     return NextResponse.json(studentInfo);

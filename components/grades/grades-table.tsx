@@ -10,7 +10,7 @@ import {
 import { GradeInput } from '@/components/ui/grade-input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ComponenteCalificacion, Estudiante, Periodo } from '@/lib/types/database';
-import { Lock, Unlock, FileUp, Download, Upload } from 'lucide-react';
+import { Lock, Unlock, FileUp, Download, Upload, ArrowUpDown, ArrowDownUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
 
 interface Calificaciones {
   porComponente: Record<string, Record<string, number>>;
@@ -103,6 +104,7 @@ export function GradesTable({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[100px] min-w-[100px]"></TableHead>
               <TableHead className="w-[180px] min-w-[180px]"></TableHead>
               <TableHead className="w-[120px] min-w-[120px]"></TableHead>
               {periodos.map((periodo, index) => {
@@ -135,12 +137,9 @@ export function GradesTable({
               </TableHead>
             </TableRow>
             <TableRow>
-              <TableHead className="w-[180px] min-w-[180px]">
-                <span>Estudiante</span>
-              </TableHead>
-              <TableHead className="w-[120px] min-w-[120px]">
-                <span>Identificación</span>
-              </TableHead>
+              <TableHead className="w-[120px] min-w-[120px]">Apellidos</TableHead>
+              <TableHead className="w-[120px] min-w-[120px]">Nombres</TableHead>
+              <TableHead className="w-[100px] min-w-[100px]">Identificación</TableHead>
               {periodos.map(periodo => (
                 <React.Fragment key={periodo.id}>
                   {componentes
@@ -216,8 +215,15 @@ export function GradesTable({
           <TableBody>
             {estudiantes.map(estudiante => (
               <TableRow key={estudiante.id}>
-                <TableCell className="font-medium w-[180px] min-w-[180px]">{estudiante.nombre_completo}</TableCell>
-                <TableCell className="w-[120px] min-w-[120px]">{estudiante.identificacion}</TableCell>
+                <TableCell className="font-medium w-[120px] min-w-[120px]">
+                  {estudiante.apellidos}
+                </TableCell>
+                <TableCell className="w-[120px] min-w-[120px]">
+                  {estudiante.nombres}
+                </TableCell>
+                <TableCell className="w-[100px] min-w-[100px]">
+                  {estudiante.identificacion}
+                </TableCell>
                 {periodos.map(periodo => (
                   <React.Fragment key={periodo.id}>
                     {componentes

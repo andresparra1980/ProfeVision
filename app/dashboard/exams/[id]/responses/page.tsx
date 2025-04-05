@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
+import { Student } from '@/lib/types/database';
 
 // Importar el componente PDF completo de forma dinámica
 const PDFGenerator = dynamic(
@@ -21,13 +22,6 @@ const PDFGenerator = dynamic(
     )
   }
 );
-
-interface Student {
-  id: string;
-  nombre: string;
-  apellido: string;
-  identificacion: string;
-}
 
 interface Group {
   id: string;
@@ -135,7 +129,8 @@ export default function ResponseSheetsPage({ params }: PageProps) {
             estudiantes:estudiante_grupo!inner (
               estudiante:estudiantes!inner (
                 id,
-                nombre_completo,
+                nombres,
+                apellidos,
                 identificacion
               )
             )
@@ -157,16 +152,12 @@ export default function ResponseSheetsPage({ params }: PageProps) {
         materia: {
           nombre: item.grupos.materias.nombre,
         },
-        estudiantes: item.grupos.estudiantes.map((e: any) => {
-          // Dividir nombre_completo en nombre y apellido
-          const [nombre = '', apellido = ''] = e.estudiante.nombre_completo.split(' ');
-          return {
-            id: e.estudiante.id,
-            nombre,
-            apellido,
-            identificacion: e.estudiante.identificacion,
-          };
-        }),
+        estudiantes: item.grupos.estudiantes.map((e: any) => ({
+          id: e.estudiante.id,
+          nombres: e.estudiante.nombres,
+          apellidos: e.estudiante.apellidos,
+          identificacion: e.estudiante.identificacion,
+        })),
       }));
 
       setExam(examData);

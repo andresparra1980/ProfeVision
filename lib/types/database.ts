@@ -39,12 +39,15 @@ export interface Periodo {
 
 export interface Estudiante {
   id: string;
-  nombre_completo: string;
+  nombres: string;
+  apellidos: string;
   identificacion: string;
   email: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export type Student = Pick<Estudiante, 'id' | 'nombres' | 'apellidos' | 'identificacion'>;
 
 export interface EsquemaCalificacion {
   id: string;
@@ -78,6 +81,17 @@ export interface Grupo {
   estado: string;
   año_escolar: string | null;
   periodo_escolar: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Profesor {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  telefono: string | null;
+  cargo: string | null;
+  biografia: string | null;
   created_at: string;
   updated_at: string;
 }

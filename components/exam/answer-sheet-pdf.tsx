@@ -142,8 +142,8 @@ const styles = StyleSheet.create({
 
 interface Student {
   id: string;
-  nombre: string;
-  apellido: string;
+  nombres: string;
+  apellidos: string;
   identificacion: string;
 }
 
@@ -251,7 +251,7 @@ export const AnswerSheetPDF = ({ exam, student, group, paperSize = 'LETTER' }: A
             <View style={styles.headerInfo}>
               <Text style={styles.title}>{exam.titulo}</Text>
               <Text style={styles.studentInfo}>
-                Estudiante: {student.nombre} {student.apellido}
+                Estudiante: {student.nombres} {student.apellidos}
               </Text>
               <Text style={styles.studentInfo}>
                 Identificación: {student.identificacion}
