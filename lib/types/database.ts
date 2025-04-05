@@ -58,6 +58,30 @@ export interface EsquemaCalificacion {
   updated_at: string;
 }
 
+export interface Materia {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  entidad_id: string;
+  profesor_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Grupo {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  entidad_id: string;
+  materia_id: string;
+  profesor_id: string;
+  estado: string;
+  año_escolar: string | null;
+  periodo_escolar: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {

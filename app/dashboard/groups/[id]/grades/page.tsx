@@ -10,6 +10,8 @@ import { ComponenteCalificacion, Estudiante, Periodo, EsquemaCalificacion } from
 import { Lock, Unlock, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { GradesExcelModal } from '@/components/grades/grades-excel-modal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface GradesPageProps {
   params: Promise<{ id: string }>;
@@ -34,6 +36,13 @@ export default function GradesPage({ params }: GradesPageProps) {
     porComponente: {}
   });
   const [groupName, setGroupName] = useState<string>('');
+  const [institucionName, setInstitucionName] = useState<string>('');
+  // Estado para modal de importar/exportar calificaciones
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedComponent, setSelectedComponent] = useState<ComponenteCalificacion | null>(null);
+  const [modalMode, setModalMode] = useState<'import' | 'export' | 'export-period' | 'export-final'>('export');
+  const [selectedPeriodo, setSelectedPeriodo] = useState<Periodo | null>(null);
+  const [materia, setMateria] = useState<any>(null);
 
   useEffect(() => {
     if (!groupId) return;
@@ -104,6 +113,27 @@ export default function GradesPage({ params }: GradesPageProps) {
     try {
       setIsLoading(true);
       
+      // Cargar información del grupo, materia y entidad educativa
+      const { data: grupo, error: grupoError } = await supabase
+        .from('grupos')
+        .select(`
+          *,
+          materia:materias (
+            *,
+            entidad:entidades_educativas (
+              nombre
+            )
+          )
+        `)
+        .eq('id', groupId)
+        .single();
+
+      if (grupoError) throw grupoError;
+      
+      setGroupName(grupo.nombre);
+      setMateria(grupo.materia);
+      setInstitucionName(grupo.materia?.entidad?.nombre || 'INSTITUCIÓN EDUCATIVA');
+
       // Cargar esquema de calificación
       const { data: esquemas, error: esquemasError } = await supabase
         .from('esquemas_calificacion')
@@ -245,33 +275,35 @@ export default function GradesPage({ params }: GradesPageProps) {
           return newState;
         });
       } else {
-        // Generar UUID usando Web Crypto API
-        const uuid = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => 
-          b.toString(16).padStart(2, '0')
-        ).join('');
-        const formattedUuid = `${uuid.slice(0,8)}-${uuid.slice(8,12)}-${uuid.slice(12,16)}-${uuid.slice(16,20)}-${uuid.slice(20)}`;
-
-        // Insertar o actualizar calificación
-        const { error } = await supabase
+        // Verificar si ya existe
+        const { data: existente } = await supabase
           .from('calificaciones')
-          .upsert(
-            {
-              id: formattedUuid,
-              estudiante_id: estudianteId,
-              componente_id: componenteId,
-              valor: value,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            },
-            {
-              onConflict: 'estudiante_id,componente_id'
-            }
-          );
-
-        if (error) {
-          throw error;
+          .select('id')
+          .eq('estudiante_id', estudianteId)
+          .eq('componente_id', componenteId)
+          .maybeSingle();
+        
+        if (existente) {
+          // Actualizar calificación existente
+          await supabase
+            .from('calificaciones')
+            .update({ valor: value })
+            .eq('id', existente.id);
+        } else {
+          // Generar UUID
+          const uuid = crypto.randomUUID();
+          
+          // Insertar nueva calificación
+          await supabase
+            .from('calificaciones')
+            .insert({ 
+              id: uuid,
+              estudiante_id: estudianteId, 
+              componente_id: componenteId, 
+              valor: value 
+            });
         }
-
+        
         // Actualizar estado local
         setCalificaciones(prev => ({
           ...prev,
@@ -299,6 +331,57 @@ export default function GradesPage({ params }: GradesPageProps) {
       ...prev,
       [componenteId]: !prev[componenteId]
     }));
+  };
+
+  // Funciones para importar/exportar calificaciones
+  const handleImportGrades = (componenteId: string) => {
+    const componente = componentes.find(c => c.id === componenteId);
+    if (componente) {
+      setSelectedComponent(componente);
+      setModalMode('import');
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleExportGrades = (componenteId: string) => {
+    const componente = componentes.find(c => c.id === componenteId);
+    if (componente) {
+      setSelectedComponent(componente);
+      setModalMode('export');
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleImportComplete = () => {
+    setIsModalOpen(false);
+    loadData(); // Recargar datos
+  };
+
+  // Función para obtener las calificaciones de un componente específico
+  const getComponentGrades = (componenteId: string): Record<string, number> => {
+    const grades: Record<string, number> = {};
+    Object.entries(calificaciones.porComponente).forEach(([estudianteId, comps]) => {
+      if (comps[componenteId] !== undefined) {
+        grades[estudianteId] = comps[componenteId];
+      }
+    });
+    return grades;
+  };
+
+  const handleExportPeriod = (periodoId: string) => {
+    const periodo = periodos.find(p => p.id === periodoId);
+    if (periodo) {
+      setSelectedPeriodo(periodo);
+      setSelectedComponent(null);
+      setModalMode('export-period');
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleExportFinal = () => {
+    setSelectedComponent(null);
+    setModalMode('export-final');
+    setIsModalOpen(true);
   };
 
   if (isLoading) {
@@ -348,8 +431,64 @@ export default function GradesPage({ params }: GradesPageProps) {
           onGradeChange={handleGradeChange}
           componentesBloqueados={componentesBloqueados}
           onToggleLock={toggleComponenteLock}
+          onImportGrades={handleImportGrades}
+          onExportGrades={handleExportGrades}
+          onExportPeriod={handleExportPeriod}
+          onExportFinal={handleExportFinal}
         />
       </div>
+
+      {/* Modal para importar/exportar calificaciones */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {modalMode === 'import' ? 'Importar' : 'Exportar'} Calificaciones
+            </DialogTitle>
+            <DialogDescription>
+              {modalMode === 'import' 
+                ? 'Importa calificaciones desde un archivo Excel' 
+                : modalMode === 'export-period'
+                ? `Exportar calificaciones del ${selectedPeriodo?.nombre}`
+                : modalMode === 'export-final'
+                ? 'Exportar todas las calificaciones y nota final'
+                : 'Exporta calificaciones a un archivo Excel'}
+            </DialogDescription>
+          </DialogHeader>
+          <GradesExcelModal
+            estudiantes={estudiantes}
+            componente={selectedComponent}
+            calificaciones={modalMode === 'import' || modalMode === 'export' 
+              ? getComponentGrades(selectedComponent?.id || '')
+              : calificaciones.porComponente}
+            onImportComplete={handleImportComplete}
+            mode={modalMode}
+            materia={materia}
+            grupo={{
+              id: groupId,
+              nombre: groupName,
+              descripcion: null,
+              entidad_id: '',
+              materia_id: '',
+              profesor_id: '',
+              estado: '',
+              año_escolar: null,
+              periodo_escolar: null,
+              created_at: '',
+              updated_at: ''
+            }}
+            periodoActual={selectedPeriodo?.nombre}
+            componentesPeriodo={modalMode === 'export-period' 
+              ? componentes.filter(c => c.periodo_id === selectedPeriodo?.id) 
+              : undefined}
+            todosComponentes={modalMode === 'export-final' ? componentes : undefined}
+            todasCalificaciones={calificaciones.porComponente}
+            periodos={periodos}
+            componentes={componentes}
+            institucionName={institucionName}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
