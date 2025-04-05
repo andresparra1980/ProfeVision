@@ -393,7 +393,7 @@ export default function GradesPage({ params }: GradesPageProps) {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto py-8 space-y-6 max-w-[95%]">
       <div className="space-y-2">
         <Button 
           variant="ghost" 
