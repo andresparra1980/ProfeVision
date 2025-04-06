@@ -13,17 +13,17 @@ import { supabase } from '@/lib/supabase/client';
 interface GradesExcelModalProps {
   estudiantes: Estudiante[];
   componente: ComponenteCalificacion | null;
-  calificaciones: Record<string, number> | Record<string, Record<string, number>>;
-  onImportComplete: () => void;
+  calificaciones: Record<string, number>;
+  onImportComplete: (calificaciones: Record<string, number>) => void;
   mode: 'import' | 'export' | 'export-period' | 'export-final';
-  materia: any;
-  grupo: any;
-  periodoActual?: string;
-  componentesPeriodo?: ComponenteCalificacion[];
-  todosComponentes?: ComponenteCalificacion[];
-  todasCalificaciones?: Record<string, Record<string, number>>;
-  periodos: Periodo[];
-  componentes: ComponenteCalificacion[];
+  materia: { id: string; nombre: string };
+  grupo: { id: string; nombre: string };
+  periodoActual: Periodo | null;
+  componentesPeriodo: ComponenteCalificacion[] | null;
+  todosComponentes: ComponenteCalificacion[] | null;
+  todasCalificaciones: Record<string, Record<string, number>> | null;
+  periodos: Periodo[] | null;
+  componentes: ComponenteCalificacion[] | null;
   institucionName?: string;
 }
 
@@ -272,7 +272,7 @@ export function GradesExcelModal({
         description: "Calificaciones importadas correctamente",
       });
 
-      onImportComplete();
+      onImportComplete(calificaciones);
     } catch (error) {
       console.error('Error al importar calificaciones:', error);
       toast({
@@ -358,7 +358,7 @@ export function GradesExcelModal({
       [''],
       [`Materia: ${materia.nombre}`],
       [`Grupo: ${grupo.nombre}`],
-      [`Periodo: ${periodoActual}`],
+      [`Periodo: ${periodoActual.nombre}`],
       [''],
       [''] // Línea en blanco antes de los datos
     ];
@@ -366,9 +366,11 @@ export function GradesExcelModal({
     // Preparar encabezados de columnas
     const columns = [
       'Identificación',
-      'Estudiante',
+      'Apellidos',
+      'Nombres',
       ...componentesPeriodo.map(comp => `${comp.nombre} (${comp.porcentaje}%)`),
-      'Nota Final del Periodo'
+      'Nota Periodo (Pond.)',
+      'Nota Periodo (Abs.)'
     ];
 
     // Preparar datos de estudiantes
@@ -378,17 +380,24 @@ export function GradesExcelModal({
         return todasCalificaciones[estudiante.id]?.[comp.id] || 0;
       });
 
-      // Calcular nota final del periodo
-      const notaFinal = componentesPeriodo.reduce((acc, comp, index) => {
+      // Calcular notas del periodo
+      let notaPonderada = 0;
+      let porcentajeTotal = 0;
+      componentesPeriodo.forEach((comp, index) => {
         const nota = notasComponentes[index];
-        return acc + (nota * (comp.porcentaje / 100));
-      }, 0);
+        notaPonderada += nota * (comp.porcentaje / 100);
+        porcentajeTotal += comp.porcentaje;
+      });
+
+      const notaAbsoluta = porcentajeTotal > 0 ? (notaPonderada * 100) / periodoActual.porcentaje : 0;
 
       return [
         estudiante.identificacion,
-        estudiante.nombres + ' ' + estudiante.apellidos,
+        estudiante.apellidos,
+        estudiante.nombres,
         ...notasComponentes.map(nota => nota || ''),
-        notaFinal.toFixed(2)
+        notaPonderada.toFixed(2),
+        notaAbsoluta.toFixed(2)
       ];
     });
 
@@ -404,8 +413,8 @@ export function GradesExcelModal({
       { s: { r: 1, c: 0 }, e: { r: 1, c: columns.length - 1 } }
     ];
 
-    XLSX.utils.book_append_sheet(wb, ws, `Periodo ${periodoActual}`);
-    XLSX.writeFile(wb, `calificaciones_periodo_${periodoActual}_${materia.nombre.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, `Periodo ${periodoActual.nombre}`);
+    XLSX.writeFile(wb, `calificaciones_periodo_${periodoActual.nombre}_${materia.nombre.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
 
     toast({
       title: "Éxito",
@@ -441,8 +450,12 @@ export function GradesExcelModal({
     // Preparar encabezados de columnas
     const columns = [
       'Identificación',
-      'Estudiante',
-      ...periodos.map(p => `${p.nombre} (${p.porcentaje}%)`),
+      'Apellidos',
+      'Nombres',
+      ...periodos.map(p => [
+        `${p.nombre} (Pond. ${p.porcentaje}%)`,
+        `${p.nombre} (Abs.)`
+      ]).flat(),
       'Nota Final'
     ];
 
@@ -450,19 +463,20 @@ export function GradesExcelModal({
     const studentsData = estudiantes.map(estudiante => {
       // Obtener notas de los periodos
       const notasPeriodos = periodos.map(periodo => {
-        const componentesPeriodo = componentes.filter((c: ComponenteCalificacion) => c.periodo_id === periodo.id);
-        let notaPeriodo = 0;
+        const componentesPeriodo = componentes.filter(c => c.periodo_id === periodo.id);
+        let notaPonderada = 0;
         let porcentajeTotal = 0;
 
-        componentesPeriodo.forEach((componente: ComponenteCalificacion) => {
-          const calificacionesEstudiante = todasCalificaciones[estudiante.id] as Record<string, number>;
-          const nota = calificacionesEstudiante?.[componente.id] || 0;
-          notaPeriodo += nota * (componente.porcentaje / 100);
+        componentesPeriodo.forEach(componente => {
+          const nota = todasCalificaciones[estudiante.id]?.[componente.id] || 0;
+          notaPonderada += nota * (componente.porcentaje / 100);
           porcentajeTotal += componente.porcentaje;
         });
 
-        return porcentajeTotal > 0 ? notaPeriodo : 0;
-      });
+        const notaAbsoluta = porcentajeTotal > 0 ? (notaPonderada * 100) / periodo.porcentaje : 0;
+
+        return [notaPonderada.toFixed(2), notaAbsoluta.toFixed(2)];
+      }).flat();
 
       // Calcular nota final
       const notaFinal = todosComponentes.reduce((acc, comp) => {
@@ -472,8 +486,9 @@ export function GradesExcelModal({
 
       return [
         estudiante.identificacion,
-        estudiante.nombres + ' ' + estudiante.apellidos,
-        ...notasPeriodos.map(nota => nota.toFixed(2)),
+        estudiante.apellidos,
+        estudiante.nombres,
+        ...notasPeriodos,
         notaFinal.toFixed(2)
       ];
     });
@@ -490,25 +505,7 @@ export function GradesExcelModal({
       { s: { r: 1, c: 0 }, e: { r: 1, c: columns.length - 1 } }
     ];
 
-    // Aplicar estilos de celda para las notas de periodo y final
-    const headerRow = headerData.length;
-    for (let row = headerRow + 1; row < headerRow + 1 + studentsData.length; row++) {
-      // Para cada periodo (empezando después de Identificación y Estudiante)
-      for (let col = 2; col < 2 + periodos.length; col++) {
-        ws[XLSX.utils.encode_cell({ r: row, c: col })] = {
-          ...ws[XLSX.utils.encode_cell({ r: row, c: col })],
-          s: { fill: { fgColor: { rgb: "F4F4F5" } } } // bg-muted/50
-        };
-      }
-      // Para la nota final (última columna)
-      const finalCol = columns.length - 1;
-      ws[XLSX.utils.encode_cell({ r: row, c: finalCol })] = {
-        ...ws[XLSX.utils.encode_cell({ r: row, c: finalCol })],
-        s: { fill: { fgColor: { rgb: "E4E4E7" } } } // bg-muted
-      };
-    }
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Notas Finales');
+    XLSX.utils.book_append_sheet(wb, ws, "Calificaciones Finales");
     XLSX.writeFile(wb, `calificaciones_finales_${materia.nombre.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
 
     toast({

@@ -66,9 +66,12 @@ export function GradesTable({
     });
 
     // Si no hay componentes o el porcentaje total es 0, retornar 0
-    if (componentesPeriodo.length === 0 || porcentajeTotal === 0) return 0;
+    if (componentesPeriodo.length === 0 || porcentajeTotal === 0) return { ponderada: 0, absoluta: 0 };
 
-    return notaFinal;
+    const notaPonderada = notaFinal;
+    const notaAbsoluta = notaFinal / (periodo.porcentaje / 100);
+
+    return { ponderada: notaPonderada, absoluta: notaAbsoluta };
   };
 
   // Función para calcular la nota final del curso para un estudiante
@@ -109,17 +112,19 @@ export function GradesTable({
               <TableHead className="w-[120px] min-w-[120px]"></TableHead>
               {periodos.map((periodo, index) => {
                 const componentesCount = componentes.filter(c => c.periodo_id === periodo.id).length;
-                const periodoWidth = `${componentesCount * 100 + 50}px`;
+                const periodoWidth = `${componentesCount * 100 + 160}px`;
                 return (
                   <TableHead 
                     key={periodo.id} 
                     className={`text-center ${index % 2 === 0 ? 'bg-muted/50' : ''}`} 
-                    colSpan={componentesCount + 1}
+                    colSpan={componentesCount + 2}
                     style={{ width: periodoWidth, minWidth: periodoWidth }}
                   >
                     <div className="flex items-center justify-center gap-2">
-                      <span>{periodo.nombre}</span>
-                      <span className="text-xs text-muted-foreground">({periodo.porcentaje}%)</span>
+                      <div className="flex flex-col items-center">
+                        <span>{periodo.nombre}</span>
+                        <span className="text-xs text-muted-foreground">({periodo.porcentaje}%)</span>
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -133,7 +138,18 @@ export function GradesTable({
                 );
               })}
               <TableHead className="text-center w-[60px] min-w-[60px]">
-                <span>Nota Final</span>
+                <div className="flex flex-col items-center gap-1">
+                  <span>Nota Final</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onExportFinal}
+                    title="Exportar notas finales"
+                    className="h-6 w-6"
+                  >
+                    <Download className="h-3 w-3" />
+                  </Button>
+                </div>
               </TableHead>
             </TableRow>
             <TableRow>
@@ -153,62 +169,68 @@ export function GradesTable({
                               ({componente.porcentaje}%)
                             </span>
                           </div>
-                          <div className="flex justify-center gap-1 p-1">
+                          <div className="flex gap-1 p-1 border-t">
+                            {!componentesBloqueados[componente.id] ? (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => onToggleLock(componente.id)}
+                                title="Bloquear calificaciones"
+                              >
+                                <Unlock className="h-3 w-3" />
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => onToggleLock(componente.id)}
+                                title="Desbloquear calificaciones"
+                              >
+                                <Lock className="h-3 w-3" />
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="h-6 w-6"
                               onClick={() => onImportGrades?.(componente.id)}
                               title="Importar calificaciones"
-                              className="h-6 w-6"
                             >
                               <Upload className="h-3 w-3" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="h-6 w-6"
                               onClick={() => onExportGrades?.(componente.id)}
                               title="Exportar calificaciones"
-                              className="h-6 w-6"
                             >
                               <Download className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onToggleLock(componente.id)}
-                              title={componentesBloqueados[componente.id] ? "Desbloquear calificaciones" : "Bloquear calificaciones"}
-                              className="h-6 w-6"
-                            >
-                              {componentesBloqueados[componente.id] ? (
-                                <Lock className="h-3 w-3" />
-                              ) : (
-                                <Unlock className="h-3 w-3" />
-                              )}
                             </Button>
                           </div>
                         </div>
                       </TableHead>
                     ))}
-                  <TableHead className="text-center border-x w-[50px] min-w-[50px]">
-                    <div className="flex flex-col items-center p-2">
-                      <span className="text-sm">Nota del Periodo</span>
+                  <TableHead className="text-center bg-muted/50 border-x w-[80px] min-w-[80px]">
+                    <div className="flex flex-col items-center">
+                      <span>Nota</span>
+                      <span>Periodo</span>
+                      <span className="text-xs text-muted-foreground">(Pond.)</span>
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center bg-muted/50 border-x w-[80px] min-w-[80px]">
+                    <div className="flex flex-col items-center">
+                      <span>Nota</span>
+                      <span>Periodo</span>
+                      <span className="text-xs text-muted-foreground">(Abs.)</span>
                     </div>
                   </TableHead>
                 </React.Fragment>
               ))}
-              <TableHead className="text-center border-x w-[60px] min-w-[60px]">
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-sm">Nota Final</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onExportFinal}
-                    title="Exportar notas finales"
-                    className="h-6 w-6"
-                  >
-                    <Download className="h-3 w-3" />
-                  </Button>
-                </div>
+              <TableHead className="text-center w-[60px] min-w-[60px]">
+                <span>Nota Final</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -239,8 +261,11 @@ export function GradesTable({
                           </div>
                         </TableCell>
                       ))}
-                    <TableCell className="text-center font-medium bg-muted/50 border-x w-[50px] min-w-[50px]">
-                      {calcularNotaPeriodo(estudiante, periodo).toFixed(2)}
+                    <TableCell className="text-center font-medium bg-muted/50 border-x w-[80px] min-w-[80px]">
+                      {calcularNotaPeriodo(estudiante, periodo).ponderada.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-center font-medium bg-muted/50 border-x w-[80px] min-w-[80px]">
+                      {calcularNotaPeriodo(estudiante, periodo).absoluta.toFixed(2)}
                     </TableCell>
                   </React.Fragment>
                 ))}
