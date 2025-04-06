@@ -7,9 +7,30 @@ import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 
+// Valor por defecto para el número de opciones (si no se especifica)
+const DEFAULT_NUM_OPTIONS = 4;
+const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']; // Soportamos hasta 8 opciones
+
+interface QRData {
+  examId?: string;
+  examenId?: string;
+  exam_id?: string;
+  examen_id?: string;
+  studentId?: string;
+  estudianteId?: string;
+  student_id?: string;
+  estudiante_id?: string;
+  groupId?: string;
+  grupoId?: string;
+  group_id?: string;
+  grupo_id?: string;
+  isDuplicate: boolean;
+  duplicateInfo?: any;
+}
+
 interface ResultsProps {
-  qrData: any;
-  answers: any[];
+  qrData: QRData | null;
+  answers: Answer[];
   processedImage: string | null;
   originalImage: string | null;
   onPrevious: () => void;
@@ -42,10 +63,62 @@ interface Answer {
   value: string;
   confidence?: number;
   num_options?: number;
+  disabled?: boolean;
+  questionNumber?: number;
+  question_number?: number;
+  question?: number;
+  num?: number;
+  answerValue?: string;
+  answer_value?: string;
+  answer?: string;
+  pregunta_id?: string;
+  opcion_id?: string;
+  es_correcta?: boolean;
 }
 
-export function Results({ qrData, answers, processedImage, originalImage, onPrevious, onComplete, onContinue, onSaved }: ResultsProps) {
-  console.log("Results component received:", { qrData, answers, processedImage });
+interface RawAnswer {
+  number?: number;
+  questionNumber?: number;
+  question_number?: number;
+  question?: number;
+  num?: number;
+  value?: string;
+  answerValue?: string;
+  answer_value?: string;
+  answer?: string;
+  confidence?: number;
+  num_options?: number;
+  numOptions?: number;
+  options_count?: number;
+  disabled?: boolean;
+  pregunta_id?: string;
+  opcion_id?: string;
+  es_correcta?: boolean;
+}
+
+interface OpcionRespuesta {
+  id: string;
+  orden: number;
+  pregunta_id: string;
+  es_correcta: boolean;
+}
+
+// Función para normalizar las respuestas
+const normalizeAnswers = (rawAnswers: RawAnswer[]): Answer[] => {
+  return rawAnswers.map(answer => ({
+    number: answer.number || answer.questionNumber || answer.question_number || answer.question || answer.num || 0,
+    value: answer.value || answer.answerValue || answer.answer_value || answer.answer || '',
+    confidence: answer.confidence,
+    num_options: answer.num_options || answer.numOptions || answer.options_count || DEFAULT_NUM_OPTIONS,
+    disabled: answer.disabled || false,
+    pregunta_id: answer.pregunta_id,
+    opcion_id: answer.opcion_id,
+    es_correcta: answer.es_correcta
+  }));
+};
+
+export function Results({ qrData, answers: initialAnswers, processedImage, originalImage, onPrevious, onComplete, onContinue, onSaved }: ResultsProps) {
+  console.log("Results component received:", { qrData, initialAnswers, processedImage });
   
   const [entityNames, setEntityNames] = useState<EntityNames>({
     materia: '',
@@ -64,24 +137,21 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
     error: null
   });
 
+  const [answers, setAnswers] = useState<Answer[]>(normalizeAnswers(initialAnswers || []));
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isDuplicate, setIsDuplicate] = useState<boolean>(false);
   const [duplicateInfo, setDuplicateInfo] = useState<any>(null);
   const { toast } = useToast();
 
-  // Valor por defecto para el número de opciones (si no se especifica)
-  const DEFAULT_NUM_OPTIONS = 4;
-  const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']; // Soportamos hasta 8 opciones
-
   // Usar useMemo para evitar recálculos innecesarios
   const normalizedAnswers = useMemo(() => {
-    return Array.isArray(answers) ? answers.map(answer => {
+    return Array.isArray(answers) ? answers.map((answer: RawAnswer) => {
       // Si la respuesta tiene structure de {question, answer} (formato antiguo)
       if ('question' in answer && 'answer' in answer) {
         return {
-          number: answer.question,
-          value: answer.answer,
+          number: answer.question || 0,
+          value: answer.answer || '',
           confidence: answer.confidence || 100,
           num_options: answer.num_options || DEFAULT_NUM_OPTIONS
         };
@@ -90,19 +160,21 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
       else if ('number' in answer && 'value' in answer) {
         return {
           ...answer,
+          number: answer.number || 0,
+          value: answer.value || '',
           num_options: answer.num_options || DEFAULT_NUM_OPTIONS
         };
       }
       // Intentar extraer campos si los nombres son diferentes
       else {
-        const number = answer.number || answer.questionNumber || answer.question_number || answer.question || answer.num || null;
-        const value = answer.value || answer.answerValue || answer.answer_value || answer.answer || null;
-        const confidence = answer.confidence || answer.conf || 100;
+        const number = answer.number || answer.questionNumber || answer.question_number || answer.question || answer.num || 0;
+        const value = answer.value || answer.answerValue || answer.answer_value || answer.answer || '';
+        const confidence = answer.confidence || 100;
         const num_options = answer.num_options || answer.numOptions || answer.options_count || DEFAULT_NUM_OPTIONS;
         
         return { number, value, confidence, num_options };
       }
-    }).filter(a => a.number !== null && a.value !== null).sort((a, b) => a.number - b.number) : [];
+    }).filter(a => a.number > 0 && a.value !== '').sort((a, b) => a.number - b.number) : [];
   }, [answers]);
 
   // Crear un arreglo con las 40 posibles preguntas
@@ -111,7 +183,8 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
     normalizedAnswers.forEach(answer => {
       map.set(answer.number, {
         value: answer.value,
-        num_options: answer.num_options || DEFAULT_NUM_OPTIONS
+        num_options: answer.num_options || DEFAULT_NUM_OPTIONS,
+        disabled: answer.disabled || false
       });
     });
     return map;
@@ -124,7 +197,8 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
       return {
         number: questionNumber,
         value: answersMap.has(questionNumber) ? answersMap.get(questionNumber).value : '-',
-        num_options: answersMap.has(questionNumber) ? answersMap.get(questionNumber).num_options : DEFAULT_NUM_OPTIONS
+        num_options: answersMap.has(questionNumber) ? answersMap.get(questionNumber).num_options : DEFAULT_NUM_OPTIONS,
+        disabled: answersMap.has(questionNumber) ? answersMap.get(questionNumber).disabled : false
       };
     });
     
@@ -133,7 +207,8 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
       return {
         number: questionNumber,
         value: answersMap.has(questionNumber) ? answersMap.get(questionNumber).value : '-',
-        num_options: answersMap.has(questionNumber) ? answersMap.get(questionNumber).num_options : DEFAULT_NUM_OPTIONS
+        num_options: answersMap.has(questionNumber) ? answersMap.get(questionNumber).num_options : DEFAULT_NUM_OPTIONS,
+        disabled: answersMap.has(questionNumber) ? answersMap.get(questionNumber).disabled : false
       };
     });
     
@@ -226,9 +301,7 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
           examRes.json()
         ]);
         
-        const puntajeTotal = parseFloat(examData.puntaje_total);
-        
-        // Extraer IDs de las preguntas
+        // Obtener respuestas correctas para TODAS las preguntas
         const questionIds = questions.map((q: any) => q.id);
         
         // Obtener respuestas correctas para cada pregunta
@@ -263,21 +336,76 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
             correctAnswersMap.set(question.orden, letterAnswer);
           }
         });
+
+        // Marcar las respuestas y asignar los IDs de pregunta y opción
+        const answersWithIds = normalizedAnswers.map((answer: Answer): Answer => {
+          const question = questions.find((q: any) => q.orden === answer.number);
+          
+          // Encontrar la opción seleccionada basada en la letra de respuesta
+          let opcionId = null;
+          let esCorrecta = false;
+          
+          if (question) {
+            // Obtener el orden basado en la letra de respuesta (A=1, B=2, etc)
+            const orden = OPTION_LETTERS.indexOf(answer.value.toUpperCase()) + 1;
+            
+            // Buscar la opción correspondiente independientemente de si está habilitada o no
+            const opcionesParaPregunta = correctAnswersData.filter(
+              (opt: OpcionRespuesta) => opt.pregunta_id === question.id
+            );
+            
+            // Encontrar la opción específica que corresponde a la respuesta del estudiante
+            const opcionSeleccionada = opcionesParaPregunta.find(
+              (opt: OpcionRespuesta) => opt.orden === orden
+            );
+            
+            // Asignar el ID de la opción seleccionada
+            opcionId = opcionSeleccionada?.id;
+            
+            // Encontrar la opción correcta para esta pregunta
+            const opcionCorrecta = opcionesParaPregunta.find(
+              (opt: OpcionRespuesta) => opt.es_correcta
+            );
+            
+            // Determinar si la respuesta es correcta
+            esCorrecta = opcionCorrecta?.orden === orden;
+          }
+
+          return {
+            ...answer,
+            number: answer.number,
+            value: answer.value,
+            confidence: answer.confidence || 100,
+            num_options: answer.num_options || DEFAULT_NUM_OPTIONS,
+            disabled: question ? !question.habilitada : false,
+            pregunta_id: question?.id,
+            opcion_id: opcionId,
+            es_correcta: esCorrecta
+          };
+        });
         
-        // Contar respuestas correctas
+        // Actualizar el estado de las respuestas con los IDs asignados
+        setAnswers(answersWithIds);
+        
+        const puntajeTotal = parseFloat(examData.puntaje_total);
+        
+        // Filtrar preguntas habilitadas solo para el cálculo de la nota
+        const preguntasHabilitadas = questions.filter((q: any) => q.habilitada);
+        
+        // Contar respuestas correctas (solo de preguntas habilitadas)
         let correctCount = 0;
-        normalizedAnswers.forEach(answer => {
-          const correctAnswer = correctAnswersMap.get(answer.number);
-          if (answer.value && correctAnswer && answer.value.toUpperCase() === correctAnswer) {
+        answersWithIds.forEach(answer => {
+          if (!answer.disabled && answer.es_correcta) {
             correctCount++;
           }
         });
         
         // Calcular porcentaje y puntaje obtenido
-        const totalQuestions = correctAnswersMap.size;
+        const totalQuestions = preguntasHabilitadas.length;
         const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
         const puntajeObtenido = (percentage / 100) * puntajeTotal;
         
+        // Actualizar el estado con los nuevos cálculos
         setExamScore({
           correctAnswers: correctCount,
           totalQuestions,
@@ -289,11 +417,11 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
         });
         
       } catch (error: any) {
-        console.error("Error calculando calificación:", error);
+        console.error("Error calculating exam score:", error);
         setExamScore(prev => ({
           ...prev,
           loading: false,
-          error: error.message || "Error al calcular la calificación"
+          error: error.message || "Error al calcular calificación"
         }));
       }
     }
@@ -302,6 +430,11 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
       fetchEntityNames();
     }
   }, [qrData]); // Eliminar normalizedAnswers de las dependencias
+
+  // Actualizar el estado de answers cuando cambien las props
+  useEffect(() => {
+    setAnswers(normalizeAnswers(initialAnswers || []));
+  }, [initialAnswers]);
 
   // Función para obtener el color de la burbuja según la opción
   const getAnswerBubbleStyle = (value: string) => {
@@ -320,22 +453,29 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
     }
   };
 
-  // Renderizar las burbujas para una respuesta
+  // Función para renderizar las burbujas de respuesta
   const renderAnswerBubbles = (answer: Answer) => {
     const numOptions = answer.num_options || DEFAULT_NUM_OPTIONS;
-    const options = OPTION_LETTERS.slice(0, numOptions);
-    
+    const selectedIndex = OPTION_LETTERS.indexOf(answer.value.toUpperCase());
+    const isDisabled = answer.disabled;
+
     return (
       <div className="flex items-center space-x-1">
-        {options.map((letter) => {
-          const isSelected = answer.value.toUpperCase() === letter;
+        {Array.from({ length: numOptions }).map((_, i) => {
+          const isSelected = i === selectedIndex;
+          
           return (
             <div 
-              key={`bubble-${answer.number}-${letter}`}
-              className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}`}
+              key={`bubble-${answer.number}-${i}`}
+              className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium transition-colors
+                ${isDisabled 
+                  ? 'bg-gray-200 text-gray-400 opacity-30' 
+                  : isSelected 
+                    ? getAnswerBubbleStyle(OPTION_LETTERS[i]) + ' text-white'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
             >
-              {isSelected ? letter : ''}
+              {OPTION_LETTERS[i]}
             </div>
           );
         })}
@@ -524,7 +664,7 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
           <div className="space-y-2">
             {answersFirstColumn.map((answer) => (
               <div key={`answer-${answer.number}`} className="flex items-center">
-                <span className="text-sm font-medium min-w-[25px]">{answer.number}.</span>
+                <span className={`text-sm font-medium min-w-[25px] ${answer.disabled ? 'line-through opacity-40' : ''}`}>{answer.number}.</span>
                 {answer.value !== '-' ? (
                   renderAnswerBubbles(answer)
                 ) : (
@@ -532,7 +672,7 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
                     {Array.from({ length: answer.num_options || DEFAULT_NUM_OPTIONS }).map((_, i) => (
                       <div 
                         key={`empty-bubble-${answer.number}-${i}`}
-                        className="w-5 h-5 rounded-full bg-gray-200"
+                        className={`w-5 h-5 rounded-full bg-gray-200 ${answer.disabled ? 'opacity-30' : ''}`}
                       />
                     ))}
                   </div>
@@ -543,7 +683,7 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
           <div className="space-y-2">
             {answersSecondColumn.map((answer) => (
               <div key={`answer-${answer.number}`} className="flex items-center">
-                <span className="text-sm font-medium min-w-[25px]">{answer.number}.</span>
+                <span className={`text-sm font-medium min-w-[25px] ${answer.disabled ? 'line-through opacity-40' : ''}`}>{answer.number}.</span>
                 {answer.value !== '-' ? (
                   renderAnswerBubbles(answer)
                 ) : (
@@ -551,7 +691,7 @@ export function Results({ qrData, answers, processedImage, originalImage, onPrev
                     {Array.from({ length: answer.num_options || DEFAULT_NUM_OPTIONS }).map((_, i) => (
                       <div 
                         key={`empty-bubble-${answer.number}-${i}`}
-                        className="w-5 h-5 rounded-full bg-gray-200"
+                        className={`w-5 h-5 rounded-full bg-gray-200 ${answer.disabled ? 'opacity-30' : ''}`}
                       />
                     ))}
                   </div>

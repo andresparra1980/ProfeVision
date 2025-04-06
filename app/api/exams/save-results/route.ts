@@ -145,6 +145,17 @@ async function cleanupTemporaryFiles() {
   }
 }
 
+interface Answer {
+  pregunta_id: string;
+  opcion_id: string;
+  es_correcta: boolean;
+}
+
+interface Pregunta {
+  id: string;
+  puntaje: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
@@ -180,28 +191,53 @@ export async function POST(req: NextRequest) {
       }
     });
     
-    // Si no tenemos profesorId, intentamos obtenerlo del examen
+    // Si no tenemos profesor_id del QR, obtenerlo del examen
     if (!profesorId) {
-      try {
-        const { data: examenData, error: examenError } = await supabase
-          .from('examenes')
-          .select('profesor_id')
-          .eq('id', examId)
-          .single();
-          
-        if (examenError || !examenData?.profesor_id) {
-          return NextResponse.json({ 
-            error: 'No se pudo obtener el profesor asociado al examen' 
-          }, { status: 400 });
-        }
-        
-        profesorId = examenData.profesor_id;
-      } catch (error) {
-        return NextResponse.json({ 
-          error: 'Error al obtener información del profesor' 
-        }, { status: 500 });
+      const { data: examData, error: examError } = await supabase
+        .from('examenes')
+        .select('profesor_id')
+        .eq('id', examId)
+        .single();
+
+      if (examError) {
+        console.error('Error al obtener profesor_id del examen:', examError);
+        return NextResponse.json(
+          { error: 'Error al obtener datos del profesor' },
+          { status: 500 }
+        );
       }
+
+      profesorId = examData.profesor_id;
     }
+
+    // Obtener preguntas habilitadas del examen (solo para calcular la nota)
+    const { data: preguntas, error: preguntasError } = await supabase
+      .from('preguntas')
+      .select('id, puntaje, habilitada')
+      .eq('examen_id', examId)
+      .order('orden');
+
+    if (preguntasError) {
+      console.error('Error al obtener preguntas:', preguntasError);
+      return NextResponse.json(
+        { error: 'Error al obtener preguntas del examen' },
+        { status: 500 }
+      );
+    }
+
+    // Filtrar preguntas habilitadas solo para el cálculo de la nota
+    const preguntasHabilitadas = preguntas.filter(p => p.habilitada);
+
+    // Contar respuestas correctas (solo de preguntas habilitadas)
+    const respuestasCorrectas = answers.filter((answer: Answer) => 
+      preguntasHabilitadas.some((p: Pregunta) => p.id === answer.pregunta_id && answer.es_correcta)
+    ).length;
+    
+    // Calcular porcentaje (respuestas correctas / total preguntas habilitadas)
+    const porcentajeCorrectas = (respuestasCorrectas / preguntasHabilitadas.length) * 100;
+    
+    // Calcular nota final (0-5)
+    const notaFinal = (respuestasCorrectas / preguntasHabilitadas.length) * 5;
 
     // Si es un reescaneo, eliminar los resultados anteriores
     if (isDuplicate && duplicateInfo && duplicateInfo.resultadoId) {
@@ -299,26 +335,7 @@ export async function POST(req: NextRequest) {
       console.log('Error al buscar versión, continuando con version_id = null:', error);
     }
     
-    // Obtener el puntaje total del examen
-    const { data: examenData, error: examenError } = await supabase
-      .from('examenes')
-      .select('puntaje_total')
-      .eq('id', examId)
-      .single();
-    
-    if (examenError) {
-      console.error('Error al obtener puntaje total del examen:', examenError);
-      return NextResponse.json(
-        { error: 'Error al obtener información del examen' },
-        { status: 500 }
-      );
-    }
-
-    // Calcular el puntaje obtenido basado en el porcentaje de respuestas correctas y el puntaje total
-    const puntajeTotal = parseFloat(examenData.puntaje_total);
-    const puntajeObtenido = (examScore.percentage / 100) * puntajeTotal;
-    
-    // Crear el resultado del examen
+    // Crear el resultado del examen con los nuevos puntajes calculados
     const { data: resultadoData, error: resultadoError } = await supabase
       .from('resultados_examen')
       .insert({
@@ -326,8 +343,8 @@ export async function POST(req: NextRequest) {
         examen_id: examId,
         estudiante_id: studentId,
         version_id: versionId,
-        puntaje_obtenido: puntajeObtenido.toFixed(2), // Redondear a 2 decimales
-        porcentaje: examScore.percentage,
+        puntaje_obtenido: notaFinal.toFixed(2),
+        porcentaje: porcentajeCorrectas.toFixed(2),
         estado: 'CALIFICADO',
         fecha_calificacion: now,
         created_at: now,
@@ -344,72 +361,47 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    // 2. Guardar las respuestas del estudiante
-    const respuestasPromises = [];
-    
-    for (const answer of answers) {
-      // Obtener id de la pregunta basado en su orden
-      const { data: preguntaData, error: preguntaError } = await supabase
-        .from('preguntas')
-        .select('id')
-        .eq('examen_id', examId)
-        .eq('orden', answer.number)
-        .single();
+    // 2. Guardar las respuestas del estudiante (TODAS, sin filtrar por habilitada)
+    try {
+      console.log('Guardando respuestas para resultado:', resultadoId);
+      console.log('Total respuestas a guardar:', answers.length);
       
-      if (preguntaError) {
-        console.error(`Error al obtener pregunta orden ${answer.number}:`, preguntaError);
-        continue;
-      }
-      
-      const preguntaId = preguntaData?.id;
-      
-      // Obtener id de la opción seleccionada
-      let letraRespuesta = '';
-      switch (answer.value.toUpperCase()) {
-        case 'A': letraRespuesta = '1'; break;
-        case 'B': letraRespuesta = '2'; break;
-        case 'C': letraRespuesta = '3'; break;
-        case 'D': letraRespuesta = '4'; break;
-        case 'E': letraRespuesta = '5'; break;
-        case 'F': letraRespuesta = '6'; break;
-        case 'G': letraRespuesta = '7'; break;
-        case 'H': letraRespuesta = '8'; break;
-        default: letraRespuesta = '1';
-      }
-      
-      const { data: opcionData, error: opcionError } = await supabase
-        .from('opciones_respuesta')
-        .select('id, es_correcta')
-        .eq('pregunta_id', preguntaId)
-        .eq('orden', letraRespuesta)
-        .single();
-      
-      if (opcionError) {
-        console.error(`Error al obtener opción para pregunta ${preguntaId}:`, opcionError);
-        continue;
-      }
-      
-      const opcionId = opcionData?.id;
-      const esCorrecta = opcionData?.es_correcta || false;
-      
-      // Agregar promesa para insertar respuesta de estudiante
-      respuestasPromises.push(
-        supabase
+      for (const answer of answers) {
+        const pregunta = preguntas.find((p: Pregunta) => p.id === answer.pregunta_id);
+        if (!pregunta) {
+          console.warn(`Pregunta no encontrada para ID: ${answer.pregunta_id}`);
+          continue;
+        }
+
+        const { error: insertError } = await supabase
           .from('respuestas_estudiante')
           .insert({
             resultado_id: resultadoId,
-            pregunta_id: preguntaId,
-            opcion_id: opcionId,
-            es_correcta: esCorrecta,
-            puntaje_obtenido: esCorrecta ? 1 : 0,
+            pregunta_id: answer.pregunta_id,
+            opcion_id: answer.opcion_id,
+            es_correcta: answer.es_correcta,
+            puntaje_obtenido: answer.es_correcta ? 1 : 0,
             created_at: now,
             updated_at: now
-          })
+          });
+
+        if (insertError) {
+          console.error('Error al guardar respuesta:', {
+            pregunta_id: answer.pregunta_id,
+            error: insertError
+          });
+          throw new Error(`Error al guardar respuesta: ${insertError.message}`);
+        }
+      }
+
+      console.log('Todas las respuestas guardadas exitosamente');
+    } catch (error) {
+      console.error('Error al guardar respuestas:', error);
+      return NextResponse.json(
+        { error: 'Error al guardar las respuestas del estudiante' },
+        { status: 500 }
       );
     }
-    
-    // Ejecutar todas las promesas de inserción de respuestas
-    await Promise.all(respuestasPromises);
     
     // 3. Subir imágenes a S3 usando el Storage API de Supabase
     // Generar rutas para las imágenes
@@ -561,7 +553,7 @@ export async function POST(req: NextRequest) {
         );
       }
       
-      // 5. También actualizar la tabla exam_scans existente
+      // 5. También actualizar la tabla exam_scans existente con los nuevos cálculos
       const { data: scanData, error: scanError } = await supabase
         .from('exam_scans')
         .insert({
@@ -572,10 +564,10 @@ export async function POST(req: NextRequest) {
           group_id: groupId,
           status: 'COMPLETED',
           result: {
-            score: examScore.percentage,
-            correctAnswers: examScore.correctAnswers,
-            totalQuestions: examScore.totalQuestions,
-            answers: answers
+            score: porcentajeCorrectas,
+            correctAnswers: respuestasCorrectas,
+            totalQuestions: preguntasHabilitadas.length,
+            answers: preguntasHabilitadas
           },
           metadata: {
             originalImage: originalPath,

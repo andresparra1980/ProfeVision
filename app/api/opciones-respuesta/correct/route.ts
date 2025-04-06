@@ -33,7 +33,13 @@ export async function POST(req: NextRequest) {
     // Obtener opciones de respuesta para las preguntas especificadas
     const { data: optionsData, error } = await supabase
       .from('opciones_respuesta')
-      .select('*')
+      .select(`
+        *,
+        pregunta:preguntas!inner(
+          id,
+          habilitada
+        )
+      `)
       .in('pregunta_id', questionIds);
     
     if (error) {

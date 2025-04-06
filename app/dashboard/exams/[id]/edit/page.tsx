@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
 
 export default function EditExamPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -19,6 +21,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showDisableDialog, setShowDisableDialog] = useState(false);
+  const [questionToToggle, setQuestionToToggle] = useState<{id: string, habilitada: boolean} | null>(null);
   const [tiposPregunta, setTiposPregunta] = useState<any[]>([]);
   const [exam, setExam] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
@@ -348,6 +352,118 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
     }
   };
 
+  // Función para manejar el toggle de habilitación/deshabilitación de pregunta
+  const handleQuestionToggle = async (questionId: string, currentValue: boolean) => {
+    if (exam.estado === "publicado") {
+      setQuestionToToggle({ id: questionId, habilitada: !currentValue });
+      setShowDisableDialog(true);
+    } else {
+      await toggleQuestionStatus(questionId, !currentValue);
+    }
+  };
+
+  // Función para confirmar el toggle de una pregunta
+  const confirmQuestionToggle = async () => {
+    if (!questionToToggle) return;
+    
+    await toggleQuestionStatus(questionToToggle.id, questionToToggle.habilitada);
+    setShowDisableDialog(false);
+    setQuestionToToggle(null);
+  };
+
+  // Función para actualizar el estado de habilitación de una pregunta
+  const toggleQuestionStatus = async (questionId: string, newStatus: boolean) => {
+    try {
+      setSaving(true);
+      
+      // Actualizar el estado de la pregunta
+      const { error: updateError } = await supabase
+        .from("preguntas")
+        .update({ habilitada: newStatus })
+        .eq("id", questionId);
+
+      if (updateError) throw updateError;
+
+      // Si el examen está publicado, recalcular las calificaciones de todos los estudiantes
+      // sin importar si estamos habilitando o deshabilitando
+      if (exam.estado === "publicado") {
+        // Obtener todos los resultados del examen
+        const { data: resultados, error: resultadosError } = await supabase
+          .from("resultados_examen")
+          .select("id, puntaje_obtenido, porcentaje")
+          .eq("examen_id", examId);
+
+        if (resultadosError) throw resultadosError;
+
+        // Para cada resultado, recalcular el puntaje considerando solo preguntas habilitadas
+        for (const resultado of resultados) {
+          // Obtener todas las respuestas del estudiante
+          const { data: respuestas, error: respuestasError } = await supabase
+            .from("respuestas_estudiante")
+            .select(`
+              pregunta_id,
+              es_correcta,
+              pregunta:preguntas!inner(
+                habilitada
+              )
+            `)
+            .eq("resultado_id", resultado.id);
+
+          if (respuestasError) throw respuestasError;
+
+          // Definir el tipo de respuesta como lo retorna Supabase
+          interface RespuestaEstudiante {
+            pregunta_id: string;
+            es_correcta: boolean;
+            pregunta: {
+              habilitada: boolean;
+            };
+          }
+
+          // Hacer un cast seguro de los datos
+          const respuestasTyped = (respuestas as unknown) as RespuestaEstudiante[];
+
+          // Filtrar solo las respuestas de preguntas habilitadas
+          const respuestasHabilitadas = respuestasTyped.filter(r => r.pregunta.habilitada);
+          const respuestasCorrectas = respuestasHabilitadas.filter(r => r.es_correcta).length;
+          
+          // Calcular nuevo porcentaje y nota usando la misma fórmula que en save-results
+          const nuevoPorcentaje = (respuestasCorrectas / respuestasHabilitadas.length) * 100;
+          const nuevaNota = (respuestasCorrectas / respuestasHabilitadas.length) * 5;
+
+          // Actualizar el resultado
+          const { error: updateResultadoError } = await supabase
+            .from("resultados_examen")
+            .update({
+              puntaje_obtenido: nuevaNota,
+              porcentaje: nuevoPorcentaje,
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", resultado.id);
+
+          if (updateResultadoError) throw updateResultadoError;
+        }
+      }
+
+      // Recargar preguntas para actualizar la UI
+      fetchQuestions();
+
+      toast({
+        title: "Éxito",
+        description: `Pregunta ${newStatus ? "habilitada" : "deshabilitada"} correctamente`,
+      });
+    } catch (error) {
+      console.error("Error toggling question status:", error);
+      toast({
+        title: "Error",
+        description: `No se pudo ${newStatus ? "habilitar" : "deshabilitar"} la pregunta`,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -407,7 +523,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         ) : (
           <div className="space-y-4">
             {questions.map((question, index) => (
-              <Card key={question.id} className="relative">
+              <Card key={question.id} className={`relative ${!question.habilitada ? 'opacity-75' : ''}`}>
                 <div className="absolute left-4 top-4 p-2 text-muted-foreground">
                   <GripVertical className="h-5 w-5" />
                 </div>
@@ -420,14 +536,30 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                         {question.puntaje} puntos
                       </CardDescription>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-destructive"
-                      onClick={() => deleteQuestion(question.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-4">
+                      {exam.estado === "publicado" && (
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`question-${question.id}-enabled`} className="text-sm">
+                            {question.habilitada ? "Habilitada" : "Deshabilitada"}
+                          </Label>
+                          <Switch
+                            id={`question-${question.id}-enabled`}
+                            checked={question.habilitada}
+                            onCheckedChange={() => handleQuestionToggle(question.id, question.habilitada)}
+                          />
+                        </div>
+                      )}
+                      {exam.estado === "borrador" && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive"
+                          onClick={() => deleteQuestion(question.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -587,6 +719,32 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           </CardFooter>
         </Card>
       )}
+
+      {/* Modal de confirmación para deshabilitar pregunta */}
+      <AlertDialog open={showDisableDialog} onOpenChange={setShowDisableDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿{questionToToggle?.habilitada ? 'Habilitar' : 'Deshabilitar'} pregunta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {questionToToggle?.habilitada ? (
+                'Al habilitar esta pregunta, se volverá a considerar en la calificación de los estudiantes.'
+              ) : (
+                'Al deshabilitar esta pregunta, se recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen, excluyendo esta pregunta del cálculo.'
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmQuestionToggle}>
+              {saving ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+              ) : (
+                'Confirmar'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 } 

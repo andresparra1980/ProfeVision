@@ -30,6 +30,7 @@ interface RespuestaEstudiante {
   pregunta: {
     orden: number;
     num_opciones: number;
+    habilitada: boolean;
   };
   opcion_respuesta: {
     orden: number;
@@ -109,6 +110,7 @@ export default function ExamResultsPage() {
             pregunta:preguntas!inner(
               id,
               orden,
+              habilitada,
               opciones:opciones_respuesta(count)
             ),
             opcion_respuesta:opciones_respuesta(
@@ -156,7 +158,8 @@ export default function ExamResultsPage() {
                     puntaje_obtenido: respuesta.puntaje_obtenido,
                     pregunta: {
                       orden: respuesta.pregunta.orden,
-                      num_opciones: respuesta.pregunta.opciones?.[0]?.count || 4
+                      num_opciones: respuesta.pregunta.opciones?.[0]?.count || 4,
+                      habilitada: respuesta.pregunta.habilitada
                     },
                     opcion_respuesta: {
                       orden: respuesta.opcion_respuesta.orden
@@ -298,9 +301,14 @@ export default function ExamResultsPage() {
                                 .filter(r => r.pregunta.orden <= 20)
                                 .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
                                 .map((respuesta) => (
-                                  <div key={respuesta.id} className="flex items-center">
-                                    <span className="text-sm font-medium min-w-[25px]">{respuesta.pregunta.orden}.</span>
-                                    <div className="flex items-center space-x-1">
+                                  <div 
+                                    key={respuesta.id} 
+                                    className={`flex items-center`}
+                                  >
+                                    <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
+                                      {respuesta.pregunta.orden}.
+                                    </span>
+                                    <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
                                       {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
                                         const letter = getLetterFromNumber(num);
                                         const isSelected = respuesta.opcion_respuesta.orden === num;
@@ -315,7 +323,7 @@ export default function ExamResultsPage() {
                                         );
                                       })}
                                     </div>
-                                    <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'}`}>
+                                    <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
                                       {respuesta.es_correcta ? '✓' : '✗'}
                                     </span>
                                   </div>
@@ -326,9 +334,14 @@ export default function ExamResultsPage() {
                                 .filter(r => r.pregunta.orden > 20)
                                 .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
                                 .map((respuesta) => (
-                                  <div key={respuesta.id} className="flex items-center">
-                                    <span className="text-sm font-medium min-w-[25px]">{respuesta.pregunta.orden}.</span>
-                                    <div className="flex items-center space-x-1">
+                                  <div 
+                                    key={respuesta.id} 
+                                    className={`flex items-center`}
+                                  >
+                                    <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
+                                      {respuesta.pregunta.orden}.
+                                    </span>
+                                    <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
                                       {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
                                         const letter = getLetterFromNumber(num);
                                         const isSelected = respuesta.opcion_respuesta.orden === num;
@@ -343,7 +356,7 @@ export default function ExamResultsPage() {
                                         );
                                       })}
                                     </div>
-                                    <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'}`}>
+                                    <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
                                       {respuesta.es_correcta ? '✓' : '✗'}
                                     </span>
                                   </div>

@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     // Obtener preguntas del examen
     const { data: questions, error } = await supabase
       .from('preguntas')
-      .select('*')
+      .select('id, texto, tipo_id, puntaje, dificultad, retroalimentacion, orden, habilitada')
       .eq('examen_id', examId)
       .order('orden');
     
