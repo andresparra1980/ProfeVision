@@ -17,7 +17,11 @@ interface GradesExcelModalProps {
   onImportComplete: (calificaciones: Record<string, number>) => void;
   mode: 'import' | 'export' | 'export-period' | 'export-final';
   materia: { id: string; nombre: string };
-  grupo: { id: string; nombre: string };
+  grupo: { 
+    id: string; 
+    nombre: string;
+    periodo_escolar: string | null;
+  };
   periodoActual: Periodo | null;
   componentesPeriodo: ComponenteCalificacion[] | null;
   todosComponentes: ComponenteCalificacion[] | null;
@@ -340,6 +344,13 @@ export function GradesExcelModal({
 
   const handleExportPeriod = () => {
     if (!materia || !grupo || !periodoActual || !componentesPeriodo || !todasCalificaciones) {
+      console.error('Datos faltantes:', {
+        materia: !!materia,
+        grupo: !!grupo,
+        periodoActual,
+        componentesPeriodo: !!componentesPeriodo,
+        todasCalificaciones: !!todasCalificaciones
+      });
       toast({
         title: "Error",
         description: "Faltan datos necesarios para la exportación del periodo",
@@ -347,6 +358,9 @@ export function GradesExcelModal({
       });
       return;
     }
+
+    console.log('Periodo actual:', periodoActual);
+    console.log('Porcentaje del periodo:', periodoActual.porcentaje);
 
     // Crear el libro de trabajo
     const wb = XLSX.utils.book_new();
@@ -358,7 +372,7 @@ export function GradesExcelModal({
       [''],
       [`Materia: ${materia.nombre}`],
       [`Grupo: ${grupo.nombre}`],
-      [`Periodo: ${periodoActual.nombre}`],
+      [`Periodo: ${periodoActual?.nombre || 'No definido'}`],
       [''],
       [''] // Línea en blanco antes de los datos
     ];
@@ -389,7 +403,21 @@ export function GradesExcelModal({
         porcentajeTotal += comp.porcentaje;
       });
 
-      const notaAbsoluta = porcentajeTotal > 0 ? (notaPonderada * 100) / periodoActual.porcentaje : 0;
+      // Verificar que tenemos el periodo y su porcentaje antes de calcular
+      if (!periodoActual?.porcentaje) {
+        console.error('No se encontró el porcentaje del periodo o el periodo es nulo');
+        return [
+          estudiante.identificacion,
+          estudiante.apellidos,
+          estudiante.nombres,
+          ...notasComponentes.map(nota => nota || ''),
+          notaPonderada.toFixed(2),
+          '0.00'
+        ];
+      }
+
+      // Calcular nota absoluta solo si hay una nota ponderada
+      const notaAbsoluta = notaPonderada > 0 ? notaPonderada / (periodoActual.porcentaje / 100) : 0;
 
       return [
         estudiante.identificacion,
@@ -442,7 +470,7 @@ export function GradesExcelModal({
       [''],
       [`Materia: ${materia.nombre}`],
       [`Grupo: ${grupo.nombre}`],
-      [`Año Lectivo: ${new Date().getFullYear()}`],
+      [`Periodo Escolar: ${grupo.periodo_escolar || 'No definido'}`],
       [''],
       [''] // Línea en blanco antes de los datos
     ];
@@ -451,32 +479,55 @@ export function GradesExcelModal({
     const columns = [
       'Identificación',
       'Apellidos',
-      'Nombres',
-      ...periodos.map(p => [
-        `${p.nombre} (Pond. ${p.porcentaje}%)`,
-        `${p.nombre} (Abs.)`
-      ]).flat(),
-      'Nota Final'
+      'Nombres'
     ];
+
+    // Agregar columnas para cada periodo y sus componentes
+    periodos.forEach(periodo => {
+      // Agregar los componentes del periodo
+      const componentesDelPeriodo = componentes.filter(c => c.periodo_id === periodo.id);
+      componentesDelPeriodo.forEach(comp => {
+        columns.push(`${periodo.nombre} - ${comp.nombre} (${comp.porcentaje}%)`);
+      });
+      // Agregar las notas del periodo
+      columns.push(
+        `${periodo.nombre} (Pond. ${periodo.porcentaje}%)`,
+        `${periodo.nombre} (Abs.)`
+      );
+    });
+
+    // Agregar columna de nota final
+    columns.push('Nota Final');
 
     // Preparar datos de estudiantes
     const studentsData = estudiantes.map(estudiante => {
-      // Obtener notas de los periodos
-      const notasPeriodos = periodos.map(periodo => {
+      const rowData = [
+        estudiante.identificacion,
+        estudiante.apellidos,
+        estudiante.nombres
+      ];
+
+      // Agregar notas de cada periodo y sus componentes
+      periodos.forEach(periodo => {
         const componentesPeriodo = componentes.filter(c => c.periodo_id === periodo.id);
         let notaPonderada = 0;
         let porcentajeTotal = 0;
 
+        // Agregar notas de los componentes
         componentesPeriodo.forEach(componente => {
           const nota = todasCalificaciones[estudiante.id]?.[componente.id] || 0;
+          rowData.push(nota.toFixed(2));
           notaPonderada += nota * (componente.porcentaje / 100);
           porcentajeTotal += componente.porcentaje;
         });
 
-        const notaAbsoluta = porcentajeTotal > 0 ? (notaPonderada * 100) / periodo.porcentaje : 0;
+        // Calcular y agregar notas del periodo
+        const notaAbsoluta = (notaPonderada > 0 && periodo.porcentaje > 0) 
+          ? notaPonderada / (periodo.porcentaje / 100)
+          : 0;
 
-        return [notaPonderada.toFixed(2), notaAbsoluta.toFixed(2)];
-      }).flat();
+        rowData.push(notaPonderada.toFixed(2), notaAbsoluta.toFixed(2));
+      });
 
       // Calcular nota final
       const notaFinal = todosComponentes.reduce((acc, comp) => {
@@ -484,13 +535,9 @@ export function GradesExcelModal({
         return acc + (nota * (comp.porcentaje / 100));
       }, 0);
 
-      return [
-        estudiante.identificacion,
-        estudiante.apellidos,
-        estudiante.nombres,
-        ...notasPeriodos,
-        notaFinal.toFixed(2)
-      ];
+      rowData.push(notaFinal.toFixed(2));
+
+      return rowData;
     });
 
     // Combinar todo en una matriz

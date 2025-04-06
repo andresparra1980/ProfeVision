@@ -37,6 +37,7 @@ export default function GradesPage({ params }: GradesPageProps) {
   });
   const [groupName, setGroupName] = useState<string>('');
   const [institucionName, setInstitucionName] = useState<string>('');
+  const [periodoEscolar, setPeriodoEscolar] = useState<string | null>(null);
   // Estado para modal de importar/exportar calificaciones
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState<ComponenteCalificacion | null>(null);
@@ -98,12 +99,15 @@ export default function GradesPage({ params }: GradesPageProps) {
     try {
       const { data: grupo, error: grupoError } = await supabase
         .from('grupos')
-        .select('nombre')
+        .select('nombre, periodo_escolar')
         .eq('id', groupId)
         .single();
 
       if (grupoError) throw grupoError;
-      if (grupo) setGroupName(grupo.nombre);
+      if (grupo) {
+        setGroupName(grupo.nombre);
+        setPeriodoEscolar(grupo.periodo_escolar);
+      }
     } catch (error) {
       console.error('Error al cargar nombre del grupo:', error);
     }
@@ -461,28 +465,20 @@ export default function GradesPage({ params }: GradesPageProps) {
             componente={selectedComponent}
             calificaciones={modalMode === 'import' || modalMode === 'export' 
               ? getComponentGrades(selectedComponent?.id || '')
-              : calificaciones.porComponente}
+              : getComponentGrades(selectedComponent?.id || '')}
             onImportComplete={handleImportComplete}
             mode={modalMode}
             materia={materia}
             grupo={{
               id: groupId,
               nombre: groupName,
-              descripcion: null,
-              entidad_id: '',
-              materia_id: '',
-              profesor_id: '',
-              estado: '',
-              año_escolar: null,
-              periodo_escolar: null,
-              created_at: '',
-              updated_at: ''
+              periodo_escolar: periodoEscolar
             }}
-            periodoActual={selectedPeriodo?.nombre}
+            periodoActual={selectedPeriodo}
             componentesPeriodo={modalMode === 'export-period' 
               ? componentes.filter(c => c.periodo_id === selectedPeriodo?.id) 
-              : undefined}
-            todosComponentes={modalMode === 'export-final' ? componentes : undefined}
+              : null}
+            todosComponentes={modalMode === 'export-final' ? componentes : null}
             todasCalificaciones={calificaciones.porComponente}
             periodos={periodos}
             componentes={componentes}
