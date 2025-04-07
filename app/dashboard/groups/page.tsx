@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { PlusCircle, Pencil, Trash2, Users, BookOpen, Calendar, Archive, ArchiveRestore, Calculator, MoreVertical } from "lucide-react";
+import { PlusCircle, Pencil, Trash2, Users, BookOpen, Calendar, Archive, ArchiveRestore, Calculator, MoreVertical, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -24,6 +24,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { format, isWithinInterval, startOfYear, endOfYear, addYears, startOfMonth, endOfMonth, addMonths, setMonth, setYear, parse } from "date-fns";
+import { es } from "date-fns/locale";
+
 
 type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
   materias: {
@@ -70,6 +73,8 @@ export default function GroupsPage() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const { profesor } = useProfesor();
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   
   const form = useForm<GrupoFormValues>({
     resolver: zodResolver(grupoSchema),
@@ -82,6 +87,12 @@ export default function GroupsPage() {
     },
   });
 
+  const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i);
+  const months = Array.from({ length: 12 }, (_, i) => ({
+    value: i,
+    label: format(setMonth(new Date(), i), 'MMMM', { locale: es })
+  }));
+
   useEffect(() => {
     if (profesor) {
       loadGrupos();
@@ -92,13 +103,25 @@ export default function GroupsPage() {
 
   useEffect(() => {
     if (editingGrupo) {
-      form.reset({
-        nombre: editingGrupo.nombre,
-        descripcion: editingGrupo.descripcion || "",
-        entidad_id: editingGrupo.entidad_id,
-        materia_id: editingGrupo.materia_id,
-        periodo_escolar: editingGrupo.periodo_escolar || editingGrupo.año_escolar || "",
-      });
+      // Primero cargar la entidad y luego la materia para mantener la consistencia
+      form.setValue("entidad_id", editingGrupo.materias?.entidades_educativas?.id || "");
+      
+      // Esperar al siguiente ciclo para que las materias se filtren
+      setTimeout(() => {
+        form.setValue("materia_id", editingGrupo.materia_id);
+      }, 0);
+
+      form.setValue("nombre", editingGrupo.nombre);
+      form.setValue("descripcion", editingGrupo.descripcion || "");
+      form.setValue("periodo_escolar", editingGrupo.periodo_escolar || "");
+
+      // Si hay un período escolar, intentar interpretarlo para mostrar las fechas
+      if (editingGrupo.periodo_escolar) {
+        // Aquí podrías intentar interpretar el período escolar inverso para setear las fechas
+        // Por ahora dejamos las fechas vacías
+        setStartDate(null);
+        setEndDate(null);
+      }
     } else {
       form.reset({
         nombre: "",
@@ -107,6 +130,8 @@ export default function GroupsPage() {
         materia_id: "",
         periodo_escolar: "",
       });
+      setStartDate(null);
+      setEndDate(null);
     }
   }, [editingGrupo, form]);
 
@@ -129,6 +154,13 @@ export default function GroupsPage() {
   useEffect(() => {
     loadGrupos();
   }, [mostrarArchivados]);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      const periodoInterpretado = interpretarPeriodoEscolar(startDate, endDate);
+      form.setValue("periodo_escolar", periodoInterpretado);
+    }
+  }, [startDate, endDate]);
 
   const loadGrupos = async () => {
     if (!profesor) return;
@@ -162,7 +194,7 @@ export default function GroupsPage() {
       
       // Para cada grupo, obtener el conteo de estudiantes
       const gruposConConteo = await Promise.all(
-        gruposData.map(async (grupo) => {
+        gruposData.map(async (grupo: Grupo) => {
           const { count, error: countError } = await supabase
             .from('estudiante_grupo')
             .select('*', { count: 'exact', head: true })
@@ -395,6 +427,85 @@ export default function GroupsPage() {
     }
   };
 
+  // Función para interpretar el período escolar
+  const interpretarPeriodoEscolar = (desde?: Date, hasta?: Date): string => {
+    if (!desde || !hasta) return "";
+
+    // Formatear fechas para comparación
+    const inicioAno = startOfYear(desde);
+    const finAno = endOfYear(desde);
+    const inicioSiguienteAno = startOfYear(addYears(desde, 1));
+    const finSiguienteAno = endOfYear(addYears(desde, 1));
+
+    // Verificar si es un año lectivo (cruza dos años)
+    if (
+      isWithinInterval(desde, { start: startOfMonth(inicioAno), end: endOfMonth(finAno) }) &&
+      isWithinInterval(hasta, { start: startOfMonth(inicioSiguienteAno), end: endOfMonth(finSiguienteAno) })
+    ) {
+      return `Año lectivo ${format(desde, 'yyyy')}-${format(hasta, 'yyyy')}`;
+    }
+
+    // Verificar si es un semestre
+    const mesInicio = desde.getMonth();
+    const mesFin = hasta.getMonth();
+    
+    // Primer semestre: Enero/Febrero a Mayo/Junio
+    if ((mesInicio === 0 || mesInicio === 1) && (mesFin === 4 || mesFin === 5)) {
+      return `${format(desde, 'yyyy')} Primer semestre`;
+    }
+    
+    // Segundo semestre: Julio/Agosto a Noviembre/Diciembre
+    if ((mesInicio === 6 || mesInicio === 7) && (mesFin === 10 || mesFin === 11)) {
+      return `${format(desde, 'yyyy')} Segundo semestre`;
+    }
+
+    // Si no coincide con ningún patrón, devolver solo mes y año
+    return `${format(desde, 'MMMM yyyy', { locale: es })} - ${format(hasta, 'MMMM yyyy', { locale: es })}`;
+  };
+
+  const handleStartDateChange = (month: number, year: number) => {
+    const newDate = setYear(setMonth(new Date(), month), year);
+    setStartDate(startOfMonth(newDate));
+    if (endDate) {
+      // Si la nueva fecha de inicio es posterior a la fecha de fin
+      if (newDate > endDate) {
+        // Si están en el mismo año y el mes de inicio es mayor, ajustamos el año de fin
+        if (year === endDate.getFullYear() && month > endDate.getMonth()) {
+          const newEndDate = setYear(endDate, year + 1);
+          setEndDate(endOfMonth(newEndDate));
+          updatePeriodoEscolar(startOfMonth(newDate), endOfMonth(newEndDate));
+          return;
+        }
+        setEndDate(null);
+      }
+    }
+    updatePeriodoEscolar(startOfMonth(newDate), endDate);
+  };
+
+  const handleEndDateChange = (month: number, year: number) => {
+    const newDate = setYear(setMonth(new Date(), month), year);
+    setEndDate(endOfMonth(newDate));
+    if (startDate) {
+      // Si la nueva fecha de fin es anterior a la fecha de inicio
+      if (newDate < startDate) {
+        // Si están en el mismo año y el mes de fin es menor, ajustamos el año de fin
+        if (year === startDate.getFullYear() && month < startDate.getMonth()) {
+          const adjustedDate = setYear(newDate, year + 1);
+          setEndDate(endOfMonth(adjustedDate));
+          updatePeriodoEscolar(startDate, endOfMonth(adjustedDate));
+          return;
+        }
+      }
+    }
+    updatePeriodoEscolar(startDate, endOfMonth(newDate));
+  };
+
+  const updatePeriodoEscolar = (desde: Date | null, hasta: Date | null) => {
+    if (!desde || !hasta) return;
+    const periodoInterpretado = interpretarPeriodoEscolar(desde, hasta);
+    form.setValue("periodo_escolar", periodoInterpretado);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -521,12 +632,106 @@ export default function GroupsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="periodo_escolar">Periodo Escolar</Label>
-                  <Input
-                    id="periodo_escolar"
-                    placeholder="Ej: 2025 o 2S-2025"
-                    {...form.register("periodo_escolar")}
-                  />
+                  <Label>Periodo Escolar</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">Fecha Inicio</Label>
+                      <div className="flex gap-2">
+                        <Select
+                          value={startDate ? startDate.getMonth().toString() : ""}
+                          onValueChange={(value) => {
+                            if (startDate) {
+                              handleStartDateChange(parseInt(value), startDate.getFullYear());
+                            } else {
+                              handleStartDateChange(parseInt(value), new Date().getFullYear());
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Mes" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {months.map((month) => (
+                              <SelectItem key={month.value} value={month.value.toString()}>
+                                {month.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={startDate ? startDate.getFullYear().toString() : ""}
+                          onValueChange={(value) => {
+                            handleStartDateChange(
+                              startDate ? startDate.getMonth() : 0,
+                              parseInt(value)
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue placeholder="Año" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {years.map((year) => (
+                              <SelectItem key={year} value={year.toString()}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">Fecha Fin</Label>
+                      <div className="flex gap-2">
+                        <Select
+                          value={endDate ? endDate.getMonth().toString() : ""}
+                          onValueChange={(value) => {
+                            if (endDate) {
+                              handleEndDateChange(parseInt(value), endDate.getFullYear());
+                            } else {
+                              handleEndDateChange(parseInt(value), new Date().getFullYear());
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Mes" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {months.map((month) => (
+                              <SelectItem key={month.value} value={month.value.toString()}>
+                                {month.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={endDate ? endDate.getFullYear().toString() : ""}
+                          onValueChange={(value) => {
+                            handleEndDateChange(
+                              endDate ? endDate.getMonth() : 0,
+                              parseInt(value)
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue placeholder="Año" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {years.map((year) => (
+                              <SelectItem key={year} value={year.toString()}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                  {form.watch("periodo_escolar") && (
+                    <div className="text-sm text-muted-foreground">
+                      Periodo interpretado: {form.watch("periodo_escolar")}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
