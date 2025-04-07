@@ -623,19 +623,19 @@ export default function GroupsPage() {
                       <Link href={`/dashboard/groups/${grupo.id}/students`} className="w-full">
                         <DropdownMenuItem>
                           <Users className="h-4 w-4 mr-2" />
-                          Estudiantes
+                          Gestion de Estudiantes
                         </DropdownMenuItem>
                       </Link>
                       <Link href={`/dashboard/groups/${grupo.id}/grades`} className="w-full">
                         <DropdownMenuItem>
                           <Calculator className="h-4 w-4 mr-2" />
-                          Calificaciones
+                          Tabulado de Notas
                         </DropdownMenuItem>
                       </Link>
                       <Link href={`/dashboard/groups/${grupo.id}/grading-scheme`} className="w-full">
                         <DropdownMenuItem>
                           <BookOpen className="h-4 w-4 mr-2" />
-                          Esquema
+                          Esquema de Calificaciones
                         </DropdownMenuItem>
                       </Link>
                       <DropdownMenuSeparator />
