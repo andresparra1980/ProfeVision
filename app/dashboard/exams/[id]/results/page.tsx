@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, Image as ImageIcon, FileImage, Loader2 } from 'lucide-react';
+import { ChevronLeft, Image as ImageIcon, FileImage, Loader2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +12,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
@@ -21,6 +30,13 @@ interface Estudiante {
   apellidos: string;
 }
 
+interface OpcionRespuesta {
+  id: string;
+  orden: number;
+  pregunta_id: string;
+  es_correcta: boolean;
+}
+
 interface RespuestaEstudiante {
   id: string;
   pregunta_id: string;
@@ -28,11 +44,14 @@ interface RespuestaEstudiante {
   es_correcta: boolean;
   puntaje_obtenido: number;
   pregunta: {
+    id: string;
     orden: number;
     num_opciones: number;
     habilitada: boolean;
+    opciones_respuesta: OpcionRespuesta[];
   };
   opcion_respuesta: {
+    id: string;
     orden: number;
   };
 }
@@ -52,12 +71,25 @@ interface ResultadoExamen {
   };
 }
 
+// Constante para las letras de las opciones
+const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
 export default function ExamResultsPage() {
   const params = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [examDetails, setExamDetails] = useState<any>(null);
   const [resultados, setResultados] = useState<ResultadoExamen[]>([]);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingUpdate, setPendingUpdate] = useState<{
+    respuestaId: string;
+    opcionId: string;
+    resultadoId: string;
+    preguntaOrden: number;
+    nuevaLetra: string;
+  } | null>(null);
+  const [updatingAnswer, setUpdatingAnswer] = useState(false);
 
   useEffect(() => {
     fetchExamResults();
@@ -111,7 +143,11 @@ export default function ExamResultsPage() {
               id,
               orden,
               habilitada,
-              opciones:opciones_respuesta(count)
+              opciones_respuesta(
+                id,
+                orden,
+                es_correcta
+              )
             ),
             opcion_respuesta:opciones_respuesta(
               id,
@@ -157,11 +193,14 @@ export default function ExamResultsPage() {
                     es_correcta: respuesta.es_correcta,
                     puntaje_obtenido: respuesta.puntaje_obtenido,
                     pregunta: {
+                      id: respuesta.pregunta.id,
                       orden: respuesta.pregunta.orden,
-                      num_opciones: respuesta.pregunta.opciones?.[0]?.count || 4,
-                      habilitada: respuesta.pregunta.habilitada
+                      num_opciones: respuesta.pregunta.opciones_respuesta?.length || 4,
+                      habilitada: respuesta.pregunta.habilitada,
+                      opciones_respuesta: respuesta.pregunta.opciones_respuesta || []
                     },
                     opcion_respuesta: {
+                      id: respuesta.opcion_respuesta.id,
                       orden: respuesta.opcion_respuesta.orden
                     }
                   };
@@ -211,6 +250,104 @@ export default function ExamResultsPage() {
       case 'G': return 'bg-red-500';
       case 'H': return 'bg-orange-500';
       default: return 'bg-gray-400';
+    }
+  };
+
+  // Función para manejar el click en una burbuja
+  const handleBubbleClick = async (
+    respuesta: RespuestaEstudiante,
+    opcionOrden: number,
+    resultadoId: string,
+    opcionId: string
+  ) => {
+    // No permitir cambios si la pregunta está deshabilitada
+    if (!respuesta.pregunta.habilitada) return;
+
+    // No permitir seleccionar la misma opción
+    if (respuesta.opcion_respuesta.orden === opcionOrden) return;
+
+    // Preparar datos para el modal de confirmación
+    setPendingUpdate({
+      respuestaId: respuesta.id,
+      opcionId,
+      resultadoId,
+      preguntaOrden: respuesta.pregunta.orden,
+      nuevaLetra: getLetterFromNumber(opcionOrden)
+    });
+
+    // Mostrar el modal de confirmación
+    setShowConfirmDialog(true);
+  };
+
+  // Función para confirmar y actualizar la respuesta
+  const handleConfirmUpdate = async () => {
+    if (!pendingUpdate) return;
+
+    try {
+      setUpdatingAnswer(true);
+
+      const response = await fetch(`/api/exams/${params.id}/update-answer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          respuestaId: pendingUpdate.respuestaId,
+          opcionId: pendingUpdate.opcionId,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al actualizar la respuesta');
+      }
+
+      const result = await response.json();
+
+      // Actualizar el estado local con la nueva información
+      setResultados(prevResultados => 
+        prevResultados.map(resultado => {
+          if (resultado.id === pendingUpdate.resultadoId) {
+            return {
+              ...resultado,
+              puntaje_obtenido: result.puntajeObtenido,
+              porcentaje: result.porcentaje,
+              respuestas_estudiante: resultado.respuestas_estudiante.map(respuesta => {
+                if (respuesta.id === pendingUpdate.respuestaId) {
+                  return {
+                    ...respuesta,
+                    opcion_id: pendingUpdate.opcionId,
+                    es_correcta: result.es_correcta,
+                    opcion_respuesta: {
+                      ...respuesta.opcion_respuesta,
+                      orden: OPTION_LETTERS.indexOf(pendingUpdate.nuevaLetra) + 1
+                    }
+                  };
+                }
+                return respuesta;
+              })
+            };
+          }
+          return resultado;
+        })
+      );
+
+      toast({
+        title: "Respuesta actualizada",
+        description: "La calificación ha sido recalculada correctamente.",
+      });
+
+    } catch (error: any) {
+      console.error('Error updating answer:', error);
+      toast({
+        title: "Error al actualizar",
+        description: error.message || "No se pudo actualizar la respuesta",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingAnswer(false);
+      setShowConfirmDialog(false);
+      setPendingUpdate(null);
     }
   };
 
@@ -312,11 +449,24 @@ export default function ExamResultsPage() {
                                       {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
                                         const letter = getLetterFromNumber(num);
                                         const isSelected = respuesta.opcion_respuesta.orden === num;
+                                        const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
+                                        
                                         return (
                                           <div 
                                             key={`bubble-${respuesta.id}-${num}`}
                                             className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                              ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}`}
+                                              ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
+                                              ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
+                                            `}
+                                            onClick={() => {
+                                              if (!respuesta.pregunta.habilitada || !opcion) return;
+                                              handleBubbleClick(
+                                                respuesta,
+                                                num,
+                                                resultado.id,
+                                                opcion.id
+                                              );
+                                            }}
                                           >
                                             {isSelected ? letter : ''}
                                           </div>
@@ -345,11 +495,24 @@ export default function ExamResultsPage() {
                                       {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
                                         const letter = getLetterFromNumber(num);
                                         const isSelected = respuesta.opcion_respuesta.orden === num;
+                                        const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
+                                        
                                         return (
                                           <div 
                                             key={`bubble-${respuesta.id}-${num}`}
                                             className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                              ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}`}
+                                              ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
+                                              ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
+                                            `}
+                                            onClick={() => {
+                                              if (!respuesta.pregunta.habilitada || !opcion) return;
+                                              handleBubbleClick(
+                                                respuesta,
+                                                num,
+                                                resultado.id,
+                                                opcion.id
+                                              );
+                                            }}
                                           >
                                             {isSelected ? letter : ''}
                                           </div>
@@ -403,6 +566,44 @@ export default function ExamResultsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar cambio de respuesta</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas cambiar la respuesta de la pregunta {pendingUpdate?.preguntaOrden} a la opción {pendingUpdate?.nuevaLetra}?
+              <br /><br />
+              Esta acción recalculará automáticamente la calificación del examen.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConfirmDialog(false);
+                setPendingUpdate(null);
+              }}
+              disabled={updatingAnswer}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmUpdate}
+              disabled={updatingAnswer}
+            >
+              {updatingAnswer ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Actualizando...
+                </>
+              ) : (
+                'Confirmar cambio'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
