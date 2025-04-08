@@ -59,8 +59,8 @@ export function GradeInput({
 
   const getBackgroundColor = (value: number | null) => {
     if (value === null) return '';
-    if (value >= 3.0) return 'bg-green-50';
-    return 'bg-red-50';
+    if (value >= 3.0) return 'bg-green-50 dark:bg-green-900/30';
+    return 'bg-red-50 dark:bg-red-900/30';
   };
 
   return (
@@ -73,6 +73,7 @@ export function GradeInput({
       className={cn(
         'w-20 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
         getBackgroundColor(value),
+        disabled && 'text-foreground/90 dark:text-foreground/80 dark:placeholder:text-foreground/50',
         className
       )}
       min={min}

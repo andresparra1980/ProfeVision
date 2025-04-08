@@ -91,13 +91,13 @@ export default function ExamsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "borrador":
-        return <span className="rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">Borrador</span>;
+        return <span className="rounded-full bg-accent text-accent-foreground px-2 py-1 text-xs font-medium shadow-sm">Borrador</span>;
       case "publicado":
-        return <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">Publicado</span>;
+        return <span className="rounded-full bg-primary text-primary-foreground px-2 py-1 text-xs font-medium shadow-sm">Publicado</span>;
       case "cerrado":
-        return <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800">Cerrado</span>;
+        return <span className="rounded-full bg-destructive text-destructive-foreground px-2 py-1 text-xs font-medium shadow-sm">Cerrado</span>;
       default:
-        return <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">{status}</span>;
+        return <span className="rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium shadow-sm">{status}</span>;
     }
   };
 
@@ -196,7 +196,7 @@ export default function ExamsPage() {
                           {exam.examen_grupo?.map((asignacion) => (
                             <span
                               key={asignacion.grupo.id}
-                              className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
+                              className="inline-flex items-center rounded-full bg-secondary text-white px-2 py-1 text-xs font-medium shadow-sm"
                             >
                               {asignacion.grupo.nombre}
                             </span>

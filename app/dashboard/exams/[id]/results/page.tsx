@@ -568,11 +568,11 @@ export default function ExamResultsPage() {
                               </td>
                               <td className="py-2 px-4 text-center">
                                 {resultado ? (
-                                  <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                  <span className="px-2 py-1 rounded-full text-xs bg-primary text-primary-foreground font-medium shadow-sm">
                                     Calificado
                                   </span>
                                 ) : (
-                                  <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                  <span className="px-2 py-1 rounded-full text-xs bg-accent text-accent-foreground font-medium shadow-sm">
                                     Pendiente
                                   </span>
                                 )}
@@ -778,7 +778,7 @@ export default function ExamResultsPage() {
 
               <TabsContent value="original">
                 {selectedResultado.examen_escaneado?.ruta_s3_original ? (
-                  <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
+                  <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-card dark:bg-card">
                     <ImageWithSignedUrl
                       path={selectedResultado.examen_escaneado.ruta_s3_original}
                       alt="Imagen original del examen"
@@ -793,7 +793,7 @@ export default function ExamResultsPage() {
 
               <TabsContent value="processed">
                 {selectedResultado.examen_escaneado?.ruta_s3_procesado ? (
-                  <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
+                  <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-card dark:bg-card">
                     <ImageWithSignedUrl
                       path={selectedResultado.examen_escaneado.ruta_s3_procesado}
                       alt="Imagen procesada del examen"
