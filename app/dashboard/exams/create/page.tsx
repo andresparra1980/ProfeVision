@@ -268,11 +268,14 @@ export default function CreateExamPage() {
   };
 
   const crearPreguntasIniciales = (cantidad: number) => {
+    const puntajeTotal = form.getValues("puntaje_total");
+    const puntajePorPregunta = parseFloat((puntajeTotal / cantidad).toFixed(4));
+    
     const nuevasPreguntas: Pregunta[] = Array.from({ length: cantidad }, (_, index) => ({
       id: `pregunta-${index + 1}`,
       texto: "",
       tipo: "opcion_multiple",
-      puntaje: form.getValues("puntaje_total") / cantidad,
+      puntaje: puntajePorPregunta,
       opciones: [
         { id: `opcion-${index}-1`, texto: "", esCorrecta: false },
         { id: `opcion-${index}-2`, texto: "", esCorrecta: false },
@@ -301,11 +304,14 @@ export default function CreateExamPage() {
   };
 
   const agregarPregunta = (index?: number) => {
+    const puntajeTotal = form.getValues("puntaje_total");
+    const puntajePorPregunta = parseFloat((puntajeTotal / (preguntas.length + 1)).toFixed(4));
+    
     const nuevaPregunta: Pregunta = {
       id: `pregunta-${preguntas.length + 1}`,
       texto: "",
       tipo: "opcion_multiple",
-      puntaje: form.getValues("puntaje_total") / (preguntas.length + 1),
+      puntaje: puntajePorPregunta,
       opciones: [
         { id: `opcion-nueva-1`, texto: "", esCorrecta: false },
         { id: `opcion-nueva-2`, texto: "", esCorrecta: false },
@@ -323,6 +329,20 @@ export default function CreateExamPage() {
     }
   };
 
+  const recalcularPuntajes = () => {
+    if (preguntas.length === 0) return;
+    
+    const puntajeTotal = form.getValues("puntaje_total");
+    const puntajePorPregunta = parseFloat((puntajeTotal / preguntas.length).toFixed(4));
+    
+    const preguntasActualizadas = preguntas.map(pregunta => ({
+      ...pregunta,
+      puntaje: puntajePorPregunta
+    }));
+    
+    setPreguntas(preguntasActualizadas);
+  };
+
   const duplicarPregunta = (index: number) => {
     const preguntaOriginal = preguntas[index];
     const preguntaDuplicada = {
@@ -337,11 +357,19 @@ export default function CreateExamPage() {
     const nuevasPreguntas = [...preguntas];
     nuevasPreguntas.splice(index + 1, 0, preguntaDuplicada);
     setPreguntas(nuevasPreguntas);
+    
+    // Recalcular puntajes después de agregar una pregunta
+    setTimeout(recalcularPuntajes, 0);
   };
 
   const eliminarPregunta = (index: number) => {
     const nuevasPreguntas = preguntas.filter((_, i) => i !== index);
     setPreguntas(nuevasPreguntas);
+    
+    // Recalcular puntajes después de eliminar una pregunta
+    if (nuevasPreguntas.length > 0) {
+      setTimeout(recalcularPuntajes, 0);
+    }
   };
 
   // Si está cargando la verificación de entidades, mostrar spinner

@@ -1,5 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
+import * as jwt from 'jsonwebtoken';
+
+// Definir interfaces para tipado
+interface OpcionRespuesta {
+  texto: string;
+  esCorrecta: boolean;
+  id?: string;
+  orden?: number;
+}
+
+interface Pregunta {
+  id?: string;
+  texto: string;
+  tipo: number;
+  puntaje: number;
+  retroalimentacion?: string;
+  habilitada?: boolean;
+  orden?: number;
+  opciones: OpcionRespuesta[];
+}
+
+interface ExamenData {
+  titulo: string;
+  descripcion: string;
+  duracion_minutos: number;
+  puntaje_total: number;
+  materia_id: string;
+  estado?: string;
+  preguntas: Pregunta[];
+  instrucciones?: string;
+  fecha_hora_inicio?: string;
+  fecha_hora_fin?: string;
+  intentos_permitidos?: number;
+  shuffle_preguntas?: boolean;
+  formato_distribucion?: string;
+  mostrar_resultados?: boolean;
+  password?: string;
+}
 
 // Crear cliente de Supabase para el servidor usando SERVICE_ROLE_KEY
 const supabase = createClient(
@@ -31,30 +70,30 @@ export async function POST(req: NextRequest) {
     }
 
     // Obtener los datos del body
-    const data = await req.json();
+    const data = await req.json() as ExamenData;
     const { titulo, descripcion, duracion_minutos, puntaje_total, materia_id, preguntas } = data;
 
-    // Validar que todas las preguntas tienen al menos una opción correcta
-    for (let i = 0; i < preguntas.length; i++) {
-      const pregunta = preguntas[i];
-      const tieneOpcionCorrecta = pregunta.opciones.some((opcion: any) => opcion.esCorrecta);
+    // Validar que todas las preguntas tengan al menos una opción correcta y que haya al menos dos opciones válidas con texto
+    for (const pregunta of preguntas) {
+      // Filtrar opciones vacías
+      const opcionesValidas = pregunta.opciones.filter((opcion) => opcion.texto.trim() !== '');
       
-      if (!tieneOpcionCorrecta) {
-        return NextResponse.json({ 
-          error: `La pregunta ${i + 1} debe tener al menos una opción correcta` 
-        }, { status: 400 });
-      }
-      
-      // Verificar que tenga opciones válidas (con texto)
-      const opcionesValidas = pregunta.opciones.filter((opcion: any) => opcion.texto.trim() !== '');
+      // Verificar que haya al menos dos opciones válidas
       if (opcionesValidas.length < 2) {
-        return NextResponse.json({ 
-          error: `La pregunta ${i + 1} debe tener al menos dos opciones con texto` 
-        }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Cada pregunta debe tener al menos dos opciones válidas' },
+          { status: 400 }
+        );
       }
       
-      // Actualizar las opciones para solo incluir las válidas
-      pregunta.opciones = opcionesValidas;
+      // Verificar que haya al menos una opción correcta
+      const tieneOpcionCorrecta = opcionesValidas.some((opcion) => opcion.esCorrecta);
+      if (!tieneOpcionCorrecta) {
+        return NextResponse.json(
+          { error: 'Cada pregunta debe tener al menos una opción correcta' },
+          { status: 400 }
+        );
+      }
     }
 
     // Obtener el profesor_id del token
@@ -77,6 +116,14 @@ export async function POST(req: NextRequest) {
         materia_id,
         profesor_id: user.id,
         estado: 'borrador',
+        instrucciones: data.instrucciones,
+        fecha_hora_inicio: data.fecha_hora_inicio,
+        fecha_hora_fin: data.fecha_hora_fin,
+        intentos_permitidos: data.intentos_permitidos,
+        shuffle_preguntas: data.shuffle_preguntas,
+        formato_distribucion: data.formato_distribucion,
+        mostrar_resultados: data.mostrar_resultados,
+        password: data.password,
       })
       .select()
       .single();
@@ -84,11 +131,11 @@ export async function POST(req: NextRequest) {
     if (examError) throw examError;
 
     // 2. Crear las preguntas
-    const preguntasConExamenId = preguntas.map((pregunta: any, index: number) => ({
+    const preguntasConExamenId = preguntas.map((pregunta, index) => ({
       examen_id: exam.id,
       texto: pregunta.texto,
       tipo_id: pregunta.tipo,
-      puntaje: pregunta.puntaje,
+      puntaje: parseFloat(pregunta.puntaje.toFixed(4)), // Asegurar 4 cifras significativas
       retroalimentacion: pregunta.retroalimentacion,
       habilitada: true,
       orden: index + 1,
@@ -108,8 +155,8 @@ export async function POST(req: NextRequest) {
 
       // Filtrar opciones vacías y asignar orden secuencial solo a las válidas
       const opcionesConPreguntaId = opcionesOriginales
-        .filter((opcion: any) => opcion.texto.trim() !== '')
-        .map((opcion: any, index: number) => ({
+        .filter((opcion) => opcion.texto.trim() !== '')
+        .map((opcion, index) => ({
           pregunta_id: pregunta.id,
           texto: opcion.texto,
           es_correcta: opcion.esCorrecta,
