@@ -323,16 +323,19 @@ class StandaloneOMRProcessor:
         if self.debug:
             cv2.imwrite(self._get_debug_path("02_blurred_roi", ".png"), blurred_roi)
 
-        # 2. Use binary threshold with Otsu's method for better separation
-        _, thresh_roi = cv2.threshold(blurred_roi, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-        
-        # 3. Invert the image to get white bubbles on black background
-        thresh_roi = cv2.bitwise_not(thresh_roi)
-        
+        # 2. Use adaptive threshold with moderate block size
+        thresh_roi = cv2.adaptiveThreshold(
+            blurred_roi,
+            255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV,
+            blockSize=25,
+            C=4
+        )
         if self.debug:
             cv2.imwrite(self._get_debug_path("03_thresh_roi", ".png"), thresh_roi)
 
-        # 4. Clean up noise with morphological operations
+        # 3. Moderate morphological operations
         kernel = np.ones((3,3), np.uint8)
         thresh_roi = cv2.morphologyEx(thresh_roi, cv2.MORPH_CLOSE, kernel, iterations=1)
         thresh_roi = cv2.morphologyEx(thresh_roi, cv2.MORPH_OPEN, kernel, iterations=1)
@@ -350,11 +353,11 @@ class StandaloneOMRProcessor:
             print(f"\nFound {len(contours)} contours in total")
 
         # Parameters for bubble detection
-        min_bubble_w, max_bubble_w = 45, 85  # Wider range for width
-        min_bubble_h, max_bubble_h = 50, 90  # Wider range for height
-        min_bubble_ar, max_bubble_ar = 0.6, 1.4  # Even more lenient aspect ratio
-        min_circularity = 0.5  # More lenient circularity threshold
-        min_center_distance = 35  # Slightly reduced minimum distance
+        min_bubble_w, max_bubble_w = 55, 75
+        min_bubble_h, max_bubble_h = 60, 80
+        min_bubble_ar, max_bubble_ar = 0.8, 1.2
+        min_circularity = 0.7
+        min_center_distance = 40  # Mínima distancia entre centros de burbujas
 
         # Detect all bubbles
         bubbles = []
@@ -362,30 +365,19 @@ class StandaloneOMRProcessor:
             try:
                 x, y, w, h = cv2.boundingRect(cnt)
                 area = cv2.contourArea(cnt)
-                if area < 80: continue  # Skip very small contours
+                if area < 100: continue  # Skip very small contours
 
                 ar = w / float(h)
                 peri = cv2.arcLength(cnt, True)
                 circularity = 4 * np.pi * (area / (peri**2)) if peri > 0 else 0
                 
-                # Primary check for well-formed bubbles
+                # Check if it's a bubble
                 is_bubble = (
                     min_bubble_w <= w <= max_bubble_w and
                     min_bubble_h <= h <= max_bubble_h and
                     min_bubble_ar <= ar <= max_bubble_ar and
                     circularity >= min_circularity
                 )
-
-                # Secondary check for misshapen but valid bubbles
-                # These might be deformed due to heavy marking
-                if not is_bubble and area > 400:  # Significant filled area
-                    is_misshapen_bubble = (
-                        min_bubble_w * 0.8 <= w <= max_bubble_w * 1.2 and
-                        min_bubble_h * 0.8 <= h <= max_bubble_h * 1.2 and
-                        0.4 <= ar <= 1.6 and  # Very lenient aspect ratio
-                        circularity >= 0.3  # Much lower circularity requirement
-                    )
-                    is_bubble = is_misshapen_bubble
 
                 if is_bubble:
                     # Calculate center of current bubble
@@ -471,72 +463,35 @@ class StandaloneOMRProcessor:
             # Debug visualization for rows
             debug_rows = cv2.cvtColor(gray_roi, cv2.COLOR_GRAY2BGR)
             colors = [(0,255,0), (255,0,0), (0,0,255), (255,255,0)]
-            
-            # Draw midline
-            cv2.line(debug_rows, 
-                    (int(gray_roi.shape[1]/2), 0),
-                    (int(gray_roi.shape[1]/2), gray_roi.shape[0]),
-                    (255,255,255), 1)
-            
             for row_idx, row in enumerate(rows):
                 color = colors[row_idx % len(colors)]
                 for bubble in row:
                     x, y, w, h = bubble['bounds']
-                    # Color based on column
-                    if bubble['center_x'] < gray_roi.shape[1]/2:
-                        col_color = (0,255,0)  # Green for left column
-                        q_num = row_idx + 1
-                    else:
-                        col_color = (0,0,255)  # Red for right column
-                        q_num = row_idx + 21
-                    
-                    cv2.rectangle(debug_rows, (x,y), (x+w,y+h), col_color, 2)
-                    cv2.putText(debug_rows, f"Q{q_num}", (x,y-5), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, col_color, 1)
-                    # Draw center point
+                    cv2.rectangle(debug_rows, (x,y), (x+w,y+h), color, 2)
+                    cv2.putText(debug_rows, f"R{row_idx+1}", (x,y-5), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+                    # Draw center point and distance circle
                     center = (int(bubble['center_x']), int(bubble['center_y']))
-                    cv2.circle(debug_rows, center, 2, (255,255,0), -1)
-            cv2.imwrite(self._get_debug_path("07_rows_columns", ".png"), debug_rows)
+                    cv2.circle(debug_rows, center, 2, (0,0,255), -1)
+                    cv2.circle(debug_rows, center, min_center_distance//2, (0,255,255), 1)
+            cv2.imwrite(self._get_debug_path("07_rows", ".png"), debug_rows)
 
         # Convert rows to questions
         questions = []
-        image_midpoint = gray_roi.shape[1] / 2
-        
         for row_idx, row in enumerate(rows):
-            # Split row into left and right columns
-            left_bubbles = [b for b in row if b['center_x'] < image_midpoint]
-            right_bubbles = [b for b in row if b['center_x'] >= image_midpoint]
+            question = {
+                'question_number': row_idx + 1,
+                'has_frame': False,
+                'frame': None,
+                'bubbles': row,
+                'num_options': len(row)
+            }
             
-            # Process left column question if exists
-            if left_bubbles:
-                left_question = {
-                    'question_number': row_idx + 1,  # Questions 1-20
-                    'has_frame': False,
-                    'frame': None,
-                    'bubbles': left_bubbles,
-                    'num_options': len(left_bubbles),
-                    'column': 'left'
-                }
-                q_data = self._process_question(gray_roi, None, left_bubbles)
-                left_question.update(q_data)
-                questions.append(left_question)
-            
-            # Process right column question if exists
-            if right_bubbles:
-                right_question = {
-                    'question_number': row_idx + 21,  # Questions 21-40
-                    'has_frame': False,
-                    'frame': None,
-                    'bubbles': right_bubbles,
-                    'num_options': len(right_bubbles),
-                    'column': 'right'
-                }
-                q_data = self._process_question(gray_roi, None, right_bubbles)
-                right_question.update(q_data)
-                questions.append(right_question)
+            # Process the question to find filled bubbles
+            q_data = self._process_question(gray_roi, None, row)
+            question.update(q_data)
+            questions.append(question)
 
-        # Sort questions by question number
-        questions.sort(key=lambda q: q['question_number'])
         return questions
 
     def _calculate_average_dims(self, elements: List[Dict]) -> Tuple[float, float]:
@@ -648,27 +603,6 @@ class StandaloneOMRProcessor:
             filled_pixels = cv2.countNonZero(masked_bubble)
             fill_ratio = filled_pixels / total_pixels if total_pixels > 0 else 0
             
-            # Debug visualization for fill ratio calculation
-            if self.debug:
-                debug_dir = "debug/fill_ratio"
-                os.makedirs(debug_dir, exist_ok=True)
-                
-                # Save the original bubble ROI
-                cv2.imwrite(f"{debug_dir}/bubble_{i}_original.png", bubble_roi)
-                
-                # Save the circular mask
-                cv2.imwrite(f"{debug_dir}/bubble_{i}_mask.png", mask)
-                
-                # Save the masked result
-                cv2.imwrite(f"{debug_dir}/bubble_{i}_masked.png", masked_bubble)
-                
-                # Create a visual representation
-                debug_fill = cv2.cvtColor(bubble_roi, cv2.COLOR_GRAY2BGR)
-                cv2.circle(debug_fill, center, radius, (0,255,0), 1)  # Green circle shows mask
-                cv2.putText(debug_fill, f"Fill: {fill_ratio:.2f}", (5, h-5),
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
-                cv2.imwrite(f"{debug_dir}/bubble_{i}_analysis.png", debug_fill)
-            
             fill_ratios.append(fill_ratio)
             total_pixels_list.append(total_pixels)
             filled_pixels_list.append(filled_pixels)
@@ -682,8 +616,7 @@ class StandaloneOMRProcessor:
             sorted_ratios = sorted(fill_ratios, reverse=True)
             second_highest = sorted_ratios[1] if len(sorted_ratios) > 1 else 0
             
-            # More strict thresholds since we have better binary image quality
-            if max_fill_ratio > 0.35 and (len(fill_ratios) == 1 or max_fill_ratio > second_highest * 1.3):
+            if max_fill_ratio > 0.4 and (len(fill_ratios) == 1 or max_fill_ratio > second_highest * 1.2):
                 results['value'] = self._get_option_letter(max_idx)
                 results['is_valid'] = True
                 results['confidence'] = float(max_fill_ratio)
@@ -840,7 +773,7 @@ class StandaloneOMRProcessor:
                 "answers": answers_list
             }
 
-            # Always generate the final debug image, regardless of debug mode
+            # Siempre generar la imagen con overlay de respuestas detectadas
             debug_image_path = self._get_debug_path(image_path, "questions_detected.jpeg")
             if len(warped.shape) == 3:
                 gray_for_debug = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)

@@ -1,0 +1,65 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+// Crear cliente de Supabase para el servidor usando SERVICE_ROLE_KEY
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Obtener el token de autorización del header
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    // Esperar a que los params estén disponibles
+    const { id: materiaId } = await params;
+
+    // Obtener grupos por materia_id
+    const { data: grupos, error } = await supabase
+      .from('grupos')
+      .select(`
+        *,
+        materia:materias (
+          nombre
+        ),
+        estudiantes:estudiante_grupo (
+          estudiante:estudiantes (
+            id,
+            nombres,
+            apellidos,
+            email
+          )
+        )
+      `)
+      .eq('materia_id', materiaId)
+      .single();
+
+    if (error) throw error;
+
+    // Transformar el resultado para que coincida con la interfaz ExamGroup
+    const grupoFormateado = {
+      ...grupos,
+      estudiantes: grupos.estudiantes.map((e: any) => ({
+        id: e.estudiante.id,
+        nombre: e.estudiante.nombres,
+        apellido: e.estudiante.apellidos,
+        email: e.estudiante.email
+      }))
+    };
+
+    return NextResponse.json(grupoFormateado);
+  } catch (error) {
+    console.error('API /groups/by-materia/[id]: Error:', error);
+    return NextResponse.json({
+      error: 'Error al obtener el grupo',
+      message: error instanceof Error ? error.message : 'Error desconocido'
+    }, { status: 500 });
+  }
+} 

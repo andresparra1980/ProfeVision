@@ -154,6 +154,7 @@ interface Answer {
 interface Pregunta {
   id: string;
   puntaje: string;
+  habilitada: boolean;
 }
 
 export async function POST(req: NextRequest) {
@@ -226,7 +227,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Filtrar preguntas habilitadas solo para el cálculo de la nota
-    const preguntasHabilitadas = preguntas.filter(p => p.habilitada);
+    const preguntasHabilitadas = preguntas.filter((p: Pregunta) => p.habilitada);
 
     // Contar respuestas correctas (solo de preguntas habilitadas)
     const respuestasCorrectas = answers.filter((answer: Answer) => 

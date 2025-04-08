@@ -43,8 +43,8 @@ export async function GET(request: NextRequest) {
 
     // Para verificar si hay resultados previos, debemos verificar:
     // 1. Verificar si hay versiones para este examen
-    // 2. Si hay versiones, buscar resultados con esas versiones
-    // 3. Si no hay versiones, también verificar resultados con version_id NULL
+    // 2. Si hay versiones, buscar resultados con esas versiones y el estudiante específico
+    // 3. Si no hay versiones, verificar resultados con version_id NULL para este examen y estudiante
 
     // Primero, obtener las versiones del examen
     const { data: versionesData, error: versionesError } = await supabase
@@ -60,34 +60,55 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Buscar resultados previos para este estudiante
-    let resultadoDataQuery = supabase
-      .from('resultados_examen')
-      .select(`
-        id,
-        version_id,
-        fecha_calificacion,
-        puntaje_obtenido,
-        porcentaje,
-        estado
-      `)
-      .eq('estudiante_id', studentId);
-    
-    // Configurar filtro según si hay versiones o no
-    if (versionesData && versionesData.length > 0) {
-      // Si hay versiones, buscar resultados con esas versiones
-      const versionIds = versionesData.map(version => version.id);
-      resultadoDataQuery = resultadoDataQuery.in('version_id', versionIds);
-    } else {
-      console.log('No hay versiones para este examen. Buscando resultados con version_id NULL');
-      // Si no hay versiones, buscar resultados con version_id NULL
-      resultadoDataQuery = resultadoDataQuery.is('version_id', null);
-    }
+    // Variable para almacenar el resultado
+    let resultadoData = null;
+    let resultadoError = null;
 
-    // Ejecutar consulta ordenada por fecha
-    const { data: resultadoData, error: resultadoError } = await resultadoDataQuery
-      .order('fecha_calificacion', { ascending: false })
-      .limit(1);
+    // Si hay versiones, buscar resultados con esas versiones
+    if (versionesData && versionesData.length > 0) {
+      const versionIds = versionesData.map((version: { id: string }) => version.id);
+      
+      // Buscar resultados para este estudiante con las versiones de este examen
+      const resultado = await supabase
+        .from('resultados_examen')
+        .select(`
+          id,
+          version_id,
+          fecha_calificacion,
+          puntaje_obtenido,
+          porcentaje,
+          estado
+        `)
+        .eq('estudiante_id', studentId)
+        .in('version_id', versionIds)
+        .order('fecha_calificacion', { ascending: false })
+        .limit(1);
+      
+      resultadoData = resultado.data;
+      resultadoError = resultado.error;
+    } else {
+      // Si no hay versiones, verificar si hay resultados directos para este examen
+      console.log('No hay versiones para este examen. Buscando resultados directos.');
+      
+      const resultado = await supabase
+        .from('resultados_examen')
+        .select(`
+          id,
+          version_id,
+          fecha_calificacion,
+          puntaje_obtenido,
+          porcentaje,
+          estado
+        `)
+        .eq('estudiante_id', studentId)
+        .eq('examen_id', examId)
+        .is('version_id', null)
+        .order('fecha_calificacion', { ascending: false })
+        .limit(1);
+      
+      resultadoData = resultado.data;
+      resultadoError = resultado.error;
+    }
 
     if (resultadoError) {
       console.error('Error al buscar resultado previo:', resultadoError);
@@ -97,9 +118,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Si no hay resultados, verificar si hay exámenes escaneados directamente
+    // Si no hay resultados, verificar si hay exámenes escaneados directamente para este examen y estudiante
     if (!resultadoData || resultadoData.length === 0) {
-      // Verificar si existe un examen escaneado para este examen y estudiante
+      // Verificar si existe un examen escaneado para este examen
       const { data: escaneadosDirectos, error: escaneadosError } = await supabase
         .from('examenes_escaneados')
         .select('*')

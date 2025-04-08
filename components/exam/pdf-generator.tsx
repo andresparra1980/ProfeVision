@@ -391,6 +391,18 @@ export function PDFGenerator({ exam, group, paperSize, fileName }: PDFGeneratorP
     setIsClient(true);
   }, []);
 
+  // Validar que el examen tenga la estructura correcta
+  if (!exam?.preguntas?.length) {
+    return (
+      <button
+        disabled
+        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+      >
+        No hay preguntas
+      </button>
+    );
+  }
+
   if (!isClient) {
     return (
       <button
@@ -418,6 +430,7 @@ export function PDFGenerator({ exam, group, paperSize, fileName }: PDFGeneratorP
         }
 
         if (error) {
+          console.error('Error generando PDF:', error);
           return (
             <button
               disabled

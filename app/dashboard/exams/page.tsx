@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FileText, Eye, Printer, Users, FileOutput } from "lucide-react";
+import { Plus, FileText, Eye, Printer, Users, FileOutput, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface Exam {
   id: string;
@@ -91,6 +103,35 @@ export default function ExamsPage() {
 
   const handleExamClick = (examId: string) => {
     router.push(`/dashboard/exams/${examId}/edit`);
+  };
+
+  const handleDelete = async (examId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      // Obtener la sesión actual
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No autorizado');
+      }
+
+      const response = await fetch(`/api/exams/${examId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Error al eliminar el examen');
+      }
+
+      toast.success('Examen eliminado correctamente');
+      // Actualizar la lista de exámenes
+      setExams(exams.filter(exam => exam.id !== examId));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al eliminar el examen');
+    }
   };
 
   return (
@@ -188,6 +229,49 @@ export default function ExamsPage() {
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
+
+                          {exam.estado === 'borrador' && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                        <span className="sr-only">Eliminar</span>
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Esta acción eliminará permanentemente el examen y todos sus elementos relacionados.
+                                          Esta acción no se puede deshacer.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
+                                          Cancelar
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          onClick={(e) => handleDelete(exam.id, e)}
+                                        >
+                                          Eliminar
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Eliminar examen</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
 
                           <TooltipProvider>
                             <Tooltip>
