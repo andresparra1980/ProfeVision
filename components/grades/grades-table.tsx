@@ -10,7 +10,7 @@ import {
 import { GradeInput } from '@/components/ui/grade-input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ComponenteCalificacion, Estudiante, Periodo } from '@/lib/types/database';
-import { Lock, Unlock, FileUp, Download, Upload, ArrowUpDown, ArrowDownUp } from 'lucide-react';
+import { Lock, Unlock, FileUp, Download, Upload, ArrowUpDown, ArrowDownUp, FileText, LinkIcon, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -19,6 +19,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase/client';
 
 interface Calificaciones {
   porComponente: Record<string, Record<string, number>>;
@@ -37,6 +40,7 @@ interface GradesTableProps {
   onExportGrades?: (componenteId: string) => void;
   onExportPeriod?: (periodoId: string) => void;
   onExportFinal?: () => void;
+  componentesVinculados?: Record<string, { examen_id: string, titulo: string }>;
 }
 
 export function GradesTable({
@@ -52,6 +56,7 @@ export function GradesTable({
   onExportGrades,
   onExportPeriod,
   onExportFinal,
+  componentesVinculados = {},
 }: GradesTableProps) {
   // Función para calcular la nota final de un periodo para un estudiante
   const calcularNotaPeriodo = (estudiante: Estudiante, periodo: Periodo) => {
@@ -89,6 +94,47 @@ export function GradesTable({
     if (componentes.length === 0 || porcentajeTotal === 0) return 0;
 
     return notaFinal;
+  };
+
+  // Función para sincronizar las calificaciones desde los exámenes vinculados
+  const handleSyncExamGrades = async (componenteId: string) => {
+    if (!componentesVinculados[componenteId]) return;
+    
+    const examenId = componentesVinculados[componenteId].examen_id;
+    try {
+      // Obtener token de sesión de Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session || !session.access_token) {
+        toast.error('No se encontró token de autenticación');
+        return;
+      }
+      
+      const response = await fetch('/api/exams/sync-grades', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ examId: examenId }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al sincronizar calificaciones');
+      }
+      
+      const result = await response.json();
+      console.log('Resultado de sincronización:', result);
+      
+      toast.success('Calificaciones sincronizadas correctamente');
+      
+      // Recargar la página para mostrar las calificaciones actualizadas
+      window.location.reload();
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al sincronizar calificaciones');
+    }
   };
 
   if (isLoading) {
@@ -168,9 +214,24 @@ export function GradesTable({
                             <span className="block text-xs text-muted-foreground">
                               ({componente.porcentaje}%)
                             </span>
+                            {componentesVinculados[componente.id] && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant="outline" className="mt-1 gap-1 px-1 py-0 h-5 bg-blue-50 text-blue-800 border-blue-300">
+                                      <LinkIcon className="h-3 w-3" />
+                                      <span className="text-xs">Examen</span>
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Vinculado al examen: {componentesVinculados[componente.id].titulo}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
                           </div>
                           <div className="flex gap-1 p-1 border-t">
-                            {!componentesBloqueados[componente.id] ? (
+                            {!componentesBloqueados[componente.id] && !componentesVinculados[componente.id] ? (
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -186,20 +247,37 @@ export function GradesTable({
                                 size="icon"
                                 className="h-6 w-6"
                                 onClick={() => onToggleLock(componente.id)}
-                                title="Desbloquear calificaciones"
+                                title={componentesVinculados[componente.id] ? 
+                                  "Componente vinculado a examen (no se puede desbloquear)" : 
+                                  "Desbloquear calificaciones"
+                                }
+                                disabled={!!componentesVinculados[componente.id]}
                               >
-                                <Lock className="h-3 w-3" />
+                                <Lock className={`h-3 w-3 ${componentesVinculados[componente.id] ? "text-blue-600" : ""}`} />
                               </Button>
                             )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => onImportGrades?.(componente.id)}
-                              title="Importar calificaciones"
-                            >
-                              <Upload className="h-3 w-3" />
-                            </Button>
+                            {componentesVinculados[componente.id] ? (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => handleSyncExamGrades(componente.id)}
+                                title="Sincronizar calificaciones desde el examen"
+                              >
+                                <RefreshCw className="h-3 w-3 text-blue-600" />
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => onImportGrades?.(componente.id)}
+                                title="Importar calificaciones"
+                                disabled={!!componentesVinculados[componente.id]}
+                              >
+                                <Upload className="h-3 w-3" />
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="icon"
@@ -251,12 +329,15 @@ export function GradesTable({
                     {componentes
                       .filter(c => c.periodo_id === periodo.id)
                       .map(componente => (
-                        <TableCell key={componente.id} className="text-center border-x w-[100px] min-w-[100px] p-0">
+                        <TableCell key={componente.id} className={`
+                          text-center border-x w-[100px] min-w-[100px] p-0
+                          ${componentesVinculados[componente.id] ? 'bg-blue-50' : ''}
+                        `}>
                           <div className="flex items-center justify-center h-full">
                             <GradeInput
                               value={calificaciones.porComponente[estudiante.id]?.[componente.id] || null}
                               onChange={(value) => onGradeChange(estudiante.id, componente.id, value)}
-                              disabled={componentesBloqueados[componente.id]}
+                              disabled={componentesBloqueados[componente.id] || !!componentesVinculados[componente.id]}
                             />
                           </div>
                         </TableCell>

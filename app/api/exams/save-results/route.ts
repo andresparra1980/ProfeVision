@@ -361,6 +361,34 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Sincronizar calificaciones automáticamente
+    try {
+      // Verificar si este examen está vinculado a algún componente de calificación
+      const { data: vinculos } = await supabase
+        .from('examenes_a_componentes_calificacion')
+        .select('componente_id')
+        .eq('examen_id', examId);
+      
+      // Si hay vínculos, sincronizar calificaciones
+      if (vinculos && vinculos.length > 0) {
+        // Llamar a la API de sincronización usando el cliente de servicios
+        // para no depender de la autenticación del usuario
+        fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/exams/sync-grades`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY || ''}`
+          },
+          body: JSON.stringify({ examId })
+        }).catch(error => {
+          console.error('Error al sincronizar calificaciones:', error);
+        });
+      }
+    } catch (syncError) {
+      console.error('Error al intentar sincronizar calificaciones:', syncError);
+      // No devolvemos error al cliente ya que el guardado principal fue exitoso
+    }
     
     // 2. Guardar las respuestas del estudiante (TODAS, sin filtrar por habilitada)
     try {

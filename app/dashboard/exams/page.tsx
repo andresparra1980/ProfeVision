@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FileText, Eye, Printer, Users, FileOutput, Trash2 } from "lucide-react";
+import { Plus, FileText, Eye, Printer, Users, FileOutput, Trash2, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -345,6 +345,25 @@ export default function ExamsPage() {
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>Ver resultados del examen</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/link-grade-component`)}
+                                >
+                                  <Link className="h-4 w-4" />
+                                  <span className="sr-only">Vincular a Componente de Nota</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Vincular a Componente de Nota</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>

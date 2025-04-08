@@ -115,6 +115,39 @@ export async function POST(request: Request, { params }: { params: { id: string 
       );
     }
 
+    // 6. Sincronizar calificaciones automáticamente
+    try {
+      // Verificar si este examen está vinculado a algún componente de calificación
+      const { data: vinculos } = await supabase
+        .from('examenes_a_componentes_calificacion')
+        .select('componente_id')
+        .eq('examen_id', respuestaData.examen_id);
+      
+      // Si hay vínculos, llamar a la API de sincronización
+      if (vinculos && vinculos.length > 0) {
+        // Obtener token de sesión para la petición
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
+
+        if (token) {
+          // Llamar a la API existente en lugar de la Edge Function
+          fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/exams/sync-grades`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ examId: respuestaData.examen_id })
+          }).catch(error => {
+            console.error('Error al sincronizar calificaciones:', error);
+          });
+        }
+      }
+    } catch (syncError) {
+      console.error('Error al intentar sincronizar calificaciones:', syncError);
+      // No devolvemos error al cliente ya que la actualización principal fue exitosa
+    }
+
     return NextResponse.json({
       success: true,
       puntajeObtenido,

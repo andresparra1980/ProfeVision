@@ -28,6 +28,7 @@ interface Estudiante {
   id: string;
   nombres: string;
   apellidos: string;
+  identificacion: string;
 }
 
 interface OpcionRespuesta {
@@ -81,7 +82,10 @@ export default function ExamResultsPage() {
   const [loading, setLoading] = useState(true);
   const [examDetails, setExamDetails] = useState<any>(null);
   const [resultados, setResultados] = useState<ResultadoExamen[]>([]);
+  const [todosEstudiantes, setTodosEstudiantes] = useState<Estudiante[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [selectedResultado, setSelectedResultado] = useState<ResultadoExamen | null>(null);
   const [pendingUpdate, setPendingUpdate] = useState<{
     respuestaId: string;
     opcionId: string;
@@ -90,6 +94,7 @@ export default function ExamResultsPage() {
     nuevaLetra: string;
   } | null>(null);
   const [updatingAnswer, setUpdatingAnswer] = useState(false);
+  const [verSoloConExamen, setVerSoloConExamen] = useState(false);
 
   useEffect(() => {
     fetchExamResults();
@@ -118,6 +123,49 @@ export default function ExamResultsPage() {
       }
 
       console.log('Exam data:', examData);
+      setExamDetails(examData);
+
+      // Obtener la relación con el grupo a través de examen_grupo
+      const { data: examenGrupoData, error: examenGrupoError } = await supabase
+        .from('examen_grupo')
+        .select(`
+          grupo_id,
+          grupos(id, nombre)
+        `)
+        .eq('examen_id', examId)
+        .maybeSingle();
+
+      if (examenGrupoError) {
+        console.error('Error fetching examen_grupo:', examenGrupoError);
+      } else if (examenGrupoData) {
+        // Agregar información del grupo al objeto de detalles del examen
+        setExamDetails((prevDetails: any) => ({
+          ...prevDetails,
+          grupo_id: examenGrupoData.grupo_id,
+          grupos: examenGrupoData.grupos
+        }));
+
+        // Obtener todos los estudiantes del grupo
+        if (examenGrupoData.grupo_id) {
+          const { data: estudiantesGrupo, error: estudiantesError } = await supabase
+            .from('estudiantes')
+            .select('*')
+            .in('id', (
+              await supabase
+                .from('estudiante_grupo')
+                .select('estudiante_id')
+                .eq('grupo_id', examenGrupoData.grupo_id)
+            ).data?.map((row: any) => row.estudiante_id) || [])
+            .order('apellidos', { ascending: true })
+            .order('nombres', { ascending: true });
+
+          if (estudiantesError) {
+            console.error('Error fetching students:', estudiantesError);
+          } else {
+            setTodosEstudiantes(estudiantesGrupo || []);
+          }
+        }
+      }
 
       // Obtener resultados con todas las relaciones en una sola consulta
       const { data: resultsData, error: resultsError } = await supabase
@@ -171,7 +219,6 @@ export default function ExamResultsPage() {
       }
 
       if (!resultsData || resultsData.length === 0) {
-        setExamDetails(examData);
         setResultados([]);
         return;
       }
@@ -213,7 +260,8 @@ export default function ExamResultsPage() {
             estudiante: {
               id: result.estudiante.id,
               nombres: result.estudiante.nombres,
-              apellidos: result.estudiante.apellidos
+              apellidos: result.estudiante.apellidos,
+              identificacion: result.estudiante.identificacion
             },
             puntaje_obtenido: result.puntaje_obtenido,
             porcentaje: result.porcentaje,
@@ -224,7 +272,6 @@ export default function ExamResultsPage() {
         })
         .filter((resultado: ResultadoExamen | null): resultado is ResultadoExamen => resultado !== null);
 
-      setExamDetails(examData);
       setResultados(typedResults);
     } catch (error) {
       console.error('Error in fetchExamResults:', error);
@@ -305,10 +352,10 @@ export default function ExamResultsPage() {
       const result = await response.json();
 
       // Actualizar el estado local con la nueva información
-      setResultados(prevResultados => 
-        prevResultados.map(resultado => {
+      setResultados(prevResultados => {
+        const updatedResultados = prevResultados.map(resultado => {
           if (resultado.id === pendingUpdate.resultadoId) {
-            return {
+            const updatedResultado = {
               ...resultado,
               puntaje_obtenido: result.puntajeObtenido,
               porcentaje: result.porcentaje,
@@ -327,10 +374,19 @@ export default function ExamResultsPage() {
                 return respuesta;
               })
             };
+            
+            // Si este resultado es el que está seleccionado actualmente en el modal, actualizarlo también
+            if (selectedResultado && selectedResultado.id === resultado.id) {
+              setTimeout(() => setSelectedResultado(updatedResultado), 0);
+            }
+            
+            return updatedResultado;
           }
           return resultado;
-        })
-      );
+        });
+        
+        return updatedResultados;
+      });
 
       toast({
         title: "Respuesta actualizada",
@@ -351,6 +407,12 @@ export default function ExamResultsPage() {
     }
   };
 
+  // Función para mostrar el diálogo de detalles
+  const handleShowDetails = (resultado: ResultadoExamen) => {
+    setSelectedResultado(resultado);
+    setShowDetailsDialog(true);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -360,212 +422,191 @@ export default function ExamResultsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => router.push("/dashboard/exams")}
-            className="mb-2"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" /> Volver a Exámenes
-          </Button>
-          <h2 className="text-3xl font-bold tracking-tight">{examDetails?.titulo}</h2>
-          <p className="text-muted-foreground">
-            {examDetails?.materias?.nombre} | Resultados
-          </p>
-        </div>
+    <div className="container mx-auto py-8 max-w-[95%]">
+      <div className="flex items-center mb-6">
+        <Button variant="ghost" onClick={() => router.back()} className="mr-2">
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Volver
+        </Button>
+        <h1 className="text-2xl font-bold">
+          Resultados: {examDetails?.titulo || 'Cargando...'}
+        </h1>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Resultados del Examen</CardTitle>
-          <CardDescription>
-            Lista de estudiantes y sus calificaciones
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : resultados.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No hay resultados disponibles para este examen
-            </div>
-          ) : (
-            <Accordion type="single" collapsible>
-              {resultados.map((resultado) => (
-                <AccordionItem key={resultado.id} value={resultado.id}>
-                  <AccordionTrigger>
-                    <div className="flex flex-col w-full gap-2">
-                      <div className="font-medium text-left">
-                        {resultado.estudiante.nombres} {resultado.estudiante.apellidos}
-                      </div>
-                      <div className="flex items-center justify-end gap-4 text-sm">
-                        <div>
-                          Calificación: {resultado.puntaje_obtenido.toFixed(2)}/{examDetails.puntaje_total}
-                        </div>
-                        <div className="text-muted-foreground">
-                          {resultado.porcentaje.toFixed(1)}%
-                        </div>
-                      </div>
+      <div className="space-y-6">
+        {examDetails && (
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <Card className="flex-1">
+              <CardHeader>
+                <CardTitle>Detalles del Examen</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">Materia:</div>
+                    <div>{examDetails.materias?.nombre || 'Sin materia'}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">Puntaje Total:</div>
+                    <div>{examDetails.puntaje_total}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">Grupo:</div>
+                    <div>{examDetails.grupos?.nombre || 'Sin grupo'}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">Fecha de Creación:</div>
+                    <div>{new Date(examDetails.created_at).toLocaleDateString()}</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="flex-1">
+              <CardHeader>
+                <CardTitle>Estadísticas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">Estudiantes con examen:</div>
+                    <div>{resultados.length} de {todosEstudiantes.length}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">Promedio:</div>
+                    <div>
+                      {resultados.length > 0
+                        ? (resultados.reduce((sum, r) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2)
+                        : 'N/A'
+                      }
                     </div>
-                  </AccordionTrigger>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">Nota más alta:</div>
+                    <div>
+                      {resultados.length > 0
+                        ? Math.max(...resultados.map(r => r.puntaje_obtenido)).toFixed(2)
+                        : 'N/A'
+                      }
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">Nota más baja:</div>
+                    <div>
+                      {resultados.length > 0
+                        ? Math.min(...resultados.map(r => r.puntaje_obtenido)).toFixed(2)
+                        : 'N/A'
+                      }
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-                  <AccordionContent>
-                    <Tabs defaultValue="answers" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="answers">Respuestas</TabsTrigger>
-                        <TabsTrigger value="original" className="flex items-center gap-2">
-                          <ImageIcon className="h-[16px] w-[16px] md:hidden shrink-0" />
-                          <span className="hidden md:inline">Imagen Original</span>
-                          <span className="md:hidden">Original</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="processed" className="flex items-center gap-2">
-                          <FileImage className="h-[16px] w-[16px] md:hidden shrink-0" />
-                          <span className="hidden md:inline">Imagen Procesada</span>
-                          <span className="md:hidden">Procesada</span>
-                        </TabsTrigger>
-                      </TabsList>
-                      
-                      <TabsContent value="answers">
-                        <div className="pt-4">
-                          <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              {resultado.respuestas_estudiante
-                                .filter(r => r.pregunta.orden <= 20)
-                                .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
-                                .map((respuesta) => (
-                                  <div 
-                                    key={respuesta.id} 
-                                    className={`flex items-center`}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="ver-solo-con-examen"
+              checked={verSoloConExamen}
+              onChange={() => setVerSoloConExamen(!verSoloConExamen)}
+              className="rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <label htmlFor="ver-solo-con-examen" className="text-sm">
+              Ver solo estudiantes con examen calificado
+            </label>
+          </div>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Resultados del Examen</CardTitle>
+              <CardDescription>
+                Lista de estudiantes y sus calificaciones
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : todosEstudiantes.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No hay estudiantes en este grupo
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 px-4 font-medium">Estudiante</th>
+                        <th className="text-left py-2 px-4 font-medium">Identificación</th>
+                        <th className="text-center py-2 px-4 font-medium">Calificación</th>
+                        <th className="text-center py-2 px-4 font-medium">Porcentaje</th>
+                        <th className="text-center py-2 px-4 font-medium">Estado</th>
+                        <th className="text-center py-2 px-4 font-medium">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {todosEstudiantes
+                        .filter(estudiante => {
+                          if (!verSoloConExamen) return true;
+                          return resultados.some(r => r.estudiante.id === estudiante.id);
+                        })
+                        .map(estudiante => {
+                          const resultado = resultados.find(r => r.estudiante.id === estudiante.id);
+                          return (
+                            <tr key={estudiante.id} className="border-b hover:bg-muted/50">
+                              <td className="py-2 px-4">{estudiante.apellidos}, {estudiante.nombres}</td>
+                              <td className="py-2 px-4">{estudiante.identificacion}</td>
+                              <td className="py-2 px-4 text-center">
+                                {resultado ? resultado.puntaje_obtenido.toFixed(2) : '-'}
+                              </td>
+                              <td className="py-2 px-4 text-center">
+                                {resultado ? resultado.porcentaje.toFixed(1) + '%' : '-'}
+                              </td>
+                              <td className="py-2 px-4 text-center">
+                                {resultado ? (
+                                  <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                    Calificado
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                    Pendiente
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-2 px-4 text-center">
+                                {resultado ? (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleShowDetails(resultado)}
                                   >
-                                    <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
-                                      {respuesta.pregunta.orden}.
-                                    </span>
-                                    <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                                      {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
-                                        const letter = getLetterFromNumber(num);
-                                        const isSelected = respuesta.opcion_respuesta.orden === num;
-                                        const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
-                                        
-                                        return (
-                                          <div 
-                                            key={`bubble-${respuesta.id}-${num}`}
-                                            className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                              ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
-                                              ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
-                                            `}
-                                            onClick={() => {
-                                              if (!respuesta.pregunta.habilitada || !opcion) return;
-                                              handleBubbleClick(
-                                                respuesta,
-                                                num,
-                                                resultado.id,
-                                                opcion.id
-                                              );
-                                            }}
-                                          >
-                                            {isSelected ? letter : ''}
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                    <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                                      {respuesta.es_correcta ? '✓' : '✗'}
-                                    </span>
-                                  </div>
-                                ))}
-                            </div>
-                            <div className="space-y-2">
-                              {resultado.respuestas_estudiante
-                                .filter(r => r.pregunta.orden > 20)
-                                .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
-                                .map((respuesta) => (
-                                  <div 
-                                    key={respuesta.id} 
-                                    className={`flex items-center`}
+                                    Ver detalles
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled
                                   >
-                                    <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
-                                      {respuesta.pregunta.orden}.
-                                    </span>
-                                    <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                                      {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
-                                        const letter = getLetterFromNumber(num);
-                                        const isSelected = respuesta.opcion_respuesta.orden === num;
-                                        const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
-                                        
-                                        return (
-                                          <div 
-                                            key={`bubble-${respuesta.id}-${num}`}
-                                            className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                              ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
-                                              ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
-                                            `}
-                                            onClick={() => {
-                                              if (!respuesta.pregunta.habilitada || !opcion) return;
-                                              handleBubbleClick(
-                                                respuesta,
-                                                num,
-                                                resultado.id,
-                                                opcion.id
-                                              );
-                                            }}
-                                          >
-                                            {isSelected ? letter : ''}
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                    <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                                      {respuesta.es_correcta ? '✓' : '✗'}
-                                    </span>
-                                  </div>
-                                ))}
-                            </div>
-                          </div>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="original">
-                        {resultado.examen_escaneado?.ruta_s3_original ? (
-                          <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
-                            <ImageWithSignedUrl
-                              path={resultado.examen_escaneado.ruta_s3_original}
-                              alt="Imagen original del examen"
-                            />
-                          </div>
-                        ) : (
-                          <div className="text-center py-8 text-muted-foreground">
-                            No hay imagen original disponible
-                          </div>
-                        )}
-                      </TabsContent>
-
-                      <TabsContent value="processed">
-                        {resultado.examen_escaneado?.ruta_s3_procesado ? (
-                          <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
-                            <ImageWithSignedUrl
-                              path={resultado.examen_escaneado.ruta_s3_procesado}
-                              alt="Imagen procesada del examen"
-                            />
-                          </div>
-                        ) : (
-                          <div className="text-center py-8 text-muted-foreground">
-                            No hay imagen procesada disponible
-                          </div>
-                        )}
-                      </TabsContent>
-                    </Tabs>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          )}
-        </CardContent>
-      </Card>
+                                    No disponible
+                                  </Button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
@@ -601,6 +642,174 @@ export default function ExamResultsPage() {
                 'Confirmar cambio'
               )}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Nuevo diálogo para mostrar detalles del examen de un estudiante */}
+      <Dialog 
+        open={showDetailsDialog} 
+        onOpenChange={setShowDetailsDialog}
+      >
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedResultado?.estudiante.apellidos}, {selectedResultado?.estudiante.nombres}
+            </DialogTitle>
+            <DialogDescription>
+              Calificación: {selectedResultado?.puntaje_obtenido.toFixed(2)}/{examDetails?.puntaje_total} ({selectedResultado?.porcentaje.toFixed(1)}%)
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedResultado && (
+            <Tabs defaultValue="answers" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="answers">Respuestas</TabsTrigger>
+                <TabsTrigger value="original" className="flex items-center gap-2">
+                  <ImageIcon className="h-[16px] w-[16px] md:hidden shrink-0" />
+                  <span className="hidden md:inline">Imagen Original</span>
+                  <span className="md:hidden">Original</span>
+                </TabsTrigger>
+                <TabsTrigger value="processed" className="flex items-center gap-2">
+                  <FileImage className="h-[16px] w-[16px] md:hidden shrink-0" />
+                  <span className="hidden md:inline">Imagen Procesada</span>
+                  <span className="md:hidden">Procesada</span>
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="answers">
+                <div className="pt-4">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      {selectedResultado.respuestas_estudiante
+                        .filter(r => r.pregunta.orden <= 20)
+                        .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
+                        .map((respuesta) => (
+                          <div 
+                            key={respuesta.id} 
+                            className={`flex items-center`}
+                          >
+                            <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
+                              {respuesta.pregunta.orden}.
+                            </span>
+                            <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
+                              {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
+                                const letter = getLetterFromNumber(num);
+                                const isSelected = respuesta.opcion_respuesta.orden === num;
+                                const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
+                                
+                                return (
+                                  <div 
+                                    key={`bubble-${respuesta.id}-${num}`}
+                                    className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
+                                      ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
+                                      ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
+                                    `}
+                                    onClick={() => {
+                                      if (!respuesta.pregunta.habilitada || !opcion) return;
+                                      handleBubbleClick(
+                                        respuesta,
+                                        num,
+                                        selectedResultado.id,
+                                        opcion.id
+                                      );
+                                    }}
+                                  >
+                                    {isSelected ? letter : ''}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
+                              {respuesta.es_correcta ? '✓' : '✗'}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                    <div className="space-y-2">
+                      {selectedResultado.respuestas_estudiante
+                        .filter(r => r.pregunta.orden > 20)
+                        .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
+                        .map((respuesta) => (
+                          <div 
+                            key={respuesta.id} 
+                            className={`flex items-center`}
+                          >
+                            <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
+                              {respuesta.pregunta.orden}.
+                            </span>
+                            <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
+                              {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
+                                const letter = getLetterFromNumber(num);
+                                const isSelected = respuesta.opcion_respuesta.orden === num;
+                                const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
+                                
+                                return (
+                                  <div 
+                                    key={`bubble-${respuesta.id}-${num}`}
+                                    className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
+                                      ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
+                                      ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
+                                    `}
+                                    onClick={() => {
+                                      if (!respuesta.pregunta.habilitada || !opcion) return;
+                                      handleBubbleClick(
+                                        respuesta,
+                                        num,
+                                        selectedResultado.id,
+                                        opcion.id
+                                      );
+                                    }}
+                                  >
+                                    {isSelected ? letter : ''}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
+                              {respuesta.es_correcta ? '✓' : '✗'}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="original">
+                {selectedResultado.examen_escaneado?.ruta_s3_original ? (
+                  <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
+                    <ImageWithSignedUrl
+                      path={selectedResultado.examen_escaneado.ruta_s3_original}
+                      alt="Imagen original del examen"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No hay imagen original disponible
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="processed">
+                {selectedResultado.examen_escaneado?.ruta_s3_procesado ? (
+                  <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-gray-50">
+                    <ImageWithSignedUrl
+                      path={selectedResultado.examen_escaneado.ruta_s3_procesado}
+                      alt="Imagen procesada del examen"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No hay imagen procesada disponible
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setShowDetailsDialog(false)}>Cerrar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

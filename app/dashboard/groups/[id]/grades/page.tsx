@@ -32,6 +32,8 @@ export default function GradesPage({ params }: GradesPageProps) {
   const [componentes, setComponentes] = useState<ComponenteCalificacion[]>([]);
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [componentesBloqueados, setComponentesBloqueados] = useState<Record<string, boolean>>({});
+  // Nuevo estado para componentes vinculados a exámenes
+  const [componentesVinculados, setComponentesVinculados] = useState<Record<string, { examen_id: string, titulo: string }>>({});
   const [calificaciones, setCalificaciones] = useState<Calificaciones>({
     porComponente: {}
   });
@@ -196,6 +198,29 @@ export default function GradesPage({ params }: GradesPageProps) {
         });
         setComponentesBloqueados(bloqueados);
 
+        // Cargar vínculos de componentes con exámenes
+        const { data: vinculos, error: vinculosError } = await supabase
+          .from('examenes_a_componentes_calificacion')
+          .select(`
+            examen_id,
+            componente_id,
+            examen:examen_id(titulo)
+          `)
+          .in('componente_id', componentes.map(c => c.id));
+        
+        if (vinculosError) throw vinculosError;
+        
+        // Transformar los vínculos en un objeto indexado por componente_id
+        const vinculosMap: Record<string, { examen_id: string, titulo: string }> = {};
+        vinculos?.forEach(vinculo => {
+          vinculosMap[vinculo.componente_id] = { 
+            examen_id: vinculo.examen_id,
+            titulo: vinculo.examen?.titulo || 'Examen sin título'
+          };
+        });
+        
+        setComponentesVinculados(vinculosMap);
+
         // Cargar estudiantes antes de las calificaciones
         const { data: estudiantes, error: estudiantesError } = await supabase
           .from('estudiantes')
@@ -258,6 +283,16 @@ export default function GradesPage({ params }: GradesPageProps) {
         variant: 'destructive',
         title: 'Error',
         description: 'Esta calificación está bloqueada para edición.',
+      });
+      return;
+    }
+
+    // Verificar si el componente está vinculado a un examen
+    if (componentesVinculados[componenteId]) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Esta calificación está vinculada al examen "${componentesVinculados[componenteId].titulo}" y no puede ser modificada manualmente.`,
       });
       return;
     }
@@ -332,6 +367,16 @@ export default function GradesPage({ params }: GradesPageProps) {
   };
 
   const toggleComponenteLock = (componenteId: string) => {
+    // No permitir el desbloqueo de componentes vinculados a exámenes
+    if (componentesVinculados[componenteId]) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Este componente está vinculado al examen "${componentesVinculados[componenteId].titulo}" y no puede ser desbloqueado.`,
+      });
+      return;
+    }
+    
     setComponentesBloqueados(prev => ({
       ...prev,
       [componenteId]: !prev[componenteId]
@@ -340,6 +385,16 @@ export default function GradesPage({ params }: GradesPageProps) {
 
   // Funciones para importar/exportar calificaciones
   const handleImportGrades = (componenteId: string) => {
+    // No permitir importar calificaciones en componentes vinculados a exámenes
+    if (componentesVinculados[componenteId]) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Este componente está vinculado al examen "${componentesVinculados[componenteId].titulo}" y no se pueden importar calificaciones manualmente.`,
+      });
+      return;
+    }
+    
     const componente = componentes.find(c => c.id === componenteId);
     if (componente) {
       setSelectedComponent(componente);
@@ -440,6 +495,7 @@ export default function GradesPage({ params }: GradesPageProps) {
           onExportGrades={handleExportGrades}
           onExportPeriod={handleExportPeriod}
           onExportFinal={handleExportFinal}
+          componentesVinculados={componentesVinculados}
         />
       </div>
 
