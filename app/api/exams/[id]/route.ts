@@ -98,8 +98,16 @@ export async function DELETE(
       .eq('examen_id', examId);
 
     if (deletePreguntasError) throw deletePreguntasError;
+    
+    // 5. Eliminar las relaciones con grupos
+    const { error: deleteGruposError } = await supabase
+      .from('examen_grupo')
+      .delete()
+      .eq('examen_id', examId);
+      
+    if (deleteGruposError) throw deleteGruposError;
 
-    // 5. Finalmente, eliminar el examen
+    // 6. Finalmente, eliminar el examen
     const { error: deleteExamError } = await supabase
       .from('examenes')
       .delete()
@@ -115,6 +123,67 @@ export async function DELETE(
     console.error('API /exams/[id] DELETE: Error:', error);
     return NextResponse.json({
       error: 'Error al eliminar el examen',
+      message: error instanceof Error ? error.message : 'Error desconocido'
+    }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: examId } = await params;
+    const { estado } = await req.json();
+
+    // Obtener el token de autorización del header
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    // 1. Verificar que el examen existe
+    const { data: exam, error: examError } = await supabase
+      .from('examenes')
+      .select('id')
+      .eq('id', examId)
+      .single();
+
+    if (examError?.code === 'PGRST116') {
+      return NextResponse.json({ error: 'Examen no encontrado' }, { status: 404 });
+    }
+    if (examError) throw examError;
+
+    // 2. Actualizar el estado del examen
+    const { error: updateError } = await supabase
+      .from('examenes')
+      .update({ estado })
+      .eq('id', examId);
+
+    if (updateError) throw updateError;
+
+    // 3. Si el estado cambia, actualizar también el estado de las asignaciones de grupos
+    let examen_grupo_estado = estado;
+    if (estado === 'publicado') {
+      examen_grupo_estado = 'programado';
+    }
+
+    const { error: updateGruposError } = await supabase
+      .from('examen_grupo')
+      .update({ estado: examen_grupo_estado })
+      .eq('examen_id', examId);
+
+    if (updateGruposError) throw updateGruposError;
+
+    return NextResponse.json({ 
+      message: 'Estado del examen actualizado correctamente',
+      estado: estado
+    });
+
+  } catch (error) {
+    console.error('API /exams/[id] PATCH: Error:', error);
+    return NextResponse.json({
+      error: 'Error al actualizar el estado del examen',
       message: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 });
   }

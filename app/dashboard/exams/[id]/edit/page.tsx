@@ -325,13 +325,28 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         return;
       }
 
-      // Actualizar estado del examen
-      const { error } = await supabase
-        .from("examenes")
-        .update({ estado: "publicado" })
-        .eq("id", examId);
+      // Obtener la sesión actual
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No autorizado');
+      }
 
-      if (error) throw error;
+      // Usar el endpoint PATCH para actualizar el estado del examen
+      const response = await fetch(`/api/exams/${examId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          estado: "publicado"
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al publicar el examen');
+      }
 
       toast({
         title: "Éxito",

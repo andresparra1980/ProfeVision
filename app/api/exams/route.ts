@@ -28,6 +28,7 @@ interface ExamenData {
   duracion_minutos: number;
   puntaje_total: number;
   materia_id: string;
+  grupo_id?: string;
   estado?: string;
   preguntas: Pregunta[];
   instrucciones?: string;
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
 
     // Obtener los datos del body
     const data = await req.json() as ExamenData;
-    const { titulo, descripcion, duracion_minutos, puntaje_total, materia_id, preguntas } = data;
+    const { titulo, descripcion, duracion_minutos, puntaje_total, materia_id, preguntas, grupo_id } = data;
 
     // Validar que todas las preguntas tengan al menos una opción correcta y que haya al menos dos opciones válidas con texto
     for (const pregunta of preguntas) {
@@ -130,7 +131,21 @@ export async function POST(req: NextRequest) {
 
     if (examError) throw examError;
 
-    // 2. Crear las preguntas
+    // 2. Si se proporcionó un grupo_id, asignar el examen al grupo
+    if (grupo_id) {
+      const { error: asignacionError } = await supabase
+        .from('examen_grupo')
+        .insert({
+          examen_id: exam.id,
+          grupo_id: grupo_id,
+          duracion_minutos: duracion_minutos,
+          estado: 'borrador' // Inicialmente en borrador, cambiará a 'programado' cuando se publique el examen
+        });
+
+      if (asignacionError) throw asignacionError;
+    }
+
+    // 3. Crear las preguntas
     const preguntasConExamenId = preguntas.map((pregunta, index) => ({
       examen_id: exam.id,
       texto: pregunta.texto,
@@ -148,7 +163,7 @@ export async function POST(req: NextRequest) {
 
     if (preguntasError) throw preguntasError;
 
-    // 3. Crear las opciones de respuesta para cada pregunta
+    // 4. Crear las opciones de respuesta para cada pregunta
     for (let i = 0; i < preguntasCreadas.length; i++) {
       const pregunta = preguntasCreadas[i];
       const opcionesOriginales = preguntas[i].opciones;

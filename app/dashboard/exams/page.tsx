@@ -325,7 +325,7 @@ export default function ExamsPage() {
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Asignar grupos al examen</p>
+                                <p>Asignar más grupos a este examen</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>

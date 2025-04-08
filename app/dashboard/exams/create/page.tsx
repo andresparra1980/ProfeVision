@@ -242,6 +242,7 @@ export default function CreateExamPage() {
           duracion_minutos: data.duracion,
           puntaje_total: data.puntaje_total,
           materia_id: data.materia_id,
+          grupo_id: data.grupo_id,
           preguntas: preguntas,
         }),
       });
