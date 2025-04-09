@@ -67,11 +67,6 @@ export default function Page() {
         throw error;
       }
 
-      toast({
-        title: "Inicio de sesión exitoso",
-        description: "Redirigiendo al panel de control...",
-      });
-      
       router.push("/dashboard");
       router.refresh();
     } catch (error: any) {
