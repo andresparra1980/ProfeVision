@@ -162,7 +162,7 @@ export function GradesTable({
                 return (
                   <TableHead 
                     key={periodo.id} 
-                    className={`text-center border-x-2 border-border ${index % 2 === 0 ? 'bg-muted dark:bg-muted/50' : 'bg-muted/80 dark:bg-muted/40'}`} 
+                    className={`text-center border-x-2 border-border`} 
                     colSpan={componentesCount + 2}
                     style={{ width: periodoWidth, minWidth: periodoWidth }}
                   >
@@ -183,7 +183,7 @@ export function GradesTable({
                   </TableHead>
                 );
               })}
-              <TableHead className="text-center w-[60px] min-w-[60px] bg-muted dark:bg-muted/50 border-x-2 border-border">
+              <TableHead className="text-center w-[60px] min-w-[60px] border-x-2 border-border">
                 <div className="flex flex-col items-center gap-1 py-2">
                   <span className="font-semibold text-foreground dark:text-foreground">Nota Final</span>
                   <Button
@@ -207,7 +207,7 @@ export function GradesTable({
                   {componentes
                     .filter(c => c.periodo_id === periodo.id)
                     .map(componente => (
-                      <TableHead key={componente.id} className={`text-center p-0 border-x w-[100px] min-w-[100px] ${componente.periodo_id && periodos.findIndex(p => p.id === componente.periodo_id) % 2 === 0 ? 'bg-muted/50 dark:bg-muted/20' : 'bg-muted/30 dark:bg-muted/10'}`}>
+                      <TableHead key={componente.id} className={`text-center p-0 border-x w-[100px] min-w-[100px]`}>
                         <div className="flex flex-col items-center">
                           <div className="p-2">
                             <span className="text-sm">{componente.nombre}</span>
@@ -291,14 +291,14 @@ export function GradesTable({
                         </div>
                       </TableHead>
                     ))}
-                  <TableHead className="text-center bg-muted/60 dark:bg-muted/30 border-x w-[80px] min-w-[80px]">
+                  <TableHead className="text-center border-x w-[80px] min-w-[80px]">
                     <div className="flex flex-col items-center">
                       <span className="font-medium">Nota</span>
                       <span className="font-medium">Periodo</span>
                       <span className="text-xs text-foreground/70 dark:text-foreground/70">(Pond.)</span>
                     </div>
                   </TableHead>
-                  <TableHead className="text-center bg-muted/60 dark:bg-muted/30 border-x w-[80px] min-w-[80px]">
+                  <TableHead className="text-center border-x w-[80px] min-w-[80px]">
                     <div className="flex flex-col items-center">
                       <span className="font-medium">Nota</span>
                       <span className="font-medium">Periodo</span>
@@ -307,7 +307,7 @@ export function GradesTable({
                   </TableHead>
                 </React.Fragment>
               ))}
-              <TableHead className="text-center w-[60px] min-w-[60px] bg-muted/60 dark:bg-muted/30 border-x">
+              <TableHead className="text-center w-[60px] min-w-[60px] border-x">
                 <span className="font-medium">Nota Final</span>
               </TableHead>
             </TableRow>
@@ -331,8 +331,7 @@ export function GradesTable({
                       .map(componente => (
                         <TableCell key={componente.id} className={`
                           text-center border-x w-[100px] min-w-[100px] p-0
-                          ${componentesVinculados[componente.id] ? 'bg-secondary/10 dark:bg-secondary/10' : 
-                            componente.periodo_id && periodos.findIndex(p => p.id === componente.periodo_id) % 2 === 0 ? 'bg-muted/20 dark:bg-muted/5' : ''}
+                          ${componentesVinculados[componente.id] ? 'bg-secondary/10 dark:bg-secondary/10' : ''}
                         `}>
                           <div className="flex items-center justify-center h-full">
                             <GradeInput
@@ -348,7 +347,7 @@ export function GradesTable({
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="font-semibold bg-muted/30 dark:bg-muted/50 px-2 py-1 rounded border border-border">
+                              <span className="font-semibold px-2 py-1">
                                 {calcularNotaPeriodo(estudiante, periodo).ponderada.toFixed(1)}
                               </span>
                             </TooltipTrigger>
@@ -359,15 +358,15 @@ export function GradesTable({
                         </TooltipProvider>
                       </div>
                     </TableHead>
-                    <TableCell className="text-center font-semibold p-1 border-x bg-muted/50 dark:bg-muted/20">
-                      <div className="bg-card dark:bg-card px-2 py-1 rounded border border-border">
+                    <TableCell className="text-center font-semibold p-1 border-x">
+                      <div className="px-2 py-1">
                         {calcularNotaFinal(estudiante).toFixed(1)}
                       </div>
                     </TableCell>
                   </React.Fragment>
                 ))}
-                <TableCell className="text-center font-semibold p-1 border-x bg-muted/70 dark:bg-muted/40">
-                  <div className="bg-card dark:bg-card px-2 py-1 rounded border border-border">
+                <TableCell className="text-center font-semibold p-1 border-x">
+                  <div className="px-2 py-1">
                     {calcularNotaFinal(estudiante).toFixed(1)}
                   </div>
                 </TableCell>
