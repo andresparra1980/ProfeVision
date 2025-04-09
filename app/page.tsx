@@ -1,9 +1,15 @@
+"use client";
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { ModeToggle } from '@/components/shared/mode-toggle';
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-8 md:p-24">
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
       <div className="z-10 w-full max-w-5xl flex flex-col items-center justify-center text-center">
         <h1 className="text-4xl md:text-6xl font-bold text-center mb-6">
           Bienvenido a <span className="text-primary">ProfeVision</span>
@@ -17,7 +23,7 @@ export default function Home() {
               Iniciar Sesión
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg">
+          <Button asChild variant="secondary" size="lg" className="text-white dark:text-secondary-foreground">
             <Link href="/auth/register">
               Registrarse
             </Link>

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { ModeToggle } from "@/components/shared/mode-toggle";
 import {
   Card,
   CardContent,
@@ -71,6 +72,9 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
       <div className="mx-auto w-full max-w-md">
         <Card>
           <CardHeader className="space-y-1">

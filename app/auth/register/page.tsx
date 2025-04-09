@@ -11,6 +11,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase, signUpWithRedirect } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
+import { ModeToggle } from "@/components/shared/mode-toggle";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
@@ -73,85 +82,92 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-      <div className="mx-auto w-full max-w-md space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Crear Cuenta</h1>
-          <p className="text-muted-foreground">
-            Regístrate para acceder a todas las funcionalidades
-          </p>
-        </div>
-        
-        <div className="space-y-4">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nombre completo</Label>
-              <Input
-                id="name"
-                placeholder="Juan Pérez"
-                {...form.register("name")}
-                disabled={isLoading}
-              />
-              {form.formState.errors.name && (
-                <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tu@ejemplo.com"
-                {...form.register("email")}
-                disabled={isLoading}
-              />
-              {form.formState.errors.email && (
-                <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...form.register("password")}
-                disabled={isLoading}
-              />
-              {form.formState.errors.password && (
-                <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                {...form.register("confirmPassword")}
-                disabled={isLoading}
-              />
-              {form.formState.errors.confirmPassword && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-            
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Registrando..." : "Registrarse"}
-            </Button>
-          </form>
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
+      <div className="mx-auto w-full max-w-md">
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
+            <CardDescription className="text-center">
+              Regístrate para acceder a todas las funcionalidades
+            </CardDescription>
+          </CardHeader>
           
-          <div className="text-center text-sm">
-            ¿Ya tienes una cuenta?{" "}
-            <Link href="/auth/login" className="text-primary hover:underline">
-              Iniciar sesión
-            </Link>
-          </div>
-        </div>
+          <CardContent>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nombre completo</Label>
+                <Input
+                  id="name"
+                  placeholder="Juan Pérez"
+                  {...form.register("name")}
+                  disabled={isLoading}
+                />
+                {form.formState.errors.name && (
+                  <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Correo electrónico</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="tu@ejemplo.com"
+                  {...form.register("email")}
+                  disabled={isLoading}
+                />
+                {form.formState.errors.email && (
+                  <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  {...form.register("password")}
+                  disabled={isLoading}
+                />
+                {form.formState.errors.password && (
+                  <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  {...form.register("confirmPassword")}
+                  disabled={isLoading}
+                />
+                {form.formState.errors.confirmPassword && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Registrando..." : "Registrarse"}
+              </Button>
+            </form>
+          </CardContent>
+          
+          <CardFooter className="flex justify-center">
+            <div className="text-center text-sm">
+              ¿Ya tienes una cuenta?{" "}
+              <Link href="/auth/login" className="text-primary hover:underline">
+                Iniciar sesión
+              </Link>
+            </div>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );
