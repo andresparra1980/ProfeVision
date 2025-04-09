@@ -112,7 +112,7 @@ export default function Page() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="tu@ejemplo.com"
+                  placeholder=""
                   {...form.register("email")}
                   disabled={isLoading}
                 />
@@ -134,7 +134,7 @@ export default function Page() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder=""
                   {...form.register("password")}
                   disabled={isLoading}
                 />

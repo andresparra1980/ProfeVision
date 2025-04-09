@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Upload, Users, RefreshCw, UserPlus, BookOpen, BookmarkPlus, School } from "lucide-react";
+import { Plus, Upload, Users, RefreshCw, UserPlus, BookOpen, BookmarkPlus, School, Folders } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -128,7 +128,7 @@ export default function StudentsPage() {
       }
       
       // Transformar los datos para obtener un formato más fácil de usar
-      const uniqueStudents = estudiantes.map(estudiante => ({
+      let uniqueStudents = estudiantes.map((estudiante: any) => ({
         id: estudiante.id,
         nombres: estudiante.nombres,
         apellidos: estudiante.apellidos,
@@ -314,9 +314,10 @@ export default function StudentsPage() {
             Los estudiantes en ProfeVision están siempre asociados a grupos específicos.
           </p>
           <Button 
-            onClick={() => router.push("/dashboard/grupos")}
+            onClick={() => router.push("/dashboard/groups")}
+            className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90"
           >
-            <BookmarkPlus className="mr-2 h-4 w-4" /> Crear Grupo
+            <Folders className="mr-2 h-4 w-4" /> Crear Grupo
           </Button>
         </div>
       );
@@ -342,9 +343,10 @@ export default function StudentsPage() {
               <UserPlus className="mr-2 h-4 w-4" /> Crear Estudiante
             </Button>
             <Button 
-              onClick={() => router.push("/dashboard/grupos")}
+              onClick={() => router.push("/dashboard/groups")}
+              className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90"
             >
-              <Users className="mr-2 h-4 w-4" /> Gestionar Grupos
+              <Folders className="mr-2 h-4 w-4" /> Gestionar Grupos
             </Button>
           </div>
         </div>
@@ -370,7 +372,7 @@ export default function StudentsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredStudents.map((student) => (
+            {filteredStudents.map((student: any) => (
               <TableRow key={student.id}>
                 <TableCell className="font-medium">{student.apellidos}</TableCell>
                 <TableCell>{student.nombres}</TableCell>
@@ -440,9 +442,10 @@ export default function StudentsPage() {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => router.push("/dashboard/grupos")}
+            onClick={() => router.push("/dashboard/groups")}
+            className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90"
           >
-            <BookmarkPlus className="mr-2 h-4 w-4" /> Gestionar Grupos
+            <Folders className="mr-2 h-4 w-4" /> Gestionar Grupos
           </Button>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>

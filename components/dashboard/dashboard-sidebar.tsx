@@ -14,9 +14,19 @@ import {
   BookOpen,
   Building2,
   Folders,
+  LogOut,
+  UserCircle,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/shared/mode-toggle";
+import { Separator } from "@/components/ui/separator";
+
+interface DashboardSidebarProps {
+  user: any;
+  handleLogout: () => Promise<void>;
+  isLoggingOut: boolean;
+}
 
 const navItems = [
   {
@@ -61,9 +71,11 @@ const navItems = [
   },
 ];
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+
+  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'Usuario';
 
   return (
     <>
@@ -87,38 +99,67 @@ export default function DashboardSidebar() {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-card transition-transform duration-200 md:static md:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col justify-between bg-card transition-transform duration-200 md:static md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center px-6">
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-secondary">ProfeVision</span>
-          </Link>
+        <div>
+          <div className="flex h-16 items-center justify-between px-4">
+            <Link href="/dashboard" className="flex items-center space-x-2">
+              <span className="text-xl font-bold text-secondary">ProfeVision</span>
+            </Link>
+            <ModeToggle />
+          </div>
+
+          <nav className="space-y-1 px-4 py-6">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  "flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-primary/10 text-primary"
+                    : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                <span>{item.title}</span>
+              </Link>
+            ))}
+          </nav>
         </div>
 
-        <nav className="flex-1 space-y-1 px-4 py-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                pathname === item.href
-                  ? "bg-primary/10 text-primary"
-                  : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              <span>{item.title}</span>
+        <div>
+          <div className="border-t px-4 py-4">
+            <div className="mb-3">
+              <p className="text-sm font-medium text-card-foreground truncate">{userName}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
+            <Link href="/dashboard/profile" className="mb-2 block w-full">
+              <Button variant="ghost" size="sm" className="w-full justify-start px-2">
+                <UserCircle className="mr-2 h-4 w-4" />
+                Mi perfil
+              </Button>
             </Link>
-          ))}
-        </nav>
+            <Button 
+              variant="ghost"
+              size="sm" 
+              disabled={isLoggingOut} 
+              onClick={handleLogout}
+              className="w-full justify-start px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+            </Button>
+          </div>
 
-        <div className="border-t p-4">
-          <p className="text-xs text-card-foreground">
-            &copy; {new Date().getFullYear()} ProfeVision
-          </p>
+          <div className="border-t p-4">
+            <p className="text-xs text-card-foreground">
+              &copy; {new Date().getFullYear()} ProfeVision
+            </p>
+          </div>
         </div>
       </aside>
     </>

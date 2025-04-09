@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
 import { ScanExamFeature } from "@/components/exam/scan-exam-feature";
+import { toast } from "@/components/ui/use-toast";
 
 export default function DashboardLayout({
   children,
@@ -15,6 +16,32 @@ export default function DashboardLayout({
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente."
+      });
+      
+      window.location.href = "/auth/login";
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error al cerrar sesión",
+        description: error.message || "Ha ocurrido un error. Intenta nuevamente."
+      });
+      setIsLoggingOut(false);
+    }
+  };
 
   useEffect(() => {
     const checkUser = async () => {
@@ -34,9 +61,15 @@ export default function DashboardLayout({
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event: string, session: any) => {
         if (event === "SIGNED_OUT") {
-          router.push("/auth/login");
+          if (window.location.pathname !== "/auth/login") {
+             router.push("/auth/login");
+          }
         } else if (session) {
           setUser(session.user);
+        } else {
+           if (window.location.pathname !== "/auth/login") {
+             router.push("/auth/login");
+           }
         }
       }
     );
@@ -56,11 +89,11 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <DashboardSidebar />
+      <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
       <div className="flex flex-1 flex-col overflow-hidden bg-card">
-        <DashboardHeader user={user} />
+        <DashboardHeader />
         <main className="flex-1 overflow-y-auto p-0">
-          <div className="bg-background rounded-tl-[2.5rem] min-h-full p-4 md:p-6 shadow-sm">
+          <div className="bg-background bg-graph-paper text-foreground rounded-tl-[2.5rem] min-h-full p-4 md:p-6 shadow-sm">
             {children}
           </div>
         </main>

@@ -9,7 +9,7 @@ export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
   return (
     <Button
       onClick={onClick}
-      className="fixed bottom-6 right-6 h-14 rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg md:hidden flex items-center gap-2 px-6"
+      className="fixed bottom-6 right-6 h-14 rounded-full bg-primary hover:bg-primary/90 text-white dark:text-black shadow-lg md:hidden flex items-center gap-2 px-6"
     >
       <Camera className="h-5 w-5" />
       ¡Califica Ya!

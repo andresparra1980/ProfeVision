@@ -508,7 +508,7 @@ export default function GroupsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Grupos</h1>
           <div className="text-sm text-muted-foreground">
@@ -517,250 +517,261 @@ export default function GroupsPage() {
         </div>
         <div className="flex gap-2">
           <Button
-            variant="outline"
+            variant="default"
             onClick={() => setMostrarArchivados(!mostrarArchivados)}
+            className="bg-rose-500 text-primary-foreground hover:bg-rose-600 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/90 transition-colors"
           >
-            {mostrarArchivados ? "Ver grupos activos" : "Ver grupos archivados"}
+            {mostrarArchivados ? (
+              <>
+                <ChevronLeft className="mr-2 h-4 w-4" /> Ver Grupos Activos
+              </>
+            ) : (
+              <>
+                <Archive className="mr-2 h-4 w-4" /> Ver Grupos Archivados
+              </>
+            )}
           </Button>
-          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setEditingGrupo(null)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Nuevo grupo
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[525px]">
-              <DialogHeader>
-                <DialogTitle>{editingGrupo ? "Editar grupo" : "Nuevo grupo"}</DialogTitle>
-                <DialogDescription>
-                  {editingGrupo 
-                    ? "Actualiza la información del grupo." 
-                    : "Ingresa los datos del nuevo grupo."}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nombre">Nombre*</Label>
-                  <Input
-                    id="nombre"
-                    placeholder="Ej: 10-A, Grupo Mañana, etc."
-                    {...form.register("nombre")}
-                  />
-                  {form.formState.errors.nombre && (
-                    <div className="text-sm text-destructive">{form.formState.errors.nombre.message}</div>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="entidad">Entidad Educativa*</Label>
-                  <Select
-                    onValueChange={(value: string) => form.setValue("entidad_id", value)}
-                    value={form.watch("entidad_id")}
-                  >
-                    <SelectTrigger id="entidad">
-                      <SelectValue placeholder="Selecciona una entidad educativa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {entidades.length > 0 ? (
-                        entidades.map((entidad) => (
-                          <SelectItem key={entidad.id} value={entidad.id}>
-                            {entidad.nombre}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-entidades" disabled>
-                          No hay entidades educativas registradas
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {form.formState.errors.entidad_id && (
-                    <div className="text-sm text-destructive">{form.formState.errors.entidad_id.message}</div>
-                  )}
-                  {entidades.length === 0 && (
-                    <div className="text-xs text-destructive">
-                      Debes crear al menos una entidad educativa antes de crear un grupo.
-                      <Link href="/dashboard/entidades-educativas" className="ml-1 text-primary hover:underline">
-                        Crear entidad educativa
-                      </Link>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="materia">Materia*</Label>
-                  <Select
-                    onValueChange={(value: string) => form.setValue("materia_id", value)}
-                    value={form.watch("materia_id")}
-                    disabled={!form.watch("entidad_id")}
-                  >
-                    <SelectTrigger id="materia">
-                      <SelectValue placeholder={
-                        form.watch("entidad_id") 
-                          ? "Selecciona una materia" 
-                          : "Primero selecciona una entidad educativa"
-                      } />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {materiasFiltradas.length > 0 ? (
-                        materiasFiltradas.map((materia) => (
-                          <SelectItem key={materia.id} value={materia.id}>
-                            {materia.nombre}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-materias" disabled>
-                          {form.watch("entidad_id") 
-                            ? "No hay materias para esta entidad educativa" 
-                            : "Selecciona primero una entidad educativa"
-                          }
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {form.formState.errors.materia_id && (
-                    <div className="text-sm text-destructive">{form.formState.errors.materia_id.message}</div>
-                  )}
-                  {form.watch("entidad_id") && materiasFiltradas.length === 0 && (
-                    <div className="text-xs text-destructive">
-                      No hay materias registradas para esta entidad educativa.
-                      <Link href="/dashboard/materias" className="ml-1 text-primary hover:underline">
-                        Crear materia
-                      </Link>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Periodo Escolar</Label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm text-muted-foreground">Fecha Inicio</Label>
-                      <div className="flex gap-2">
-                        <Select
-                          value={startDate ? startDate.getMonth().toString() : ""}
-                          onValueChange={(value) => {
-                            if (startDate) {
-                              handleStartDateChange(parseInt(value), startDate.getFullYear());
-                            } else {
-                              handleStartDateChange(parseInt(value), new Date().getFullYear());
-                            }
-                          }}
-                        >
-                          <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Mes" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {months.map((month) => (
-                              <SelectItem key={month.value} value={month.value.toString()}>
-                                {month.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Select
-                          value={startDate ? startDate.getFullYear().toString() : ""}
-                          onValueChange={(value) => {
-                            handleStartDateChange(
-                              startDate ? startDate.getMonth() : 0,
-                              parseInt(value)
-                            );
-                          }}
-                        >
-                          <SelectTrigger className="w-[100px]">
-                            <SelectValue placeholder="Año" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {years.map((year) => (
-                              <SelectItem key={year} value={year.toString()}>
-                                {year}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm text-muted-foreground">Fecha Fin</Label>
-                      <div className="flex gap-2">
-                        <Select
-                          value={endDate ? endDate.getMonth().toString() : ""}
-                          onValueChange={(value) => {
-                            if (endDate) {
-                              handleEndDateChange(parseInt(value), endDate.getFullYear());
-                            } else {
-                              handleEndDateChange(parseInt(value), new Date().getFullYear());
-                            }
-                          }}
-                        >
-                          <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Mes" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {months.map((month) => (
-                              <SelectItem key={month.value} value={month.value.toString()}>
-                                {month.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Select
-                          value={endDate ? endDate.getFullYear().toString() : ""}
-                          onValueChange={(value) => {
-                            handleEndDateChange(
-                              endDate ? endDate.getMonth() : 0,
-                              parseInt(value)
-                            );
-                          }}
-                        >
-                          <SelectTrigger className="w-[100px]">
-                            <SelectValue placeholder="Año" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {years.map((year) => (
-                              <SelectItem key={year} value={year.toString()}>
-                                {year}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+          {!mostrarArchivados && (
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+              <DialogTrigger asChild>
+                <Button onClick={() => setEditingGrupo(null)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Nuevo grupo
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[525px]">
+                <DialogHeader>
+                  <DialogTitle>{editingGrupo ? "Editar grupo" : "Nuevo grupo"}</DialogTitle>
+                  <DialogDescription>
+                    {editingGrupo 
+                      ? "Actualiza la información del grupo." 
+                      : "Ingresa los datos del nuevo grupo."}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="nombre">Nombre*</Label>
+                    <Input
+                      id="nombre"
+                      placeholder="Ej: 10-A, Grupo Mañana, etc."
+                      {...form.register("nombre")}
+                    />
+                    {form.formState.errors.nombre && (
+                      <div className="text-sm text-destructive">{form.formState.errors.nombre.message}</div>
+                    )}
                   </div>
-                  {form.watch("periodo_escolar") && (
-                    <div className="text-sm text-muted-foreground">
-                      Periodo interpretado: {form.watch("periodo_escolar")}
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="entidad">Entidad Educativa*</Label>
+                    <Select
+                      onValueChange={(value: string) => form.setValue("entidad_id", value)}
+                      value={form.watch("entidad_id")}
+                    >
+                      <SelectTrigger id="entidad">
+                        <SelectValue placeholder="Selecciona una entidad educativa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {entidades.length > 0 ? (
+                          entidades.map((entidad) => (
+                            <SelectItem key={entidad.id} value={entidad.id}>
+                              {entidad.nombre}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-entidades" disabled>
+                            No hay entidades educativas registradas
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {form.formState.errors.entidad_id && (
+                      <div className="text-sm text-destructive">{form.formState.errors.entidad_id.message}</div>
+                    )}
+                    {entidades.length === 0 && (
+                      <div className="text-xs text-destructive">
+                        Debes crear al menos una entidad educativa antes de crear un grupo.
+                        <Link href="/dashboard/entidades-educativas" className="ml-1 text-primary hover:underline">
+                          Crear entidad educativa
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="materia">Materia*</Label>
+                    <Select
+                      onValueChange={(value: string) => form.setValue("materia_id", value)}
+                      value={form.watch("materia_id")}
+                      disabled={!form.watch("entidad_id")}
+                    >
+                      <SelectTrigger id="materia">
+                        <SelectValue placeholder={
+                          form.watch("entidad_id") 
+                            ? "Selecciona una materia" 
+                            : "Primero selecciona una entidad educativa"
+                        } />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {materiasFiltradas.length > 0 ? (
+                          materiasFiltradas.map((materia) => (
+                            <SelectItem key={materia.id} value={materia.id}>
+                              {materia.nombre}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-materias" disabled>
+                            {form.watch("entidad_id") 
+                              ? "No hay materias para esta entidad educativa" 
+                              : "Selecciona primero una entidad educativa"
+                            }
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {form.formState.errors.materia_id && (
+                      <div className="text-sm text-destructive">{form.formState.errors.materia_id.message}</div>
+                    )}
+                    {form.watch("entidad_id") && materiasFiltradas.length === 0 && (
+                      <div className="text-xs text-destructive">
+                        No hay materias registradas para esta entidad educativa.
+                        <Link href="/dashboard/materias" className="ml-1 text-primary hover:underline">
+                          Crear materia
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Periodo Escolar</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm text-muted-foreground">Fecha Inicio</Label>
+                        <div className="flex gap-2">
+                          <Select
+                            value={startDate ? startDate.getMonth().toString() : ""}
+                            onValueChange={(value) => {
+                              if (startDate) {
+                                handleStartDateChange(parseInt(value), startDate.getFullYear());
+                              } else {
+                                handleStartDateChange(parseInt(value), new Date().getFullYear());
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue placeholder="Mes" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {months.map((month) => (
+                                <SelectItem key={month.value} value={month.value.toString()}>
+                                  {month.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select
+                            value={startDate ? startDate.getFullYear().toString() : ""}
+                            onValueChange={(value) => {
+                              handleStartDateChange(
+                                startDate ? startDate.getMonth() : 0,
+                                parseInt(value)
+                              );
+                            }}
+                          >
+                            <SelectTrigger className="w-[100px]">
+                              <SelectValue placeholder="Año" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {years.map((year) => (
+                                <SelectItem key={year} value={year.toString()}>
+                                  {year}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm text-muted-foreground">Fecha Fin</Label>
+                        <div className="flex gap-2">
+                          <Select
+                            value={endDate ? endDate.getMonth().toString() : ""}
+                            onValueChange={(value) => {
+                              if (endDate) {
+                                handleEndDateChange(parseInt(value), endDate.getFullYear());
+                              } else {
+                                handleEndDateChange(parseInt(value), new Date().getFullYear());
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue placeholder="Mes" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {months.map((month) => (
+                                <SelectItem key={month.value} value={month.value.toString()}>
+                                  {month.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select
+                            value={endDate ? endDate.getFullYear().toString() : ""}
+                            onValueChange={(value) => {
+                              handleEndDateChange(
+                                endDate ? endDate.getMonth() : 0,
+                                parseInt(value)
+                              );
+                            }}
+                          >
+                            <SelectTrigger className="w-[100px]">
+                              <SelectValue placeholder="Año" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {years.map((year) => (
+                                <SelectItem key={year} value={year.toString()}>
+                                  {year}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="descripcion">Descripción</Label>
-                  <Textarea
-                    id="descripcion"
-                    placeholder="Información adicional sobre el grupo"
-                    {...form.register("descripcion")}
-                  />
-                </div>
-                
-                <DialogFooter>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => {
-                      setOpenDialog(false);
-                      setEditingGrupo(null);
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={materias.length === 0}>
-                    {editingGrupo ? "Actualizar" : "Crear"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+                    {form.watch("periodo_escolar") && (
+                      <div className="text-sm text-muted-foreground">
+                        Periodo interpretado: {form.watch("periodo_escolar")}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="descripcion">Descripción</Label>
+                    <Textarea
+                      id="descripcion"
+                      placeholder="Información adicional sobre el grupo"
+                      {...form.register("descripcion")}
+                    />
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => {
+                        setOpenDialog(false);
+                        setEditingGrupo(null);
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={materias.length === 0}>
+                      {editingGrupo ? "Actualizar" : "Crear"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 
@@ -774,10 +785,6 @@ export default function GroupsPage() {
             <div className="mb-4 text-center text-muted-foreground">
               No hay grupos registrados.
             </div>
-            <Button onClick={() => setOpenDialog(true)} disabled={materias.length === 0}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Crear grupo
-            </Button>
             {materias.length === 0 && (
               <div className="mt-4 text-center text-sm text-muted-foreground">
                 Debes crear al menos una materia antes de crear un grupo.

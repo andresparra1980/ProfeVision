@@ -11,7 +11,7 @@
     --accent: #ffd60a;
 
     --foreground: var(--text);
-    --card: #ffffff;
+    --card: #f8f9fa;
     --card-foreground: #1e293b;
  
     --popover: #ffffff;
@@ -43,7 +43,7 @@
     --accent: #f5cc00;
 
     --foreground: var(--text);
-    --card: #222223;
+    --card: #1e1e1f;
     --card-foreground: #f0e9d9;
  
     --popover: #222223;
