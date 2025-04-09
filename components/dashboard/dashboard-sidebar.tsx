@@ -93,7 +93,7 @@ export default function DashboardSidebar() {
       >
         <div className="flex h-16 items-center px-6">
           <Link href="/dashboard" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">ProfeVision</span>
+            <span className="text-xl font-bold text-secondary">ProfeVision</span>
           </Link>
         </div>
 
@@ -106,7 +106,7 @@ export default function DashboardSidebar() {
                 "flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 pathname === item.href
                   ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -116,7 +116,7 @@ export default function DashboardSidebar() {
         </nav>
 
         <div className="border-t p-4">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-card-foreground">
             &copy; {new Date().getFullYear()} ProfeVision
           </p>
         </div>
