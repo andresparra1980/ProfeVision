@@ -165,7 +165,7 @@ export default function EntitiesPage() {
               <Plus className="mr-2 h-4 w-4" /> Nueva Institución
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-[500px] bg-[#FAFAF4] dark:bg-[#171717]">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
                 <DialogTitle>Añadir Institución Educativa</DialogTitle>
@@ -182,6 +182,7 @@ export default function EntitiesPage() {
                     value={formData.nombre}
                     onChange={handleChange}
                     placeholder="Ej. Universidad Nacional, Colegio San José"
+                    className="bg-white dark:bg-[#1E1E1F]"
                     required
                   />
                 </div>
@@ -191,7 +192,7 @@ export default function EntitiesPage() {
                     value={formData.tipo}
                     onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo: value }))}
                   >
-                    <SelectTrigger id="tipo">
+                    <SelectTrigger id="tipo" className="bg-white dark:bg-[#1E1E1F]">
                       <SelectValue placeholder="Selecciona un tipo de institución" />
                     </SelectTrigger>
                     <SelectContent>

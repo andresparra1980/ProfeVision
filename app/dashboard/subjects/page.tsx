@@ -222,7 +222,7 @@ export default function SubjectsPage() {
               Nueva materia
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[525px]">
+          <DialogContent className="sm:max-w-[525px] bg-[#FAFAF4] dark:bg-[#171717]">
             <DialogHeader>
               <DialogTitle>{editingMateria ? "Editar materia" : "Nueva materia"}</DialogTitle>
               <DialogDescription>
@@ -236,6 +236,7 @@ export default function SubjectsPage() {
                 <Label htmlFor="nombre">Nombre*</Label>
                 <Input
                   id="nombre"
+                  className="bg-white dark:bg-[#1E1E1F]"
                   {...form.register("nombre")}
                 />
                 {form.formState.errors.nombre && (
@@ -248,6 +249,7 @@ export default function SubjectsPage() {
                 <Textarea
                   id="descripcion"
                   placeholder="Breve descripción de la materia"
+                  className="bg-white dark:bg-[#1E1E1F]"
                   {...form.register("descripcion")}
                 />
               </div>
@@ -258,7 +260,7 @@ export default function SubjectsPage() {
                   onValueChange={(value: string) => form.setValue("entidad_id", value)}
                   value={form.watch("entidad_id")}
                 >
-                  <SelectTrigger id="entidad">
+                  <SelectTrigger id="entidad" className="bg-white dark:bg-[#1E1E1F]">
                     <SelectValue placeholder="Selecciona una institución" />
                   </SelectTrigger>
                   <SelectContent>
@@ -359,7 +361,7 @@ export default function SubjectsPage() {
 
       {/* Delete confirmation dialog */}
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-[#FAFAF4] dark:bg-[#171717]">
           <DialogHeader>
             <DialogTitle>Confirmar eliminación</DialogTitle>
             <DialogDescription>

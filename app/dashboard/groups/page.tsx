@@ -539,7 +539,7 @@ export default function GroupsPage() {
                   Nuevo grupo
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[525px]">
+              <DialogContent className="sm:max-w-[525px] bg-[#FAFAF4] dark:bg-[#171717]">
                 <DialogHeader>
                   <DialogTitle>{editingGrupo ? "Editar grupo" : "Nuevo grupo"}</DialogTitle>
                   <DialogDescription>
@@ -550,10 +550,11 @@ export default function GroupsPage() {
                 </DialogHeader>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="nombre">Nombre*</Label>
+                    <Label htmlFor="nombre">Nombre del grupo (Ej: 10-A, Grupo Mañana, etc.)*</Label>
                     <Input
                       id="nombre"
-                      placeholder="Ej: 10-A, Grupo Mañana, etc."
+                      placeholder=""
+                      className="bg-white dark:bg-[#1E1E1F]"
                       {...form.register("nombre")}
                     />
                     {form.formState.errors.nombre && (
@@ -567,7 +568,7 @@ export default function GroupsPage() {
                       onValueChange={(value: string) => form.setValue("entidad_id", value)}
                       value={form.watch("entidad_id")}
                     >
-                      <SelectTrigger id="entidad">
+                      <SelectTrigger id="entidad" className="bg-white dark:bg-[#1E1E1F]">
                         <SelectValue placeholder="Selecciona una entidad educativa" />
                       </SelectTrigger>
                       <SelectContent>
@@ -604,7 +605,7 @@ export default function GroupsPage() {
                       value={form.watch("materia_id")}
                       disabled={!form.watch("entidad_id")}
                     >
-                      <SelectTrigger id="materia">
+                      <SelectTrigger id="materia" className="bg-white dark:bg-[#1E1E1F]">
                         <SelectValue placeholder={
                           form.watch("entidad_id") 
                             ? "Selecciona una materia" 
@@ -657,7 +658,7 @@ export default function GroupsPage() {
                               }
                             }}
                           >
-                            <SelectTrigger className="w-[140px]">
+                            <SelectTrigger className="w-[140px] bg-white dark:bg-[#1E1E1F]">
                               <SelectValue placeholder="Mes" />
                             </SelectTrigger>
                             <SelectContent>
@@ -677,7 +678,7 @@ export default function GroupsPage() {
                               );
                             }}
                           >
-                            <SelectTrigger className="w-[100px]">
+                            <SelectTrigger className="w-[100px] bg-white dark:bg-[#1E1E1F]">
                               <SelectValue placeholder="Año" />
                             </SelectTrigger>
                             <SelectContent>
@@ -703,7 +704,7 @@ export default function GroupsPage() {
                               }
                             }}
                           >
-                            <SelectTrigger className="w-[140px]">
+                            <SelectTrigger className="w-[140px] bg-white dark:bg-[#1E1E1F]">
                               <SelectValue placeholder="Mes" />
                             </SelectTrigger>
                             <SelectContent>
@@ -723,7 +724,7 @@ export default function GroupsPage() {
                               );
                             }}
                           >
-                            <SelectTrigger className="w-[100px]">
+                            <SelectTrigger className="w-[100px] bg-white dark:bg-[#1E1E1F]">
                               <SelectValue placeholder="Año" />
                             </SelectTrigger>
                             <SelectContent>
@@ -749,6 +750,7 @@ export default function GroupsPage() {
                     <Textarea
                       id="descripcion"
                       placeholder="Información adicional sobre el grupo"
+                      className="bg-white dark:bg-[#1E1E1F]"
                       {...form.register("descripcion")}
                     />
                   </div>
@@ -902,7 +904,7 @@ export default function GroupsPage() {
 
       {/* Diálogo de confirmación de eliminación */}
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-[#FAFAF4] dark:bg-[#171717]">
           <DialogHeader>
             <DialogTitle>Confirmar eliminación</DialogTitle>
             <DialogDescription>

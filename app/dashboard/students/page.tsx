@@ -397,7 +397,7 @@ export default function StudentsPage() {
         </Table>
 
         <Dialog open={showDetails} onOpenChange={setShowDetails}>
-          <DialogContent>
+          <DialogContent className="bg-[#FAFAF4] dark:bg-[#171717]">
             <DialogHeader>
               <DialogTitle>Detalles del Estudiante</DialogTitle>
               <DialogDescription>
@@ -453,7 +453,7 @@ export default function StudentsPage() {
                 <Plus className="mr-2 h-4 w-4" /> Crear Estudiante
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[525px]">
+            <DialogContent className="bg-[#FAFAF4] dark:bg-[#171717]">
               <DialogHeader>
                 <DialogTitle>Agregar Estudiante</DialogTitle>
                 <DialogDescription>
@@ -470,6 +470,7 @@ export default function StudentsPage() {
                     value={formData.nombres}
                     onChange={handleChange}
                     placeholder="Nombres del estudiante"
+                    className="bg-white dark:bg-[#1E1E1F]"
                   />
                 </div>
 
@@ -481,6 +482,7 @@ export default function StudentsPage() {
                     value={formData.apellidos}
                     onChange={handleChange}
                     placeholder="Apellidos del estudiante"
+                    className="bg-white dark:bg-[#1E1E1F]"
                   />
                 </div>
 
@@ -492,6 +494,7 @@ export default function StudentsPage() {
                     value={formData.identificacion}
                     onChange={handleChange}
                     placeholder="Número de identificación"
+                    className="bg-white dark:bg-[#1E1E1F]"
                   />
                 </div>
 
@@ -503,6 +506,7 @@ export default function StudentsPage() {
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="Correo electrónico del estudiante"
+                    className="bg-white dark:bg-[#1E1E1F]"
                   />
                 </div>
 
@@ -512,7 +516,7 @@ export default function StudentsPage() {
                     value={formData.grupo_id}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, grupo_id: value }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white dark:bg-[#1E1E1F]">
                       <SelectValue placeholder="Selecciona un grupo" />
                     </SelectTrigger>
                     <SelectContent>
