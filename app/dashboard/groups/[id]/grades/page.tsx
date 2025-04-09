@@ -63,7 +63,7 @@ export default function GradesPage({ params }: GradesPageProps) {
           schema: 'public',
           table: 'calificaciones'
         },
-        (payload) => {
+        (payload: any) => {
           if (payload.eventType === 'DELETE') {
             // Eliminar calificación
             setCalificaciones(prev => {
@@ -185,7 +185,7 @@ export default function GradesPage({ params }: GradesPageProps) {
         const { data: componentes, error: componentesError } = await supabase
           .from('componentes_calificacion')
           .select('*')
-          .in('periodo_id', periodos.map(p => p.id))
+          .in('periodo_id', periodos.map((p: any) => p.id))
           .order('created_at');
 
         if (componentesError) throw componentesError;
@@ -193,7 +193,7 @@ export default function GradesPage({ params }: GradesPageProps) {
 
         // Inicializar todos los componentes como bloqueados
         const bloqueados: Record<string, boolean> = {};
-        componentes.forEach(c => {
+        componentes.forEach((c: any) => {
           bloqueados[c.id] = true;
         });
         setComponentesBloqueados(bloqueados);
@@ -206,13 +206,13 @@ export default function GradesPage({ params }: GradesPageProps) {
             componente_id,
             examen:examen_id(titulo)
           `)
-          .in('componente_id', componentes.map(c => c.id));
+          .in('componente_id', componentes.map((c: any) => c.id));
         
         if (vinculosError) throw vinculosError;
         
         // Transformar los vínculos en un objeto indexado por componente_id
         const vinculosMap: Record<string, { examen_id: string, titulo: string }> = {};
-        vinculos?.forEach(vinculo => {
+        vinculos?.forEach((vinculo: any) => {
           vinculosMap[vinculo.componente_id] = { 
             examen_id: vinculo.examen_id,
             titulo: vinculo.examen?.titulo || 'Examen sin título'
@@ -230,7 +230,7 @@ export default function GradesPage({ params }: GradesPageProps) {
               .from('estudiante_grupo')
               .select('estudiante_id')
               .eq('grupo_id', groupId)
-          ).data?.map(row => row.estudiante_id) || []
+          ).data?.map((row: any) => row.estudiante_id) || []
           )
           .order('apellidos', { ascending: true })
           .order('nombres', { ascending: true });
@@ -242,8 +242,8 @@ export default function GradesPage({ params }: GradesPageProps) {
         const { data: calificaciones, error: calificacionesError } = await supabase
           .from('calificaciones')
           .select('*')
-          .in('componente_id', componentes.map(c => c.id))
-          .in('estudiante_id', estudiantes?.map(e => e.id) || []);
+          .in('componente_id', componentes.map((c: any) => c.id))
+          .in('estudiante_id', estudiantes?.map((e: any) => e.id) || []);
 
         if (calificacionesError) throw calificacionesError;
         
@@ -252,7 +252,7 @@ export default function GradesPage({ params }: GradesPageProps) {
           porComponente: {} as Record<string, Record<string, number>>
         };
         
-        calificaciones?.forEach(cal => {
+        calificaciones?.forEach((cal: any) => {
           if (!calificacionesMap.porComponente[cal.estudiante_id]) {
             calificacionesMap.porComponente[cal.estudiante_id] = {};
           }
@@ -454,32 +454,22 @@ export default function GradesPage({ params }: GradesPageProps) {
 
   return (
     <div className="container mx-auto py-8 space-y-6 max-w-[95%]">
-      <div className="space-y-2">
+      <div className="flex flex-col space-y-2">
         <Button 
           variant="ghost" 
           size="sm"
           onClick={() => router.push("/dashboard/groups")}
-          className="mb-2"
+          className="mb-0 w-fit"
         >
           <ChevronLeft className="mr-2 h-4 w-4" /> Volver a Grupos
         </Button>
-        <nav className="flex text-sm text-muted-foreground">
-          <ol className="flex items-center space-x-2">
-            <li>
-              <Link href="/dashboard/groups" className="hover:text-foreground">
-                Grupos
-              </Link>
-            </li>
-            <li>/</li>
-            <li className="text-foreground font-medium">
-              {groupName}
-            </li>
-            <li>/</li>
-            <li className="text-foreground font-medium">
-              Calificaciones
-            </li>
-          </ol>
-        </nav>
+        
+        <div className="mt-2">
+          <h1 className="text-2xl font-bold tracking-tight">Calificaciones</h1>
+          <p className="text-sm text-muted-foreground">
+            {institucionName} / {materia?.nombre || 'Materia'} / Grupo {groupName}
+          </p>
+        </div>
       </div>
 
       <div className="space-y-4">

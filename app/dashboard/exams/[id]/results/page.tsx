@@ -2,16 +2,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, Image as ImageIcon, FileImage, Loader2, Save } from 'lucide-react';
+import { ChevronLeft, Image as ImageIcon, FileImage, Loader2, Save, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/lib/supabase';
-import Image from 'next/image';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Estudiante {
   id: string;
@@ -85,7 +80,11 @@ export default function ExamResultsPage() {
   const [todosEstudiantes, setTodosEstudiantes] = useState<Estudiante[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showManualGradeDialog, setShowManualGradeDialog] = useState(false);
   const [selectedResultado, setSelectedResultado] = useState<ResultadoExamen | null>(null);
+  const [selectedEstudiante, setSelectedEstudiante] = useState<Estudiante | null>(null);
+  const [manualGrade, setManualGrade] = useState<string>('');
+  const [isSubmittingGrade, setIsSubmittingGrade] = useState(false);
   const [pendingUpdate, setPendingUpdate] = useState<{
     respuestaId: string;
     opcionId: string;
@@ -413,6 +412,71 @@ export default function ExamResultsPage() {
     setShowDetailsDialog(true);
   };
 
+  // Función para mostrar el diálogo de calificación manual
+  const handleShowManualGradeDialog = (estudiante: Estudiante) => {
+    setSelectedEstudiante(estudiante);
+    setManualGrade('');
+    setShowManualGradeDialog(true);
+  };
+
+  // Función para guardar la calificación manual
+  const handleSaveManualGrade = async () => {
+    if (!selectedEstudiante || !manualGrade) return;
+    
+    try {
+      setIsSubmittingGrade(true);
+      
+      const gradeValue = parseFloat(manualGrade);
+      
+      if (isNaN(gradeValue) || gradeValue < 0 || gradeValue > 5) {
+        toast({
+          title: "Error",
+          description: "La calificación debe ser un número entre 0 y 5",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const response = await fetch(`/api/exams/${params.id}/manual-grade`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          estudianteId: selectedEstudiante.id,
+          puntaje: gradeValue,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al guardar la calificación');
+      }
+
+      const result = await response.json();
+      
+      // Refrescar los resultados
+      await fetchExamResults();
+      
+      toast({
+        title: "Calificación guardada",
+        description: "La calificación ha sido registrada correctamente.",
+      });
+      
+      setShowManualGradeDialog(false);
+      
+    } catch (error: any) {
+      console.error('Error saving manual grade:', error);
+      toast({
+        title: "Error al guardar",
+        description: error.message || "No se pudo guardar la calificación",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingGrade(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -423,17 +487,26 @@ export default function ExamResultsPage() {
 
   return (
     <div className="container mx-auto py-8 max-w-[95%]">
-      <div className="flex items-center mb-6">
-        <Button variant="ghost" onClick={() => router.back()} className="mr-2">
+      <div className="flex flex-col space-y-2">
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => router.back()} 
+          className="mb-0 w-fit"
+        >
           <ChevronLeft className="mr-2 h-4 w-4" />
           Volver
         </Button>
-        <h1 className="text-2xl font-bold">
-          Resultados: {examDetails?.titulo || 'Cargando...'}
-        </h1>
+        
+        <div className="mt-2">
+          <h1 className="text-2xl font-bold tracking-tight">Resultados: {examDetails?.titulo || 'Cargando...'}</h1>
+          <p className="text-sm text-muted-foreground">
+            Detalles de calificaciones y respuestas de los estudiantes
+          </p>
+        </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 mt-6">
         {examDetails && (
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <Card className="flex-1">
@@ -511,7 +584,7 @@ export default function ExamResultsPage() {
               type="checkbox"
               id="ver-solo-con-examen"
               checked={verSoloConExamen}
-              onChange={() => setVerSoloConExamen(!verSoloConExamen)}
+              onChange={(e) => setVerSoloConExamen(e.target.checked)}
               className="rounded border-gray-300 text-primary focus:ring-primary"
             />
             <label htmlFor="ver-solo-con-examen" className="text-sm">
@@ -521,17 +594,14 @@ export default function ExamResultsPage() {
           
           <Card>
             <CardHeader>
-              <CardTitle>Resultados del Examen</CardTitle>
+              <CardTitle>Estudiantes</CardTitle>
               <CardDescription>
-                Lista de estudiantes y sus calificaciones
+                Resultados de los estudiantes en este examen
               </CardDescription>
             </CardHeader>
+            
             <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : todosEstudiantes.length === 0 ? (
+              {todosEstudiantes.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   No hay estudiantes en este grupo
                 </div>
@@ -539,13 +609,13 @@ export default function ExamResultsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-4 font-medium">Estudiante</th>
-                        <th className="text-left py-2 px-4 font-medium">Identificación</th>
-                        <th className="text-center py-2 px-4 font-medium">Calificación</th>
-                        <th className="text-center py-2 px-4 font-medium">Porcentaje</th>
-                        <th className="text-center py-2 px-4 font-medium">Estado</th>
-                        <th className="text-center py-2 px-4 font-medium">Acciones</th>
+                      <tr className="bg-muted/50">
+                        <th className="py-2 px-4 text-left">Nombre</th>
+                        <th className="py-2 px-4 text-left">Identificación</th>
+                        <th className="py-2 px-4 text-center">Nota</th>
+                        <th className="py-2 px-4 text-center">Porcentaje</th>
+                        <th className="py-2 px-4 text-center">Estado</th>
+                        <th className="py-2 px-4 text-center">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -590,9 +660,9 @@ export default function ExamResultsPage() {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    disabled
+                                    onClick={() => handleShowManualGradeDialog(estudiante)}
                                   >
-                                    No disponible
+                                    Ingresar Nota
                                   </Button>
                                 )}
                               </td>
@@ -810,6 +880,76 @@ export default function ExamResultsPage() {
           
           <DialogFooter>
             <Button onClick={() => setShowDetailsDialog(false)}>Cerrar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para ingresar calificación manual */}
+      <Dialog open={showManualGradeDialog} onOpenChange={setShowManualGradeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ingresar calificación manual</DialogTitle>
+            <DialogDescription>
+              Esta funcionalidad está diseñada para casos especiales donde el estudiante no realizó el examen general, como recuperaciones o supletorios.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md mt-3 mb-4 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <span className="text-sm">
+              Si posteriormente se escanea un examen para este estudiante, esta calificación manual será reemplazada por el resultado del escaneo.
+            </span>
+          </div>
+          
+          <div className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="estudiante">Estudiante</Label>
+              <Input 
+                id="estudiante" 
+                value={selectedEstudiante ? `${selectedEstudiante.apellidos}, ${selectedEstudiante.nombres}` : ''} 
+                disabled 
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="grade">Calificación (0-5)</Label>
+              <Input 
+                id="grade" 
+                type="number" 
+                step="0.1"
+                min="0" 
+                max="5" 
+                value={manualGrade} 
+                onChange={(e) => setManualGrade(e.target.value)}
+                className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowManualGradeDialog(false)}
+              disabled={isSubmittingGrade}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveManualGrade}
+              disabled={isSubmittingGrade || !manualGrade}
+            >
+              {isSubmittingGrade ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Guardar calificación
+                </>
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

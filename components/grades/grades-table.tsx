@@ -153,9 +153,14 @@ export function GradesTable({
         <Table>
           <TableHeader>
             <TableRow className="border-b-2 border-border">
-              <TableHead className="w-[100px] min-w-[100px]"></TableHead>
-              <TableHead className="w-[180px] min-w-[180px]"></TableHead>
-              <TableHead className="w-[120px] min-w-[120px]"></TableHead>
+              <TableHead 
+                className="text-center border-x-2 border-border"
+                colSpan={3}
+              >
+                <div className="flex items-center justify-center py-2">
+                  <span className="font-semibold text-foreground dark:text-foreground">Datos del Estudiante</span>
+                </div>
+              </TableHead>
               {periodos.map((periodo, index) => {
                 const componentesCount = componentes.filter(c => c.periodo_id === periodo.id).length;
                 const periodoWidth = `${componentesCount * 100 + 160}px`;

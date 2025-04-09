@@ -14,13 +14,13 @@ import { toast } from "@/components/ui/use-toast";
 import { Building2 } from "lucide-react";
 import { Plus } from "lucide-react";
 import { BookOpen } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Grip, Trash2, Copy, MoreVertical } from "lucide-react";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -386,13 +386,10 @@ export default function CreateExamPage() {
   if (!hasEntities) {
     return (
       <div className="space-y-4">
-        <Breadcrumbs
-          items={[
-            { label: "Dashboard", href: "/dashboard" },
-            { label: "Exámenes", href: "/dashboard/exams" },
-            { label: "Crear Examen", href: "/dashboard/exams/create", current: true },
-          ]}
-        />
+        <Button variant="ghost" onClick={() => router.push('/dashboard/exams')} className="mb-4">
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Volver a Exámenes
+        </Button>
 
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Crear Examen</h2>
@@ -425,13 +422,10 @@ export default function CreateExamPage() {
   if (materias.length === 0 && !loading) {
     return (
       <div className="space-y-4">
-        <Breadcrumbs
-          items={[
-            { label: "Dashboard", href: "/dashboard" },
-            { label: "Exámenes", href: "/dashboard/exams" },
-            { label: "Crear Examen", href: "/dashboard/exams/create", current: true },
-          ]}
-        />
+        <Button variant="ghost" onClick={() => router.push('/dashboard/exams')} className="mb-4">
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Volver a Exámenes
+        </Button>
 
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Crear Examen</h2>
@@ -462,15 +456,12 @@ export default function CreateExamPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-8">
-      <Breadcrumbs
-        items={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Exámenes", href: "/dashboard/exams" },
-          { label: "Crear Examen", href: "/dashboard/exams/create", current: true },
-        ]}
-      />
+      <Button variant="ghost" onClick={() => router.push('/dashboard/exams')} className="mb-0">
+        <ChevronLeft className="mr-2 h-4 w-4" />
+        Volver a Exámenes
+      </Button>
 
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mt-2">
       <div>
           <h1 className="text-3xl font-bold tracking-tight">Crear Examen</h1>
           <p className="text-sm text-muted-foreground">

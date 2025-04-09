@@ -25,19 +25,36 @@ export default function GradingSchemePage() {
   const [initialScheme, setInitialScheme] = useState<GradingScheme | null>(null);
   const [loading, setLoading] = useState(true);
   const [groupName, setGroupName] = useState<string>('');
+  const [materia, setMateria] = useState<string>('');
+  const [institucion, setInstitucion] = useState<string>('');
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Cargar el nombre del grupo
+        // Cargar información completa del grupo, incluyendo materia e institución
         const { data: grupo, error: grupoError } = await supabase
           .from('grupos')
-          .select('nombre')
+          .select(`
+            nombre,
+            materia:materias (
+              nombre,
+              entidad:entidades_educativas (
+                nombre
+              )
+            )
+          `)
           .eq('id', groupId)
           .single();
 
         if (grupoError) throw grupoError;
-        if (grupo) setGroupName(grupo.nombre);
+        
+        if (grupo) {
+          setGroupName(grupo.nombre);
+          if (grupo.materia) {
+            setMateria(grupo.materia.nombre || '');
+            setInstitucion(grupo.materia.entidad?.nombre || 'INSTITUCIÓN EDUCATIVA');
+          }
+        }
 
         // Primero obtenemos el esquema
         const { data: schemes, error: schemeError } = await supabase
@@ -80,8 +97,8 @@ export default function GradingSchemePage() {
           ...schemes[0],
           periodos: schemes[0].periodos
             ? schemes[0].periodos
-                .sort((a, b) => a.orden - b.orden)
-                .map(periodo => ({
+                .sort((a: any, b: any) => a.orden - b.orden)
+                .map((periodo: any) => ({
                   ...periodo,
                   componentes: periodo.componentes || []
                 }))
@@ -131,34 +148,22 @@ export default function GradingSchemePage() {
 
   return (
     <div className="container mx-auto py-8 space-y-6">
-      <div className="space-y-2">
+      <div className="flex flex-col space-y-2">
         <Button 
           variant="ghost" 
           size="sm"
           onClick={() => router.push("/dashboard/groups")}
-          className="mb-2"
+          className="mb-0 w-fit"
         >
           <ChevronLeft className="mr-2 h-4 w-4" /> Volver a Grupos
         </Button>
-        <nav className="flex text-sm text-muted-foreground">
-          <ol className="flex items-center space-x-2">
-            <li>
-              <Link href="/dashboard/groups" className="hover:text-foreground">
-                Grupos
-              </Link>
-            </li>
-            <li>/</li>
-            <li>
-              <Link href={`/dashboard/groups/${groupId}/grades`} className="hover:text-foreground">
-                {groupName}
-              </Link>
-            </li>
-            <li>/</li>
-            <li className="text-foreground font-medium">
-              Esquema de Calificación
-            </li>
-          </ol>
-        </nav>
+        
+        <div className="mt-2">
+          <h1 className="text-2xl font-bold tracking-tight">Esquema de Calificación</h1>
+          <p className="text-sm text-muted-foreground">
+            {institucion} / {materia} / {groupName}
+          </p>
+        </div>
       </div>
 
       <GradingSchemeEditor

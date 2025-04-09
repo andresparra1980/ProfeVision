@@ -594,12 +594,16 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                         <div className="space-y-2">
                           {question.opciones.map((option: any, optIndex: number) => (
                             <div key={option.id} className="flex items-center gap-2">
-                              <div className={`w-5 h-5 rounded-full flex items-center justify-center ${option.es_correcta ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                                option.es_correcta 
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-600 dark:text-white' 
+                                  : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                              }`}>
                                 {optIndex + 1}
                               </div>
                               <p className={option.es_correcta ? 'font-medium' : ''}>{option.texto}</p>
                               {option.es_correcta && (
-                                <span className="text-xs text-green-600">(Correcta)</span>
+                                <span className="text-xs text-green-600 dark:text-green-400">(Correcta)</span>
                               )}
                             </div>
                           ))}
