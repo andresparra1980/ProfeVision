@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { ModeToggle } from "@/components/shared/mode-toggle";
+import { Turnstile } from "@marsidev/react-turnstile";
 import {
   Card,
   CardContent,
@@ -31,6 +32,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<any>(null);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -41,11 +44,23 @@ export default function Page() {
   });
 
   async function onSubmit(data: LoginFormValues) {
+    if (!captchaToken) {
+      toast({
+        variant: "destructive",
+        title: "Error de validación",
+        description: "Por favor, completa el CAPTCHA para continuar.",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
+        options: {
+          captchaToken,
+        }
       });
 
       if (error) {
@@ -65,6 +80,12 @@ export default function Page() {
         title: "Error al iniciar sesión",
         description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
+      
+      // Resetear el CAPTCHA en caso de error
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +143,29 @@ export default function Page() {
                 )}
               </div>
               
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <div className="flex justify-center">
+                <Turnstile
+                  ref={turnstileRef}
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onError={() => {
+                    setCaptchaToken(null);
+                    toast({
+                      variant: "destructive",
+                      title: "Error de CAPTCHA",
+                      description: "Error al validar el CAPTCHA. Por favor, inténtalo de nuevo.",
+                    });
+                  }}
+                  onExpire={() => setCaptchaToken(null)}
+                  className="mx-auto"
+                  options={{
+                    language: "es",
+                    theme: "auto",
+                  }}
+                />
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
                 {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
               </Button>
             </form>

@@ -25,13 +25,14 @@ export function getServiceSupabase() {
 }
 
 // Update sign-up options to include redirectTo
-export const signUpWithRedirect = (email: string, password: string, userData: any) => {
+export const signUpWithRedirect = (email: string, password: string, userData: any, captchaToken?: string) => {
   return supabase.auth.signUp({
     email,
     password,
     options: {
       data: userData,
       emailRedirectTo: `${siteUrl}/auth/callback`,
+      captchaToken: captchaToken,
     },
   });
 }; 

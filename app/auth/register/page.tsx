@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { supabase, signUpWithRedirect } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { ModeToggle } from "@/components/shared/mode-toggle";
+import { Turnstile } from "@marsidev/react-turnstile";
 import {
   Card,
   CardContent,
@@ -36,6 +37,8 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<any>(null);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -48,6 +51,15 @@ export default function RegisterPage() {
   });
 
   async function onSubmit(data: RegisterFormValues) {
+    if (!captchaToken) {
+      toast({
+        variant: "destructive",
+        title: "Error de validación",
+        description: "Por favor, completa el CAPTCHA para continuar.",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { error } = await signUpWithRedirect(
@@ -56,7 +68,8 @@ export default function RegisterPage() {
         {
           full_name: data.name,
           name: data.name,
-        }
+        },
+        captchaToken
       );
 
       if (error) {
@@ -75,99 +88,130 @@ export default function RegisterPage() {
         title: "Error al registrarse",
         description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
+      
+      // Resetear el CAPTCHA en caso de error
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-      <div className="absolute top-4 right-4">
+    <div className="min-h-screen flex flex-col">
+      <div className="absolute top-4 right-4 z-10">
         <ModeToggle />
       </div>
-      <div className="mx-auto w-full max-w-md">
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
-            <CardDescription className="text-center">
-              Regístrate para acceder a todas las funcionalidades
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nombre completo</Label>
-                <Input
-                  id="name"
-                  placeholder="Juan Pérez"
-                  {...form.register("name")}
-                  disabled={isLoading}
-                />
-                {form.formState.errors.name && (
-                  <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
-                )}
+      
+      <div className="flex-1 flex items-start justify-center pt-24 pb-36 px-4">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
+              <CardDescription className="text-center">
+                Regístrate para acceder a todas las funcionalidades
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nombre completo</Label>
+                  <Input
+                    id="name"
+                    placeholder="Juan Pérez"
+                    {...form.register("name")}
+                    disabled={isLoading}
+                  />
+                  {form.formState.errors.name && (
+                    <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Correo electrónico</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="tu@ejemplo.com"
+                    {...form.register("email")}
+                    disabled={isLoading}
+                  />
+                  {form.formState.errors.email && (
+                    <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Contraseña</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    {...form.register("password")}
+                    disabled={isLoading}
+                  />
+                  {form.formState.errors.password && (
+                    <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    {...form.register("confirmPassword")}
+                    disabled={isLoading}
+                  />
+                  {form.formState.errors.confirmPassword && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex justify-center mt-6 mb-6">
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onError={() => {
+                      setCaptchaToken(null);
+                      toast({
+                        variant: "destructive",
+                        title: "Error de CAPTCHA",
+                        description: "Error al validar el CAPTCHA. Por favor, inténtalo de nuevo.",
+                      });
+                    }}
+                    onExpire={() => setCaptchaToken(null)}
+                    className="mx-auto"
+                    options={{
+                      language: "es",
+                      theme: "auto",
+                    }}
+                  />
+                </div>
+                
+                <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
+                  {isLoading ? "Registrando..." : "Registrarse"}
+                </Button>
+              </form>
+            </CardContent>
+            
+            <CardFooter className="flex justify-center pt-2 pb-8">
+              <div className="text-center text-sm">
+                ¿Ya tienes una cuenta?{" "}
+                <Link href="/auth/login" className="text-primary hover:underline">
+                  Iniciar sesión
+                </Link>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@ejemplo.com"
-                  {...form.register("email")}
-                  disabled={isLoading}
-                />
-                {form.formState.errors.email && (
-                  <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  {...form.register("password")}
-                  disabled={isLoading}
-                />
-                {form.formState.errors.password && (
-                  <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  {...form.register("confirmPassword")}
-                  disabled={isLoading}
-                />
-                {form.formState.errors.confirmPassword && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.confirmPassword.message}
-                  </p>
-                )}
-              </div>
-              
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Registrando..." : "Registrarse"}
-              </Button>
-            </form>
-          </CardContent>
-          
-          <CardFooter className="flex justify-center">
-            <div className="text-center text-sm">
-              ¿Ya tienes una cuenta?{" "}
-              <Link href="/auth/login" className="text-primary hover:underline">
-                Iniciar sesión
-              </Link>
-            </div>
-          </CardFooter>
-        </Card>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     </div>
   );
