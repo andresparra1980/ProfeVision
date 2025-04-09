@@ -1,5 +1,5 @@
 import { supabase as clientSupabase } from './supabase/client';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './types/database';
 
 // Re-export the client instance
@@ -15,8 +15,8 @@ export const siteUrl =
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
 
-export function getServiceSupabase() {
-  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
+export function getServiceSupabase(): SupabaseClient {
+  return createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
