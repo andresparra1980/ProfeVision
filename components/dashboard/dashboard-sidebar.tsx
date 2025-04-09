@@ -87,11 +87,11 @@ export default function DashboardSidebar() {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r bg-card transition-transform duration-200 md:static md:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-card transition-transform duration-200 md:static md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center border-b px-6">
+        <div className="flex h-16 items-center px-6">
           <Link href="/dashboard" className="flex items-center space-x-2">
             <span className="text-xl font-bold">ProfeVision</span>
           </Link>

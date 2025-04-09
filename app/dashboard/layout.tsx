@@ -32,7 +32,7 @@ export default function DashboardLayout({
     checkUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event: string, session: any) => {
         if (event === "SIGNED_OUT") {
           router.push("/auth/login");
         } else if (session) {
@@ -57,9 +57,13 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden">
       <DashboardSidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden bg-card">
         <DashboardHeader user={user} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-0">
+          <div className="bg-background rounded-tl-[2.5rem] min-h-full p-4 md:p-6 shadow-sm">
+            {children}
+          </div>
+        </main>
       </div>
       <ScanExamFeature />
     </div>
