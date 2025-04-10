@@ -155,28 +155,17 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   }, [normalizedAnswers]);
   
   // Crear arrays para las dos columnas
-  const { answersFirstColumn, answersSecondColumn } = useMemo(() => {
-    const first = Array.from({ length: 20 }, (_, i) => {
-      const questionNumber = i + 1;
-      return {
-        number: questionNumber,
-        value: answersMap.has(questionNumber) ? answersMap.get(questionNumber).value : '-',
-        num_options: answersMap.has(questionNumber) ? answersMap.get(questionNumber).num_options : DEFAULT_NUM_OPTIONS,
-        disabled: answersMap.has(questionNumber) ? answersMap.get(questionNumber).disabled : false
-      };
-    });
-    
-    const second = Array.from({ length: 20 }, (_, i) => {
-      const questionNumber = i + 21;
-      return {
-        number: questionNumber,
-        value: answersMap.has(questionNumber) ? answersMap.get(questionNumber).value : '-',
-        num_options: answersMap.has(questionNumber) ? answersMap.get(questionNumber).num_options : DEFAULT_NUM_OPTIONS,
-        disabled: answersMap.has(questionNumber) ? answersMap.get(questionNumber).disabled : false
-      };
-    });
-    
-    return { answersFirstColumn: first, answersSecondColumn: second };
+  const answersForDisplay = useMemo(() => {
+    const map = new Map();
+    for (let i = 1; i <= 40; i++) {
+      map.set(i, {
+        number: i,
+        value: answersMap.has(i) ? answersMap.get(i).value : '-',
+        num_options: answersMap.has(i) ? answersMap.get(i).num_options : DEFAULT_NUM_OPTIONS,
+        disabled: answersMap.has(i) ? answersMap.get(i).disabled : false
+      });
+    }
+    return map;
   }, [answersMap]);
 
   // Al cargar el componente, comprobar si es un duplicado
@@ -199,7 +188,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         }
         
         if (DEBUG) {
-          console.log('QR data in Results component:', qrData);
+          logger.log('QR data in Results component:', qrData);
         }
         
         // Handle colon-separated UUID format
@@ -243,65 +232,60 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           logger.log("Fetching entity details with:", { examId, studentId, groupId });
         }
         
-        try {
-          // Fetch exam details (includes subject)
-          const examRes = await fetch(`/api/exams/${examId}/details`);
-          if (!examRes.ok) {
-            const errorText = await examRes.text();
-            if (DEBUG) logger.error(`Error fetching exam details: ${examRes.status}`, errorText);
-            throw new Error(`Error al obtener detalles del examen: ${examRes.status}`);
-          }
-          const examData = await examRes.json();
-          
-          // Fetch student details
-          const studentRes = await fetch(`/api/students/${studentId}`);
-          if (!studentRes.ok) {
-            const errorText = await studentRes.text();
-            if (DEBUG) logger.error(`Error fetching student details: ${studentRes.status}`, errorText);
-            throw new Error(`Error al obtener detalles del estudiante: ${studentRes.status}`);
-          }
-          const studentData = await studentRes.json();
-          
-          let groupData = null;
-          // Fetch group details if available
-          if (groupId) {
-            try {
-              const groupRes = await fetch(`/api/groups/${groupId}`);
-              if (groupRes.ok) {
-                groupData = await groupRes.json();
-              } else {
-                if (DEBUG) logger.warn(`Group details not found for ID: ${groupId}`);
-              }
-            } catch (groupError) {
-              if (DEBUG) logger.warn("Error fetching group data:", groupError);
-              // Don't fail the whole process if just group data fails
+        // Fetch exam details (includes subject)
+        const examRes = await fetch(`/api/exams/${examId}/details`);
+        if (!examRes.ok) {
+          const errorText = await examRes.text();
+          if (DEBUG) logger.error(`Error fetching exam details: ${examRes.status}`, errorText);
+          throw new Error(`Error al obtener detalles del examen: ${examRes.status}`);
+        }
+        const examData = await examRes.json();
+        
+        // Fetch student details
+        const studentRes = await fetch(`/api/students/${studentId}`);
+        if (!studentRes.ok) {
+          const errorText = await studentRes.text();
+          if (DEBUG) logger.error(`Error fetching student details: ${studentRes.status}`, errorText);
+          throw new Error(`Error al obtener detalles del estudiante: ${studentRes.status}`);
+        }
+        const studentData = await studentRes.json();
+        
+        let groupData = null;
+        // Fetch group details if available
+        if (groupId) {
+          try {
+            const groupRes = await fetch(`/api/groups/${groupId}`);
+            if (groupRes.ok) {
+              groupData = await groupRes.json();
+            } else {
+              if (DEBUG) logger.warn(`Group details not found for ID: ${groupId}`);
             }
+          } catch (groupError) {
+            if (DEBUG) logger.warn("Error fetching group data:", groupError);
+            // Don't fail the whole process if just group data fails
           }
-          
-          setEntityNames({
-            materia: examData.materia?.nombre || 'No disponible',
-            examen: examData.titulo || examData.title || 'No disponible',
-            estudiante: `${studentData.nombres || ''} ${studentData.apellidos || ''}`.trim() || 'No disponible',
-            grupo: groupData?.nombre || 'No asignado',
-            loading: false,
-            error: null
-          });
-          
-          // Ahora calculamos la calificación
-          await calculateExamScore(examId);
-          
-        } catch (fetchError) {
-          throw fetchError; // Re-throw specific fetch errors
         }
         
-      } catch (error: any) {
+        setEntityNames({
+          materia: examData.materia?.nombre || 'No disponible',
+          examen: examData.titulo || examData.title || 'No disponible',
+          estudiante: `${studentData.nombres || ''} ${studentData.apellidos || ''}`.trim() || 'No disponible',
+          grupo: groupData?.nombre || 'No asignado',
+          loading: false,
+          error: null
+        });
+        
+        // Ahora calculamos la calificación
+        await calculateExamScore(examId);
+        
+      } catch (error: Error | unknown) {
         if (DEBUG) {
           logger.error("Error fetching entity names:", error);
         }
         setEntityNames(prev => ({
           ...prev,
           loading: false,
-          error: error.message || "Error al cargar datos de las entidades"
+          error: (error as Error).message || "Error al cargar datos de las entidades"
         }));
       }
     }
@@ -325,7 +309,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         ]);
         
         // Obtener respuestas correctas para TODAS las preguntas
-        const questionIds = questions.map((q: any) => q.id);
+        const questionIds = questions.map((q: { id: string }) => q.id);
         
         // Obtener respuestas correctas para cada pregunta
         const correctAnswersRes = await fetch('/api/opciones-respuesta/correct', {
@@ -341,8 +325,8 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         
         // Mapear respuestas correctas por orden de pregunta
         const correctAnswersMap = new Map();
-        correctAnswersData.forEach((option: any) => {
-          const question = questions.find((q: any) => q.id === option.pregunta_id);
+        correctAnswersData.forEach((option: OpcionRespuesta) => {
+          const question = questions.find((q: { id: string, orden: number }) => q.id === option.pregunta_id);
           if (question && option.es_correcta) {
             let letterAnswer = '';
             switch (option.orden) {
@@ -362,7 +346,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
 
         // Marcar las respuestas y asignar los IDs de pregunta y opción
         const answersWithIds = normalizedAnswers.map((answer: Answer): Answer => {
-          const question = questions.find((q: any) => q.orden === answer.number);
+          const question = questions.find((q: { orden: number, id: string, habilitada: boolean }) => q.orden === answer.number);
           
           // Encontrar la opción seleccionada basada en la letra de respuesta
           let opcionId = null;
@@ -413,7 +397,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         const puntajeTotal = parseFloat(examData.puntaje_total);
         
         // Filtrar preguntas habilitadas solo para el cálculo de la nota
-        const preguntasHabilitadas = questions.filter((q: any) => q.habilitada);
+        const preguntasHabilitadas = questions.filter((q: { habilitada: boolean }) => q.habilitada);
         
         // Contar respuestas correctas (solo de preguntas habilitadas)
         let correctCount = 0;
@@ -429,7 +413,8 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         const puntajeObtenido = (percentage / 100) * puntajeTotal;
         
         // Actualizar el estado con los nuevos cálculos
-        setExamScore({
+        setExamScore(prev => ({
+          ...prev,
           correctAnswers: correctCount,
           totalQuestions,
           percentage,
@@ -437,16 +422,19 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           puntajeObtenido,
           loading: false,
           error: null
-        });
+        }));
         
-      } catch (error: any) {
+      } catch (error: Error | unknown) {
         if (DEBUG) {
           logger.error("Error calculating exam score:", error);
         }
         setExamScore(prev => ({
           ...prev,
+          correctAnswers: 0,
+          totalQuestions: 0,
+          percentage: 0,
           loading: false,
-          error: error.message || "Error al calcular calificación"
+          error: (error as Error).message || "Error al calcular la calificación"
         }));
       }
     }
@@ -454,7 +442,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
     if (qrData) {
       fetchEntityNames();
     }
-  }, [qrData]); // Eliminar normalizedAnswers de las dependencias
+  }, [qrData]);
 
   // Actualizar el estado de answers cuando cambien las props
   useEffect(() => {
@@ -567,7 +555,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         onSaved(result.resultado_id);
       }
       
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       if (DEBUG) {
         logger.error("Error al guardar resultados:", error);
       }
@@ -575,7 +563,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       // Mostrar notificación de error
       toast({
         title: "Error al guardar",
-        description: error.message || "Ha ocurrido un error al guardar los resultados",
+        description: (error as Error).message || "Ha ocurrido un error al guardar los resultados",
         variant: "destructive",
       });
       

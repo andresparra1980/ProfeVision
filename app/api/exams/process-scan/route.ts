@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import fs from 'fs/promises';
 import { exec } from 'child_process';
@@ -12,8 +11,27 @@ const DEBUG = process.env.NODE_ENV === 'development';
 // Promisify exec for cleaner async/await usage
 const execPromise = promisify(exec);
 
+// Define interfaces for better type handling
+interface OMRResult {
+  answers: Array<{
+    question_number: number;
+    answer_value: string;
+    confidence?: number;
+    number?: number;
+    value?: string;
+  }>;
+  processed_image_path?: string;
+  processedImagePath?: string;
+  original_image_path?: string;
+  originalImagePath?: string;
+  qr_data?: string | Record<string, unknown>;
+  qrData?: string | Record<string, unknown>;
+  student_info?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 // Function to run the Python OMR script
-async function runOMRScript(imagePath: string, jobId: string): Promise<any> {
+async function runOMRScript(imagePath: string, _unused: string): Promise<OMRResult> {
   try {
     const cwd = process.cwd();
     const scriptDir = path.join(cwd, 'scripts', 'omr');
@@ -53,7 +71,7 @@ async function runOMRScript(imagePath: string, jobId: string): Promise<any> {
     
     try {
       // Try to parse the stdout as JSON
-      const result = JSON.parse(stdout);
+      const result = JSON.parse(stdout) as OMRResult;
       
       // Debug: Log the structure of the result to help identify where the processed image path is stored
       if (DEBUG) {
@@ -66,12 +84,13 @@ async function runOMRScript(imagePath: string, jobId: string): Promise<any> {
           // Look for image paths in nested objects
           for (const key in result) {
             if (typeof result[key] === 'object' && result[key] !== null) {
-              const nestedKeys = Object.keys(result[key]);
+              const nestedKeys = Object.keys(result[key] as object);
               logger.log(`Nested keys in ${key}:`, nestedKeys);
               
-              if (result[key].processed_image_path || result[key].processedImagePath) {
+              const nestedObj = result[key] as Record<string, unknown>;
+              if (nestedObj.processed_image_path || nestedObj.processedImagePath) {
                 logger.log(`Found image path in ${key}:`, 
-                  result[key].processed_image_path || result[key].processedImagePath);
+                  nestedObj.processed_image_path || nestedObj.processedImagePath);
               }
             }
           }
@@ -180,9 +199,9 @@ async function runEnvironmentDiagnostic() {
 runEnvironmentDiagnostic();
 
 // Function to parse and normalize QR data
-function normalizeQRData(qrData: any) {
+function normalizeQRData(qrData: string | Record<string, unknown>): Record<string, unknown> {
   // If QR data is already properly structured, return it
-  if (qrData && typeof qrData === 'object' && (qrData.examId || qrData.examenId)) {
+  if (qrData && typeof qrData === 'object' && ('examId' in qrData || 'examenId' in qrData)) {
     return qrData;
   }
   
@@ -360,22 +379,25 @@ export async function POST(request: NextRequest) {
           }
           
           // Add the student info to the QR data if we have it
-          normalizedResult.qr_data.studentInfo = normalizedResult.student_info;
-          
-          // Try to extract IDs from the student info if it's an object
-          const studentInfo = normalizedResult.student_info;
-          if (studentInfo && typeof studentInfo === 'object') {
-            // Use type assertion to avoid TypeScript errors
-            const typedStudentInfo = studentInfo as Record<string, any>;
+          if (normalizedResult.qr_data && typeof normalizedResult.qr_data === 'object') {
+            const qrDataObj = normalizedResult.qr_data as Record<string, unknown>;
+            qrDataObj.studentInfo = normalizedResult.student_info;
             
-            if (typedStudentInfo.id && !normalizedResult.qr_data.studentId) {
-              normalizedResult.qr_data.studentId = String(typedStudentInfo.id);
-            }
-            if (typedStudentInfo.exam_id && !normalizedResult.qr_data.examId) {
-              normalizedResult.qr_data.examId = String(typedStudentInfo.exam_id);
-            }
-            if (typedStudentInfo.group_id && !normalizedResult.qr_data.groupId) {
-              normalizedResult.qr_data.groupId = String(typedStudentInfo.group_id);
+            // Try to extract IDs from the student info if it's an object
+            const studentInfo = normalizedResult.student_info;
+            if (studentInfo && typeof studentInfo === 'object') {
+              // Use type assertion to avoid TypeScript errors
+              const typedStudentInfo = studentInfo as Record<string, any>;
+              
+              if (typedStudentInfo.id && !qrDataObj.studentId) {
+                qrDataObj.studentId = String(typedStudentInfo.id);
+              }
+              if (typedStudentInfo.exam_id && !qrDataObj.examId) {
+                qrDataObj.examId = String(typedStudentInfo.exam_id);
+              }
+              if (typedStudentInfo.group_id && !qrDataObj.groupId) {
+                qrDataObj.groupId = String(typedStudentInfo.group_id);
+              }
             }
           }
         }
@@ -387,9 +409,9 @@ export async function POST(request: NextRequest) {
         // In dev mode, create synthetic answers for testing
         if (DEBUG) {
           normalizedResult.answers = [
-            { number: 1, value: 'A', confidence: 95 },
-            { number: 2, value: 'B', confidence: 90 },
-            { number: 3, value: 'C', confidence: 85 }
+            { question_number: 1, answer_value: 'A', confidence: 95 },
+            { question_number: 2, answer_value: 'B', confidence: 90 },
+            { question_number: 3, answer_value: 'C', confidence: 85 }
           ];
         }
       }

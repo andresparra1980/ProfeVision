@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { ExamScanner } from '@/components/exam/exam-scanner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,12 +9,24 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, AlertCircle, CheckCircle2, XCircle, QrCode, AlertTriangle, Check, CircleAlert, RefreshCcw, FileSearch, Wrench } from 'lucide-react';
-import { decodeQRData, DecodedQRData, getReadableQRContent } from '@/lib/utils/qr-code';
+import { decodeQRData } from '@/lib/utils/qr-code';
 import { translateQRData, QREntities } from '@/lib/utils/qr-translation';
 import Link from 'next/link';
 import ConnectionDiagnostic from '@/components/exam/connection-diagnostic';
+import logger from '@/lib/utils/logger';
 
 const DEBUG = process.env.NODE_ENV === 'development';
+
+// Datos de fallback para cuando no se puede cargar la información del examen
+const fallbackExamData = {
+  id: 'fallback-exam',
+  title: 'Examen (Modo Fallback)',
+  subject: {
+    id: 'fallback-subject',
+    name: 'Materia no disponible',
+  },
+  numQuestions: 0,
+};
 
 // Tipos para los datos del OMR
 interface OMRAnswer {
@@ -135,7 +146,8 @@ const ScanQRInfo = ({ qrData, qrValidation, examId }: { qrData: any; qrValidatio
     const currentGroupId = decodedData.groupId;
     
     // Usar una ref para evitar múltiples llamadas con los mismos datos
-    const requestIdKey = `${currentExamId}-${currentStudentId}-${currentGroupId}`;
+    // No la usamos directamente pero la dejamos comentada como referencia
+    // const _requestIdKey = `${currentExamId}-${currentStudentId}-${currentGroupId}`;
 
     // Si ya hay una carga en progreso para estos IDs, salir
     if (isLoadingNames) return;
@@ -164,7 +176,7 @@ const ScanQRInfo = ({ qrData, qrValidation, examId }: { qrData: any; qrValidatio
           setEntityNames(names);
         }
       } catch (error) {
-        console.error('Error al cargar nombres de entidades:', error);
+        logger.error('Error al cargar nombres de entidades:', error);
       } finally {
         setIsLoadingNames(false);
       }
@@ -315,26 +327,6 @@ const ScanQRInfo = ({ qrData, qrValidation, examId }: { qrData: any; qrValidatio
   );
 };
 
-// Datos de examen de fallback para cuando la API falla
-const fallbackExamData = {
-  id: "48eb2046-9030-43f3-bb29-94081023ff83",
-  titulo: "Prueba 20",
-  descripcion: "Prueba 20",
-  instrucciones: "no se equivoquen",
-  materia_id: "0f92110f-b874-4dc0-bc90-3f6108dfebf0",
-  profesor_id: "78f64700-c962-419d-8716-94e7d8f7be30",
-  estado: "publicado",
-  fecha_creacion: "2025-03-28T20:11:26.802Z",
-  duracion_minutos: 60,
-  puntaje_total: "100.00",
-  created_at: "2025-03-28T20:11:26.802Z",
-  updated_at: "2025-03-28T20:14:45.379Z",
-  materia: {
-    id: "0f92110f-b874-4dc0-bc90-3f6108dfebf0",
-    nombre: "FISICA I"
-  }
-};
-
 interface ExamDetails {
   id: string;
   title: string;
@@ -353,7 +345,6 @@ export default function ExamScanPage() {
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [exam, setExam] = useState<any>(null);
   const [scanResult, setScanResult] = useState<ScanResult>({ success: false });
   const [scanImageUrl, setScanImageUrl] = useState<string | null>(null);
   const [examDetails, setExamDetails] = useState<ExamDetails | null>(null);
@@ -399,7 +390,6 @@ export default function ExamScanPage() {
         }
         
         setExamDetails(data);
-        setExam(data);
       } catch (err) {
         console.error('Error en fetchExamDetails:', err);
         setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos del examen');
@@ -418,7 +408,6 @@ export default function ExamScanPage() {
           },
           numQuestions: 0,
         });
-        setExam(fallbackExamData);
       } finally {
         setIsLoading(false);
       }
@@ -549,7 +538,6 @@ export default function ExamScanPage() {
           }
           
           setExamDetails(data);
-          setExam(data);
         } catch (err) {
           console.error('Error en fetchExamDetails:', err);
           setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos del examen');
@@ -568,7 +556,6 @@ export default function ExamScanPage() {
             },
             numQuestions: 0,
           });
-          setExam(fallbackExamData);
         } finally {
           setIsLoading(false);
         }
@@ -677,7 +664,6 @@ export default function ExamScanPage() {
               <ExamScanner 
                 examId={examId} 
                 onScanComplete={handleScanComplete}
-                allowMultipleScans={true}
                 onConnectionError={handleConnectionError}
               />
             </CardContent>

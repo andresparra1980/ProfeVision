@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import logger from '@/lib/utils/logger';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
 
     if (versionesError) {
       if (DEBUG) {
-        console.error('Error al buscar versiones:', versionesError);
+        logger.error('Error al buscar versiones:', versionesError);
       }
       return NextResponse.json(
         { error: 'Error al verificar versiones de examen' },
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Si no hay versiones, verificar si hay resultados directos para este examen
       if (DEBUG) {
-        console.log('No hay versiones para este examen. Buscando resultados directos.');
+        logger.log('No hay versiones para este examen. Buscando resultados directos.');
       }
       
       const resultado = await supabase
@@ -118,7 +119,7 @@ export async function GET(request: NextRequest) {
 
     if (resultadoError) {
       if (DEBUG) {
-        console.error('Error al buscar resultado previo:', resultadoError);
+        logger.error('Error al buscar resultado previo:', resultadoError);
       }
       return NextResponse.json(
         { error: 'Error al verificar resultados previos' },
@@ -138,7 +139,7 @@ export async function GET(request: NextRequest) {
 
       if (escaneadosError) {
         if (DEBUG) {
-          console.error('Error al buscar escaneos directos:', escaneadosError);
+          logger.error('Error al buscar escaneos directos:', escaneadosError);
         }
       } else if (escaneadosDirectos && escaneadosDirectos.length > 0) {
         // Si hay un escaneo directo, verificar si el resultado asociado es de este estudiante
@@ -182,7 +183,7 @@ export async function GET(request: NextRequest) {
 
       if (scanError) {
         if (DEBUG) {
-          console.error('Error al buscar escaneo previo:', scanError);
+          logger.error('Error al buscar escaneo previo:', scanError);
         }
       } else {
         scanData = scanDataResult;
@@ -209,7 +210,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ exists: false });
   } catch (error: unknown) {
     if (DEBUG) {
-      console.error('Error en check-duplicate:', error);
+      logger.error('Error en check-duplicate:', error);
     }
     return NextResponse.json(
       { error: 'Error al verificar duplicados' },
@@ -232,7 +233,8 @@ export async function POST(req: NextRequest) {
     // Extraer información del QR
     const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
     const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
-    const groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
+    // Extraer groupId pero no usarlo directamente para evitar advertencia de variable no utilizada
+    const _groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
     
     if (!examId || !studentId) {
       return NextResponse.json(
@@ -271,7 +273,7 @@ export async function POST(req: NextRequest) {
     
     if (error) {
       if (DEBUG) {
-        console.error('Error al verificar duplicado:', error);
+        logger.error('Error al verificar duplicado:', error);
       }
       return NextResponse.json(
         { error: 'Error al verificar duplicados' },
@@ -294,7 +296,7 @@ export async function POST(req: NextRequest) {
     
   } catch (error) {
     if (DEBUG) {
-      console.error('Error al verificar duplicados:', error);
+      logger.error('Error al verificar duplicados:', error);
     }
     return NextResponse.json(
       { error: 'Error interno del servidor' },
