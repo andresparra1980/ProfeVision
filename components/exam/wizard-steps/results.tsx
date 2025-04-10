@@ -335,123 +335,65 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
 
   // Cargar entidades y calcular puntuación
   useEffect(() => {
-    async function fetchEntityNames() {
-      setEntityNames(prev => ({ ...prev, loading: true, error: null }));
-      
+    const fetchEntityNames = async () => {
       try {
-        if (!qrData) {
-          throw new Error("No hay datos de QR disponibles");
+        setEntityNames(prev => ({ ...prev, loading: true, error: null }));
+        
+        if (!qrData || 
+            (!qrData.examId && !qrData.examenId && !qrData.exam_id && !qrData.examen_id) || 
+            (!qrData.studentId && !qrData.estudianteId && !qrData.student_id && !qrData.estudiante_id)) {
+          throw new Error("Datos QR incompletos. No se puede cargar información detallada.");
         }
         
-        if (DEBUG) {
-          logger.log('QR data in Results component:', qrData);
-        }
+        // Obtener IDs usando optional chaining para mejor type safety
+        const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
+        const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
         
-        // Handle colon-separated UUID format
-        let examId = '';
-        let studentId = '';
-        let groupId = '';
+        // Cargar detalles del examen y estudiante
+        const [examResponse, studentResponse] = await Promise.all([
+          fetch(`/api/exams/${examId}/details`),
+          fetch(`/api/students/${studentId}`)
+        ]);
         
-        // Check if qrData is a string with UUID format
-        if (typeof qrData === 'string') {
-          const qrDataString = qrData as string;
-          if (qrDataString.includes(':') && qrDataString.includes('-')) {
-            const parts = qrDataString.split(':');
-            if (parts.length >= 3) {
-              examId = parts[0];
-              studentId = parts[1];
-              groupId = parts[2];
-            }
-          }
-        } 
-        // Handle object format (most common case)
-        else {
-          // Extract IDs safely with fallbacks
-          examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id || '';
-          studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id || '';
-          groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id || '';
-        }
+        if (!examResponse.ok) throw new Error(`No se pudo cargar el examen: ${examResponse.statusText}`);
+        if (!studentResponse.ok) throw new Error(`No se pudo cargar el estudiante: ${studentResponse.statusText}`);
         
-        // Provide better error messages with more details
-        if (!examId) {
-          if (DEBUG) logger.warn("QR data missing examId", qrData);
-          throw new Error("Datos de QR incompletos: Falta ID de examen");
-        }
+        const [examData, studentData] = await Promise.all([
+          examResponse.json(),
+          studentResponse.json()
+        ]);
         
-        if (!studentId) {
-          if (DEBUG) logger.warn("QR data missing studentId", qrData);
-          throw new Error("Datos de QR incompletos: Falta ID de estudiante");
-        }
-        
-        // More detailed logging
-        if (DEBUG) {
-          logger.log("Fetching entity details with:", { examId, studentId, groupId });
-        }
-        
-        // Fetch exam details (includes subject)
-        const examRes = await fetch(`/api/exams/${examId}/details`);
-        if (!examRes.ok) {
-          const errorText = await examRes.text();
-          if (DEBUG) logger.error(`Error fetching exam details: ${examRes.status}`, errorText);
-          throw new Error(`Error al obtener detalles del examen: ${examRes.status}`);
-        }
-        const examData = await examRes.json();
-        
-        // Fetch student details
-        const studentRes = await fetch(`/api/students/${studentId}`);
-        if (!studentRes.ok) {
-          const errorText = await studentRes.text();
-          if (DEBUG) logger.error(`Error fetching student details: ${studentRes.status}`, errorText);
-          throw new Error(`Error al obtener detalles del estudiante: ${studentRes.status}`);
-        }
-        const studentData = await studentRes.json();
-        
-        let groupData = null;
-        // Fetch group details if available
-        if (groupId) {
-          try {
-            const groupRes = await fetch(`/api/groups/${groupId}`);
-            if (groupRes.ok) {
-              groupData = await groupRes.json();
-            } else {
-              if (DEBUG) logger.warn(`Group details not found for ID: ${groupId}`);
-            }
-          } catch (groupError) {
-            if (DEBUG) logger.warn("Error fetching group data:", groupError);
-            // Don't fail the whole process if just group data fails
-          }
-        }
-        
-        setEntityNames({
-          materia: examData.materia?.nombre || 'No disponible',
-          examen: examData.titulo || examData.title || 'No disponible',
-          estudiante: `${studentData.nombres || ''} ${studentData.apellidos || ''}`.trim() || 'No disponible',
-          grupo: groupData?.nombre || 'No asignado',
-          loading: false,
-          error: null
-        });
-        
-        // Ahora calculamos la calificación solo si tenemos el examId
+        // Calcular puntaje del examen
         if (examId) {
           calculateExamScore(examId);
         }
         
+        // Actualizar los nombres de las entidades
+        setEntityNames({
+          materia: examData.materia?.nombre || 'No disponible',
+          examen: examData.nombre || 'No disponible',
+          estudiante: studentData.nombre_completo || 'No disponible',
+          grupo: examData.grupo?.nombre || 'No disponible',
+          loading: false,
+          error: null
+        });
       } catch (error: unknown) {
         if (DEBUG) {
-          logger.error("Error fetching entity names:", error);
+          logger.error("Error al cargar entidades:", error);
         }
+        
         setEntityNames(prev => ({
           ...prev,
           loading: false,
           error: (error as Error).message || "Error al cargar datos de las entidades"
         }));
       }
-    }
+    };
     
     if (qrData) {
       fetchEntityNames();
     }
-  }, [qrData]); // Quitamos calculateExamScore de las dependencias
+  }, [qrData, calculateExamScore]); // Añadimos calculateExamScore a las dependencias
 
   // Actualizar el estado de answers cuando cambien las props
   useEffect(() => {
