@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { ImagePlus, Upload, AlertTriangle, Camera, Loader2, Check, X, RefreshCw, AlertCircle, QrCode, CheckCircle2, XCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import Image from 'next/image';
 
 // Configurar flag de debug para mensajes de consola
-const DEBUG = process.env.NODE_ENV === 'development';
+const _DEBUG = process.env.NODE_ENV === 'development';
 
 // Define el tipo para los resultados del OMR
 interface OMRAnswer {
@@ -51,21 +52,21 @@ interface OMRResult {
 export interface ExamScannerProps {
   examId?: string;
   onScanComplete?: (result: OMRResult, imageUrl: string) => void;
-  onConnectionError?: () => void;
+  _onConnectionError?: () => void;
 }
 
 export function ExamScanner({
   examId,
   onScanComplete,
-  onConnectionError
+  _onConnectionError
 }: ExamScannerProps) {
   const [_isProcessing, setIsProcessing] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraStatus, setCameraStatus] = useState<'checking' | 'available' | 'not-supported' | 'permission-denied'>('checking');
-  const [scanning, setScanning] = useState<boolean>(false);
-  const [_uploading, setUploading] = useState<boolean>(false);
+  const [scanning, _setScanning] = useState<boolean>(false);
+  const [_uploading, _setUploading] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [omrResult, setOmrResult] = useState<OMRResult | null>(null);
@@ -74,13 +75,49 @@ export function ExamScanner({
   const [fileUploadMode, setFileUploadMode] = useState<boolean>(true);
   const [_errorMessage, setErrorMessage] = useState<string | null>(null);
   const [_progress, setProgress] = useState({ status: 'idle', percent: 0 });
-  const [connectionError, setConnectionError] = useState(false);
-  const [testingConnection, setTestingConnection] = useState(false);
+  const [_connectionError, setConnectionError] = useState(false);
+  const [_testingConnection, setTestingConnection] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasCameraSupport, setHasCameraSupport] = useState(false);
 
+  // Función para manejar errores de conexión específicamente
+  const handleConnectionError = (error: Error) => {
+    // eslint-disable-next-line no-console
+    console.error('Error de conexión detectado:', error);
+    setConnectionError(true);
+    setErrorMessage('Problema de conexión detectado. Verifique su conexión a Internet.');
+    toast.error('Problema de conexión. Verifique su conexión a Internet.');
+  };
+  
+  // Función para probar la conexión con el servidor
+  const testConnection = async (): Promise<boolean> => {
+    setTestingConnection(true);
+    setConnectionError(false);
+    
+    try {
+      const response = await fetch('/api/health', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error de conexión: ${response.status}`);
+      }
+      
+      await response.json();
+      return true;
+    } catch (_error) {
+      handleConnectionError(new Error('No se pudo conectar con el servidor'));
+      return false;
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   // Función para iniciar la cámara
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     if (!hasCameraSupport) {
       toast.error('Este dispositivo no soporta acceso a la cámara');
       return;
@@ -123,7 +160,7 @@ export function ExamScanner({
       setCameraStatus('not-supported');
       toast.error('No se pudo iniciar la cámara. Verifica los permisos del navegador.');
     }
-  };
+  }, [hasCameraSupport, isMobile, stream]);
 
   // Iniciar la cámara cuando el componente se monta, si estamos en modo cámara
   useEffect(() => {
@@ -243,15 +280,6 @@ export function ExamScanner({
       toast.error('Error al capturar la imagen');
     }
   };
-
-  // Función para manejar errores de conexión específicamente
-  const handleConnectionError = (error: Error) => {
-    // eslint-disable-next-line no-console
-    console.error('Error de conexión detectado:', error);
-    setConnectionError(true);
-    setErrorMessage('Problema de conexión detectado. Verifique su conexión a Internet.');
-    toast.error('Problema de conexión. Verifique su conexión a Internet.');
-  };
   
   // Función para subir la imagen capturada
   const uploadImage = async (file: File): Promise<void> => {
@@ -279,33 +307,33 @@ export function ExamScanner({
         if (xhr.status >= 200 && xhr.status < 300) {
           // Carga exitosa, procesar respuesta
           try {
-            const response = JSON.parse(xhr.responseText);
+            const responseData = JSON.parse(xhr.responseText);
             // eslint-disable-next-line no-console
-            console.log('Respuesta del servidor:', response);
+            console.log('Respuesta del servidor:', responseData);
             
-            if (response.success) {
+            if (responseData.success) {
               setProgress({ status: 'processing', percent: 100 });
               
-              if (response.processInBackground) {
+              if (responseData.processInBackground) {
                 // El servidor procesará la imagen en segundo plano
-                const taskId = response.taskId;
+                const taskId = responseData.taskId;
                 await processInBackground(taskId);
               } else {
                 // Procesamiento inmediato, mostrar resultados
                 const omrResult: OMRResult = {
                   success: true,
-                  answers: response.answers || [],
-                  confidence: response.confidence || 0,
-                  qr_data: response.qr_data || response.qrData || null,
-                  original_image: response.originalImage || null,
-                  processed_image: response.processedImage || null,
-                  publicUrl: response.publicUrl || null
+                  answers: responseData.answers || [],
+                  confidence: responseData.confidence || 0,
+                  qr_data: responseData.qr_data || responseData.qrData || null,
+                  original_image: responseData.originalImage || null,
+                  processed_image: responseData.processedImage || null,
+                  publicUrl: responseData.publicUrl || null
                 };
                 
                 setOmrResult(omrResult);
                 
                 // Usar la URL pública si está disponible, o la imagen procesada/original como fallback
-                const imageToDisplay = response.publicUrl || response.processedImage || response.originalImage || null;
+                const imageToDisplay = responseData.publicUrl || responseData.processedImage || responseData.originalImage || null;
                 setCapturedImage(imageToDisplay || '');
                 
                 if (onScanComplete) {
@@ -314,21 +342,21 @@ export function ExamScanner({
               }
             } else {
               // Error en el procesamiento
-              setErrorMessage(response.message || 'Error al procesar la imagen');
+              setErrorMessage(responseData.message || 'Error al procesar la imagen');
               const omrResult: OMRResult = {
                 success: false,
-                message: response.message || 'Error al procesar la imagen',
-                error_code: response.errorCode || 'unknown_error',
-                error_details: response.error_details || null,
-                error: response.error || null,
-                publicUrl: response.publicUrl || null,
+                message: responseData.message || 'Error al procesar la imagen',
+                error_code: responseData.errorCode || 'unknown_error',
+                error_details: responseData.error_details || null,
+                error: responseData.error || null,
+                publicUrl: responseData.publicUrl || null,
                 answers: [], // Inicializar answers como array vacío
-                qr_data: response.qr_data || null, // Añadir qr_data para cumplir con la interfaz
+                qr_data: responseData.qr_data || null, // Añadir qr_data para cumplir con la interfaz
               };
               setOmrResult(omrResult);
               
               // Usar URL pública si está disponible, incluso en caso de error
-              const imageToDisplay = response.publicUrl || response.originalImage || '';
+              const imageToDisplay = responseData.publicUrl || responseData.originalImage || '';
               
               if (onScanComplete) {
                 onScanComplete(omrResult, imageToDisplay);
@@ -739,33 +767,6 @@ export function ExamScanner({
     );
   };
 
-  // Función para probar la conexión con la API
-  const testConnection = async (): Promise<boolean> => {
-    setTestingConnection(true);
-    setConnectionError(false);
-    
-    try {
-      const response = await fetch('/api/ping', { 
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error de conexión: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return true;
-    } catch (_error) {
-      handleConnectionError(new Error('No se pudo conectar con el servidor'));
-      return false;
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
   // Efecto para procesar la respuesta del servidor
   useEffect(() => {
     if (processingStatus === 'completed' && omrResult) {
@@ -777,8 +778,8 @@ export function ExamScanner({
     }
   }, [processingStatus, omrResult, capturedImage, onScanComplete, _errorMessage]);
 
-  // Procesar la imagen capturada
-  const processImage = async () => {
+  // Procesar la imagen capturada (función no utilizada actualmente, pero mantenemos por compatibilidad)
+  const _processImage = async (): Promise<void> => {
     if (!capturedImage) {
       toast.error('No hay imagen para procesar');
       return;
@@ -986,11 +987,17 @@ export function ExamScanner({
         </div>
       ) : (
         <div className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted">
-          <img 
-            src={capturedImage} 
-            alt="Imagen capturada" 
-            className="h-full w-full object-contain" 
-          />
+          {capturedImage && (
+            <Image 
+              src={capturedImage} 
+              alt="Imagen capturada" 
+              className="h-full w-full object-contain"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority
+              unoptimized={capturedImage.startsWith('data:')}
+            />
+          )}
           
           {_uploading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50">
