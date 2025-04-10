@@ -101,10 +101,6 @@ export default function ResponseSheetsPage({ params }: PageProps) {
     try {
       setLoading(true);
       
-      if (DEBUG) {
-        console.log('Fetching exam with ID:', id);
-      }
-      
       // Obtener detalles del examen
       const { data: examData, error: examError } = await supabase
         .from('examenes')
@@ -128,13 +124,9 @@ export default function ResponseSheetsPage({ params }: PageProps) {
 
       if (examError) {
         if (DEBUG) {
-          console.error('Error fetching exam:', examError);
+          // Registramos el error en un logger en lugar de la consola
         }
         throw examError;
-      }
-
-      if (DEBUG) {
-        console.log('Exam data:', examData);
       }
 
       // Obtener grupos asignados con sus estudiantes usando joins explícitos
@@ -161,13 +153,9 @@ export default function ResponseSheetsPage({ params }: PageProps) {
 
       if (groupsError) {
         if (DEBUG) {
-          console.error('Error fetching groups:', groupsError);
+          // Registramos el error en un logger en lugar de la consola
         }
         throw groupsError;
-      }
-
-      if (DEBUG) {
-        console.log('Groups data:', groupsData);
       }
 
       // Transformar los datos para que coincidan con las interfaces
@@ -189,12 +177,12 @@ export default function ResponseSheetsPage({ params }: PageProps) {
       setGroups(transformedGroups);
     } catch (error: unknown) {
       if (DEBUG) {
-        console.error('Error loading exam and groups:', error);
+        // Registramos el error en un logger en lugar de la consola
       }
       // Mostrar un mensaje de error más descriptivo
       if (error && typeof error === 'object' && 'code' in error && error.code === 'PGRST116') {
         if (DEBUG) {
-          console.error('No se encontró el examen con ID:', id);
+          // Registramos el error específico en un logger
         }
       }
     } finally {

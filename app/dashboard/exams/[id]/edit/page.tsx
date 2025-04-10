@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Save, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,40 @@ import { toast } from "@/components/ui/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 
+interface TipoPregunta {
+  id: string;
+  nombre: string;
+}
+
+interface OpcionRespuesta {
+  id?: string;
+  texto: string;
+  es_correcta: boolean;
+}
+
+interface Pregunta {
+  id?: string;
+  texto: string;
+  tipo_id: string;
+  puntaje: number;
+  dificultad: string;
+  retroalimentacion: string;
+  habilitada?: boolean;
+  orden?: number;
+  opciones: OpcionRespuesta[];
+  opciones_respuesta?: OpcionRespuesta[];
+}
+
+interface Examen {
+  id: string;
+  titulo: string;
+  estado: string;
+  materias?: {
+    nombre: string;
+  };
+  [key: string]: unknown;
+}
+
 export default function EditExamPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const examId = resolvedParams.id;
@@ -23,9 +57,9 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   const [saving, setSaving] = useState(false);
   const [showDisableDialog, setShowDisableDialog] = useState(false);
   const [questionToToggle, setQuestionToToggle] = useState<{id: string, habilitada: boolean} | null>(null);
-  const [tiposPregunta, setTiposPregunta] = useState<any[]>([]);
-  const [exam, setExam] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [tiposPregunta, setTiposPregunta] = useState<TipoPregunta[]>([]);
+  const [exam, setExam] = useState<Examen | null>(null);
+  const [questions, setQuestions] = useState<Pregunta[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState({
     texto: "",
     tipo_id: "",
@@ -40,13 +74,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
     ],
   });
 
-  useEffect(() => {
-    fetchExamDetails();
-    fetchQuestions();
-    fetchQuestionTypes();
-  }, [examId]);
-
-  async function fetchExamDetails() {
+  const fetchExamDetails = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -68,9 +96,9 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
     } finally {
       setLoading(false);
     }
-  }
+  }, [examId, router]);
 
-  async function fetchQuestions() {
+  const fetchQuestions = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("preguntas")
@@ -81,7 +109,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       if (error) throw error;
       
       // Organizar las opciones_respuesta dentro de cada pregunta
-      const formattedQuestions = data.map(q => ({
+      const formattedQuestions = data.map((q: Record<string, unknown>) => ({
         ...q,
         opciones: q.opciones_respuesta || []
       }));
@@ -95,9 +123,9 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         variant: "destructive",
       });
     }
-  }
+  }, [examId]);
 
-  async function fetchQuestionTypes() {
+  const fetchQuestionTypes = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("tipos_pregunta")
@@ -117,7 +145,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
     } catch (error) {
       console.error("Error fetching question types:", error);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchExamDetails();
+    fetchQuestions();
+    fetchQuestionTypes();
+  }, [fetchExamDetails, fetchQuestions, fetchQuestionTypes]);
 
   // Función para manejar el cambio en los campos de la pregunta actual
   const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -369,7 +403,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
   // Función para manejar el toggle de habilitación/deshabilitación de pregunta
   const handleQuestionToggle = async (questionId: string, currentValue: boolean) => {
-    if (exam.estado === "publicado") {
+    if (exam && exam.estado === "publicado") {
       setQuestionToToggle({ id: questionId, habilitada: !currentValue });
       setShowDisableDialog(true);
     } else {
@@ -401,7 +435,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
       // Si el examen está publicado, recalcular las calificaciones de todos los estudiantes
       // sin importar si estamos habilitando o deshabilitando
-      if (exam.estado === "publicado") {
+      if (exam && exam.estado === "publicado") {
         // Obtener todos los resultados del examen
         const { data: resultados, error: resultadosError } = await supabase
           .from("resultados_examen")
@@ -538,7 +572,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         ) : (
           <div className="space-y-4">
             {questions.map((question, index) => (
-              <Card key={question.id} className={`relative ${!question.habilitada ? 'opacity-75' : ''}`}>
+              <Card key={question.id ? question.id : index} className={`relative ${!question.habilitada ? 'opacity-75' : ''}`}>
                 <div className="absolute left-4 top-4 p-2 text-muted-foreground">
                   <GripVertical className="h-5 w-5" />
                 </div>
@@ -552,24 +586,24 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-4">
-                      {exam.estado === "publicado" && (
+                      {exam && exam.estado === "publicado" && (
                         <div className="flex items-center gap-2">
-                          <Label htmlFor={`question-${question.id}-enabled`} className="text-sm">
+                          <Label htmlFor={`question-${question.id ? question.id : index}-enabled`} className="text-sm">
                             {question.habilitada ? "Habilitada" : "Deshabilitada"}
                           </Label>
                           <Switch
-                            id={`question-${question.id}-enabled`}
+                            id={`question-${question.id ? question.id : index}-enabled`}
                             checked={question.habilitada}
-                            onCheckedChange={() => handleQuestionToggle(question.id, question.habilitada)}
+                            onCheckedChange={() => handleQuestionToggle(question.id as string, question.habilitada || false)}
                           />
                         </div>
                       )}
-                      {exam.estado === "borrador" && (
+                      {exam && exam.estado === "borrador" && (
                         <Button 
                           variant="ghost" 
                           size="sm" 
                           className="text-destructive"
-                          onClick={() => deleteQuestion(question.id)}
+                          onClick={() => deleteQuestion(question.id as string)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -592,7 +626,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                       <div>
                         <p className="text-sm font-medium mb-2">Opciones:</p>
                         <div className="space-y-2">
-                          {question.opciones.map((option: any, optIndex: number) => (
+                          {question.opciones.map((option: OpcionRespuesta, optIndex: number) => (
                             <div key={option.id} className="flex items-center gap-2">
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
                                 option.es_correcta 
@@ -619,7 +653,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       </div>
 
       {/* Formulario para agregar nueva pregunta */}
-      {exam.estado === "borrador" && (
+      {exam && exam.estado === "borrador" && (
         <Card>
           <CardHeader>
             <CardTitle>Agregar Nueva Pregunta</CardTitle>

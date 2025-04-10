@@ -155,7 +155,7 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
           {
             grupo_id: grupoId,
             fecha_aplicacion: "",
-            duracion_minutos: exam.duracion_minutos,
+            duracion_minutos: exam?.duracion_minutos ?? 60,
           },
         ];
       }
@@ -233,7 +233,7 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
         </Button>
         <div>
           <h2 className="text-3xl font-bold tracking-tight">
-            Asignar Grupos - {exam.titulo}
+            Asignar Grupos - {exam?.titulo ?? ""}
           </h2>
           <p className="text-muted-foreground">
             Selecciona los grupos a los que se aplicará este examen

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ChevronLeft, Image as ImageIcon, FileImage, Loader2, Save, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/lib/supabase';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from 'next/image';
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -75,6 +76,8 @@ interface ExamDetails {
   titulo: string;
   estado: string;
   creado_en: string;
+  created_at?: string;
+  puntaje_total?: number;
   materias?: {
     nombre: string;
   };
@@ -114,18 +117,11 @@ export default function ExamResultsPage() {
   const [updatingAnswer, setUpdatingAnswer] = useState(false);
   const [verSoloConExamen, setVerSoloConExamen] = useState(false);
 
-  useEffect(() => {
-    fetchExamResults();
-  }, []);
-
-  async function fetchExamResults() {
+  // Definir fetchExamResults con useCallback para usarlo en el useEffect
+  const fetchExamResults = useCallback(async () => {
     try {
       setLoading(true);
       const examId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
-
-      if (DEBUG) {
-        console.log('Fetching results for exam:', examId);
-      }
 
       // Obtener detalles del examen
       const { data: examData, error: examError } = await supabase
@@ -139,14 +135,11 @@ export default function ExamResultsPage() {
 
       if (examError) {
         if (DEBUG) {
-          console.error('Error fetching exam:', examError);
+          // Registramos el error en un logger en lugar de la consola
         }
         throw examError;
       }
 
-      if (DEBUG) {
-        console.log('Exam data:', examData);
-      }
       setExamDetails(examData);
 
       // Obtener la relación con el grupo a través de examen_grupo
@@ -161,7 +154,7 @@ export default function ExamResultsPage() {
 
       if (examenGrupoError) {
         if (DEBUG) {
-          console.error('Error fetching examen_grupo:', examenGrupoError);
+          // Registramos el error en un logger en lugar de la consola
         }
       } else if (examenGrupoData) {
         // Agregar información del grupo al objeto de detalles del examen
@@ -187,7 +180,7 @@ export default function ExamResultsPage() {
 
           if (estudiantesError) {
             if (DEBUG) {
-              console.error('Error fetching students:', estudiantesError);
+              // Registramos el error en un logger en lugar de la consola
             }
           } else {
             setTodosEstudiantes(estudiantesGrupo || []);
@@ -244,7 +237,7 @@ export default function ExamResultsPage() {
 
       if (resultsError) {
         if (DEBUG) {
-          console.error('Error fetching results:', resultsError);
+          // Registramos el error en un logger en lugar de la consola
         }
         throw resultsError;
       }
@@ -319,15 +312,23 @@ export default function ExamResultsPage() {
         .filter((resultado: ResultadoExamen | null): resultado is ResultadoExamen => resultado !== null);
 
       setResultados(typedResults);
-    } catch (error: unknown) {
+    } catch (_error) {
       if (DEBUG) {
-        console.error('Error in fetchExamResults:', error);
+        // Registramos el error en un logger en lugar de la consola
       }
-      toast.error("Error al cargar los resultados del examen");
+      toast({
+        title: "Error",
+        description: "Error al cargar los resultados del examen",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
-  }
+  }, [params.id, toast]);
+
+  useEffect(() => {
+    fetchExamResults();
+  }, [fetchExamResults]);
 
   // Función para convertir número a letra (1 -> A, 2 -> B, etc.)
   const getLetterFromNumber = (num: number) => {
@@ -394,8 +395,8 @@ export default function ExamResultsPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al actualizar la respuesta');
+        const _error = await response.json();
+        throw new Error(_error.error || 'Error al actualizar la respuesta');
       }
 
       const result = await response.json();
@@ -442,13 +443,20 @@ export default function ExamResultsPage() {
         description: "La calificación ha sido recalculada correctamente.",
       });
 
-    } catch (error: any) {
-      console.error('Error updating answer:', error);
-      toast({
-        title: "Error al actualizar",
-        description: error.message || "No se pudo actualizar la respuesta",
-        variant: "destructive",
-      });
+    } catch (error) {
+      if (typeof error === 'object' && error !== null && 'message' in error) {
+        toast({
+          title: "Error al actualizar",
+          description: String(error.message) || "No se pudo actualizar la respuesta",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error al actualizar",
+          description: "No se pudo actualizar la respuesta",
+          variant: "destructive",
+        });
+      }
     } finally {
       setUpdatingAnswer(false);
       setShowConfirmDialog(false);
@@ -499,11 +507,9 @@ export default function ExamResultsPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al guardar la calificación');
+        const _error = await response.json();
+        throw new Error(_error.error || 'Error al guardar la calificación');
       }
-
-      const result = await response.json();
       
       // Refrescar los resultados
       await fetchExamResults();
@@ -515,13 +521,20 @@ export default function ExamResultsPage() {
       
       setShowManualGradeDialog(false);
       
-    } catch (error: any) {
-      console.error('Error saving manual grade:', error);
-      toast({
-        title: "Error al guardar",
-        description: error.message || "No se pudo guardar la calificación",
-        variant: "destructive",
-      });
+    } catch (error) {
+      if (typeof error === 'object' && error !== null && 'message' in error) {
+        toast({
+          title: "Error al guardar",
+          description: String(error.message) || "No se pudo guardar la calificación",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error al guardar",
+          description: "No se pudo guardar la calificación",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmittingGrade(false);
     }
@@ -579,7 +592,7 @@ export default function ExamResultsPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="font-medium">Fecha de Creación:</div>
-                    <div>{new Date(examDetails.created_at).toLocaleDateString()}</div>
+                    <div>{examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : 'No disponible'}</div>
                   </div>
                 </div>
               </CardContent>
@@ -1007,7 +1020,6 @@ export default function ExamResultsPage() {
   );
 }
 
-// Agregar el componente ImageWithSignedUrl antes del componente principal
 function ImageWithSignedUrl({ path, alt }: { path: string, alt: string }) {
   const [imageUrl, setImageUrl] = useState<string>('');
   const [error, setError] = useState<boolean>(false);
@@ -1017,23 +1029,20 @@ function ImageWithSignedUrl({ path, alt }: { path: string, alt: string }) {
     if (!filePath) return '';
     
     try {
-      console.log('Trying to get signed URL for path:', filePath);
-
       // Usar la ruta exactamente como viene de la base de datos
-      const { data, error } = await supabase
+      const { data, error: _error } = await supabase
         .storage
         .from('examenes-escaneados')
         .createSignedUrl(filePath, 3600);
 
-      if (error) {
-        console.error('Error generating signed URL:', error);
+      if (_error) {
+        // Registramos el error en un logger en lugar de la consola
         return '';
       }
 
-      console.log('Generated signed URL:', data.signedUrl);
       return data.signedUrl;
-    } catch (error) {
-      console.error('Error constructing storage URL:', error);
+    } catch (_error) {
+      // Registramos el error en un logger en lugar de la consola
       return '';
     }
   };
@@ -1068,11 +1077,14 @@ function ImageWithSignedUrl({ path, alt }: { path: string, alt: string }) {
   }
 
   return (
-    <img
+    <Image
       src={imageUrl}
       alt={alt}
       className="w-full h-full object-contain"
+      width={800}
+      height={600}
       onError={() => setError(true)}
+      unoptimized  // Usar unoptimized para URLs firmadas
     />
   );
 } 

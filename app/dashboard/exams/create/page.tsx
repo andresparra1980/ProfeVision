@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -79,7 +79,7 @@ type ExamFormValues = z.infer<typeof examSchema>;
 
 export default function CreateExamPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, _setLoading] = useState(false);
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const [hasEntities, setHasEntities] = useState(false);
@@ -102,34 +102,8 @@ export default function CreateExamPage() {
     },
   });
 
-  useEffect(() => {
-    checkEntities();
-  }, []);
-
-  useEffect(() => {
-    if (profesor) {
-      loadMaterias();
-      loadGrupos();
-    }
-  }, [profesor]);
-
-  useEffect(() => {
-    const materiaId = form.watch("materia_id");
-    if (materiaId) {
-      const gruposDeMateria = grupos.filter(g => g.materia_id === materiaId && g.estado === 'activo');
-      setGruposFiltrados(gruposDeMateria);
-      // Resetear el grupo seleccionado si no pertenece a la materia
-      const grupoActual = form.watch("grupo_id");
-      if (grupoActual && !gruposDeMateria.find(g => g.id === grupoActual)) {
-        form.setValue("grupo_id", "");
-      }
-    } else {
-      setGruposFiltrados([]);
-      form.setValue("grupo_id", "");
-    }
-  }, [form.watch("materia_id"), grupos]);
-
-  async function checkEntities() {
+  // Definir las funciones antes de usarlas en useEffect
+  const checkEntities = useCallback(async () => {
     try {
       setIsCheckingEntities(true);
       const { data: { session } } = await supabase.auth.getSession();
@@ -159,9 +133,9 @@ export default function CreateExamPage() {
     } finally {
       setIsCheckingEntities(false);
     }
-  }
+  }, [router]);
 
-  const loadMaterias = async () => {
+  const loadMaterias = useCallback(async () => {
     if (!profesor) return;
     
     try {
@@ -187,9 +161,9 @@ export default function CreateExamPage() {
         description: errorMessage,
       });
     }
-  };
+  }, [profesor]);
 
-  const loadGrupos = async () => {
+  const loadGrupos = useCallback(async () => {
     if (!profesor) return;
     
     try {
@@ -210,7 +184,61 @@ export default function CreateExamPage() {
         description: errorMessage,
       });
     }
-  };
+  }, [profesor]);
+
+  const crearPreguntasIniciales = useCallback((cantidad: number) => {
+    const puntajeTotal = form.getValues("puntaje_total");
+    const puntajePorPregunta = parseFloat((puntajeTotal / cantidad).toFixed(4));
+    
+    const nuevasPreguntas: Pregunta[] = Array.from({ length: cantidad }, (_, index) => ({
+      id: `pregunta-${index + 1}`,
+      texto: "",
+      tipo: "opcion_multiple",
+      puntaje: puntajePorPregunta,
+      opciones: [
+        { id: `opcion-${index}-1`, texto: "", esCorrecta: false },
+        { id: `opcion-${index}-2`, texto: "", esCorrecta: false },
+        { id: `opcion-${index}-3`, texto: "", esCorrecta: false },
+        { id: `opcion-${index}-4`, texto: "", esCorrecta: false },
+      ],
+    }));
+    
+    setPreguntas(nuevasPreguntas);
+  }, [form]);
+
+  useEffect(() => {
+    checkEntities();
+  }, []);
+
+  useEffect(() => {
+    if (profesor) {
+      loadMaterias();
+      loadGrupos();
+    }
+  }, [profesor]);
+
+  useEffect(() => {
+    const materiaId = form.watch("materia_id");
+    if (materiaId) {
+      const gruposDeMateria = grupos.filter(g => g.materia_id === materiaId && g.estado === 'activo');
+      setGruposFiltrados(gruposDeMateria);
+      // Resetear el grupo seleccionado si no pertenece a la materia
+      const grupoActual = form.watch("grupo_id");
+      if (grupoActual && !gruposDeMateria.find(g => g.id === grupoActual)) {
+        form.setValue("grupo_id", "");
+      }
+    } else {
+      setGruposFiltrados([]);
+      form.setValue("grupo_id", "");
+    }
+  }, [form.watch("materia_id"), grupos]);
+
+  useEffect(() => {
+    const numeroPreguntas = form.watch("numero_preguntas");
+    if (numeroPreguntas > 0) {
+      crearPreguntasIniciales(numeroPreguntas);
+    }
+  }, [form.watch("numero_preguntas")]);
 
   const onSubmit = async (data: ExamFormValues) => {
     try {
@@ -243,7 +271,8 @@ export default function CreateExamPage() {
         throw new Error(errorData.error || 'Error al crear el examen');
       }
 
-      const examData = await response.json();
+      const _examData = await response.json();
+
       toast({
         title: "Éxito",
         description: "Examen creado correctamente",
@@ -258,32 +287,6 @@ export default function CreateExamPage() {
       });
     }
   };
-
-  const crearPreguntasIniciales = (cantidad: number) => {
-    const puntajeTotal = form.getValues("puntaje_total");
-    const puntajePorPregunta = parseFloat((puntajeTotal / cantidad).toFixed(4));
-    
-    const nuevasPreguntas: Pregunta[] = Array.from({ length: cantidad }, (_, index) => ({
-      id: `pregunta-${index + 1}`,
-      texto: "",
-      tipo: "opcion_multiple",
-      puntaje: puntajePorPregunta,
-      opciones: [
-        { id: `opcion-${index}-1`, texto: "", esCorrecta: false },
-        { id: `opcion-${index}-2`, texto: "", esCorrecta: false },
-        { id: `opcion-${index}-3`, texto: "", esCorrecta: false },
-        { id: `opcion-${index}-4`, texto: "", esCorrecta: false },
-      ],
-    }));
-    setPreguntas(nuevasPreguntas);
-  };
-
-  useEffect(() => {
-    const numeroPreguntas = form.watch("numero_preguntas");
-    if (numeroPreguntas > 0) {
-      crearPreguntasIniciales(numeroPreguntas);
-    }
-  }, [form.watch("numero_preguntas")]);
 
   // The 'result' param uses DropResult type from @hello-pangea/dnd
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
