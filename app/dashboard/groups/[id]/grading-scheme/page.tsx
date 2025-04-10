@@ -8,15 +8,35 @@ import type { GradingScheme } from '@/lib/types/grading';
 import type { Database } from '@/lib/types/database';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import Link from 'next/link';
 
-type EsquemaCalificacion = Database['public']['Tables']['esquemas_calificacion']['Row'] & {
+// Prefijo _ para indicar que no se utiliza
+type _EsquemaCalificacion = Database['public']['Tables']['esquemas_calificacion']['Row'] & {
   periodos: Array<
     Database['public']['Tables']['periodos_calificacion']['Row'] & {
       componentes: Array<Database['public']['Tables']['componentes_calificacion']['Row']>
     }
   >
 };
+
+// Definir interfaces para los tipos específicos
+interface PeriodoCalificacion {
+  id: string;
+  nombre: string;
+  porcentaje: number;
+  orden: number;
+  esquema_id: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  componentes: ComponenteCalificacion[];
+}
+
+interface ComponenteCalificacion {
+  id: string;
+  nombre: string;
+  porcentaje: number;
+  periodo_id: string;
+  tipo: string;
+}
 
 export default function GradingSchemePage() {
   const params = useParams();
@@ -97,8 +117,8 @@ export default function GradingSchemePage() {
           ...schemes[0],
           periodos: schemes[0].periodos
             ? schemes[0].periodos
-                .sort((a: any, b: any) => a.orden - b.orden)
-                .map((periodo: any) => ({
+                .sort((a: PeriodoCalificacion, b: PeriodoCalificacion) => a.orden - b.orden)
+                .map((periodo: PeriodoCalificacion) => ({
                   ...periodo,
                   componentes: periodo.componentes || []
                 }))

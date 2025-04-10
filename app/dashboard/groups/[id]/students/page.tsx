@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Search, X, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,27 +13,56 @@ import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
 import { ExcelImport } from "@/components/students/excel-import";
 
-export default function GroupStudentsPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const groupId = resolvedParams.id;
+interface Student {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  identificacion: string;
+  email: string;
+  estudiante_id?: string;
+}
+
+interface ImportResult {
+  success: boolean;
+  count?: number;
+}
+
+interface GroupData {
+  id: string;
+  nombre: string;
+  materias?: {
+    nombre: string;
+  };
+  periodo_escolar?: string;
+  año_escolar?: string;
+}
+
+interface EstudianteGrupoRecord {
+  id: string;
+  estudiante_id: string;
+  estudiantes: {
+    nombres: string;
+    apellidos: string;
+    identificacion: string;
+    email: string;
+  };
+}
+
+export default function GroupStudentsPage({ params }: { params: { id: string } }) {
+  const groupId = params.id;
   
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [group, setGroup] = useState<any>(null);
-  const [groupStudents, setGroupStudents] = useState<any[]>([]);
+  const [group, setGroup] = useState<GroupData | null>(null);
+  const [groupStudents, setGroupStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Student[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchGroupDetails();
-    fetchGroupStudents();
-  }, [groupId]);
-
-  async function fetchGroupDetails() {
+  const fetchGroupDetails = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -55,9 +84,9 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function fetchGroupStudents() {
+  const fetchGroupStudents = async () => {
     try {
       const { data, error } = await supabase
         .from("estudiante_grupo")
@@ -68,7 +97,7 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
       if (error) throw error;
       
       // Format data to display student information directly
-      const formattedData = data.map(item => ({
+      const formattedData = data.map((item: EstudianteGrupoRecord) => ({
         id: item.id,
         estudiante_id: item.estudiante_id,
         nombres: item.estudiantes.nombres,
@@ -86,7 +115,12 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
         variant: "destructive",
       });
     }
-  }
+  };
+
+  useEffect(() => {
+    fetchGroupDetails();
+    fetchGroupStudents();
+  }, [groupId]);
 
   async function searchStudents() {
     if (!searchQuery.trim()) {
@@ -108,7 +142,7 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
       
       // Filter students that are already in the group
       const studentIds = groupStudents.map(s => s.estudiante_id);
-      const filteredResults = data.filter(student => !studentIds.includes(student.id));
+      const filteredResults = data.filter((student: Student) => !studentIds.includes(student.id));
       
       setSearchResults(filteredResults);
     } catch (error) {
@@ -123,9 +157,20 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  async function addStudentToGroup(student: any) {
+  const handleImportComplete = () => {
+    toast({
+      title: "¡Éxito!",
+      description: "Los estudiantes han sido importados exitosamente",
+      variant: "default",
+    });
+    
+    fetchGroupStudents();
+  };
+
+  const addStudentToGroup = async (student: Student) => {
+    setIsAdding(true);
+
     try {
-      setIsAdding(true);
       const { error } = await supabase.rpc('crear_estudiante_en_grupo', {
         p_nombres: student.nombres,
         p_apellidos: student.apellidos,
@@ -155,7 +200,7 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
     } finally {
       setIsAdding(false);
     }
-  }
+  };
 
   async function removeStudentFromGroup(studentId: string) {
     try {
@@ -182,26 +227,6 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
       });
     }
   }
-
-  // Function to handle import completion
-  const handleImportComplete = async () => {
-    try {
-      toast({
-        title: "¡Éxito!",
-        description: "Los estudiantes han sido importados exitosamente",
-        variant: "default",
-      });
-      
-      fetchGroupStudents();
-    } catch (error) {
-      console.error("Error adding imported students to group:", error);
-      toast({
-        title: "Error",
-        description: "No se pudieron agregar los estudiantes importados al grupo",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (loading) {
     return (

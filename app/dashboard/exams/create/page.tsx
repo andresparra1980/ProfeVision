@@ -102,7 +102,7 @@ export default function CreateExamPage() {
     },
   });
 
-  // Definir las funciones antes de usarlas en useEffect
+  // Definir las funciones con useCallback para usarlas en useEffect sin recrearlas
   const checkEntities = useCallback(async () => {
     try {
       setIsCheckingEntities(true);
@@ -208,17 +208,19 @@ export default function CreateExamPage() {
 
   useEffect(() => {
     checkEntities();
-  }, []);
+  }, [checkEntities]);
 
   useEffect(() => {
     if (profesor) {
       loadMaterias();
       loadGrupos();
     }
-  }, [profesor]);
+  }, [profesor, loadMaterias, loadGrupos]);
 
+  // Extraer el valor para evitar expresiones complejas en las dependencias
+  const materiaId = form.watch("materia_id");
+  
   useEffect(() => {
-    const materiaId = form.watch("materia_id");
     if (materiaId) {
       const gruposDeMateria = grupos.filter(g => g.materia_id === materiaId && g.estado === 'activo');
       setGruposFiltrados(gruposDeMateria);
@@ -231,14 +233,16 @@ export default function CreateExamPage() {
       setGruposFiltrados([]);
       form.setValue("grupo_id", "");
     }
-  }, [form.watch("materia_id"), grupos]);
+  }, [materiaId, grupos, form]);
+
+  // Extraer el valor para evitar expresiones complejas en las dependencias
+  const numeroPreguntas = form.watch("numero_preguntas");
 
   useEffect(() => {
-    const numeroPreguntas = form.watch("numero_preguntas");
     if (numeroPreguntas > 0) {
       crearPreguntasIniciales(numeroPreguntas);
     }
-  }, [form.watch("numero_preguntas")]);
+  }, [numeroPreguntas, crearPreguntasIniciales]);
 
   const onSubmit = async (data: ExamFormValues) => {
     try {
