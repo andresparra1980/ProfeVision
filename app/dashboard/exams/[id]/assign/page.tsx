@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Student } from "@/lib/types/database";
+import logger from "@/lib/utils/logger";
 
 interface Grupo {
   id: string;
@@ -26,25 +27,33 @@ interface Asignacion {
   duracion_minutos: number;
 }
 
+interface ExamenData {
+  id: string;
+  titulo: string;
+  materia_id: string;
+  duracion_minutos: number;
+  materias?: { nombre: string };
+  examen_grupo?: ExamenGrupo[];
+  [key: string]: unknown;
+}
+
+interface ExamenGrupo {
+  grupo: { id: string; nombre: string };
+  fecha_aplicacion: string;
+  duracion_minutos: number;
+  estado: string;
+}
+
 export default function AssignExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: examId } = use(params);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [exam, setExam] = useState<any>(null);
+  const [exam, setExam] = useState<ExamenData | null>(null);
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
 
-  useEffect(() => {
-    fetchExamDetails();
-  }, []);
-
-  useEffect(() => {
-    if (exam?.materia_id) {
-      fetchGrupos();
-    }
-  }, [exam?.materia_id]);
-
+  // Función para cargar los detalles del examen
   async function fetchExamDetails() {
     try {
       const { data, error } = await supabase
@@ -66,21 +75,24 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
       setExam(data);
 
       // Inicializar asignaciones con los grupos ya asignados
-      const asignacionesIniciales = data.examen_grupo?.map((ag: any) => ({
+      const asignacionesIniciales = data.examen_grupo?.map((ag: ExamenGrupo) => ({
         grupo_id: ag.grupo.id,
         fecha_aplicacion: ag.fecha_aplicacion || "",
         duracion_minutos: ag.duracion_minutos || data.duracion_minutos,
       })) || [];
       setAsignaciones(asignacionesIniciales);
     } catch (error) {
-      console.error("Error fetching exam details:", error);
+      logger.error("Error fetching exam details:", error);
       toast.error("Error al cargar los detalles del examen");
     } finally {
       setLoading(false);
     }
   }
 
+  // Función para cargar los grupos relacionados con la materia
   async function fetchGrupos() {
+    if (!exam?.materia_id) return;
+    
     try {
       const { data, error } = await supabase
         .from("grupos")
@@ -101,9 +113,9 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
       if (error) throw error;
 
       // Transformar los datos para que coincidan con la interfaz Grupo
-      const gruposFormateados = data.map((grupo: any) => ({
+      const gruposFormateados = data.map((grupo: Record<string, unknown>) => ({
         ...grupo,
-        estudiantes: grupo.estudiantes.map((e: any) => ({
+        estudiantes: (grupo.estudiantes as Array<{ estudiante: Student }>).map(e => ({
           id: e.estudiante.id,
           nombres: e.estudiante.nombres,
           apellidos: e.estudiante.apellidos,
@@ -113,10 +125,24 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
 
       setGrupos(gruposFormateados);
     } catch (error) {
-      console.error("Error fetching groups:", error);
+      logger.error("Error fetching groups:", error);
       toast.error("Error al cargar los grupos");
     }
   }
+
+  // Efecto para cargar detalles del examen cuando se monta el componente
+  useEffect(() => {
+    fetchExamDetails();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [examId]); // No incluir fetchExamDetails para evitar dependencia circular
+
+  // Efecto para cargar grupos cuando cambia la materia del examen
+  useEffect(() => {
+    if (exam?.materia_id) {
+      fetchGrupos();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exam?.materia_id]); // No incluir fetchGrupos para evitar dependencia circular
 
   const handleGrupoToggle = (grupoId: string) => {
     setAsignaciones((prev) => {
@@ -179,7 +205,7 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
       toast.success("Grupos asignados correctamente");
       router.push("/dashboard/exams");
     } catch (error) {
-      console.error("Error saving assignments:", error);
+      logger.error("Error saving assignments:", error);
       toast.error("Error al guardar las asignaciones");
     } finally {
       setSaving(false);

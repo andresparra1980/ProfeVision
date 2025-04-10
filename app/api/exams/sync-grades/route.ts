@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
+import logger from '@/lib/utils/logger';
 
 // Definir interfaces para tipado
 interface ResultadoExamen {
@@ -74,7 +76,7 @@ export async function POST(req: NextRequest) {
     
     if (vinculosError) {
       if (DEBUG) {
-        console.error('Error al obtener vínculos:', vinculosError);
+        logger.error('Error al obtener vínculos:', vinculosError);
       }
       return NextResponse.json({ error: 'Error al obtener vínculos' }, { status: 500 });
     }
@@ -85,7 +87,7 @@ export async function POST(req: NextRequest) {
     
     // For debugging
     if (DEBUG) {
-      console.log('Estructura de vínculos:', JSON.stringify(vinculos[0]));
+      logger.log('Estructura de vínculos:', JSON.stringify(vinculos[0]));
     }
     
     // Agrupar vínculos por examen_id para reducir consultas
@@ -123,7 +125,7 @@ export async function POST(req: NextRequest) {
       
       if (resultadosError) {
         if (DEBUG) {
-          console.error(`Error al obtener resultados del examen ${examenId}:`, resultadosError);
+          logger.error(`Error al obtener resultados del examen ${examenId}:`, resultadosError);
         }
         continue;
       }
@@ -154,7 +156,7 @@ export async function POST(req: NextRequest) {
           
           if (calificacionError) {
             if (DEBUG) {
-              console.error(`Error al verificar calificación existente:`, calificacionError);
+              logger.error(`Error al verificar calificación existente:`, calificacionError);
             }
             continue;
           }
@@ -168,7 +170,7 @@ export async function POST(req: NextRequest) {
             
             if (updateError) {
               if (DEBUG) {
-                console.error(`Error al actualizar calificación:`, updateError);
+                logger.error(`Error al actualizar calificación:`, updateError);
               }
             }
           } else {
@@ -183,7 +185,7 @@ export async function POST(req: NextRequest) {
             
             if (insertError) {
               if (DEBUG) {
-                console.error(`Error al insertar calificación:`, insertError);
+                logger.error(`Error al insertar calificación:`, insertError);
               }
             }
           }
@@ -200,7 +202,7 @@ export async function POST(req: NextRequest) {
     
   } catch (error: unknown) {
     if (DEBUG) {
-      console.error('Error en sincronización de notas:', error);
+      logger.error('Error en sincronización de notas:', error);
     }
     return NextResponse.json({
       error: 'Error interno del servidor',
