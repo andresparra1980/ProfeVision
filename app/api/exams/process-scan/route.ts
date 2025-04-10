@@ -211,7 +211,7 @@ function normalizeQRData(qrData: string | Record<string, unknown>): Record<strin
       // Try to parse as JSON first
       const parsedData = JSON.parse(qrData);
       return normalizeQRData(parsedData); // Recursively normalize the parsed data
-    } catch (e) {
+    } catch (_e) {
       // Not JSON, try to extract IDs from the string
       
       // Check if it might be colon-separated UUIDs (common QR format)
@@ -387,6 +387,7 @@ export async function POST(request: NextRequest) {
             const studentInfo = normalizedResult.student_info;
             if (studentInfo && typeof studentInfo === 'object') {
               // Use type assertion to avoid TypeScript errors
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const typedStudentInfo = studentInfo as Record<string, any>;
               
               if (typedStudentInfo.id && !qrDataObj.studentId) {

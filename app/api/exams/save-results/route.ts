@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { promises as fsPromises } from 'fs';
 import * as path from 'path';
 import sharp from 'sharp';
+import logger from '@/lib/utils/logger';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -33,7 +34,7 @@ async function compressImage(imageBase64: string, quality: number = 80, maxSize:
     
     // Verificar que el buffer no está vacío
     if (buffer.length < 100) {
-      if (DEBUG) console.error('Buffer de imagen demasiado pequeño para comprimir');
+      if (DEBUG) logger.error('Buffer de imagen demasiado pequeño para comprimir');
       return buffer;
     }
     
@@ -47,7 +48,7 @@ async function compressImage(imageBase64: string, quality: number = 80, maxSize:
       // Si es la imagen original, rotarla 90 grados a la derecha para corregir la orientación
       if (isOriginal) {
         sharpInstance.rotate(90);
-        if (DEBUG) console.log('Aplicando rotación de 90° a imagen original para corregir orientación');
+        if (DEBUG) logger.log('Aplicando rotación de 90° a imagen original para corregir orientación');
       }
       
       // Redimensionar si es muy grande
@@ -60,26 +61,26 @@ async function compressImage(imageBase64: string, quality: number = 80, maxSize:
       sharpInstance.png({ quality });
       
       if (DEBUG) {
-        console.log(`Procesando imagen como PNG, ${isOriginal ? 'con rotación' : 'sin rotación'}`);
+        logger.log(`Procesando imagen como PNG, ${isOriginal ? 'con rotación' : 'sin rotación'}`);
       }
       
       return await sharpInstance.toBuffer()
         .catch(err => {
-          if (DEBUG) console.error('Error en sharp.toBuffer():', err);
+          if (DEBUG) logger.error('Error en sharp.toBuffer():', err);
           return buffer; // Devolver buffer original en caso de error
         });
     } catch (sharpError) {
-      if (DEBUG) console.error('Error al usar sharp:', sharpError);
+      if (DEBUG) logger.error('Error al usar sharp:', sharpError);
       return buffer; // Devolver buffer original en caso de error
     }
   } catch (error) {
-    if (DEBUG) console.error('Error al comprimir imagen:', error);
+    if (DEBUG) logger.error('Error al comprimir imagen:', error);
     
     // Si la decodificación base64 falla, intentamos devolver un buffer vacío
     try {
       return Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
     } catch (fallbackError) {
-      if (DEBUG) console.error('Error en fallback de buffer:', fallbackError);
+      if (DEBUG) logger.error('Error en fallback de buffer:', fallbackError);
       return Buffer.from([]); // Buffer vacío como último recurso
     }
   }
@@ -113,7 +114,7 @@ async function cleanupTemporaryFiles() {
         }
       } catch (error) {
         if (DEBUG) {
-          console.error(`Error al procesar archivo ${filePath}:`, error);
+          logger.error(`Error al procesar archivo ${filePath}:`, error);
         }
       }
     });
@@ -122,7 +123,7 @@ async function cleanupTemporaryFiles() {
   } catch (error) {
     // Si el directorio no existe o hay otro error, lo registramos pero continuamos
     if (DEBUG) {
-      console.error('Error al limpiar archivos temporales:', error);
+      logger.error('Error al limpiar archivos temporales:', error);
     }
   }
 }
@@ -173,7 +174,7 @@ interface SaveResultsData {
 export async function POST(req: NextRequest) {
   try {
     if (DEBUG) {
-      console.log('POST /api/exams/save-results iniciando...');
+      logger.log('POST /api/exams/save-results iniciando...');
     }
 
     const data = await req.json() as SaveResultsData;
@@ -194,7 +195,7 @@ export async function POST(req: NextRequest) {
     // Extraer información del QR
     const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
     const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
-    const groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
+    const _groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
     
     if (!examId || !studentId) {
       return NextResponse.json({ error: 'Datos de QR incompletos' }, { status: 400 });
@@ -219,7 +220,7 @@ export async function POST(req: NextRequest) {
 
       if (examError) {
         if (DEBUG) {
-          console.error('Error al obtener profesor_id del examen:', examError);
+          logger.error('Error al obtener profesor_id del examen:', examError);
         }
         // Continuamos aunque no tengamos el profesor_id
       } else {
@@ -227,7 +228,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (error) {
       if (DEBUG) {
-        console.error('Error al obtener profesor_id:', error);
+        logger.error('Error al obtener profesor_id:', error);
       }
       // Continuamos sin profesor_id
     }
@@ -244,11 +245,11 @@ export async function POST(req: NextRequest) {
         
       if (existingResultsError) {
         if (DEBUG) {
-          console.error('Error al buscar resultados existentes:', existingResultsError);
+          logger.error('Error al buscar resultados existentes:', existingResultsError);
         }
       } else if (existingResults && existingResults.length > 0) {
         if (DEBUG) {
-          console.log(`Encontrados ${existingResults.length} resultados existentes para eliminar`);
+          logger.log(`Encontrados ${existingResults.length} resultados existentes para eliminar`);
         }
         
         // Procesar cada resultado encontrado
@@ -263,11 +264,11 @@ export async function POST(req: NextRequest) {
             
           if (escaneosError) {
             if (DEBUG) {
-              console.error(`Error al buscar escaneos para resultado ${resultadoId}:`, escaneosError);
+              logger.error(`Error al buscar escaneos para resultado ${resultadoId}:`, escaneosError);
             }
           } else if (escaneos && escaneos.length > 0) {
             if (DEBUG) {
-              console.log(`Encontrados ${escaneos.length} escaneos para eliminar`);
+              logger.log(`Encontrados ${escaneos.length} escaneos para eliminar`);
             }
             
             // Eliminar las imágenes de S3 para cada escaneo
@@ -283,14 +284,14 @@ export async function POST(req: NextRequest) {
                     
                   if (error) {
                     if (DEBUG) {
-                      console.error(`Error al eliminar imagen original: ${error.message}`, error);
+                      logger.error(`Error al eliminar imagen original: ${error.message}`, error);
                     }
                   } else if (DEBUG) {
-                    console.log(`Eliminada imagen original: ${rutaRelativa}`, data);
+                    logger.log(`Eliminada imagen original: ${rutaRelativa}`, data);
                   }
                 } catch (e) {
                   if (DEBUG) {
-                    console.error(`Excepción al eliminar imagen original:`, e);
+                    logger.error(`Excepción al eliminar imagen original:`, e);
                   }
                 }
               }
@@ -305,14 +306,14 @@ export async function POST(req: NextRequest) {
                     
                   if (error) {
                     if (DEBUG) {
-                      console.error(`Error al eliminar imagen procesada: ${error.message}`, error);
+                      logger.error(`Error al eliminar imagen procesada: ${error.message}`, error);
                     }
                   } else if (DEBUG) {
-                    console.log(`Eliminada imagen procesada: ${rutaRelativa}`, data);
+                    logger.log(`Eliminada imagen procesada: ${rutaRelativa}`, data);
                   }
                 } catch (e) {
                   if (DEBUG) {
-                    console.error(`Excepción al eliminar imagen procesada:`, e);
+                    logger.error(`Excepción al eliminar imagen procesada:`, e);
                   }
                 }
               }
@@ -325,7 +326,7 @@ export async function POST(req: NextRequest) {
                 
               if (deleteEscaneoError) {
                 if (DEBUG) {
-                  console.error(`Error al eliminar escaneo ${escaneo.id}:`, deleteEscaneoError);
+                  logger.error(`Error al eliminar escaneo ${escaneo.id}:`, deleteEscaneoError);
                 }
               }
             }
@@ -339,7 +340,7 @@ export async function POST(req: NextRequest) {
             
           if (deleteRespuestasError) {
             if (DEBUG) {
-              console.error(`Error al eliminar respuestas para resultado ${resultadoId}:`, deleteRespuestasError);
+              logger.error(`Error al eliminar respuestas para resultado ${resultadoId}:`, deleteRespuestasError);
             }
           }
           
@@ -351,14 +352,14 @@ export async function POST(req: NextRequest) {
             
           if (deleteResultadoError) {
             if (DEBUG) {
-              console.error(`Error al eliminar resultado ${resultadoId}:`, deleteResultadoError);
+              logger.error(`Error al eliminar resultado ${resultadoId}:`, deleteResultadoError);
             }
           }
         }
       }
     } catch (error) {
       if (DEBUG) {
-        console.error('Error al procesar registros existentes:', error);
+        logger.error('Error al procesar registros existentes:', error);
       }
       // Continuamos aunque haya errores en la limpieza previa
     }
@@ -372,7 +373,7 @@ export async function POST(req: NextRequest) {
 
     if (preguntasError) {
       if (DEBUG) {
-        console.error('Error al obtener preguntas:', preguntasError);
+        logger.error('Error al obtener preguntas:', preguntasError);
       }
       return NextResponse.json(
         { error: 'Error al obtener preguntas del examen' },
@@ -398,7 +399,7 @@ export async function POST(req: NextRequest) {
     if (isDuplicate && duplicateInfo && duplicateInfo.resultadoId) {
       try {
         if (DEBUG) {
-          console.log('Eliminando resultado duplicado anterior:', duplicateInfo.resultadoId);
+          logger.log('Eliminando resultado duplicado anterior:', duplicateInfo.resultadoId);
         }
 
         // 1. Primero obtener datos del resultado escaneado
@@ -410,7 +411,7 @@ export async function POST(req: NextRequest) {
 
         if (escaneoError) {
           if (DEBUG) {
-            console.error('Error al obtener datos del escaneo anterior:', escaneoError);
+            logger.error('Error al obtener datos del escaneo anterior:', escaneoError);
           }
         }
 
@@ -425,14 +426,14 @@ export async function POST(req: NextRequest) {
                 
               if (error) {
                 if (DEBUG) {
-                  console.error(`Error al eliminar imagen original S3: ${error.message}`, error);
+                  logger.error(`Error al eliminar imagen original S3: ${error.message}`, error);
                 }
               } else if (DEBUG) {
-                console.log(`Eliminada imagen original: ${escaneoData.ruta_s3_original}`, data);
+                logger.log(`Eliminada imagen original: ${escaneoData.ruta_s3_original}`, data);
               }
             } catch (e) {
               if (DEBUG) {
-                console.error(`Excepción al eliminar imagen original S3:`, e);
+                logger.error(`Excepción al eliminar imagen original S3:`, e);
               }
             }
           } else if (escaneoData.archivo_original) {
@@ -448,14 +449,14 @@ export async function POST(req: NextRequest) {
                 
               if (error) {
                 if (DEBUG) {
-                  console.error(`Error al eliminar imagen original S3 (ruta antigua): ${error.message}`, error);
+                  logger.error(`Error al eliminar imagen original S3 (ruta antigua): ${error.message}`, error);
                 }
               } else if (DEBUG) {
-                console.log(`Eliminada imagen original (ruta antigua): ${rutaAntigua}`, data);
+                logger.log(`Eliminada imagen original (ruta antigua): ${rutaAntigua}`, data);
               }
             } catch (e) {
               if (DEBUG) {
-                console.error(`Excepción al eliminar imagen original S3 (ruta antigua):`, e);
+                logger.error(`Excepción al eliminar imagen original S3 (ruta antigua):`, e);
               }
             }
           }
@@ -468,14 +469,14 @@ export async function POST(req: NextRequest) {
                 
               if (error) {
                 if (DEBUG) {
-                  console.error(`Error al eliminar imagen procesada S3: ${error.message}`, error);
+                  logger.error(`Error al eliminar imagen procesada S3: ${error.message}`, error);
                 }
               } else if (DEBUG) {
-                console.log(`Eliminada imagen procesada: ${escaneoData.ruta_s3_procesado}`, data);
+                logger.log(`Eliminada imagen procesada: ${escaneoData.ruta_s3_procesado}`, data);
               }
             } catch (e) {
               if (DEBUG) {
-                console.error(`Excepción al eliminar imagen procesada S3:`, e);
+                logger.error(`Excepción al eliminar imagen procesada S3:`, e);
               }
             }
           } else if (escaneoData.archivo_procesado) {
@@ -491,14 +492,14 @@ export async function POST(req: NextRequest) {
                 
               if (error) {
                 if (DEBUG) {
-                  console.error(`Error al eliminar imagen procesada S3 (ruta antigua): ${error.message}`, error);
+                  logger.error(`Error al eliminar imagen procesada S3 (ruta antigua): ${error.message}`, error);
                 }
               } else if (DEBUG) {
-                console.log(`Eliminada imagen procesada (ruta antigua): ${rutaAntigua}`, data);
+                logger.log(`Eliminada imagen procesada (ruta antigua): ${rutaAntigua}`, data);
               }
             } catch (e) {
               if (DEBUG) {
-                console.error(`Excepción al eliminar imagen procesada S3 (ruta antigua):`, e);
+                logger.error(`Excepción al eliminar imagen procesada S3 (ruta antigua):`, e);
               }
             }
           }
@@ -511,7 +512,7 @@ export async function POST(req: NextRequest) {
 
           if (deleteEscaneoError) {
             if (DEBUG) {
-              console.error('Error al eliminar escaneo anterior:', deleteEscaneoError);
+              logger.error('Error al eliminar escaneo anterior:', deleteEscaneoError);
             }
           }
         }
@@ -524,7 +525,7 @@ export async function POST(req: NextRequest) {
 
         if (deleteRespuestasError) {
           if (DEBUG) {
-            console.error('Error al eliminar respuestas anteriores:', deleteRespuestasError);
+            logger.error('Error al eliminar respuestas anteriores:', deleteRespuestasError);
           }
         }
 
@@ -536,12 +537,12 @@ export async function POST(req: NextRequest) {
 
         if (deleteError) {
           if (DEBUG) {
-            console.error('Error al eliminar resultado anterior:', deleteError);
+            logger.error('Error al eliminar resultado anterior:', deleteError);
           }
         }
       } catch (error) {
         if (DEBUG) {
-          console.error('Error durante la eliminación del resultado anterior:', error);
+          logger.error('Error durante la eliminación del resultado anterior:', error);
         }
       }
     }
@@ -575,7 +576,7 @@ export async function POST(req: NextRequest) {
 
     if (originalError) {
       if (DEBUG) {
-        console.error('Error al subir imagen original:', originalError);
+        logger.error('Error al subir imagen original:', originalError);
       }
       return NextResponse.json(
         { error: 'Error al guardar imagen original' },
@@ -593,7 +594,7 @@ export async function POST(req: NextRequest) {
 
     if (processedError) {
       if (DEBUG) {
-        console.error('Error al subir imagen procesada:', processedError);
+        logger.error('Error al subir imagen procesada:', processedError);
       }
       return NextResponse.json(
         { error: 'Error al guardar imagen procesada' },
@@ -627,7 +628,7 @@ export async function POST(req: NextRequest) {
 
     if (resultadoExamenError) {
       if (DEBUG) {
-        console.error('Error al guardar en resultados_examen:', resultadoExamenError);
+        logger.error('Error al guardar en resultados_examen:', resultadoExamenError);
       }
       return NextResponse.json(
         { error: 'Error al guardar resultados' },
@@ -654,7 +655,7 @@ export async function POST(req: NextRequest) {
     
     if (respuestasError) {
       if (DEBUG) {
-        console.error('Error al guardar respuestas individuales:', respuestasError);
+        logger.error('Error al guardar respuestas individuales:', respuestasError);
       }
       // Aunque haya error en las respuestas, continuamos con el resto del proceso
       // para no perder los datos del resultado principal
@@ -695,7 +696,7 @@ export async function POST(req: NextRequest) {
 
     if (resultadoError) {
       if (DEBUG) {
-        console.error('Error al guardar resultados de escaneo:', resultadoError);
+        logger.error('Error al guardar resultados de escaneo:', resultadoError);
       }
       return NextResponse.json(
         { error: 'Error al guardar imágenes escaneadas' },
@@ -725,7 +726,7 @@ export async function POST(req: NextRequest) {
 
   } catch (error: unknown) {
     if (DEBUG) {
-      console.error('Error en POST /api/exams/save-results:', error);
+      logger.error('Error en POST /api/exams/save-results:', error);
     }
     return NextResponse.json(
       { error: 'Error interno del servidor' },
