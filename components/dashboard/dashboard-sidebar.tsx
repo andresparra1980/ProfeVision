@@ -100,15 +100,18 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-40 flex w-64 flex-col justify-between bg-card transition-transform duration-200 md:static md:translate-x-0",
+          "border-r border-muted/20 dark:border-muted/40",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div>
           <div className="flex h-16 items-center justify-between px-4">
-            <Link href="/dashboard" className="flex items-center space-x-2">
+            <Link href="/dashboard" className="hidden md:flex items-center space-x-2">
               <span className="text-xl font-bold text-secondary">ProfeVision</span>
             </Link>
-            <ModeToggle />
+            <div className="flex-1 md:flex-none flex justify-end">
+              <ModeToggle />
+            </div>
           </div>
 
           <nav className="space-y-1 px-4 py-6">
