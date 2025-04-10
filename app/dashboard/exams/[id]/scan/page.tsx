@@ -18,7 +18,7 @@ import logger from '@/lib/utils/logger';
 const DEBUG = process.env.NODE_ENV === 'development';
 
 // Datos de fallback para cuando no se puede cargar la información del examen
-const fallbackExamData = {
+const _fallbackExamData = {
   id: 'fallback-exam',
   title: 'Examen (Modo Fallback)',
   subject: {
@@ -36,7 +36,7 @@ interface OMRAnswer {
   num_options: number;
 }
 
-interface OMRResult {
+interface _OMRResult {
   success: boolean;
   qr_data: string;
   total_questions: number;
@@ -100,8 +100,10 @@ interface ScanResult {
 }
 
 // Componente para mostrar información detallada del QR en la página de resultados
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ScanQRInfo = ({ qrData, qrValidation, examId }: { qrData: any; qrValidation?: QRValidation; examId: string }) => {
   // Si qrData ya es un objeto (por el procesamiento en el endpoint)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let decodedData: any = qrData;
   let rawData: string = '';
   let validation: QRValidation | undefined = qrValidation;
@@ -157,7 +159,7 @@ const ScanQRInfo = ({ qrData, qrValidation, examId }: { qrData: any; qrValidatio
       setIsLoadingNames(true);
       try {
         if (DEBUG) {
-          console.log('Cargando nombres para entidades:', {
+          logger.log('Cargando nombres para entidades:', {
             examId: currentExamId,
             studentId: currentStudentId,
             groupId: currentGroupId
@@ -184,7 +186,7 @@ const ScanQRInfo = ({ qrData, qrValidation, examId }: { qrData: any; qrValidatio
     
     loadEntityNames();
     
-  }, [decodedData?.examId, decodedData?.studentId, decodedData?.groupId]);
+  }, [decodedData, isLoadingNames, decodedData?.examId, decodedData?.studentId, decodedData?.groupId]);
   
   if (!decodedData) {
     return (
@@ -357,21 +359,21 @@ export default function ExamScanPage() {
       setError(null);
       
       if (DEBUG) {
-        console.log(`Intentando cargar detalles para el examen ID: ${examId}`);
+        logger.log(`Intentando cargar detalles para el examen ID: ${examId}`);
       }
       
       try {
         // Intentar obtener datos de la API principal
         const mainApiUrl = `/api/exams/${examId}/details`;
         if (DEBUG) {
-          console.log(`Cargando desde endpoint principal: ${mainApiUrl}`);
+          logger.log(`Cargando desde endpoint principal: ${mainApiUrl}`);
         }
         
         const response = await fetch(mainApiUrl);
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
-          console.error(`Error al cargar datos del examen. Status: ${response.status}`, errorData);
+          logger.error(`Error al cargar datos del examen. Status: ${response.status}`, errorData);
           
           throw new Error(
             `No se pudieron cargar los detalles del examen (${response.status}): ${
@@ -382,7 +384,7 @@ export default function ExamScanPage() {
         
         const data = await response.json();
         if (DEBUG) {
-          console.log('Datos del examen recibidos correctamente:', data);
+          logger.log('Datos del examen recibidos correctamente:', data);
         }
         
         if (!data) {
@@ -391,12 +393,12 @@ export default function ExamScanPage() {
         
         setExamDetails(data);
       } catch (err) {
-        console.error('Error en fetchExamDetails:', err);
+        logger.error('Error en fetchExamDetails:', err);
         setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos del examen');
         
         // Intentar usar datos de fallback para poder continuar
         if (DEBUG) {
-          console.log('Usando datos de fallback para el examen...');
+          logger.log('Usando datos de fallback para el examen...');
         }
         setExamDetails({
           id: typeof params.id === 'string' ? params.id : 
@@ -422,9 +424,10 @@ export default function ExamScanPage() {
   }, [examId, params.id]);
   
   // Manejar cuando se completa un escaneo
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleScanComplete = (result: any, imageUrl: string) => {
     if (DEBUG) {
-      console.log('Scan completed with result:', result);
+      logger.log('Scan completed with result:', result);
     }
     // Asegurarnos de que el resultado tenga las propiedades correctas
     const processedResult: ScanResult = {
@@ -445,13 +448,13 @@ export default function ExamScanPage() {
       processedResult.qr_data = result.qr_data;
       processedResult.qrData = result.qr_data; // Duplicamos para asegurar compatibilidad
       if (DEBUG) {
-        console.log('Asignado desde result.qr_data:', processedResult.qr_data);
+        logger.log('Asignado desde result.qr_data:', processedResult.qr_data);
       }
     } else if (result.qrData) {
       processedResult.qrData = result.qrData;
       processedResult.qr_data = result.qrData; // Duplicamos para asegurar compatibilidad
       if (DEBUG) {
-        console.log('Asignado desde result.qrData:', processedResult.qrData);
+        logger.log('Asignado desde result.qrData:', processedResult.qrData);
       }
     }
     
@@ -459,7 +462,7 @@ export default function ExamScanPage() {
     if (result.qr_validation) {
       processedResult.qr_validation = result.qr_validation;
       if (DEBUG) {
-        console.log('QR validation:', processedResult.qr_validation);
+        logger.log('QR validation:', processedResult.qr_validation);
       }
     }
     
@@ -481,7 +484,7 @@ export default function ExamScanPage() {
     }
     
     if (DEBUG) {
-      console.log('Resultado procesado final:', JSON.stringify(processedResult).substring(0, 300) + '...');
+      logger.log('Resultado procesado final:', JSON.stringify(processedResult).substring(0, 300) + '...');
     }
     
     setScanResult(processedResult);
@@ -512,14 +515,14 @@ export default function ExamScanPage() {
           // Intentar obtener datos de la API principal
           const mainApiUrl = `/api/exams/${examId}/details`;
           if (DEBUG) {
-            console.log(`Cargando desde endpoint principal: ${mainApiUrl}`);
+            logger.log(`Cargando desde endpoint principal: ${mainApiUrl}`);
           }
           
           const response = await fetch(mainApiUrl);
           
           if (!response.ok) {
             const errorData = await response.json().catch(() => null);
-            console.error(`Error al cargar datos del examen. Status: ${response.status}`, errorData);
+            logger.error(`Error al cargar datos del examen. Status: ${response.status}`, errorData);
             
             throw new Error(
               `No se pudieron cargar los detalles del examen (${response.status}): ${
@@ -530,7 +533,7 @@ export default function ExamScanPage() {
           
           const data = await response.json();
           if (DEBUG) {
-            console.log('Datos del examen recibidos correctamente:', data);
+            logger.log('Datos del examen recibidos correctamente:', data);
           }
           
           if (!data) {
@@ -539,12 +542,12 @@ export default function ExamScanPage() {
           
           setExamDetails(data);
         } catch (err) {
-          console.error('Error en fetchExamDetails:', err);
+          logger.error('Error en fetchExamDetails:', err);
           setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos del examen');
           
           // Intentar usar datos de fallback para poder continuar
           if (DEBUG) {
-            console.log('Usando datos de fallback para el examen...');
+            logger.log('Usando datos de fallback para el examen...');
           }
           setExamDetails({
             id: typeof params.id === 'string' ? params.id : 
@@ -905,7 +908,7 @@ export default function ExamScanPage() {
                             alt="Escaneo con respuestas detectadas" 
                             className="w-full object-contain"
                             onError={(e) => {
-                              console.error('Error cargando imagen procesada:', (e.target as HTMLImageElement).src);
+                              logger.error('Error cargando imagen procesada:', (e.target as HTMLImageElement).src);
                             }}
                           />
                           <div className="p-2 text-center text-xs text-muted-foreground">
