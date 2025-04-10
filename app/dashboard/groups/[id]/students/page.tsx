@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Search, X, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
 import { ExcelImport } from "@/components/students/excel-import";
@@ -20,11 +19,6 @@ interface Student {
   identificacion: string;
   email: string;
   estudiante_id?: string;
-}
-
-interface ImportResult {
-  success: boolean;
-  count?: number;
 }
 
 interface GroupData {
@@ -62,7 +56,7 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
   const [isOpen, setIsOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  const fetchGroupDetails = async () => {
+  const fetchGroupDetails = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -73,20 +67,21 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
 
       if (error) throw error;
       setGroup(data);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching group details:", error);
+      const errorMessage = error instanceof Error ? error.message : "No se pudo cargar la información del grupo";
       toast({
         title: "Error",
-        description: "No se pudo cargar la información del grupo",
+        description: errorMessage,
         variant: "destructive",
       });
       router.push("/dashboard/groups");
     } finally {
       setLoading(false);
     }
-  };
+  }, [groupId, router]);
 
-  const fetchGroupStudents = async () => {
+  const fetchGroupStudents = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("estudiante_grupo")
@@ -107,20 +102,21 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
       }));
       
       setGroupStudents(formattedData);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching group students:", error);
+      const errorMessage = error instanceof Error ? error.message : "Could not load students for this group";
       toast({
         title: "Error",
-        description: "Could not load students for this group",
+        description: errorMessage,
         variant: "destructive",
       });
     }
-  };
+  }, [groupId]);
 
   useEffect(() => {
     fetchGroupDetails();
     fetchGroupStudents();
-  }, [groupId]);
+  }, [fetchGroupDetails, fetchGroupStudents]);
 
   async function searchStudents() {
     if (!searchQuery.trim()) {
@@ -145,11 +141,12 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
       const filteredResults = data.filter((student: Student) => !studentIds.includes(student.id));
       
       setSearchResults(filteredResults);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error searching students:", error);
+      const errorMessage = error instanceof Error ? error.message : "Could not search for students";
       toast({
         title: "Error",
-        description: "Could not search for students",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -190,11 +187,12 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
         title: "Estudiante agregado",
         description: "El estudiante ha sido agregado al grupo exitosamente",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error adding student to group:", error);
+      const errorMessage = error instanceof Error ? error.message : "No se pudo agregar el estudiante al grupo";
       toast({
         title: "Error",
-        description: error.message || "No se pudo agregar el estudiante al grupo",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -218,11 +216,12 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
         title: "Estudiante removido",
         description: "El estudiante ha sido removido del grupo exitosamente",
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error removing student from group:", error);
+      const errorMessage = error instanceof Error ? error.message : "No se pudo remover el estudiante del grupo";
       toast({
         title: "Error",
-        description: "No se pudo remover el estudiante del grupo",
+        description: errorMessage,
         variant: "destructive",
       });
     }
