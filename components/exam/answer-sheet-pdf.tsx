@@ -15,10 +15,10 @@ const PAPER_SIZES = {
 type PaperSize = keyof typeof PAPER_SIZES;
 
 // Convertir puntos a milímetros
-const ptToMm = (pt: number) => pt * 0.352778;
+const _ptToMm = (pt: number) => pt * 0.352778;
 
 // Generar hash de validación
-const generateValidationHash = (studentId: string, examId: string) => {
+const _generateValidationHash = (studentId: string, examId: string) => {
   const secret = process.env.EXAM_RESPONSE_SHEET_SECRET_KEY || 'default-secret';
   const salt = process.env.EXAM_RESPONSE_SHEET_SALT || 'default-salt';
   const data = `${studentId}:${examId}:${salt}`;
@@ -246,6 +246,7 @@ export const AnswerSheetPDF = ({ exam, student, group, paperSize = 'LETTER' }: A
           {/* Encabezado con QR e información */}
           <View style={styles.header}>
             <View style={styles.qrCode}>
+              {/* El componente Image de @react-pdf/renderer no soporta el atributo alt */}
               <Image src={qrCodeUrl} style={{ width: 112, height: 112 }} />
             </View>
             <View style={styles.headerInfo}>

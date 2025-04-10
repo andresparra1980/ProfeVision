@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
@@ -178,6 +178,162 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
     }
   }, [qrData]);
 
+  // Función para calcular la puntuación del examen
+  const calculateExamScore = useCallback(async (examId: string) => {
+    try {
+      setExamScore(prev => ({ ...prev, loading: true, error: null }));
+      
+      // Obtener preguntas y puntaje total del examen
+      const [questionsRes, examRes] = await Promise.all([
+        fetch(`/api/exams/${examId}/questions`),
+        fetch(`/api/exams/${examId}/details`)
+      ]);
+      
+      if (!questionsRes.ok) throw new Error(`Error al obtener preguntas del examen: ${questionsRes.statusText}`);
+      if (!examRes.ok) throw new Error(`Error al obtener detalles del examen: ${examRes.statusText}`);
+      
+      const [questions, examData] = await Promise.all([
+        questionsRes.json(),
+        examRes.json()
+      ]);
+      
+      // Obtener respuestas correctas para TODAS las preguntas
+      const questionIds = questions.map((q: { id: string }) => q.id);
+      
+      // Obtener respuestas correctas para cada pregunta
+      const correctAnswersRes = await fetch('/api/opciones-respuesta/correct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ questionIds }),
+      });
+      
+      if (!correctAnswersRes.ok) throw new Error(`Error al obtener respuestas correctas: ${correctAnswersRes.statusText}`);
+      const correctAnswersData = await correctAnswersRes.json();
+      
+      // Mapear respuestas correctas por orden de pregunta
+      const correctAnswersMap = new Map();
+      correctAnswersData.forEach((option: OpcionRespuesta) => {
+        const question = questions.find((q: { id: string, orden: number }) => q.id === option.pregunta_id);
+        if (question && option.es_correcta) {
+          let letterAnswer = '';
+          switch (option.orden) {
+            case 1: letterAnswer = 'A'; break;
+            case 2: letterAnswer = 'B'; break;
+            case 3: letterAnswer = 'C'; break;
+            case 4: letterAnswer = 'D'; break;
+            case 5: letterAnswer = 'E'; break;
+            case 6: letterAnswer = 'F'; break;
+            case 7: letterAnswer = 'G'; break;
+            case 8: letterAnswer = 'H'; break;
+            default: letterAnswer = '';
+          }
+          correctAnswersMap.set(question.orden, letterAnswer);
+        }
+      });
+
+      // Marcar las respuestas y asignar los IDs de pregunta y opción
+      // Usamos directamente el estado actual de answers en vez de normalizedAnswers
+      setAnswers(prevAnswers => {
+        // Normalizar las respuestas actuales para procesamiento
+        const currentAnswers = normalizeAnswers(prevAnswers);
+        
+        const answersWithIds = currentAnswers.map((answer: Answer): Answer => {
+          const question = questions.find((q: { orden: number, id: string, habilitada: boolean }) => q.orden === answer.number);
+          
+          // Encontrar la opción seleccionada basada en la letra de respuesta
+          let opcionId = null;
+          let esCorrecta = false;
+          
+          if (question) {
+            // Obtener el orden basado en la letra de respuesta (A=1, B=2, etc)
+            const orden = OPTION_LETTERS.indexOf(answer.value.toUpperCase()) + 1;
+            
+            // Buscar la opción correspondiente independientemente de si está habilitada o no
+            const opcionesParaPregunta = correctAnswersData.filter(
+              (opt: OpcionRespuesta) => opt.pregunta_id === question.id
+            );
+            
+            // Encontrar la opción específica que corresponde a la respuesta del estudiante
+            const opcionSeleccionada = opcionesParaPregunta.find(
+              (opt: OpcionRespuesta) => opt.orden === orden
+            );
+            
+            // Asignar el ID de la opción seleccionada
+            opcionId = opcionSeleccionada?.id;
+            
+            // Encontrar la opción correcta para esta pregunta
+            const opcionCorrecta = opcionesParaPregunta.find(
+              (opt: OpcionRespuesta) => opt.es_correcta
+            );
+            
+            // Determinar si la respuesta es correcta
+            esCorrecta = opcionCorrecta?.orden === orden;
+          }
+
+          return {
+            ...answer,
+            number: answer.number,
+            value: answer.value,
+            confidence: answer.confidence || 100,
+            num_options: answer.num_options || DEFAULT_NUM_OPTIONS,
+            disabled: question ? !question.habilitada : false,
+            pregunta_id: question?.id,
+            opcion_id: opcionId,
+            es_correcta: esCorrecta
+          };
+        });
+        
+        // Cálculos para la calificación
+        const puntajeTotal = parseFloat(examData.puntaje_total);
+        const preguntasHabilitadas = questions.filter((q: { habilitada: boolean }) => q.habilitada);
+        
+        // Contar respuestas correctas (solo de preguntas habilitadas)
+        let correctCount = 0;
+        answersWithIds.forEach(answer => {
+          if (!answer.disabled && answer.es_correcta) {
+            correctCount++;
+          }
+        });
+        
+        // Calcular porcentaje y puntaje obtenido
+        const totalQuestions = preguntasHabilitadas.length;
+        const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+        const puntajeObtenido = (percentage / 100) * puntajeTotal;
+        
+        // Actualizar el estado con los nuevos cálculos
+        setExamScore(prev => ({
+          ...prev,
+          correctAnswers: correctCount,
+          totalQuestions,
+          percentage,
+          puntajeTotal,
+          puntajeObtenido,
+          loading: false,
+          error: null
+        }));
+        
+        // Devolver las respuestas actualizadas
+        return answersWithIds;
+      });
+      
+    } catch (error: unknown) {
+      if (DEBUG) {
+        logger.error("Error calculating exam score:", error);
+      }
+      setExamScore(prev => ({
+        ...prev,
+        correctAnswers: 0,
+        totalQuestions: 0,
+        percentage: 0,
+        loading: false,
+        error: (error as Error).message || "Error al calcular la calificación"
+      }));
+    }
+  }, []); // Ya no depende de normalizedAnswers
+
+  // Cargar entidades y calcular puntuación
   useEffect(() => {
     async function fetchEntityNames() {
       setEntityNames(prev => ({ ...prev, loading: true, error: null }));
@@ -275,10 +431,12 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           error: null
         });
         
-        // Ahora calculamos la calificación
-        await calculateExamScore(examId);
+        // Ahora calculamos la calificación solo si tenemos el examId
+        if (examId) {
+          calculateExamScore(examId);
+        }
         
-      } catch (error: Error | unknown) {
+      } catch (error: unknown) {
         if (DEBUG) {
           logger.error("Error fetching entity names:", error);
         }
@@ -290,160 +448,10 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       }
     }
     
-    async function calculateExamScore(examId: string) {
-      try {
-        setExamScore(prev => ({ ...prev, loading: true, error: null }));
-        
-        // Obtener preguntas y puntaje total del examen
-        const [questionsRes, examRes] = await Promise.all([
-          fetch(`/api/exams/${examId}/questions`),
-          fetch(`/api/exams/${examId}/details`)
-        ]);
-        
-        if (!questionsRes.ok) throw new Error(`Error al obtener preguntas del examen: ${questionsRes.statusText}`);
-        if (!examRes.ok) throw new Error(`Error al obtener detalles del examen: ${examRes.statusText}`);
-        
-        const [questions, examData] = await Promise.all([
-          questionsRes.json(),
-          examRes.json()
-        ]);
-        
-        // Obtener respuestas correctas para TODAS las preguntas
-        const questionIds = questions.map((q: { id: string }) => q.id);
-        
-        // Obtener respuestas correctas para cada pregunta
-        const correctAnswersRes = await fetch('/api/opciones-respuesta/correct', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ questionIds }),
-        });
-        
-        if (!correctAnswersRes.ok) throw new Error(`Error al obtener respuestas correctas: ${correctAnswersRes.statusText}`);
-        const correctAnswersData = await correctAnswersRes.json();
-        
-        // Mapear respuestas correctas por orden de pregunta
-        const correctAnswersMap = new Map();
-        correctAnswersData.forEach((option: OpcionRespuesta) => {
-          const question = questions.find((q: { id: string, orden: number }) => q.id === option.pregunta_id);
-          if (question && option.es_correcta) {
-            let letterAnswer = '';
-            switch (option.orden) {
-              case 1: letterAnswer = 'A'; break;
-              case 2: letterAnswer = 'B'; break;
-              case 3: letterAnswer = 'C'; break;
-              case 4: letterAnswer = 'D'; break;
-              case 5: letterAnswer = 'E'; break;
-              case 6: letterAnswer = 'F'; break;
-              case 7: letterAnswer = 'G'; break;
-              case 8: letterAnswer = 'H'; break;
-              default: letterAnswer = '';
-            }
-            correctAnswersMap.set(question.orden, letterAnswer);
-          }
-        });
-
-        // Marcar las respuestas y asignar los IDs de pregunta y opción
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        const answersWithIds = normalizedAnswers.map((answer: Answer): Answer => {
-          const question = questions.find((q: { orden: number, id: string, habilitada: boolean }) => q.orden === answer.number);
-          
-          // Encontrar la opción seleccionada basada en la letra de respuesta
-          let opcionId = null;
-          let esCorrecta = false;
-          
-          if (question) {
-            // Obtener el orden basado en la letra de respuesta (A=1, B=2, etc)
-            const orden = OPTION_LETTERS.indexOf(answer.value.toUpperCase()) + 1;
-            
-            // Buscar la opción correspondiente independientemente de si está habilitada o no
-            const opcionesParaPregunta = correctAnswersData.filter(
-              (opt: OpcionRespuesta) => opt.pregunta_id === question.id
-            );
-            
-            // Encontrar la opción específica que corresponde a la respuesta del estudiante
-            const opcionSeleccionada = opcionesParaPregunta.find(
-              (opt: OpcionRespuesta) => opt.orden === orden
-            );
-            
-            // Asignar el ID de la opción seleccionada
-            opcionId = opcionSeleccionada?.id;
-            
-            // Encontrar la opción correcta para esta pregunta
-            const opcionCorrecta = opcionesParaPregunta.find(
-              (opt: OpcionRespuesta) => opt.es_correcta
-            );
-            
-            // Determinar si la respuesta es correcta
-            esCorrecta = opcionCorrecta?.orden === orden;
-          }
-
-          return {
-            ...answer,
-            number: answer.number,
-            value: answer.value,
-            confidence: answer.confidence || 100,
-            num_options: answer.num_options || DEFAULT_NUM_OPTIONS,
-            disabled: question ? !question.habilitada : false,
-            pregunta_id: question?.id,
-            opcion_id: opcionId,
-            es_correcta: esCorrecta
-          };
-        });
-        
-        // Actualizar el estado de las respuestas con los IDs asignados
-        setAnswers(answersWithIds);
-        
-        const puntajeTotal = parseFloat(examData.puntaje_total);
-        
-        // Filtrar preguntas habilitadas solo para el cálculo de la nota
-        const preguntasHabilitadas = questions.filter((q: { habilitada: boolean }) => q.habilitada);
-        
-        // Contar respuestas correctas (solo de preguntas habilitadas)
-        let correctCount = 0;
-        answersWithIds.forEach(answer => {
-          if (!answer.disabled && answer.es_correcta) {
-            correctCount++;
-          }
-        });
-        
-        // Calcular porcentaje y puntaje obtenido
-        const totalQuestions = preguntasHabilitadas.length;
-        const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
-        const puntajeObtenido = (percentage / 100) * puntajeTotal;
-        
-        // Actualizar el estado con los nuevos cálculos
-        setExamScore(prev => ({
-          ...prev,
-          correctAnswers: correctCount,
-          totalQuestions,
-          percentage,
-          puntajeTotal,
-          puntajeObtenido,
-          loading: false,
-          error: null
-        }));
-        
-      } catch (error: Error | unknown) {
-        if (DEBUG) {
-          logger.error("Error calculating exam score:", error);
-        }
-        setExamScore(prev => ({
-          ...prev,
-          correctAnswers: 0,
-          totalQuestions: 0,
-          percentage: 0,
-          loading: false,
-          error: (error as Error).message || "Error al calcular la calificación"
-        }));
-      }
-    }
-    
     if (qrData) {
       fetchEntityNames();
     }
-  }, [qrData]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [qrData]); // Quitamos calculateExamScore de las dependencias
 
   // Actualizar el estado de answers cuando cambien las props
   useEffect(() => {
@@ -453,7 +461,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
     } else {
       setAnswers([]);
     }
-  }, [initialAnswers]); /* eslint-disable-line react-hooks/exhaustive-deps */
+  }, [initialAnswers]);
 
   // Función para cargar imagen desde URL y convertirla a base64
   const loadImageAsBase64 = async (url: string): Promise<string> => {
@@ -480,7 +488,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
-    } catch (error) {
+    } catch (error: unknown) {
       if (DEBUG) {
         logger.error('Error al cargar imagen:', error);
       }
@@ -494,7 +502,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       setSaving(true);
       
       // Verificar que tenemos todos los datos necesarios
-      if (!qrData || !normalizedAnswers.length || !processedImage || !originalImage || !examScore) {
+      if (!qrData || !answers.length || !processedImage || !originalImage || !examScore) {
         throw new Error("Faltan datos para guardar los resultados");
       }
       
@@ -509,10 +517,13 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         logger.log('Imágenes preparadas correctamente');
       }
       
+      // Crear una copia de las respuestas normalizadas para enviar
+      const answersToSend = answers.filter(a => a.number > 0 && a.value !== '').sort((a, b) => a.number - b.number);
+      
       // Preparar datos para enviar al endpoint
       const data = {
         qrData,
-        answers: normalizedAnswers,
+        answers: answersToSend,
         originalImage: originalImageBase64,
         processedImage: processedImageBase64,
         examScore,
@@ -561,7 +572,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         onSaved(result.resultado_id);
       }
       
-    } catch (error: Error | unknown) {
+    } catch (error: unknown) {
       if (DEBUG) {
         logger.error("Error al guardar resultados:", error);
       }

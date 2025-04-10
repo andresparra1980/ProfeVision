@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { ImagePlus, Upload, AlertTriangle, Camera, Loader2, Check, X, RefreshCw, AlertCircle, QrCode, CheckCircle2, XCircle } from 'lucide-react';
@@ -74,60 +74,56 @@ export function ExamScanner({
   const [fileUploadMode, setFileUploadMode] = useState<boolean>(true);
   const [_errorMessage, setErrorMessage] = useState<string | null>(null);
   const [_progress, setProgress] = useState({ status: 'idle', percent: 0 });
+  const [connectionError, setConnectionError] = useState(false);
+  const [testingConnection, setTestingConnection] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [hasCameraSupport, setHasCameraSupport] = useState(false);
 
   // Función para iniciar la cámara
-  const startCamera = useCallback(async () => {
-    setCameraStatus('checking');
+  const startCamera = async () => {
+    if (!hasCameraSupport) {
+      toast.error('Este dispositivo no soporta acceso a la cámara');
+      return;
+    }
     
     try {
-      // Detener stream anterior si existe
+      // Si ya hay una transmisión activa, la detenemos primero
       if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
       }
       
-      // Verificar si mediaDevices está disponible
-      if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
-        if (DEBUG) {
-          // eslint-disable-next-line no-console
-          console.error('MediaDevices API no disponible en este navegador');
+      // Obtener una nueva transmisión de la cámara
+      const constraints = {
+        video: {
+          facingMode: isMobile ? 'environment' : 'user',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
         }
-        setCameraStatus('not-supported');
-        setFileUploadMode(true); // Cambiar automáticamente a modo de carga de archivos
-        toast('Cámara no disponible', {
-          description: 'No se puede acceder a la cámara. Usando modo de subida de archivos.'
-        });
+      };
+      
+      // Comprobar conectividad primero
+      const hasConnection = await testConnection();
+      if (!hasConnection) {
+        setConnectionError(true);
+        toast.error('No se pudo conectar al servidor. Verifica tu conexión a internet.');
         return;
       }
       
-      // Solicitar acceso a la cámara trasera preferentemente
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
-      
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(mediaStream);
-      
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
-      
       setCameraStatus('available');
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error accessing camera:', error);
       
-      if (error instanceof DOMException && error.name === 'NotAllowedError') {
-        setCameraStatus('permission-denied');
-      } else {
-        setCameraStatus('not-supported');
-      }
-      
-      // Cambiar automáticamente a modo de carga de archivos si hay error de cámara
-      setFileUploadMode(true);
-      toast('Cámara no disponible', {
-        description: 'Se utilizará el modo de subida de archivos en su lugar.'
-      });
+    } catch (_error) {
+      console.error('Error al iniciar la cámara:', _error);
+      setCameraStatus('not-supported');
+      toast.error('No se pudo iniciar la cámara. Verifica los permisos del navegador.');
     }
-  }, [stream, setFileUploadMode]);
+  };
 
   // Iniciar la cámara cuando el componente se monta, si estamos en modo cámara
   useEffect(() => {
@@ -203,51 +199,58 @@ export function ExamScanner({
   };
   
   // Función para capturar imagen desde la cámara
-  const captureImage = () => {
-    if (!videoRef.current || cameraStatus !== 'available') return;
-    
-    setScanning(true);
+  const captureImage = async () => {
+    if (!videoRef.current || !stream) {
+      toast.error('No hay una transmisión de cámara activa');
+      return;
+    }
     
     try {
       const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
+      const video = videoRef.current;
       
+      // Configuramos el tamaño del canvas para que coincida con el video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Dibujamos el frame actual del video en el canvas
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        throw new Error('No se pudo obtener el contexto 2D');
+        throw new Error('No se pudo obtener contexto 2D del canvas');
       }
       
-      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      // Convertir a base64
-      const imageData = canvas.toDataURL('image/png');
-      setCapturedImage(imageData);
+      // Convertimos el canvas a un blob
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('No se pudo convertir la imagen a blob'));
+          }
+        }, 'image/jpeg', 0.95);
+      });
+      
+      // Creamos un File a partir del Blob
+      const file = new File([blob], `exam-scan-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      
+      // Actualizamos el estado con la imagen capturada
+      setCapturedImage(URL.createObjectURL(file));
       setProcessingStatus('idle');
       
-      // Detener la cámara para ahorrar recursos
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        setStream(null);
-      }
-    } catch (error) {
-      console.error('Error capturing image:', error);
-      toast('Error al capturar la imagen. Intenta de nuevo.');
-    } finally {
-      setScanning(false);
+    } catch (_error) {
+      toast.error('Error al capturar la imagen');
     }
   };
 
-  // Helper function to handle connection errors
+  // Función para manejar errores de conexión específicamente
   const handleConnectionError = (error: Error) => {
-    if (DEBUG) {
-      console.error('Error de conexión detectado:', error);
-    }
-    
-    // Call the onConnectionError callback if provided
-    if (onConnectionError) {
-      onConnectionError();
-    }
+    // eslint-disable-next-line no-console
+    console.error('Error de conexión detectado:', error);
+    setConnectionError(true);
+    setErrorMessage('Problema de conexión detectado. Verifique su conexión a Internet.');
+    toast.error('Problema de conexión. Verifique su conexión a Internet.');
   };
   
   // Función para subir la imagen capturada
@@ -303,7 +306,7 @@ export function ExamScanner({
                 
                 // Usar la URL pública si está disponible, o la imagen procesada/original como fallback
                 const imageToDisplay = response.publicUrl || response.processedImage || response.originalImage || null;
-                setCapturedImage(imageToDisplay);
+                setCapturedImage(imageToDisplay || '');
                 
                 if (onScanComplete) {
                   onScanComplete(omrResult, imageToDisplay || '');
@@ -512,9 +515,9 @@ export function ExamScanner({
             headers: {
               'Content-Type': 'application/json',
             },
-      });
+          });
 
-      if (!response.ok) {
+          if (!response.ok) {
             // Error HTTP
             const statusText = response.statusText;
             // eslint-disable-next-line no-console
@@ -588,6 +591,7 @@ export function ExamScanner({
             await new Promise(resolve => setTimeout(resolve, 2000));
           }
         } catch (pollError) {
+          // eslint-disable-next-line no-console
           console.error('Error en el polling:', pollError);
           
           // Si después de varios intentos seguimos teniendo errores, podría ser un problema de conexión
@@ -611,6 +615,7 @@ export function ExamScanner({
       }
       
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error en processInBackground:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Error desconocido en el procesamiento');
       
@@ -733,6 +738,115 @@ export function ExamScanner({
       </div>
     );
   };
+
+  // Función para probar la conexión con la API
+  const testConnection = async (): Promise<boolean> => {
+    setTestingConnection(true);
+    setConnectionError(false);
+    
+    try {
+      const response = await fetch('/api/ping', { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error de conexión: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return true;
+    } catch (_error) {
+      handleConnectionError(new Error('No se pudo conectar con el servidor'));
+      return false;
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
+  // Efecto para procesar la respuesta del servidor
+  useEffect(() => {
+    if (processingStatus === 'completed' && omrResult) {
+      if (onScanComplete) {
+        onScanComplete(omrResult, capturedImage || '');
+      }
+    } else if (processingStatus === 'error' && _errorMessage) {
+      toast.error(`Error al procesar: ${_errorMessage}`);
+    }
+  }, [processingStatus, omrResult, capturedImage, onScanComplete, _errorMessage]);
+
+  // Procesar la imagen capturada
+  const processImage = async () => {
+    if (!capturedImage) {
+      toast.error('No hay imagen para procesar');
+      return;
+    }
+    
+    setProcessingStatus('processing');
+    
+    try {
+      // Aquí implementar la lógica para procesar la imagen
+      // Ejemplo: Enviar la imagen a un servicio para OMR
+      
+      const formData = new FormData();
+      
+      // Convertir dataURL a blob si es necesario
+      if (capturedImage.startsWith('data:')) {
+        const response = await fetch(capturedImage);
+        const blob = await response.blob();
+        formData.append('file', blob, 'scanned-image.jpg');
+      } else {
+        // La imagen ya es un archivo o URL
+        formData.append('file', capturedImage);
+      }
+      
+      // Enviar al servidor para procesamiento OMR
+      const response = await fetch('/api/process-omr', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error al procesar: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      setOmrResult(result);
+      setProcessingStatus('completed');
+      
+    } catch (_error) {
+      console.error('Error al procesar la imagen:', _error);
+      setProcessingStatus('error');
+      setErrorMessage(_error instanceof Error ? _error.message : 'Error desconocido al procesar la imagen');
+    }
+  };
+
+  // Detectar si se está ejecutando en un dispositivo móvil
+  const checkMobile = () => {
+    const userAgent = typeof window.navigator === 'undefined' ? '' : navigator.userAgent;
+    const mobile = Boolean(
+      userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i)
+    );
+    setIsMobile(mobile);
+  };
+  
+  // Verificar soporte de cámara
+  const checkCameraSupport = async () => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setHasCameraSupport(false);
+        return;
+      }
+      setHasCameraSupport(true);
+    } catch (_error) {
+      setHasCameraSupport(false);
+    }
+  };
+  
+  checkMobile();
+  checkCameraSupport();
 
   return (
     <div className="flex flex-col space-y-4">
