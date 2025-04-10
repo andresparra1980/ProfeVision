@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,21 +11,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 
+// Definir interfaces para los tipos
+interface Entidad {
+  id: string;
+  nombre: string;
+}
+
 export default function CreateSubjectPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [entities, setEntities] = useState<any[]>([]);
+  const [entities, setEntities] = useState<Entidad[]>([]);
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
     entidad_id: "",
   });
 
-  useEffect(() => {
-    fetchEntities();
-  }, []);
-
-  async function fetchEntities() {
+  const fetchEntities = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -57,7 +59,14 @@ export default function CreateSubjectPage() {
       }
       
       // Transformar el resultado para tener un array de entidades
-      const entitiesList = data.map((item: any) => ({
+      interface EntidadResponse {
+        entidades_educativas: {
+          id: string;
+          nombre: string;
+        };
+      }
+      
+      const entitiesList = data.map((item: EntidadResponse) => ({
         id: item.entidades_educativas.id,
         nombre: item.entidades_educativas.nombre
       }));
@@ -72,7 +81,11 @@ export default function CreateSubjectPage() {
         variant: "destructive",
       });
     }
-  }
+  }, [router]);
+
+  useEffect(() => {
+    fetchEntities();
+  }, [fetchEntities]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -106,7 +119,7 @@ export default function CreateSubjectPage() {
       }
 
       // Crear materia
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("materias")
         .insert({
           nombre: formData.nombre,
@@ -151,12 +164,13 @@ export default function CreateSubjectPage() {
 
       // Redirigir a la página de materias
       router.push("/dashboard/subjects");
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Mostrar información más detallada sobre el error
+      const err = error as Error;
       console.error("Error al crear materia:", {
-        name: error?.name,
-        message: error?.message,
-        stack: error?.stack,
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
         error
       });
       

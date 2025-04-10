@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { QRData, Answer, QRValidation, FinalOutput } from '../types';
+import { QRValidation, FinalOutput } from '../types';
 
 // Define the context type
 interface ImageContextType {

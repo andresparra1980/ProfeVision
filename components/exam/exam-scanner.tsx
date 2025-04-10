@@ -59,38 +59,24 @@ export function ExamScanner({
   onScanComplete,
   onConnectionError
 }: ExamScannerProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [_isProcessing, setIsProcessing] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraStatus, setCameraStatus] = useState<'checking' | 'available' | 'not-supported' | 'permission-denied'>('checking');
   const [scanning, setScanning] = useState<boolean>(false);
-  const [uploading, setUploading] = useState<boolean>(false);
+  const [_uploading, setUploading] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [omrResult, setOmrResult] = useState<OMRResult | null>(null);
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'completed' | 'error'>('idle');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [fileUploadMode, setFileUploadMode] = useState<boolean>(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [progress, setProgress] = useState({ status: 'idle', percent: 0 });
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [_progress, setProgress] = useState({ status: 'idle', percent: 0 });
 
-  // Iniciar la cámara cuando el componente se monta, si estamos en modo cámara
-  useEffect(() => {
-    if (!fileUploadMode) {
-      startCamera();
-    }
-    
-    // Limpieza al desmontar
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [fileUploadMode, stream]);
-  
   // Función para iniciar la cámara
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     setCameraStatus('checking');
     
     try {
@@ -102,6 +88,7 @@ export function ExamScanner({
       // Verificar si mediaDevices está disponible
       if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
         if (DEBUG) {
+          // eslint-disable-next-line no-console
           console.error('MediaDevices API no disponible en este navegador');
         }
         setCameraStatus('not-supported');
@@ -125,6 +112,7 @@ export function ExamScanner({
       
       setCameraStatus('available');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error accessing camera:', error);
       
       if (error instanceof DOMException && error.name === 'NotAllowedError') {
@@ -139,8 +127,22 @@ export function ExamScanner({
         description: 'Se utilizará el modo de subida de archivos en su lugar.'
       });
     }
-  };
+  }, [stream, setFileUploadMode]);
 
+  // Iniciar la cámara cuando el componente se monta, si estamos en modo cámara
+  useEffect(() => {
+    if (!fileUploadMode) {
+      startCamera();
+    }
+    
+    // Limpieza al desmontar
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [fileUploadMode, stream, startCamera]);
+  
   // Función para manejar la carga de archivos
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -275,6 +277,7 @@ export function ExamScanner({
           // Carga exitosa, procesar respuesta
           try {
             const response = JSON.parse(xhr.responseText);
+            // eslint-disable-next-line no-console
             console.log('Respuesta del servidor:', response);
             
             if (response.success) {
@@ -339,6 +342,7 @@ export function ExamScanner({
           }
         } else {
           // Error HTTP
+          // eslint-disable-next-line no-console
           console.error('Error HTTP:', xhr.status, xhr.statusText);
           
           let errorMessage = `Error del servidor: ${xhr.status} ${xhr.statusText}`;
@@ -347,7 +351,7 @@ export function ExamScanner({
           try {
             parsedError = JSON.parse(xhr.responseText);
             errorMessage = parsedError.message || errorMessage;
-          } catch (e) {
+          } catch (_e) {
             // No es JSON, usar el mensaje genérico
           }
           
@@ -383,6 +387,7 @@ export function ExamScanner({
       };
       
       xhr.onerror = function() {
+        // eslint-disable-next-line no-console
         console.error('Error de red al subir la imagen');
         setErrorMessage('Error de conexión al subir la imagen');
         
@@ -414,6 +419,7 @@ export function ExamScanner({
       
       xhr.timeout = 60000; // 60 segundos de timeout
       xhr.ontimeout = function() {
+        // eslint-disable-next-line no-console
         console.error('Timeout al subir la imagen');
         setErrorMessage('La solicitud ha excedido el tiempo límite');
         
@@ -446,7 +452,8 @@ export function ExamScanner({
       xhr.open('POST', '/api/exams/process-scan', true);
       xhr.send(formData);
       
-      } catch (error) {
+    } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error al subir la imagen:', error);
       setErrorMessage('Error al iniciar la carga de la imagen');
       
@@ -510,6 +517,7 @@ export function ExamScanner({
       if (!response.ok) {
             // Error HTTP
             const statusText = response.statusText;
+            // eslint-disable-next-line no-console
             console.error(`Error al verificar estado (${response.status}): ${statusText}`);
             
             // Si es un error 5xx, podría ser un problema de conexión o del servidor
@@ -738,7 +746,7 @@ export function ExamScanner({
       />
       
       {/* Instrucciones */}
-      {!capturedImage && !uploading && (
+      {!capturedImage && !_uploading && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Instrucciones</AlertTitle>
@@ -870,7 +878,7 @@ export function ExamScanner({
             className="h-full w-full object-contain" 
           />
           
-          {uploading && (
+          {_uploading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50">
               <Loader2 className="h-8 w-8 animate-spin text-white" />
               <span className="mt-2 text-white">Subiendo imagen...</span>
@@ -920,7 +928,7 @@ export function ExamScanner({
         </div>
       ) : (
         <div className="flex justify-center space-x-2">
-          {!uploading && processingStatus === 'idle' && (
+          {!_uploading && processingStatus === 'idle' && (
             <>
               <Button
                 onClick={() => {

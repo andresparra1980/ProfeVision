@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Document, Page, Text, View, StyleSheet, Svg, Path, Image, Font, Circle } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Svg, Path, Image, Circle } from "@react-pdf/renderer";
 import CryptoJS from "crypto-js";
 import { useState, useEffect } from 'react';
 import { generateLMarkerPath, calculateMarkerDimensions, generateMarkerContainerStyle } from '@/lib/utils/corner-markers';
@@ -223,7 +223,7 @@ const OptionBubble = ({ letter }: { letter: string }) => (
 
 export const AnswerSheetPDF = ({ exam, student, group, paperSize = 'LETTER' }: AnswerSheetPDFProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
-  const dimensions = PAPER_SIZES[paperSize];
+  const _dimensions = PAPER_SIZES[paperSize];
 
   useEffect(() => {
     generateQRCode(student.id, exam.id).then(setQrCodeUrl);

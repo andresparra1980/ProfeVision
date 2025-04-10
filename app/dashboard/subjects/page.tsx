@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,30 +47,7 @@ export default function SubjectsPage() {
     },
   });
 
-  useEffect(() => {
-    if (profesor) {
-      loadMaterias();
-      loadEntidades();
-    }
-  }, [profesor]);
-
-  useEffect(() => {
-    if (editingMateria) {
-      form.reset({
-        nombre: editingMateria.nombre,
-        descripcion: editingMateria.descripcion || "",
-        entidad_id: editingMateria.entidad_id || "none",
-      });
-    } else {
-      form.reset({
-        nombre: "",
-        descripcion: "",
-        entidad_id: "none",
-      });
-    }
-  }, [editingMateria, form]);
-
-  const loadMaterias = async () => {
+  const loadMaterias = useCallback(async () => {
     if (!profesor) return;
     
     try {
@@ -89,18 +66,19 @@ export default function SubjectsPage() {
 
       if (error) throw error;
       setMaterias(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string };
       toast({
         variant: "destructive",
         title: "Error al cargar materias",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [profesor]);
 
-  const loadEntidades = async () => {
+  const loadEntidades = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("entidades_educativas")
@@ -109,14 +87,38 @@ export default function SubjectsPage() {
 
       if (error) throw error;
       setEntidades(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string };
       toast({
         variant: "destructive",
         title: "Error al cargar instituciones",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (profesor) {
+      loadMaterias();
+      loadEntidades();
+    }
+  }, [profesor, loadMaterias, loadEntidades]);
+
+  useEffect(() => {
+    if (editingMateria) {
+      form.reset({
+        nombre: editingMateria.nombre,
+        descripcion: editingMateria.descripcion || "",
+        entidad_id: editingMateria.entidad_id || "none",
+      });
+    } else {
+      form.reset({
+        nombre: "",
+        descripcion: "",
+        entidad_id: "none",
+      });
+    }
+  }, [editingMateria, form]);
 
   const onSubmit = async (data: MateriaFormValues) => {
     if (!profesor) return;
@@ -163,11 +165,12 @@ export default function SubjectsPage() {
       setEditingMateria(null);
       form.reset();
       loadMaterias();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string };
       toast({
         variant: "destructive",
         title: "Error al guardar materia",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     }
   };
@@ -194,11 +197,12 @@ export default function SubjectsPage() {
       });
       
       loadMaterias();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string };
       toast({
         variant: "destructive",
         title: "Error al eliminar materia",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     } finally {
       setDeletingId(null);
@@ -340,11 +344,11 @@ export default function SubjectsPage() {
                     </Button>
                   </div>
                 </div>
-                {/* @ts-ignore */}
+                {/* @ts-expect-error - entidades_educativas puede existir pero TypeScript no lo reconoce */}
                 {materia.entidades_educativas && (
                   <div className="flex items-center text-sm text-muted-foreground">
                     <School className="mr-1 h-3 w-3" />
-                    {/* @ts-ignore */}
+                    {/* @ts-expect-error - entidades_educativas.nombre puede existir pero TypeScript no lo reconoce */}
                     <span>{materia.entidades_educativas.nombre}</span>
                   </div>
                 )}

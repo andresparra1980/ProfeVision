@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Upload, Users, RefreshCw, UserPlus, BookOpen, BookmarkPlus, School, Folders } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Users, RefreshCw, UserPlus, BookOpen, School, Folders } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExcelImport } from "@/components/students/excel-import";
 import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -64,7 +62,6 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("manual");
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,13 +72,7 @@ export default function StudentsPage() {
   const [showDetails, setShowDetails] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
-  useEffect(() => {
-    checkForGroups();
-    fetchStudents();
-    loadGrupos();
-  }, []);
-
-  const checkForGroups = async () => {
+  const checkForGroups = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -90,13 +81,13 @@ export default function StudentsPage() {
         return;
       }
 
-      const { error, count } = await supabase
+      const { error: groupError, count } = await supabase
         .from("grupos")
         .select("*", { count: 'exact' })
         .eq("profesor_id", session.user.id)
         .limit(1);
 
-      if (error) {
+      if (groupError) {
         toast({
           title: "Error",
           description: "No se pudieron verificar los grupos",
@@ -106,16 +97,16 @@ export default function StudentsPage() {
       }
 
       setHasGroups(count !== null && count > 0);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Error al verificar grupos",
         variant: "destructive",
       });
     }
-  };
+  }, [router]);
 
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -161,7 +152,7 @@ export default function StudentsPage() {
       }));
       
       setStudents(uniqueStudents);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "No se pudieron cargar los estudiantes",
@@ -170,7 +161,7 @@ export default function StudentsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   const loadGrupos = async () => {
     try {
@@ -178,7 +169,7 @@ export default function StudentsPage() {
       
       if (!session) return;
 
-      const { data, error } = await supabase
+      const { data, error: gruposError } = await supabase
         .from("grupos")
         .select(`
           id,
@@ -190,9 +181,9 @@ export default function StudentsPage() {
         .eq("profesor_id", session.user.id)
         .order("nombre");
 
-      if (error) throw error;
+      if (gruposError) throw gruposError;
       setGrupos(data || []);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Error al cargar grupos",
@@ -200,6 +191,12 @@ export default function StudentsPage() {
       });
     }
   };
+
+  useEffect(() => {
+    checkForGroups();
+    fetchStudents();
+    loadGrupos();
+  }, [checkForGroups, fetchStudents]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -415,7 +412,6 @@ export default function StudentsPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
             <Button 
               onClick={() => {
-                setActiveTab("manual");
                 setIsOpen(true);
               }} 
               variant="outline"

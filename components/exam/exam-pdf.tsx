@@ -3,13 +3,14 @@ import { es } from "date-fns/locale";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 // Tamaños de papel en puntos (1 punto = 1/72 pulgada)
-const PAGE_SIZES = {
+// Used for type inference, keeping with underscore prefix
+const _PAGE_SIZES = {
   letter: [612, 792], // 8.5" x 11"
   a4: [595, 842], // 210mm x 297mm
   legal: [612, 1008], // 8.5" x 14"
 } as const;
 
-type PaperSize = keyof typeof PAGE_SIZES;
+type PaperSize = keyof typeof _PAGE_SIZES;
 
 // Función para convertir el tamaño de papel a formato aceptado por react-pdf
 function getPageSize(paperSize: PaperSize) {
@@ -163,8 +164,8 @@ export function ExamPDF({ exam, paperSize = "letter", selectedGroup }: ExamPDFPr
     locale: es 
   });
 
-  // Formatear el nombre completo del profesor
-  const profesorNombreCompleto = `${exam.materias.profesor.nombres} ${exam.materias.profesor.apellidos}`;
+  // Formatear el nombre completo del profesor (no usado actualmente)
+  // const _profesorNombreCompleto = `${exam.materias.profesor.nombres} ${exam.materias.profesor.apellidos}`;
 
   return (
     <Document>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 
+// Definir interfaces para los tipos
+interface Entidad {
+  id: string;
+  nombre: string;
+}
+
+interface Materia {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  entidad_id: string | null;
+  profesor_id: string;
+  created_at: string;
+  updated_at: string;
+  entidades_educativas?: {
+    nombre: string;
+  };
+}
+
 export default function EditSubjectPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const subjectId = resolvedParams.id;
@@ -19,20 +38,15 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [entities, setEntities] = useState<any[]>([]);
-  const [subject, setSubject] = useState<any>(null);
+  const [entities, setEntities] = useState<Entidad[]>([]);
+  const [subject, setSubject] = useState<Materia | null>(null);
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
     entidad_id: "",
   });
 
-  useEffect(() => {
-    fetchSubject();
-    fetchEntities();
-  }, [subjectId]);
-
-  async function fetchSubject() {
+  const fetchSubject = useCallback(async () => {
     try {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
@@ -85,9 +99,9 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
     } finally {
       setLoading(false);
     }
-  }
+  }, [subjectId, router]);
 
-  async function fetchEntities() {
+  const fetchEntities = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -113,7 +127,14 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
       }
       
       // Transformar el resultado para tener un array de entidades
-      const entitiesList = data.map((item: any) => ({
+      interface EntidadResponse {
+        entidades_educativas: {
+          id: string;
+          nombre: string;
+        };
+      }
+      
+      const entitiesList = data.map((item: EntidadResponse) => ({
         id: item.entidades_educativas.id,
         nombre: item.entidades_educativas.nombre
       }));
@@ -129,7 +150,12 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
     } finally {
       setLoading(false);
     }
-  }
+  }, [router]);
+
+  useEffect(() => {
+    fetchSubject();
+    fetchEntities();
+  }, [subjectId, fetchSubject, fetchEntities]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -207,12 +233,13 @@ export default function EditSubjectPage({ params }: { params: Promise<{ id: stri
 
       // Redirigir a la página de materias
       router.push("/dashboard/subjects");
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Mostrar información más detallada sobre el error
+      const err = error as Error;
       console.error("Error al actualizar materia:", {
-        name: error?.name,
-        message: error?.message,
-        stack: error?.stack,
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
         error
       });
       

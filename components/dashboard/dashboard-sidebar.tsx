@@ -20,10 +20,18 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/shared/mode-toggle";
-import { Separator } from "@/components/ui/separator";
+
+// Definir un tipo más específico para el usuario
+interface User {
+  email?: string;
+  user_metadata?: {
+    full_name?: string;
+    name?: string;
+  };
+}
 
 interface DashboardSidebarProps {
-  user: any;
+  user: User;
   handleLogout: () => Promise<void>;
   isLoggingOut: boolean;
 }

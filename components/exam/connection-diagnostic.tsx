@@ -86,6 +86,7 @@ export default function ConnectionDiagnostic(_props: ConnectionDiagnosticProps) 
     try {
       const url = '/api/supabase-diagnostic';
       if (DEBUG) {
+        // eslint-disable-next-line no-console
         console.log('Ejecutando diagnóstico desde:', url);
       }
       
@@ -97,11 +98,13 @@ export default function ConnectionDiagnostic(_props: ConnectionDiagnosticProps) 
       
       const data = await response.json();
       if (DEBUG) {
+        // eslint-disable-next-line no-console
         console.log('Resultado del diagnóstico:', data);
       }
       setDiagnosticResult(data);
     } catch (err) {
       if (DEBUG) {
+        // eslint-disable-next-line no-console
         console.error('Error al ejecutar diagnóstico:', err);
       }
       setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -121,6 +124,7 @@ export default function ConnectionDiagnostic(_props: ConnectionDiagnosticProps) 
       
       const result = await response.json();
       if (DEBUG) {
+        // eslint-disable-next-line no-console
         console.log('Resultado de fix-env:', result);
       }
       
@@ -130,6 +134,7 @@ export default function ConnectionDiagnostic(_props: ConnectionDiagnosticProps) 
       return result;
     } catch (err) {
       if (DEBUG) {
+        // eslint-disable-next-line no-console
         console.error('Error al corregir variables de entorno:', err);
       }
       setError(err instanceof Error ? err.message : 'Error desconocido');
