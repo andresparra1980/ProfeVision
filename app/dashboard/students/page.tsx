@@ -23,6 +23,15 @@ interface FormData {
   grupo_id: string;
 }
 
+interface Student {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  identificacion: string;
+  email: string;
+  created_at: string;
+}
+
 interface StudentDetails {
   id: string;
   grupos: Array<{
@@ -32,6 +41,14 @@ interface StudentDetails {
       nombre: string;
     };
   }>;
+}
+
+interface Grupo {
+  id: string;
+  nombre: string;
+  materias: {
+    nombre: string;
+  };
 }
 
 const initialFormData: FormData = {
@@ -44,7 +61,7 @@ const initialFormData: FormData = {
 
 export default function StudentsPage() {
   const router = useRouter();
-  const [students, setStudents] = useState<any[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("manual");
@@ -53,7 +70,7 @@ export default function StudentsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasGroups, setHasGroups] = useState(false);
-  const [grupos, setGrupos] = useState<any[]>([]);
+  const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<StudentDetails | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -64,7 +81,7 @@ export default function StudentsPage() {
     loadGrupos();
   }, []);
 
-  async function checkForGroups() {
+  const checkForGroups = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -73,27 +90,34 @@ export default function StudentsPage() {
         return;
       }
 
-      const { data, error, count } = await supabase
+      const { error, count } = await supabase
         .from("grupos")
         .select("*", { count: 'exact' })
         .eq("profesor_id", session.user.id)
         .limit(1);
 
       if (error) {
-        console.error("Error al verificar grupos:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron verificar los grupos",
+          variant: "destructive",
+        });
         return;
       }
 
       setHasGroups(count !== null && count > 0);
     } catch (error) {
-      console.error("Error al verificar grupos:", error);
+      toast({
+        title: "Error",
+        description: "Error al verificar grupos",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
-  async function fetchStudents() {
+  const fetchStudents = async () => {
     try {
       setLoading(true);
-      console.log("Obteniendo estudiantes de la base de datos...");
       
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -123,12 +147,11 @@ export default function StudentsPage() {
         .order('nombres');
 
       if (estudiantesError) {
-        console.error("Error al consultar estudiantes:", estudiantesError);
         throw estudiantesError;
       }
       
       // Transformar los datos para obtener un formato más fácil de usar
-      let uniqueStudents = estudiantes.map((estudiante: any) => ({
+      const uniqueStudents = estudiantes.map((estudiante: Student) => ({
         id: estudiante.id,
         nombres: estudiante.nombres,
         apellidos: estudiante.apellidos,
@@ -137,10 +160,8 @@ export default function StudentsPage() {
         created_at: estudiante.created_at
       }));
       
-      console.log(`Se encontraron ${uniqueStudents.length} estudiantes en los grupos del profesor`);
       setStudents(uniqueStudents);
     } catch (error) {
-      console.error("Error fetching students:", error);
       toast({
         title: "Error",
         description: "No se pudieron cargar los estudiantes",
@@ -149,9 +170,9 @@ export default function StudentsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function loadGrupos() {
+  const loadGrupos = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -172,9 +193,13 @@ export default function StudentsPage() {
       if (error) throw error;
       setGrupos(data || []);
     } catch (error) {
-      console.error("Error al cargar grupos:", error);
+      toast({
+        title: "Error",
+        description: "Error al cargar grupos",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,37 +229,71 @@ export default function StudentsPage() {
         .single();
 
       if (grupoError || !grupoCheck) {
-        setError('No tienes permiso para agregar estudiantes a este grupo');
+        setError('El grupo seleccionado no es válido');
         setIsSubmitting(false);
         return;
       }
 
-      // Crear el estudiante y asignarlo al grupo en una transacción usando RPC
-      const { data: result, error: rpcError } = await supabase
-        .rpc('crear_estudiante_en_grupo', {
-          p_nombres: formData.nombres,
-          p_apellidos: formData.apellidos,
-          p_identificacion: formData.identificacion,
-          p_email: formData.email || null,
-          p_grupo_id: formData.grupo_id
-        });
+      // Crear el estudiante o usar uno existente
+      const { data: existingStudent, error: checkError } = await supabase
+        .from('estudiantes')
+        .select('id')
+        .eq('identificacion', formData.identificacion)
+        .limit(1);
 
-      if (rpcError) {
-        throw rpcError;
+      if (checkError) {
+        throw checkError;
       }
 
+      let studentId;
+
+      if (existingStudent && existingStudent.length > 0) {
+        // Estudiante ya existe
+        studentId = existingStudent[0].id;
+      } else {
+        // Crear nuevo estudiante
+        const { data: newStudent, error: createError } = await supabase
+          .from('estudiantes')
+          .insert({
+            nombres: formData.nombres,
+            apellidos: formData.apellidos,
+            identificacion: formData.identificacion,
+            email: formData.email || null,
+          })
+          .select('id')
+          .single();
+
+        if (createError) {
+          throw createError;
+        }
+
+        studentId = newStudent.id;
+      }
+
+      // Vincular estudiante al grupo
+      const { error: linkError } = await supabase
+        .from('estudiante_grupo')
+        .insert({
+          estudiante_id: studentId,
+          grupo_id: formData.grupo_id,
+        });
+
+      if (linkError) {
+        throw linkError;
+      }
+
+      // Éxito
       toast({
-        title: "Estudiante creado",
-        description: "El estudiante ha sido agregado exitosamente al grupo",
+        title: "Estudiante agregado",
+        description: "El estudiante ha sido agregado al grupo exitosamente",
       });
 
-      setIsOpen(false);
       setFormData(initialFormData);
+      setIsOpen(false);
       fetchStudents();
-
-    } catch (error: any) {
-      console.error('Error:', error);
-      setError(error.message || 'Ocurrió un error al crear el estudiante');
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      setError(err.message || 'Ha ocurrido un error al agregar el estudiante');
     } finally {
       setIsSubmitting(false);
     }
@@ -242,7 +301,17 @@ export default function StudentsPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      grupo_id: value,
+    }));
   };
 
   const filteredStudents = students.filter((student) =>
@@ -253,41 +322,52 @@ export default function StudentsPage() {
   );
 
   async function fetchStudentDetails(studentId: string) {
+    setLoadingDetails(true);
     try {
-      setLoadingDetails(true);
-      
       const { data, error } = await supabase
-        .from('estudiante_grupo')
+        .from("estudiante_grupo")
         .select(`
-          grupos!inner(
+          grupo_id,
+          grupos (
             id,
             nombre,
-            materias!inner(
+            materias (
               nombre
             )
           )
         `)
-        .eq('estudiante_id', studentId);
+        .eq("estudiante_id", studentId);
 
       if (error) throw error;
 
-      setSelectedStudent({
-        id: studentId,
-        grupos: data.map((item: any) => ({
+      if (data) {
+        const grupos = data.map((item: {
+          grupos: {
+            id: string;
+            nombre: string;
+            materias: {
+              nombre: string;
+            }
+          }
+        }) => ({
           id: item.grupos.id,
           nombre: item.grupos.nombre,
           materia: {
             nombre: item.grupos.materias.nombre
           }
-        }))
-      });
-      
-      setShowDetails(true);
-    } catch (error) {
-      console.error('Error al cargar detalles del estudiante:', error);
+        }));
+
+        setSelectedStudent({
+          id: studentId,
+          grupos: grupos
+        });
+        setShowDetails(true);
+      }
+    } catch (error: unknown) {
+      const err = error as { message?: string };
       toast({
         title: "Error",
-        description: "No se pudieron cargar los detalles del estudiante",
+        description: err.message || "No se pudo cargar la información del estudiante",
         variant: "destructive",
       });
     } finally {
@@ -372,7 +452,7 @@ export default function StudentsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredStudents.map((student: any) => (
+            {filteredStudents.map((student: Student) => (
               <TableRow key={student.id}>
                 <TableCell className="font-medium">{student.apellidos}</TableCell>
                 <TableCell>{student.nombres}</TableCell>
@@ -514,7 +594,7 @@ export default function StudentsPage() {
                   <Label htmlFor="grupo">Grupo*</Label>
                   <Select
                     value={formData.grupo_id}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, grupo_id: value }))}
+                    onValueChange={handleSelectChange}
                   >
                     <SelectTrigger className="bg-white dark:bg-[#1E1E1F]">
                       <SelectValue placeholder="Selecciona un grupo" />

@@ -98,8 +98,9 @@ export default function SettingsPage() {
         title: "Perfil actualizado",
         description: "Los cambios han sido guardados correctamente",
       });
-    } catch (error: any) {
-      console.error("Error updating profile:", error);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("Error updating profile:", err);
       toast({
         title: "Error",
         description: "No se pudieron guardar los cambios",

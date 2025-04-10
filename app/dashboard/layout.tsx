@@ -7,6 +7,7 @@ import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
 import { ScanExamFeature } from "@/components/exam/scan-exam-feature";
 import { toast } from "@/components/ui/use-toast";
+import type { User, Session } from '@supabase/supabase-js';
 
 export default function DashboardLayout({
   children,
@@ -15,7 +16,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -33,11 +34,12 @@ export default function DashboardLayout({
       });
       
       window.location.href = "/auth/login";
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string };
       toast({
         variant: "destructive",
         title: "Error al cerrar sesión",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente."
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente."
       });
       setIsLoggingOut(false);
     }
@@ -59,7 +61,7 @@ export default function DashboardLayout({
     checkUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event: string, session: any) => {
+      (event: string, session: Session | null) => {
         if (event === "SIGNED_OUT") {
           if (window.location.pathname !== "/auth/login") {
              router.push("/auth/login");

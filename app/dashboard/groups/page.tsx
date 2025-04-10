@@ -41,11 +41,11 @@ type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
   estado: 'activo' | 'archivado';
 };
 
+type EntidadEducativa = Database["public"]["Tables"]["entidades_educativas"]["Row"];
+
 type Materia = Database["public"]["Tables"]["materias"]["Row"] & {
   entidades_educativas: EntidadEducativa | null;
 };
-
-type EntidadEducativa = Database["public"]["Tables"]["entidades_educativas"]["Row"];
 
 const grupoSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),

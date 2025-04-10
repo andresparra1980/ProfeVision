@@ -3,8 +3,17 @@ import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/types/database';
 import { Session } from '@supabase/supabase-js';
 
-export type Profesor = Database['public']['Tables']['profesores']['Row'];
-export type ProfesorUpdate = Database['public']['Tables']['profesores']['Update'];
+export type Profesor = Database['public']['Tables']['profesores']['Row'] & {
+  telefono?: string | null;
+  cargo?: string | null;
+  biografia?: string | null;
+};
+
+export type ProfesorUpdate = Database['public']['Tables']['profesores']['Update'] & {
+  telefono?: string | null;
+  cargo?: string | null;
+  biografia?: string | null;
+};
 
 export function useProfesor() {
   const [profesor, setProfesor] = useState<Profesor | null>(null);

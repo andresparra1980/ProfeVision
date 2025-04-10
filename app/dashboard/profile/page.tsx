@@ -13,6 +13,7 @@ import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useProfesor } from "@/lib/hooks/useProfesor";
+import type { User } from "@supabase/supabase-js";
 
 const profileSchema = z.object({
   nombres: z.string().min(2, { message: "Los nombres deben tener al menos 2 caracteres" }),
@@ -26,7 +27,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const { profesor, loading: profesorLoading, updateProfesor } = useProfesor();
 
@@ -97,11 +98,12 @@ export default function ProfilePage() {
       
       // Trigger refresh to update display name in header
       router.refresh();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string };
       toast({
         variant: "destructive",
         title: "Error al actualizar perfil",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     } finally {
       setIsLoading(false);
