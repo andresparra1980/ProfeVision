@@ -31,26 +31,28 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     // Set the callback for when processing completes
     setOnProcessingComplete(() => {
-      // Move to results step when processing completes
-      if (finalOutput) {
-        // Update local state with results from context
-        setScanData((prev) => ({
-          ...prev,
-          processedImage: finalOutput.processedImage,
-          qrData: finalOutput.qrData,
-          answers: Array.isArray(finalOutput.answers) ? finalOutput.answers : [],
-        }));
-        setStep(4);
-      }
+      return (result: ProcessingResult) => {
+        // Este callback se ejecutará cuando el procesamiento se complete
+        if (result) {
+          // Update local state with results from context
+          setScanData((prev) => ({
+            ...prev,
+            processedImage: result.processedImage,
+            qrData: result.qrData || result.qr_data,
+            answers: Array.isArray(result.answers) ? result.answers : [],
+          }));
+          setStep(4);
+        }
+      };
     });
     
     return () => {
       // Clean up the callback on unmount
       setOnProcessingComplete(null);
     };
-  }, [setOnProcessingComplete]);
+  }, [setOnProcessingComplete]); // Quitamos finalOutput de las dependencias
 
-  // Watch for finalOutput changes
+  // Watch for finalOutput changes - este efecto es independiente
   useEffect(() => {
     if (finalOutput) {
       // Update local state with results from context
@@ -140,7 +142,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     reader.readAsDataURL(imageFile);
   };
 
-  const handleProcessingComplete = (data: ProcessingResult) => {
+  const _handleProcessingComplete = (data: ProcessingResult) => {
     setScanData((prev) => ({
       ...prev,
       processedImage: data.processedImage,

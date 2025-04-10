@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, ArrowRight, RotateCcw } from "lucide-react";
+import { Camera, ArrowRight, RotateCcw } from "lucide-react";
+import Image from "next/image";
 
 interface ImageCaptureProps {
   onCapture: (file: File) => void;
@@ -11,7 +12,7 @@ interface ImageCaptureProps {
 
 export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: ImageCaptureProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,7 +56,7 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
                 className="hidden"
               />
               <p className="text-xs text-gray-500 mt-4">
-                Al hacer clic en "Tomar Foto", se abrirá la cámara de tu dispositivo
+                Al hacer clic en &quot;Tomar Foto&quot;, se abrirá la cámara de tu dispositivo
               </p>
             </div>
           </div>
@@ -73,11 +74,15 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
         </>
       ) : (
         <div className="space-y-4">
-          <div className="relative bg-gray-100 border border-gray-200 rounded-lg overflow-hidden">
-            <img 
+          <div className="relative bg-gray-100 border border-gray-200 rounded-lg overflow-hidden aspect-[4/3]">
+            <Image 
               src={capturedImage} 
               alt="Examen capturado" 
-              className="w-full h-auto max-h-[60vh] object-contain mx-auto"
+              className="object-contain mx-auto"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority
+              unoptimized={capturedImage.startsWith('data:')}
             />
           </div>
           
