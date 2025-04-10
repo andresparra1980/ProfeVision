@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, AlertCircle, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
 import { QRData, Answer, ProcessingResult, DuplicateInfo, ErrorDetails } from '../types';
 import { useImageContext } from '../contexts';
 import logger from '@/lib/utils/logger';
 import type { ProcessResult } from '@/types/scan';
+import Image from 'next/image';
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -26,11 +27,11 @@ interface DuplicateCheckResponse {
 export function Processing() {
   const { 
     processedImageData, 
-    qrValidation, 
+    qrValidation: _qrValidation, 
     clearImageData, 
     setQrValidation, 
     setFinalOutput,
-    setProcessedImageData,
+    setProcessedImageData: _setProcessedImageData,
     onProcessingComplete
   } = useImageContext();
   
@@ -43,22 +44,7 @@ export function Processing() {
   const retryCount = useRef(0);
   const MAX_RETRIES = 3;
 
-  // Set processedImageData when component mounts
-  useEffect(() => {
-    // Component setup on mount
-    setStatus('idle');
-    
-    // Auto-process the image when it becomes available
-    if (processedImageData && !processingInProgress.current && !processingCompleted.current) {
-      processImage();
-    }
-
-    return () => {
-      // Cleanup when component unmounts
-      retryCount.current = 0;
-    };
-  }, [processedImageData]);
-
+  // Helper function to check for duplicates
   const checkForDuplicates = async (qrData: QRData | null): Promise<DuplicateCheckResponse | null> => {
     if (!qrData) return null;
     
@@ -80,19 +66,20 @@ export function Processing() {
       });
       
       if (!response.ok) {
-        if (DEBUG) console.error('Error checking for duplicates: Server responded with', response.status);
+        if (DEBUG) logger.error('Error checking for duplicates: Server responded with', response.status);
         return null;
       }
       
       const data = await response.json() as DuplicateCheckResponse;
       return data;
     } catch (error) {
-      if (DEBUG) console.error('Error checking for duplicates:', error);
+      if (DEBUG) logger.error('Error checking for duplicates:', error);
       return null;
     }
   };
 
-  const processImage = async () => {
+  // Memoizamos la función processImage para evitar recreaciones en cada renderizado
+  const processImage = useCallback(async () => {
     if (!processedImageData || processingInProgress.current || processingCompleted.current) return;
   
     processingInProgress.current = true;
@@ -108,7 +95,7 @@ export function Processing() {
       formData.append('scan', blob, 'scan.jpg');
 
       if (DEBUG) {
-        console.log('Submitting image for processing, size:', blob.size, 'bytes');
+        logger.log('Submitting image for processing, size:', blob.size, 'bytes');
       }
 
       // Call the API to process the image
@@ -135,7 +122,7 @@ export function Processing() {
         
         // Debug the QR data from the API
         if (DEBUG) {
-          console.log('QR data received from API:', parsedQrData);
+          logger.log('QR data received from API:', parsedQrData);
         }
         
         // If QR data is a string, try to parse it
@@ -143,7 +130,7 @@ export function Processing() {
           try {
             // See if it's JSON
             parsedQrData = JSON.parse(parsedQrData);
-          } catch (e) {
+          } catch (_e) {
             // Not JSON, but could be a colon-separated format
             if (parsedQrData.includes(':') && parsedQrData.includes('-')) {
               const parts = parsedQrData.split(':');
@@ -183,7 +170,7 @@ export function Processing() {
           }
         }
 
-        const result: ProcessingResult = {
+        const _result: ProcessingResult = {
           ...data,
           isManualScan: isManualScan || false,
           isDuplicate: duplicateData?.exists || false,
@@ -204,7 +191,7 @@ export function Processing() {
         };
         
         if (DEBUG) {
-          console.log('Setting final output:', finalOutput);
+          logger.log('Setting final output:', finalOutput);
         }
         
         setFinalOutput(finalOutput);
@@ -219,7 +206,7 @@ export function Processing() {
       }
     } catch (error) {
       if (DEBUG) {
-        console.error('Error processing image:', error);
+        logger.error('Error processing image:', error);
       }
       
       // Increment retry count
@@ -247,7 +234,23 @@ export function Processing() {
         processingInProgress.current = false;
       }
     }
-  };
+  }, [processedImageData, status, setQrValidation, setFinalOutput, onProcessingComplete]);
+
+  // Set processedImageData when component mounts
+  useEffect(() => {
+    // Component setup on mount
+    setStatus('idle');
+    
+    // Auto-process the image when it becomes available
+    if (processedImageData && !processingInProgress.current && !processingCompleted.current) {
+      processImage();
+    }
+
+    return () => {
+      // Cleanup when component unmounts
+      retryCount.current = 0;
+    };
+  }, [processedImageData, processImage]);
 
   // Reiniciar el estado cuando se cambia de imagen
   useEffect(() => {
@@ -312,23 +315,29 @@ export function Processing() {
         {/* Imagen previa o procesada */}
         <div className="relative w-full aspect-[3/4] border border-gray-300 rounded-lg overflow-hidden bg-gray-50 mb-2">
           {status === 'processing' ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80">
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 z-10">
               <RefreshCw className="animate-spin h-12 w-12 text-blue-500" />
             </div>
           ) : null}
           
           {/* Mostrar la imagen procesada o la original */}
           {processedImageData && (
-            <img 
-              src={processedImageData} 
-              alt="Imagen procesada" 
-              className="w-full h-full object-contain"
-            />
+            <div className="relative w-full h-full">
+              <Image 
+                src={processedImageData} 
+                alt="Imagen procesada" 
+                fill
+                sizes="(max-width: 768px) 100vw, 400px"
+                className="object-contain"
+                unoptimized={processedImageData.startsWith('data:')}
+                priority
+              />
+            </div>
           )}
           
           {/* Sobreponer icono de estado */}
           {status !== 'processing' && (
-            <div className="absolute top-2 right-2 rounded-full p-1" 
+            <div className="absolute top-2 right-2 rounded-full p-1 z-10" 
                 style={{
                   backgroundColor: status === 'complete' ? 'rgba(34, 197, 94, 0.2)' : 
                                   status === 'duplicate' ? 'rgba(249, 115, 22, 0.2)' : 
