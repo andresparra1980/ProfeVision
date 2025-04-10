@@ -160,7 +160,7 @@ export function ExamScanner({
       setCameraStatus('not-supported');
       toast.error('No se pudo iniciar la cámara. Verifica los permisos del navegador.');
     }
-  }, [hasCameraSupport, isMobile, stream]);
+  }, [hasCameraSupport, isMobile, stream, testConnection]);
 
   // Iniciar la cámara cuando el componente se monta, si estamos en modo cámara
   useEffect(() => {
