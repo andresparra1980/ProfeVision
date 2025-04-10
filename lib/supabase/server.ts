@@ -14,13 +14,15 @@ export const createClient = (): SupabaseClient => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          const cookie = cookieStore.get(name);
+        async get(name: string) {
+          const cookiesObj = await cookieStore;
+          const cookie = cookiesObj.get(name);
           return cookie?.value;
         },
-        set(name: string, value: string, options) {
+        async set(name: string, value: string, options) {
           try {
-            cookieStore.set({ name, value, ...options });
+            const cookiesObj = await cookieStore;
+            cookiesObj.set({ name, value, ...options });
           } catch (error: unknown) {
             // No se pueden establecer cookies después de que se haya enviado la respuesta
             if (DEBUG) {
@@ -28,9 +30,10 @@ export const createClient = (): SupabaseClient => {
             }
           }
         },
-        remove(name: string, options) {
+        async remove(name: string, options) {
           try {
-            cookieStore.delete({ name, ...options });
+            const cookiesObj = await cookieStore;
+            cookiesObj.delete({ name, ...options });
           } catch (error: unknown) {
             // No se pueden eliminar cookies después de que se haya enviado la respuesta
             if (DEBUG) {

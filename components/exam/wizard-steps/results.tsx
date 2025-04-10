@@ -348,20 +348,44 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         // Obtener IDs usando optional chaining para mejor type safety
         const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
         const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
+        const groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
         
-        // Cargar detalles del examen y estudiante
-        const [examResponse, studentResponse] = await Promise.all([
+        // Preparar las promesas para cargar los datos
+        const promises = [
           fetch(`/api/exams/${examId}/details`),
           fetch(`/api/students/${studentId}`)
-        ]);
+        ];
         
-        if (!examResponse.ok) throw new Error(`No se pudo cargar el examen: ${examResponse.statusText}`);
-        if (!studentResponse.ok) throw new Error(`No se pudo cargar el estudiante: ${studentResponse.statusText}`);
+        // Si hay ID de grupo, añadir la petición para obtener datos del grupo
+        if (groupId) {
+          promises.push(fetch(`/api/groups/${groupId}`));
+        }
         
-        const [examData, studentData] = await Promise.all([
-          examResponse.json(),
-          studentResponse.json()
-        ]);
+        // Ejecutar las promesas en paralelo
+        const responses = await Promise.all(promises);
+        
+        // Verificar respuestas
+        if (!responses[0].ok) throw new Error(`No se pudo cargar el examen: ${responses[0].statusText}`);
+        if (!responses[1].ok) throw new Error(`No se pudo cargar el estudiante: ${responses[1].statusText}`);
+        
+        // Preparar promesas para extraer los datos JSON
+        const dataPromises = [responses[0].json(), responses[1].json()];
+        if (groupId && responses.length > 2) {
+          dataPromises.push(responses[2].ok ? responses[2].json() : Promise.resolve(null));
+        }
+        
+        // Obtener los datos
+        const data = await Promise.all(dataPromises);
+        const examData = data[0];
+        const studentData = data[1];
+        const groupData = data.length > 2 ? data[2] : null;
+        
+        // Para depuración: registrar los datos recibidos
+        if (DEBUG) {
+          logger.log('Datos del examen recibidos:', examData);
+          logger.log('Datos del estudiante recibidos:', studentData);
+          logger.log('Datos del grupo recibidos:', groupData);
+        }
         
         // Calcular puntaje del examen
         if (examId) {
@@ -371,9 +395,17 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         // Actualizar los nombres de las entidades
         setEntityNames({
           materia: examData.materia?.nombre || 'No disponible',
-          examen: examData.nombre || 'No disponible',
-          estudiante: studentData.nombre_completo || 'No disponible',
-          grupo: examData.grupo?.nombre || 'No disponible',
+          examen: examData.nombre || examData.titulo || examData.title || 'No disponible',
+          estudiante: studentData.nombres && studentData.apellidos 
+            ? `${studentData.nombres} ${studentData.apellidos}`
+            : studentData.nombres || studentData.apellidos || 'No disponible',
+          grupo: groupData 
+            ? (groupData.nombre || groupData.name || `Grupo ${groupData.id}`)
+            : (examData.grupo_id 
+                ? `Grupo ID: ${examData.grupo_id}`
+                : (qrData.grupo_id || qrData.groupId 
+                    ? `Grupo ID: ${qrData.grupo_id || qrData.groupId}` 
+                    : 'No disponible')),
           loading: false,
           error: null
         });

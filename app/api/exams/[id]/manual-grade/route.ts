@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import _logger from '@/lib/utils/logger';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -9,11 +10,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+// En Next.js 15, los params son un Promise
+type Params = Promise<{ id: string }>;
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: Request, { params }: { params: Params }) {
   try {
-    // Manejar correctamente los parámetros en Next.js 14
-    params = await Promise.resolve(params);
-    const examenId = params.id;
+    // Resolver los params del Promise
+    const resolvedParams = await params;
+    const examId = resolvedParams.id;
     
     const { estudianteId, puntaje } = await request.json();
     
@@ -28,7 +34,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const { data: existingResult } = await supabase
       .from('resultados_examen')
       .select('id')
-      .eq('examen_id', examenId)
+      .eq('examen_id', examId)
       .eq('estudiante_id', estudianteId)
       .maybeSingle();
 
@@ -65,7 +71,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       const { data: newResult, error: insertError } = await supabase
         .from('resultados_examen')
         .insert({
-          examen_id: examenId,
+          examen_id: examId,
           estudiante_id: estudianteId,
           puntaje_obtenido: puntaje,
           porcentaje,
@@ -93,7 +99,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       const { data: vinculos } = await supabase
         .from('examenes_a_componentes_calificacion')
         .select('componente_id')
-        .eq('examen_id', examenId);
+        .eq('examen_id', examId);
       
       if (vinculos && vinculos.length > 0) {
         const { data: sessionData } = await supabase.auth.getSession();
@@ -106,7 +112,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ examId: examenId })
+            body: JSON.stringify({ examId: examId })
           }).catch((error: Error) => {
             if (DEBUG) {
               console.error('Error al sincronizar calificaciones:', error);

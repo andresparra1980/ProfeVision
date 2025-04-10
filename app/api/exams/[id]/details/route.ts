@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import logger from '@/lib/utils/logger';
+
+export const dynamic = 'force-dynamic';
+
+// En Next.js 15, los params son un Promise
+type Params = Promise<{ id: string }>;
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
-    // Manejar correctamente los parámetros en Next.js 14
-    params = await Promise.resolve(params);
-    const examId = params.id;
+    // Resolver los params del Promise
+    const resolvedParams = await params;
+    const examId = resolvedParams.id;
     
     if (!examId) {
       return NextResponse.json(
@@ -44,7 +50,7 @@ export async function GET(
       .single();
     
     if (examError) {
-      console.error('Error al obtener examen:', examError);
+      logger.error('Error al obtener examen:', examError);
       return NextResponse.json(
         { error: 'Error al obtener detalles del examen' },
         { status: 500 }
@@ -70,7 +76,7 @@ export async function GET(
       if (!subjectError && subject) {
         subjectData = subject;
       } else if (subjectError) {
-        console.error('Error al obtener materia:', subjectError);
+        logger.error('Error al obtener materia:', subjectError);
       }
     }
     
@@ -83,7 +89,7 @@ export async function GET(
     return NextResponse.json(response);
     
   } catch (error) {
-    console.error('Error al procesar la solicitud:', error);
+    logger.error('Error al procesar la solicitud:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

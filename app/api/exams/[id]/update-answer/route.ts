@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import _logger from '@/lib/utils/logger';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -15,14 +16,19 @@ const supabase = createClient(
   }
 );
 
+// En Next.js 15, los params son un Promise
+type Params = Promise<{ id: string }>;
+
+export const dynamic = 'force-dynamic';
+
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
-    // Manejar correctamente los parámetros en Next.js 14
-    params = await Promise.resolve(params);
-    const examId = params.id;
+    // Resolver los params del Promise
+    const resolvedParams = await params;
+    const examId = resolvedParams.id;
     
     if (!examId) {
       return NextResponse.json(

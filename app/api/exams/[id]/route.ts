@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import _logger from '@/lib/utils/logger';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -9,15 +10,22 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+export const dynamic = 'force-dynamic';
+
+// En Next.js 15, los params son un Promise
+type Params = Promise<{ id: string }>;
+
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: Params }
 ) {
   try {
-    const { id: examId } = await params;
+    // Resolver los params del Promise
+    const resolvedParams = await params;
+    const examId = resolvedParams.id;
 
     // Obtener el token de autorización del header
-    const authHeader = req.headers.get('authorization');
+    const authHeader = request.headers.get('authorization');
     if (!authHeader) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -46,14 +54,16 @@ export async function GET(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: Params }
 ) {
   try {
-    const { id: examId } = await params;
+    // Resolver los params del Promise
+    const resolvedParams = await params;
+    const examId = resolvedParams.id;
 
     // Obtener el token de autorización del header
-    const authHeader = req.headers.get('authorization');
+    const authHeader = request.headers.get('authorization');
     if (!authHeader) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -199,12 +209,12 @@ export async function PATCH(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
-    // Manejar correctamente los parámetros en Next.js 14
-    params = await Promise.resolve(params);
-    const examId = params.id;
+    // Resolver los params del Promise
+    const resolvedParams = await params;
+    const examId = resolvedParams.id;
     
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

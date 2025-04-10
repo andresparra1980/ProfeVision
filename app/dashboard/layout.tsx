@@ -91,7 +91,11 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
+      {user ? (
+        <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
+      ) : (
+        <div className="w-64 bg-card border-r border-muted/20 dark:border-muted/40"></div>
+      )}
       <div className="flex flex-1 flex-col overflow-hidden bg-card">
         <DashboardHeader />
         <main className="flex-1 overflow-y-auto p-0">

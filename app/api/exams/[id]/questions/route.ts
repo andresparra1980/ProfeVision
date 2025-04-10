@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import _logger from '@/lib/utils/logger';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export const dynamic = 'force-dynamic';
+
+// En Next.js 15, los params son un Promise
+type Params = Promise<{ id: string }>;
+
+export async function GET(req: NextRequest, { params }: { params: Params }) {
   try {
-    // Manejar correctamente los parámetros en Next.js 14
-    params = await Promise.resolve(params);
-    const examId = params.id;
+    // Resolver los params del Promise
+    const resolvedParams = await params;
+    const examId = resolvedParams.id;
     
     if (!examId) {
       return NextResponse.json(

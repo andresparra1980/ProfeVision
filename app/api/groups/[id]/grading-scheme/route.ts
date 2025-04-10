@@ -1,14 +1,21 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { GradingScheme } from '@/lib/types/grading';
+import _logger from '@/lib/utils/logger';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
-export async function POST(request: Request, context: { params: { id: string } }) {
+export const dynamic = 'force-dynamic';
+
+// En Next.js 15, los params son un Promise
+type Params = Promise<{ id: string }>;
+
+export async function POST(request: Request, { params }: { params: Params }) {
   try {
     // Obtener datos de la petición
     const scheme: GradingScheme = await request.json();
-    const { id: groupId } = await Promise.resolve(context.params);
+    const resolvedParams = await params;
+    const groupId = resolvedParams.id;
 
     // Inicializar cliente Supabase con service role
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

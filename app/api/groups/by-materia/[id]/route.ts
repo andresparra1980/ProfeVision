@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import _logger from '@/lib/utils/logger';
+import { Estudiante } from '@/lib/types/database';
+
+export const dynamic = 'force-dynamic';
+
+// En Next.js 15, los params son un Promise
+type Params = Promise<{ id: string }>;
 
 // Define interfaces for type safety
-interface Estudiante {
-  id: string;
-  nombres: string;
-  apellidos: string;
-  email: string;
-}
-
 interface EstudianteGrupo {
   estudiante: Estudiante;
 }
@@ -23,7 +23,7 @@ const supabase = createClient(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Params }
 ) {
   try {
     // Obtener el token de autorización del header
@@ -32,8 +32,9 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Esperar a que los params estén disponibles
-    const { id: materiaId } = await params;
+    // Resolver los params del Promise
+    const resolvedParams = await params;
+    const materiaId = resolvedParams.id;
 
     // Obtener grupos por materia_id
     const { data: grupos, error } = await supabase

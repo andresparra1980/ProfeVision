@@ -30,5 +30,5 @@
     "lib/types/**/*.d.ts",
     "components/ui/*.d.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "supabase/functions"]
 } 

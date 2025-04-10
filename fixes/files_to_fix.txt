@@ -1,0 +1,5 @@
+./app/api/exams/[id]/questions/route.ts
+./app/api/exams/[id]/route.ts
+./app/api/exams/[id]/manual-grade/route.ts
+./app/api/exams/[id]/update-answer/route.ts
+./app/api/groups/[id]/route.ts

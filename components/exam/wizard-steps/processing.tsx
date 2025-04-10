@@ -397,15 +397,16 @@ export function Processing() {
         
         {/* Botones de acción */}
         <div className="flex justify-center space-x-4">
-          {/* Botón de retomar foto (siempre visible excepto durante procesamiento) */}
-          <Button 
-            variant="outline"
-            onClick={handleRetake}
-            disabled={status === 'processing'}
-            className="px-4"
-          >
-            Tomar otra foto
-          </Button>
+          {/* Botón de retomar foto (visible excepto durante procesamiento) */}
+          {status !== 'processing' && (
+            <Button 
+              variant="outline"
+              onClick={handleRetake}
+              className="px-4"
+            >
+              Tomar otra foto
+            </Button>
+          )}
           
           {/* Botón de reintento (solo visible en caso de error) */}
           {status === 'error' && (
@@ -422,7 +423,7 @@ export function Processing() {
             </Button>
           )}
           
-          {/* Botón de continuar (visible en estados idle, complete, duplicate) */}
+          {/* Botón de continuar (visible en estados idle, complete, duplicate, pero no en processing) */}
           {(status === 'idle' || status === 'complete' || status === 'duplicate') && (
             <Button
               onClick={processImage}

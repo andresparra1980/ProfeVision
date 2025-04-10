@@ -62,12 +62,18 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
+      // Dividir el nombre completo en nombre y apellido
+      const nameParts = data.name.split(' ');
+      const nombre = nameParts[0] || '';
+      const apellido = nameParts.slice(1).join(' ') || '';
+      
       const { error } = await signUpWithRedirect(
         data.email, 
         data.password, 
         {
-          full_name: data.name,
-          name: data.name,
+          nombre: nombre,
+          apellido: apellido,
+          full_name: data.name, // Campo adicional que se puede mantener
         },
         captchaToken
       );
