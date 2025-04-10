@@ -246,7 +246,12 @@ export const AnswerSheetPDF = ({ exam, student, group, paperSize = 'LETTER' }: A
           {/* Encabezado con QR e información */}
           <View style={styles.header}>
             <View style={styles.qrCode}>
-              {/* El componente Image de @react-pdf/renderer no soporta el atributo alt */}
+              {/* 
+                El componente Image de @react-pdf/renderer no soporta el atributo alt.
+                Este componente es parte de una generación de PDF, no de HTML, por lo que
+                jsx-a11y/alt-text no aplica aquí. La accesibilidad se maneja de forma diferente en PDFs.
+              */}
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
               <Image src={qrCodeUrl} style={{ width: 112, height: 112 }} />
             </View>
             <View style={styles.headerInfo}>
