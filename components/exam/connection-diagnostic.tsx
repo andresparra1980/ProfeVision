@@ -1,13 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { CircleAlert, RefreshCcw, CheckCircle2, Server, Database, Key } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { CircleAlert, RefreshCcw, Server, Database, Key } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const DEBUG = process.env.NODE_ENV === 'development';
+
 interface ConnectionDiagnosticProps {
-  examId?: string;
+  examId?: string; // Not currently used but kept for future implementation
+}
+
+// Define types for service sample data and exam data
+interface ExamData {
+  id: string;
+  title: string;
+  created_at: string;
+  [key: string]: unknown;
+}
+
+interface ServiceSampleData {
+  id: string;
+  [key: string]: unknown;
 }
 
 interface DiagnosticResult {
@@ -40,13 +55,13 @@ interface DiagnosticResult {
     data_received: string;
     data_count: number;
     data_preview: string;
-    data_sample?: any[];
+    data_sample?: ServiceSampleData[];
   };
   specific_exam_test?: {
     exam_id: string;
     found: boolean;
     error: string | null;
-    exam_data?: any;
+    exam_data?: ExamData;
   };
   status?: {
     overall: string;
@@ -59,7 +74,7 @@ interface DiagnosticResult {
   message?: string;
 }
 
-export default function ConnectionDiagnostic({ examId }: ConnectionDiagnosticProps) {
+export default function ConnectionDiagnostic(_props: ConnectionDiagnosticProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [diagnosticResult, setDiagnosticResult] = useState<DiagnosticResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +85,9 @@ export default function ConnectionDiagnostic({ examId }: ConnectionDiagnosticPro
     
     try {
       const url = '/api/supabase-diagnostic';
-      console.log('Ejecutando diagnóstico desde:', url);
+      if (DEBUG) {
+        console.log('Ejecutando diagnóstico desde:', url);
+      }
       
       const response = await fetch(url);
       
@@ -79,10 +96,14 @@ export default function ConnectionDiagnostic({ examId }: ConnectionDiagnosticPro
       }
       
       const data = await response.json();
-      console.log('Resultado del diagnóstico:', data);
+      if (DEBUG) {
+        console.log('Resultado del diagnóstico:', data);
+      }
       setDiagnosticResult(data);
     } catch (err) {
-      console.error('Error al ejecutar diagnóstico:', err);
+      if (DEBUG) {
+        console.error('Error al ejecutar diagnóstico:', err);
+      }
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setIsLoading(false);
@@ -99,14 +120,18 @@ export default function ConnectionDiagnostic({ examId }: ConnectionDiagnosticPro
       }
       
       const result = await response.json();
-      console.log('Resultado de fix-env:', result);
+      if (DEBUG) {
+        console.log('Resultado de fix-env:', result);
+      }
       
       // Ejecutar diagnóstico nuevamente para ver los cambios
       await runDiagnostic();
       
       return result;
     } catch (err) {
-      console.error('Error al corregir variables de entorno:', err);
+      if (DEBUG) {
+        console.error('Error al corregir variables de entorno:', err);
+      }
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setIsLoading(false);
@@ -376,9 +401,9 @@ export default function ConnectionDiagnostic({ examId }: ConnectionDiagnosticPro
                         <p className="text-red-500 text-xs">{diagnosticResult.specific_exam_test.error}</p>
                       ) : diagnosticResult.specific_exam_test.exam_data ? (
                         <div className="mt-1 text-xs">
-                          <p><strong>Título:</strong> {diagnosticResult.specific_exam_test.exam_data.titulo}</p>
-                          <p><strong>ID Profesor:</strong> {diagnosticResult.specific_exam_test.exam_data.profesor_id}</p>
-                          <p><strong>ID Materia:</strong> {diagnosticResult.specific_exam_test.exam_data.materia_id}</p>
+                          <p><strong>Título:</strong> {diagnosticResult.specific_exam_test.exam_data.title}</p>
+                          <p><strong>ID Profesor:</strong> {String(diagnosticResult.specific_exam_test.exam_data.profesor_id || '')}</p>
+                          <p><strong>ID Materia:</strong> {String(diagnosticResult.specific_exam_test.exam_data.materia_id || '')}</p>
                         </div>
                       ) : null}
                     </div>

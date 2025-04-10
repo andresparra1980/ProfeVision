@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Printer, Eye, Download, FileOutput } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/lib/supabase";
@@ -74,11 +74,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const [previewing, setPreviewing] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
 
-  useEffect(() => {
-    fetchExamDetails();
-  }, [examId]);
-
-  async function fetchExamDetails() {
+  const fetchExamDetails = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -144,7 +140,11 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     } finally {
       setLoading(false);
     }
-  }
+  }, [examId, router]);
+
+  useEffect(() => {
+    fetchExamDetails();
+  }, [fetchExamDetails]);
 
   const handleExport = async (type: 'questions' | 'answers') => {
     try {

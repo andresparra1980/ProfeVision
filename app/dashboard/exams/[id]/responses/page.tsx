@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useCallback, use } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -9,6 +8,9 @@ import { Label } from '@/components/ui/label';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
 import { Student } from '@/lib/types/database';
+
+// Configurar flag de debug para mensajes de consola
+const DEBUG = process.env.NODE_ENV === 'development';
 
 // Importar el componente PDF completo de forma dinámica
 const PDFGenerator = dynamic(
@@ -22,6 +24,19 @@ const PDFGenerator = dynamic(
     )
   }
 );
+
+interface GroupWithEstudiantes {
+  grupos: {
+    id: string;
+    nombre: string;
+    materias: {
+      nombre: string;
+    };
+    estudiantes: Array<{
+      estudiante: Student;
+    }>;
+  };
+}
 
 interface Group {
   id: string;
@@ -82,11 +97,13 @@ export default function ResponseSheetsPage({ params }: PageProps) {
   }, []);
 
   // Cargar datos del examen y grupos asignados
-  const loadExamAndGroups = async () => {
+  const loadExamAndGroups = useCallback(async () => {
     try {
       setLoading(true);
       
-      console.log('Fetching exam with ID:', id);
+      if (DEBUG) {
+        console.log('Fetching exam with ID:', id);
+      }
       
       // Obtener detalles del examen
       const { data: examData, error: examError } = await supabase
@@ -110,11 +127,15 @@ export default function ResponseSheetsPage({ params }: PageProps) {
         .single();
 
       if (examError) {
-        console.error('Error fetching exam:', examError);
+        if (DEBUG) {
+          console.error('Error fetching exam:', examError);
+        }
         throw examError;
       }
 
-      console.log('Exam data:', examData);
+      if (DEBUG) {
+        console.log('Exam data:', examData);
+      }
 
       // Obtener grupos asignados con sus estudiantes usando joins explícitos
       const { data: groupsData, error: groupsError } = await supabase
@@ -139,20 +160,24 @@ export default function ResponseSheetsPage({ params }: PageProps) {
         .eq('examen_id', id);
 
       if (groupsError) {
-        console.error('Error fetching groups:', groupsError);
+        if (DEBUG) {
+          console.error('Error fetching groups:', groupsError);
+        }
         throw groupsError;
       }
 
-      console.log('Groups data:', groupsData);
+      if (DEBUG) {
+        console.log('Groups data:', groupsData);
+      }
 
       // Transformar los datos para que coincidan con las interfaces
-      const transformedGroups: Group[] = groupsData.map((item: any) => ({
+      const transformedGroups: Group[] = groupsData.map((item: GroupWithEstudiantes) => ({
         id: item.grupos.id,
         nombre: item.grupos.nombre,
         materia: {
           nombre: item.grupos.materias.nombre,
         },
-        estudiantes: item.grupos.estudiantes.map((e: any) => ({
+        estudiantes: item.grupos.estudiantes.map((e) => ({
           id: e.estudiante.id,
           nombres: e.estudiante.nombres,
           apellidos: e.estudiante.apellidos,
@@ -162,21 +187,25 @@ export default function ResponseSheetsPage({ params }: PageProps) {
 
       setExam(examData);
       setGroups(transformedGroups);
-    } catch (error) {
-      console.error('Error loading exam and groups:', error);
+    } catch (error: unknown) {
+      if (DEBUG) {
+        console.error('Error loading exam and groups:', error);
+      }
       // Mostrar un mensaje de error más descriptivo
-      if ((error as any)?.code === 'PGRST116') {
-        console.error('No se encontró el examen con ID:', id);
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'PGRST116') {
+        if (DEBUG) {
+          console.error('No se encontró el examen con ID:', id);
+        }
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   // Cargar datos al montar el componente
   useEffect(() => {
     loadExamAndGroups();
-  }, [id]);
+  }, [id, loadExamAndGroups]);
 
   if (loading) {
     return (
@@ -248,15 +277,11 @@ export default function ResponseSheetsPage({ params }: PageProps) {
               <CardTitle>Generar PDF</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">
-                Se generará un PDF con hojas de respuesta para todos los estudiantes de {selectedGroup?.nombre}.
-              </p>
-              
               {selectedGroup && (
                 <AllAnswerSheets 
                   exam={exam} 
-                  group={selectedGroup}
-                  paperSize={paperSize}
+                  group={selectedGroup} 
+                  paperSize={paperSize} 
                 />
               )}
             </CardContent>

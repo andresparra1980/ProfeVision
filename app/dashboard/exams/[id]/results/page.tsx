@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ChevronLeft, Image as ImageIcon, FileImage, Loader2, Save, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/lib/supabase';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+// Configurar flag de debug para mensajes de consola
+const DEBUG = process.env.NODE_ENV === 'development';
 
 interface Estudiante {
   id: string;
@@ -67,6 +70,22 @@ interface ResultadoExamen {
   };
 }
 
+interface ExamDetails {
+  id: string;
+  titulo: string;
+  estado: string;
+  creado_en: string;
+  materias?: {
+    nombre: string;
+  };
+  grupo_id?: string;
+  grupos?: {
+    id: string;
+    nombre: string;
+  };
+  [key: string]: unknown;
+}
+
 // Constante para las letras de las opciones
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
@@ -75,7 +94,7 @@ export default function ExamResultsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [examDetails, setExamDetails] = useState<any>(null);
+  const [examDetails, setExamDetails] = useState<ExamDetails | null>(null);
   const [resultados, setResultados] = useState<ResultadoExamen[]>([]);
   const [todosEstudiantes, setTodosEstudiantes] = useState<Estudiante[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -104,7 +123,9 @@ export default function ExamResultsPage() {
       setLoading(true);
       const examId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
 
-      console.log('Fetching results for exam:', examId);
+      if (DEBUG) {
+        console.log('Fetching results for exam:', examId);
+      }
 
       // Obtener detalles del examen
       const { data: examData, error: examError } = await supabase
@@ -117,11 +138,15 @@ export default function ExamResultsPage() {
         .single();
 
       if (examError) {
-        console.error('Error fetching exam:', examError);
+        if (DEBUG) {
+          console.error('Error fetching exam:', examError);
+        }
         throw examError;
       }
 
-      console.log('Exam data:', examData);
+      if (DEBUG) {
+        console.log('Exam data:', examData);
+      }
       setExamDetails(examData);
 
       // Obtener la relación con el grupo a través de examen_grupo
@@ -135,14 +160,16 @@ export default function ExamResultsPage() {
         .maybeSingle();
 
       if (examenGrupoError) {
-        console.error('Error fetching examen_grupo:', examenGrupoError);
+        if (DEBUG) {
+          console.error('Error fetching examen_grupo:', examenGrupoError);
+        }
       } else if (examenGrupoData) {
         // Agregar información del grupo al objeto de detalles del examen
-        setExamDetails((prevDetails: any) => ({
+        setExamDetails((prevDetails) => prevDetails ? {
           ...prevDetails,
           grupo_id: examenGrupoData.grupo_id,
           grupos: examenGrupoData.grupos
-        }));
+        } : null);
 
         // Obtener todos los estudiantes del grupo
         if (examenGrupoData.grupo_id) {
@@ -154,12 +181,14 @@ export default function ExamResultsPage() {
                 .from('estudiante_grupo')
                 .select('estudiante_id')
                 .eq('grupo_id', examenGrupoData.grupo_id)
-            ).data?.map((row: any) => row.estudiante_id) || [])
+            ).data?.map((row: { estudiante_id: string }) => row.estudiante_id) || [])
             .order('apellidos', { ascending: true })
             .order('nombres', { ascending: true });
 
           if (estudiantesError) {
-            console.error('Error fetching students:', estudiantesError);
+            if (DEBUG) {
+              console.error('Error fetching students:', estudiantesError);
+            }
           } else {
             setTodosEstudiantes(estudiantesGrupo || []);
           }
@@ -178,7 +207,8 @@ export default function ExamResultsPage() {
           estudiante:estudiantes!inner(
             id,
             nombres,
-            apellidos
+            apellidos,
+            identificacion
           ),
           respuestas_estudiante(
             id,
@@ -213,7 +243,9 @@ export default function ExamResultsPage() {
         .order('fecha_calificacion', { ascending: false });
 
       if (resultsError) {
-        console.error('Error fetching results:', resultsError);
+        if (DEBUG) {
+          console.error('Error fetching results:', resultsError);
+        }
         throw resultsError;
       }
 
@@ -224,56 +256,74 @@ export default function ExamResultsPage() {
 
       // Asegurarnos de que los datos coincidan con el tipo ResultadoExamen
       const typedResults: ResultadoExamen[] = resultsData
-        .map((result: any): ResultadoExamen | null => {
-          if (!result.estudiante) return null;
+        .map((result: Record<string, unknown>): ResultadoExamen | null => {
+          const estudiante = result.estudiante as Estudiante | undefined;
+          if (!estudiante) return null;
 
-          const respuestas = Array.isArray(result.respuestas_estudiante) 
-            ? result.respuestas_estudiante
-                .map((respuesta: any): RespuestaEstudiante | null => {
-                  if (!respuesta.pregunta || !respuesta.opcion_respuesta) return null;
+          const respuestasEstudiante = result.respuestas_estudiante as Array<Record<string, unknown>> | undefined;
+          const respuestas = Array.isArray(respuestasEstudiante) 
+            ? respuestasEstudiante
+                .map((respuesta): RespuestaEstudiante | null => {
+                  const pregunta = respuesta.pregunta as Record<string, unknown> | undefined;
+                  const opcionRespuesta = respuesta.opcion_respuesta as Record<string, unknown> | undefined;
+                  
+                  if (!pregunta || !opcionRespuesta) return null;
+
+                  const opcionesRespuesta = pregunta.opciones_respuesta as OpcionRespuesta[] | undefined;
 
                   return {
-                    id: respuesta.id,
-                    pregunta_id: respuesta.pregunta_id,
-                    opcion_id: respuesta.opcion_id,
-                    es_correcta: respuesta.es_correcta,
-                    puntaje_obtenido: respuesta.puntaje_obtenido,
+                    id: respuesta.id as string,
+                    pregunta_id: respuesta.pregunta_id as string,
+                    opcion_id: respuesta.opcion_id as string,
+                    es_correcta: respuesta.es_correcta as boolean,
+                    puntaje_obtenido: respuesta.puntaje_obtenido as number,
                     pregunta: {
-                      id: respuesta.pregunta.id,
-                      orden: respuesta.pregunta.orden,
-                      num_opciones: respuesta.pregunta.opciones_respuesta?.length || 4,
-                      habilitada: respuesta.pregunta.habilitada,
-                      opciones_respuesta: respuesta.pregunta.opciones_respuesta || []
+                      id: pregunta.id as string,
+                      orden: pregunta.orden as number,
+                      num_opciones: opcionesRespuesta?.length || 4,
+                      habilitada: pregunta.habilitada as boolean,
+                      opciones_respuesta: opcionesRespuesta || []
                     },
                     opcion_respuesta: {
-                      id: respuesta.opcion_respuesta.id,
-                      orden: respuesta.opcion_respuesta.orden
+                      id: opcionRespuesta.id as string,
+                      orden: opcionRespuesta.orden as number
                     }
                   };
                 })
                 .filter((r: RespuestaEstudiante | null): r is RespuestaEstudiante => r !== null)
             : [];
 
+          const examenesEscaneados = result.examenes_escaneados as Array<Record<string, unknown>> | undefined;
+          const examenEscaneado = examenesEscaneados?.[0];
+
           return {
-            id: result.id,
+            id: result.id as string,
             estudiante: {
-              id: result.estudiante.id,
-              nombres: result.estudiante.nombres,
-              apellidos: result.estudiante.apellidos,
-              identificacion: result.estudiante.identificacion
+              id: estudiante.id,
+              nombres: estudiante.nombres,
+              apellidos: estudiante.apellidos,
+              identificacion: estudiante.identificacion
             },
-            puntaje_obtenido: result.puntaje_obtenido,
-            porcentaje: result.porcentaje,
-            fecha_calificacion: result.fecha_calificacion,
+            puntaje_obtenido: result.puntaje_obtenido as number,
+            porcentaje: result.porcentaje as number,
+            fecha_calificacion: result.fecha_calificacion as string,
             respuestas_estudiante: respuestas,
-            examen_escaneado: result.examenes_escaneados?.[0]
+            examen_escaneado: examenEscaneado ? {
+              archivo_original: examenEscaneado.archivo_original as string,
+              archivo_procesado: examenEscaneado.archivo_procesado as string,
+              ruta_s3_original: examenEscaneado.ruta_s3_original as string,
+              ruta_s3_procesado: examenEscaneado.ruta_s3_procesado as string
+            } : undefined
           };
         })
         .filter((resultado: ResultadoExamen | null): resultado is ResultadoExamen => resultado !== null);
 
       setResultados(typedResults);
-    } catch (error) {
-      console.error('Error in fetchExamResults:', error);
+    } catch (error: unknown) {
+      if (DEBUG) {
+        console.error('Error in fetchExamResults:', error);
+      }
+      toast.error("Error al cargar los resultados del examen");
     } finally {
       setLoading(false);
     }

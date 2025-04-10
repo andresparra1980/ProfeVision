@@ -1,26 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function GET(req: NextRequest) {
-  console.log('API /exams/list: Iniciando solicitud');
-  
+const DEBUG = process.env.NODE_ENV === 'development';
+
+export async function GET() {
   try {
-    // Configuración de Supabase
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('API /exams/list: Error - Variables de entorno faltantes');
       return NextResponse.json(
         { error: 'Error de configuración del servidor' },
         { status: 500 }
       );
     }
-    
-    // Crear cliente de Supabase
-    console.log('API /exams/list: Creando cliente Supabase');
-    console.log(`API URL: ${supabaseUrl.substring(0, 15)}...`);
-    console.log(`API Service Key presente: ${supabaseServiceKey ? 'Sí' : 'No'}`);
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
@@ -29,39 +22,30 @@ export async function GET(req: NextRequest) {
       }
     });
     
-    // Consultar los exámenes
-    console.log('API /exams/list: Consultando todos los exámenes');
-    
     const { data: exams, error } = await supabase
       .from('examenes')
-      .select('id, titulo, descripcion, materia_id, estado, duracion_minutos, created_at')
-      .order('created_at', { ascending: false })
-      .limit(20);
-    
+      .select('*')
+      .eq('is_archived', true)
+      .order('created_at', { ascending: false });
+      
     if (error) {
-      console.error('API /exams/list: Error SQL:', error);
+      if (DEBUG) {
+        console.error('Error al obtener exámenes archivados:', error);
+      }
       return NextResponse.json(
-        { error: `Error en la consulta: ${error.message}` },
+        { error: 'Error al obtener exámenes archivados' },
         { status: 500 }
       );
     }
     
-    console.log(`API /exams/list: Encontrados ${exams?.length || 0} exámenes`);
+    return NextResponse.json(exams);
     
-    if (!exams || exams.length === 0) {
-      return NextResponse.json({ exams: [] });
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error al procesar la solicitud:', error);
     }
-    
-    return NextResponse.json({ 
-      exams,
-      count: exams.length,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (error) {
-    console.error('API /exams/list: Error general:', error);
     return NextResponse.json(
-      { error: `Error interno del servidor: ${error instanceof Error ? error.message : 'Error desconocido'}` },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

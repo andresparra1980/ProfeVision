@@ -4,12 +4,6 @@ import type { Database } from '@/lib/types/database';
 // Singleton instance
 let client: ReturnType<typeof createBrowserClient<Database>> | null = null;
 
-// Get site URL for auth callbacks
-const siteUrl = 
-  typeof window !== 'undefined' 
-    ? window.location.origin
-    : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-
 // Function to get Supabase client
 export function getSupabaseClient() {
   if (client) return client;

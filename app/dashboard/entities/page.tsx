@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,20 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+interface EducationalEntity {
+  id: string;
+  nombre: string;
+  tipo: string | null;
+}
+
+interface ProfesorEntidadRelation {
+  entidad_id: string;
+  entidades_educativas: EducationalEntity;
+}
+
 export default function EntitiesPage() {
   const router = useRouter();
-  const [entities, setEntities] = useState<any[]>([]);
+  const [entities, setEntities] = useState<EducationalEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,11 +37,8 @@ export default function EntitiesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchEntities();
-  }, []);
-
-  async function fetchEntities() {
+  // Wrap fetchEntities in useCallback to use it in dependency arrays
+  const fetchEntities = useCallback(async () => {
     try {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
@@ -57,7 +65,7 @@ export default function EntitiesPage() {
       }
       
       // Transformar el resultado para tener un array de entidades
-      const entitiesList = data.map((item: any) => item.entidades_educativas);
+      const entitiesList = data.map((item: ProfesorEntidadRelation) => item.entidades_educativas);
       setEntities(entitiesList || []);
     } catch (error) {
       console.error("Error inesperado:", error);
@@ -69,7 +77,22 @@ export default function EntitiesPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [router]);
+
+  useEffect(() => {
+    fetchEntities();
+  }, [fetchEntities]);
+
+  // Display the error if it exists
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error,
+        variant: 'destructive',
+      });
+    }
+  }, [error]);
 
   const filteredEntities = entities.filter((entity) =>
     entity.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -130,12 +153,13 @@ export default function EntitiesPage() {
 
       // Recargar datos
       fetchEntities();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error);
-      setError(error.message || 'Error al crear la entidad educativa');
+      const errorMessage = error instanceof Error ? error.message : 'Error al crear la entidad educativa';
+      setError(errorMessage);
       toast({
         title: 'Error',
-        description: error.message || 'Error al crear la entidad educativa',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

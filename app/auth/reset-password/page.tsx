@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { ModeToggle } from "@/components/shared/mode-toggle";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   Card,
   CardContent,
@@ -31,7 +31,7 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const turnstileRef = useRef<any>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const form = useForm<ResetFormValues>({
     resolver: zodResolver(resetSchema),
@@ -66,11 +66,11 @@ export default function ResetPasswordPage() {
         title: "Correo enviado",
         description: "Se ha enviado un enlace para restablecer tu contraseña.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.",
       });
       
       // Resetear el CAPTCHA en caso de error

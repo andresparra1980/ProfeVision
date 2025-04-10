@@ -1,6 +1,8 @@
 import { getServiceSupabase } from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
 
+const DEBUG = process.env.NODE_ENV === 'development';
+
 interface ScanData {
   examId: string; // puede ser null si aún no se ha procesado el QR
   studentId?: string;
@@ -13,6 +15,17 @@ interface ProcessingResult {
   uploadUrl: string;
   status: 'queued' | 'processing' | 'completed' | 'failed';
   scanData: ScanData;
+}
+
+interface OmrServiceCallbackData {
+  job_id: string;
+  file_url: string;
+  callback_url: string;
+  metadata: {
+    exam_id: string | null;
+    student_id: string | null;
+    group_id: string | null;
+  };
 }
 
 /**
@@ -50,7 +63,7 @@ export async function uploadScanToStorage(
   }
   
   // Subir la imagen al bucket 'exam-scans'
-  const { data: uploadData, error: uploadError } = await supabase
+  const { error: uploadError } = await supabase
     .storage
     .from('exam-scans')
     .upload(filePath, file, {
@@ -59,7 +72,9 @@ export async function uploadScanToStorage(
     });
   
   if (uploadError) {
-    console.error('Error uploading scan to storage:', uploadError);
+    if (DEBUG) {
+      console.error('Error uploading scan to storage:', uploadError);
+    }
     throw new Error(`Error uploading scan: ${uploadError.message}`);
   }
   
@@ -77,7 +92,7 @@ export async function uploadScanToStorage(
     timestamp: new Date().toISOString(),
   };
   
-  const { data: jobData, error: jobError } = await supabase
+  const { error: jobError } = await supabase
     .from('exam_scan_jobs')
     .insert({
       id: jobId,
@@ -92,7 +107,9 @@ export async function uploadScanToStorage(
     .single();
   
   if (jobError) {
-    console.error('Error creating scan job record:', jobError);
+    if (DEBUG) {
+      console.error('Error creating scan job record:', jobError);
+    }
     throw new Error(`Error creating scan job: ${jobError.message}`);
   }
   
@@ -122,7 +139,9 @@ async function notifyOmrService(
     const omrServiceEndpoint = process.env.OMR_SERVICE_ENDPOINT;
     
     if (!omrServiceEndpoint) {
-      console.log('OMR service endpoint not configured. Job queued:', { jobId, filePath });
+      if (DEBUG) {
+        console.log('OMR service endpoint not configured. Job queued:', { jobId, filePath });
+      }
       return;
     }
     
@@ -134,38 +153,46 @@ async function notifyOmrService(
       .createSignedUrl(filePath, 60 * 60); // 1 hora de validez
     
     if (error || !data) {
-      console.error('Error creating signed URL:', error);
+      if (DEBUG) {
+        console.error('Error creating signed URL:', error);
+      }
       throw new Error(`Error creating signed URL: ${error?.message || 'Unknown error'}`);
     }
     
     const signedUrl = data.signedUrl;
     
     // Enviar solicitud al microservicio
+    const payload: OmrServiceCallbackData = {
+      job_id: jobId,
+      file_url: signedUrl,
+      callback_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/omr/callback`,
+      metadata: {
+        exam_id: scanData.examId || null,
+        student_id: scanData.studentId || null,
+        group_id: scanData.groupId || null,
+      }
+    };
+    
     const response = await fetch(omrServiceEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.OMR_SERVICE_API_KEY || ''}`,
       },
-      body: JSON.stringify({
-        job_id: jobId,
-        file_url: signedUrl,
-        callback_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/omr/callback`,
-        metadata: {
-          exam_id: scanData.examId || null,
-          student_id: scanData.studentId || null,
-          group_id: scanData.groupId || null,
-        }
-      }),
+      body: JSON.stringify(payload),
     });
     
     if (!response.ok) {
       throw new Error(`Error notifying OMR service: ${response.statusText}`);
     }
     
-    console.log('OMR service notified successfully:', jobId);
-  } catch (error) {
-    console.error('Error notifying OMR service:', error);
+    if (DEBUG) {
+      console.log('OMR service notified successfully:', jobId);
+    }
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error notifying OMR service:', error);
+    }
     // No lanzamos error para no interrumpir el flujo, pero registramos el problema
   }
 }
@@ -196,7 +223,9 @@ export async function getProcessingJob(jobId: string): Promise<ProcessingResult 
     .single();
   
   if (error || !data) {
-    console.error('Error fetching scan job:', error);
+    if (DEBUG) {
+      console.error('Error fetching scan job:', error);
+    }
     return null;
   }
   
@@ -228,11 +257,11 @@ export async function getProcessingJob(jobId: string): Promise<ProcessingResult 
 export async function updateJobStatus(
   jobId: string, 
   status: 'processing' | 'completed' | 'failed',
-  result?: any
+  result?: Record<string, unknown>
 ): Promise<void> {
   const supabase = getServiceSupabase();
   
-  const updates: any = {
+  const updates: Record<string, unknown> = {
     status,
     updated_at: new Date().toISOString(),
   };
@@ -255,7 +284,9 @@ export async function updateJobStatus(
     .eq('id', jobId);
   
   if (error) {
-    console.error('Error updating scan job status:', error);
+    if (DEBUG) {
+      console.error('Error updating scan job status:', error);
+    }
     throw new Error(`Error updating job status: ${error.message}`);
   }
 } 

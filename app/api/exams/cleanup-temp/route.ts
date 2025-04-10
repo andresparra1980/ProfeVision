@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+const DEBUG = process.env.NODE_ENV === 'development';
+
 export async function POST(req: NextRequest) {
   try {
     const { imageUrl } = await req.json();
@@ -45,17 +47,23 @@ export async function POST(req: NextRequest) {
       })
       .map(file => path.join(uploadDir, file));
 
-    console.log('Archivos a eliminar:', filesToDelete);
+    if (DEBUG) {
+      console.log('Archivos a eliminar:', filesToDelete);
+    }
 
     // Eliminar archivos si existen
     for (const file of filesToDelete) {
       try {
         await fs.unlink(file);
-        console.log(`Archivo eliminado: ${file}`);
+        if (DEBUG) {
+          console.log(`Archivo eliminado: ${file}`);
+        }
       } catch (error) {
         // Ignorar errores si el archivo no existe
         if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-          console.error(`Error al eliminar archivo ${file}:`, error);
+          if (DEBUG) {
+            console.error(`Error al eliminar archivo ${file}:`, error);
+          }
         }
       }
     }
@@ -66,8 +74,10 @@ export async function POST(req: NextRequest) {
       filesDeleted: filesToDelete.map(f => path.basename(f))
     });
 
-  } catch (error) {
-    console.error('Error al limpiar archivos temporales:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error al limpiar archivos temporales:', error);
+    }
     return NextResponse.json(
       { 
         error: 'Error al limpiar archivos temporales',

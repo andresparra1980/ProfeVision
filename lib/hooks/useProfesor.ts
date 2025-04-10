@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/types/database';
+import { Session } from '@supabase/supabase-js';
 
 export type Profesor = Database['public']['Tables']['profesores']['Row'];
 export type ProfesorUpdate = Database['public']['Tables']['profesores']['Update'];
@@ -29,9 +30,9 @@ export function useProfesor() {
 
         if (profesorError) throw profesorError;
         setProfesor(profesorData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error al cargar profesor:', err);
-        setError(err);
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setLoading(false);
       }
@@ -40,7 +41,7 @@ export function useProfesor() {
     loadProfesor();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: string, session: Session | null) => {
         if (event === 'SIGNED_OUT') {
           setProfesor(null);
         } else if (session) {

@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { ModeToggle } from "@/components/shared/mode-toggle";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   Card,
   CardContent,
@@ -33,7 +33,7 @@ export default function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const turnstileRef = useRef<any>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -69,11 +69,11 @@ export default function Page() {
 
       router.push("/dashboard");
       router.refresh();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: "destructive",
         title: "Error al iniciar sesión",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.",
       });
       
       // Resetear el CAPTCHA en caso de error

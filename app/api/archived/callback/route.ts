@@ -21,6 +21,22 @@ import { updateJobStatus } from '@/lib/services/exam-scan-service';
  *   }
  * }
  */
+
+interface QRData {
+  examId: string;
+  studentId: string;
+  groupId: string;
+}
+
+interface ProcessingResults {
+  qrData: QRData | null;
+  answers: Record<string, string>;
+  processedAt: string;
+  exam_id?: string;
+  student_id?: string;
+  group_id?: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
     // Verificar la autorización - Usando API key simple
@@ -52,7 +68,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Formatear los resultados para nuestro almacenamiento
-    let processingResults: any = null;
+    let processingResults: ProcessingResults | null = null;
     
     if (data.status === 'completed' && data.results) {
       processingResults = {
@@ -95,10 +111,10 @@ export async function POST(req: NextRequest) {
       status: data.status,
     });
     
-  } catch (error) {
-    console.error('Error processing OMR callback:', error);
+  } catch (error: unknown) {
+    console.error('Error in archived callback:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Error processing callback' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

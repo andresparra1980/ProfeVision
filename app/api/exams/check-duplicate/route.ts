@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+const DEBUG = process.env.NODE_ENV === 'development';
+
 export async function GET(request: NextRequest) {
   try {
     // Crear cliente Supabase con Service Role Key para operaciones del lado del servidor
@@ -53,7 +55,9 @@ export async function GET(request: NextRequest) {
       .eq('examen_id', examId);
 
     if (versionesError) {
-      console.error('Error al buscar versiones:', versionesError);
+      if (DEBUG) {
+        console.error('Error al buscar versiones:', versionesError);
+      }
       return NextResponse.json(
         { error: 'Error al verificar versiones de examen' },
         { status: 500 }
@@ -88,7 +92,9 @@ export async function GET(request: NextRequest) {
       resultadoError = resultado.error;
     } else {
       // Si no hay versiones, verificar si hay resultados directos para este examen
-      console.log('No hay versiones para este examen. Buscando resultados directos.');
+      if (DEBUG) {
+        console.log('No hay versiones para este examen. Buscando resultados directos.');
+      }
       
       const resultado = await supabase
         .from('resultados_examen')
@@ -111,7 +117,9 @@ export async function GET(request: NextRequest) {
     }
 
     if (resultadoError) {
-      console.error('Error al buscar resultado previo:', resultadoError);
+      if (DEBUG) {
+        console.error('Error al buscar resultado previo:', resultadoError);
+      }
       return NextResponse.json(
         { error: 'Error al verificar resultados previos' },
         { status: 500 }
@@ -129,7 +137,9 @@ export async function GET(request: NextRequest) {
         .limit(1);
 
       if (escaneadosError) {
-        console.error('Error al buscar escaneos directos:', escaneadosError);
+        if (DEBUG) {
+          console.error('Error al buscar escaneos directos:', escaneadosError);
+        }
       } else if (escaneadosDirectos && escaneadosDirectos.length > 0) {
         // Si hay un escaneo directo, verificar si el resultado asociado es de este estudiante
         if (escaneadosDirectos[0].resultado_id) {
@@ -171,7 +181,9 @@ export async function GET(request: NextRequest) {
         .limit(1);
 
       if (scanError) {
-        console.error('Error al buscar escaneo previo:', scanError);
+        if (DEBUG) {
+          console.error('Error al buscar escaneo previo:', scanError);
+        }
       } else {
         scanData = scanDataResult;
       }
@@ -195,10 +207,97 @@ export async function GET(request: NextRequest) {
 
     // Si no hay resultado previo
     return NextResponse.json({ exists: false });
-  } catch (error) {
-    console.error('Error en check-duplicate:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error en check-duplicate:', error);
+    }
     return NextResponse.json(
       { error: 'Error al verificar duplicados' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const { qrData } = await req.json();
+    
+    if (!qrData) {
+      return NextResponse.json(
+        { error: 'No se proporcionaron datos de QR' },
+        { status: 400 }
+      );
+    }
+    
+    // Extraer información del QR
+    const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
+    const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
+    const groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
+    
+    if (!examId || !studentId) {
+      return NextResponse.json(
+        { error: 'Datos de QR incompletos' },
+        { status: 400 }
+      );
+    }
+    
+    // Configuración de Supabase
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        { error: 'Error de configuración del servidor' },
+        { status: 500 }
+      );
+    }
+    
+    // Crear cliente de Supabase
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+    
+    // Verificar si ya existe un resultado para este examen y estudiante
+    const { data, error } = await supabase
+      .from('resultados_examen')
+      .select('id, puntaje_obtenido, porcentaje, fecha_calificacion')
+      .eq('examen_id', examId)
+      .eq('estudiante_id', studentId)
+      .order('fecha_calificacion', { ascending: false })
+      .limit(1);
+    
+    if (error) {
+      if (DEBUG) {
+        console.error('Error al verificar duplicado:', error);
+      }
+      return NextResponse.json(
+        { error: 'Error al verificar duplicados' },
+        { status: 500 }
+      );
+    }
+    
+    const exists = data && data.length > 0;
+    const duplicateInfo = exists ? {
+      resultadoId: data[0].id,
+      fecha_calificacion: data[0].fecha_calificacion,
+      puntaje: data[0].puntaje_obtenido,
+      porcentaje: data[0].porcentaje,
+    } : null;
+    
+    return NextResponse.json({
+      exists,
+      duplicateInfo
+    });
+    
+  } catch (error) {
+    if (DEBUG) {
+      console.error('Error al verificar duplicados:', error);
+    }
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

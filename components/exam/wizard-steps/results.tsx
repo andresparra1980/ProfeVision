@@ -1,33 +1,27 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
+import { OMRForm } from '@/components/exam/omr-form';
+import { 
+  QRData, 
+  Answer, 
+  EntityNames, 
+  ExamScore, 
+  DEFAULT_NUM_OPTIONS, 
+  OPTION_LETTERS,
+  DuplicateInfo
+} from '../types';
+import logger from '@/lib/utils/logger';
 
-// Valor por defecto para el número de opciones (si no se especifica)
-const DEFAULT_NUM_OPTIONS = 4;
-const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']; // Soportamos hasta 8 opciones
+// Constants
+const DEBUG = process.env.NODE_ENV === 'development';
 
-interface QRData {
-  examId?: string;
-  examenId?: string;
-  exam_id?: string;
-  examen_id?: string;
-  studentId?: string;
-  estudianteId?: string;
-  student_id?: string;
-  estudiante_id?: string;
-  groupId?: string;
-  grupoId?: string;
-  group_id?: string;
-  grupo_id?: string;
-  isDuplicate: boolean;
-  duplicateInfo?: any;
-}
-
+// Use types from the shared types file
 interface ResultsProps {
   qrData: QRData | null;
   answers: Answer[];
@@ -37,43 +31,6 @@ interface ResultsProps {
   onComplete: () => void;
   onContinue: () => void;
   onSaved: (resultadoId: string) => void;
-}
-
-interface EntityNames {
-  materia: string;
-  examen: string;
-  estudiante: string;
-  grupo: string;
-  loading: boolean;
-  error: string | null;
-}
-
-interface ExamScore {
-  correctAnswers: number;
-  totalQuestions: number;
-  percentage: number;
-  loading: boolean;
-  error: string | null;
-  puntajeTotal?: number;
-  puntajeObtenido?: number;
-}
-
-interface Answer {
-  number: number;
-  value: string;
-  confidence?: number;
-  num_options?: number;
-  disabled?: boolean;
-  questionNumber?: number;
-  question_number?: number;
-  question?: number;
-  num?: number;
-  answerValue?: string;
-  answer_value?: string;
-  answer?: string;
-  pregunta_id?: string;
-  opcion_id?: string;
-  es_correcta?: boolean;
 }
 
 interface RawAnswer {
@@ -118,7 +75,14 @@ const normalizeAnswers = (rawAnswers: RawAnswer[]): Answer[] => {
 };
 
 export function Results({ qrData, answers: initialAnswers, processedImage, originalImage, onPrevious, onComplete, onContinue, onSaved }: ResultsProps) {
-  console.log("Results component received:", { qrData, initialAnswers, processedImage });
+  // Usar una ref para registrar si ya se ha mostrado el log
+  const loggedRef = useRef(false);
+  
+  // Log solo cuando no se haya mostrado antes
+  if (DEBUG && !loggedRef.current) {
+    logger.log("Results component received:", { qrData, initialAnswersCount: initialAnswers?.length, processedImage: !!processedImage });
+    loggedRef.current = true;
+  }
   
   const [entityNames, setEntityNames] = useState<EntityNames>({
     materia: '',
@@ -141,7 +105,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isDuplicate, setIsDuplicate] = useState<boolean>(false);
-  const [duplicateInfo, setDuplicateInfo] = useState<any>(null);
+  const [duplicateInfo, setDuplicateInfo] = useState<DuplicateInfo | null>(null);
   const { toast } = useToast();
 
   // Usar useMemo para evitar recálculos innecesarios
@@ -234,47 +198,106 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           throw new Error("No hay datos de QR disponibles");
         }
         
-        const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
-        const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
-        const groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
-        
-        if (!examId || !studentId) {
-          throw new Error("Datos de QR incompletos");
+        if (DEBUG) {
+          console.log('QR data in Results component:', qrData);
         }
         
-        // Fetch exam details (includes subject)
-        const examRes = await fetch(`/api/exams/${examId}/details`);
-        if (!examRes.ok) throw new Error(`Error al obtener detalles del examen: ${examRes.statusText}`);
-        const examData = await examRes.json();
+        // Handle colon-separated UUID format
+        let examId = '';
+        let studentId = '';
+        let groupId = '';
         
-        // Fetch student details
-        const studentRes = await fetch(`/api/students/${studentId}`);
-        if (!studentRes.ok) throw new Error(`Error al obtener detalles del estudiante: ${studentRes.statusText}`);
-        const studentData = await studentRes.json();
-        
-        let groupData = null;
-        // Fetch group details if available
-        if (groupId) {
-          const groupRes = await fetch(`/api/groups/${groupId}`);
-          if (groupRes.ok) {
-            groupData = await groupRes.json();
+        // Check if qrData is a string with UUID format
+        if (typeof qrData === 'string') {
+          const qrDataString = qrData as string;
+          if (qrDataString.includes(':') && qrDataString.includes('-')) {
+            const parts = qrDataString.split(':');
+            if (parts.length >= 3) {
+              examId = parts[0];
+              studentId = parts[1];
+              groupId = parts[2];
+            }
           }
+        } 
+        // Handle object format (most common case)
+        else {
+          // Extract IDs safely with fallbacks
+          examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id || '';
+          studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id || '';
+          groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id || '';
         }
         
-        setEntityNames({
-          materia: examData.materia?.nombre || 'No disponible',
-          examen: examData.titulo || examData.title || 'No disponible',
-          estudiante: `${studentData.nombres} ${studentData.apellidos}`.trim() || 'No disponible',
-          grupo: groupData?.nombre || 'No asignado',
-          loading: false,
-          error: null
-        });
+        // Provide better error messages with more details
+        if (!examId) {
+          if (DEBUG) logger.warn("QR data missing examId", qrData);
+          throw new Error("Datos de QR incompletos: Falta ID de examen");
+        }
         
-        // Ahora calculamos la calificación
-        await calculateExamScore(examId);
+        if (!studentId) {
+          if (DEBUG) logger.warn("QR data missing studentId", qrData);
+          throw new Error("Datos de QR incompletos: Falta ID de estudiante");
+        }
+        
+        // More detailed logging
+        if (DEBUG) {
+          logger.log("Fetching entity details with:", { examId, studentId, groupId });
+        }
+        
+        try {
+          // Fetch exam details (includes subject)
+          const examRes = await fetch(`/api/exams/${examId}/details`);
+          if (!examRes.ok) {
+            const errorText = await examRes.text();
+            if (DEBUG) logger.error(`Error fetching exam details: ${examRes.status}`, errorText);
+            throw new Error(`Error al obtener detalles del examen: ${examRes.status}`);
+          }
+          const examData = await examRes.json();
+          
+          // Fetch student details
+          const studentRes = await fetch(`/api/students/${studentId}`);
+          if (!studentRes.ok) {
+            const errorText = await studentRes.text();
+            if (DEBUG) logger.error(`Error fetching student details: ${studentRes.status}`, errorText);
+            throw new Error(`Error al obtener detalles del estudiante: ${studentRes.status}`);
+          }
+          const studentData = await studentRes.json();
+          
+          let groupData = null;
+          // Fetch group details if available
+          if (groupId) {
+            try {
+              const groupRes = await fetch(`/api/groups/${groupId}`);
+              if (groupRes.ok) {
+                groupData = await groupRes.json();
+              } else {
+                if (DEBUG) logger.warn(`Group details not found for ID: ${groupId}`);
+              }
+            } catch (groupError) {
+              if (DEBUG) logger.warn("Error fetching group data:", groupError);
+              // Don't fail the whole process if just group data fails
+            }
+          }
+          
+          setEntityNames({
+            materia: examData.materia?.nombre || 'No disponible',
+            examen: examData.titulo || examData.title || 'No disponible',
+            estudiante: `${studentData.nombres || ''} ${studentData.apellidos || ''}`.trim() || 'No disponible',
+            grupo: groupData?.nombre || 'No asignado',
+            loading: false,
+            error: null
+          });
+          
+          // Ahora calculamos la calificación
+          await calculateExamScore(examId);
+          
+        } catch (fetchError) {
+          throw fetchError; // Re-throw specific fetch errors
+        }
         
       } catch (error: any) {
-        console.error("Error fetching entity names:", error);
+        if (DEBUG) {
+          logger.error("Error fetching entity names:", error);
+        }
         setEntityNames(prev => ({
           ...prev,
           loading: false,
@@ -417,7 +440,9 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         });
         
       } catch (error: any) {
-        console.error("Error calculating exam score:", error);
+        if (DEBUG) {
+          logger.error("Error calculating exam score:", error);
+        }
         setExamScore(prev => ({
           ...prev,
           loading: false,
@@ -435,53 +460,6 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   useEffect(() => {
     setAnswers(normalizeAnswers(initialAnswers || []));
   }, [initialAnswers]);
-
-  // Función para obtener el color de la burbuja según la opción
-  const getAnswerBubbleStyle = (value: string) => {
-    if (value === '-') return 'bg-gray-200';
-    
-    switch (value.toUpperCase()) {
-      case 'A': return 'bg-blue-500';
-      case 'B': return 'bg-green-500';
-      case 'C': return 'bg-yellow-500';
-      case 'D': return 'bg-purple-500';
-      case 'E': return 'bg-pink-500';
-      case 'F': return 'bg-indigo-500';
-      case 'G': return 'bg-red-500';
-      case 'H': return 'bg-orange-500';
-      default: return 'bg-gray-400';
-    }
-  };
-
-  // Función para renderizar las burbujas de respuesta
-  const renderAnswerBubbles = (answer: Answer) => {
-    const numOptions = answer.num_options || DEFAULT_NUM_OPTIONS;
-    const selectedIndex = OPTION_LETTERS.indexOf(answer.value.toUpperCase());
-    const isDisabled = answer.disabled;
-
-    return (
-      <div className="flex items-center space-x-1">
-        {Array.from({ length: numOptions }).map((_, i) => {
-          const isSelected = i === selectedIndex;
-          
-          return (
-            <div 
-              key={`bubble-${answer.number}-${i}`}
-              className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium transition-colors
-                ${isDisabled 
-                  ? 'bg-gray-200 text-gray-400 opacity-30' 
-                  : isSelected 
-                    ? getAnswerBubbleStyle(OPTION_LETTERS[i]) + ' text-white'
-                    : 'bg-gray-100 text-gray-600'
-                }`}
-            >
-              {OPTION_LETTERS[i]}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
 
   // Función para cargar imagen desde URL y convertirla a base64
   const loadImageAsBase64 = async (url: string): Promise<string> => {
@@ -509,7 +487,9 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         reader.readAsDataURL(blob);
       });
     } catch (error) {
-      console.error('Error al cargar imagen:', error);
+      if (DEBUG) {
+        logger.error('Error al cargar imagen:', error);
+      }
       throw new Error('No se pudo cargar la imagen. Intente nuevamente.');
     }
   };
@@ -525,11 +505,15 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       }
       
       // Convertir imágenes a base64 si son URLs
-      console.log('Preparando imágenes para guardar...');
+      if (DEBUG) {
+        logger.log('Preparando imágenes para guardar...');
+      }
       const originalImageBase64 = await loadImageAsBase64(originalImage);
       const processedImageBase64 = await loadImageAsBase64(processedImage);
       
-      console.log('Imágenes preparadas correctamente');
+      if (DEBUG) {
+        logger.log('Imágenes preparadas correctamente');
+      }
       
       // Preparar datos para enviar al endpoint
       const data = {
@@ -542,7 +526,9 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         duplicateInfo
       };
       
-      console.log('Enviando datos al servidor...');
+      if (DEBUG) {
+        logger.log('Enviando datos al servidor...');
+      }
       
       // Enviar datos al endpoint
       const response = await fetch('/api/exams/save-results', {
@@ -559,7 +545,9 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       }
       
       const result = await response.json();
-      console.log('Respuesta del servidor:', result);
+      if (DEBUG) {
+        logger.log('Respuesta del servidor:', result);
+      }
       
       // Mostrar notificación de éxito
       toast({
@@ -580,7 +568,9 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       }
       
     } catch (error: any) {
-      console.error("Error al guardar resultados:", error);
+      if (DEBUG) {
+        logger.error("Error al guardar resultados:", error);
+      }
       
       // Mostrar notificación de error
       toast({
@@ -660,46 +650,28 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             <span>D</span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="space-y-2">
-            {answersFirstColumn.map((answer) => (
-              <div key={`answer-${answer.number}`} className="flex items-center">
-                <span className={`text-sm font-medium min-w-[25px] ${answer.disabled ? 'line-through opacity-40' : ''}`}>{answer.number}.</span>
-                {answer.value !== '-' ? (
-                  renderAnswerBubbles(answer)
-                ) : (
-                  <div className="flex items-center space-x-1">
-                    {Array.from({ length: answer.num_options || DEFAULT_NUM_OPTIONS }).map((_, i) => (
-                      <div 
-                        key={`empty-bubble-${answer.number}-${i}`}
-                        className={`w-5 h-5 rounded-full bg-gray-200 ${answer.disabled ? 'opacity-30' : ''}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="space-y-2">
-            {answersSecondColumn.map((answer) => (
-              <div key={`answer-${answer.number}`} className="flex items-center">
-                <span className={`text-sm font-medium min-w-[25px] ${answer.disabled ? 'line-through opacity-40' : ''}`}>{answer.number}.</span>
-                {answer.value !== '-' ? (
-                  renderAnswerBubbles(answer)
-                ) : (
-                  <div className="flex items-center space-x-1">
-                    {Array.from({ length: answer.num_options || DEFAULT_NUM_OPTIONS }).map((_, i) => (
-                      <div 
-                        key={`empty-bubble-${answer.number}-${i}`}
-                        className={`w-5 h-5 rounded-full bg-gray-200 ${answer.disabled ? 'opacity-30' : ''}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        
+        <OMRForm
+          title=""
+          numQuestions={40}
+          numOptions={DEFAULT_NUM_OPTIONS}
+          questionsPerColumn={20}
+          selectedAnswers={useMemo(() => {
+            const answerMap: Record<number, string> = {};
+            normalizedAnswers.forEach(answer => {
+              if (answer.value && answer.value !== '-') {
+                answerMap[answer.number] = answer.value;
+              }
+            });
+            return answerMap;
+          }, [normalizedAnswers])}
+          disabledQuestions={useMemo(() => {
+            return normalizedAnswers
+              .filter(answer => answer.disabled)
+              .map(answer => answer.number);
+          }, [normalizedAnswers])}
+          showHeaders={false}
+        />
         
         {examScore.loading ? (
           <div className="flex items-center justify-center py-4 mt-4">

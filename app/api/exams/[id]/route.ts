@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+const DEBUG = process.env.NODE_ENV === 'development';
+
 // Crear cliente de Supabase para el servidor usando SERVICE_ROLE_KEY
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,8 +34,10 @@ export async function GET(
     if (error) throw error;
 
     return NextResponse.json(exam);
-  } catch (error) {
-    console.error('API /exams/[id]: Error:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('API /exams/[id]: Error:', error);
+    }
     return NextResponse.json({
       error: 'Error al procesar la solicitud',
       message: error instanceof Error ? error.message : 'Error desconocido'
@@ -119,8 +123,10 @@ export async function DELETE(
       message: 'Examen y elementos relacionados eliminados correctamente' 
     });
 
-  } catch (error) {
-    console.error('API /exams/[id] DELETE: Error:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('API /exams/[id] DELETE: Error:', error);
+    }
     return NextResponse.json({
       error: 'Error al eliminar el examen',
       message: error instanceof Error ? error.message : 'Error desconocido'
@@ -143,7 +149,7 @@ export async function PATCH(
     }
 
     // 1. Verificar que el examen existe
-    const { data: exam, error: examError } = await supabase
+    const { error: examError } = await supabase
       .from('examenes')
       .select('id')
       .eq('id', examId)
@@ -180,11 +186,86 @@ export async function PATCH(
       estado: estado
     });
 
-  } catch (error) {
-    console.error('API /exams/[id] PATCH: Error:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('API /exams/[id] PATCH: Error:', error);
+    }
     return NextResponse.json({
       error: 'Error al actualizar el estado del examen',
       message: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 });
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Manejar correctamente los parámetros en Next.js 14
+    params = await Promise.resolve(params);
+    const examId = params.id;
+    
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        { error: 'Error de configuración del servidor' },
+        { status: 500 }
+      );
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+    
+    const body = await request.json();
+    const { title, description, questions, is_archived } = body;
+    
+    if (!title || !questions) {
+      return NextResponse.json(
+        { error: 'Faltan campos requeridos' },
+        { status: 400 }
+      );
+    }
+    
+    const { error: updateError } = await supabase
+      .from('examenes')
+      .update({
+        title,
+        description,
+        questions,
+        is_archived,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', examId);
+      
+    if (updateError) {
+      if (DEBUG) {
+        console.error('Error al actualizar examen:', updateError);
+      }
+      return NextResponse.json(
+        { error: 'Error al actualizar examen' },
+        { status: 500 }
+      );
+    }
+    
+    return NextResponse.json({ 
+      success: true,
+      message: 'Examen actualizado correctamente'
+    });
+    
+  } catch (error) {
+    if (DEBUG) {
+      console.error('Error en PUT /api/exams/[id]:', error);
+    }
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
   }
 } 

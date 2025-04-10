@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { PlusCircle, Pencil, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -96,11 +95,12 @@ export default function EntidadesPage() {
 
       if (error) throw error;
       setEntidades(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.";
       toast({
         variant: "destructive",
         title: "Error al cargar entidades",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -157,11 +157,12 @@ export default function EntidadesPage() {
       setEditingEntidad(null);
       form.reset();
       loadEntidades();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.";
       toast({
         variant: "destructive",
         title: "Error al guardar entidad",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: errorMessage,
       });
     }
   };
@@ -188,11 +189,12 @@ export default function EntidadesPage() {
       });
       
       loadEntidades();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.";
       toast({
         variant: "destructive",
         title: "Error al eliminar entidad",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: errorMessage,
       });
     } finally {
       setDeletingId(null);

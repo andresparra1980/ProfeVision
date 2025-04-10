@@ -9,10 +9,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase, signUpWithRedirect } from "@/lib/supabase";
+import { signUpWithRedirect } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { ModeToggle } from "@/components/shared/mode-toggle";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   Card,
   CardContent,
@@ -38,7 +38,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const turnstileRef = useRef<any>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -82,11 +82,11 @@ export default function RegisterPage() {
       });
       
       router.push("/auth/verify-email");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: "destructive",
         title: "Error al registrarse",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.",
       });
       
       // Resetear el CAPTCHA en caso de error

@@ -35,128 +35,86 @@ if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
-export async function POST(req: NextRequest) {
+const DEBUG = process.env.NODE_ENV === 'development';
+
+export async function POST(request: NextRequest) {
   try {
-    console.log("API de subida iniciada");
-    // Obtener datos de la solicitud
-    const body = await req.json();
-    const { imageData, contentType, examId, studentId, groupId } = body;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!imageData) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: 'No se proporcionó ninguna imagen' },
+        { error: 'Error de configuración del servidor' },
+        { status: 500 }
+      );
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+    
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+    const examId = formData.get('examId') as string;
+    const studentId = formData.get('studentId') as string;
+    const groupId = formData.get('groupId') as string;
+    
+    if (!file || !examId || !studentId || !groupId) {
+      return NextResponse.json(
+        { error: 'Faltan datos requeridos' },
         { status: 400 }
       );
     }
-
-    // Generar un ID único para el trabajo
+    
     const jobId = uuidv4();
+    const imagePath = `scans/${jobId}.jpg`;
     
-    // Timestamp actual
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    
-    // Definir el nombre del archivo
-    const filename = `scan_${jobId}_${timestamp}.png`;
-    const filePath = path.join(UPLOAD_DIR, filename);
-    
-    // Extraer la parte de datos de base64 (eliminar el prefijo si existe)
-    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
-    
-    // Guardar la imagen en el sistema de archivos local
-    fs.writeFileSync(filePath, buffer);
-    
-    // Generar URL para acceso público
-    const publicUrl = `/uploads/${filename}`;
-    console.log(`Imagen guardada en: ${filePath}`);
-    
-    // Usar cliente admin con service role para guardar en BD
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    let scanId;
-    
-    if (supabaseUrl && serviceKey) {
-      const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      });
+    const { error: uploadError } = await supabase.storage
+      .from('exam-scans')
+      .upload(imagePath, file);
       
-      // Crear registro en la tabla exam_scans
-      const { data: scanData, error: insertError } = await supabaseAdmin
-        .from('exam_scans')
-        .insert({
-          job_id: jobId,
-          exam_id: examId || null,
-          student_id: studentId || null,
-          group_id: groupId || null,
-          image_path: filePath,
-          public_url: publicUrl,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        })
-        .select('id')
-        .single();
-      
-      if (insertError) {
-        console.error('Error al registrar en BD:', insertError);
-      } else {
-        scanId = scanData?.id;
-        console.log(`Registro creado en BD con ID: ${scanId}`);
+    if (uploadError) {
+      if (DEBUG) {
+        console.error('Error al subir archivo:', uploadError);
       }
+      return NextResponse.json(
+        { error: 'Error al subir archivo' },
+        { status: 500 }
+      );
     }
     
-    // Llamar al endpoint de procesamiento OMR
-    try {
-      const omrResponse = await fetch(new URL('/api/exams/process-omr', req.url), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          imagePath: filePath,
-          jobId: jobId,
-          examId: examId,
-          studentId: studentId,
-          groupId: groupId
-        }),
+    const { error: insertError } = await supabase
+      .from('escaneos_examen')
+      .insert({
+        id: jobId,
+        ruta_imagen: imagePath,
+        estado: 'pending',
+        exam_id: examId,
+        student_id: studentId,
+        group_id: groupId
       });
       
-      if (!omrResponse.ok) {
-        const errorData = await omrResponse.json();
-        console.error('Error al procesar imagen con OMR:', errorData);
+    if (insertError) {
+      if (DEBUG) {
+        console.error('Error al registrar escaneo:', insertError);
       }
-      
-      const omrResult = await omrResponse.json();
-      
-      // Devolver la URL de la imagen y el resultado del procesamiento
-      return NextResponse.json({
-        success: true,
-        jobId: jobId,
-        scanId: scanId,
-        fileUrl: publicUrl,
-        omrResult: omrResult
-      });
-      
-    } catch (omrError) {
-      console.error('Error al llamar al servicio OMR:', omrError);
-      
-      // Si hay error en el procesamiento OMR, igualmente devolvemos la URL de la imagen
-      return NextResponse.json({
-        success: true,
-        jobId: jobId,
-        scanId: scanId,
-        fileUrl: publicUrl,
-        omrError: 'Error al procesar la imagen con OMR. Intente de nuevo más tarde.'
-      });
+      return NextResponse.json(
+        { error: 'Error al registrar escaneo' },
+        { status: 500 }
+      );
     }
     
-  } catch (error: any) {
-    console.error('Error general en la API:', error);
+    return NextResponse.json({ jobId });
+    
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error al procesar la solicitud:', error);
+    }
     return NextResponse.json(
-      { error: `Error inesperado: ${error.message}` },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

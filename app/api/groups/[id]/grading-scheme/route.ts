@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/lib/types/database';
 import { GradingScheme } from '@/lib/types/grading';
+
+const DEBUG = process.env.NODE_ENV === 'development';
 
 export async function POST(request: Request, context: { params: { id: string } }) {
   try {
@@ -14,7 +15,9 @@ export async function POST(request: Request, context: { params: { id: string } }
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Error: Faltan variables de entorno para Supabase');
+      if (DEBUG) {
+        console.error('Error: Faltan variables de entorno para Supabase');
+      }
       return NextResponse.json({ 
         error: 'Error de configuración del servidor' 
       }, { status: 500 });
@@ -35,7 +38,9 @@ export async function POST(request: Request, context: { params: { id: string } }
       .single();
 
     if (grupoError) {
-      console.error('Error al verificar grupo:', grupoError);
+      if (DEBUG) {
+        console.error('Error al verificar grupo:', grupoError);
+      }
       return NextResponse.json(
         { error: 'No se pudo verificar el acceso al grupo' },
         { status: 403 }
@@ -100,7 +105,9 @@ export async function POST(request: Request, context: { params: { id: string } }
         .single();
 
       if (schemeError) {
-        console.error('Error al crear esquema:', schemeError);
+        if (DEBUG) {
+          console.error('Error al crear esquema:', schemeError);
+        }
         throw schemeError;
       }
 
@@ -129,7 +136,9 @@ export async function POST(request: Request, context: { params: { id: string } }
           .single();
 
         if (periodError) {
-          console.error('Error al crear periodo:', periodError);
+          if (DEBUG) {
+            console.error('Error al crear periodo:', periodError);
+          }
           throw periodError;
         }
 
@@ -151,7 +160,9 @@ export async function POST(request: Request, context: { params: { id: string } }
             });
 
           if (componentError) {
-            console.error('Error al crear componente:', componentError);
+            if (DEBUG) {
+              console.error('Error al crear componente:', componentError);
+            }
             throw componentError;
           }
         }
@@ -169,7 +180,9 @@ export async function POST(request: Request, context: { params: { id: string } }
           .eq('id', periodo.id);
 
         if (periodError) {
-          console.error('Error al actualizar periodo:', periodError);
+          if (DEBUG) {
+            console.error('Error al actualizar periodo:', periodError);
+          }
           throw periodError;
         }
 
@@ -183,7 +196,9 @@ export async function POST(request: Request, context: { params: { id: string } }
             .not('id', 'in', `(${componentIds.join(',')})`);
 
           if (deleteError) {
-            console.error('Error al eliminar componentes:', deleteError);
+            if (DEBUG) {
+              console.error('Error al eliminar componentes:', deleteError);
+            }
             throw deleteError;
           }
         }
@@ -202,7 +217,9 @@ export async function POST(request: Request, context: { params: { id: string } }
               });
 
             if (componentError) {
-              console.error('Error al crear componente:', componentError);
+              if (DEBUG) {
+                console.error('Error al crear componente:', componentError);
+              }
               throw componentError;
             }
           } else {
@@ -217,7 +234,9 @@ export async function POST(request: Request, context: { params: { id: string } }
               .eq('id', componente.id);
 
             if (componentError) {
-              console.error('Error al actualizar componente:', componentError);
+              if (DEBUG) {
+                console.error('Error al actualizar componente:', componentError);
+              }
               throw componentError;
             }
           }
@@ -235,7 +254,9 @@ export async function POST(request: Request, context: { params: { id: string } }
         .not('id', 'in', `(${periodIds.join(',')})`);
 
       if (deleteError) {
-        console.error('Error al eliminar periodos:', deleteError);
+        if (DEBUG) {
+          console.error('Error al eliminar periodos:', deleteError);
+        }
         throw deleteError;
       }
     }
@@ -268,15 +289,21 @@ export async function POST(request: Request, context: { params: { id: string } }
       .single();
 
     if (loadError) {
-      console.error('Error al cargar esquema actualizado:', loadError);
+      if (DEBUG) {
+        console.error('Error al cargar esquema actualizado:', loadError);
+      }
       throw loadError;
     }
 
     return NextResponse.json(updatedScheme);
-  } catch (error) {
-    console.error('Error al guardar esquema:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error al guardar esquema:', error);
+    }
     return NextResponse.json(
-      { error: 'Error al guardar el esquema de calificaciones' },
+      { error: 'Error al guardar el esquema de calificaciones', 
+        message: error instanceof Error ? error.message : 'Error desconocido' 
+      },
       { status: 500 }
     );
   }

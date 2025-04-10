@@ -1,6 +1,5 @@
 import { supabase as clientSupabase } from './supabase/client';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from './types/database';
 
 // Re-export the client instance
 export const supabase = clientSupabase;
@@ -24,8 +23,20 @@ export function getServiceSupabase(): SupabaseClient {
   });
 }
 
+// User data type for signup
+interface UserSignupData {
+  nombre: string;
+  apellido: string;
+  [key: string]: unknown;
+}
+
 // Update sign-up options to include redirectTo
-export const signUpWithRedirect = (email: string, password: string, userData: any, captchaToken?: string) => {
+export const signUpWithRedirect = (
+  email: string, 
+  password: string, 
+  userData: UserSignupData, 
+  captchaToken?: string
+) => {
   return supabase.auth.signUp({
     email,
     password,

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+const DEBUG = process.env.NODE_ENV === 'development';
+
 // Crear el cliente de Supabase para servidor
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,6 +11,10 @@ const supabase = createClient(
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
+    // Manejar correctamente los parámetros en Next.js 14
+    params = await Promise.resolve(params);
+    const examenId = params.id;
+    
     const { estudianteId, puntaje } = await request.json();
     
     if (!estudianteId || puntaje === undefined) {
@@ -17,9 +23,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
         { status: 400 }
       );
     }
-
-    // Obtener el ID del examen (usar await según recomendación de Next.js)
-    const examenId = await params.id;
 
     // Verificar si ya existe un resultado para este estudiante en este examen
     const { data: existingResult } = await supabase
@@ -47,7 +50,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
         .eq('id', existingResult.id);
 
       if (updateError) {
-        console.error("Error al actualizar la calificación:", updateError);
+        if (DEBUG) {
+          console.error("Error al actualizar la calificación:", updateError);
+        }
         return NextResponse.json(
           { error: 'Error al actualizar la calificación' },
           { status: 500 }
@@ -71,7 +76,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
         .single();
 
       if (insertError) {
-        console.error("Error al insertar la calificación:", insertError);
+        if (DEBUG) {
+          console.error("Error al insertar la calificación:", insertError);
+        }
         return NextResponse.json(
           { error: 'Error al insertar la calificación' },
           { status: 500 }
@@ -100,13 +107,17 @@ export async function POST(request: Request, { params }: { params: { id: string 
               'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ examId: examenId })
-          }).catch(error => {
-            console.error('Error al sincronizar calificaciones:', error);
+          }).catch((error: Error) => {
+            if (DEBUG) {
+              console.error('Error al sincronizar calificaciones:', error);
+            }
           });
         }
       }
-    } catch (syncError) {
-      console.error('Error al intentar sincronizar calificaciones:', syncError);
+    } catch (syncError: unknown) {
+      if (DEBUG) {
+        console.error('Error al intentar sincronizar calificaciones:', syncError);
+      }
     }
 
     return NextResponse.json({
@@ -116,10 +127,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
       porcentaje
     });
 
-  } catch (error: any) {
-    console.error('Error in manual-grade route:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error in manual-grade route:', error);
+    }
     return NextResponse.json(
-      { error: error.message || 'Error interno del servidor' },
+      { error: error instanceof Error ? error.message : 'Error interno del servidor' },
       { status: 500 }
     );
   }

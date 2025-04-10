@@ -3,19 +3,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { ImagePlus, Upload, AlertTriangle, Camera, Loader2, Check, X, RefreshCw, AlertCircle, FileText, QrCode, User, UserCheck, UsersRound, CheckCircle2, XCircle } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { ImagePlus, Upload, AlertTriangle, Camera, Loader2, Check, X, RefreshCw, AlertCircle, QrCode, CheckCircle2, XCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
-import { decodeQRData, DecodedQRData, getReadableQRContent, isValidQRForExam } from '@/lib/utils/qr-code';
 
-// Función para generar un ID único compatible con navegadores antiguos
-function generateUniqueId(): string {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
-}
+// Configurar flag de debug para mensajes de consola
+const DEBUG = process.env.NODE_ENV === 'development';
 
 // Define el tipo para los resultados del OMR
 interface OMRAnswer {
@@ -25,10 +17,19 @@ interface OMRAnswer {
   num_options: number;
 }
 
+// Define the structure for QR data
+interface QRData {
+  examId: string;
+  studentId: string;
+  groupId?: string;
+  isValid: boolean;
+  [key: string]: unknown;
+}
+
 interface OMRResult {
   success: boolean;
   answers: OMRAnswer[];
-  qr_data: any;  // Cambiado de string a any para aceptar tanto string como objeto
+  qr_data: QRData | string;
   original_image?: string;
   processed_image?: string;
   publicUrl?: string;
@@ -49,158 +50,16 @@ interface OMRResult {
 // Expandir las propiedades del componente para incluir callbacks adicionales
 export interface ExamScannerProps {
   examId?: string;
-  studentId?: string;
-  groupId?: string;
   onScanComplete?: (result: OMRResult, imageUrl: string) => void;
-  allowMultipleScans?: boolean;
-  disableRegistration?: boolean;
   onConnectionError?: () => void;
 }
 
-// Función para obtener el tamaño aproximado de una imagen base64
-function getBase64Size(base64String: string): number {
-  // Eliminar metadatos si existen
-  const base64 = base64String.split(',')[1] || base64String;
-  // 4 caracteres base64 representan 3 bytes
-  return Math.ceil((base64.length * 3) / 4);
-}
-
-// Función para comprimir una imagen
-function compressImage(base64Image: string, quality = 0.8, maxWidth = 1280): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      // Calcular nueva dimensión manteniendo relación de aspecto
-      let width = img.width;
-      let height = img.height;
-      
-      if (width > maxWidth) {
-        const ratio = maxWidth / width;
-        width = maxWidth;
-        height = height * ratio;
-      }
-      
-      canvas.width = width;
-      canvas.height = height;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('No se pudo obtener el contexto 2D'));
-        return;
-      }
-      
-      ctx.drawImage(img, 0, 0, width, height);
-      
-      // Convertir a formato comprimido
-      const compressedImage = canvas.toDataURL('image/jpeg', quality);
-      resolve(compressedImage);
-    };
-    
-    img.onerror = () => {
-      reject(new Error('Error al cargar la imagen para compresión'));
-    };
-    
-    img.src = base64Image;
-  });
-}
-
-// Componente para mostrar información detallada del QR de forma visual
-const QRInfo = ({ qrData, examId }: { qrData: string; examId?: string }) => {
-  const decodedData = decodeQRData(qrData);
-  
-  if (!decodedData) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error en el código QR</AlertTitle>
-        <AlertDescription>El formato del código QR no es reconocido.</AlertDescription>
-      </Alert>
-    );
-  }
-  
-  // Verificar si el QR pertenece al examen actual (si se proporciona un examId)
-  const matchesExam = examId ? decodedData.examId === examId : true;
-  
-  return (
-    <Card className="p-4 mt-4">
-      <div className="flex items-center space-x-2 mb-3">
-        <QrCode className="h-5 w-5 text-primary" />
-        <h3 className="font-semibold">Información del código QR</h3>
-        <Badge variant={decodedData.isValid ? "success" : "destructive"}>
-          {decodedData.isValid ? "Válido" : "Inválido"}
-        </Badge>
-        {examId && (
-          <Badge variant={matchesExam ? "outline" : "destructive"}>
-            {matchesExam ? "Coincide con examen" : "No coincide con examen"}
-          </Badge>
-        )}
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        <div className="flex items-center space-x-2 p-2 rounded-md bg-muted/40">
-          <FileText className="h-4 w-4 text-primary" />
-          <div>
-            <div className="text-xs text-muted-foreground">Examen</div>
-            <div className="text-sm font-medium">{decodedData.examId}</div>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-2 p-2 rounded-md bg-muted/40">
-          <User className="h-4 w-4 text-primary" />
-          <div>
-            <div className="text-xs text-muted-foreground">Estudiante</div>
-            <div className="text-sm font-medium">{decodedData.studentId}</div>
-          </div>
-        </div>
-        
-        {decodedData.groupId && (
-          <div className="flex items-center space-x-2 p-2 rounded-md bg-muted/40">
-            <UsersRound className="h-4 w-4 text-primary" />
-            <div>
-              <div className="text-xs text-muted-foreground">Grupo</div>
-              <div className="text-sm font-medium">{decodedData.groupId}</div>
-            </div>
-          </div>
-        )}
-        
-        {!decodedData.isValid && (
-          <Alert variant="destructive" className="col-span-1 md:col-span-2 mt-2">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Código QR inválido</AlertTitle>
-            <AlertDescription>
-              El hash de verificación no coincide con los datos esperados.
-              Esto puede indicar una hoja de respuestas manipulada o un error en el procesamiento.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {examId && !matchesExam && (
-          <Alert variant="destructive" className="col-span-1 md:col-span-2 mt-2">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Examen incorrecto</AlertTitle>
-            <AlertDescription>
-              Este código QR corresponde a un examen diferente al actual.
-              Verifica que estés escaneando la hoja de respuestas correcta.
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
-    </Card>
-  );
-};
-
 export function ExamScanner({
   examId,
-  studentId,
-  groupId,
   onScanComplete,
-  allowMultipleScans = false,
-  disableRegistration = false,
   onConnectionError
 }: ExamScannerProps) {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [useAlternativeMethod, setUseAlternativeMethod] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -213,9 +72,8 @@ export function ExamScanner({
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'completed' | 'error'>('idle');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [fileUploadMode, setFileUploadMode] = useState<boolean>(true);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [progress, setProgress] = useState({ status: 'idle', percent: 0 });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [progress, setProgress] = useState({ status: 'idle', percent: 0 });
 
   // Iniciar la cámara cuando el componente se monta, si estamos en modo cámara
   useEffect(() => {
@@ -229,7 +87,7 @@ export function ExamScanner({
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [fileUploadMode]);
+  }, [fileUploadMode, stream]);
   
   // Función para iniciar la cámara
   const startCamera = async () => {
@@ -243,7 +101,9 @@ export function ExamScanner({
       
       // Verificar si mediaDevices está disponible
       if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
-        console.error('MediaDevices API no disponible en este navegador');
+        if (DEBUG) {
+          console.error('MediaDevices API no disponible en este navegador');
+        }
         setCameraStatus('not-supported');
         setFileUploadMode(true); // Cambiar automáticamente a modo de carga de archivos
         toast('Cámara no disponible', {
@@ -376,14 +236,17 @@ export function ExamScanner({
     }
   };
 
-  // Función para procesar errores de conexión
-  const handleConnectionError = useCallback((error: any) => {
-    console.error('Error de conexión detectado:', error);
-    setErrorMessage('Se detectó un problema de conexión con el servidor');
+  // Helper function to handle connection errors
+  const handleConnectionError = (error: Error) => {
+    if (DEBUG) {
+      console.error('Error de conexión detectado:', error);
+    }
+    
+    // Call the onConnectionError callback if provided
     if (onConnectionError) {
       onConnectionError();
     }
-  }, [onConnectionError]);
+  };
   
   // Función para subir la imagen capturada
   const uploadImage = async (file: File): Promise<void> => {
@@ -508,7 +371,7 @@ export function ExamScanner({
             error: undefined,
             publicUrl: undefined,
             answers: [], // Inicializar answers como array vacío
-            qr_data: undefined // Añadir qr_data para cumplir con la interfaz
+            qr_data: { examId: "", studentId: "", isValid: false }
           };
           
           setOmrResult(omrResult);
@@ -539,7 +402,7 @@ export function ExamScanner({
           error: undefined,
           publicUrl: undefined,
           answers: [], // Inicializar answers como array vacío
-          qr_data: undefined // Añadir qr_data para cumplir con la interfaz
+          qr_data: { examId: "", studentId: "", isValid: false }
         };
         
         setOmrResult(omrResult);
@@ -570,7 +433,7 @@ export function ExamScanner({
           error: undefined,
           publicUrl: undefined,
           answers: [], // Inicializar answers como array vacío
-          qr_data: undefined // Añadir qr_data para cumplir con la interfaz
+          qr_data: { examId: "", studentId: "", isValid: false }
         };
         
         setOmrResult(omrResult);
@@ -606,7 +469,7 @@ export function ExamScanner({
         error: undefined,
         publicUrl: undefined,
         answers: [], // Inicializar answers como array vacío
-        qr_data: undefined // Añadir qr_data para cumplir con la interfaz
+        qr_data: { examId: "", studentId: "", isValid: false }
       };
       
       setOmrResult(omrResult);
@@ -673,7 +536,7 @@ export function ExamScanner({
                 success: true,
                 answers: data.result.answers || [],
                 confidence: data.result.confidence || 0,
-                qr_data: data.result.qrData || null,
+                qr_data: data.result.qrData || { examId: "", studentId: "", isValid: false },
                 original_image: data.result.originalImage || null,
                 processed_image: data.result.processedImage || null,
                 publicUrl: data.result.publicUrl || null
@@ -700,7 +563,7 @@ export function ExamScanner({
                 error: data.result.error || null,
                 publicUrl: data.result.publicUrl || null,
                 answers: [], // Inicializar answers como array vacío
-                qr_data: data.result.qrData || null, // Añadir qr_data para cumplir con la interfaz
+                qr_data: data.result.qrData || { examId: "", studentId: "", isValid: false },
               };
               
               setOmrResult(omrResult);
@@ -764,7 +627,7 @@ export function ExamScanner({
         error: undefined,
         publicUrl: undefined,
         answers: [], // Inicializar answers como array vacío
-        qr_data: undefined // Añadir qr_data para cumplir con la interfaz
+        qr_data: { examId: "", studentId: "", isValid: false }
       };
       
       setOmrResult(omrResult);
@@ -823,24 +686,37 @@ export function ExamScanner({
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-muted rounded-md p-2">
                 <span className="text-xs text-muted-foreground">ID Examen</span>
-                <p className="font-medium">{omrResult.qr_data.examId || 'No disponible'}</p>
+                <p className="font-medium">
+                  {typeof omrResult.qr_data === 'string' 
+                    ? 'No disponible' 
+                    : omrResult.qr_data.examId || 'No disponible'}
+                </p>
               </div>
               <div className="bg-muted rounded-md p-2">
                 <span className="text-xs text-muted-foreground">ID Estudiante</span>
-                <p className="font-medium">{omrResult.qr_data.studentId || 'No disponible'}</p>
+                <p className="font-medium">
+                  {typeof omrResult.qr_data === 'string' 
+                    ? 'No disponible' 
+                    : omrResult.qr_data.studentId || 'No disponible'}
+                </p>
               </div>
-              {omrResult.qr_data.groupId && (
+              {typeof omrResult.qr_data !== 'string' && omrResult.qr_data.groupId && (
                 <div className="bg-muted rounded-md p-2">
                   <span className="text-xs text-muted-foreground">Grupo</span>
-                  <p className="font-medium">{omrResult.qr_data.groupId}</p>
+                  <p className="font-medium">
+                    {omrResult.qr_data.groupId}
+                  </p>
                 </div>
               )}
               <div className="bg-muted rounded-md p-2">
                 <span className="text-xs text-muted-foreground">Validación</span>
                 <p className="font-medium flex items-center gap-1">
-                  {omrResult.qr_data.isValid 
-                    ? <><Check className="h-4 w-4 text-green-500" /> Válido</>
-                    : <><XCircle className="h-4 w-4 text-red-500" /> Inválido</>}
+                  {typeof omrResult.qr_data === 'string' 
+                    ? <><XCircle className="h-4 w-4 text-red-500" /> Inválido</>
+                    : omrResult.qr_data.isValid 
+                      ? <><Check className="h-4 w-4 text-green-500" /> Válido</>
+                      : <><XCircle className="h-4 w-4 text-red-500" /> Inválido</>
+                  }
                 </p>
               </div>
             </div>

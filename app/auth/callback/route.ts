@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+const DEBUG = process.env.NODE_ENV === 'development';
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
@@ -20,14 +22,14 @@ export async function GET(request: NextRequest) {
           get(name: string) {
             return request.cookies.get(name)?.value;
           },
-          set(name: string, value: string, options) {
+          set(name: string, value: string, options: Record<string, unknown>) {
             request.cookies.set({
               name,
               value,
               ...options,
             });
           },
-          remove(name: string, options) {
+          remove(name: string) {
             request.cookies.delete(name);
           },
         },
@@ -44,8 +46,10 @@ export async function GET(request: NextRequest) {
     
     // For other auth types like recovery, etc.
     return NextResponse.redirect(new URL('/auth/login', request.url));
-  } catch (error) {
-    console.error('Error during auth callback:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error during auth callback:', error);
+    }
     return NextResponse.redirect(new URL('/auth/login?error=auth_callback_error', request.url));
   }
 } 

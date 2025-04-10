@@ -41,7 +41,7 @@ export function generateArucoMarkerPath(markerId: number): string {
 // Función auxiliar para generar la matriz binaria 4x4 desde un ID
 function generateBinaryMatrix(id: number): boolean[][] {
   const matrix = Array(4).fill(null).map(() => Array(4).fill(false));
-  let binary = id.toString(2).padStart(16, '0');
+  const binary = id.toString(2).padStart(16, '0');
   
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {

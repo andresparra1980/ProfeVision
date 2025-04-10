@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Define interfaces for type safety
+interface Estudiante {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  email: string;
+}
+
+interface EstudianteGrupo {
+  estudiante: Estudiante;
+}
+
+const DEBUG = process.env.NODE_ENV === 'development';
+
 // Crear cliente de Supabase para el servidor usando SERVICE_ROLE_KEY
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,7 +60,7 @@ export async function GET(
     // Transformar el resultado para que coincida con la interfaz ExamGroup
     const grupoFormateado = {
       ...grupos,
-      estudiantes: grupos.estudiantes.map((e: any) => ({
+      estudiantes: grupos.estudiantes.map((e: EstudianteGrupo) => ({
         id: e.estudiante.id,
         nombre: e.estudiante.nombres,
         apellido: e.estudiante.apellidos,
@@ -55,8 +69,10 @@ export async function GET(
     };
 
     return NextResponse.json(grupoFormateado);
-  } catch (error) {
-    console.error('API /groups/by-materia/[id]: Error:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('API /groups/by-materia/[id]: Error:', error);
+    }
     return NextResponse.json({
       error: 'Error al obtener el grupo',
       message: error instanceof Error ? error.message : 'Error desconocido'

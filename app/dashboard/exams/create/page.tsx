@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -61,17 +61,6 @@ type Grupo = {
   nombre: string;
   materia_id: string;
   estado: 'activo' | 'archivado';
-};
-
-type PreguntaDB = {
-  id: string;
-  examen_id: string;
-  texto: string;
-  tipo_id: string;
-  puntaje: number;
-  retroalimentacion?: string;
-  orden: number;
-  habilitada: boolean;
 };
 
 // Schema de validación
@@ -190,11 +179,12 @@ export default function CreateExamPage() {
 
       if (error) throw error;
       setMaterias(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.";
       toast({
         variant: "destructive",
         title: "Error al cargar materias",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: errorMessage,
       });
     }
   };
@@ -212,11 +202,12 @@ export default function CreateExamPage() {
 
       if (error) throw error;
       setGrupos(data || []);
-    } catch (error: any) {
-        toast({
-          variant: "destructive",
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.";
+      toast({
+        variant: "destructive",
         title: "Error al cargar grupos",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: errorMessage,
       });
     }
   };
@@ -294,6 +285,8 @@ export default function CreateExamPage() {
     }
   }, [form.watch("numero_preguntas")]);
 
+  // The 'result' param uses DropResult type from @hello-pangea/dnd
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
 

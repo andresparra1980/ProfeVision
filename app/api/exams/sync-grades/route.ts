@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Definir interfaces para tipado
+interface ResultadoExamen {
+  id: string;
+  estudiante_id: string;
+  puntaje_obtenido: number;
+  porcentaje: number;
+  examen_id: string;
+}
+
+const DEBUG = process.env.NODE_ENV === 'development';
+
 // Crear un cliente de Supabase sin cookies
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -62,7 +73,9 @@ export async function POST(req: NextRequest) {
     const { data: vinculos, error: vinculosError } = await sincronizacionQuery;
     
     if (vinculosError) {
-      console.error('Error al obtener vínculos:', vinculosError);
+      if (DEBUG) {
+        console.error('Error al obtener vínculos:', vinculosError);
+      }
       return NextResponse.json({ error: 'Error al obtener vínculos' }, { status: 500 });
     }
     
@@ -70,16 +83,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'No hay vínculos para sincronizar' });
     }
     
-    // Agrupar vínculos por examen_id para reducir consultas
-    const vinculosPorExamen: Record<string, { componente_id: string, examen: any }[]> = {};
+    // For debugging
+    if (DEBUG) {
+      console.log('Estructura de vínculos:', JSON.stringify(vinculos[0]));
+    }
     
-    vinculos.forEach((vinculo: any) => {
-      if (!vinculosPorExamen[vinculo.examen_id]) {
-        vinculosPorExamen[vinculo.examen_id] = [];
+    // Agrupar vínculos por examen_id para reducir consultas
+    const vinculosPorExamen: Record<string, Array<{ 
+      componente_id: string, 
+      examen: Record<string, unknown> 
+    }>> = {};
+    
+    vinculos.forEach((vinculo: Record<string, unknown>) => {
+      if (!vinculosPorExamen[vinculo.examen_id as string]) {
+        vinculosPorExamen[vinculo.examen_id as string] = [];
       }
-      vinculosPorExamen[vinculo.examen_id].push({
-        componente_id: vinculo.componente_id,
-        examen: vinculo.examen
+      vinculosPorExamen[vinculo.examen_id as string].push({
+        componente_id: vinculo.componente_id as string,
+        examen: vinculo.examen as Record<string, unknown>
       });
     });
     
@@ -101,7 +122,9 @@ export async function POST(req: NextRequest) {
         .eq('estado', 'CALIFICADO'); // Usar 'CALIFICADO' en mayúsculas
       
       if (resultadosError) {
-        console.error(`Error al obtener resultados del examen ${examenId}:`, resultadosError);
+        if (DEBUG) {
+          console.error(`Error al obtener resultados del examen ${examenId}:`, resultadosError);
+        }
         continue;
       }
       
@@ -115,11 +138,11 @@ export async function POST(req: NextRequest) {
         const componenteId = vinculo.componente_id;
         
         // Procesar cada resultado de estudiante
-        for (const resultado of resultadosExamen) {
+        for (const resultado of resultadosExamen as ResultadoExamen[]) {
           const estudianteId = resultado.estudiante_id;
           // Usamos el porcentaje como calificación (de 0 a 5)
           // Si la escala es diferente, ajustar esta conversión
-          const calificacion = parseFloat(resultado.porcentaje) / 20; // Convertir porcentaje (0-100) a escala 0-5
+          const calificacion = parseFloat(resultado.porcentaje as unknown as string) / 20; // Convertir porcentaje (0-100) a escala 0-5
           
           // Verificar si ya existe una calificación para este estudiante y componente
           const { data: calificacionExistente, error: calificacionError } = await supabase
@@ -130,7 +153,9 @@ export async function POST(req: NextRequest) {
             .maybeSingle();
           
           if (calificacionError) {
-            console.error(`Error al verificar calificación existente:`, calificacionError);
+            if (DEBUG) {
+              console.error(`Error al verificar calificación existente:`, calificacionError);
+            }
             continue;
           }
           
@@ -142,7 +167,9 @@ export async function POST(req: NextRequest) {
               .eq('id', calificacionExistente.id);
             
             if (updateError) {
-              console.error(`Error al actualizar calificación:`, updateError);
+              if (DEBUG) {
+                console.error(`Error al actualizar calificación:`, updateError);
+              }
             }
           } else {
             const { error: insertError } = await supabase
@@ -155,7 +182,9 @@ export async function POST(req: NextRequest) {
               });
             
             if (insertError) {
-              console.error(`Error al insertar calificación:`, insertError);
+              if (DEBUG) {
+                console.error(`Error al insertar calificación:`, insertError);
+              }
             }
           }
         }
@@ -169,8 +198,13 @@ export async function POST(req: NextRequest) {
       resultados 
     });
     
-  } catch (error) {
-    console.error('Error en sincronización de notas:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error en sincronización de notas:', error);
+    }
+    return NextResponse.json({
+      error: 'Error interno del servidor',
+      message: error instanceof Error ? error.message : 'Error desconocido'
+    }, { status: 500 });
   }
 } 

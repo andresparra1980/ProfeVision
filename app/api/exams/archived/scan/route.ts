@@ -2,108 +2,82 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function POST(req: NextRequest) {
+const DEBUG = process.env.NODE_ENV === 'development';
+
+export async function POST(request: NextRequest) {
   try {
-    // Obtener los datos en formato JSON
-    const body = await req.json();
-    const { imageData, filename, contentType, examData } = body;
-    
-    if (!imageData) {
-      return NextResponse.json(
-        { error: 'No se proporcionó ninguna imagen' },
-        { status: 400 }
-      );
-    }
-    
-    let examId, studentId, groupId;
-    
-    // Si hay datos del examen desde el QR, los usamos
-    if (examData) {
-      try {
-        examId = examData.examId;
-        studentId = examData.studentId;
-        groupId = examData.groupId;
-      } catch (error) {
-        console.error('Error parsing examData:', error);
-        // Continuamos sin estos datos, el microservicio intentará extraerlos del QR
-      }
-    }
-    
-    // Usar cliente admin con service role para bypassear RLS
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!supabaseUrl || !serviceKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
         { error: 'Error de configuración del servidor' },
         { status: 500 }
       );
     }
     
-    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
       }
     });
     
-    // Generar un ID único para el trabajo
-    const jobId = uuidv4();
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+    const examId = formData.get('examId') as string;
     
-    // Timestamp actual
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    
-    // Definir el nombre del archivo basado en la información disponible
-    let filePath: string;
-    
-    if (examId) {
-      // Si tenemos el ID del examen, lo usamos en el nombre del archivo
-      filePath = `exams/${examId}/scan_${timestamp}.png`;
-    } else {
-      // Si no tenemos el ID del examen, usamos el ID del trabajo
-      filePath = `pending/scan_${jobId}_${timestamp}.png`;
+    if (!file || !examId) {
+      return NextResponse.json(
+        { error: 'No se proporcionó archivo o ID de examen' },
+        { status: 400 }
+      );
     }
     
-    // Convertir base64 a binario
-    const base64Str = imageData; // Ya viene sin el prefijo data:image/*;base64,
-    const buffer = Buffer.from(base64Str, 'base64');
+    const jobId = uuidv4();
+    const imagePath = `scans/${jobId}.jpg`;
     
-    // Subir la imagen al bucket 'exam-scans'
-    const { data: uploadData, error: uploadError } = await supabaseAdmin
-      .storage
+    const { error: uploadError } = await supabase.storage
       .from('exam-scans')
-      .upload(filePath, buffer, {
-        contentType: contentType || 'image/png',
-        upsert: false
-      });
-    
+      .upload(imagePath, file);
+      
     if (uploadError) {
-      console.error('Error uploading scan to storage:', uploadError);
+      if (DEBUG) {
+        console.error('Error al subir archivo:', uploadError);
+      }
       return NextResponse.json(
-        { error: `Error al subir la imagen: ${uploadError.message}` },
+        { error: 'Error al subir archivo' },
         { status: 500 }
       );
     }
     
-    // Obtener la URL pública del archivo
-    const { data: { publicUrl } } = supabaseAdmin
-      .storage
-      .from('exam-scans')
-      .getPublicUrl(filePath);
+    const { error: insertError } = await supabase
+      .from('escaneos_examen')
+      .insert({
+        id: jobId,
+        ruta_imagen: imagePath,
+        estado: 'pending',
+        exam_id: examId
+      });
+      
+    if (insertError) {
+      if (DEBUG) {
+        console.error('Error al registrar escaneo:', insertError);
+      }
+      return NextResponse.json(
+        { error: 'Error al registrar escaneo' },
+        { status: 500 }
+      );
+    }
     
-    // En vez de crear un registro en la tabla 'exam_scan_jobs', simplemente
-    // devolvemos la información necesaria para el cliente
-    return NextResponse.json({
-      message: 'Imagen subida y procesada correctamente',
-      jobId: jobId,
-      status: 'processing',
-      fileUrl: publicUrl,
-    });
+    return NextResponse.json({ jobId });
     
-  } catch (error) {
-    console.error('Error processing scan:', error);
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error al procesar la solicitud:', error);
+    }
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Error al procesar la imagen' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+const DEBUG = process.env.NODE_ENV === 'development';
+
 // Cliente de supabase para el servidor
 export const createClient = (): SupabaseClient => {
   const cookieStore = cookies();
@@ -19,15 +21,21 @@ export const createClient = (): SupabaseClient => {
         set(name: string, value: string, options) {
           try {
             cookieStore.set({ name, value, ...options });
-          } catch (error) {
+          } catch (error: unknown) {
             // No se pueden establecer cookies después de que se haya enviado la respuesta
+            if (DEBUG) {
+              console.error('Error setting cookie:', error);
+            }
           }
         },
         remove(name: string, options) {
           try {
             cookieStore.delete({ name, ...options });
-          } catch (error) {
+          } catch (error: unknown) {
             // No se pueden eliminar cookies después de que se haya enviado la respuesta
+            if (DEBUG) {
+              console.error('Error removing cookie:', error);
+            }
           }
         },
       },

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -15,18 +15,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
+
+// Configurar flag de debug para mensajes de consola
+const DEBUG = process.env.NODE_ENV === 'development';
 
 // Define el esquema de validación para el formulario
 const formSchema = z.object({
@@ -70,12 +66,6 @@ type Grupo = {
   nombre: string;
 };
 
-type EsquemaCalificacion = {
-  id: string;
-  nombre: string;
-  grupo_id: string;
-};
-
 type PeriodoCalificacion = {
   id: string;
   nombre: string;
@@ -102,7 +92,6 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
   const [saving, setSaving] = useState(false);
   const [gruposDelExamen, setGruposDelExamen] = useState<Grupo[]>([]);
   const [componentes, setComponentes] = useState<ComponentePorGrupo[]>([]);
-  const [componentesVinculados, setComponentesVinculados] = useState<string[]>([]);
   const [examen, setExamen] = useState<{ titulo: string; estado: string } | null>(null);
 
   // Configurar el formulario
@@ -163,7 +152,7 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
             return null;
           }
           
-          const promesasPeriodos = esquemasData.map(async (esquema: EsquemaCalificacion) => {
+          const promesasPeriodos = esquemasData.map(async (esquema: { id: string; nombre: string; grupo_id: string }) => {
             const { data: periodosData, error: periodosError } = await supabase
               .from("periodos_calificacion")
               .select(`
@@ -248,15 +237,16 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
         if (vinculacionesError) throw vinculacionesError;
         
         const idsComponentesVinculados = vinculacionesData.map((v: { componente_id: string }) => v.componente_id);
-        setComponentesVinculados(idsComponentesVinculados);
         
         // Establecer los valores iniciales del formulario
         form.setValue("componentesSeleccionados", idsComponentesVinculados);
         
+        setLoading(false);
       } catch (error) {
-        console.error("Error al cargar datos:", error);
-        toast.error("Error al cargar los datos de vinculación");
-      } finally {
+        if (DEBUG) {
+          console.error("Error al cargar datos:", error);
+        }
+        toast.error("Error al cargar componentes de calificación");
         setLoading(false);
       }
     }
@@ -310,8 +300,10 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
       
       toast.success("Vinculaciones actualizadas correctamente");
       router.push("/dashboard/exams");
-    } catch (error) {
-      console.error("Error al guardar vinculaciones:", error);
+    } catch (error: unknown) {
+      if (DEBUG) {
+        console.error("Error al guardar vinculaciones:", error);
+      }
       toast.error("Error al guardar las vinculaciones");
     } finally {
       setSaving(false);

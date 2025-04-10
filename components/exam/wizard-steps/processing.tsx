@@ -1,204 +1,260 @@
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, RotateCcw, AlertCircle, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { ArrowRight, AlertCircle, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { QRData, Answer, ProcessingResult, DuplicateInfo, ErrorDetails } from '../types';
+import { useImageContext } from '../contexts';
+import logger from '@/lib/utils/logger';
+import type { ProcessResult } from '@/types/scan';
 
-interface ProcessingProps {
-  imageUrl: string;
-  onComplete: (data: any) => void;
-  onRetake: () => void;
-  onNext: () => void;
+// Configurar flag de debug para mensajes de consola
+const DEBUG = process.env.NODE_ENV === 'development';
+
+type StatusType = 
+  | 'idle' 
+  | 'processing' 
+  | 'checking_duplicates'
+  | 'complete' 
+  | 'error' 
+  | 'duplicate';
+
+// Define the type for the duplicate check response
+interface DuplicateCheckResponse {
+  exists: boolean;
+  duplicateInfo?: DuplicateInfo;
 }
 
-export function Processing({ imageUrl, onComplete, onRetake, onNext }: ProcessingProps) {
-  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'duplicate'>('loading');
-  const [processingResult, setProcessingResult] = useState<any>(null);
-  const [errorDetails, setErrorDetails] = useState<any>(null);
-  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
-  const [duplicateInfo, setDuplicateInfo] = useState<any>(null);
+export function Processing() {
+  const { 
+    processedImageData, 
+    qrValidation, 
+    clearImageData, 
+    setQrValidation, 
+    setFinalOutput,
+    setProcessedImageData,
+    onProcessingComplete
+  } = useImageContext();
+  
+  const [status, setStatus] = useState<StatusType>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [duplicateData, setDuplicateData] = useState<DuplicateInfo | null>(null);
+  
   const processingCompleted = useRef(false);
+  const processingInProgress = useRef(false);
+  const retryCount = useRef(0);
+  const MAX_RETRIES = 3;
 
+  // Set processedImageData when component mounts
   useEffect(() => {
-    // Evitar procesamiento duplicado
-    if (processingCompleted.current) return;
+    // Component setup on mount
+    setStatus('idle');
     
-    const processImage = async () => {
-      setStatus('loading');
-      
-      try {
-        // Convertir el blob URL a File para procesar
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const imageFile = new File([blob], 'exam-scan.jpg', { type: 'image/jpeg' });
-        
-        console.log('Archivo de imagen creado:', imageFile.name, imageFile.type, imageFile.size);
-        
-        // Crear FormData para el endpoint de escaneo
-        const formData = new FormData();
-        // Usar sólo el campo 'file' como espera el endpoint
-        formData.append('file', imageFile);
-        
-        formData.append('examId', ''); // Campo vacío para el ID del examen
-        formData.append('studentId', ''); // Campo vacío para el ID del estudiante
-        formData.append('job_id', `manual-scan-${Date.now()}`);
-        formData.append('source', 'manual');
-        formData.append('save_result', 'true');
-        
-        // Imprimir keys para debug
-        console.log('FormData keys: file, examId, studentId, job_id, source, save_result');
-        
-        // Enviar directamente al endpoint de process-scan
-        const omrResponse = await fetch('/api/exams/process-scan', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        // Log para debuggear
-        const responseText = await omrResponse.text();
-        console.log('Respuesta del servidor:', responseText);
-        
-        if (!omrResponse.ok) {
-          throw new Error(`Error en el procesamiento OMR: ${omrResponse.status}`);
-        }
-        
-        const omrData = JSON.parse(responseText);
-        console.log('Datos de OMR recibidos:', omrData);
-        setProcessingResult(omrData);
-        
-        if (omrData.success) {
-          // Si hay una imagen procesada, mostrarla
-          let imageUrl = null;
-          if (omrData.processedImageUrl) {
-            imageUrl = omrData.processedImageUrl;
-          } else if (omrData.publicUrl) {
-            imageUrl = omrData.publicUrl;
-          } else if (omrData.result && omrData.result.processed_image_path) {
-            imageUrl = `/uploads/${omrData.result.processed_image_path.split('/').pop()}`;
-          }
-          
-          setProcessedImageUrl(imageUrl);
-          
-          // Extraer datos del QR
-          const qrData = omrData.qr_data || omrData.result?.qr_data || null;
-          
-          // Verificar si el examen ya ha sido calificado
-          if (qrData && (qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id) && 
-                        (qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id)) {
-            
-            const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
-            const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
-            
-            try {
-              console.log('Verificando si el examen ya ha sido calificado:', { examId, studentId });
-              // Verificar si ya existe un resultado para este examen y estudiante
-              const checkDuplicateResponse = await fetch(`/api/exams/check-duplicate?examId=${examId}&studentId=${studentId}`);
-              
-              if (!checkDuplicateResponse.ok) {
-                const errorData = await checkDuplicateResponse.json();
-                console.error('Error al verificar duplicados:', errorData);
-                // Continuar con el flujo normal aunque haya habido un error
-              } else {
-                const checkDuplicateData = await checkDuplicateResponse.json();
-                
-                if (checkDuplicateData.exists) {
-                  // Examen ya calificado
-                  console.log('Examen ya calificado:', checkDuplicateData);
-                  
-                  // Inmediatamente establecer el estado a 'duplicate' (esto es importante)
-                  setStatus('duplicate');
-                  
-                  setDuplicateInfo({
-                    examId: examId,
-                    studentId: studentId,
-                    resultadoId: checkDuplicateData.resultadoId,
-                    fecha: checkDuplicateData.fecha_calificacion,
-                    puntaje: checkDuplicateData.puntaje,
-                    porcentaje: checkDuplicateData.porcentaje
-                  });
-                  
-                  // Marcar el procesamiento como completado
-                  processingCompleted.current = true;
-                  
-                  // Modificar los datos del QR para incluir la información del duplicado
-                  qrData.isDuplicate = true;
-                  qrData.duplicateInfo = checkDuplicateData;
-                  
-                  // Añadir logs para depuración
-                  console.log('Estado actualizado a duplicate:', 'duplicate');
-                  console.log('Información de duplicado:', {
-                    examId, 
-                    studentId, 
-                    resultadoId: checkDuplicateData.resultadoId
-                  });
-                  
-                  // Preparar los datos del resultado para el componente padre
-                  const resultData = {
-                    processedImage: imageUrl,
-                    qrData: qrData,
-                    answers: omrData.answers || omrData.result?.answers || [],
-                    isDuplicate: true,
-                    duplicateInfo: checkDuplicateData
-                  };
-                  
-                  // Notificar al componente padre
-                  onComplete(resultData);
-                  return; // Importante para evitar que el código posterior se ejecute
-                }
-              }
-            } catch (error) {
-              console.error('Error al verificar duplicados:', error);
-              // Continuar con el flujo normal si no se puede verificar
-            }
-          }
-          
-          // Si es duplicado o no se pudo verificar, continuar con el flujo normal
-          if (status !== 'error') {
-            setStatus(status === 'duplicate' ? 'duplicate' : 'success');
-            processingCompleted.current = true;
-            
-            // Preparar los datos para el componente padre, normalizando la estructura de las respuestas
-            const resultAnswers = omrData.answers || omrData.result?.answers || [];
-            console.log('Enviando respuestas al componente Results:', resultAnswers);
-            
-            const resultData = {
-              processedImage: imageUrl,
-              qrData: qrData,
-              answers: resultAnswers,
-              isDuplicate: status === 'duplicate'
-            };
-            
-            // Notificar al componente padre del resultado
-            onComplete(resultData);
-          }
-        } else {
-          setErrorDetails(omrData.error_details || {
-            message: 'Error desconocido en el procesamiento',
-            recommendations: ['Intenta capturar la imagen nuevamente']
-          });
-          setStatus('error');
-          processingCompleted.current = true;
-        }
-      } catch (error) {
-        console.error('Error al procesar la imagen:', error);
-        setStatus('error');
-        setErrorDetails({
-          message: error instanceof Error ? error.message : 'Error desconocido',
-          recommendations: ['Intenta nuevamente', 'Verifica tu conexión a internet']
-        });
-        processingCompleted.current = true;
-      }
-    };
-    
-    if (imageUrl) {
+    // Auto-process the image when it becomes available
+    if (processedImageData && !processingInProgress.current && !processingCompleted.current) {
       processImage();
     }
-  }, [imageUrl, onComplete]);
+
+    return () => {
+      // Cleanup when component unmounts
+      retryCount.current = 0;
+    };
+  }, [processedImageData]);
+
+  const checkForDuplicates = async (qrData: QRData | null): Promise<DuplicateCheckResponse | null> => {
+    if (!qrData) return null;
+    
+    // Skip duplicate check for incomplete or placeholder QR data
+    if (!qrData.examId || !qrData.studentId || 
+        qrData.examId === 'placeholder-exam-id' || 
+        qrData.studentId === 'placeholder-student-id') {
+      return null;
+    }
+    
+    try {
+      setStatus('checking_duplicates');
+      const response = await fetch('/api/exams/check-duplicate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ qrData }),
+      });
+      
+      if (!response.ok) {
+        if (DEBUG) console.error('Error checking for duplicates: Server responded with', response.status);
+        return null;
+      }
+      
+      const data = await response.json() as DuplicateCheckResponse;
+      return data;
+    } catch (error) {
+      if (DEBUG) console.error('Error checking for duplicates:', error);
+      return null;
+    }
+  };
+
+  const processImage = async () => {
+    if (!processedImageData || processingInProgress.current || processingCompleted.current) return;
+  
+    processingInProgress.current = true;
+    setStatus('processing');
+    setErrorMessage(null);
+    
+    try {
+      // Prepare form data with the image
+      const formData = new FormData();
+      // Convert the data URL to a blob
+      const blob = await fetch(processedImageData).then(r => r.blob());
+      // Important: The field must be named 'scan' as expected by the API
+      formData.append('scan', blob, 'scan.jpg');
+
+      if (DEBUG) {
+        console.log('Submitting image for processing, size:', blob.size, 'bytes');
+      }
+
+      // Call the API to process the image
+      const response = await fetch('/api/exams/process-scan', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        const statusCode = response.status;
+        throw new Error(`API error (${statusCode}): ${errorText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setStatus('complete');
+        processingCompleted.current = true;
+        retryCount.current = 0; // Reset retry count on success
+        
+        // Properly prepare QR data in standardized format
+        let parsedQrData = data.qr_data || null;
+        
+        // Debug the QR data from the API
+        if (DEBUG) {
+          console.log('QR data received from API:', parsedQrData);
+        }
+        
+        // If QR data is a string, try to parse it
+        if (typeof parsedQrData === 'string') {
+          try {
+            // See if it's JSON
+            parsedQrData = JSON.parse(parsedQrData);
+          } catch (e) {
+            // Not JSON, but could be a colon-separated format
+            if (parsedQrData.includes(':') && parsedQrData.includes('-')) {
+              const parts = parsedQrData.split(':');
+              if (parts.length >= 3) {
+                parsedQrData = {
+                  examId: parts[0],
+                  studentId: parts[1],
+                  groupId: parts[2],
+                  version: parts[3] || '1'
+                };
+              }
+            }
+          }
+        }
+        
+        // Ensure QR data has the right structure with explicit properties
+        const normalizedQrData = {
+          examId: parsedQrData?.examId || parsedQrData?.examenId || parsedQrData?.exam_id || parsedQrData?.examen_id || null,
+          studentId: parsedQrData?.studentId || parsedQrData?.estudianteId || parsedQrData?.student_id || parsedQrData?.estudiante_id || null,
+          groupId: parsedQrData?.groupId || parsedQrData?.grupoId || parsedQrData?.group_id || parsedQrData?.grupo_id || null,
+          version: parsedQrData?.version || '1'
+        };
+        
+        // Check if the QR data contains placeholder IDs
+        const isManualScan = !normalizedQrData.examId || 
+          !normalizedQrData.studentId || 
+          normalizedQrData.examId === 'placeholder-exam-id' || 
+          normalizedQrData.studentId === 'placeholder-student-id';
+        
+        let duplicateData = null;
+        if (!isManualScan) {
+          // Only check for duplicates if we have valid IDs
+          const duplicateResponse = await checkForDuplicates(normalizedQrData);
+          if (duplicateResponse?.exists && duplicateResponse.duplicateInfo) {
+            setDuplicateData(duplicateResponse.duplicateInfo);
+            duplicateData = duplicateResponse;
+          }
+        }
+
+        const result: ProcessingResult = {
+          ...data,
+          isManualScan: isManualScan || false,
+          isDuplicate: duplicateData?.exists || false,
+          duplicateInfo: duplicateData?.duplicateInfo || undefined,
+        };
+
+        // Set QR validation with the normalized data
+        setQrValidation({
+          validated: true,
+          data: normalizedQrData
+        });
+        
+        const finalOutput = {
+          qrData: normalizedQrData,
+          answers: data.result?.answers || data.answers || {},
+          originalImage: processedImageData,
+          processedImage: data.result?.processed_image_path || '',
+        };
+        
+        if (DEBUG) {
+          console.log('Setting final output:', finalOutput);
+        }
+        
+        setFinalOutput(finalOutput);
+        
+        // Trigger the callback if it exists
+        if (onProcessingComplete) {
+          onProcessingComplete();
+        }
+      } else {
+        setStatus('error');
+        setErrorMessage(data.error_details?.message || data.error || 'Error processing image');
+      }
+    } catch (error) {
+      if (DEBUG) {
+        console.error('Error processing image:', error);
+      }
+      
+      // Increment retry count
+      retryCount.current += 1;
+      
+      // Check if we should retry automatically
+      if (retryCount.current <= MAX_RETRIES) {
+        setErrorMessage(`Error processing image (attempt ${retryCount.current}/${MAX_RETRIES}): ${error instanceof Error ? error.message : 'Unknown error'}`);
+        
+        // Wait a bit before retrying
+        setTimeout(() => {
+          processingInProgress.current = false;
+          processImage();
+        }, 2000);
+        
+        return;
+      }
+      
+      setStatus('error');
+      setErrorMessage(
+        `Error processing image after ${MAX_RETRIES} attempts: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`
+      );
+    } finally {
+      if (retryCount.current >= MAX_RETRIES || status === 'complete') {
+        processingInProgress.current = false;
+      }
+    }
+  };
 
   // Reiniciar el estado cuando se cambia de imagen
   useEffect(() => {
     return () => {
       processingCompleted.current = false;
     };
-  }, [imageUrl]);
+  }, [processedImageData]);
 
   const handleRetake = async () => {
     try {
@@ -209,23 +265,25 @@ export function Processing({ imageUrl, onComplete, onRetake, onNext }: Processin
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          imageUrl: processedImageUrl || imageUrl
+          imageUrl: processedImageData || ""
         })
       });
 
       if (!response.ok) {
-        console.error('Error al limpiar archivos temporales:', await response.text());
+        if (DEBUG) {
+          logger.error('Error al limpiar archivos temporales:', await response.text());
+        }
       }
     } catch (error) {
-      console.error('Error al limpiar archivos temporales:', error);
+      if (DEBUG) {
+        logger.error('Error al limpiar archivos temporales:', error);
+      }
     }
 
     processingCompleted.current = false;
-    onRetake();
-  };
-
-  const handleNext = () => {
-    onNext();
+    processingInProgress.current = false;
+    setStatus('idle');
+    clearImageData();
   };
 
   const formatDate = (dateString: string) => {
@@ -241,101 +299,132 @@ export function Processing({ imageUrl, onComplete, onRetake, onNext }: Processin
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <h2 className="text-2xl font-bold text-center">Procesando Imagen</h2>
+    <div className="flex flex-col items-center justify-center p-4 space-y-6 w-full">
+      <h2 className="text-xl font-bold text-center text-gray-800">
+        {status === 'idle' ? 'Procesando imagen...' :
+         status === 'processing' ? 'Procesando imagen...' :
+         status === 'complete' ? 'Procesamiento exitoso' :
+         status === 'duplicate' ? 'Examen ya calificado' :
+         'Error de procesamiento'}
+      </h2>
       
-      <div className="bg-gray-100 border border-gray-200 rounded-lg overflow-hidden p-4">
-        <img 
-          src={processedImageUrl || imageUrl} 
-          alt="Imagen del examen" 
-          className="w-full h-auto max-h-[40vh] object-contain mx-auto mb-4"
-        />
-        
-        <div className="flex justify-center items-center py-4">
-          {status === 'loading' && (
-            <div className="flex flex-col items-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              <p className="mt-4 text-gray-600">Procesando imagen...</p>
+      <div className="w-full max-w-md relative">
+        {/* Imagen previa o procesada */}
+        <div className="relative w-full aspect-[3/4] border border-gray-300 rounded-lg overflow-hidden bg-gray-50 mb-2">
+          {status === 'processing' ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80">
+              <RefreshCw className="animate-spin h-12 w-12 text-blue-500" />
             </div>
+          ) : null}
+          
+          {/* Mostrar la imagen procesada o la original */}
+          {processedImageData && (
+            <img 
+              src={processedImageData} 
+              alt="Imagen procesada" 
+              className="w-full h-full object-contain"
+            />
           )}
           
-          {status === 'success' && (
-            <div className="flex flex-col items-center text-green-600">
-              <CheckCircle2 className="h-12 w-12" />
-              <p className="mt-2 font-medium">¡Procesamiento exitoso!</p>
-              <p className="text-sm text-gray-600 text-center mt-1">
-                Se han detectado {processingResult?.answers?.length || processingResult?.result?.answers?.length || 0} respuestas
-              </p>
-            </div>
-          )}
-          
-          {status === 'duplicate' && (
-            <div className="flex flex-col items-center text-orange-600 border-2 border-orange-300 bg-orange-50 p-4 rounded-lg">
-              <AlertTriangle className="h-12 w-12" />
-              <p className="mt-2 font-medium text-lg">¡Examen ya calificado!</p>
-              {duplicateInfo && (
-                <div className="text-sm text-orange-700 text-center mt-2 space-y-2">
-                  <p className="font-medium">Este examen ya fue calificado el {formatDate(duplicateInfo.fecha)}.</p>
-                  <div className="bg-white p-3 rounded-md border border-orange-200 mb-2">
-                    <p className="font-medium text-orange-800 mb-1">Calificación anterior:</p>
-                    <div className="flex justify-between">
-                      <span>Calificación obtenida:</span>
-                      <span className="font-medium">{duplicateInfo.puntaje}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Porcentaje:</span>
-                      <span className="font-medium">{duplicateInfo.porcentaje}%</span>
-                    </div>
-                  </div>
-                  <p className="font-medium mt-2">¿Desea continuar y reemplazar la calificación anterior?</p>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {status === 'error' && (
-            <div className="flex flex-col items-center">
-              <AlertCircle className="h-12 w-12 text-red-500" />
-              <p className="mt-2 font-medium text-red-600">{errorDetails?.message || 'Error en el procesamiento'}</p>
-              
-              {errorDetails?.recommendations && (
-                <div className="mt-4 bg-red-50 p-3 rounded-lg w-full">
-                  <p className="text-sm font-medium text-red-800 mb-2">Recomendaciones:</p>
-                  <ul className="list-disc pl-5 text-sm text-red-700 space-y-1">
-                    {errorDetails.recommendations.map((rec: string, i: number) => (
-                      <li key={i}>{rec}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          {/* Sobreponer icono de estado */}
+          {status !== 'processing' && (
+            <div className="absolute top-2 right-2 rounded-full p-1" 
+                style={{
+                  backgroundColor: status === 'complete' ? 'rgba(34, 197, 94, 0.2)' : 
+                                  status === 'duplicate' ? 'rgba(249, 115, 22, 0.2)' : 
+                                  'rgba(239, 68, 68, 0.2)'
+                }}>
+              {status === 'complete' && <CheckCircle2 className="h-8 w-8 text-green-500" />}
+              {status === 'duplicate' && <AlertTriangle className="h-8 w-8 text-orange-500" />}
+              {status === 'error' && <AlertCircle className="h-8 w-8 text-red-500" />}
             </div>
           )}
         </div>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4 mt-6">
-        <Button
-          variant="outline"
-          onClick={handleRetake}
-          disabled={status === 'loading'}
-          className="flex items-center justify-center gap-2 h-10 px-4 py-2"
-        >
-          <RefreshCw className="w-4 h-4 shrink-0" />
-          <span className="truncate">Volver a capturar</span>
-        </Button>
         
-        <Button 
-          onClick={handleNext}
-          disabled={status === 'loading' || status === 'error'}
-          className={`flex items-center justify-center gap-2 h-10 px-4 py-2 whitespace-nowrap ${
-            status === 'duplicate' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-primary'
-          }`}
-        >
-          <span className="truncate">
-            {status === 'duplicate' ? 'Reemplazar' : 'Continuar'}
-          </span>
-          <ArrowRight className="w-4 h-4 shrink-0" />
-        </Button>
+        {/* Mensaje de estado */}
+        <div className="text-center mb-4">
+          {status === 'processing' && (
+            <p className="text-gray-600">
+              Procesando su imagen. Este proceso puede tardar unos segundos...
+            </p>
+          )}
+          
+          {status === 'complete' && (
+            <p className="text-green-600 font-medium">
+              ¡Imagen procesada correctamente!
+            </p>
+          )}
+          
+          {status === 'duplicate' && (
+            <>
+              <p className="text-orange-600 font-medium">
+                Este examen ya ha sido calificado anteriormente
+              </p>
+              
+              {duplicateData && (
+                <div className="text-sm text-orange-700 text-center mt-2 space-y-2">
+                  <p className="font-medium">Este examen ya fue calificado el {formatDate(duplicateData.fecha_calificacion)}.</p>
+                  <div className="bg-white p-3 rounded-md border border-orange-200 mb-2">
+                    <p className="font-medium text-orange-800 mb-1">Calificación anterior:</p>
+                    <div className="flex justify-between">
+                      <span>Puntaje:</span>
+                      <span className="font-medium">{duplicateData.puntaje} puntos</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Porcentaje:</span>
+                      <span className="font-medium">{duplicateData.porcentaje}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          
+          {status === 'error' && (
+            <div className="text-red-600 space-y-2">
+              <p className="font-medium">{errorMessage}</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Botones de acción */}
+        <div className="flex justify-center space-x-4">
+          {/* Botón de retomar foto (siempre visible excepto durante procesamiento) */}
+          <Button 
+            variant="outline"
+            onClick={handleRetake}
+            disabled={status === 'processing'}
+            className="px-4"
+          >
+            Tomar otra foto
+          </Button>
+          
+          {/* Botón de reintento (solo visible en caso de error) */}
+          {status === 'error' && (
+            <Button
+              onClick={() => {
+                retryCount.current = 0;
+                processingCompleted.current = false;
+                processImage();
+              }}
+              className="px-6 bg-primary"
+            >
+              Reintentar
+              <RefreshCw className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+          
+          {/* Botón de continuar (visible en estados idle, complete, duplicate) */}
+          {(status === 'idle' || status === 'complete' || status === 'duplicate') && (
+            <Button
+              onClick={processImage}
+              className="px-6"
+            >
+              {status === 'duplicate' ? 'Continuar de todas formas' : 'Continuar'}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

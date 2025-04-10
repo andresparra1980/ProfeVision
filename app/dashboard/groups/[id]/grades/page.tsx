@@ -21,6 +21,17 @@ interface Calificaciones {
   porComponente: Record<string, Record<string, number>>;
 }
 
+interface Materia {
+  id: string;
+  nombre: string;
+  codigo?: string;
+  descripcion?: string;
+  entidad?: {
+    nombre: string;
+    id?: string;
+  } | null;
+}
+
 export default function GradesPage({ params }: GradesPageProps) {
   const resolvedParams = use(params);
   const groupId = resolvedParams.id;
@@ -45,13 +56,27 @@ export default function GradesPage({ params }: GradesPageProps) {
   const [selectedComponent, setSelectedComponent] = useState<ComponenteCalificacion | null>(null);
   const [modalMode, setModalMode] = useState<'import' | 'export' | 'export-period' | 'export-final'>('export');
   const [selectedPeriodo, setSelectedPeriodo] = useState<Periodo | null>(null);
-  const [materia, setMateria] = useState<any>(null);
+  const [materia, setMateria] = useState<Materia | null>(null);
 
   useEffect(() => {
     if (!groupId) return;
 
     loadData();
     loadGroupName();
+
+    // Define payload type for the subscription
+    interface CalificacionPayload {
+      eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+      new?: {
+        estudiante_id: string;
+        componente_id: string;
+        valor: number;
+      };
+      old?: {
+        estudiante_id: string;
+        componente_id: string;
+      };
+    }
 
     // Suscribirse a cambios en calificaciones
     const calificacionesSubscription = supabase
@@ -63,30 +88,32 @@ export default function GradesPage({ params }: GradesPageProps) {
           schema: 'public',
           table: 'calificaciones'
         },
-        (payload: any) => {
+        (payload: CalificacionPayload) => {
           if (payload.eventType === 'DELETE') {
             // Eliminar calificación
             setCalificaciones(prev => {
               const newState = { ...prev };
-              const oldRecord = payload.old as any;
-              if (newState.porComponente[oldRecord.estudiante_id]) {
+              const oldRecord = payload.old;
+              if (oldRecord && newState.porComponente[oldRecord.estudiante_id]) {
                 delete newState.porComponente[oldRecord.estudiante_id][oldRecord.componente_id];
               }
               return newState;
             });
           } else {
             // Insertar o actualizar calificación
-            const record = payload.new as any;
-            setCalificaciones(prev => ({
-              ...prev,
-              porComponente: {
-                ...prev.porComponente,
-                [record.estudiante_id]: {
-                  ...prev.porComponente[record.estudiante_id],
-                  [record.componente_id]: record.valor
+            const record = payload.new;
+            if (record) {
+              setCalificaciones(prev => ({
+                ...prev,
+                porComponente: {
+                  ...prev.porComponente,
+                  [record.estudiante_id]: {
+                    ...prev.porComponente[record.estudiante_id],
+                    [record.componente_id]: record.valor
+                  }
                 }
-              }
-            }));
+              }));
+            }
           }
         }
       )
@@ -137,7 +164,10 @@ export default function GradesPage({ params }: GradesPageProps) {
       if (grupoError) throw grupoError;
       
       setGroupName(grupo.nombre);
-      setMateria(grupo.materia);
+      // Handle the case where materia might be null
+      if (grupo.materia) {
+        setMateria(grupo.materia);
+      }
       setInstitucionName(grupo.materia?.entidad?.nombre || 'INSTITUCIÓN EDUCATIVA');
 
       // Cargar esquema de calificación
@@ -185,7 +215,7 @@ export default function GradesPage({ params }: GradesPageProps) {
         const { data: componentes, error: componentesError } = await supabase
           .from('componentes_calificacion')
           .select('*')
-          .in('periodo_id', periodos.map((p: any) => p.id))
+          .in('periodo_id', periodos.map((p: Periodo) => p.id))
           .order('created_at');
 
         if (componentesError) throw componentesError;
@@ -193,7 +223,7 @@ export default function GradesPage({ params }: GradesPageProps) {
 
         // Inicializar todos los componentes como bloqueados
         const bloqueados: Record<string, boolean> = {};
-        componentes.forEach((c: any) => {
+        componentes.forEach((c: ComponenteCalificacion) => {
           bloqueados[c.id] = true;
         });
         setComponentesBloqueados(bloqueados);
@@ -206,13 +236,22 @@ export default function GradesPage({ params }: GradesPageProps) {
             componente_id,
             examen:examen_id(titulo)
           `)
-          .in('componente_id', componentes.map((c: any) => c.id));
+          .in('componente_id', componentes.map((c: ComponenteCalificacion) => c.id));
         
         if (vinculosError) throw vinculosError;
         
         // Transformar los vínculos en un objeto indexado por componente_id
         const vinculosMap: Record<string, { examen_id: string, titulo: string }> = {};
-        vinculos?.forEach((vinculo: any) => {
+        
+        interface VinculoItem {
+          componente_id: string;
+          examen_id: string;
+          examen?: {
+            titulo?: string;
+          };
+        }
+        
+        vinculos?.forEach((vinculo: VinculoItem) => {
           vinculosMap[vinculo.componente_id] = { 
             examen_id: vinculo.examen_id,
             titulo: vinculo.examen?.titulo || 'Examen sin título'
@@ -230,7 +269,7 @@ export default function GradesPage({ params }: GradesPageProps) {
               .from('estudiante_grupo')
               .select('estudiante_id')
               .eq('grupo_id', groupId)
-          ).data?.map((row: any) => row.estudiante_id) || []
+          ).data?.map((row: { estudiante_id: string }) => row.estudiante_id) || []
           )
           .order('apellidos', { ascending: true })
           .order('nombres', { ascending: true });
@@ -242,8 +281,8 @@ export default function GradesPage({ params }: GradesPageProps) {
         const { data: calificaciones, error: calificacionesError } = await supabase
           .from('calificaciones')
           .select('*')
-          .in('componente_id', componentes.map((c: any) => c.id))
-          .in('estudiante_id', estudiantes?.map((e: any) => e.id) || []);
+          .in('componente_id', componentes.map((c: ComponenteCalificacion) => c.id))
+          .in('estudiante_id', estudiantes?.map((e: Estudiante) => e.id) || []);
 
         if (calificacionesError) throw calificacionesError;
         
@@ -252,7 +291,13 @@ export default function GradesPage({ params }: GradesPageProps) {
           porComponente: {} as Record<string, Record<string, number>>
         };
         
-        calificaciones?.forEach((cal: any) => {
+        interface CalificacionItem {
+          estudiante_id: string;
+          componente_id: string;
+          valor: number;
+        }
+        
+        calificaciones?.forEach((cal: CalificacionItem) => {
           if (!calificacionesMap.porComponente[cal.estudiante_id]) {
             calificacionesMap.porComponente[cal.estudiante_id] = {};
           }
@@ -514,7 +559,7 @@ export default function GradesPage({ params }: GradesPageProps) {
               : getComponentGrades(selectedComponent?.id || '')}
             onImportComplete={handleImportComplete}
             mode={modalMode}
-            materia={materia}
+            materia={materia ? materia : { id: '', nombre: 'Sin materia' }}
             grupo={{
               id: groupId,
               nombre: groupName,

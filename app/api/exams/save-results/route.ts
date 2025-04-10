@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs/promises';
-import path from 'path';
+import { promises as fsPromises } from 'fs';
+import * as path from 'path';
 import sharp from 'sharp';
+
+const DEBUG = process.env.NODE_ENV === 'development';
 
 // Configuración para el cliente de Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -13,96 +15,73 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const s3BucketName = process.env.S3_BUCKET_NAME || 'examenes-escaneados';
 
 // Función auxiliar para comprimir imágenes
-async function compressImage(imageBase64: string, quality: number = 80, maxSize: number = 1000): Promise<Buffer> {
+async function compressImage(imageBase64: string, quality: number = 80, maxSize: number = 1200, isOriginal: boolean = false): Promise<Buffer> {
+  // Configurar flag de debug para mensajes de consola
+  const DEBUG = process.env.NODE_ENV === 'development';
+  
   try {
-    // Extraer los datos base64 después del prefijo
+    // Detectar formato si no se proporciona
     let base64Data = imageBase64;
-    let format: 'jpeg' | 'png' = 'jpeg';
-    let contentType = '';
     
-    // Detectar formato basado en el encabezado data URI
+    // Eliminar encabezado de data URI si existe
     if (imageBase64.startsWith('data:image/')) {
-      const matches = imageBase64.match(/^data:image\/([a-zA-Z]+);base64,/);
-      if (matches && matches.length > 1) {
-        const detectedFormat = matches[1].toLowerCase();
-        contentType = `image/${detectedFormat}`;
-        if (detectedFormat === 'png' || detectedFormat === 'jpeg' || detectedFormat === 'jpg') {
-          format = detectedFormat === 'jpg' ? 'jpeg' : detectedFormat as 'jpeg' | 'png';
-        }
-      }
       base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
     }
     
     // Decodificar la cadena base64 a un buffer
     const buffer = Buffer.from(base64Data, 'base64');
     
-    // Imprimir información para depuración
-    console.log(`Comprimiendo imagen: formato=${format}, tamaño original=${buffer.length} bytes`);
-    
     // Verificar que el buffer no está vacío
     if (buffer.length < 100) {
-      throw new Error('Buffer de imagen demasiado pequeño para comprimir');
+      if (DEBUG) console.error('Buffer de imagen demasiado pequeño para comprimir');
+      return buffer;
     }
     
-    // Utilizar sharp para comprimir la imagen con opciones agresivas
-    const processedImage = sharp(buffer)
-      .rotate() // Rotar automáticamente basado en EXIF
-      .withMetadata(); // Mantener metadatos EXIF
-    
-    // Obtener metadatos para conocer el tamaño original
-    const metadata = await processedImage.metadata();
-    const width = metadata.width || 1200;
-    const height = metadata.height || 1600;
-    
-    // Si la imagen es muy grande, redimensionarla manteniendo la proporción
-    if (width > maxSize || height > maxSize) {
-      const aspectRatio = width / height;
-      const newWidth = width > height ? maxSize : Math.round(maxSize * aspectRatio);
-      const newHeight = height > width ? maxSize : Math.round(maxSize / aspectRatio);
+    try {
+      // Crear una instancia de sharp con opciones permisivas
+      const sharpInstance = sharp(buffer, { 
+        failOnError: false,
+        limitInputPixels: 0  // Sin límite de píxeles
+      });
       
-      processedImage.resize({
-        width: newWidth,
-        height: newHeight,
+      // Si es la imagen original, rotarla 90 grados a la derecha para corregir la orientación
+      if (isOriginal) {
+        sharpInstance.rotate(90);
+        if (DEBUG) console.log('Aplicando rotación de 90° a imagen original para corregir orientación');
+      }
+      
+      // Redimensionar si es muy grande
+      sharpInstance.resize(maxSize, maxSize, {
         fit: 'inside',
         withoutEnlargement: true
       });
       
-      console.log(`Redimensionando imagen de ${width}x${height} a ${newWidth}x${newHeight}`);
+      // Siempre usar PNG para mejor calidad y preservar transparencia
+      sharpInstance.png({ quality });
+      
+      if (DEBUG) {
+        console.log(`Procesando imagen como PNG, ${isOriginal ? 'con rotación' : 'sin rotación'}`);
+      }
+      
+      return await sharpInstance.toBuffer()
+        .catch(err => {
+          if (DEBUG) console.error('Error en sharp.toBuffer():', err);
+          return buffer; // Devolver buffer original en caso de error
+        });
+    } catch (sharpError) {
+      if (DEBUG) console.error('Error al usar sharp:', sharpError);
+      return buffer; // Devolver buffer original en caso de error
     }
-    
-    // Aplicar opciones de compresión según el formato
-    if (format === 'jpeg') {
-      // Configuración agresiva para JPEG
-      processedImage.jpeg({
-        quality: quality,
-        progressive: true,
-        optimiseCoding: true,
-        trellisQuantisation: true,
-        overshootDeringing: true,
-        mozjpeg: true,            // Usar compresión mozjpeg para mejor resultado
-        chromaSubsampling: '4:2:0' // Reducir información de color
-      });
-    } else {
-      // Configuración para PNG
-      processedImage.png({
-        quality: quality,
-        compressionLevel: 9,      // Nivel de compresión máximo
-        adaptiveFiltering: true,  // Filtrado adaptativo para mejor compresión
-        palette: true             // Usar paleta de colores para reducir tamaño
-      });
-    }
-    
-    // Generar el buffer comprimido
-    const compressedBuffer = await processedImage.toBuffer();
-    
-    console.log(`Imagen comprimida: tamaño final=${compressedBuffer.length} bytes, reducción=${Math.round((1 - compressedBuffer.length / buffer.length) * 100)}%`);
-    
-    return compressedBuffer;
   } catch (error) {
-    console.error('Error al comprimir imagen:', error);
-    // Si falla la compresión, devolvemos el buffer original
-    const buffer = Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-    return buffer;
+    if (DEBUG) console.error('Error al comprimir imagen:', error);
+    
+    // Si la decodificación base64 falla, intentamos devolver un buffer vacío
+    try {
+      return Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+    } catch (fallbackError) {
+      if (DEBUG) console.error('Error en fallback de buffer:', fallbackError);
+      return Buffer.from([]); // Buffer vacío como último recurso
+    }
   }
 }
 
@@ -112,10 +91,10 @@ async function cleanupTemporaryFiles() {
   
   try {
     // Verificar si el directorio existe
-    await fs.access(publicUploadsDir);
+    await fsPromises.access(publicUploadsDir);
     
     // Leer todos los archivos en el directorio
-    const files = await fs.readdir(publicUploadsDir);
+    const files = await fsPromises.readdir(publicUploadsDir);
     
     // Obtener la fecha actual
     const now = Date.now();
@@ -125,23 +104,26 @@ async function cleanupTemporaryFiles() {
       const filePath = path.join(publicUploadsDir, file);
       
       try {
-        const stats = await fs.stat(filePath);
+        const stats = await fsPromises.stat(filePath);
         const fileAge = now - stats.mtime.getTime();
         
         // Si el archivo es más antiguo que 1 hora o si tiene extensión .jpg o .jpeg
         if (fileAge > 3600000 || file.endsWith('.jpg') || file.endsWith('.jpeg') || file.endsWith('.png')) {
-          await fs.unlink(filePath);
-          console.log(`Archivo temporal eliminado: ${filePath}`);
+          await fsPromises.unlink(filePath);
         }
       } catch (error) {
-        console.error(`Error al procesar archivo ${filePath}:`, error);
+        if (DEBUG) {
+          console.error(`Error al procesar archivo ${filePath}:`, error);
+        }
       }
     });
     
     await Promise.all(deletePromises);
   } catch (error) {
     // Si el directorio no existe o hay otro error, lo registramos pero continuamos
-    console.error('Error al limpiar archivos temporales:', error);
+    if (DEBUG) {
+      console.error('Error al limpiar archivos temporales:', error);
+    }
   }
 }
 
@@ -157,9 +139,44 @@ interface Pregunta {
   habilitada: boolean;
 }
 
+interface QRData {
+  examId?: string;
+  examenId?: string;
+  exam_id?: string;
+  examen_id?: string;
+  studentId?: string;
+  estudianteId?: string;
+  student_id?: string;
+  estudiante_id?: string;
+  groupId?: string;
+  grupoId?: string;
+  group_id?: string;
+  grupo_id?: string;
+  profesorId?: string;
+  profesor_id?: string;
+}
+
+interface DuplicateInfo {
+  resultadoId: string;
+}
+
+interface SaveResultsData {
+  qrData: QRData;
+  answers: Answer[];
+  originalImage: string;
+  processedImage: string;
+  examScore: number;
+  isDuplicate?: boolean;
+  duplicateInfo?: DuplicateInfo;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const data = await req.json();
+    if (DEBUG) {
+      console.log('POST /api/exams/save-results iniciando...');
+    }
+
+    const data = await req.json() as SaveResultsData;
     const { 
       qrData, 
       answers, 
@@ -178,7 +195,6 @@ export async function POST(req: NextRequest) {
     const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
     const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
     const groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
-    let profesorId = qrData.profesorId || qrData.profesor_id;
     
     if (!examId || !studentId) {
       return NextResponse.json({ error: 'Datos de QR incompletos' }, { status: 400 });
@@ -192,8 +208,9 @@ export async function POST(req: NextRequest) {
       }
     });
     
-    // Si no tenemos profesor_id del QR, obtenerlo del examen
-    if (!profesorId) {
+    // Obtener profesor_id del examen al principio
+    let profesorId;
+    try {
       const { data: examData, error: examError } = await supabase
         .from('examenes')
         .select('profesor_id')
@@ -201,14 +218,149 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (examError) {
-        console.error('Error al obtener profesor_id del examen:', examError);
-        return NextResponse.json(
-          { error: 'Error al obtener datos del profesor' },
-          { status: 500 }
-        );
+        if (DEBUG) {
+          console.error('Error al obtener profesor_id del examen:', examError);
+        }
+        // Continuamos aunque no tengamos el profesor_id
+      } else {
+        profesorId = examData.profesor_id;
       }
-
-      profesorId = examData.profesor_id;
+    } catch (error) {
+      if (DEBUG) {
+        console.error('Error al obtener profesor_id:', error);
+      }
+      // Continuamos sin profesor_id
+    }
+    
+    // Verificar si ya existe un registro para este examen y estudiante
+    // y eliminarlo junto con sus imágenes en S3
+    try {
+      // 1. Buscar resultados existentes para este examen y estudiante
+      const { data: existingResults, error: existingResultsError } = await supabase
+        .from('resultados_examen')
+        .select('id')
+        .eq('examen_id', examId)
+        .eq('estudiante_id', studentId);
+        
+      if (existingResultsError) {
+        if (DEBUG) {
+          console.error('Error al buscar resultados existentes:', existingResultsError);
+        }
+      } else if (existingResults && existingResults.length > 0) {
+        if (DEBUG) {
+          console.log(`Encontrados ${existingResults.length} resultados existentes para eliminar`);
+        }
+        
+        // Procesar cada resultado encontrado
+        for (const result of existingResults) {
+          const resultadoId = result.id;
+          
+          // 2. Buscar escaneos asociados a este resultado
+          const { data: escaneos, error: escaneosError } = await supabase
+            .from('examenes_escaneados')
+            .select('*')
+            .eq('resultado_id', resultadoId);
+            
+          if (escaneosError) {
+            if (DEBUG) {
+              console.error(`Error al buscar escaneos para resultado ${resultadoId}:`, escaneosError);
+            }
+          } else if (escaneos && escaneos.length > 0) {
+            if (DEBUG) {
+              console.log(`Encontrados ${escaneos.length} escaneos para eliminar`);
+            }
+            
+            // Eliminar las imágenes de S3 para cada escaneo
+            for (const escaneo of escaneos) {
+              // Eliminar imágenes si existen rutas S3
+              if (escaneo.ruta_s3_original) {
+                // Extraer la ruta relativa sin el nombre del bucket
+                const rutaRelativa = escaneo.ruta_s3_original.replace(`${s3BucketName}/`, '');
+                try {
+                  const { data, error } = await supabase.storage
+                    .from(s3BucketName)
+                    .remove([rutaRelativa]);
+                    
+                  if (error) {
+                    if (DEBUG) {
+                      console.error(`Error al eliminar imagen original: ${error.message}`, error);
+                    }
+                  } else if (DEBUG) {
+                    console.log(`Eliminada imagen original: ${rutaRelativa}`, data);
+                  }
+                } catch (e) {
+                  if (DEBUG) {
+                    console.error(`Excepción al eliminar imagen original:`, e);
+                  }
+                }
+              }
+              
+              if (escaneo.ruta_s3_procesado) {
+                // Extraer la ruta relativa sin el nombre del bucket
+                const rutaRelativa = escaneo.ruta_s3_procesado.replace(`${s3BucketName}/`, '');
+                try {
+                  const { data, error } = await supabase.storage
+                    .from(s3BucketName)
+                    .remove([rutaRelativa]);
+                    
+                  if (error) {
+                    if (DEBUG) {
+                      console.error(`Error al eliminar imagen procesada: ${error.message}`, error);
+                    }
+                  } else if (DEBUG) {
+                    console.log(`Eliminada imagen procesada: ${rutaRelativa}`, data);
+                  }
+                } catch (e) {
+                  if (DEBUG) {
+                    console.error(`Excepción al eliminar imagen procesada:`, e);
+                  }
+                }
+              }
+              
+              // Eliminar el registro de examenes_escaneados
+              const { error: deleteEscaneoError } = await supabase
+                .from('examenes_escaneados')
+                .delete()
+                .eq('id', escaneo.id);
+                
+              if (deleteEscaneoError) {
+                if (DEBUG) {
+                  console.error(`Error al eliminar escaneo ${escaneo.id}:`, deleteEscaneoError);
+                }
+              }
+            }
+          }
+          
+          // 3. Eliminar respuestas asociadas
+          const { error: deleteRespuestasError } = await supabase
+            .from('respuestas_estudiante')
+            .delete()
+            .eq('resultado_id', resultadoId);
+            
+          if (deleteRespuestasError) {
+            if (DEBUG) {
+              console.error(`Error al eliminar respuestas para resultado ${resultadoId}:`, deleteRespuestasError);
+            }
+          }
+          
+          // 4. Eliminar el resultado
+          const { error: deleteResultadoError } = await supabase
+            .from('resultados_examen')
+            .delete()
+            .eq('id', resultadoId);
+            
+          if (deleteResultadoError) {
+            if (DEBUG) {
+              console.error(`Error al eliminar resultado ${resultadoId}:`, deleteResultadoError);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      if (DEBUG) {
+        console.error('Error al procesar registros existentes:', error);
+      }
+      // Continuamos aunque haya errores en la limpieza previa
     }
 
     // Obtener preguntas habilitadas del examen (solo para calcular la nota)
@@ -219,7 +371,9 @@ export async function POST(req: NextRequest) {
       .order('orden');
 
     if (preguntasError) {
-      console.error('Error al obtener preguntas:', preguntasError);
+      if (DEBUG) {
+        console.error('Error al obtener preguntas:', preguntasError);
+      }
       return NextResponse.json(
         { error: 'Error al obtener preguntas del examen' },
         { status: 500 }
@@ -240,397 +394,339 @@ export async function POST(req: NextRequest) {
     // Calcular nota final (0-5)
     const notaFinal = (respuestasCorrectas / preguntasHabilitadas.length) * 5;
 
-    // Si es un reescaneo, eliminar los resultados anteriores
+    // Si es un duplicado, eliminamos el resultado anterior
     if (isDuplicate && duplicateInfo && duplicateInfo.resultadoId) {
-      console.log(`Eliminando resultado anterior: ${duplicateInfo.resultadoId}`);
-      
       try {
-        // 1. Obtener información de las imágenes a eliminar
+        if (DEBUG) {
+          console.log('Eliminando resultado duplicado anterior:', duplicateInfo.resultadoId);
+        }
+
+        // 1. Primero obtener datos del resultado escaneado
         const { data: escaneoData, error: escaneoError } = await supabase
           .from('examenes_escaneados')
-          .select('ruta_s3_original, ruta_s3_procesado')
+          .select('*')
           .eq('resultado_id', duplicateInfo.resultadoId)
-          .maybeSingle();
-          
-        if (!escaneoError && escaneoData) {
-          // 2. Eliminar imágenes del storage
+          .single();
+
+        if (escaneoError) {
+          if (DEBUG) {
+            console.error('Error al obtener datos del escaneo anterior:', escaneoError);
+          }
+        }
+
+        // 2. Eliminar imágenes si existen
+        if (escaneoData) {
+          // Usar las rutas S3 directamente del registro para eliminar los archivos
           if (escaneoData.ruta_s3_original) {
-            const { error: deleteOriginalError } = await supabase
-              .storage
-              .from(s3BucketName)
-              .remove([escaneoData.ruta_s3_original]);
+            try {
+              const { data, error } = await supabase.storage
+                .from(s3BucketName)
+                .remove([escaneoData.ruta_s3_original]);
+                
+              if (error) {
+                if (DEBUG) {
+                  console.error(`Error al eliminar imagen original S3: ${error.message}`, error);
+                }
+              } else if (DEBUG) {
+                console.log(`Eliminada imagen original: ${escaneoData.ruta_s3_original}`, data);
+              }
+            } catch (e) {
+              if (DEBUG) {
+                console.error(`Excepción al eliminar imagen original S3:`, e);
+              }
+            }
+          } else if (escaneoData.archivo_original) {
+            // Compatibilidad con datos antiguos - construir la ruta completa
+            const rutaAntigua = profesorId && examId ? 
+              `examenes-escaneados/${profesorId}/${examId}/${escaneoData.archivo_original}` : 
+              `examenes-escaneados/unassigned/${escaneoData.archivo_original}`;
               
-            if (deleteOriginalError) {
-              console.error('Error al eliminar imagen original:', deleteOriginalError);
+            try {
+              const { data, error } = await supabase.storage
+                .from(s3BucketName)
+                .remove([rutaAntigua]);
+                
+              if (error) {
+                if (DEBUG) {
+                  console.error(`Error al eliminar imagen original S3 (ruta antigua): ${error.message}`, error);
+                }
+              } else if (DEBUG) {
+                console.log(`Eliminada imagen original (ruta antigua): ${rutaAntigua}`, data);
+              }
+            } catch (e) {
+              if (DEBUG) {
+                console.error(`Excepción al eliminar imagen original S3 (ruta antigua):`, e);
+              }
             }
           }
           
           if (escaneoData.ruta_s3_procesado) {
-            const { error: deleteProcessedError } = await supabase
-              .storage
-              .from(s3BucketName)
-              .remove([escaneoData.ruta_s3_procesado]);
+            try {
+              const { data, error } = await supabase.storage
+                .from(s3BucketName)
+                .remove([escaneoData.ruta_s3_procesado]);
+                
+              if (error) {
+                if (DEBUG) {
+                  console.error(`Error al eliminar imagen procesada S3: ${error.message}`, error);
+                }
+              } else if (DEBUG) {
+                console.log(`Eliminada imagen procesada: ${escaneoData.ruta_s3_procesado}`, data);
+              }
+            } catch (e) {
+              if (DEBUG) {
+                console.error(`Excepción al eliminar imagen procesada S3:`, e);
+              }
+            }
+          } else if (escaneoData.archivo_procesado) {
+            // Compatibilidad con datos antiguos - construir la ruta completa
+            const rutaAntigua = profesorId && examId ? 
+              `examenes-escaneados/${profesorId}/${examId}/${escaneoData.archivo_procesado}` : 
+              `examenes-escaneados/unassigned/${escaneoData.archivo_procesado}`;
               
-            if (deleteProcessedError) {
-              console.error('Error al eliminar imagen procesada:', deleteProcessedError);
+            try {
+              const { data, error } = await supabase.storage
+                .from(s3BucketName)
+                .remove([rutaAntigua]);
+                
+              if (error) {
+                if (DEBUG) {
+                  console.error(`Error al eliminar imagen procesada S3 (ruta antigua): ${error.message}`, error);
+                }
+              } else if (DEBUG) {
+                console.log(`Eliminada imagen procesada (ruta antigua): ${rutaAntigua}`, data);
+              }
+            } catch (e) {
+              if (DEBUG) {
+                console.error(`Excepción al eliminar imagen procesada S3 (ruta antigua):`, e);
+              }
             }
           }
           
-          // 3. Eliminar registro de escaneo
+          // Eliminar el registro de examenes_escaneados
           const { error: deleteEscaneoError } = await supabase
             .from('examenes_escaneados')
             .delete()
             .eq('resultado_id', duplicateInfo.resultadoId);
-            
+
           if (deleteEscaneoError) {
-            console.error('Error al eliminar registro de escaneo:', deleteEscaneoError);
+            if (DEBUG) {
+              console.error('Error al eliminar escaneo anterior:', deleteEscaneoError);
+            }
           }
         }
-        
-        // 4. Eliminar respuestas del estudiante
+
+        // 3. Eliminar las respuestas estudiante asociadas
         const { error: deleteRespuestasError } = await supabase
           .from('respuestas_estudiante')
           .delete()
           .eq('resultado_id', duplicateInfo.resultadoId);
-          
+
         if (deleteRespuestasError) {
-          console.error('Error al eliminar respuestas:', deleteRespuestasError);
+          if (DEBUG) {
+            console.error('Error al eliminar respuestas anteriores:', deleteRespuestasError);
+          }
         }
-        
-        // 5. Eliminar resultado del examen
-        const { error: deleteResultadoError } = await supabase
+
+        // 4. Eliminar el registro de resultados_examen
+        const { error: deleteError } = await supabase
           .from('resultados_examen')
           .delete()
           .eq('id', duplicateInfo.resultadoId);
-          
-        if (deleteResultadoError) {
-          console.error('Error al eliminar resultado:', deleteResultadoError);
+
+        if (deleteError) {
+          if (DEBUG) {
+            console.error('Error al eliminar resultado anterior:', deleteError);
+          }
         }
-        
       } catch (error) {
-        console.error('Error al eliminar resultados anteriores:', error);
-        // Continuamos con el proceso aunque haya error en la eliminación
+        if (DEBUG) {
+          console.error('Error durante la eliminación del resultado anterior:', error);
+        }
       }
     }
 
-    // 1. Crear un nuevo registro en resultados_examen
-    const resultadoId = uuidv4();
-    const now = new Date().toISOString();
+    // Comprimir imágenes
+    const compressedOriginal = await compressImage(originalImage, 80, 1200, true);
+    const compressedProcessed = await compressImage(processedImage, 80, 1200, false);
+
+    // Construir rutas S3 completas con la estructura de carpetas correcta
+    const s3PathPrefix = profesorId && examId ? 
+      `examenes-escaneados/${profesorId}/${examId}/` : 
+      'examenes-escaneados/unassigned/'; // Carpeta de respaldo si falta algún ID
     
-    // Buscar si existe una versión para este examen
-    let versionId = null;
-    try {
-      const { data: versionData, error: versionError } = await supabase
-        .from('versiones_examen')
-        .select('id')
-        .eq('examen_id', examId)
-        .order('created_at', { ascending: false })
-        .maybeSingle();
-      
-      versionId = versionData?.id;
-      
-      if (!versionId) {
-        console.log('No se encontró versión para este examen, continuando con version_id = null');
+    // Generar nombres únicos para las imágenes con timestamp para evitar colisiones
+    const timestamp = new Date().toISOString().replace(/:/g, '-');
+    const originalFileName = `${uuidv4()}_original_${timestamp}.png`;
+    const processedFileName = `${uuidv4()}_processed_${timestamp}.png`;
+    
+    // Rutas completas para S3
+    const s3OriginalPath = `${s3PathPrefix}${originalFileName}`;
+    const s3ProcessedPath = `${s3PathPrefix}${processedFileName}`;
+
+    // Subir imágenes comprimidas a Supabase Storage con la ruta adecuada
+    const { error: originalError } = await supabase.storage
+      .from(s3BucketName)
+      .upload(s3OriginalPath, compressedOriginal, {
+        contentType: 'image/png',
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (originalError) {
+      if (DEBUG) {
+        console.error('Error al subir imagen original:', originalError);
       }
-    } catch (error) {
-      console.log('Error al buscar versión, continuando con version_id = null:', error);
+      return NextResponse.json(
+        { error: 'Error al guardar imagen original' },
+        { status: 500 }
+      );
     }
-    
-    // Crear el resultado del examen con los nuevos puntajes calculados
-    const { data: resultadoData, error: resultadoError } = await supabase
+
+    const { error: processedError } = await supabase.storage
+      .from(s3BucketName)
+      .upload(s3ProcessedPath, compressedProcessed, {
+        contentType: 'image/png',
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (processedError) {
+      if (DEBUG) {
+        console.error('Error al subir imagen procesada:', processedError);
+      }
+      return NextResponse.json(
+        { error: 'Error al guardar imagen procesada' },
+        { status: 500 }
+      );
+    }
+
+    // Obtener URLs públicas de las imágenes
+    const { data: originalUrlData } = await supabase.storage
+      .from(s3BucketName)
+      .getPublicUrl(s3OriginalPath);
+
+    const { data: processedUrlData } = await supabase.storage
+      .from(s3BucketName)
+      .getPublicUrl(s3ProcessedPath);
+
+    // Guardar resultados en la base de datos
+    // Primero creamos el registro en resultados_examen (sin el campo respuestas)
+    const { data: resultadoExamen, error: resultadoExamenError } = await supabase
       .from('resultados_examen')
       .insert({
-        id: resultadoId,
         examen_id: examId,
         estudiante_id: studentId,
-        version_id: versionId,
-        puntaje_obtenido: notaFinal.toFixed(4),
-        porcentaje: porcentajeCorrectas.toFixed(4),
-        estado: 'CALIFICADO',
-        fecha_calificacion: now,
-        created_at: now,
-        updated_at: now
+        puntaje_obtenido: notaFinal,
+        porcentaje: porcentajeCorrectas,
+        fecha_calificacion: new Date().toISOString(),
+        estado: 'CALIFICADO'
       })
       .select()
       .single();
+
+    if (resultadoExamenError) {
+      if (DEBUG) {
+        console.error('Error al guardar en resultados_examen:', resultadoExamenError);
+      }
+      return NextResponse.json(
+        { error: 'Error al guardar resultados' },
+        { status: 500 }
+      );
+    }
     
+    // Guardar las respuestas individuales en la tabla respuestas_estudiante
+    const respuestasToInsert = answers.map((respuesta: Answer) => ({
+      id: uuidv4(),
+      resultado_id: resultadoExamen.id,
+      pregunta_id: respuesta.pregunta_id,
+      opcion_id: respuesta.opcion_id,
+      es_correcta: respuesta.es_correcta,
+      // Calcular puntaje_obtenido basado en si es correcta
+      puntaje_obtenido: respuesta.es_correcta ? 
+        parseFloat(preguntasHabilitadas.find((p: Pregunta) => p.id === respuesta.pregunta_id)?.puntaje || '0') : 0
+    }));
+    
+    // Insertar respuestas en lotes para evitar errores por demasiadas inserciones
+    const { error: respuestasError } = await supabase
+      .from('respuestas_estudiante')
+      .insert(respuestasToInsert);
+    
+    if (respuestasError) {
+      if (DEBUG) {
+        console.error('Error al guardar respuestas individuales:', respuestasError);
+      }
+      // Aunque haya error en las respuestas, continuamos con el resto del proceso
+      // para no perder los datos del resultado principal
+    }
+
+    // Ahora guardamos en examenes_escaneados con la referencia a resultados_examen
+    interface ExamEscaneadoData {
+      resultado_id: string;
+      examen_id: string;
+      archivo_original: string;
+      archivo_procesado: string;
+      ruta_s3_original: string;
+      ruta_s3_procesado: string;
+      fecha_escaneo: string;
+      profesor_id?: string;
+    }
+    
+    const examEscaneadoData: ExamEscaneadoData = {
+      resultado_id: resultadoExamen.id,
+      examen_id: examId,
+      archivo_original: originalFileName,    // Guardar solo el nombre del archivo, no la ruta completa
+      archivo_procesado: processedFileName,  // Guardar solo el nombre del archivo, no la ruta completa
+      ruta_s3_original: s3OriginalPath,
+      ruta_s3_procesado: s3ProcessedPath,
+      fecha_escaneo: new Date().toISOString()
+    };
+    
+    // Solo añadir profesor_id si lo tenemos
+    if (profesorId) {
+      examEscaneadoData.profesor_id = profesorId;
+    }
+    
+    const { data: resultado, error: resultadoError } = await supabase
+      .from('examenes_escaneados')
+      .insert(examEscaneadoData)
+      .select()
+      .single();
+
     if (resultadoError) {
-      console.error('Error al guardar resultado de examen:', resultadoError);
+      if (DEBUG) {
+        console.error('Error al guardar resultados de escaneo:', resultadoError);
+      }
       return NextResponse.json(
-        { error: 'Error al guardar resultado de examen: ' + resultadoError.message },
+        { error: 'Error al guardar imágenes escaneadas' },
         { status: 500 }
       );
     }
 
-    // Sincronizar calificaciones automáticamente
-    try {
-      // Verificar si este examen está vinculado a algún componente de calificación
-      const { data: vinculos } = await supabase
-        .from('examenes_a_componentes_calificacion')
-        .select('componente_id')
-        .eq('examen_id', examId);
-      
-      // Si hay vínculos, sincronizar calificaciones
-      if (vinculos && vinculos.length > 0) {
-        // Llamar a la API de sincronización usando el cliente de servicios
-        // para no depender de la autenticación del usuario
-        fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/exams/sync-grades`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY || ''}`
-          },
-          body: JSON.stringify({ examId })
-        }).catch(error => {
-          console.error('Error al sincronizar calificaciones:', error);
-        });
-      }
-    } catch (syncError) {
-      console.error('Error al intentar sincronizar calificaciones:', syncError);
-      // No devolvemos error al cliente ya que el guardado principal fue exitoso
-    }
-    
-    // 2. Guardar las respuestas del estudiante (TODAS, sin filtrar por habilitada)
-    try {
-      console.log('Guardando respuestas para resultado:', resultadoId);
-      console.log('Total respuestas a guardar:', answers.length);
-      
-      for (const answer of answers) {
-        const pregunta = preguntas.find((p: Pregunta) => p.id === answer.pregunta_id);
-        if (!pregunta) {
-          console.warn(`Pregunta no encontrada para ID: ${answer.pregunta_id}`);
-          continue;
-        }
+    // Limpiar archivos temporales
+    await cleanupTemporaryFiles();
 
-        const { error: insertError } = await supabase
-          .from('respuestas_estudiante')
-          .insert({
-            resultado_id: resultadoId,
-            pregunta_id: answer.pregunta_id,
-            opcion_id: answer.opcion_id,
-            es_correcta: answer.es_correcta,
-            puntaje_obtenido: answer.es_correcta ? 1 : 0,
-            created_at: now,
-            updated_at: now
-          });
-
-        if (insertError) {
-          console.error('Error al guardar respuesta:', {
-            pregunta_id: answer.pregunta_id,
-            error: insertError
-          });
-          throw new Error(`Error al guardar respuesta: ${insertError.message}`);
+    return NextResponse.json({
+      success: true,
+      resultado_id: resultadoExamen.id,
+      resultado: {
+        id: resultadoExamen.id,
+        escaneo_id: resultado.id,
+        nota: notaFinal,
+        porcentaje: porcentajeCorrectas,
+        respuestasCorrectas,
+        totalPreguntas: preguntasHabilitadas.length,
+        imagenes: {
+          original: originalUrlData.publicUrl,
+          procesada: processedUrlData.publicUrl
         }
       }
+    });
 
-      console.log('Todas las respuestas guardadas exitosamente');
-    } catch (error) {
-      console.error('Error al guardar respuestas:', error);
-      return NextResponse.json(
-        { error: 'Error al guardar las respuestas del estudiante' },
-        { status: 500 }
-      );
+  } catch (error: unknown) {
+    if (DEBUG) {
+      console.error('Error en POST /api/exams/save-results:', error);
     }
-    
-    // 3. Subir imágenes a S3 usando el Storage API de Supabase
-    // Generar rutas para las imágenes
-    const timestamp = now.replace(/[:.]/g, '-');
-    const jobId = uuidv4();
-    
-    // Rutas para guardar en Storage - Estructura simplificada
-    const originalPath = `examenes-escaneados/${profesorId}/${examId}/${jobId}_original_${timestamp}.png`;
-    const processedPath = `examenes-escaneados/${profesorId}/${examId}/${jobId}_processed_${timestamp}.png`;
-    
-    // Validar formato de las imágenes
-    if (!originalImage || typeof originalImage !== 'string') {
-      return NextResponse.json({ error: 'La imagen original no es válida' }, { status: 400 });
-    }
-    
-    if (!processedImage || typeof processedImage !== 'string') {
-      return NextResponse.json({ error: 'La imagen procesada no es válida' }, { status: 400 });
-    }
-    
-    // Obtener los tipos de contenido
-    let originalContentType = 'image/png';
-    if (originalImage.startsWith('data:image/jpeg') || originalImage.startsWith('data:image/jpg')) {
-      originalContentType = 'image/jpeg';
-    } else if (!originalImage.startsWith('data:image/')) {
-      return NextResponse.json({ 
-        error: 'La imagen original debe ser un string base64 con formato data:image/*;base64,' 
-      }, { status: 400 });
-    }
-    
-    let processedContentType = 'image/png';
-    if (processedImage.startsWith('data:image/jpeg') || processedImage.startsWith('data:image/jpg')) {
-      processedContentType = 'image/jpeg';
-    } else if (!processedImage.startsWith('data:image/')) {
-      return NextResponse.json({ 
-        error: 'La imagen procesada debe ser un string base64 con formato data:image/*;base64,' 
-      }, { status: 400 });
-    }
-    
-    // Verificar que las imágenes parecen ser cadenas base64 válidas
-    if (!originalImage.includes('base64,')) {
-      return NextResponse.json({ error: 'La imagen original no contiene el marcador base64,' }, { status: 400 });
-    }
-    
-    if (!processedImage.includes('base64,')) {
-      return NextResponse.json({ error: 'La imagen procesada no contiene el marcador base64,' }, { status: 400 });
-    }
-    
-    if (originalImage.length < 100) {
-      return NextResponse.json({ error: 'La imagen original es demasiado pequeña para ser válida' }, { status: 400 });
-    }
-    
-    if (processedImage.length < 100) {
-      return NextResponse.json({ error: 'La imagen procesada es demasiado pequeña para ser válida' }, { status: 400 });
-    }
-    
-    try {
-      // Comprimir la imagen original antes de subirla
-      console.log('Comprimiendo imagen original...');
-      // Calidad menor para la imagen original (es solo para archivo)
-      const compressedOriginalBuffer = await compressImage(originalImage, 60, 800);
-      
-      console.log(`Imagen original comprimida: ${compressedOriginalBuffer.length} bytes`);
-      
-      const { data: originalData, error: originalError } = await supabase
-        .storage
-        .from(s3BucketName)
-        .upload(originalPath, compressedOriginalBuffer, {
-          contentType: originalContentType,
-          cacheControl: '3600'
-        });
-      
-      if (originalError) {
-        console.error('Error al subir imagen original:', originalError);
-        return NextResponse.json(
-          { error: 'Error al subir imagen original: ' + originalError.message },
-          { status: 500 }
-        );
-      }
-      
-      // Comprimir la imagen procesada
-      console.log('Comprimiendo imagen procesada...');
-      // Mayor calidad para la imagen procesada para preservar las marcas
-      const compressedProcessedBuffer = await compressImage(processedImage, 75, 1000);
-      
-      console.log(`Imagen procesada comprimida: ${compressedProcessedBuffer.length} bytes`);
-      
-      // Verificar que el buffer no esté vacío
-      if (compressedProcessedBuffer.length < 100) {
-        console.error('Buffer de imagen procesada demasiado pequeño:', compressedProcessedBuffer.length);
-        return NextResponse.json(
-          { error: 'La imagen procesada parece estar corrupta o vacía' },
-          { status: 400 }
-        );
-      }
-      
-      const { data: processedData, error: processedError } = await supabase
-        .storage
-        .from(s3BucketName)
-        .upload(processedPath, compressedProcessedBuffer, {
-          contentType: processedContentType,
-          cacheControl: '3600'
-        });
-      
-      if (processedError) {
-        console.error('Error al subir imagen procesada:', processedError);
-        return NextResponse.json(
-          { error: 'Error al subir imagen procesada' },
-          { status: 500 }
-        );
-      }
-      
-      // Obtener URLs públicas
-      const { data: originalUrlData } = await supabase
-        .storage
-        .from(s3BucketName)
-        .getPublicUrl(originalPath);
-      
-      const { data: processedUrlData } = await supabase
-        .storage
-        .from(s3BucketName)
-        .getPublicUrl(processedPath);
-      
-      const originalUrl = originalUrlData.publicUrl;
-      const processedUrl = processedUrlData.publicUrl;
-      
-      // 4. Guardar registro en examenes_escaneados
-      const { data: escaneoData, error: escaneoError } = await supabase
-        .from('examenes_escaneados')
-        .insert({
-          profesor_id: profesorId,
-          examen_id: examId,
-          resultado_id: resultadoId,
-          archivo_original: `${jobId}_original_${timestamp}.png`,
-          archivo_procesado: `${jobId}_processed_${timestamp}.png`,
-          ruta_s3_original: originalPath,
-          ruta_s3_procesado: processedPath,
-          fecha_escaneo: now,
-          created_at: now,
-          updated_at: now
-        })
-        .select()
-        .single();
-      
-      if (escaneoError) {
-        console.error('Error al guardar registro de escaneo:', escaneoError);
-        return NextResponse.json(
-          { error: 'Error al guardar registro de escaneo' },
-          { status: 500 }
-        );
-      }
-      
-      // 5. También actualizar la tabla exam_scans existente con los nuevos cálculos
-      const { data: scanData, error: scanError } = await supabase
-        .from('exam_scans')
-        .insert({
-          job_id: jobId,
-          image_path: processedPath,
-          exam_id: examId,
-          student_id: studentId,
-          group_id: groupId,
-          status: 'COMPLETED',
-          result: {
-            score: porcentajeCorrectas,
-            correctAnswers: respuestasCorrectas,
-            totalQuestions: preguntasHabilitadas.length,
-            answers: preguntasHabilitadas
-          },
-          metadata: {
-            originalImage: originalPath,
-            processedImage: processedPath,
-            resultadoId: resultadoId
-          },
-          created_at: now,
-          updated_at: now
-        })
-        .select()
-        .single();
-
-      // 6. Limpiar archivos temporales
-      await cleanupTemporaryFiles();
-
-      return NextResponse.json({
-        success: true,
-        resultado_id: resultadoId,
-        image_paths: {
-          original: originalUrl,
-          processed: processedUrl
-        }
-      });
-      
-    } catch (error) {
-      console.error('Error al procesar las imágenes:', error);
-      return NextResponse.json(
-        { error: `Error al procesar las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}` },
-        { status: 500 }
-      );
-    }
-    
-  } catch (error) {
-    console.error('Error al procesar la solicitud:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

@@ -15,6 +15,8 @@ import { translateQRData, QREntities } from '@/lib/utils/qr-translation';
 import Link from 'next/link';
 import ConnectionDiagnostic from '@/components/exam/connection-diagnostic';
 
+const DEBUG = process.env.NODE_ENV === 'development';
+
 // Tipos para los datos del OMR
 interface OMRAnswer {
   number: number;
@@ -142,11 +144,13 @@ const ScanQRInfo = ({ qrData, qrValidation, examId }: { qrData: any; qrValidatio
     async function loadEntityNames() {
       setIsLoadingNames(true);
       try {
-        console.log('Cargando nombres para entidades:', {
-          examId: currentExamId,
-          studentId: currentStudentId,
-          groupId: currentGroupId
-        });
+        if (DEBUG) {
+          console.log('Cargando nombres para entidades:', {
+            examId: currentExamId,
+            studentId: currentStudentId,
+            groupId: currentGroupId
+          });
+        }
         
         const names = await translateQRData(
           currentExamId, 
@@ -361,12 +365,16 @@ export default function ExamScanPage() {
       setIsLoading(true);
       setError(null);
       
-      console.log(`Intentando cargar detalles para el examen ID: ${examId}`);
+      if (DEBUG) {
+        console.log(`Intentando cargar detalles para el examen ID: ${examId}`);
+      }
       
       try {
         // Intentar obtener datos de la API principal
         const mainApiUrl = `/api/exams/${examId}/details`;
-        console.log(`Cargando desde endpoint principal: ${mainApiUrl}`);
+        if (DEBUG) {
+          console.log(`Cargando desde endpoint principal: ${mainApiUrl}`);
+        }
         
         const response = await fetch(mainApiUrl);
         
@@ -382,7 +390,9 @@ export default function ExamScanPage() {
         }
         
         const data = await response.json();
-        console.log('Datos del examen recibidos correctamente:', data);
+        if (DEBUG) {
+          console.log('Datos del examen recibidos correctamente:', data);
+        }
         
         if (!data) {
           throw new Error('No se recibieron datos del examen');
@@ -395,7 +405,9 @@ export default function ExamScanPage() {
         setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos del examen');
         
         // Intentar usar datos de fallback para poder continuar
-        console.log('Usando datos de fallback para el examen...');
+        if (DEBUG) {
+          console.log('Usando datos de fallback para el examen...');
+        }
         setExamDetails({
           id: typeof params.id === 'string' ? params.id : 
              Array.isArray(params.id) ? params.id[0] : '',
@@ -422,7 +434,9 @@ export default function ExamScanPage() {
   
   // Manejar cuando se completa un escaneo
   const handleScanComplete = (result: any, imageUrl: string) => {
-    console.log('Scan completed with result:', result);
+    if (DEBUG) {
+      console.log('Scan completed with result:', result);
+    }
     // Asegurarnos de que el resultado tenga las propiedades correctas
     const processedResult: ScanResult = {
       success: result.success,
@@ -438,23 +452,26 @@ export default function ExamScanPage() {
     }
     
     // Mapear los datos del QR - añadir logs para debugging
-    console.log('QR data recibido:', result.qr_data || result.qrData);
-    
-    // Asignar los datos del QR, priorizando qr_data sobre qrData
     if (result.qr_data) {
       processedResult.qr_data = result.qr_data;
       processedResult.qrData = result.qr_data; // Duplicamos para asegurar compatibilidad
-      console.log('Asignado desde result.qr_data:', processedResult.qr_data);
+      if (DEBUG) {
+        console.log('Asignado desde result.qr_data:', processedResult.qr_data);
+      }
     } else if (result.qrData) {
       processedResult.qrData = result.qrData;
       processedResult.qr_data = result.qrData; // Duplicamos para asegurar compatibilidad
-      console.log('Asignado desde result.qrData:', processedResult.qrData);
+      if (DEBUG) {
+        console.log('Asignado desde result.qrData:', processedResult.qrData);
+      }
     }
     
     // Mapear la validación del QR
     if (result.qr_validation) {
       processedResult.qr_validation = result.qr_validation;
-      console.log('QR validation:', processedResult.qr_validation);
+      if (DEBUG) {
+        console.log('QR validation:', processedResult.qr_validation);
+      }
     }
     
     // Mapear los detalles de error si existen
@@ -474,7 +491,9 @@ export default function ExamScanPage() {
       imageUrl = result.publicUrl;
     }
     
-    console.log('Resultado procesado final:', JSON.stringify(processedResult).substring(0, 300) + '...');
+    if (DEBUG) {
+      console.log('Resultado procesado final:', JSON.stringify(processedResult).substring(0, 300) + '...');
+    }
     
     setScanResult(processedResult);
     setScanImageUrl(imageUrl);
@@ -503,7 +522,9 @@ export default function ExamScanPage() {
         try {
           // Intentar obtener datos de la API principal
           const mainApiUrl = `/api/exams/${examId}/details`;
-          console.log(`Cargando desde endpoint principal: ${mainApiUrl}`);
+          if (DEBUG) {
+            console.log(`Cargando desde endpoint principal: ${mainApiUrl}`);
+          }
           
           const response = await fetch(mainApiUrl);
           
@@ -519,7 +540,9 @@ export default function ExamScanPage() {
           }
           
           const data = await response.json();
-          console.log('Datos del examen recibidos correctamente:', data);
+          if (DEBUG) {
+            console.log('Datos del examen recibidos correctamente:', data);
+          }
           
           if (!data) {
             throw new Error('No se recibieron datos del examen');
@@ -532,7 +555,9 @@ export default function ExamScanPage() {
           setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos del examen');
           
           // Intentar usar datos de fallback para poder continuar
-          console.log('Usando datos de fallback para el examen...');
+          if (DEBUG) {
+            console.log('Usando datos de fallback para el examen...');
+          }
           setExamDetails({
             id: typeof params.id === 'string' ? params.id : 
                Array.isArray(params.id) ? params.id[0] : '',
