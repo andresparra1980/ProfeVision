@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
 import { ExcelImport } from "@/components/students/excel-import";
+import { use } from "react";
 
 interface Student {
   id: string;
@@ -42,8 +43,15 @@ interface EstudianteGrupoRecord {
   };
 }
 
-export default function GroupStudentsPage({ params }: { params: { id: string } }) {
-  const groupId = params.id;
+// Componente principal que maneja los params y usa React.use()
+export default function GroupStudentsPage({ params }: { params: Promise<{ id: string }> }) {
+  // Usando React.use() para desenvolver la promesa de params
+  const resolvedParams = use(params);
+  return <GroupStudentsContent groupId={resolvedParams.id} />;
+}
+
+// Componente interno que contiene toda la lógica
+function GroupStudentsContent({ groupId }: { groupId: string }) {
   const router = useRouter();
   
   // State variables
