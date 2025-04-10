@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { PlusCircle, Pencil, Trash2, Users, BookOpen, Calendar, Archive, ArchiveRestore, Calculator, MoreVertical, ChevronLeft, ChevronRight } from "lucide-react";
+import { PlusCircle, Pencil, Trash2, Users, BookOpen, Calendar, Archive, ArchiveRestore, Calculator, MoreVertical, ChevronLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -24,9 +24,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { format, isWithinInterval, startOfYear, endOfYear, addYears, startOfMonth, endOfMonth, addMonths, setMonth, setYear, parse } from "date-fns";
+import { format, isWithinInterval, startOfYear, endOfYear, addYears, startOfMonth, endOfMonth, setMonth, setYear } from "date-fns";
 import { es } from "date-fns/locale";
-
 
 type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
   materias: {
@@ -43,10 +42,7 @@ type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
 };
 
 type Materia = Database["public"]["Tables"]["materias"]["Row"] & {
-  entidades_educativas: {
-    id: string;
-    nombre: string;
-  } | null;
+  entidades_educativas: EntidadEducativa | null;
 };
 
 type EntidadEducativa = Database["public"]["Tables"]["entidades_educativas"]["Row"];
@@ -93,76 +89,7 @@ export default function GroupsPage() {
     label: format(setMonth(new Date(), i), 'MMMM', { locale: es })
   }));
 
-  useEffect(() => {
-    if (profesor) {
-      loadGrupos();
-      loadMaterias();
-      loadEntidades();
-    }
-  }, [profesor]);
-
-  useEffect(() => {
-    if (editingGrupo) {
-      // Primero cargar la entidad y luego la materia para mantener la consistencia
-      form.setValue("entidad_id", editingGrupo.materias?.entidades_educativas?.id || "");
-      
-      // Esperar al siguiente ciclo para que las materias se filtren
-      setTimeout(() => {
-        form.setValue("materia_id", editingGrupo.materia_id);
-      }, 0);
-
-      form.setValue("nombre", editingGrupo.nombre);
-      form.setValue("descripcion", editingGrupo.descripcion || "");
-      form.setValue("periodo_escolar", editingGrupo.periodo_escolar || "");
-
-      // Si hay un período escolar, intentar interpretarlo para mostrar las fechas
-      if (editingGrupo.periodo_escolar) {
-        // Aquí podrías intentar interpretar el período escolar inverso para setear las fechas
-        // Por ahora dejamos las fechas vacías
-        setStartDate(null);
-        setEndDate(null);
-      }
-    } else {
-      form.reset({
-        nombre: "",
-        descripcion: "",
-        entidad_id: "",
-        materia_id: "",
-        periodo_escolar: "",
-      });
-      setStartDate(null);
-      setEndDate(null);
-    }
-  }, [editingGrupo, form]);
-
-  useEffect(() => {
-    const entidadId = form.watch("entidad_id");
-    if (entidadId) {
-      const materiasDeEntidad = materias.filter(m => m.entidad_id === entidadId);
-      setMateriasFiltradas(materiasDeEntidad);
-      // Resetear la materia seleccionada si no pertenece a la entidad
-      const materiaActual = form.watch("materia_id");
-      if (materiaActual && !materiasDeEntidad.find(m => m.id === materiaActual)) {
-        form.setValue("materia_id", "");
-      }
-    } else {
-      setMateriasFiltradas([]);
-      form.setValue("materia_id", "");
-    }
-  }, [form.watch("entidad_id"), materias]);
-
-  useEffect(() => {
-    loadGrupos();
-  }, [mostrarArchivados]);
-
-  useEffect(() => {
-    if (startDate && endDate) {
-      const periodoInterpretado = interpretarPeriodoEscolar(startDate, endDate);
-      form.setValue("periodo_escolar", periodoInterpretado);
-    }
-  }, [startDate, endDate]);
-
-  const loadGrupos = async () => {
+  const loadGrupos = useCallback(async () => {
     if (!profesor) return;
     
     try {
@@ -216,19 +143,20 @@ export default function GroupsPage() {
       );
       
       setGrupos(gruposConConteo);
-    } catch (error: any) {
-      console.error('Error al cargar grupos:', error);
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error('Error al cargar grupos:', err);
       toast({
         variant: "destructive",
         title: "Error al cargar grupos",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [profesor, mostrarArchivados]);
 
-  const loadMaterias = async () => {
+  const loadMaterias = useCallback(async () => {
     if (!profesor) return;
     
     try {
@@ -246,16 +174,17 @@ export default function GroupsPage() {
 
       if (error) throw error;
       setMaterias(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       toast({
         variant: "destructive",
         title: "Error al cargar materias",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     }
-  };
+  }, [profesor]);
 
-  const loadEntidades = async () => {
+  const loadEntidades = useCallback(async () => {
     if (!profesor) return;
     
     try {
@@ -268,35 +197,93 @@ export default function GroupsPage() {
 
       // Extraer entidades únicas de las materias
       const entidadesMap = new Map<string, EntidadEducativa>();
-      materias?.forEach((materia: any) => {
+      materias?.forEach((materia: Materia) => {
         const entidad = materia.entidades_educativas;
         if (entidad && entidad.id) {
-          entidadesMap.set(entidad.id, {
-            id: entidad.id,
-            nombre: entidad.nombre,
-            tipo: entidad.tipo,
-            ciudad: entidad.ciudad || null,
-            direccion: entidad.direccion || null,
-            email: entidad.email || null,
-            logo_url: entidad.logo_url || null,
-            pais: entidad.pais || null,
-            telefono: entidad.telefono || null,
-            website: entidad.website || null,
-            created_at: entidad.created_at,
-            updated_at: entidad.updated_at
-          });
+          entidadesMap.set(entidad.id, entidad);
         }
       });
       
       setEntidades(Array.from(entidadesMap.values()));
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       toast({
         variant: "destructive",
         title: "Error al cargar entidades educativas",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     }
-  };
+  }, [profesor]);
+
+  useEffect(() => {
+    if (profesor) {
+      loadGrupos();
+      loadMaterias();
+      loadEntidades();
+    }
+  }, [profesor, loadGrupos, loadMaterias, loadEntidades]);
+
+  useEffect(() => {
+    if (editingGrupo) {
+      // Primero cargar la entidad y luego la materia para mantener la consistencia
+      form.setValue("entidad_id", editingGrupo.materias?.entidades_educativas?.id || "");
+      
+      // Esperar al siguiente ciclo para que las materias se filtren
+      setTimeout(() => {
+        form.setValue("materia_id", editingGrupo.materia_id);
+      }, 0);
+
+      form.setValue("nombre", editingGrupo.nombre);
+      form.setValue("descripcion", editingGrupo.descripcion || "");
+      form.setValue("periodo_escolar", editingGrupo.periodo_escolar || "");
+
+      // Si hay un período escolar, intentar interpretarlo para mostrar las fechas
+      if (editingGrupo.periodo_escolar) {
+        // Aquí podrías intentar interpretar el período escolar inverso para setear las fechas
+        // Por ahora dejamos las fechas vacías
+        setStartDate(null);
+        setEndDate(null);
+      }
+    } else {
+      form.reset({
+        nombre: "",
+        descripcion: "",
+        entidad_id: "",
+        materia_id: "",
+        periodo_escolar: "",
+      });
+      setStartDate(null);
+      setEndDate(null);
+    }
+  }, [editingGrupo, form]);
+
+  useEffect(() => {
+    const entidadId = form.watch("entidad_id");
+    if (entidadId) {
+      const materiasDeEntidad = materias.filter(m => m.entidad_id === entidadId);
+      setMateriasFiltradas(materiasDeEntidad);
+      
+      // Resetear la materia seleccionada si no pertenece a la entidad
+      const materiaActual = form.watch("materia_id");
+      if (materiaActual && !materiasDeEntidad.find(m => m.id === materiaActual)) {
+        form.setValue("materia_id", "");
+      }
+    } else {
+      setMateriasFiltradas([]);
+      form.setValue("materia_id", "");
+    }
+  }, [form, materias]);
+
+  useEffect(() => {
+    loadGrupos();
+  }, [mostrarArchivados, loadGrupos]);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      const periodoInterpretado = interpretarPeriodoEscolar(startDate, endDate);
+      form.setValue("periodo_escolar", periodoInterpretado);
+    }
+  }, [startDate, endDate, form]);
 
   const onSubmit = async (data: GrupoFormValues) => {
     if (!profesor) return;
@@ -334,8 +321,6 @@ export default function GroupsPage() {
           periodo_escolar: data.periodo_escolar || null,
         };
         
-        console.log('Datos a insertar:', dataToInsert);
-        
         const { error } = await supabase
           .from("grupos")
           .insert(dataToInsert);
@@ -351,13 +336,14 @@ export default function GroupsPage() {
       setEditingGrupo(null);
       form.reset();
       loadGrupos();
-    } catch (error: any) {
-      console.error('Error al guardar grupo:', error);
+    } catch (error: unknown) {
+      const err = error as Error & { code?: string; details?: string };
+      console.error('Error al guardar grupo:', err);
       toast({
         variant: "destructive",
         title: "Error al guardar grupo",
-        description: error.message 
-          ? `${error.message} ${error.code ? `(Código: ${error.code})` : ''} ${error.details ? `- ${error.details}` : ''}`
+        description: err.message 
+          ? `${err.message} ${err.code ? `(Código: ${err.code})` : ''} ${err.details ? `- ${err.details}` : ''}`
           : "Ha ocurrido un error. Intenta nuevamente.",
       });
     }
@@ -385,11 +371,12 @@ export default function GroupsPage() {
       });
       
       loadGrupos();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       toast({
         variant: "destructive",
         title: "Error al eliminar grupo",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     } finally {
       setDeletingId(null);
@@ -418,11 +405,12 @@ export default function GroupsPage() {
       });
       
       loadGrupos();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       toast({
         variant: "destructive",
         title: "Error al cambiar estado del grupo",
-        description: error.message || "Ha ocurrido un error. Intenta nuevamente.",
+        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
       });
     }
   };

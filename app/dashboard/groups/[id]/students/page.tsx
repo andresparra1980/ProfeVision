@@ -44,8 +44,9 @@ interface EstudianteGrupoRecord {
 
 export default function GroupStudentsPage({ params }: { params: { id: string } }) {
   const groupId = params.id;
-  
   const router = useRouter();
+  
+  // State variables
   const [loading, setLoading] = useState(true);
   const [group, setGroup] = useState<GroupData | null>(null);
   const [groupStudents, setGroupStudents] = useState<Student[]>([]);
@@ -56,6 +57,7 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
   const [isOpen, setIsOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
+  // Callback functions
   const fetchGroupDetails = useCallback(async () => {
     try {
       setLoading(true);
@@ -104,7 +106,7 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
       setGroupStudents(formattedData);
     } catch (error: unknown) {
       console.error("Error fetching group students:", error);
-      const errorMessage = error instanceof Error ? error.message : "Could not load students for this group";
+      const errorMessage = error instanceof Error ? error.message : "No se pudieron cargar los estudiantes de este grupo";
       toast({
         title: "Error",
         description: errorMessage,
@@ -113,12 +115,7 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
     }
   }, [groupId]);
 
-  useEffect(() => {
-    fetchGroupDetails();
-    fetchGroupStudents();
-  }, [fetchGroupDetails, fetchGroupStudents]);
-
-  async function searchStudents() {
+  const searchStudents = useCallback(async () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
       return;
@@ -143,7 +140,7 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
       setSearchResults(filteredResults);
     } catch (error: unknown) {
       console.error("Error searching students:", error);
-      const errorMessage = error instanceof Error ? error.message : "Could not search for students";
+      const errorMessage = error instanceof Error ? error.message : "No se pudieron buscar estudiantes";
       toast({
         title: "Error",
         description: errorMessage,
@@ -152,9 +149,9 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
     } finally {
       setIsSearching(false);
     }
-  }
+  }, [searchQuery, groupStudents]);
 
-  const handleImportComplete = () => {
+  const handleImportComplete = useCallback(() => {
     toast({
       title: "¡Éxito!",
       description: "Los estudiantes han sido importados exitosamente",
@@ -162,9 +159,9 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
     });
     
     fetchGroupStudents();
-  };
+  }, [fetchGroupStudents]);
 
-  const addStudentToGroup = async (student: Student) => {
+  const addStudentToGroup = useCallback(async (student: Student) => {
     setIsAdding(true);
 
     try {
@@ -198,9 +195,9 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
     } finally {
       setIsAdding(false);
     }
-  };
+  }, [groupId, fetchGroupStudents]);
 
-  async function removeStudentFromGroup(studentId: string) {
+  const removeStudentFromGroup = useCallback(async (studentId: string) => {
     try {
       const { error } = await supabase
         .from("estudiante_grupo")
@@ -225,8 +222,15 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
         variant: "destructive",
       });
     }
-  }
+  }, [fetchGroupStudents]);
 
+  // Effects
+  useEffect(() => {
+    fetchGroupDetails();
+    fetchGroupStudents();
+  }, [fetchGroupDetails, fetchGroupStudents]);
+
+  // Conditional rendering
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -249,6 +253,7 @@ export default function GroupStudentsPage({ params }: { params: { id: string } }
     );
   }
 
+  // Main render
   return (
     <div className="space-y-6">
       <div>
