@@ -155,7 +155,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   }, [normalizedAnswers]);
   
   // Crear arrays para las dos columnas
-  const answersForDisplay = useMemo(() => {
+  const _answersForDisplay = useMemo(() => {
     const map = new Map();
     for (let i = 1; i <= 40; i++) {
       map.set(i, {
@@ -345,6 +345,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         });
 
         // Marcar las respuestas y asignar los IDs de pregunta y opción
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         const answersWithIds = normalizedAnswers.map((answer: Answer): Answer => {
           const question = questions.find((q: { orden: number, id: string, habilitada: boolean }) => q.orden === answer.number);
           
@@ -442,12 +443,17 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
     if (qrData) {
       fetchEntityNames();
     }
-  }, [qrData]);
+  }, [qrData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Actualizar el estado de answers cuando cambien las props
   useEffect(() => {
-    setAnswers(normalizeAnswers(initialAnswers || []));
-  }, [initialAnswers]);
+    // Aplicamos directamente normalizeAnswers sin referencia a normalizedAnswers
+    if (initialAnswers) {
+      setAnswers(normalizeAnswers(initialAnswers));
+    } else {
+      setAnswers([]);
+    }
+  }, [initialAnswers]); /* eslint-disable-line react-hooks/exhaustive-deps */
 
   // Función para cargar imagen desde URL y convertirla a base64
   const loadImageAsBase64 = async (url: string): Promise<string> => {

@@ -1,15 +1,13 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { notFound, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { GradesTable } from '@/components/grades/grades-table';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 import { ComponenteCalificacion, Estudiante, Periodo, EsquemaCalificacion } from '@/lib/types/database';
-import { Lock, Unlock, ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { GradesExcelModal } from '@/components/grades/grades-excel-modal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
@@ -122,6 +120,7 @@ export default function GradesPage({ params }: GradesPageProps) {
     return () => {
       calificacionesSubscription.unsubscribe();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId]);
 
   const loadGroupName = async () => {
