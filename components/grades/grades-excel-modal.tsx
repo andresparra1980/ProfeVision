@@ -4,11 +4,17 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileSpreadsheet, Download, FileUp, AlertCircle } from 'lucide-react';
+import { Download, AlertCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { ComponenteCalificacion, Estudiante, Materia, Grupo, Periodo } from '@/lib/types/database';
+import { ComponenteCalificacion, Estudiante, Periodo } from '@/lib/types/database';
 import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase/client';
+import logger from '@/lib/utils/logger';
+
+// Extiende la interfaz ComponenteCalificacion para incluir la propiedad grupo_id
+interface ComponenteCalificacionWithGrupo extends ComponenteCalificacion {
+  grupo_id: string;
+}
 
 interface GradesExcelModalProps {
   estudiantes: Estudiante[];
@@ -47,6 +53,7 @@ export function GradesExcelModal({
   componentes,
   institucionName = 'INSTITUCIÓN EDUCATIVA',
 }: GradesExcelModalProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [preview, setPreview] = useState<{identificacion: string, nombres: string, apellidos: string, valor: number}[]>([]);
@@ -113,7 +120,7 @@ export function GradesExcelModal({
         });
       }
     } catch (error) {
-      console.error("Error reading Excel file:", error);
+      logger.error("Error reading Excel file:", error);
       toast({
         title: "Error",
         description: "No se pudo procesar el archivo. Asegúrate de que sea un archivo Excel válido y no esté dañado.",
@@ -122,7 +129,16 @@ export function GradesExcelModal({
     }
   };
   
-  const readExcelFile = (file: File): Promise<any[]> => {
+  // Define una interfaz para la estructura del archivo Excel
+  interface ExcelRowData {
+    Identificación: string;
+    Nombres: string;
+    Apellidos: string;
+    Calificación: string;
+    [key: string]: string | number; // Para otras columnas que puedan existir
+  }
+  
+  const readExcelFile = (file: File): Promise<ExcelRowData[]> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       
@@ -137,14 +153,14 @@ export function GradesExcelModal({
           const worksheet = workbook.Sheets[sheetName];
           
           // Usar opciones para asegurar que todos los valores sean strings
-          const json = XLSX.utils.sheet_to_json(worksheet, {
+          const json = XLSX.utils.sheet_to_json<ExcelRowData>(worksheet, {
             raw: false, // Convertir todo a strings
             defval: "", // Valor predeterminado para celdas vacías
           });
           
           resolve(json);
         } catch (error) {
-          console.error("Error al procesar archivo Excel:", error);
+          logger.error("Error al procesar archivo Excel:", error);
           reject(error);
         }
       };
@@ -154,7 +170,7 @@ export function GradesExcelModal({
     });
   };
   
-  const validateData = (data: any[]): { valid: {identificacion: string, nombres: string, apellidos: string, valor: number}[], errors: string[] } => {
+  const validateData = (data: ExcelRowData[]): { valid: {identificacion: string, nombres: string, apellidos: string, valor: number}[], errors: string[] } => {
     const validGrades: {identificacion: string, nombres: string, apellidos: string, valor: number}[] = [];
     const errors: string[] = [];
     
@@ -247,7 +263,7 @@ export function GradesExcelModal({
         .select('estudiante_id')
         .eq('componente_id', componente.id);
 
-      const existingStudentIds = new Set(existingGrades?.map(g => g.estudiante_id) || []);
+      const _existingStudentIds = new Set(existingGrades?.map((g: { estudiante_id: string }) => g.estudiante_id) || []);
       
       // Preparar arrays para upsert
       const calificacionesArray = preview.map(item => {
@@ -278,7 +294,7 @@ export function GradesExcelModal({
 
       onImportComplete(calificaciones);
     } catch (error) {
-      console.error('Error al importar calificaciones:', error);
+      logger.error('Error al importar calificaciones:', error);
       toast({
         title: "Error",
         description: "No se pudieron importar las calificaciones",
@@ -344,7 +360,7 @@ export function GradesExcelModal({
 
   const handleExportPeriod = () => {
     if (!materia || !grupo || !periodoActual || !componentesPeriodo || !todasCalificaciones) {
-      console.error('Datos faltantes:', {
+      logger.error('Datos faltantes:', {
         materia: !!materia,
         grupo: !!grupo,
         periodoActual,
@@ -359,8 +375,8 @@ export function GradesExcelModal({
       return;
     }
 
-    console.log('Periodo actual:', periodoActual);
-    console.log('Porcentaje del periodo:', periodoActual.porcentaje);
+    logger.log('Periodo actual:', periodoActual);
+    logger.log('Porcentaje del periodo:', periodoActual.porcentaje);
 
     // Crear el libro de trabajo
     const wb = XLSX.utils.book_new();
@@ -396,16 +412,16 @@ export function GradesExcelModal({
 
       // Calcular notas del periodo
       let notaPonderada = 0;
-      let porcentajeTotal = 0;
+      let _porcentajeTotal = 0;
       componentesPeriodo.forEach((comp, index) => {
         const nota = notasComponentes[index];
         notaPonderada += nota * (comp.porcentaje / 100);
-        porcentajeTotal += comp.porcentaje;
+        _porcentajeTotal += comp.porcentaje;
       });
 
       // Verificar que tenemos el periodo y su porcentaje antes de calcular
       if (!periodoActual?.porcentaje) {
-        console.error('No se encontró el porcentaje del periodo o el periodo es nulo');
+        logger.error('No se encontró el porcentaje del periodo o el periodo es nulo');
         return [
           estudiante.identificacion,
           estudiante.apellidos,
@@ -460,6 +476,12 @@ export function GradesExcelModal({
       return;
     }
 
+    // Filtrar componentes por grupo
+    const componentesDelGrupo = todosComponentes?.filter((g) => {
+      // Asegurar que g tenga grupo_id antes de compararlos
+      return (g as ComponenteCalificacionWithGrupo).grupo_id === grupo.id;
+    }) || [];
+    
     // Crear el libro de trabajo
     const wb = XLSX.utils.book_new();
     
@@ -511,14 +533,14 @@ export function GradesExcelModal({
       periodos.forEach(periodo => {
         const componentesPeriodo = componentes.filter(c => c.periodo_id === periodo.id);
         let notaPonderada = 0;
-        let porcentajeTotal = 0;
+        let _porcentajeTotal = 0;
 
         // Agregar notas de los componentes
         componentesPeriodo.forEach(componente => {
           const nota = todasCalificaciones[estudiante.id]?.[componente.id] || 0;
           rowData.push(nota.toFixed(2));
           notaPonderada += nota * (componente.porcentaje / 100);
-          porcentajeTotal += componente.porcentaje;
+          _porcentajeTotal += componente.porcentaje;
         });
 
         // Calcular y agregar notas del periodo
@@ -530,7 +552,7 @@ export function GradesExcelModal({
       });
 
       // Calcular nota final
-      const notaFinal = todosComponentes.reduce((acc, comp) => {
+      const notaFinal = componentesDelGrupo.reduce((acc, comp) => {
         const nota = todasCalificaciones[estudiante.id]?.[comp.id] || 0;
         return acc + (nota * (comp.porcentaje / 100));
       }, 0);

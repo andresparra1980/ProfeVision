@@ -10,7 +10,7 @@ import {
 import { GradeInput } from '@/components/ui/grade-input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ComponenteCalificacion, Estudiante, Periodo } from '@/lib/types/database';
-import { Lock, Unlock, FileUp, Download, Upload, ArrowUpDown, ArrowDownUp, FileText, LinkIcon, RefreshCw } from 'lucide-react';
+import { Lock, Unlock, Download, Upload, LinkIcon, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -18,10 +18,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase/client';
+import logger from '@/lib/utils/logger';
 
 interface Calificaciones {
   porComponente: Record<string, Record<string, number>>;
@@ -125,14 +125,14 @@ export function GradesTable({
       }
       
       const result = await response.json();
-      console.log('Resultado de sincronización:', result);
+      logger.log('Resultado de sincronización:', result);
       
       toast.success('Calificaciones sincronizadas correctamente');
       
       // Recargar la página para mostrar las calificaciones actualizadas
       window.location.reload();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al sincronizar calificaciones');
     }
   };
@@ -161,7 +161,7 @@ export function GradesTable({
                   <span className="font-semibold text-foreground dark:text-foreground">Datos del Estudiante</span>
                 </div>
               </TableHead>
-              {periodos.map((periodo, index) => {
+              {periodos.map((periodo, _index) => {
                 const componentesCount = componentes.filter(c => c.periodo_id === periodo.id).length;
                 const periodoWidth = `${componentesCount * 100 + 160}px`;
                 return (

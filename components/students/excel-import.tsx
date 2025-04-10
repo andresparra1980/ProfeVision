@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, FileUp, Download, AlertCircle } from "lucide-react";
+import { Download, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
 import * as XLSX from "xlsx";
+import logger from "@/lib/utils/logger";
 
 interface Student {
   id?: string;
@@ -22,12 +23,12 @@ interface ExcelImportProps {
 }
 
 export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
-  const [file, setFile] = useState<File | null>(null);
+  const [_file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
+  const [errors, _setErrors] = useState<string[]>([]);
   
-  const validateData = (data: any[]): { valid: Student[], errors: string[] } => {
+  const _validateData = (data: Record<string, string>[]): { valid: Student[], errors: string[] } => {
     const validStudents: Student[] = [];
     const errors: string[] = [];
     
@@ -102,7 +103,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       const data = await readExcelFile(file);
       
       // Mapear los datos a nuestro formato
-      const mappedData = data.map((row: any) => ({
+      const mappedData = data.map((row: Record<string, string>) => ({
         nombres: row.nombres || row.Nombres || '',
         apellidos: row.apellidos || row.Apellidos || '',
         identificacion: row.identificacion || row.Identificación || row.ID || '',
@@ -112,7 +113,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       setPreview(mappedData);
       setFile(file);
     } catch (error) {
-      console.error('Error reading file:', error);
+      logger.error('Error reading file:', error);
       toast({
         title: "Error",
         description: "No se pudo leer el archivo. Asegúrate de que sea un archivo Excel válido.",
@@ -123,7 +124,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     }
   };
   
-  const readExcelFile = (file: File): Promise<any[]> => {
+  const readExcelFile = (file: File): Promise<Record<string, string>[]> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       
@@ -143,9 +144,9 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
             defval: "", // Valor predeterminado para celdas vacías
           });
           
-          resolve(json);
+          resolve(json as Record<string, string>[]);
         } catch (error) {
-          console.error("Error al procesar archivo Excel:", error);
+          logger.error("Error al procesar archivo Excel:", error);
           reject(error);
         }
       };
@@ -172,7 +173,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       // Si estamos importando dentro de un grupo, usamos una estrategia diferente
       if (groupId) {
         // Preparamos un array para guardar los IDs de estudiantes (nuevos y existentes)
-        let estudianteIds: string[] = [];
+        const estudianteIds: string[] = [];
         
         // Primero, buscamos estudiantes que ya existan por identificación
         const identificaciones = preview.map(s => s.identificacion);
@@ -186,14 +187,14 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
         // Mapeamos los IDs y creamos un mapa para buscar rápidamente
         const existingMap = new Map();
         if (existingStudents && existingStudents.length > 0) {
-          existingStudents.forEach(student => {
+          existingStudents.forEach((student: { identificacion: string, id: string }) => {
             existingMap.set(student.identificacion, student.id);
             estudianteIds.push(student.id);
           });
         }
         
         // Filtramos los estudiantes que no existen aún
-        const newStudents = preview.filter(student => !existingMap.has(student.identificacion));
+        const newStudents = preview.filter((student: Student) => !existingMap.has(student.identificacion));
         
         // Si hay nuevos estudiantes, los insertamos
         if (newStudents.length > 0) {
@@ -205,7 +206,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
           
           if (insertError) {
             // Si no existe la función RPC, intentamos la inserción directa
-            console.warn("Error usando RPC, intentando inserción directa:", insertError);
+            logger.warn("Error usando RPC, intentando inserción directa:", insertError);
             
             // Inserción directa como fallback
             const { data, error } = await supabase
@@ -216,7 +217,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
             if (error) throw error;
             
             if (data && data.length > 0) {
-              data.forEach(student => estudianteIds.push(student.id));
+              data.forEach((student: { id: string }) => estudianteIds.push(student.id));
             }
           } else if (insertedStudents && insertedStudents.length > 0) {
             // Si usamos RPC, añadimos los IDs devueltos
@@ -231,7 +232,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
             if (freshError) throw freshError;
             
             if (freshStudents && freshStudents.length > 0) {
-              freshStudents.forEach(student => {
+              freshStudents.forEach((student: { id: string }) => {
                 if (!estudianteIds.includes(student.id)) {
                   estudianteIds.push(student.id);
                 }
@@ -278,7 +279,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
           .insert(preview)
           .select();
         
-        console.log("Resultado de importación:", { data, error, preview_length: preview.length });
+        logger.log("Resultado de importación:", { data, error, preview_length: preview.length });
         
         if (error) {
           if (error.code === "23505") {
@@ -309,11 +310,11 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       const fileInput = document.getElementById('file-input') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
       
-    } catch (error: any) {
-      console.error("Error importing students:", error);
+    } catch (error: Error | unknown) {
+      logger.error("Error importing students:", error);
       toast({
         title: "Error",
-        description: error.message || "No se pudieron importar los estudiantes",
+        description: error instanceof Error ? error.message : "No se pudieron importar los estudiantes",
         variant: "destructive",
       });
     } finally {

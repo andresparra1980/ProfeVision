@@ -177,7 +177,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
     });
   };
 
-  const updatePeriod = (index: number, field: keyof GradingPeriod, value: any) => {
+  const updatePeriod = (index: number, field: keyof GradingPeriod, value: string | number | GradingComponent[]) => {
     const updatedPeriods = [...scheme.periodos];
     updatedPeriods[index] = {
       ...updatedPeriods[index],
@@ -221,7 +221,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
     periodIndex: number,
     componentIndex: number,
     field: keyof GradingComponent,
-    value: any
+    value: string | number | ComponentType
   ) => {
     const updatedPeriods = [...scheme.periodos];
     const component = updatedPeriods[periodIndex].componentes[componentIndex];
