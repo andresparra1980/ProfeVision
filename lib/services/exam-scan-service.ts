@@ -1,5 +1,6 @@
 import { getServiceSupabase } from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
+import logger from '@/lib/utils/logger';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -73,7 +74,7 @@ export async function uploadScanToStorage(
   
   if (uploadError) {
     if (DEBUG) {
-      console.error('Error uploading scan to storage:', uploadError);
+      logger.error('Error uploading scan to storage:', uploadError);
     }
     throw new Error(`Error uploading scan: ${uploadError.message}`);
   }
@@ -108,7 +109,7 @@ export async function uploadScanToStorage(
   
   if (jobError) {
     if (DEBUG) {
-      console.error('Error creating scan job record:', jobError);
+      logger.error('Error creating scan job record:', jobError);
     }
     throw new Error(`Error creating scan job: ${jobError.message}`);
   }
@@ -140,7 +141,7 @@ async function notifyOmrService(
     
     if (!omrServiceEndpoint) {
       if (DEBUG) {
-        console.log('OMR service endpoint not configured. Job queued:', { jobId, filePath });
+        logger.log('OMR service endpoint not configured. Job queued:', { jobId, filePath });
       }
       return;
     }
@@ -154,7 +155,7 @@ async function notifyOmrService(
     
     if (error || !data) {
       if (DEBUG) {
-        console.error('Error creating signed URL:', error);
+        logger.error('Error creating signed URL:', error);
       }
       throw new Error(`Error creating signed URL: ${error?.message || 'Unknown error'}`);
     }
@@ -187,11 +188,11 @@ async function notifyOmrService(
     }
     
     if (DEBUG) {
-      console.log('OMR service notified successfully:', jobId);
+      logger.log('OMR service notified successfully:', jobId);
     }
   } catch (error: unknown) {
     if (DEBUG) {
-      console.error('Error notifying OMR service:', error);
+      logger.error('Error notifying OMR service:', error);
     }
     // No lanzamos error para no interrumpir el flujo, pero registramos el problema
   }
@@ -224,7 +225,7 @@ export async function getProcessingJob(jobId: string): Promise<ProcessingResult 
   
   if (error || !data) {
     if (DEBUG) {
-      console.error('Error fetching scan job:', error);
+      logger.error('Error fetching scan job:', error);
     }
     return null;
   }
@@ -285,7 +286,7 @@ export async function updateJobStatus(
   
   if (error) {
     if (DEBUG) {
-      console.error('Error updating scan job status:', error);
+      logger.error('Error updating scan job status:', error);
     }
     throw new Error(`Error updating job status: ${error.message}`);
   }

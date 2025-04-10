@@ -1,6 +1,7 @@
 /**
  * Utilidades para traducir IDs de QR a nombres legibles para el usuario
  */
+import logger from '@/lib/utils/logger';
 
 export interface QREntities {
   examName?: string | null;
@@ -43,12 +44,12 @@ export async function translateQRData(
     const cachedEntry = translationCache[cacheKey];
     
     if (cachedEntry && (now - cachedEntry.timestamp < CACHE_EXPIRATION)) {
-      console.log('Usando datos de caché para:', cacheKey);
+      logger.log('Usando datos de caché para:', cacheKey);
       return cachedEntry.data;
     }
 
     // Llamar al endpoint de traducción
-    console.log('Realizando solicitud a API para:', cacheKey);
+    logger.log('Realizando solicitud a API para:', cacheKey);
     const response = await fetch('/api/qr/translate', {
       method: 'POST',
       headers: {
@@ -79,7 +80,7 @@ export async function translateQRData(
 
     return result.data as QREntities;
   } catch (error) {
-    console.error('Error al traducir datos de QR:', error);
+    logger.error('Error al traducir datos de QR:', error);
     // En caso de error, devolver los IDs como fallback
     return {
       examName: examId ? `Examen (${examId.substring(0, 8)}...)` : null,

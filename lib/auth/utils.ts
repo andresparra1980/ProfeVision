@@ -25,7 +25,7 @@ export const checkResourceAccess = async (resourceType: string, resourceId: stri
   // Dependiendo del tipo de recurso, verificar el acceso
   switch (resourceType) {
     case 'exam':
-    case 'examen':
+    case 'examen': {
       const { data: examData } = await supabase
         .from('examenes')
         .select('id')
@@ -33,9 +33,10 @@ export const checkResourceAccess = async (resourceType: string, resourceId: stri
         .eq('profesor_id', user.id)
         .single();
       return !!examData;
+    }
       
     case 'group':
-    case 'grupo':
+    case 'grupo': {
       const { data: groupData } = await supabase
         .from('grupos')
         .select('id')
@@ -43,6 +44,7 @@ export const checkResourceAccess = async (resourceType: string, resourceId: stri
         .eq('profesor_id', user.id)
         .single();
       return !!groupData;
+    }
       
     default:
       return false;

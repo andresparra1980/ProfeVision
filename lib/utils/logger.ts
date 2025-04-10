@@ -7,6 +7,16 @@
 const IS_DEV = process.env.NODE_ENV === 'development';
 
 /**
+ * Función auxiliar segura que encapsula console para evitar errores de linting
+ */
+// eslint-disable-next-line no-console
+const safeConsole = {
+  log: console.log,
+  warn: console.warn,
+  error: console.error
+};
+
+/**
  * Logger utility that only outputs in development environment
  */
 export const logger = {
@@ -17,7 +27,8 @@ export const logger = {
    */
   log: (message: string, ...data: unknown[]) => {
     if (IS_DEV) {
-      console.log(`[INFO] ${message}`, ...data);
+      // eslint-disable-next-line no-console
+      safeConsole.log(`[INFO] ${message}`, ...data);
     }
   },
   
@@ -28,7 +39,8 @@ export const logger = {
    */
   warn: (message: string, ...data: unknown[]) => {
     if (IS_DEV) {
-      console.warn(`[WARN] ${message}`, ...data);
+      // eslint-disable-next-line no-console
+      safeConsole.warn(`[WARN] ${message}`, ...data);
     }
   },
   
@@ -39,7 +51,8 @@ export const logger = {
    */
   error: (message: string, error?: unknown) => {
     if (IS_DEV) {
-      console.error(`[ERROR] ${message}`, error);
+      // eslint-disable-next-line no-console
+      safeConsole.error(`[ERROR] ${message}`, error);
     }
   },
   
@@ -50,7 +63,8 @@ export const logger = {
    */
   perf: (label: string, ...data: unknown[]) => {
     if (IS_DEV) {
-      console.log(`[PERF] ${label}`, ...data);
+      // eslint-disable-next-line no-console
+      safeConsole.log(`[PERF] ${label}`, ...data);
     }
   },
   
@@ -61,7 +75,8 @@ export const logger = {
    */
   api: (endpoint: string, ...data: unknown[]) => {
     if (IS_DEV) {
-      console.log(`[API] ${endpoint}`, ...data);
+      // eslint-disable-next-line no-console
+      safeConsole.log(`[API] ${endpoint}`, ...data);
     }
   }
 };

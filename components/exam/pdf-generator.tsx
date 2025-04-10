@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Circle, Svg, Path, Rect, Image, BlobProvider } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Circle, Svg, Path, Image, BlobProvider } from '@react-pdf/renderer';
 import { generateLMarkerPath, calculateMarkerDimensions, generateMarkerContainerStyle } from '@/lib/utils/corner-markers';
 import { generateOptimizedQRCode, generateOptimizedQRData } from '@/lib/utils/qr-code';
 
@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
 });
 
 // Componente para los marcadores en forma de L
-const CornerMarker = ({ position, paperSize = 'LETTER' }: { position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'; paperSize?: 'LETTER' | 'A4' }) => {
-  const { size, margin } = calculateMarkerDimensions(paperSize);
+const CornerMarker = ({ position, paperSize: _paperSize = 'LETTER' }: { position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'; paperSize?: 'LETTER' | 'A4' }) => {
+  const { size, margin } = calculateMarkerDimensions(_paperSize);
   const containerStyle = generateMarkerContainerStyle(position, margin);
   const path = generateLMarkerPath(size);
   
@@ -284,6 +284,7 @@ const QRCodeComponent = ({ data }: { data: string }) => {
 
   return (
     <View style={styles.qrCode}>
+      {/* eslint-disable-next-line jsx-a11y/alt-text */}
       <Image src={qrDataUrl} style={{ width: 100, height: 100 }} />
     </View>
   );
@@ -384,7 +385,7 @@ const PDFDocument = ({ exam, group }: { exam: Exam; group: Group }) => (
   </Document>
 );
 
-export function PDFGenerator({ exam, group, paperSize, fileName }: PDFGeneratorProps) {
+export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName }: PDFGeneratorProps) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
