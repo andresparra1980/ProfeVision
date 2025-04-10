@@ -1,10 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, AlertCircle, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
-import { QRData, Answer, ProcessingResult, DuplicateInfo, ErrorDetails } from '../types';
+import { QRData, ProcessingResult, DuplicateInfo } from '../types';
 import { useImageContext } from '../contexts';
 import logger from '@/lib/utils/logger';
-import type { ProcessResult } from '@/types/scan';
 import Image from 'next/image';
 
 // Configurar flag de debug para mensajes de consola
