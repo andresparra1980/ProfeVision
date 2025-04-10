@@ -81,41 +81,14 @@ export function ExamScanner({
   const [hasCameraSupport, setHasCameraSupport] = useState(false);
 
   // Función para manejar errores de conexión específicamente
-  const handleConnectionError = (error: Error) => {
+  const handleConnectionError = useCallback((error: Error) => {
     // eslint-disable-next-line no-console
     console.error('Error de conexión detectado:', error);
     setConnectionError(true);
     setErrorMessage('Problema de conexión detectado. Verifique su conexión a Internet.');
     toast.error('Problema de conexión. Verifique su conexión a Internet.');
-  };
+  }, []);
   
-  // Función para probar la conexión con el servidor
-  const testConnection = async (): Promise<boolean> => {
-    setTestingConnection(true);
-    setConnectionError(false);
-    
-    try {
-      const response = await fetch('/api/health', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error de conexión: ${response.status}`);
-      }
-      
-      await response.json();
-      return true;
-    } catch (_error) {
-      handleConnectionError(new Error('No se pudo conectar con el servidor'));
-      return false;
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
   // Función para iniciar la cámara
   const startCamera = useCallback(async () => {
     if (!hasCameraSupport) {
@@ -140,6 +113,33 @@ export function ExamScanner({
         }
       };
       
+      // Función interna para probar la conexión con el servidor
+      const testConnection = async (): Promise<boolean> => {
+        setTestingConnection(true);
+        setConnectionError(false);
+        
+        try {
+          const response = await fetch('/api/health', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Error de conexión: ${response.status}`);
+          }
+          
+          await response.json();
+          return true;
+        } catch (_error) {
+          handleConnectionError(new Error('No se pudo conectar con el servidor'));
+          return false;
+        } finally {
+          setTestingConnection(false);
+        }
+      };
+      
       // Comprobar conectividad primero
       const hasConnection = await testConnection();
       if (!hasConnection) {
@@ -160,7 +160,7 @@ export function ExamScanner({
       setCameraStatus('not-supported');
       toast.error('No se pudo iniciar la cámara. Verifica los permisos del navegador.');
     }
-  }, [hasCameraSupport, isMobile, stream, testConnection]);
+  }, [hasCameraSupport, isMobile, stream, handleConnectionError]);
 
   // Iniciar la cámara cuando el componente se monta, si estamos en modo cámara
   useEffect(() => {
