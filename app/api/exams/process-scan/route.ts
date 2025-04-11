@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
-import * as fsSync from 'fs';
 import * as path from 'path';
 import * as _os from 'os';
 import * as _crypto from 'crypto';
@@ -204,7 +203,7 @@ runEnvironmentDiagnostic();
 // Function to parse and normalize QR data
 function normalizeQRData(qrData: string | Record<string, unknown>): Record<string, unknown> {
   // If QR data is already properly structured, return it
-  if (qrData && typeof qrData === 'object' && ('examId' in qrData || 'examenId' in qrData)) {
+  if (qrData && typeof qrData === 'object' && 'examId' in qrData) {
     return qrData;
   }
   
