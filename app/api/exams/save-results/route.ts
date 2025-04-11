@@ -173,36 +173,11 @@ interface SaveResultsData {
 
 export async function POST(req: NextRequest) {
   try {
-    // Capture start time for debugging
-    const startTime = Date.now();
-    
-    // Parse the request body
-    let data: SaveResultsData;
-    try {
-      data = await req.json();
-    } catch (parseError) {
-      if (DEBUG) {
-        logger.error('Error parseando JSON de la petición:', parseError);
-      }
-      return NextResponse.json(
-        { error: 'Error al procesar datos de entrada', details: String(parseError) },
-        { status: 400 }
-      );
-    }
-    
-    // Check if required data exists
-    if (!data || !data.qrData || !data.answers || !data.originalImage || !data.processedImage) {
-      return NextResponse.json(
-        { error: 'Faltan datos requeridos en la petición' },
-        { status: 400 }
-      );
-    }
-    
-    // Log processing time
     if (DEBUG) {
-      logger.log(`[${startTime}] Procesando petición save-results...`);
+      logger.log('POST /api/exams/save-results iniciando...');
     }
 
+    const data = await req.json() as SaveResultsData;
     const { 
       qrData, 
       answers, 
@@ -752,27 +727,9 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     if (DEBUG) {
       logger.error('Error en POST /api/exams/save-results:', error);
-      
-      // Log additional details to help diagnose the issue
-      const errorObj = error instanceof Error ? {
-        message: error.message,
-        name: error.name,
-        stack: error.stack
-      } : String(error);
-      
-      logger.error('Detalles del error:', JSON.stringify(errorObj, null, 2));
     }
-    
-    // Create a more informative error response
-    const errorMessage = error instanceof Error ? error.message : 'Error interno del servidor';
-    const errorName = error instanceof Error ? error.name : 'UnknownError';
-    
     return NextResponse.json(
-      { 
-        error: 'Error interno del servidor',
-        details: errorMessage,
-        type: errorName
-      },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

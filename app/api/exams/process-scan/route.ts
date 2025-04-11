@@ -115,29 +115,7 @@ async function ensureUploadsDirectory() {
   const publicUploadsDir = path.join(cwd, 'public', 'uploads', 'omr');
   
   try {
-    // Create directory with recursive option
     await fs.mkdir(publicUploadsDir, { recursive: true });
-    
-    // Try to create a test file to verify write permissions
-    const testFilePath = path.join(publicUploadsDir, '.write-test');
-    try {
-      await fs.writeFile(testFilePath, 'test');
-      await fs.unlink(testFilePath);
-    } catch (writeError) {
-      console.error('Cannot write to uploads directory, possible permission issue:', writeError);
-      
-      // Try to use a temp directory instead if available
-      const tempDir = path.join(publicUploadsDir, 'temp');
-      try {
-        await fs.mkdir(tempDir, { recursive: true, mode: 0o777 });
-        console.log('Created temp directory with 777 permissions as fallback');
-        return tempDir;
-      } catch (tempDirError) {
-        console.error('Failed to create temp directory:', tempDirError);
-        // Continue with original path and hope for the best
-      }
-    }
-    
     return publicUploadsDir;
   } catch (error) {
     logger.error('Error creating uploads directory:', error);
@@ -573,13 +551,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Determine the base URL, preferring NEXT_PUBLIC_SITE_URL in production if request.nextUrl.origin is localhost
-      const baseUrl = 
-        request.nextUrl.origin.includes('localhost') && process.env.NEXT_PUBLIC_SITE_URL
-          ? process.env.NEXT_PUBLIC_SITE_URL
-          : request.nextUrl.origin;
-          
-      const processedPublicUrl = new URL(processedPublicPath, baseUrl).toString();
+      const processedPublicUrl = new URL(processedPublicPath, request.nextUrl.origin).toString();
       
       // Return results
       return NextResponse.json({
