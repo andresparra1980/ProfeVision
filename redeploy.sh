@@ -41,6 +41,15 @@ fi
 echo "Creating uploads directory if it doesn't exist..."
 mkdir -p public/uploads/omr
 
+# Set correct permissions for uploads directory
+echo "Setting correct permissions for uploads directory..."
+sudo chown -R $USER:$USER public/uploads
+chmod -R 755 public/uploads
+
+# Create an explicit writable folder for the process
+mkdir -p public/uploads/omr/temp
+chmod 777 public/uploads/omr/temp
+
 # Install dependencies (using yarn with legacy peer deps)
 echo "Installing dependencies..."
 yarn install --legacy-peer-deps
@@ -52,6 +61,18 @@ yarn build
 # Restart the application with PM2 in cluster mode
 echo "Restarting application in PM2 cluster mode..."
 pm2 delete profevision || true
+
+# Get the current user for PM2
+PM2_USER=$(whoami)
+echo "Setting up application to run as user: $PM2_USER"
+
+# Make sure the application has permission to write to the uploads directory
+sudo mkdir -p /home/$PM2_USER/ProfeVision/public/uploads/omr
+sudo chown -R $PM2_USER:$PM2_USER /home/$PM2_USER/ProfeVision/public/uploads
+sudo chmod -R 755 /home/$PM2_USER/ProfeVision/public/uploads
+sudo chmod 777 /home/$PM2_USER/ProfeVision/public/uploads/omr
+
+# Start the application with PM2 in cluster mode
 pm2 start npm --name "profevision" -i -1 -- start
 
 # Copy static files to nginx directory
