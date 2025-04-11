@@ -27,8 +27,6 @@ interface ResultsProps {
   answers: Answer[];
   processedImage: string | null;
   originalImage: string | null;
-  processedImageData?: string | null;
-  originalImageData?: string | null;
   onPrevious: () => void;
   onComplete: () => void;
   onContinue: () => void;
@@ -76,18 +74,7 @@ const normalizeAnswers = (rawAnswers: RawAnswer[]): Answer[] => {
   }));
 };
 
-export function Results({ 
-  qrData, 
-  answers: initialAnswers, 
-  processedImage, 
-  originalImage, 
-  processedImageData,
-  originalImageData,
-  onPrevious, 
-  onComplete, 
-  onContinue, 
-  onSaved 
-}: ResultsProps) {
+export function Results({ qrData, answers: initialAnswers, processedImage, originalImage, onPrevious, onComplete, onContinue, onSaved }: ResultsProps) {
   // Usar una ref para registrar si ya se ha mostrado el log
   const loggedRef = useRef(false);
   
@@ -464,95 +451,17 @@ export function Results({
         throw new Error(`URL de imagen no válida: ${url}`);
       }
       
-      // Construir la URL apropiada según el entorno
-      let fetchUrl = url;
-      if (typeof window !== 'undefined') {
-        // Si la URL comienza con '/', construye la URL completa usando window.location.origin
-        if (url.startsWith('/')) {
-          fetchUrl = `${window.location.origin}${url}`;
-        }
-        // Reemplazar localhost:3000 con el origin actual si estamos en otro entorno
-        else if ((url.includes('localhost:3000') || url.includes('127.0.0.1:3000')) && 
-                !window.location.hostname.includes('localhost') && 
-                !window.location.hostname.includes('127.0.0.1')) {
-          fetchUrl = url.replace(/https?:\/\/(localhost|127\.0\.0\.1):3000/g, window.location.origin);
-        }
-      }
+      // Cargar la imagen
+      const response = await fetch(url);
+      const blob = await response.blob();
       
-      if (DEBUG) {
-        logger.log('Intentando cargar imagen desde URL inicial:', fetchUrl);
-      }
-      
-      // Detectar si la URL contiene un path de imagen de OMR
-      const isOmrImage = /\/uploads\/omr\/(.+)\.(jpg|jpeg|png)/.test(fetchUrl);
-      const omrFilename = isOmrImage 
-        ? fetchUrl.match(/\/uploads\/omr\/(.+)\.(jpg|jpeg|png)/)?.slice(1).join('.') 
-        : null;
-      
-      // Lista de rutas alternativas para intentar si la primera falla
-      const urlsToTry = [
-        fetchUrl, // La URL original
-        
-        // API endpoint alternativo (si la URL es de uploads/omr)
-        isOmrImage ? `${window.location.origin}/api/images/omr/${omrFilename}` : null,
-        
-        // Probar con la ruta base sin origin por si el servidor está configurado para servir archivos estáticos
-        isOmrImage ? `/uploads/omr/${omrFilename}` : null,
-        
-        // Intentar con una versión cacheable agregando timestamp
-        `${fetchUrl}${fetchUrl.includes('?') ? '&' : '?'}_t=${Date.now()}`,
-      ].filter(Boolean) as string[];
-      
-      if (DEBUG) {
-        logger.log('URLs alternativas a intentar:', urlsToTry);
-      }
-      
-      let lastError = null;
-      
-      // Intentar cada URL hasta que una funcione
-      for (const urlToTry of urlsToTry) {
-        try {
-          if (DEBUG) {
-            logger.log('Intentando cargar desde:', urlToTry);
-          }
-          
-          const response = await fetch(urlToTry, { 
-            method: 'GET',
-            // Asegúrate de que no se use caché para evitar problemas 
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0'
-            }
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Error al cargar imagen: ${response.status} ${response.statusText}`);
-          }
-          
-          const blob = await response.blob();
-          
-          // Convertir a base64
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
-        } catch (err) {
-          lastError = err;
-          if (DEBUG) {
-            logger.warn(`Error al cargar desde ${urlToTry}:`, err);
-          }
-          // Continúa con la siguiente URL
-          continue;
-        }
-      }
-      
-      // Si llegamos aquí, ninguna URL funcionó
-      throw lastError || new Error('No se pudo cargar la imagen desde ninguna URL alternativa');
-      
+      // Convertir a base64
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
     } catch (error: unknown) {
       if (DEBUG) {
         logger.error('Error al cargar imagen:', error);
@@ -567,40 +476,16 @@ export function Results({
       setSaving(true);
       
       // Verificar que tenemos todos los datos necesarios
-      if (!qrData || !answers.length || 
-          ((!processedImage && !processedImageData) || 
-           (!originalImage && !originalImageData))) {
+      if (!qrData || !answers.length || !processedImage || !originalImage || !examScore) {
         throw new Error("Faltan datos para guardar los resultados");
       }
       
-      // Use image data directly if available, without loading from URL
-      let originalImageBase64: string;
-      let processedImageBase64: string;
-      
-      // Prioritize using the data directly
-      if (originalImageData) {
-        originalImageBase64 = originalImageData;
-        if (DEBUG) {
-          logger.log('Usando datos directos de la imagen original');
-        }
-      } else {
-        if (DEBUG) {
-          logger.log('Cargando imagen original desde URL...');
-        }
-        originalImageBase64 = await loadImageAsBase64(originalImage!);
+      // Convertir imágenes a base64 si son URLs
+      if (DEBUG) {
+        logger.log('Preparando imágenes para guardar...');
       }
-      
-      if (processedImageData) {
-        processedImageBase64 = processedImageData;
-        if (DEBUG) {
-          logger.log('Usando datos directos de la imagen procesada');
-        }
-      } else {
-        if (DEBUG) {
-          logger.log('Cargando imagen procesada desde URL...');
-        }
-        processedImageBase64 = await loadImageAsBase64(processedImage!);
-      }
+      const originalImageBase64 = await loadImageAsBase64(originalImage);
+      const processedImageBase64 = await loadImageAsBase64(processedImage);
       
       if (DEBUG) {
         logger.log('Imágenes preparadas correctamente');

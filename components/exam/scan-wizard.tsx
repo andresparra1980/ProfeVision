@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Instructions, ImageCapture, Processing, Results, Confirmation } from './wizard-steps';
-import { ScanData, ProcessingResult, OMRResult } from './types';
+import { ScanData, ProcessingResult } from './types';
 import { ImageProvider, useImageContext } from './contexts';
 import logger from '@/lib/utils/logger';
 
@@ -19,9 +19,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
   const { 
     setProcessedImageData, 
     setOnProcessingComplete,
-    finalOutput,
-    processedImageData,
-    qrValidation
+    finalOutput
   } = useImageContext();
   
   const [step, setStep] = useState(1);
@@ -72,35 +70,6 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     }
   }, [finalOutput, step]);
 
-  // Add a custom onProcessingComplete handler to process the final output
-  useEffect(() => {
-    // No necesitamos extraer el contexto aquí, ya lo tenemos arriba
-    
-    const handleProcessingComplete = () => {
-      if (finalOutput && qrValidation.validated) {
-        // Pass the image data directly to avoid URL loading
-        setScanData((prev) => ({
-          ...prev,
-          processedImage: finalOutput.processedImage,
-          processedImageData: finalOutput.originalImage || processedImageData, // Use original image as fallback
-          originalImageData: finalOutput.originalImage || processedImageData,
-          qrData: finalOutput.qrData,
-          // Convert answers to Answer[] if needed
-          answers: Array.isArray(finalOutput.answers) ? finalOutput.answers : [],
-        }));
-        
-        // Move to the results step
-        setStep(4);
-      }
-    };
-    
-    // Set the processing complete handler
-    setOnProcessingComplete(() => handleProcessingComplete);
-    
-    // Cleanup
-    return () => setOnProcessingComplete(null);
-  }, [setOnProcessingComplete, finalOutput, qrValidation, processedImageData]);
-
   const handleNext = () => {
     if (step === 2) {
       // If we're moving from capture to processing, ensure the image is in the context
@@ -140,19 +109,18 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     // Convertir la imagen capturada a una URL de datos (data URL)
     const reader = new FileReader();
     reader.onload = (e) => {
-      const result = e.target?.result as string;
+      const dataUrl = e.target?.result as string;
       
       // Only update the state if this is still the current image being processed
       if (processedImageId.current === imageId) {
         // Update both the local state and the ImageContext
         setScanData((prev) => ({
           ...prev,
-          originalImage: result,
-          originalImageData: result  // Store the image data directly
+          originalImage: dataUrl,
         }));
         
         // Set the image data in the ImageContext
-        setProcessedImageData(result);
+        setProcessedImageData(dataUrl);
         
         // Move to the next step
         setStep(3);
@@ -174,17 +142,17 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     reader.readAsDataURL(imageFile);
   };
 
-  const _handleScanComplete = (result: OMRResult, imageUrl: string) => {
+  const _handleProcessingComplete = (data: ProcessingResult) => {
     setScanData((prev) => ({
       ...prev,
-      originalImage: imageUrl,
-      processedImage: result.processed_image || imageUrl,
-      originalImageData: result.originalImageData || imageUrl,
-      processedImageData: result.processedImageData || imageUrl,
-      qrData: result.qr_data,
-      answers: result.answers,
+      processedImage: data.processedImage,
+      qrData: data.qrData,
+      answers: data.answers,
+      isDuplicate: data.isDuplicate,
+      duplicateInfo: data.duplicateInfo,
     }));
     
+    // Move to results step
     setStep(4);
   };
 
@@ -266,8 +234,6 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
             answers={scanData.answers || []}
             processedImage={scanData.processedImage || null}
             originalImage={scanData.originalImage || null}
-            processedImageData={scanData.processedImageData || null}  // Pass processed image data
-            originalImageData={scanData.originalImageData || null}    // Pass original image data
             onPrevious={handleRetake}
             onComplete={handleClose}
             onContinue={handleReset}

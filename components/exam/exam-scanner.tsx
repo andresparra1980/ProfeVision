@@ -46,8 +46,6 @@ interface OMRResult {
     message: string;
     recommendations: string[];
   };
-  originalImageData?: string | null;
-  processedImageData?: string | null;
 }
 
 // Expandir las propiedades del componente para incluir callbacks adicionales
@@ -81,8 +79,6 @@ export function ExamScanner({
   const [_testingConnection, setTestingConnection] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasCameraSupport, setHasCameraSupport] = useState(false);
-  const [_originalImageData, _setOriginalImageData] = useState<string | null>(null);
-  const [_processedImageData, _setProcessedImageData] = useState<string | null>(null);
 
   // Función para manejar errores de conexión específicamente
   const handleConnectionError = useCallback((error: Error) => {
@@ -331,9 +327,7 @@ export function ExamScanner({
                   qr_data: responseData.qr_data || responseData.qrData || null,
                   original_image: responseData.originalImage || null,
                   processed_image: responseData.processedImage || null,
-                  publicUrl: responseData.publicUrl || null,
-                  originalImageData: capturedImage || null,
-                  processedImageData: capturedImage || null
+                  publicUrl: responseData.publicUrl || null
                 };
                 
                 setOmrResult(omrResult);
@@ -584,9 +578,7 @@ export function ExamScanner({
                 qr_data: data.result.qrData || { examId: "", studentId: "", isValid: false },
                 original_image: data.result.originalImage || null,
                 processed_image: data.result.processedImage || null,
-                publicUrl: data.result.publicUrl || null,
-                originalImageData: capturedImage || null,
-                processedImageData: capturedImage || null
+                publicUrl: data.result.publicUrl || null
               };
               
               setOmrResult(omrResult);
@@ -997,9 +989,7 @@ export function ExamScanner({
         <div className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted">
           {capturedImage && (
             <Image 
-              src={capturedImage.startsWith('/') && typeof window !== 'undefined' 
-                   ? `${window.location.origin}${capturedImage}` 
-                   : capturedImage} 
+              src={capturedImage} 
               alt="Imagen capturada" 
               className="h-full w-full object-contain"
               fill
