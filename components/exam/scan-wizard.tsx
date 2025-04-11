@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Instructions, ImageCapture, Processing, Results, Confirmation } from './wizard-steps';
-import { ScanData, ProcessingResult } from './types';
+import { ScanData, ProcessingResult, OMRResult } from './types';
 import { ImageProvider, useImageContext } from './contexts';
 import logger from '@/lib/utils/logger';
 
@@ -19,7 +19,9 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
   const { 
     setProcessedImageData, 
     setOnProcessingComplete,
-    finalOutput
+    finalOutput,
+    processedImageData,
+    qrValidation
   } = useImageContext();
   
   const [step, setStep] = useState(1);
@@ -69,6 +71,35 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
       }
     }
   }, [finalOutput, step]);
+
+  // Add a custom onProcessingComplete handler to process the final output
+  useEffect(() => {
+    // No necesitamos extraer el contexto aquí, ya lo tenemos arriba
+    
+    const handleProcessingComplete = () => {
+      if (finalOutput && qrValidation.validated) {
+        // Pass the image data directly to avoid URL loading
+        setScanData((prev) => ({
+          ...prev,
+          processedImage: finalOutput.processedImage,
+          processedImageData: finalOutput.originalImage || processedImageData, // Use original image as fallback
+          originalImageData: finalOutput.originalImage || processedImageData,
+          qrData: finalOutput.qrData,
+          // Convert answers to Answer[] if needed
+          answers: Array.isArray(finalOutput.answers) ? finalOutput.answers : [],
+        }));
+        
+        // Move to the results step
+        setStep(4);
+      }
+    };
+    
+    // Set the processing complete handler
+    setOnProcessingComplete(() => handleProcessingComplete);
+    
+    // Cleanup
+    return () => setOnProcessingComplete(null);
+  }, [setOnProcessingComplete, finalOutput, qrValidation, processedImageData]);
 
   const handleNext = () => {
     if (step === 2) {
@@ -143,18 +174,17 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     reader.readAsDataURL(imageFile);
   };
 
-  const _handleProcessingComplete = (data: ProcessingResult) => {
+  const _handleScanComplete = (result: OMRResult, imageUrl: string) => {
     setScanData((prev) => ({
       ...prev,
-      processedImage: data.processedImage,
-      processedImageData: data.processedImageData, // Store the processed image data
-      qrData: data.qrData,
-      answers: data.answers,
-      isDuplicate: data.isDuplicate,
-      duplicateInfo: data.duplicateInfo,
+      originalImage: imageUrl,
+      processedImage: result.processed_image || imageUrl,
+      originalImageData: result.originalImageData || imageUrl,
+      processedImageData: result.processedImageData || imageUrl,
+      qrData: result.qr_data,
+      answers: result.answers,
     }));
     
-    // Move to results step
     setStep(4);
   };
 

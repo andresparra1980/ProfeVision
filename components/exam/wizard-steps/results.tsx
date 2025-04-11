@@ -464,17 +464,18 @@ export function Results({
         throw new Error(`URL de imagen no válida: ${url}`);
       }
       
-      // Reemplazar localhost:3000 con la URL de producción si estamos en producción
+      // Construir la URL apropiada según el entorno
       let fetchUrl = url;
       if (typeof window !== 'undefined') {
         // Si la URL comienza con '/', construye la URL completa usando window.location.origin
         if (url.startsWith('/')) {
           fetchUrl = `${window.location.origin}${url}`;
         }
-        // Reemplazar localhost:3000 con la URL actual si estamos en producción
-        else if (url.includes('localhost:3000') && !window.location.hostname.includes('localhost')) {
-          fetchUrl = url.replace('http://localhost:3000', window.location.origin)
-                        .replace('https://localhost:3000', window.location.origin);
+        // Reemplazar localhost:3000 con el origin actual si estamos en otro entorno
+        else if ((url.includes('localhost:3000') || url.includes('127.0.0.1:3000')) && 
+                !window.location.hostname.includes('localhost') && 
+                !window.location.hostname.includes('127.0.0.1')) {
+          fetchUrl = url.replace(/https?:\/\/(localhost|127\.0\.0\.1):3000/g, window.location.origin);
         }
       }
       
@@ -510,16 +511,22 @@ export function Results({
       setSaving(true);
       
       // Verificar que tenemos todos los datos necesarios
-      if (!qrData || !answers.length || (!processedImage && !processedImageData) || (!originalImage && !originalImageData)) {
+      if (!qrData || !answers.length || 
+          ((!processedImage && !processedImageData) || 
+           (!originalImage && !originalImageData))) {
         throw new Error("Faltan datos para guardar los resultados");
       }
       
-      // Usar los datos de imagen directamente si están disponibles, de lo contrario cargar desde la URL
+      // Use image data directly if available, without loading from URL
       let originalImageBase64: string;
       let processedImageBase64: string;
       
+      // Prioritize using the data directly
       if (originalImageData) {
         originalImageBase64 = originalImageData;
+        if (DEBUG) {
+          logger.log('Usando datos directos de la imagen original');
+        }
       } else {
         if (DEBUG) {
           logger.log('Cargando imagen original desde URL...');
@@ -529,6 +536,9 @@ export function Results({
       
       if (processedImageData) {
         processedImageBase64 = processedImageData;
+        if (DEBUG) {
+          logger.log('Usando datos directos de la imagen procesada');
+        }
       } else {
         if (DEBUG) {
           logger.log('Cargando imagen procesada desde URL...');

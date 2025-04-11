@@ -161,9 +161,9 @@ export interface OMRResult {
   processed_image?: string;
   publicUrl?: string;
   
-  // Nuevos campos para almacenar las imágenes como datos base64
-  originalImageData?: string;
-  processedImageData?: string;
+  // Image data in base64 format
+  originalImageData?: string | null;
+  processedImageData?: string | null;
   
   total_questions?: number;
   confidence?: number;
