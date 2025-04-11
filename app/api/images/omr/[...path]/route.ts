@@ -6,11 +6,11 @@ import { existsSync } from 'fs';
 // Endpoint para servir imágenes OMR desde la API
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: { path: string[] } }
 ) {
   try {
     // Reconstruir la ruta del archivo solicitado
-    const filePath = params.path.join('/');
+    const filePath = context.params.path.join('/');
     
     // Construir la ruta completa al archivo en el sistema
     const omrDirectory = path.join(process.cwd(), 'public', 'uploads', 'omr');
