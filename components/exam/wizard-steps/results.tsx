@@ -27,6 +27,8 @@ interface ResultsProps {
   answers: Answer[];
   processedImage: string | null;
   originalImage: string | null;
+  processedImageData?: string | null;
+  originalImageData?: string | null;
   onPrevious: () => void;
   onComplete: () => void;
   onContinue: () => void;
@@ -74,7 +76,18 @@ const normalizeAnswers = (rawAnswers: RawAnswer[]): Answer[] => {
   }));
 };
 
-export function Results({ qrData, answers: initialAnswers, processedImage, originalImage, onPrevious, onComplete, onContinue, onSaved }: ResultsProps) {
+export function Results({ 
+  qrData, 
+  answers: initialAnswers, 
+  processedImage, 
+  originalImage, 
+  processedImageData,
+  originalImageData,
+  onPrevious, 
+  onComplete, 
+  onContinue, 
+  onSaved 
+}: ResultsProps) {
   // Usar una ref para registrar si ya se ha mostrado el log
   const loggedRef = useRef(false);
   
@@ -497,16 +510,31 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       setSaving(true);
       
       // Verificar que tenemos todos los datos necesarios
-      if (!qrData || !answers.length || !processedImage || !originalImage || !examScore) {
+      if (!qrData || !answers.length || (!processedImage && !processedImageData) || (!originalImage && !originalImageData)) {
         throw new Error("Faltan datos para guardar los resultados");
       }
       
-      // Convertir imágenes a base64 si son URLs
-      if (DEBUG) {
-        logger.log('Preparando imágenes para guardar...');
+      // Usar los datos de imagen directamente si están disponibles, de lo contrario cargar desde la URL
+      let originalImageBase64: string;
+      let processedImageBase64: string;
+      
+      if (originalImageData) {
+        originalImageBase64 = originalImageData;
+      } else {
+        if (DEBUG) {
+          logger.log('Cargando imagen original desde URL...');
+        }
+        originalImageBase64 = await loadImageAsBase64(originalImage!);
       }
-      const originalImageBase64 = await loadImageAsBase64(originalImage);
-      const processedImageBase64 = await loadImageAsBase64(processedImage);
+      
+      if (processedImageData) {
+        processedImageBase64 = processedImageData;
+      } else {
+        if (DEBUG) {
+          logger.log('Cargando imagen procesada desde URL...');
+        }
+        processedImageBase64 = await loadImageAsBase64(processedImage!);
+      }
       
       if (DEBUG) {
         logger.log('Imágenes preparadas correctamente');

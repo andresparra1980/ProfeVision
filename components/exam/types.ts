@@ -88,6 +88,8 @@ export interface ProcessingResult {
   success?: boolean;
   processedImage?: string | null;
   processedImageUrl?: string;
+  processedImageData?: string | null;
+  originalImageData?: string | null;
   publicUrl?: string;
   qrData?: QRData | null;
   qr_data?: QRData;
@@ -109,9 +111,13 @@ export interface ProcessingResult {
 export interface ScanData {
   originalImage?: string;
   processedImage?: string | null;
+  originalImageData?: string | null;
+  processedImageData?: string | null;
   qrData?: QRData | null;
   answers?: Answer[];
   resultadoId?: string;
+  isDuplicate?: boolean;
+  duplicateInfo?: DuplicateInfo | null;
 }
 
 /**
@@ -137,4 +143,28 @@ export interface ExamScore {
   error: string | null;
   puntajeTotal?: number;
   puntajeObtenido?: number;
+}
+
+/**
+ * Result data from processing a scanned exam
+ */
+export interface OMRResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+  error_code?: string;
+  error_details?: ErrorDetails;
+  
+  answers: Answer[];
+  qr_data: QRData;
+  original_image?: string;
+  processed_image?: string;
+  publicUrl?: string;
+  
+  // Nuevos campos para almacenar las imágenes como datos base64
+  originalImageData?: string;
+  processedImageData?: string;
+  
+  total_questions?: number;
+  confidence?: number;
 } 

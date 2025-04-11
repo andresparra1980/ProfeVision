@@ -109,18 +109,19 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     // Convertir la imagen capturada a una URL de datos (data URL)
     const reader = new FileReader();
     reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
+      const result = e.target?.result as string;
       
       // Only update the state if this is still the current image being processed
       if (processedImageId.current === imageId) {
         // Update both the local state and the ImageContext
         setScanData((prev) => ({
           ...prev,
-          originalImage: dataUrl,
+          originalImage: result,
+          originalImageData: result  // Store the image data directly
         }));
         
         // Set the image data in the ImageContext
-        setProcessedImageData(dataUrl);
+        setProcessedImageData(result);
         
         // Move to the next step
         setStep(3);
@@ -146,6 +147,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     setScanData((prev) => ({
       ...prev,
       processedImage: data.processedImage,
+      processedImageData: data.processedImageData, // Store the processed image data
       qrData: data.qrData,
       answers: data.answers,
       isDuplicate: data.isDuplicate,
@@ -234,6 +236,8 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
             answers={scanData.answers || []}
             processedImage={scanData.processedImage || null}
             originalImage={scanData.originalImage || null}
+            processedImageData={scanData.processedImageData || null}  // Pass processed image data
+            originalImageData={scanData.originalImageData || null}    // Pass original image data
             onPrevious={handleRetake}
             onComplete={handleClose}
             onContinue={handleReset}

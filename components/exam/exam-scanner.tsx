@@ -79,6 +79,8 @@ export function ExamScanner({
   const [_testingConnection, setTestingConnection] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasCameraSupport, setHasCameraSupport] = useState(false);
+  const [_originalImageData, setOriginalImageData] = useState<string | null>(null);
+  const [_processedImageData, setProcessedImageData] = useState<string | null>(null);
 
   // Función para manejar errores de conexión específicamente
   const handleConnectionError = useCallback((error: Error) => {
@@ -334,10 +336,24 @@ export function ExamScanner({
                 
                 // Usar la URL pública si está disponible, o la imagen procesada/original como fallback
                 const imageToDisplay = responseData.publicUrl || responseData.processedImage || responseData.originalImage || null;
+                // Si la URL comienza con /, es una ruta relativa, guardar como está
+                // Si es una URL completa y contiene /uploads/, extraer solo la parte relativa
+                // De lo contrario, usar la URL completa
                 setCapturedImage(imageToDisplay || '');
                 
+                // Guardamos la imagen original y procesada para pasarlas al siguiente paso
+                // Esto evita tener que hacer solicitudes HTTP para obtener las imágenes
+                setOriginalImageData(responseData.originalImage || responseData.publicUrl || null);
+                setProcessedImageData(responseData.processedImage || responseData.publicUrl || null);
+                
                 if (onScanComplete) {
-                  onScanComplete(omrResult, imageToDisplay || '');
+                  // Pasar las imágenes directamente al componente padre
+                  const omrResultWithImages = {
+                    ...omrResult,
+                    originalImageData: responseData.originalImage || responseData.publicUrl || null,
+                    processedImageData: responseData.processedImage || responseData.publicUrl || null
+                  };
+                  onScanComplete(omrResultWithImages, imageToDisplay || '');
                 }
               }
             } else {
