@@ -451,8 +451,29 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         throw new Error(`URL de imagen no válida: ${url}`);
       }
       
+      // Reemplazar localhost:3000 con la URL de producción si estamos en producción
+      let fetchUrl = url;
+      if (typeof window !== 'undefined') {
+        // Si la URL comienza con '/', construye la URL completa usando window.location.origin
+        if (url.startsWith('/')) {
+          fetchUrl = `${window.location.origin}${url}`;
+        }
+        // Reemplazar localhost:3000 con la URL actual si estamos en producción
+        else if (url.includes('localhost:3000') && !window.location.hostname.includes('localhost')) {
+          fetchUrl = url.replace('http://localhost:3000', window.location.origin)
+                        .replace('https://localhost:3000', window.location.origin);
+        }
+      }
+      
+      if (DEBUG) {
+        logger.log('Cargando imagen desde URL:', fetchUrl);
+      }
+      
       // Cargar la imagen
-      const response = await fetch(url);
+      const response = await fetch(fetchUrl);
+      if (!response.ok) {
+        throw new Error(`Error al cargar imagen: ${response.status} ${response.statusText}`);
+      }
       const blob = await response.blob();
       
       // Convertir a base64

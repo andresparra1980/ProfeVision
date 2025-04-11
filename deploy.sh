@@ -299,4 +299,39 @@ fi
 echo "IMPORTANT: Make sure your DNS is properly configured to point to this server."
 echo "If you're using Cloudflare or another CDN, ensure SSL/TLS encryption mode is set to 'Full' or 'Full (Strict)'."
 echo "HTTPS should now be properly configured. Try accessing https://profevision.andresparra.co"
-echo "Deployment completed successfully!" 
+echo "Deployment completed successfully!"
+
+echo "Updating Nginx configuration to serve the uploads directory..."
+
+# Create the Nginx configuration for the uploads directory
+sudo tee /etc/nginx/snippets/serve-uploads.conf << EOF
+# Serve uploads directory
+location /uploads/ {
+    alias /home/ucaretaker/Documents/Code/ProfeVision/public/uploads/;
+    expires 1d;
+    add_header Cache-Control "public, max-age=86400";
+    
+    # Ensure proper MIME types
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # Allow CORS
+    add_header 'Access-Control-Allow-Origin' '*';
+    add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS';
+    add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+    add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+}
+EOF
+
+# Add the include directive to the existing server block
+sudo sed -i '/server_name profevision.andresparra.co;/a\    include snippets/serve-uploads.conf;' /etc/nginx/sites-available/profevision
+
+# Test Nginx configuration
+echo "Testing Nginx configuration..."
+sudo nginx -t
+
+# Restart Nginx to apply changes
+echo "Restarting Nginx..."
+sudo systemctl restart nginx
+
+echo "Nginx configuration updated successfully!" 

@@ -989,7 +989,9 @@ export function ExamScanner({
         <div className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted">
           {capturedImage && (
             <Image 
-              src={capturedImage} 
+              src={capturedImage.startsWith('/') && typeof window !== 'undefined' 
+                   ? `${window.location.origin}${capturedImage}` 
+                   : capturedImage} 
               alt="Imagen capturada" 
               className="h-full w-full object-contain"
               fill
