@@ -431,128 +431,36 @@ export async function POST(request: NextRequest) {
       if (DEBUG) {
         logger.log(`[${requestId}] OMR script completed, waiting for file system updates...`);
       }
-      
+
       // Wait for a moment to let the file system catch up
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Handle the processed image path - the Python script creates a version with "questions_detected" suffix
+
+      // Handle the processed image path - the Python script appends "questions_detected.jpeg" to the original filename
       const originalDir = path.dirname(filePath);
-      const originalFileName = path.basename(filePath, `.${extension}`);
-      const processedFileName = `${originalFileName}questions_detected.${extension}`;
-      const processedImagePath = normalizedResult.processed_image_path || 
-                                 path.join(originalDir, processedFileName);
-      
+      const originalFileNameWithoutExt = path.basename(filePath, `.${extension}`);
+      const processedFileName = `${originalFileNameWithoutExt}questions_detected.jpeg`;
+      const processedImagePath = path.join(originalDir, processedFileName);
+
       // Check if the processed image exists
-      let processedImageExists = false;
-      let actualProcessedPath = processedImagePath; // Variable to store the actual path if found
-      
-      // Try multiple times with small delays between attempts
-      const maxAttempts = 3;
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        // Log the directory contents to help debug
-        let dirContents: string[] = [];
+      try {
+        await fs.access(processedImagePath);
         if (DEBUG) {
-          try {
-            dirContents = await fs.readdir(originalDir);
-            logger.log(`[${requestId}] Contents of uploads directory (attempt ${attempt}):`, dirContents);
-            
-            // Check if any file in the directory looks like a processed version
-            const possibleProcessedFiles = dirContents.filter(fileName => 
-              fileName.includes('questions_detected') || 
-              fileName.includes('processed') || 
-              (fileName.includes(path.basename(filePath, `.${extension}`)) && 
-               fileName !== path.basename(filePath))
-            );
-            
-            if (possibleProcessedFiles.length > 0) {
-              logger.log(`[${requestId}] Possible processed files found:`, possibleProcessedFiles);
-            }
-          } catch (error) {
-            logger.error(`[${requestId}] Error reading uploads directory:`, error);
-          }
+          logger.log(`[${requestId}] Processed image found at:`, processedImagePath);
         }
-        
-        try {
-          await fs.access(processedImagePath);
-          processedImageExists = true;
-          if (DEBUG) {
-            logger.log(`[${requestId}] Processed image found at (attempt ${attempt}):`, processedImagePath);
-          }
-          break; // Found the file, no need to try other patterns
-        } catch {
-          // Try alternative naming patterns if the first attempt fails
-          const alternativePaths = [
-            // Try with different separators between filename and suffix
-            path.join(originalDir, `${originalFileName}_questions_detected.${extension}`),
-            // Try with direct appending of the suffix
-            path.join(originalDir, `${originalFileName}questions_detected.${extension}`),
-            // Try with common prefix variations
-            path.join(originalDir, `${originalFileName.replace('scan_', '@scan_')}questions_detected.${extension}`),
-            path.join(originalDir, `@${originalFileName}questions_detected.${extension}`),
-            // Try Python-generated variations
-            path.join(originalDir, `processed_${originalFileName}.${extension}`),
-            // Try plain filename with questions_detected in different positions
-            path.join(originalDir, `questions_detected_${path.basename(filePath)}`),
-            // Try just looking for the original filename in the path
-            ...dirContents
-              .filter((file: string) => 
-                file.includes(path.basename(filePath, `.${extension}`)) && 
-                file !== path.basename(filePath)
-              )
-              .map((file: string) => path.join(originalDir, file))
-          ];
-          
-          // Try each alternative path
-          for (const altPath of alternativePaths) {
-            try {
-              await fs.access(altPath);
-              processedImageExists = true;
-              actualProcessedPath = altPath; // Store the actual path that was found
-              if (DEBUG) {
-                logger.log(`[${requestId}] Processed image found at alternative path (attempt ${attempt}):`, altPath);
-              }
-              break;
-            } catch {
-              // Continue to next path
-            }
-          }
-          
-          if (processedImageExists) {
-            break; // Found a file with an alternative path, no need to continue
-          }
-          
-          // If this is not the last attempt and we haven't found the file yet, wait before trying again
-          if (attempt < maxAttempts && !processedImageExists) {
-            if (DEBUG) {
-              logger.warn(`[${requestId}] Processed image not found on attempt ${attempt}, waiting before retry...`);
-            }
-            // Wait a bit longer between attempts
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
-      }
-      
-      // If still not found after all attempts, log warning
-      if (!processedImageExists && DEBUG) {
-        logger.warn(`[${requestId}] Processed image not found after ${maxAttempts} attempts:`, {
-          primary: processedImagePath,
-          imageData: normalizedResult.qr_data ? 'QR data present' : 'No QR data',
-          answersCount: normalizedResult.answers ? normalizedResult.answers.length : 0
-        });
-      }
-      
-      // Get public URLs for the images
-      let processedPublicPath = publicPath; // Default to original image path
-      if (processedImageExists) {
-        // Extract just the filename from the actual processed path
-        const processedFileName = path.basename(actualProcessedPath);
-        processedPublicPath = `/uploads/omr/${processedFileName}`;
-        
+      } catch (_error) {
         if (DEBUG) {
-          logger.log(`[${requestId}] Using processed image public path:`, processedPublicPath);
+          logger.error(`[${requestId}] Processed image not found at expected path:`, processedImagePath);
         }
+        return NextResponse.json({ 
+          success: false, 
+          error: "Error al procesar el escaneo - imagen procesada no encontrada",
+          error_details: { message: "No se pudo encontrar la imagen procesada" }
+        }, { status: 500 });
       }
 
+      // Get public URLs for the images
+      const processedPublicPath = `/uploads/omr/${processedFileName}`;
+      
       // Add a timestamp to the processed URL to ensure it's unique
       const timestamp = Date.now();
       const processedPublicPathWithTimestamp = `${processedPublicPath}?t=${timestamp}`;
