@@ -350,9 +350,9 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         }
         
         // Extraer IDs usando optional chaining para mejor type safety
-        const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
-        const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
-        const groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
+        const examId = qrData.examId;
+        const studentId = qrData.studentId;
+        const groupId = qrData.groupId;
         
         // Validar IDs requeridos
         const missingIds = [];
@@ -408,7 +408,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         }
         
         // Calcular puntaje del examen
-        if (examId) {
+        if (examId && typeof examId === 'string') {
           calculateExamScore(examId);
         }
         
