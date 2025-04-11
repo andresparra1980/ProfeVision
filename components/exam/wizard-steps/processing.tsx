@@ -117,7 +117,7 @@ export function Processing() {
         retryCount.current = 0; // Reset retry count on success
         
         // Properly prepare QR data in standardized format
-        let parsedQrData = data.qr_data || null;
+        let parsedQrData = data.result?.qr_data || null;
         
         // Debug the QR data from the API
         if (DEBUG) {
@@ -134,6 +134,7 @@ export function Processing() {
             if (parsedQrData.includes(':') && parsedQrData.includes('-')) {
               const parts = parsedQrData.split(':');
               if (parts.length >= 3) {
+                // Format is examId:studentId:groupId[:hash]
                 parsedQrData = {
                   examId: parts[0],
                   studentId: parts[1],
@@ -147,9 +148,9 @@ export function Processing() {
         
         // Ensure QR data has the right structure with explicit properties
         const normalizedQrData = {
-          examId: parsedQrData?.examId || parsedQrData?.examenId || parsedQrData?.exam_id || parsedQrData?.examen_id || null,
-          studentId: parsedQrData?.studentId || parsedQrData?.estudianteId || parsedQrData?.student_id || parsedQrData?.estudiante_id || null,
-          groupId: parsedQrData?.groupId || parsedQrData?.grupoId || parsedQrData?.group_id || parsedQrData?.grupo_id || null,
+          examId: parsedQrData?.examId || null,
+          studentId: parsedQrData?.studentId || null,
+          groupId: parsedQrData?.groupId || null,
           version: parsedQrData?.version || '1'
         };
         
@@ -199,15 +200,28 @@ export function Processing() {
                              data.result?.processed_image_path || 
                              '';
                              
-        if (DEBUG && processedImg) {
+        if (DEBUG) {
           logger.log('Using processed image URL:', processedImg);
+          logger.log('Original image URL:', processedImageData);
+          // Log the extracted processedImageUrl from response data
+          logger.log('processedImageUrl from API:', {
+            directUrl: data.processedImageUrl,
+            fromResult: data.result?.processed_image_path,
+            publicUrl: data.publicUrl,
+            responseKeys: Object.keys(data)
+          });
         }
         
         const finalOutput = {
           qrData: normalizedQrData,
           answers: data.result?.answers || data.answers || {},
           originalImage: processedImageData,
-          processedImage: processedImg || processedImageData,
+          // Force use different URL for processed image to avoid using the same image
+          processedImage: (processedImg && processedImg !== processedImageData) 
+                          ? processedImg 
+                          : (data.publicUrl && data.publicUrl !== processedImageData)
+                            ? data.publicUrl
+                            : data.result?.processed_image_path || '',
         };
         
         if (DEBUG) {

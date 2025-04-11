@@ -21,20 +21,10 @@ export interface DuplicateInfo {
  * QR Data structure from scanned exams
  */
 export interface QRData {
-  examId?: string;
-  examenId?: string;
-  exam_id?: string;
-  examen_id?: string;
-  studentId?: string;
-  estudianteId?: string;
-  student_id?: string;
-  estudiante_id?: string;
+  examId: string;
+  studentId: string;
   groupId?: string;
-  grupoId?: string;
-  group_id?: string;
-  grupo_id?: string;
-  formId?: string;
-  examTitle?: string;
+  version?: string;
   isDuplicate?: boolean;
   duplicateInfo?: DuplicateInfo;
   [key: string]: string | boolean | DuplicateInfo | undefined;

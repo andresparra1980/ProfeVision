@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import { promises as fs } from 'fs';
+import * as fsSync from 'fs';
+import * as path from 'path';
+import * as _os from 'os';
+import * as _crypto from 'crypto';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import logger from '@/lib/utils/logger';
@@ -219,7 +222,7 @@ function normalizeQRData(qrData: string | Record<string, unknown>): Record<strin
       if (qrData.includes(':') && qrData.includes('-')) {
         const parts = qrData.split(':');
         if (parts.length >= 3) {
-          // Assume format is examId:studentId:groupId[:version]
+          // Format is examId:studentId:groupId[:hash]
           return {
             examId: parts[0],
             studentId: parts[1],
@@ -340,7 +343,7 @@ export async function POST(request: NextRequest) {
         ? process.env.NEXT_PUBLIC_SITE_URL
         : request.nextUrl.origin;
     
-    const fullPublicUrl = new URL(publicPath, baseUrl).toString();
+    const _fullPublicUrl = new URL(publicPath, baseUrl).toString();
     
     try {
       // Process the image using the Python OMR script
@@ -551,71 +554,50 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const processedPublicUrl = new URL(processedPublicPath, request.nextUrl.origin).toString();
+      // Add a timestamp to the processed URL to ensure it's unique
+      const timestamp = Date.now();
+      const processedPublicPathWithTimestamp = `${processedPublicPath}?t=${timestamp}`;
+      const processedPublicUrl = new URL(processedPublicPathWithTimestamp, request.nextUrl.origin).toString();
       
-      // Return results
+      if (DEBUG) {
+        logger.log(`[${requestId}] Original URL: ${_fullPublicUrl}`);
+        logger.log(`[${requestId}] Processed URL with timestamp: ${processedPublicUrl}`);
+      }
+      
+      // Return success response with URLs and results
       return NextResponse.json({
         success: true,
-        processedImageUrl: processedPublicUrl,
-        publicUrl: fullPublicUrl,
-        qr_data: normalizedResult.qr_data,
-        answers: normalizedResult.answers,
         result: {
-          processed_image_path: processedPublicUrl,
-          original_image_path: fullPublicUrl,
+          ...normalizedResult,
+          qr_data: normalizedResult.qr_data, // Ensure QR data is included at the correct level
           answers: normalizedResult.answers,
-          qr_data: normalizedResult.qr_data
-        }
+          processed_image_path: processedImagePath,
+          student_info: normalizedResult.student_info
+        },
+        publicUrl: _fullPublicUrl,
+        processedImageUrl: processedPublicUrl
       });
-    } catch (omrError) {
-      logger.error(`[${requestId}] OMR processing error:`, omrError);
       
-      // Check if the error is related to missing script files
-      const errorMessage = omrError instanceof Error ? omrError.message : "Error al procesar con OMR";
-      const isMissingScriptError = errorMessage.includes('ENOENT') || 
-                                  errorMessage.includes('No such file or directory') ||
-                                  errorMessage.includes('not found');
-      
-      // Provide specific recommendations based on the error type
-      const recommendations = isMissingScriptError
-        ? [
-            "El script de Python no se encuentra en la ubicación esperada",
-            "Asegúrate de que se ha instalado correctamente el entorno de Python",
-            "Verifica la estructura de directorios scripts/omr"
-          ]
-        : [
-            "Verifica que la imagen sea clara y bien iluminada",
-            "Asegúrate de que el examen esté completo en la imagen",
-            "Comprueba que la imagen no esté distorsionada o borrosa"
-          ];
-      
-      // Return a more specific error for OMR processing failure
+    } catch (error) {
+      // Log error and return error response
+      if (DEBUG) {
+        logger.error('Error processing scan:', error);
+      }
       return NextResponse.json({ 
         success: false, 
-        error: "Error en el procesamiento OMR",
-        error_details: {
-          message: errorMessage,
-          recommendations,
-          request_id: requestId
-        }
+        error: "Error al procesar el escaneo",
+        error_details: { message: error instanceof Error ? error.message : 'Unknown error' }
       }, { status: 500 });
     }
-    
   } catch (error) {
-    logger.error(`[${requestId}] Error general en procesamiento de escaneo:`, error);
-    
+    // Log error and return error response for outer try block
+    if (DEBUG) {
+      logger.error('Error in process-scan endpoint:', error);
+    }
     return NextResponse.json({ 
       success: false, 
-      error: error instanceof Error ? error.message : "Error desconocido",
-      error_details: {
-        message: error instanceof Error ? error.message : "Error desconocido en procesamiento",
-        recommendations: [
-          "Intenta con una imagen con mejor iluminación",
-          "Asegúrate de que el examen esté completamente visible",
-          "Asegúrate de que el código QR sea visible y esté en buen estado"
-        ],
-        request_id: requestId
-      }
+      error: "Error interno del servidor",
+      error_details: { message: error instanceof Error ? error.message : 'Unknown error' }
     }, { status: 500 });
   }
 }

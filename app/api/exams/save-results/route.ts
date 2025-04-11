@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
-import { promises as fsPromises } from 'fs';
-import * as path from 'path';
+import { promises as _fsPromises } from 'fs';
+import * as _path from 'path';
 import sharp from 'sharp';
 import logger from '@/lib/utils/logger';
 
@@ -86,48 +86,6 @@ async function compressImage(imageBase64: string, quality: number = 80, maxSize:
   }
 }
 
-// Limpiar archivos temporales en public/uploads si existen
-async function cleanupTemporaryFiles() {
-  const publicUploadsDir = path.join(process.cwd(), 'public', 'uploads', 'omr');
-  
-  try {
-    // Verificar si el directorio existe
-    await fsPromises.access(publicUploadsDir);
-    
-    // Leer todos los archivos en el directorio
-    const files = await fsPromises.readdir(publicUploadsDir);
-    
-    // Obtener la fecha actual
-    const now = Date.now();
-    
-    // Eliminar archivos más antiguos que 1 hora (3600000 ms)
-    const deletePromises = files.map(async (file) => {
-      const filePath = path.join(publicUploadsDir, file);
-      
-      try {
-        const stats = await fsPromises.stat(filePath);
-        const fileAge = now - stats.mtime.getTime();
-        
-        // Si el archivo es más antiguo que 1 hora o si tiene extensión .jpg o .jpeg
-        if (fileAge > 3600000 || file.endsWith('.jpg') || file.endsWith('.jpeg') || file.endsWith('.png')) {
-          await fsPromises.unlink(filePath);
-        }
-      } catch (error) {
-        if (DEBUG) {
-          logger.error(`Error al procesar archivo ${filePath}:`, error);
-        }
-      }
-    });
-    
-    await Promise.all(deletePromises);
-  } catch (error) {
-    // Si el directorio no existe o hay otro error, lo registramos pero continuamos
-    if (DEBUG) {
-      logger.error('Error al limpiar archivos temporales:', error);
-    }
-  }
-}
-
 interface Answer {
   pregunta_id: string;
   opcion_id: string;
@@ -171,12 +129,59 @@ interface SaveResultsData {
   duplicateInfo?: DuplicateInfo;
 }
 
+// Function to clean up temporary files in the uploads/omr directory
+async function cleanupUploadsDirectory() {
+  const uploadsDir = `${process.cwd()}/public/uploads/omr`;
+  
+  try {
+    // Check if directory exists
+    try {
+      await _fsPromises.access(uploadsDir);
+    } catch (_err) {
+      // Directory doesn't exist, nothing to clean up
+      return;
+    }
+    
+    // Read all files in directory
+    const files = await _fsPromises.readdir(uploadsDir);
+    const now = Date.now();
+    const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    
+    // Process each file
+    for (const file of files) {
+      if (file === '.gitkeep') continue; // Skip .gitkeep file
+      
+      const filePath = `${uploadsDir}/${file}`;
+      try {
+        const stats = await _fsPromises.stat(filePath);
+        const fileAge = now - stats.mtime.getTime();
+        
+        // Delete if older than MAX_AGE or if it's a common image file
+        if (fileAge > MAX_AGE || file.match(/\.(jpg|jpeg|png|gif)$/i)) {
+          await _fsPromises.unlink(filePath);
+          if (DEBUG) {
+            logger.log(`Cleaned up old file: ${file}, age: ${fileAge / (60 * 60 * 1000)} hours`);
+          }
+        }
+      } catch (err) {
+        if (DEBUG) {
+          logger.warn(`Error processing file ${file}:`, err);
+        }
+      }
+    }
+  } catch (err) {
+    if (DEBUG) {
+      logger.warn('Error during uploads directory cleanup:', err);
+    }
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     // Capture request timing for debugging
     const requestId = Date.now().toString();
     if (DEBUG) {
-      logger.log(`[${requestId}] POST /api/exams/save-results iniciando...`);
+      logger.log(`[${requestId}] Starting save-results request`);
     }
 
     // Parse request body with error handling
@@ -192,9 +197,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate required data
+    // Extract and validate data
     const { qrData, answers, originalImage, processedImage, examScore, isDuplicate, duplicateInfo } = data;
+    
+    // Validate that the required data exists
+    if (!qrData || !qrData.examId || !qrData.studentId) {
+      if (DEBUG) {
+        logger.error('Invalid QR data:', qrData);
+      }
+      return NextResponse.json({ error: 'Datos de QR incompletos' }, { status: 400 });
+    }
 
+    // Check all required fields are present
     if (!qrData || !answers || !originalImage || !processedImage || !examScore) {
       return NextResponse.json({ 
         error: 'Datos incompletos',
@@ -209,6 +223,14 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
+    // Inicializar cliente de Supabase
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      }
+    });
+
     // Extraer información del QR
     const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
     const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
@@ -218,14 +240,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Datos de QR incompletos' }, { status: 400 });
     }
 
-    // Inicializar cliente de Supabase
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      }
-    });
-    
     // Obtener profesor_id del examen al principio
     let profesorId;
     try {
@@ -721,8 +735,54 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Limpiar archivos temporales
-    await cleanupTemporaryFiles();
+    // After successful upload to S3, clean up the temporary files
+    try {
+      // Clean up temporary files in the file system
+      if (processedImage && !processedImage.startsWith('data:')) {
+        // Handle relative paths
+        const processedPath = processedImage.startsWith('/') ? 
+          `${process.cwd()}/public${processedImage}` : 
+          processedImage;
+        
+        // Try to delete the file
+        try {
+          await _fsPromises.unlink(processedPath);
+          if (DEBUG) {
+            logger.log(`Deleted temporary processed image: ${processedPath}`);
+          }
+        } catch (err) {
+          if (DEBUG) {
+            logger.warn(`Could not delete processed image file ${processedPath}:`, err);
+          }
+        }
+      }
+      
+      // Similar cleanup for original image if it's a file path
+      if (originalImage && !originalImage.startsWith('data:')) {
+        const originalPath = originalImage.startsWith('/') ? 
+          `${process.cwd()}/public${originalImage}` : 
+          originalImage;
+        
+        try {
+          await _fsPromises.unlink(originalPath);
+          if (DEBUG) {
+            logger.log(`Deleted temporary original image: ${originalPath}`);
+          }
+        } catch (err) {
+          if (DEBUG) {
+            logger.warn(`Could not delete original image file ${originalPath}:`, err);
+          }
+        }
+      }
+      
+      // Clean up any remaining files in the uploads directory
+      await cleanupUploadsDirectory();
+    } catch (cleanupError) {
+      // Log but don't fail if cleanup has issues
+      if (DEBUG) {
+        logger.warn('Error during temporary file cleanup:', cleanupError);
+      }
+    }
 
     return NextResponse.json({
       success: true,

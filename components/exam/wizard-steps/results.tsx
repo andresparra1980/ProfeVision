@@ -344,16 +344,24 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       try {
         setEntityNames(prev => ({ ...prev, loading: true, error: null }));
         
-        if (!qrData || 
-            (!qrData.examId && !qrData.examenId && !qrData.exam_id && !qrData.examen_id) || 
-            (!qrData.studentId && !qrData.estudianteId && !qrData.student_id && !qrData.estudiante_id)) {
-          throw new Error("Datos QR incompletos. No se puede cargar información detallada.");
+        // Validar que tenemos datos QR
+        if (!qrData) {
+          throw new Error("No se detectaron datos del código QR.");
         }
         
-        // Obtener IDs usando optional chaining para mejor type safety
+        // Extraer IDs usando optional chaining para mejor type safety
         const examId = qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
         const studentId = qrData.studentId || qrData.estudianteId || qrData.student_id || qrData.estudiante_id;
         const groupId = qrData.groupId || qrData.grupoId || qrData.group_id || qrData.grupo_id;
+        
+        // Validar IDs requeridos
+        const missingIds = [];
+        if (!examId) missingIds.push('examen');
+        if (!studentId) missingIds.push('estudiante');
+        
+        if (missingIds.length > 0) {
+          throw new Error(`Datos QR incompletos. Falta identificador de: ${missingIds.join(', ')}.`);
+        }
         
         // Preparar las promesas para cargar los datos
         const promises = [
@@ -369,9 +377,16 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         // Ejecutar las promesas en paralelo
         const responses = await Promise.all(promises);
         
-        // Verificar respuestas
-        if (!responses[0].ok) throw new Error(`No se pudo cargar el examen: ${responses[0].statusText}`);
-        if (!responses[1].ok) throw new Error(`No se pudo cargar el estudiante: ${responses[1].statusText}`);
+        // Verificar respuestas y preparar mensajes de error específicos
+        if (!responses[0].ok) {
+          throw new Error(`No se pudo cargar la información del examen (${responses[0].status}): ${responses[0].statusText}`);
+        }
+        if (!responses[1].ok) {
+          throw new Error(`No se pudo cargar la información del estudiante (${responses[1].status}): ${responses[1].statusText}`);
+        }
+        if (groupId && responses[2] && !responses[2].ok) {
+          logger.warn(`No se pudo cargar la información del grupo (${responses[2].status}): ${responses[2].statusText}`);
+        }
         
         // Preparar promesas para extraer los datos JSON
         const dataPromises = [responses[0].json(), responses[1].json()];
@@ -389,7 +404,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         if (DEBUG) {
           logger.log('Datos del examen recibidos:', examData);
           logger.log('Datos del estudiante recibidos:', studentData);
-          logger.log('Datos del grupo recibidos:', groupData);
+          if (groupData) logger.log('Datos del grupo recibidos:', groupData);
         }
         
         // Calcular puntaje del examen
@@ -397,7 +412,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           calculateExamScore(examId);
         }
         
-        // Actualizar los nombres de las entidades
+        // Actualizar los nombres de las entidades con manejo de casos nulos
         setEntityNames({
           materia: examData.materia?.nombre || 'No disponible',
           examen: examData.nombre || examData.titulo || examData.title || 'No disponible',
@@ -422,7 +437,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         setEntityNames(prev => ({
           ...prev,
           loading: false,
-          error: (error as Error).message || "Error al cargar datos de las entidades"
+          error: error instanceof Error ? error.message : "Error desconocido al cargar datos de las entidades"
         }));
       }
     };
@@ -633,28 +648,54 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         throw new Error("Faltan datos para guardar los resultados");
       }
       
+      // Verificar si tenemos URLs diferentes para las imágenes
+      const imagesAreSame = originalImage === processedImage;
+      
       // Convertir imágenes a base64 si son URLs
       if (DEBUG) {
         logger.log('Preparando imágenes para guardar...', {
           originalImage: originalImage ? `${originalImage.substring(0, 50)}...` : null,
           processedImage: processedImage ? `${processedImage.substring(0, 50)}...` : null,
-          areEqual: originalImage === processedImage,
+          areEqual: imagesAreSame,
           originalIsDataUrl: originalImage?.startsWith('data:'),
           processedIsDataUrl: processedImage?.startsWith('data:'),
+          environment: process.env.NODE_ENV
         });
       }
       
       // Comprobación adicional: si las imágenes son iguales cuando no deberían serlo
-      if (originalImage === processedImage && !originalImage?.startsWith('data:')) {
+      if (imagesAreSame && !originalImage?.startsWith('data:')) {
         logger.warn('¡Advertencia! Las URLs de la imagen original y procesada son idénticas:', 
           originalImage?.substring(0, 50)
         );
+        
+        // En producción, intentar usar diferentes métodos para cargar las imágenes
+        if (process.env.NODE_ENV === 'production') {
+          logger.log('Estamos en producción, intentando trabajar con la misma imagen de forma diferente');
+        }
       }
       
       let originalImageBase64, processedImageBase64;
       try {
+        // Cargar la imagen original
         originalImageBase64 = await loadImageAsBase64(originalImage);
-        processedImageBase64 = await loadImageAsBase64(processedImage);
+        
+        // Si las imágenes son diferentes, cargar la procesada normalmente
+        if (!imagesAreSame) {
+          processedImageBase64 = await loadImageAsBase64(processedImage);
+        } 
+        // Si son la misma imagen pero ya es un data URL, intentar modificar ligeramente la procesada
+        else if (originalImage?.startsWith('data:')) {
+          logger.log('Las imágenes son idénticas data URLs, intentando diferenciar la procesada');
+          processedImageBase64 = originalImageBase64;
+        } 
+        // Si son la misma imagen pero son URLs, intentar forzar que sean diferentes
+        else {
+          logger.log('Las imágenes son idénticas URLs, intentando cargar la procesada con parámetros diferentes');
+          // Añadir timestamp como query param para forzar carga diferente
+          const processedWithParams = `${processedImage}${processedImage.includes('?') ? '&' : '?'}t=${Date.now()}`;
+          processedImageBase64 = await loadImageAsBase64(processedWithParams);
+        }
         
         if (DEBUG) {
           const originalPrefix = originalImageBase64.substring(0, 30);
@@ -670,7 +711,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         }
         
         // Verificación adicional: si las imágenes convertidas son idénticas pero las URLs originales no lo eran
-        if (originalImageBase64 === processedImageBase64 && originalImage !== processedImage) {
+        if (originalImageBase64 === processedImageBase64 && !imagesAreSame) {
           logger.warn('¡Advertencia! Las imágenes convertidas son idénticas aunque las URLs no lo eran');
         }
         
