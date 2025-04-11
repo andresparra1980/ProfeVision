@@ -234,16 +234,30 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
           <Processing />
         )}
         {step === 4 && (
-          <Results
-            qrData={scanData.qrData || null}
-            answers={scanData.answers || []}
-            processedImage={scanData.processedImage || null}
-            originalImage={scanData.originalImage || null}
-            onPrevious={handleRetake}
-            onComplete={handleClose}
-            onContinue={handleReset}
-            onSaved={handleResultsSaved}
-          />
+          <>
+            {DEBUG && (
+              (() => {
+                logger.log('Rendering Results component with:', {
+                  processedImageType: typeof scanData.processedImage,
+                  processedImage: scanData.processedImage ? `${scanData.processedImage.substring(0, 50)}...` : null,
+                  originalImageType: typeof scanData.originalImage,
+                  originalImage: scanData.originalImage ? `${scanData.originalImage.substring(0, 50)}...` : null,
+                  areImagesEqual: scanData.processedImage === scanData.originalImage
+                });
+                return null;
+              })()
+            )}
+            <Results
+              qrData={scanData.qrData || null}
+              answers={scanData.answers || []}
+              processedImage={scanData.processedImage || null}
+              originalImage={scanData.originalImage || null}
+              onPrevious={handleRetake}
+              onComplete={handleClose}
+              onContinue={handleReset}
+              onSaved={handleResultsSaved}
+            />
+          </>
         )}
         {step === 5 && (
           <Confirmation

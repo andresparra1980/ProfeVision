@@ -175,7 +175,8 @@ export function Processing() {
             responseKeys: Object.keys(data),
             resultKeys: data.result ? Object.keys(data.result) : [],
             processedImageUrl: data.processedImageUrl,
-            processedImagePath: data.result?.processed_image_path
+            processedImagePath: data.result?.processed_image_path,
+            originalImagePath: data.result?.original_image_path || data.publicUrl
           };
           logger.log('API Response debug info:', debugInfo);
         }
@@ -193,11 +194,20 @@ export function Processing() {
           data: normalizedQrData
         });
         
+        // Determine processed image URL - prefer the direct URL from API response
+        const processedImg = data.processedImageUrl || 
+                             data.result?.processed_image_path || 
+                             '';
+                             
+        if (DEBUG && processedImg) {
+          logger.log('Using processed image URL:', processedImg);
+        }
+        
         const finalOutput = {
           qrData: normalizedQrData,
           answers: data.result?.answers || data.answers || {},
           originalImage: processedImageData,
-          processedImage: data.processedImageUrl || data.result?.processed_image_path || '',
+          processedImage: processedImg || processedImageData,
         };
         
         if (DEBUG) {

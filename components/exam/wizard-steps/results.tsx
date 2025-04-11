@@ -457,20 +457,31 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         logger.log('Procesando imagen para convertir a base64:', url);
       }
       
-      // Para URLs que incluyen localhost, reemplazar con la URL correcta en producción
+      // Determinar la URL final para cargar la imagen
       let finalUrl = url;
-      if ((url.includes('localhost:3000') || url.includes('/uploads/')) && typeof window !== 'undefined') {
-        // Usar origen de la ventana actual como base
-        if (url.includes('localhost:3000')) {
-          finalUrl = url.replace('https://localhost:3000', window.location.origin);
-          finalUrl = finalUrl.replace('http://localhost:3000', window.location.origin);
-        } else if (url.startsWith('/uploads/')) {
-          // Si es una ruta relativa, convertirla a absoluta
-          finalUrl = `${window.location.origin}${url}`;
-        }
-        
+      
+      // Caso 1: URLs absolutas con localhost
+      if (url.includes('localhost:3000') && typeof window !== 'undefined') {
+        // Reemplazar localhost con el origen actual
+        finalUrl = url.replace(/https?:\/\/localhost:3000/g, window.location.origin);
         if (DEBUG) {
-          logger.log('URL reescrita para evitar CORS:', finalUrl);
+          logger.log('URL de localhost reescrita:', finalUrl);
+        }
+      } 
+      // Caso 2: URLs relativas que empiezan con /uploads
+      else if (url.startsWith('/uploads/') && typeof window !== 'undefined') {
+        // Convertir a URL absoluta
+        finalUrl = `${window.location.origin}${url}`;
+        if (DEBUG) {
+          logger.log('URL relativa convertida a absoluta:', finalUrl);
+        }
+      }
+      // Caso 3: URLs que contienen /uploads/ pero no son relativas ni localhost
+      else if (url.includes('/uploads/') && !url.startsWith('http') && typeof window !== 'undefined') {
+        // Asumir que es una ruta relativa que no comienza con /
+        finalUrl = `${window.location.origin}/${url}`;
+        if (DEBUG) {
+          logger.log('URL parcial convertida a absoluta:', finalUrl);
         }
       }
       
@@ -532,7 +543,14 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           };
           
           img.onerror = () => {
-            // Si falla la carga de imagen, devolver un placeholder
+            // Si falla la carga de imagen, intentar con una variante de la URL como último recurso
+            if (finalUrl !== url && !finalUrl.includes('localhost')) {
+              // Intentar con la URL original si la modificada falló
+              logger.warn('Falló carga con URL modificada, intentando URL original:', url);
+              img.src = url;
+              return;
+            }
+            
             if (DEBUG) {
               logger.error('No se pudo cargar la imagen:', finalUrl);
             }
@@ -618,22 +636,44 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       // Convertir imágenes a base64 si son URLs
       if (DEBUG) {
         logger.log('Preparando imágenes para guardar...', {
-          originalImage: originalImage.substring(0, 50) + '...',
-          processedImage: processedImage.substring(0, 50) + '...'
+          originalImage: originalImage ? `${originalImage.substring(0, 50)}...` : null,
+          processedImage: processedImage ? `${processedImage.substring(0, 50)}...` : null,
+          areEqual: originalImage === processedImage,
+          originalIsDataUrl: originalImage?.startsWith('data:'),
+          processedIsDataUrl: processedImage?.startsWith('data:'),
         });
+      }
+      
+      // Comprobación adicional: si las imágenes son iguales cuando no deberían serlo
+      if (originalImage === processedImage && !originalImage?.startsWith('data:')) {
+        logger.warn('¡Advertencia! Las URLs de la imagen original y procesada son idénticas:', 
+          originalImage?.substring(0, 50)
+        );
       }
       
       let originalImageBase64, processedImageBase64;
       try {
         originalImageBase64 = await loadImageAsBase64(originalImage);
         processedImageBase64 = await loadImageAsBase64(processedImage);
+        
         if (DEBUG) {
+          const originalPrefix = originalImageBase64.substring(0, 30);
+          const processedPrefix = processedImageBase64.substring(0, 30);
+          
           logger.log('Imágenes preparadas correctamente', {
             originalLength: originalImageBase64.length,
             processedLength: processedImageBase64.length,
+            originalPrefix: `${originalPrefix}...`,
+            processedPrefix: `${processedPrefix}...`,
             areEqual: originalImageBase64 === processedImageBase64
           });
         }
+        
+        // Verificación adicional: si las imágenes convertidas son idénticas pero las URLs originales no lo eran
+        if (originalImageBase64 === processedImageBase64 && originalImage !== processedImage) {
+          logger.warn('¡Advertencia! Las imágenes convertidas son idénticas aunque las URLs no lo eran');
+        }
+        
       } catch (imageError) {
         logger.error('Error al procesar imágenes:', imageError);
         throw new Error(`Error al preparar imágenes: ${imageError instanceof Error ? imageError.message : 'Error desconocido'}`);
