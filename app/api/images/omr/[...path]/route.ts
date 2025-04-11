@@ -3,14 +3,20 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
 
+// Define params type for Next.js 15
+type PathParams = Promise<{ path: string[] }>;
+
 // Endpoint para servir imágenes OMR desde la API
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: PathParams }
 ) {
   try {
+    // Resolver los params del Promise
+    const resolvedParams = await params;
+    
     // Reconstruir la ruta del archivo solicitado
-    const filePath = params.path.join('/');
+    const filePath = resolvedParams.path.join('/');
     
     // Construir la ruta completa al archivo en el sistema
     const omrDirectory = path.join(process.cwd(), 'public', 'uploads', 'omr');
