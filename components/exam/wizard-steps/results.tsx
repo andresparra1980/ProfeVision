@@ -480,23 +480,79 @@ export function Results({
       }
       
       if (DEBUG) {
-        logger.log('Cargando imagen desde URL:', fetchUrl);
+        logger.log('Intentando cargar imagen desde URL inicial:', fetchUrl);
       }
       
-      // Cargar la imagen
-      const response = await fetch(fetchUrl);
-      if (!response.ok) {
-        throw new Error(`Error al cargar imagen: ${response.status} ${response.statusText}`);
-      }
-      const blob = await response.blob();
+      // Detectar si la URL contiene un path de imagen de OMR
+      const isOmrImage = /\/uploads\/omr\/(.+)\.(jpg|jpeg|png)/.test(fetchUrl);
+      const omrFilename = isOmrImage 
+        ? fetchUrl.match(/\/uploads\/omr\/(.+)\.(jpg|jpeg|png)/)?.slice(1).join('.') 
+        : null;
       
-      // Convertir a base64
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
+      // Lista de rutas alternativas para intentar si la primera falla
+      const urlsToTry = [
+        fetchUrl, // La URL original
+        
+        // API endpoint alternativo (si la URL es de uploads/omr)
+        isOmrImage ? `${window.location.origin}/api/images/omr/${omrFilename}` : null,
+        
+        // Probar con la ruta base sin origin por si el servidor está configurado para servir archivos estáticos
+        isOmrImage ? `/uploads/omr/${omrFilename}` : null,
+        
+        // Intentar con una versión cacheable agregando timestamp
+        `${fetchUrl}${fetchUrl.includes('?') ? '&' : '?'}_t=${Date.now()}`,
+      ].filter(Boolean) as string[];
+      
+      if (DEBUG) {
+        logger.log('URLs alternativas a intentar:', urlsToTry);
+      }
+      
+      let lastError = null;
+      
+      // Intentar cada URL hasta que una funcione
+      for (const urlToTry of urlsToTry) {
+        try {
+          if (DEBUG) {
+            logger.log('Intentando cargar desde:', urlToTry);
+          }
+          
+          const response = await fetch(urlToTry, { 
+            method: 'GET',
+            // Asegúrate de que no se use caché para evitar problemas 
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Error al cargar imagen: ${response.status} ${response.statusText}`);
+          }
+          
+          const blob = await response.blob();
+          
+          // Convertir a base64
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        } catch (err) {
+          lastError = err;
+          if (DEBUG) {
+            logger.warn(`Error al cargar desde ${urlToTry}:`, err);
+          }
+          // Continúa con la siguiente URL
+          continue;
+        }
+      }
+      
+      // Si llegamos aquí, ninguna URL funcionó
+      throw lastError || new Error('No se pudo cargar la imagen desde ninguna URL alternativa');
+      
     } catch (error: unknown) {
       if (DEBUG) {
         logger.error('Error al cargar imagen:', error);
