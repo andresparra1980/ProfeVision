@@ -384,7 +384,7 @@ export default function ExamResultsPage() {
       setUpdatingAnswer(true);
 
       const response = await fetch(`/api/exams/${params.id}/update-answer`, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
