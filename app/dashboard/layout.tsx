@@ -99,7 +99,7 @@ export default function DashboardLayout({
       <div className="flex flex-1 flex-col overflow-hidden bg-card">
         <DashboardHeader />
         <main className="flex-1 overflow-y-auto p-0">
-          <div className="bg-background dark:bg-background bg-graph-paper dark:bg-graph-paper-dark text-foreground rounded-tl-[2.5rem] min-h-full p-4 md:p-6 shadow-sm">
+          <div className="bg-background dark:bg-background bg-graph-paper dark:bg-graph-paper-dark text-foreground rounded-2xl min-h-full p-4 md:p-6 shadow-sm">
             {children}
           </div>
         </main>

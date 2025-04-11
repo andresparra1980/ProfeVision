@@ -5,13 +5,13 @@
 @layer base {
   :root {
     --text: #040316;
-    --background: #fafaf4;
+    --background: #e8ecee;
     --primary: #0b890f;
     --secondary: #bc152b;
     --accent: #ffd60a;
 
     --foreground: var(--text);
-    --card: #f8f9fa;
+    --card: #F8F9FA;
     --card-foreground: #1e293b;
  
     --popover: #ffffff;
@@ -43,7 +43,7 @@
     --accent: #f5cc00;
 
     --foreground: var(--text);
-    --card: #1e1e1f;
+    --card: #333334;
     --card-foreground: #f0e9d9;
  
     --popover: #222223;
@@ -60,7 +60,7 @@
     --destructive: #991b1b;
     --destructive-foreground: #fecaca;
  
-    --border: #333333;
+    --border: #555555;
     --input: #222223;
     --ring: #d4d4d8;
  
@@ -74,5 +74,22 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  :root:not(.dark) main {
+    background-color: #F8F9FA !important;
+  }
+  :root:not(.dark) header, :root:not(.dark) aside {
+    background-color: #F8F9FA !important;
+  }
+  :root.dark header, :root.dark aside {
+    background-color: #333334 !important;
+  }
+  :root.dark main {
+    background-color: #333334 !important;
+  }
+  @media (max-width: 768px) {
+    main h1, main h2, main .title {
+      margin-top: 1.5rem;
+    }
   }
 } 

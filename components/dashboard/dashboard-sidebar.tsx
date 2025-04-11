@@ -108,7 +108,6 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-40 flex w-64 flex-col justify-between bg-card transition-transform duration-200 md:static md:translate-x-0",
-          "border-r border-muted/20 dark:border-muted/40",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
