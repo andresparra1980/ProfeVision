@@ -6,11 +6,11 @@ import { existsSync } from 'fs';
 // Endpoint para servir imágenes OMR desde la API
 export async function GET(
   request: NextRequest,
-  context: { params: { path: string[] } }
+  { params }: { params: { path: string[] } }
 ) {
   try {
     // Reconstruir la ruta del archivo solicitado
-    const filePath = context.params.path.join('/');
+    const filePath = params.path.join('/');
     
     // Construir la ruta completa al archivo en el sistema
     const omrDirectory = path.join(process.cwd(), 'public', 'uploads', 'omr');
@@ -57,6 +57,10 @@ export async function GET(
     const headers = new Headers({
       'Content-Type': contentType,
       'Cache-Control': 'public, max-age=86400', // Caché de 1 día
+      // Add CORS headers to prevent CORS issues
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
     });
     
     // Devolver la imagen con los encabezados apropiados
