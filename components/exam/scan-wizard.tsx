@@ -55,10 +55,15 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
   // Watch for finalOutput changes - este efecto es independiente
   useEffect(() => {
     if (finalOutput) {
+      if (DEBUG) {
+        logger.log('Actualización desde finalOutput:', finalOutput);
+      }
+      
       // Update local state with results from context
       setScanData((prev) => ({
         ...prev,
-        processedImage: finalOutput.processedImage,
+        processedImage: finalOutput.processedImage || null,
+        originalImage: finalOutput.originalImage || prev.originalImage,
         qrData: finalOutput.qrData,
         answers: Array.isArray(finalOutput.answers) ? finalOutput.answers : [],
       }));

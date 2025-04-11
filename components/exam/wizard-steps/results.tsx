@@ -80,7 +80,12 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   
   // Log solo cuando no se haya mostrado antes
   if (DEBUG && !loggedRef.current) {
-    logger.log("Results component received:", { qrData, initialAnswersCount: initialAnswers?.length, processedImage: !!processedImage });
+    logger.log("Results component received:", { 
+      qrData, 
+      initialAnswersCount: initialAnswers?.length, 
+      processedImage: processedImage ? `${processedImage.substring(0, 50)}...` : null,
+      originalImage: originalImage ? `${originalImage.substring(0, 50)}...` : null
+    });
     loggedRef.current = true;
   }
   
@@ -442,15 +447,28 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
     try {
       // Si ya es un data URL, devolverlo directamente
       if (url.startsWith('data:')) {
+        if (DEBUG) {
+          logger.log('La imagen ya es un data URL, devolviéndola directamente');
+        }
         return url;
+      }
+      
+      if (DEBUG) {
+        logger.log('Procesando imagen para convertir a base64:', url);
       }
       
       // Para URLs que incluyen localhost, reemplazar con la URL correcta en producción
       let finalUrl = url;
-      if (url.includes('localhost:3000') && typeof window !== 'undefined') {
+      if ((url.includes('localhost:3000') || url.includes('/uploads/')) && typeof window !== 'undefined') {
         // Usar origen de la ventana actual como base
-        finalUrl = url.replace('https://localhost:3000', window.location.origin);
-        finalUrl = finalUrl.replace('http://localhost:3000', window.location.origin);
+        if (url.includes('localhost:3000')) {
+          finalUrl = url.replace('https://localhost:3000', window.location.origin);
+          finalUrl = finalUrl.replace('http://localhost:3000', window.location.origin);
+        } else if (url.startsWith('/uploads/')) {
+          // Si es una ruta relativa, convertirla a absoluta
+          finalUrl = `${window.location.origin}${url}`;
+        }
+        
         if (DEBUG) {
           logger.log('URL reescrita para evitar CORS:', finalUrl);
         }
@@ -458,6 +476,10 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       
       try {
         // Intentar fetch con la URL corregida
+        if (DEBUG) {
+          logger.log('Intentando fetch de la imagen desde:', finalUrl);
+        }
+        
         const response = await fetch(finalUrl, { 
           mode: 'cors',
           cache: 'no-cache',
@@ -469,6 +491,10 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         }
         
         const blob = await response.blob();
+        
+        if (DEBUG) {
+          logger.log('Imagen cargada correctamente, tamaño:', blob.size, 'bytes, tipo:', blob.type);
+        }
         
         // Comprimir la imagen antes de convertirla a base64
         const compressedBlob = await compressImage(blob);
@@ -591,7 +617,10 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       
       // Convertir imágenes a base64 si son URLs
       if (DEBUG) {
-        logger.log('Preparando imágenes para guardar...');
+        logger.log('Preparando imágenes para guardar...', {
+          originalImage: originalImage.substring(0, 50) + '...',
+          processedImage: processedImage.substring(0, 50) + '...'
+        });
       }
       
       let originalImageBase64, processedImageBase64;
@@ -599,7 +628,11 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         originalImageBase64 = await loadImageAsBase64(originalImage);
         processedImageBase64 = await loadImageAsBase64(processedImage);
         if (DEBUG) {
-          logger.log('Imágenes preparadas correctamente');
+          logger.log('Imágenes preparadas correctamente', {
+            originalLength: originalImageBase64.length,
+            processedLength: processedImageBase64.length,
+            areEqual: originalImageBase64 === processedImageBase64
+          });
         }
       } catch (imageError) {
         logger.error('Error al procesar imágenes:', imageError);

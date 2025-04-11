@@ -169,6 +169,17 @@ export function Processing() {
           }
         }
 
+        if (DEBUG) {
+          const debugInfo = {
+            qrData: normalizedQrData,
+            responseKeys: Object.keys(data),
+            resultKeys: data.result ? Object.keys(data.result) : [],
+            processedImageUrl: data.processedImageUrl,
+            processedImagePath: data.result?.processed_image_path
+          };
+          logger.log('API Response debug info:', debugInfo);
+        }
+
         const _result: ProcessingResult = {
           ...data,
           isManualScan: isManualScan || false,
@@ -186,7 +197,7 @@ export function Processing() {
           qrData: normalizedQrData,
           answers: data.result?.answers || data.answers || {},
           originalImage: processedImageData,
-          processedImage: data.result?.processed_image_path || '',
+          processedImage: data.processedImageUrl || data.result?.processed_image_path || '',
         };
         
         if (DEBUG) {
