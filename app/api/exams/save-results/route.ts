@@ -173,23 +173,40 @@ interface SaveResultsData {
 
 export async function POST(req: NextRequest) {
   try {
+    // Capture request timing for debugging
+    const requestId = Date.now().toString();
     if (DEBUG) {
-      logger.log('POST /api/exams/save-results iniciando...');
+      logger.log(`[${requestId}] POST /api/exams/save-results iniciando...`);
     }
 
-    const data = await req.json() as SaveResultsData;
-    const { 
-      qrData, 
-      answers, 
-      originalImage, 
-      processedImage, 
-      examScore,
-      isDuplicate,
-      duplicateInfo
-    } = data;
+    // Parse request body with error handling
+    let data: SaveResultsData;
+    try {
+      data = await req.json() as SaveResultsData;
+    } catch (parseError) {
+      // Log error details for debugging
+      logger.error(`[${requestId}] Error parseando JSON:`, parseError);
+      return NextResponse.json(
+        { error: 'Error al procesar datos de entrada', details: String(parseError) },
+        { status: 400 }
+      );
+    }
+
+    // Validate required data
+    const { qrData, answers, originalImage, processedImage, examScore, isDuplicate, duplicateInfo } = data;
 
     if (!qrData || !answers || !originalImage || !processedImage || !examScore) {
-      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'Datos incompletos',
+        details: {
+          hasQrData: !!qrData,
+          hasAnswers: !!answers,
+          answersLength: answers?.length || 0,
+          hasOriginalImage: !!originalImage,
+          hasProcessedImage: !!processedImage,
+          hasExamScore: !!examScore
+        }
+      }, { status: 400 });
     }
 
     // Extraer información del QR

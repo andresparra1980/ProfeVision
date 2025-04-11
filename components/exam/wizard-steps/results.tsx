@@ -440,34 +440,143 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   // Función para cargar imagen desde URL y convertirla a base64
   const loadImageAsBase64 = async (url: string): Promise<string> => {
     try {
-      // Verificar si ya es un string base64
-      if (url.startsWith('data:image/')) {
+      // Si ya es un data URL, devolverlo directamente
+      if (url.startsWith('data:')) {
         return url;
       }
       
-      // Verificar si es una URL válida
-      const isValidUrl = url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/');
-      if (!isValidUrl) {
-        throw new Error(`URL de imagen no válida: ${url}`);
+      // Para URLs que incluyen localhost, reemplazar con la URL correcta en producción
+      let finalUrl = url;
+      if (url.includes('localhost:3000') && typeof window !== 'undefined') {
+        // Usar origen de la ventana actual como base
+        finalUrl = url.replace('https://localhost:3000', window.location.origin);
+        finalUrl = url.replace('http://localhost:3000', window.location.origin);
+        if (DEBUG) {
+          logger.log('URL reescrita para evitar CORS:', finalUrl);
+        }
       }
       
-      // Cargar la imagen
-      const response = await fetch(url);
-      const blob = await response.blob();
-      
-      // Convertir a base64
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error: unknown) {
+      try {
+        // Intentar fetch con la URL corregida
+        const response = await fetch(finalUrl, { 
+          mode: 'cors',
+          cache: 'no-cache',
+          headers: { 'Access-Control-Allow-Origin': '*' }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error al cargar imagen: ${response.status} ${response.statusText}`);
+        }
+        
+        const blob = await response.blob();
+        
+        // Comprimir la imagen antes de convertirla a base64
+        const compressedBlob = await compressImage(blob);
+        
+        // Convertir a base64
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error('Error al leer el archivo'));
+          reader.readAsDataURL(compressedBlob);
+        });
+      } catch (fetchError) {
+        // Si falla el fetch por CORS, intentar cargar la imagen usando createElement
+        if (DEBUG) {
+          logger.log('Fetch falló, intentando método alternativo con Image:', fetchError);
+        }
+        
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              reject(new Error('No se pudo obtener contexto de canvas'));
+              return;
+            }
+            
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
+          };
+          
+          img.onerror = () => {
+            // Si falla la carga de imagen, devolver un placeholder
+            if (DEBUG) {
+              logger.error('No se pudo cargar la imagen:', finalUrl);
+            }
+            reject(new Error(`No se pudo cargar la imagen: ${finalUrl}`));
+          };
+          
+          img.src = finalUrl;
+        });
+      }
+    } catch (error) {
       if (DEBUG) {
-        logger.error('Error al cargar imagen:', error);
+        logger.error('Error al cargar imagen como base64:', error);
       }
-      throw new Error('No se pudo cargar la imagen. Intente nuevamente.');
+      throw new Error(`Error al cargar imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
+  };
+  
+  // Función para comprimir una imagen
+  const compressImage = async (blob: Blob): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        
+        // Escalar la imagen si es muy grande
+        let width = img.width;
+        let height = img.height;
+        const maxSize = 1200; // Tamaño máximo en píxeles
+        
+        if (width > maxSize || height > maxSize) {
+          if (width > height) {
+            height = Math.round((height * maxSize) / width);
+            width = maxSize;
+          } else {
+            width = Math.round((width * maxSize) / height);
+            height = maxSize;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('No se pudo obtener el contexto del canvas'));
+          return;
+        }
+        
+        // Dibujar la imagen en el canvas con el nuevo tamaño
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convertir a Blob con calidad reducida
+        canvas.toBlob(
+          (result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(new Error('Error al comprimir la imagen'));
+            }
+          },
+          'image/jpeg',
+          0.7 // Calidad del 70%
+        );
+      };
+      
+      img.onerror = () => reject(new Error('Error al cargar la imagen para compresión'));
+      
+      // Crear URL a partir del Blob
+      img.src = URL.createObjectURL(blob);
+    });
   };
 
   // Función para guardar los resultados y subir las imágenes
@@ -484,11 +593,17 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       if (DEBUG) {
         logger.log('Preparando imágenes para guardar...');
       }
-      const originalImageBase64 = await loadImageAsBase64(originalImage);
-      const processedImageBase64 = await loadImageAsBase64(processedImage);
       
-      if (DEBUG) {
-        logger.log('Imágenes preparadas correctamente');
+      let originalImageBase64, processedImageBase64;
+      try {
+        originalImageBase64 = await loadImageAsBase64(originalImage);
+        processedImageBase64 = await loadImageAsBase64(processedImage);
+        if (DEBUG) {
+          logger.log('Imágenes preparadas correctamente');
+        }
+      } catch (imageError) {
+        logger.error('Error al procesar imágenes:', imageError);
+        throw new Error(`Error al preparar imágenes: ${imageError instanceof Error ? imageError.message : 'Error desconocido'}`);
       }
       
       // Crear una copia de las respuestas normalizadas para enviar
@@ -509,41 +624,79 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         logger.log('Enviando datos al servidor...');
       }
       
-      // Enviar datos al endpoint
-      const response = await fetch('/api/exams/save-results', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al guardar los resultados");
-      }
-      
-      const result = await response.json();
-      if (DEBUG) {
-        logger.log('Respuesta del servidor:', result);
-      }
-      
-      // Mostrar notificación de éxito
-      toast({
-        title: isDuplicate ? "Resultados actualizados" : "Resultados guardados",
-        description: isDuplicate 
-          ? `La calificación anterior ha sido reemplazada correctamente.`
-          : `La calificación del examen ha sido registrada correctamente.`,
-        variant: "default",
-      });
-      
-      // Marcar como guardado
-      setSaved(true);
-      setSaving(false);
-      
-      // Notificar al padre que se guardó y pasar el ID del resultado
-      if (result && result.resultado_id) {
-        onSaved(result.resultado_id);
+      try {
+        // Enviar datos al endpoint con timeout para evitar esperas indefinidas
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 segundos
+        
+        const response = await fetch('/api/exams/save-results', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+          signal: controller.signal
+        });
+        
+        // Limpiar timeout
+        clearTimeout(timeoutId);
+        
+        // Verificar si la respuesta es exitosa
+        if (!response.ok) {
+          let errorMessage = "Error al guardar los resultados";
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+            if (errorData.details) {
+              console.error('Detalles del error:', errorData.details);
+            }
+          } catch (parseError) {
+            console.error('Error al parsear respuesta de error:', parseError);
+          }
+          throw new Error(errorMessage);
+        }
+        
+        // Leer la respuesta como texto primero para validar
+        const responseText = await response.text();
+        if (!responseText) {
+          throw new Error("El servidor respondió con un cuerpo vacío");
+        }
+        
+        // Parsear la respuesta JSON después de verificar que no está vacía
+        let result;
+        try {
+          result = JSON.parse(responseText);
+        } catch (parseError) {
+          throw new Error(`Error al procesar respuesta: ${parseError instanceof Error ? parseError.message : 'Error de formato'}`);
+        }
+        
+        if (DEBUG) {
+          logger.log('Respuesta del servidor:', result);
+        }
+        
+        // Mostrar notificación de éxito
+        toast({
+          title: isDuplicate ? "Resultados actualizados" : "Resultados guardados",
+          description: isDuplicate 
+            ? `La calificación anterior ha sido reemplazada correctamente.`
+            : `La calificación del examen ha sido registrada correctamente.`,
+          variant: "default",
+        });
+        
+        // Marcar como guardado
+        setSaved(true);
+        setSaving(false);
+        
+        // Notificar al padre que se guardó y pasar el ID del resultado
+        if (result && result.resultado_id) {
+          onSaved(result.resultado_id);
+        }
+      } catch (fetchError) {
+        // Manejar errores específicos de la petición
+        if (fetchError instanceof DOMException && fetchError.name === 'AbortError') {
+          throw new Error("La solicitud excedió el tiempo máximo de espera (60 segundos)");
+        }
+        throw fetchError;
       }
       
     } catch (error: unknown) {
