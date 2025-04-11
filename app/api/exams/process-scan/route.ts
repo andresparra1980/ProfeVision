@@ -333,7 +333,14 @@ export async function POST(request: NextRequest) {
     
     // Get the public URL for the saved image
     const publicPath = `/uploads/omr/${filename}`;
-    const fullPublicUrl = new URL(publicPath, request.nextUrl.origin).toString();
+    
+    // Determine the base URL, preferring NEXT_PUBLIC_SITE_URL in production if request.nextUrl.origin is localhost
+    const baseUrl = 
+      request.nextUrl.origin.includes('localhost') && process.env.NEXT_PUBLIC_SITE_URL
+        ? process.env.NEXT_PUBLIC_SITE_URL
+        : request.nextUrl.origin;
+    
+    const fullPublicUrl = new URL(publicPath, baseUrl).toString();
     
     try {
       // Process the image using the Python OMR script
@@ -544,7 +551,13 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const processedPublicUrl = new URL(processedPublicPath, request.nextUrl.origin).toString();
+      // Determine the base URL, preferring NEXT_PUBLIC_SITE_URL in production if request.nextUrl.origin is localhost
+      const baseUrl = 
+        request.nextUrl.origin.includes('localhost') && process.env.NEXT_PUBLIC_SITE_URL
+          ? process.env.NEXT_PUBLIC_SITE_URL
+          : request.nextUrl.origin;
+          
+      const processedPublicUrl = new URL(processedPublicPath, baseUrl).toString();
       
       // Return results
       return NextResponse.json({

@@ -41,6 +41,23 @@ fi
 # Navigate to project directory
 cd profevision
 
+# Create or update the .env.local file with production values
+echo "Setting up environment variables..."
+if [ -f ".env.local" ]; then
+    # If .env.local exists, make sure NEXT_PUBLIC_SITE_URL is set correctly
+    if grep -q "NEXT_PUBLIC_SITE_URL" .env.local; then
+        sed -i 's|NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=https://profevision.andresparra.co|g' .env.local
+    else
+        echo "NEXT_PUBLIC_SITE_URL=https://profevision.andresparra.co" >> .env.local
+    fi
+else
+    # Create a new .env.local file with essential variables
+    echo "Creating .env.local file with production values..."
+    cp .env.local.example .env.local
+    sed -i 's|NEXT_PUBLIC_API_URL=http://localhost:3000|NEXT_PUBLIC_API_URL=https://profevision.andresparra.co|g' .env.local
+    echo "NEXT_PUBLIC_SITE_URL=https://profevision.andresparra.co" >> .env.local
+fi
+
 # Install dependencies with legacy peer deps
 echo "Installing project dependencies..."
 yarn install --legacy-peer-deps
