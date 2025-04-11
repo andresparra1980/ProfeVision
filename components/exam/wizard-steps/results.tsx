@@ -450,7 +450,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       if (url.includes('localhost:3000') && typeof window !== 'undefined') {
         // Usar origen de la ventana actual como base
         finalUrl = url.replace('https://localhost:3000', window.location.origin);
-        finalUrl = url.replace('http://localhost:3000', window.location.origin);
+        finalUrl = finalUrl.replace('http://localhost:3000', window.location.origin);
         if (DEBUG) {
           logger.log('URL reescrita para evitar CORS:', finalUrl);
         }
