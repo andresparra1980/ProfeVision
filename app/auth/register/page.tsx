@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/card";
 
 const registerSchema = z.object({
-  name: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
+  nombres: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
+  apellidos: z.string().min(2, { message: "El apellido debe tener al menos 2 caracteres" }),
   email: z.string().email({ message: "Ingresa un correo electrónico válido" }),
   password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
   confirmPassword: z.string(),
@@ -43,7 +44,8 @@ export default function RegisterPage() {
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: "",
+      nombres: "",
+      apellidos: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -62,18 +64,13 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      // Dividir el nombre completo en nombre y apellido
-      const nameParts = data.name.split(' ');
-      const nombre = nameParts[0] || '';
-      const apellido = nameParts.slice(1).join(' ') || '';
-      
       const { error } = await signUpWithRedirect(
         data.email, 
         data.password, 
         {
-          nombre: nombre,
-          apellido: apellido,
-          full_name: data.name, // Campo adicional que se puede mantener
+          nombre: data.nombres,
+          apellido: data.apellidos,
+          full_name: `${data.nombres} ${data.apellidos}`,
         },
         captchaToken
       );
@@ -95,7 +92,6 @@ export default function RegisterPage() {
         description: error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.",
       });
       
-      // Resetear el CAPTCHA en caso de error
       if (turnstileRef.current) {
         turnstileRef.current.reset();
       }
@@ -124,15 +120,28 @@ export default function RegisterPage() {
             <CardContent>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nombre completo</Label>
+                  <Label htmlFor="nombres">Nombres</Label>
                   <Input
-                    id="name"
-                    placeholder="Juan Pérez"
-                    {...form.register("name")}
+                    id="nombres"
+                    placeholder="Juan"
+                    {...form.register("nombres")}
                     disabled={isLoading}
                   />
-                  {form.formState.errors.name && (
-                    <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
+                  {form.formState.errors.nombres && (
+                    <p className="text-sm text-destructive">{form.formState.errors.nombres.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="apellidos">Apellidos</Label>
+                  <Input
+                    id="apellidos"
+                    placeholder="Pérez González"
+                    {...form.register("apellidos")}
+                    disabled={isLoading}
+                  />
+                  {form.formState.errors.apellidos && (
+                    <p className="text-sm text-destructive">{form.formState.errors.apellidos.message}</p>
                   )}
                 </div>
                 
