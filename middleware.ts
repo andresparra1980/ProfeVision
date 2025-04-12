@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -13,24 +13,20 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
+        getAll: () => {
+          return Array.from(request.cookies.getAll())
+            .map(cookie => ({
+              name: cookie.name,
+              value: cookie.value
+            }));
         },
-        set(name: string, value: string, options) {
-          // Set the cookie in the response
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options) {
-          // Remove the cookie from the response
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-            maxAge: 0,
+        setAll: (cookies) => {
+          cookies.forEach(({ name, value, options }) => {
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            });
           });
         },
       },
