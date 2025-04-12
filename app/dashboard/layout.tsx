@@ -8,6 +8,7 @@ import DashboardHeader from "@/components/dashboard/dashboard-header";
 import { ScanExamFeature } from "@/components/exam/scan-exam-feature";
 import { toast } from "@/components/ui/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
+import { SidebarProvider } from "@/lib/contexts/sidebar-context";
 
 export default function DashboardLayout({
   children,
@@ -90,21 +91,23 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {user ? (
-        <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
-      ) : (
-        <div className="w-64 bg-card border-r border-muted/20 dark:border-muted/40"></div>
-      )}
-      <div className="flex flex-1 flex-col overflow-hidden bg-card">
-        <DashboardHeader />
-        <main className="flex-1 overflow-y-auto p-0">
-          <div className="bg-background dark:bg-background bg-graph-paper dark:bg-graph-paper-dark text-foreground rounded-2xl min-h-full p-4 md:p-6 shadow-sm">
-            {children}
-          </div>
-        </main>
+    <SidebarProvider>
+      <div className="flex h-screen overflow-hidden">
+        {user ? (
+          <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
+        ) : (
+          <div className="w-64 bg-card border-r border-muted/20 dark:border-muted/40"></div>
+        )}
+        <div className="flex flex-1 flex-col overflow-hidden bg-card transition-all duration-200">
+          <DashboardHeader />
+          <main className="flex-1 overflow-y-auto pl-2 pb-2 pr-2">
+            <div className="bg-background dark:bg-background bg-graph-paper dark:bg-graph-paper-dark text-foreground rounded-2xl min-h-full p-4 md:p-6 shadow-sm">
+              {children}
+            </div>
+          </main>
+        </div>
+        <ScanExamFeature />
       </div>
-      <ScanExamFeature />
-    </div>
+    </SidebarProvider>
   );
 } 
