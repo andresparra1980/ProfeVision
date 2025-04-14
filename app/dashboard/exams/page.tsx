@@ -196,7 +196,7 @@ export default function ExamsPage() {
                           {exam.examen_grupo?.map((asignacion) => (
                             <span
                               key={asignacion.grupo.id}
-                              className="inline-flex items-center rounded-full bg-secondary text-white px-2 py-1 text-xs font-medium shadow-sm"
+                              className="inline-flex items-center justify-center rounded-full bg-secondary text-white px-2 py-1 text-xs font-medium shadow-sm text-center"
                             >
                               {asignacion.grupo.nombre}
                             </span>

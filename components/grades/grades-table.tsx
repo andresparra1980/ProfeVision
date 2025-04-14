@@ -147,238 +147,242 @@ export function GradesTable({
     );
   }
 
+  // Calcular el ancho total necesario para los datos de estudiante
+  const studentDataWidth = 340; // 120px + 120px + 100px
+
   return (
     <div className="space-y-4">
-      <div className="rounded-md border overflow-x-auto w-full bg-card dark:bg-card shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b-2 border-border">
-              <TableHead 
-                className="text-center border-x-2 border-border"
-                colSpan={3}
-              >
-                <div className="flex items-center justify-center py-2">
-                  <span className="font-semibold text-foreground dark:text-foreground">Datos del Estudiante</span>
-                </div>
-              </TableHead>
-              {periodos.map((periodo, _index) => {
-                const componentesCount = componentes.filter(c => c.periodo_id === periodo.id).length;
-                const periodoWidth = `${componentesCount * 100 + 160}px`;
-                return (
-                  <TableHead 
-                    key={periodo.id} 
-                    className={`text-center border-x-2 border-border`} 
-                    colSpan={componentesCount + 2}
-                    style={{ width: periodoWidth, minWidth: periodoWidth }}
-                  >
-                    <div className="flex items-center justify-center gap-2 py-2">
-                      <div className="flex flex-col items-center">
-                        <span className="font-semibold text-foreground dark:text-foreground">{periodo.nombre}</span>
-                        <span className="text-xs text-foreground/80 dark:text-foreground/80">({periodo.porcentaje}%)</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onExportPeriod?.(periodo.id)}
-                        title="Exportar periodo"
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableHead>
-                );
-              })}
-              <TableHead className="text-center w-[60px] min-w-[60px] border-x-2 border-border">
-                <div className="flex flex-col items-center gap-1 py-2">
-                  <span className="font-semibold text-foreground dark:text-foreground">Nota Final</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onExportFinal}
-                    title="Exportar notas finales"
-                    className="h-6 w-6"
-                  >
-                    <Download className="h-3 w-3" />
-                  </Button>
-                </div>
-              </TableHead>
-            </TableRow>
-            <TableRow className="border-b-2 border-border">
-              <TableHead className="w-[120px] min-w-[120px]">Apellidos</TableHead>
-              <TableHead className="w-[120px] min-w-[120px]">Nombres</TableHead>
-              <TableHead className="w-[100px] min-w-[100px]">Identificación</TableHead>
-              {periodos.map(periodo => (
-                <React.Fragment key={periodo.id}>
-                  {componentes
-                    .filter(c => c.periodo_id === periodo.id)
-                    .map(componente => (
-                      <TableHead key={componente.id} className={`text-center p-0 border-x w-[100px] min-w-[100px]`}>
+      <div className="rounded-md border w-full bg-card dark:bg-card shadow-sm relative">
+        <div className="overflow-x-auto" style={{ position: 'relative' }}>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b-2 border-border">
+                <TableHead 
+                  className="text-center border-x-2 border-border sticky left-0 z-20 bg-card dark:bg-card"
+                  colSpan={3}
+                  style={{ width: `${studentDataWidth}px`, minWidth: `${studentDataWidth}px` }}
+                >
+                  <div className="flex items-center justify-center py-2">
+                    <span className="font-semibold text-foreground dark:text-foreground">Datos del Estudiante</span>
+                  </div>
+                </TableHead>
+                {periodos.map((periodo, _index) => {
+                  const componentesCount = componentes.filter(c => c.periodo_id === periodo.id).length;
+                  const periodoWidth = `${componentesCount * 100 + 160}px`;
+                  return (
+                    <TableHead 
+                      key={periodo.id} 
+                      className={`text-center border-x-2 border-border`} 
+                      colSpan={componentesCount + 2}
+                      style={{ width: periodoWidth, minWidth: periodoWidth }}
+                    >
+                      <div className="flex items-center justify-center gap-2 py-2">
                         <div className="flex flex-col items-center">
-                          <div className="p-2">
-                            <span className="text-sm">{componente.nombre}</span>
-                            <span className="block text-xs text-muted-foreground">
-                              ({componente.porcentaje}%)
-                            </span>
-                            {componentesVinculados[componente.id] && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Badge variant="outline" className="mt-1 gap-1 px-1 py-0 h-5 bg-secondary text-primary-foreground border-secondary hover:bg-secondary/90">
-                                      <LinkIcon className="h-3 w-3" />
-                                      <span className="text-xs">Examen</span>
-                                    </Badge>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Vinculado al examen: {componentesVinculados[componente.id].titulo}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
-                          </div>
-                          <div className="flex gap-1 p-1 border-t">
-                            {!componentesBloqueados[componente.id] && !componentesVinculados[componente.id] ? (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => onToggleLock(componente.id)}
-                                title="Bloquear calificaciones"
-                              >
-                                <Unlock className="h-3 w-3" />
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => onToggleLock(componente.id)}
-                                title={componentesVinculados[componente.id] ? 
-                                  "Componente vinculado a examen (no se puede desbloquear)" : 
-                                  "Desbloquear calificaciones"
-                                }
-                                disabled={!!componentesVinculados[componente.id]}
-                              >
-                                <Lock className={`h-3 w-3 ${componentesVinculados[componente.id] ? "text-secondary" : ""}`} />
-                              </Button>
-                            )}
-                            {componentesVinculados[componente.id] ? (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleSyncExamGrades(componente.id)}
-                                title="Sincronizar calificaciones desde el examen"
-                              >
-                                <RefreshCw className="h-3 w-3 text-secondary" />
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => onImportGrades?.(componente.id)}
-                                title="Importar calificaciones"
-                                disabled={!!componentesVinculados[componente.id]}
-                              >
-                                <Upload className="h-3 w-3" />
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => onExportGrades?.(componente.id)}
-                              title="Exportar calificaciones"
-                            >
-                              <Download className="h-3 w-3" />
-                            </Button>
-                          </div>
+                          <span className="font-semibold text-foreground dark:text-foreground">{periodo.nombre}</span>
+                          <span className="text-xs text-foreground/80 dark:text-foreground/80">({periodo.porcentaje}%)</span>
                         </div>
-                      </TableHead>
-                    ))}
-                  <TableHead className="text-center border-x w-[80px] min-w-[80px]">
-                    <div className="flex flex-col items-center">
-                      <span className="font-medium">Nota</span>
-                      <span className="font-medium">Periodo</span>
-                      <span className="text-xs text-foreground/70 dark:text-foreground/70">(Pond.)</span>
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-center border-x w-[80px] min-w-[80px]">
-                    <div className="flex flex-col items-center">
-                      <span className="font-medium">Nota</span>
-                      <span className="font-medium">Periodo</span>
-                      <span className="text-xs text-foreground/70 dark:text-foreground/70">(Abs.)</span>
-                    </div>
-                  </TableHead>
-                </React.Fragment>
-              ))}
-              <TableHead className="text-center w-[60px] min-w-[60px] border-x">
-                <span className="font-medium">Nota Final</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {estudiantes.map(estudiante => (
-              <TableRow key={estudiante.id}>
-                <TableCell className="font-medium w-[120px] min-w-[120px]">
-                  {estudiante.apellidos}
-                </TableCell>
-                <TableCell className="w-[120px] min-w-[120px]">
-                  {estudiante.nombres}
-                </TableCell>
-                <TableCell className="w-[100px] min-w-[100px]">
-                  {estudiante.identificacion}
-                </TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onExportPeriod?.(periodo.id)}
+                          title="Exportar periodo"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableHead>
+                  );
+                })}
+                <TableHead className="text-center w-[60px] min-w-[60px] border-x-2 border-border">
+                  <div className="flex flex-col items-center gap-1 py-2">
+                    <span className="font-semibold text-foreground dark:text-foreground">Nota Final</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onExportFinal}
+                      title="Exportar notas finales"
+                      className="h-6 w-6"
+                    >
+                      <Download className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </TableHead>
+              </TableRow>
+              <TableRow className="border-b-2 border-border">
+                <TableHead className="w-[120px] min-w-[120px] sticky left-0 z-20 bg-card dark:bg-card">Apellidos</TableHead>
+                <TableHead className="w-[120px] min-w-[120px] sticky left-[120px] z-20 bg-card dark:bg-card">Nombres</TableHead>
+                <TableHead className="w-[100px] min-w-[100px] sticky left-[240px] z-20 bg-card dark:bg-card">Identificación</TableHead>
                 {periodos.map(periodo => (
                   <React.Fragment key={periodo.id}>
                     {componentes
                       .filter(c => c.periodo_id === periodo.id)
                       .map(componente => (
-                        <TableCell key={componente.id} className={`
-                          text-center border-x w-[100px] min-w-[100px] p-0
-                          ${componentesVinculados[componente.id] ? 'bg-secondary/10 dark:bg-secondary/10' : ''}
-                        `}>
-                          <div className="flex items-center justify-center h-full">
-                            <GradeInput
-                              value={calificaciones.porComponente[estudiante.id]?.[componente.id] || null}
-                              onChange={(value) => onGradeChange(estudiante.id, componente.id, value)}
-                              disabled={componentesBloqueados[componente.id] || !!componentesVinculados[componente.id]}
-                            />
-                          </div>
-                        </TableCell>
-                      ))}
-                    <TableHead key={`periodo-nota-${periodo.id}`} className="text-center p-1 border-x">
-                      <div className="flex justify-center items-center h-full">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="font-semibold px-2 py-1">
-                                {calcularNotaPeriodo(estudiante, periodo).ponderada.toFixed(1)}
+                        <TableHead key={componente.id} className={`text-center p-0 border-x w-[100px] min-w-[100px]`}>
+                          <div className="flex flex-col items-center">
+                            <div className="p-2">
+                              <span className="text-sm">{componente.nombre}</span>
+                              <span className="block text-xs text-muted-foreground">
+                                ({componente.porcentaje}%)
                               </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Nota absoluta: {calcularNotaPeriodo(estudiante, periodo).absoluta.toFixed(1)}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                              {componentesVinculados[componente.id] && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Badge variant="outline" className="mt-1 gap-1 px-1 py-0 h-5 bg-secondary text-primary-foreground border-secondary hover:bg-secondary/90">
+                                        <LinkIcon className="h-3 w-3" />
+                                        <span className="text-xs">Examen</span>
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Vinculado al examen: {componentesVinculados[componente.id].titulo}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </div>
+                            <div className="flex gap-1 p-1 border-t">
+                              {!componentesBloqueados[componente.id] && !componentesVinculados[componente.id] ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => onToggleLock(componente.id)}
+                                  title="Bloquear calificaciones"
+                                >
+                                  <Unlock className="h-3 w-3" />
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => onToggleLock(componente.id)}
+                                  title="Desbloquear calificaciones"
+                                  disabled={!!componentesVinculados[componente.id]}
+                                >
+                                  <Lock className="h-3 w-3" />
+                                </Button>
+                              )}
+    
+                              {componentesVinculados[componente.id] ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => handleSyncExamGrades(componente.id)}
+                                  title="Sincronizar calificaciones desde el examen"
+                                >
+                                  <RefreshCw className="h-3 w-3 text-secondary" />
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => onImportGrades?.(componente.id)}
+                                  title="Importar calificaciones"
+                                  disabled={!!componentesVinculados[componente.id]}
+                                >
+                                  <Upload className="h-3 w-3" />
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => onExportGrades?.(componente.id)}
+                                title="Exportar calificaciones"
+                              >
+                                <Download className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </TableHead>
+                      ))}
+                    <TableHead className="text-center border-x w-[80px] min-w-[80px]">
+                      <div className="flex flex-col items-center">
+                        <span className="font-medium">Nota</span>
+                        <span className="font-medium">Periodo</span>
+                        <span className="text-xs text-foreground/70 dark:text-foreground/70">(Pond.)</span>
                       </div>
                     </TableHead>
-                    <TableCell className="text-center font-semibold p-1 border-x">
-                      <div className="px-2 py-1">
-                        {calcularNotaFinal(estudiante).toFixed(1)}
+                    <TableHead className="text-center border-x w-[80px] min-w-[80px]">
+                      <div className="flex flex-col items-center">
+                        <span className="font-medium">Nota</span>
+                        <span className="font-medium">Periodo</span>
+                        <span className="text-xs text-foreground/70 dark:text-foreground/70">(Abs.)</span>
                       </div>
-                    </TableCell>
+                    </TableHead>
                   </React.Fragment>
                 ))}
-                <TableCell className="text-center font-semibold p-1 border-x">
-                  <div className="px-2 py-1">
-                    {calcularNotaFinal(estudiante).toFixed(1)}
-                  </div>
-                </TableCell>
+                <TableHead className="text-center w-[60px] min-w-[60px] border-x">
+                  <span className="font-medium">Nota Final</span>
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {estudiantes.map(estudiante => (
+                <TableRow key={estudiante.id}>
+                  <TableCell className="font-medium w-[120px] min-w-[120px] sticky left-0 z-10 bg-white dark:bg-black">
+                    {estudiante.apellidos}
+                  </TableCell>
+                  <TableCell className="w-[120px] min-w-[120px] sticky left-[120px] z-10 bg-white dark:bg-black">
+                    {estudiante.nombres}
+                  </TableCell>
+                  <TableCell className="w-[100px] min-w-[100px] sticky left-[240px] z-10 bg-white dark:bg-black">
+                    {estudiante.identificacion}
+                  </TableCell>
+                  {periodos.map(periodo => (
+                    <React.Fragment key={periodo.id}>
+                      {componentes
+                        .filter(c => c.periodo_id === periodo.id)
+                        .map(componente => (
+                          <TableCell key={componente.id} className={`
+                            text-center border-x w-[100px] min-w-[100px] p-0
+                            ${componentesVinculados[componente.id] ? 'bg-secondary/10 dark:bg-secondary/10' : ''}
+                          `}>
+                            <div className="flex items-center justify-center h-full">
+                              <GradeInput
+                                value={calificaciones.porComponente[estudiante.id]?.[componente.id] || null}
+                                onChange={(value) => onGradeChange(estudiante.id, componente.id, value)}
+                                disabled={componentesBloqueados[componente.id] || !!componentesVinculados[componente.id]}
+                              />
+                            </div>
+                          </TableCell>
+                        ))}
+                      <TableHead key={`periodo-nota-${periodo.id}`} className="text-center p-1 border-x">
+                        <div className="flex justify-center items-center h-full">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="font-semibold px-2 py-1">
+                                  {calcularNotaPeriodo(estudiante, periodo).ponderada.toFixed(1)}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Nota absoluta: {calcularNotaPeriodo(estudiante, periodo).absoluta.toFixed(1)}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </TableHead>
+                      <TableCell className="text-center font-semibold p-1 border-x">
+                        <div className="px-2 py-1">
+                          {calcularNotaFinal(estudiante).toFixed(1)}
+                        </div>
+                      </TableCell>
+                    </React.Fragment>
+                  ))}
+                  <TableCell className="text-center font-semibold p-1 border-x">
+                    <div className="px-2 py-1">
+                      {calcularNotaFinal(estudiante).toFixed(1)}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

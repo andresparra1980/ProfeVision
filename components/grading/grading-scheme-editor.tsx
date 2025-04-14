@@ -237,22 +237,26 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <Label htmlFor="scheme-name">Nombre del Esquema</Label>
-          <Input
-            id="scheme-name"
-            value={scheme.nombre}
-            onChange={(e) => setScheme({ ...scheme, nombre: e.target.value })}
-          />
-        </div>
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1 w-full">
+              <Label htmlFor="scheme-name">Nombre del Esquema</Label>
+              <Input
+                id="scheme-name"
+                value={scheme.nombre}
+                onChange={(e) => setScheme({ ...scheme, nombre: e.target.value })}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-4">
         <DragDropContext onDragEnd={handlePeriodDragEnd}>
           <Droppable droppableId="periodos">
             {(provided: DroppableProvided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
+              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-6">
                 {scheme.periodos.map((periodo, periodIndex) => (
                   <Draggable
                     key={periodo.id || `new-${periodIndex}`}
@@ -263,7 +267,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                       <Card
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className="relative"
+                        className="relative p-1 border-2 bg-card dark:bg-card shadow-sm"
                       >
                         <div
                           {...provided.dragHandleProps}

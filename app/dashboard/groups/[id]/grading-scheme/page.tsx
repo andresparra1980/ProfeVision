@@ -167,8 +167,8 @@ export default function GradingSchemePage() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div className="flex flex-col space-y-2">
+    <div className="px-0 py-6 space-y-6 w-full">
+      <div className="flex flex-col space-y-2 px-6">
         <Button 
           variant="ghost" 
           size="sm"
@@ -186,11 +186,13 @@ export default function GradingSchemePage() {
         </div>
       </div>
 
-      <GradingSchemeEditor
-        initialScheme={initialScheme || undefined}
-        groupId={groupId}
-        onSave={handleSave}
-      />
+      <div className="px-6">
+        <GradingSchemeEditor
+          initialScheme={initialScheme || undefined}
+          groupId={groupId}
+          onSave={handleSave}
+        />
+      </div>
     </div>
   );
 } 

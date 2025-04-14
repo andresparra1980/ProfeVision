@@ -497,8 +497,8 @@ export default function GradesPage({ params }: GradesPageProps) {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6 max-w-[95%]">
-      <div className="flex flex-col space-y-2">
+    <div className="px-0 py-6 space-y-6 w-full">
+      <div className="flex flex-col space-y-2 px-6">
         <Button 
           variant="ghost" 
           size="sm"

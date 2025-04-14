@@ -92,7 +92,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden relative">
         {user ? (
           <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
         ) : (
@@ -101,12 +101,14 @@ export default function DashboardLayout({
         <div className="flex flex-1 flex-col overflow-hidden bg-card transition-all duration-200">
           <DashboardHeader />
           <main className="flex-1 overflow-y-auto pl-2 pb-2 pr-2">
-            <div className="bg-background dark:bg-background bg-graph-paper dark:bg-graph-paper-dark text-foreground rounded-2xl min-h-full p-4 md:p-6 shadow-sm">
+            <div className="bg-background dark:bg-background bg-graph-paper dark:bg-graph-paper-dark text-foreground rounded-2xl min-h-full p-4 md:p-6 shadow-sm md:mb-0 mb-16">
               {children}
             </div>
           </main>
         </div>
-        <ScanExamFeature />
+        <div className="absolute bottom-0 right-0 z-50 w-full h-0">
+          <ScanExamFeature />
+        </div>
       </div>
     </SidebarProvider>
   );
