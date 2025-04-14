@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Instructions, ImageCapture, Processing, Results, Confirmation } from './wizard-steps';
@@ -19,7 +19,9 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
   const { 
     setProcessedImageData, 
     setOnProcessingComplete,
-    finalOutput
+    finalOutput,
+    processedImageData,
+    clearImageData
   } = useImageContext();
   
   const [step, setStep] = useState(1);
@@ -74,6 +76,42 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
       }
     }
   }, [finalOutput, step]);
+
+  const handleRetake = useCallback(() => {
+    // Reset processing flags when retaking
+    processingImage.current = false;
+    processedImageId.current = null;
+    
+    // Reset any existing results data
+    setScanData((prev) => ({
+      ...prev,
+      originalImage: undefined,
+      processedImage: null,
+      qrData: null,
+      answers: undefined,
+      isDuplicate: false,
+      duplicateInfo: null,
+    }));
+    
+    // Asegurarse de limpiar la imagen en el contexto también
+    clearImageData();
+    
+    // Go back to the capture step
+    setStep(2);
+  }, [setScanData, setStep, clearImageData]);
+
+  // Effect to automatically return to capture step if image data is cleared
+  useEffect(() => {
+    if (!processedImageData && step > 2) {
+      if (DEBUG) {
+        logger.log('Image data cleared in context, returning to capture step (step 2).');
+      }
+      handleRetake(); // Call the existing function to go back to step 2
+    }
+    // It's important handleRetake is stable or included if it changes.
+    // In this case, handleRetake doesn't seem to depend on changing state/props,
+    // but including it defensively.
+  }, [processedImageData, step, handleRetake]);
 
   const handleNext = () => {
     if (step === 2) {
@@ -159,25 +197,6 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     
     // Move to results step
     setStep(4);
-  };
-
-  const handleRetake = () => {
-    // Reset processing flags when retaking
-    processingImage.current = false;
-    processedImageId.current = null;
-    
-    // Reset any existing results data
-    setScanData((prev) => ({
-      ...prev,
-      processedImage: null,
-      qrData: null,
-      answers: undefined,
-      isDuplicate: false,
-      duplicateInfo: null,
-    }));
-    
-    // Go back to the capture step
-    setStep(2);
   };
 
   const handleResultsSaved = (resultadoId: string) => {

@@ -146,6 +146,7 @@ async function cleanupUploadsDirectory() {
     const files = await _fsPromises.readdir(uploadsDir);
     const now = Date.now();
     const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    const MIN_IMAGE_AGE = 10 * 60 * 1000; // 10 minutes - don't delete images newer than this
     
     // Process each file
     for (const file of files) {
@@ -156,8 +157,9 @@ async function cleanupUploadsDirectory() {
         const stats = await _fsPromises.stat(filePath);
         const fileAge = now - stats.mtime.getTime();
         
-        // Delete if older than MAX_AGE or if it's a common image file
-        if (fileAge > MAX_AGE || file.match(/\.(jpg|jpeg|png|gif)$/i)) {
+        // Delete if older than MAX_AGE
+        // For image files, only delete if they're older than MIN_IMAGE_AGE
+        if (fileAge > MAX_AGE || (fileAge > MIN_IMAGE_AGE && file.match(/\.(jpg|jpeg|png|gif)$/i))) {
           await _fsPromises.unlink(filePath);
           if (DEBUG) {
             logger.log(`Cleaned up old file: ${file}, age: ${fileAge / (60 * 60 * 1000)} hours`);

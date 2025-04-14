@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, AlertCircle, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { ArrowRight, RefreshCw } from 'lucide-react';
 import { QRData, ProcessingResult, DuplicateInfo } from '../types';
 import { useImageContext } from '../contexts';
 import logger from '@/lib/utils/logger';
@@ -40,8 +40,6 @@ export function Processing() {
   
   const processingCompleted = useRef(false);
   const processingInProgress = useRef(false);
-  const retryCount = useRef(0);
-  const MAX_RETRIES = 3;
 
   // Helper function to check for duplicates
   const checkForDuplicates = async (qrData: QRData | null): Promise<DuplicateCheckResponse | null> => {
@@ -114,7 +112,6 @@ export function Processing() {
       if (data.success) {
         setStatus('complete');
         processingCompleted.current = true;
-        retryCount.current = 0; // Reset retry count on success
         
         // Properly prepare QR data in standardized format
         let parsedQrData = data.result?.qr_data || null;
@@ -153,6 +150,17 @@ export function Processing() {
           groupId: parsedQrData?.groupId || null,
           version: parsedQrData?.version || '1'
         };
+        
+        // --> Add check for invalid scan result <--
+        const noAnswersFound = !data.result?.answers || Object.keys(data.result.answers).length === 0;
+        if (!normalizedQrData.examId && !normalizedQrData.studentId && noAnswersFound) {
+          setStatus('error');
+          setErrorMessage('No se pudo detectar un examen válido en la imagen. Por favor, asegúrese de que el código QR y las marcas de respuesta sean claramente visibles e intente de nuevo.');
+          processingInProgress.current = false;
+          processingCompleted.current = false; // Not successfully completed
+          return; // Stop processing
+        }
+        // <-- End check -->
         
         // Check if the QR data contains placeholder IDs
         const isManualScan = !normalizedQrData.examId || 
@@ -239,36 +247,25 @@ export function Processing() {
         setErrorMessage(data.error_details?.message || data.error || 'Error processing image');
       }
     } catch (error) {
+      const genericErrorMessage = 'Error al procesar. Intente de nuevo.';
+      let specificErrorMessage = genericErrorMessage;
+
       if (DEBUG) {
         logger.error('Error processing image:', error);
       }
       
-      // Increment retry count
-      retryCount.current += 1;
-      
-      // Check if we should retry automatically
-      if (retryCount.current <= MAX_RETRIES) {
-        setErrorMessage(`Error processing image (attempt ${retryCount.current}/${MAX_RETRIES}): ${error instanceof Error ? error.message : 'Unknown error'}`);
-        
-        // Wait a bit before retrying
-        setTimeout(() => {
-          processingInProgress.current = false;
-          processImage();
-        }, 2000);
-        
-        return;
+      // Check if the error message indicates the specific "processed image not found" scenario
+      if (error instanceof Error && error.message.includes('imagen procesada no encontrada')) {
+        specificErrorMessage = NO_EXAM_DETECTED_MSG; // Use the specific user-friendly message
       }
       
+      // Just set error state directly without retry
       setStatus('error');
-      setErrorMessage(
-        `Error processing image after ${MAX_RETRIES} attempts: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`
-      );
-    } finally {
-      if (retryCount.current >= MAX_RETRIES || status === 'complete') {
-        processingInProgress.current = false;
-      }
+      setErrorMessage(specificErrorMessage); // Set the determined message
+      processingInProgress.current = false;
+      processingCompleted.current = false; // Ensure it's not marked as completed
     }
-  }, [processedImageData, status, setQrValidation, setFinalOutput, onProcessingComplete]);
+  }, [processedImageData, setQrValidation, setFinalOutput, onProcessingComplete]);
 
   // Set processedImageData when component mounts
   useEffect(() => {
@@ -282,7 +279,6 @@ export function Processing() {
 
     return () => {
       // Cleanup when component unmounts
-      retryCount.current = 0;
     };
   }, [processedImageData, processImage]);
 
@@ -294,32 +290,7 @@ export function Processing() {
   }, [processedImageData]);
 
   const handleRetake = async () => {
-    try {
-      // Limpiar archivos temporales antes de retomar la foto
-      const response = await fetch('/api/exams/cleanup-temp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          imageUrl: processedImageData || ""
-        })
-      });
-
-      if (!response.ok) {
-        if (DEBUG) {
-          logger.error('Error al limpiar archivos temporales:', await response.text());
-        }
-      }
-    } catch (error) {
-      if (DEBUG) {
-        logger.error('Error al limpiar archivos temporales:', error);
-      }
-    }
-
-    processingCompleted.current = false;
-    processingInProgress.current = false;
-    setStatus('idle');
+    // Only call clearImageData - this should trigger the parent wizard
     clearImageData();
   };
 
@@ -335,14 +306,20 @@ export function Processing() {
     });
   };
 
+  // Mensaje específico para cuando no se detecta examen válido
+  const NO_EXAM_DETECTED_MSG = "Examen no detectado. Intente de nuevo.";
+
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-6 w-full">
       <h2 className="text-xl font-bold text-center text-gray-800">
         {status === 'idle' ? 'Procesando imagen...' :
          status === 'processing' ? 'Procesando imagen...' :
+         status === 'checking_duplicates' ? 'Verificando duplicados...' :
          status === 'complete' ? 'Procesamiento exitoso' :
          status === 'duplicate' ? 'Examen ya calificado' :
-         'Error de procesamiento'}
+         status === 'error' && errorMessage === NO_EXAM_DETECTED_MSG ? 'Examen no detectado' :
+         status === 'error' ? 'Error de procesamiento' :
+         'Procesando imagen...'}
       </h2>
       
       <div className="w-full max-w-md relative">
@@ -369,63 +346,24 @@ export function Processing() {
             </div>
           )}
           
-          {/* Sobreponer icono de estado */}
+          {/* Sobreponer icono y mensaje de estado/error */}
           {status !== 'processing' && (
-            <div className="absolute top-2 right-2 rounded-full p-1 z-10" 
-                style={{
-                  backgroundColor: status === 'complete' ? 'rgba(34, 197, 94, 0.2)' : 
-                                  status === 'duplicate' ? 'rgba(249, 115, 22, 0.2)' : 
-                                  'rgba(239, 68, 68, 0.2)'
-                }}>
-              {status === 'complete' && <CheckCircle2 className="h-8 w-8 text-green-500" />}
-              {status === 'duplicate' && <AlertTriangle className="h-8 w-8 text-orange-500" />}
-              {status === 'error' && <AlertCircle className="h-8 w-8 text-red-500" />}
-            </div>
-          )}
-        </div>
-        
-        {/* Mensaje de estado */}
-        <div className="text-center mb-4">
-          {status === 'processing' && (
-            <p className="text-gray-600">
-              Procesando su imagen. Este proceso puede tardar unos segundos...
-            </p>
-          )}
-          
-          {status === 'complete' && (
-            <p className="text-green-600 font-medium">
-              ¡Imagen procesada correctamente!
-            </p>
-          )}
-          
-          {status === 'duplicate' && (
-            <>
-              <p className="text-orange-600 font-medium">
-                Este examen ya ha sido calificado anteriormente
+            <div 
+              className="absolute bottom-0 left-0 right-0 p-2 z-10 flex items-center justify-center text-center"
+              style={{
+                backgroundColor: 
+                  status === 'complete' ? 'rgba(34, 197, 94, 0.8)' :
+                  status === 'duplicate' ? 'rgba(249, 115, 22, 0.8)' :
+                  status === 'error' && errorMessage === NO_EXAM_DETECTED_MSG ? 'rgba(249, 115, 22, 0.8)' :
+                  status === 'error' ? 'rgba(239, 68, 68, 0.8)' :
+                  'transparent'
+              }}
+            >
+              <p className="text-white text-sm font-medium">
+                {status === 'complete' && '¡Procesado correctamente!'}
+                {status === 'duplicate' && (duplicateData ? `Examen ya calificado el ${formatDate(duplicateData.fecha_calificacion)}` : 'Examen ya calificado.')}
+                {status === 'error' && errorMessage}
               </p>
-              
-              {duplicateData && (
-                <div className="text-sm text-orange-700 text-center mt-2 space-y-2">
-                  <p className="font-medium">Este examen ya fue calificado el {formatDate(duplicateData.fecha_calificacion)}.</p>
-                  <div className="bg-white p-3 rounded-md border border-orange-200 mb-2">
-                    <p className="font-medium text-orange-800 mb-1">Calificación anterior:</p>
-                    <div className="flex justify-between">
-                      <span>Puntaje:</span>
-                      <span className="font-medium">{duplicateData.puntaje} puntos</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Porcentaje:</span>
-                      <span className="font-medium">{duplicateData.porcentaje}%</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          
-          {status === 'error' && (
-            <div className="text-red-600 space-y-2">
-              <p className="font-medium">{errorMessage}</p>
             </div>
           )}
         </div>
@@ -435,7 +373,6 @@ export function Processing() {
           {/* Botón de retomar foto (visible excepto durante procesamiento) */}
           {status !== 'processing' && (
             <Button 
-              variant="outline"
               onClick={handleRetake}
               className="px-4"
             >
@@ -443,11 +380,10 @@ export function Processing() {
             </Button>
           )}
           
-          {/* Botón de reintento (solo visible en caso de error) */}
-          {status === 'error' && (
+          {/* Botón de reintento (solo visible en caso de error GENÉRICO) */}
+          {status === 'error' && errorMessage !== NO_EXAM_DETECTED_MSG && (
             <Button
               onClick={() => {
-                retryCount.current = 0;
                 processingCompleted.current = false;
                 processImage();
               }}
