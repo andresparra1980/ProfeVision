@@ -100,15 +100,13 @@ export default function DashboardLayout({
         )}
         <div className="flex flex-1 flex-col overflow-hidden bg-card transition-all duration-200">
           <DashboardHeader />
-          <main className="flex-1 overflow-y-auto pl-2 pb-2 pr-2">
-            <div className="bg-background dark:bg-background bg-graph-paper dark:bg-graph-paper-dark text-foreground rounded-2xl min-h-full p-4 md:p-6 shadow-sm md:mb-0 mb-16">
+          <main className="flex-1 overflow-y-auto pl-2 pt-2 pr-2 pb-20 md:pb-2">
+            <div className="bg-background dark:bg-background bg-graph-paper dark:bg-graph-paper-dark text-foreground rounded-2xl min-h-full p-4 md:p-6 shadow-sm">
               {children}
             </div>
           </main>
         </div>
-        <div className="absolute bottom-0 right-0 z-50 w-full h-0">
-          <ScanExamFeature />
-        </div>
+        <ScanExamFeature />
       </div>
     </SidebarProvider>
   );
