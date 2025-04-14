@@ -158,7 +158,7 @@ export function GradesTable({
             <TableHeader>
               <TableRow className="border-b-2 border-border">
                 <TableHead 
-                  className="text-center border-x-2 border-border sticky left-0 z-20 bg-card dark:bg-card"
+                  className="text-center border-x-2 border-border md:sticky left-0 z-20 bg-card dark:bg-card"
                   colSpan={3}
                   style={{ width: `${studentDataWidth}px`, minWidth: `${studentDataWidth}px` }}
                 >
@@ -209,9 +209,9 @@ export function GradesTable({
                 </TableHead>
               </TableRow>
               <TableRow className="border-b-2 border-border">
-                <TableHead className="w-[120px] min-w-[120px] sticky left-0 z-20 bg-card dark:bg-card">Apellidos</TableHead>
-                <TableHead className="w-[120px] min-w-[120px] sticky left-[120px] z-20 bg-card dark:bg-card">Nombres</TableHead>
-                <TableHead className="w-[100px] min-w-[100px] sticky left-[240px] z-20 bg-card dark:bg-card">Identificación</TableHead>
+                <TableHead className="w-[120px] min-w-[120px] md:sticky left-0 z-20 bg-card dark:bg-card">Apellidos</TableHead>
+                <TableHead className="w-[120px] min-w-[120px] md:sticky left-[120px] z-20 bg-card dark:bg-card">Nombres</TableHead>
+                <TableHead className="w-[100px] min-w-[100px] md:sticky left-[240px] z-20 bg-card dark:bg-card">Identificación</TableHead>
                 {periodos.map(periodo => (
                   <React.Fragment key={periodo.id}>
                     {componentes
@@ -323,13 +323,13 @@ export function GradesTable({
             <TableBody>
               {estudiantes.map(estudiante => (
                 <TableRow key={estudiante.id}>
-                  <TableCell className="font-medium w-[120px] min-w-[120px] sticky left-0 z-10 bg-white dark:bg-black">
+                  <TableCell className="font-medium w-[120px] min-w-[120px] md:sticky left-0 z-10 bg-white dark:bg-black">
                     {estudiante.apellidos}
                   </TableCell>
-                  <TableCell className="w-[120px] min-w-[120px] sticky left-[120px] z-10 bg-white dark:bg-black">
+                  <TableCell className="w-[120px] min-w-[120px] md:sticky left-[120px] z-10 bg-white dark:bg-black">
                     {estudiante.nombres}
                   </TableCell>
-                  <TableCell className="w-[100px] min-w-[100px] sticky left-[240px] z-10 bg-white dark:bg-black">
+                  <TableCell className="w-[100px] min-w-[100px] md:sticky left-[240px] z-10 bg-white dark:bg-black">
                     {estudiante.identificacion}
                   </TableCell>
                   {periodos.map(periodo => (
