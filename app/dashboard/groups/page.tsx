@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { format, isWithinInterval, startOfYear, endOfYear, addYears, startOfMonth, endOfMonth, setMonth, setYear } from "date-fns";
 import { es } from "date-fns/locale";
+import logger from "@/lib/utils/logger";
 
 type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
   materias: {
@@ -128,7 +129,7 @@ export default function GroupsPage() {
             .eq('grupo_id', grupo.id);
           
           if (countError) {
-            console.error(`Error al obtener conteo para grupo ${grupo.id}:`, countError);
+            logger.error(`Error al obtener conteo para grupo ${grupo.id}:`, countError);
             return {
               ...grupo,
               estudiantes_count: 0
@@ -145,7 +146,7 @@ export default function GroupsPage() {
       setGrupos(gruposConConteo);
     } catch (error: unknown) {
       const err = error as Error;
-      console.error('Error al cargar grupos:', err);
+      logger.error('Error al cargar grupos:', err);
       toast({
         variant: "destructive",
         title: "Error al cargar grupos",
@@ -173,7 +174,33 @@ export default function GroupsPage() {
         .order("nombre");
 
       if (error) throw error;
-      setMaterias(data || []);
+      
+      logger.log("Loaded subjects from DB:", data?.length || 0);
+      
+      // Log a sample of the data structure
+      if (data && data.length > 0) {
+        logger.log("Sample subject data structure:", JSON.stringify(data[0], null, 2));
+      }
+      
+      // Ensure all materias have consistent data structure with explicit entidad_id
+      const processedData = data?.map((materia: Partial<Materia>) => {
+        // Si el objeto ya tiene entidad_id directo, lo usamos
+        // Si no, intentamos obtenerlo de la relación entidades_educativas
+        const entidad_id = materia.entidad_id || 
+                          (materia.entidades_educativas?.id || null);
+        
+        return {
+          ...materia,
+          entidad_id: entidad_id
+        };
+      }) || [];
+      
+      logger.log("Processed subjects count:", processedData.length);
+      if (processedData.length > 0) {
+        logger.log("First processed subject:", JSON.stringify(processedData[0], null, 2));
+      }
+      
+      setMaterias(processedData);
     } catch (error: unknown) {
       const err = error as Error;
       toast({
@@ -188,25 +215,54 @@ export default function GroupsPage() {
     if (!profesor) return;
     
     try {
+      // Primero cargamos todas las entidades disponibles
+      const { data: entidadesData, error: entidadesError } = await supabase
+        .from("entidades_educativas")
+        .select("*")
+        .order("nombre");
+        
+      if (entidadesError) throw entidadesError;
+      
+      logger.log("Entidades totales disponibles:", entidadesData?.length || 0);
+      
+      // Ahora cargamos las materias del profesor para filtrar solo las entidades que tienen materias
       const { data: materias, error: materiasError } = await supabase
         .from("materias")
-        .select("*, entidades_educativas!inner(*)")
+        .select("*, entidades_educativas(*)")
         .eq("profesor_id", profesor.id);
 
       if (materiasError) throw materiasError;
 
+      logger.log("Materias para filtrar entidades:", materias?.length || 0);
+      
       // Extraer entidades únicas de las materias
       const entidadesMap = new Map<string, EntidadEducativa>();
+      
       materias?.forEach((materia: Materia) => {
-        const entidad = materia.entidades_educativas;
-        if (entidad && entidad.id) {
-          entidadesMap.set(entidad.id, entidad);
+        // Si la materia tiene directamente un entidad_id
+        if (materia.entidad_id) {
+          // Buscar la entidad correspondiente en entidadesData
+          const entidad = entidadesData?.find((e: EntidadEducativa) => e.id === materia.entidad_id);
+          if (entidad) {
+            entidadesMap.set(entidad.id, entidad);
+          }
+        }
+        
+        // Si la materia tiene la relación entidades_educativas
+        if (materia.entidades_educativas && materia.entidades_educativas.id) {
+          entidadesMap.set(
+            materia.entidades_educativas.id, 
+            materia.entidades_educativas
+          );
         }
       });
       
-      setEntidades(Array.from(entidadesMap.values()));
+      const entidadesArray = Array.from(entidadesMap.values());
+      logger.log("Entidades educativas filtradas:", entidadesArray.length);
+      setEntidades(entidadesArray);
     } catch (error: unknown) {
       const err = error as Error;
+      logger.error('Error al cargar entidades educativas:', err);
       toast({
         variant: "destructive",
         title: "Error al cargar entidades educativas",
@@ -226,12 +282,37 @@ export default function GroupsPage() {
   useEffect(() => {
     if (editingGrupo) {
       // Primero cargar la entidad y luego la materia para mantener la consistencia
-      form.setValue("entidad_id", editingGrupo.materias?.entidades_educativas?.id || "");
+      const entidadId = editingGrupo.materias?.entidades_educativas?.id || "";
+      logger.log("Editing grupo:", editingGrupo.nombre);
+      logger.log("Setting entidad_id:", entidadId);
+      logger.log("Grupo materia_id:", editingGrupo.materia_id);
+      form.setValue("entidad_id", entidadId);
       
-      // Esperar al siguiente ciclo para que las materias se filtren
-      setTimeout(() => {
-        form.setValue("materia_id", editingGrupo.materia_id);
-      }, 0);
+      if (entidadId) {
+        // Filtrar materias por la entidad seleccionada usando la lógica mejorada
+        const materiasDeEntidad = materias.filter(m => {
+          // Verificamos si la materia tiene entidad_id directamente
+          if (m.entidad_id === entidadId) {
+            return true;
+          }
+          
+          // Verificamos la relación anidada en entidades_educativas
+          if (m.entidades_educativas && m.entidades_educativas.id === entidadId) {
+            return true;
+          }
+          
+          return false;
+        });
+        
+        logger.log("Materias filtradas para entidad:", materiasDeEntidad.length);
+        setMateriasFiltradas(materiasDeEntidad);
+        
+        // Esperar al siguiente ciclo para que las materias se filtren
+        setTimeout(() => {
+          logger.log("Setting materia_id:", editingGrupo.materia_id);
+          form.setValue("materia_id", editingGrupo.materia_id);
+        }, 50);
+      }
 
       form.setValue("nombre", editingGrupo.nombre);
       form.setValue("descripcion", editingGrupo.descripcion || "");
@@ -255,17 +336,37 @@ export default function GroupsPage() {
       setStartDate(null);
       setEndDate(null);
     }
-  }, [editingGrupo, form]);
+  }, [editingGrupo, form, materias]);
 
   useEffect(() => {
     const entidadId = form.watch("entidad_id");
     if (entidadId) {
-      const materiasDeEntidad = materias.filter(m => m.entidad_id === entidadId);
+      logger.log("Entity change detected:", entidadId);
+      
+      // Modificamos la condición de filtrado para considerar correctamente la relación
+      const materiasDeEntidad = materias.filter(m => {
+        // Verificamos si la materia tiene entidad_id directamente
+        if (m.entidad_id === entidadId) {
+          return true;
+        }
+        
+        // Verificamos la relación anidada en entidades_educativas
+        if (m.entidades_educativas && m.entidades_educativas.id === entidadId) {
+          return true;
+        }
+        
+        return false;
+      });
+      
+      logger.log("Filtered subjects count:", materiasDeEntidad.length);
+      logger.log("Available subject IDs:", materiasDeEntidad.map(m => m.id).join(", "));
+      
       setMateriasFiltradas(materiasDeEntidad);
       
       // Resetear la materia seleccionada si no pertenece a la entidad
       const materiaActual = form.watch("materia_id");
       if (materiaActual && !materiasDeEntidad.find(m => m.id === materiaActual)) {
+        logger.log("Current subject not found in filtered list, resetting:", materiaActual);
         form.setValue("materia_id", "");
       }
     } else {
@@ -296,7 +397,6 @@ export default function GroupsPage() {
           .update({
             nombre: data.nombre,
             descripcion: data.descripcion || null,
-            entidad_id: data.entidad_id,
             materia_id: data.materia_id,
             año_escolar: data.periodo_escolar || null,
             periodo_escolar: data.periodo_escolar || null,
@@ -314,7 +414,6 @@ export default function GroupsPage() {
         const dataToInsert = {
           nombre: data.nombre,
           descripcion: data.descripcion || null,
-          entidad_id: data.entidad_id,
           materia_id: data.materia_id,
           profesor_id: profesor.id,
           año_escolar: data.periodo_escolar || null,
@@ -338,7 +437,7 @@ export default function GroupsPage() {
       loadGrupos();
     } catch (error: unknown) {
       const err = error as Error & { code?: string; details?: string };
-      console.error('Error al guardar grupo:', err);
+      logger.error('Error al guardar grupo:', err);
       toast({
         variant: "destructive",
         title: "Error al guardar grupo",
