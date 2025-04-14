@@ -15,7 +15,7 @@ export function ScanExamFeature() {
 
   return (
     <>
-      <FloatingActionButton onClick={openWizard} />
+      {!isWizardOpen && <FloatingActionButton onClick={openWizard} />}
       <ScanWizard isOpen={isWizardOpen} onClose={closeWizard} />
     </>
   );

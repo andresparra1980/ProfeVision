@@ -311,7 +311,7 @@ export function Processing() {
 
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-6 w-full">
-      <h2 className="text-xl font-bold text-center text-gray-800">
+      <h2 className="text-xl font-bold text-center">
         {status === 'idle' ? 'Procesando imagen...' :
          status === 'processing' ? 'Procesando imagen...' :
          status === 'checking_duplicates' ? 'Verificando duplicados...' :
