@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "cprofevision",
+      name: "profevision",
       script: "node_modules/.bin/next",
       args: "start",
       instances: "max",
