@@ -4,7 +4,7 @@ import { Camera, ArrowRight, RotateCcw } from "lucide-react";
 import Image from "next/image";
 
 interface ImageCaptureProps {
-  onCapture: (file: File) => void;
+  onCapture: (_file: File) => void;
   capturedImage?: string;
   onNext: () => void;
   onRetake: () => void;

@@ -32,13 +32,13 @@ interface GradesTableProps {
   periodos: Periodo[];
   componentes: ComponenteCalificacion[];
   calificaciones: Calificaciones;
-  onGradeChange: (estudianteId: string, componenteId: string, value: number | null) => void;
+  onGradeChange: (_estudianteId: string, _componenteId: string, _value: number | null) => void;
   isLoading?: boolean;
   componentesBloqueados: Record<string, boolean>;
-  onToggleLock: (componenteId: string) => void;
-  onImportGrades?: (componenteId: string) => void;
-  onExportGrades?: (componenteId: string) => void;
-  onExportPeriod?: (periodoId: string) => void;
+  onToggleLock: (_componenteId: string) => void;
+  onImportGrades?: (_componenteId: string) => void;
+  onExportGrades?: (_componenteId: string) => void;
+  onExportPeriod?: (_periodoId: string) => void;
   onExportFinal?: () => void;
   componentesVinculados?: Record<string, { examen_id: string, titulo: string }>;
 }

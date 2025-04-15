@@ -428,16 +428,16 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
                                     key={componente.id}
                                     control={form.control}
                                     name="componentesSeleccionados"
-                                    render={({ field }: { field: { value: string[], onChange: (value: string[]) => void } }) => {
+                                    render={({ field: { value: _value, onChange } }) => {
                                       return (
                                         <FormItem key={componente.id} className="flex flex-row items-start space-x-3 space-y-0">
                                           <FormControl>
                                             <Checkbox
-                                              checked={field.value?.includes(componente.id)}
+                                              checked={_value?.includes(componente.id)}
                                               onCheckedChange={(checked) => {
                                                 return checked
-                                                  ? field.onChange([...field.value, componente.id])
-                                                  : field.onChange(field.value?.filter((value) => value !== componente.id));
+                                                  ? onChange([..._value, componente.id])
+                                                  : onChange(_value?.filter((value) => value !== componente.id));
                                               }}
                                             />
                                           </FormControl>

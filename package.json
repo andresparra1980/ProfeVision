@@ -57,7 +57,9 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.24.0",
+    "@next/eslint-plugin-next": "^15.3.0",
     "@types/crypto-js": "^4.2.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
@@ -65,9 +67,11 @@
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "autoprefixer": "^10.0.1",
-    "eslint": "^8.57.1",
+    "eslint": "9",
     "eslint-config-next": "^15.2.3",
+    "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "5",
     "globals": "^16.0.0",
     "postcss": "^8",
     "supabase": "^2.19.7",

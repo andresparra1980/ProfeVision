@@ -30,7 +30,7 @@ interface ResultsProps {
   onPrevious: () => void;
   onComplete: () => void;
   onContinue: () => void;
-  onSaved: (resultadoId: string) => void;
+  onSaved: (_resultadoId: string) => void;
 }
 
 interface RawAnswer {

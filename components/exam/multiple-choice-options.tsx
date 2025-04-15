@@ -5,7 +5,7 @@ export interface MultipleChoiceOptionsProps {
   numOptions?: number;
   disabled?: boolean;
   readOnly?: boolean;
-  onSelect?: (option: string) => void;
+  onSelect?: (_option: string) => void;
   questionNumber?: number;
   size?: 'sm' | 'md' | 'lg';
   showLabels?: boolean;

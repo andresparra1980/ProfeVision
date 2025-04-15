@@ -28,7 +28,7 @@ const COMPONENT_TYPES: { value: ComponentType; label: string }[] = [
 interface Props {
   initialScheme?: GradingScheme;
   groupId: string;
-  onSave: (scheme: GradingScheme) => Promise<void>;
+  onSave: (_scheme: GradingScheme) => Promise<void>;
 }
 
 export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {

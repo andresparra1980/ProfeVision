@@ -20,7 +20,7 @@ interface GradesExcelModalProps {
   estudiantes: Estudiante[];
   componente: ComponenteCalificacion | null;
   calificaciones: Record<string, number>;
-  onImportComplete: (calificaciones: Record<string, number>) => void;
+  onImportComplete: (_calificaciones: Record<string, number>) => void;
   mode: 'import' | 'export' | 'export-period' | 'export-final';
   materia: { id: string; nombre: string };
   grupo: { 
@@ -53,8 +53,7 @@ export function GradesExcelModal({
   componentes,
   institucionName = 'INSTITUCIÓN EDUCATIVA',
 }: GradesExcelModalProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [file, setFile] = useState<File | null>(null);
+  const [_file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [preview, setPreview] = useState<{identificacion: string, nombres: string, apellidos: string, valor: number}[]>([]);
   const [errors, setErrors] = useState<string[]>([]);

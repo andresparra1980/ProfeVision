@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface GradeInputProps {
   value: number | null;
-  onChange: (value: number | null) => void;
+  onChange: (_value: number | null) => void;
   min?: number;
   max?: number;
   className?: string;

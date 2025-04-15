@@ -10,13 +10,11 @@ const IS_DEV = process.env.NODE_ENV === 'development';
  * Función auxiliar segura que encapsula console para evitar errores de linting
  */
 // Deshabilitamos el linting para todas las propiedades de console
-/* eslint-disable no-console */
 const safeConsole = {
   log: console.log,
   warn: console.warn,
   error: console.error
 };
-/* eslint-enable no-console */
 
 /**
  * Logger utility that only outputs in development environment

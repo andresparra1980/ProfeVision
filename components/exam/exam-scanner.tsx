@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { ImagePlus, Upload, AlertTriangle, Camera, Loader2, Check, X, RefreshCw, AlertCircle, QrCode, CheckCircle2, XCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
+import logger from '@/lib/utils/logger';
 
 // Configurar flag de debug para mensajes de consola
 const _DEBUG = process.env.NODE_ENV === 'development';
@@ -51,7 +52,7 @@ interface OMRResult {
 // Expandir las propiedades del componente para incluir callbacks adicionales
 export interface ExamScannerProps {
   examId?: string;
-  onScanComplete?: (result: OMRResult, imageUrl: string) => void;
+  onScanComplete?: (_result: OMRResult, _imageUrl: string) => void;
   _onConnectionError?: () => void;
 }
 
@@ -82,8 +83,7 @@ export function ExamScanner({
 
   // Función para manejar errores de conexión específicamente
   const handleConnectionError = useCallback((error: Error) => {
-    // eslint-disable-next-line no-console
-    console.error('Error de conexión detectado:', error);
+    logger.error('Error de conexión detectado:', error);
     setConnectionError(true);
     setErrorMessage('Problema de conexión detectado. Verifique su conexión a Internet.');
     toast.error('Problema de conexión. Verifique su conexión a Internet.');
@@ -156,7 +156,7 @@ export function ExamScanner({
       setCameraStatus('available');
       
     } catch (_error) {
-      console.error('Error al iniciar la cámara:', _error);
+      logger.error('Error al iniciar la cámara:', _error);
       setCameraStatus('not-supported');
       toast.error('No se pudo iniciar la cámara. Verifica los permisos del navegador.');
     }
@@ -308,8 +308,7 @@ export function ExamScanner({
           // Carga exitosa, procesar respuesta
           try {
             const responseData = JSON.parse(xhr.responseText);
-            // eslint-disable-next-line no-console
-            console.log('Respuesta del servidor:', responseData);
+            logger.log('Respuesta del servidor:', responseData);
             
             if (responseData.success) {
               setProgress({ status: 'processing', percent: 100 });
@@ -363,7 +362,7 @@ export function ExamScanner({
               }
             }
           } catch (parseError) {
-            console.error('Error al procesar respuesta del servidor:', parseError);
+            logger.error('Error al procesar respuesta del servidor:', parseError);
             setErrorMessage('Error al procesar la respuesta del servidor');
             
             // Verificar si es un error de conexión o de formato
@@ -373,8 +372,7 @@ export function ExamScanner({
           }
         } else {
           // Error HTTP
-          // eslint-disable-next-line no-console
-          console.error('Error HTTP:', xhr.status, xhr.statusText);
+          logger.error(`Error HTTP: ${xhr.status} ${xhr.statusText}`);
           
           let errorMessage = `Error del servidor: ${xhr.status} ${xhr.statusText}`;
           let parsedError = null;
@@ -418,8 +416,7 @@ export function ExamScanner({
       };
       
       xhr.onerror = function() {
-        // eslint-disable-next-line no-console
-        console.error('Error de red al subir la imagen');
+        logger.error('Error de red al subir la imagen');
         setErrorMessage('Error de conexión al subir la imagen');
         
         // Claro error de conexión
@@ -450,8 +447,7 @@ export function ExamScanner({
       
       xhr.timeout = 60000; // 60 segundos de timeout
       xhr.ontimeout = function() {
-        // eslint-disable-next-line no-console
-        console.error('Timeout al subir la imagen');
+        logger.error('Timeout al subir la imagen');
         setErrorMessage('La solicitud ha excedido el tiempo límite');
         
         // También es un tipo de error de conexión
@@ -482,10 +478,8 @@ export function ExamScanner({
       
       xhr.open('POST', '/api/exams/process-scan', true);
       xhr.send(formData);
-      
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error al subir la imagen:', error);
+      logger.error('Error al subir la imagen:', error);
       setErrorMessage('Error al iniciar la carga de la imagen');
       
       // Error general, podría ser de conexión o local
@@ -497,12 +491,12 @@ export function ExamScanner({
       const omrResult: OMRResult = {
         success: false,
         message: 'Error al iniciar la carga de la imagen',
-        error_code: 'upload_init_error',
+        error_code: 'general_error',
         error_details: {
-          type: 'upload_error',
-          code: 'upload_init_error',
-          message: error instanceof Error ? error.message : String(error),
-          recommendations: ['Intente con una imagen diferente', 'Verifique su conexión a internet']
+          type: 'general_error',
+          code: 'general_error',
+          message: error instanceof Error ? error.message : 'Error desconocido al intentar subir la imagen',
+          recommendations: ['Verifique su conexión a internet', 'Intente nuevamente más tarde']
         },
         error: undefined,
         publicUrl: undefined,
@@ -547,44 +541,32 @@ export function ExamScanner({
 
           if (!response.ok) {
             // Error HTTP
-            const statusText = response.statusText;
-            // eslint-disable-next-line no-console
-            console.error(`Error al verificar estado (${response.status}): ${statusText}`);
-            
-            // Si es un error 5xx, podría ser un problema de conexión o del servidor
-            if (response.status >= 500) {
-              handleConnectionError(new Error(`Error del servidor al verificar estado: ${response.status}`));
-              throw new Error(`Error del servidor: ${response.status} ${statusText}`);
-            }
-            
-            const errorData = await response.json().catch(() => ({ 
-              message: `Error HTTP: ${response.status} ${statusText}` 
-            }));
-            
-            throw new Error(errorData.message || `Error ${response.status}: ${statusText}`);
+            const statusText = await response.text();
+            logger.error(`Error al verificar estado (${response.status}): ${statusText}`);
+            throw new Error(`Error al verificar estado (${response.status}): ${statusText}`);
           }
           
-          const data = await response.json();
+          const statusData = await response.json();
           
-          if (data.status === 'completed') {
+          if (statusData.status === 'completed') {
             completed = true;
             setProgress({ status: 'processing', percent: 100 });
             
-            if (data.result.success) {
+            if (statusData.result.success) {
               const omrResult: OMRResult = {
                 success: true,
-                answers: data.result.answers || [],
-                confidence: data.result.confidence || 0,
-                qr_data: data.result.qrData || { examId: "", studentId: "", isValid: false },
-                original_image: data.result.originalImage || null,
-                processed_image: data.result.processedImage || null,
-                publicUrl: data.result.publicUrl || null
+                answers: statusData.result.answers || [],
+                confidence: statusData.result.confidence || 0,
+                qr_data: statusData.result.qrData || { examId: "", studentId: "", isValid: false },
+                original_image: statusData.result.originalImage || null,
+                processed_image: statusData.result.processedImage || null,
+                publicUrl: statusData.result.publicUrl || null
               };
               
               setOmrResult(omrResult);
               
               // Usar la URL pública si está disponible, o la imagen procesada/original como fallback
-              const imageToDisplay = data.result.publicUrl || data.result.processedImage || data.result.originalImage || null;
+              const imageToDisplay = statusData.result.publicUrl || statusData.result.processedImage || statusData.result.originalImage || null;
               setCapturedImage(imageToDisplay);
               
               if (onScanComplete) {
@@ -592,35 +574,34 @@ export function ExamScanner({
               }
             } else {
               // Procesamiento completado pero con error
-              setErrorMessage(data.result.message || 'Error al procesar la imagen');
+              setErrorMessage(statusData.result.message || 'Error al procesar la imagen');
               
               const omrResult: OMRResult = {
                 success: false,
-                message: data.result.message || 'Error al procesar la imagen',
-                error_code: data.result.errorCode || 'processing_error',
-                error_details: data.result.errorDetails || null,
-                error: data.result.error || null,
-                publicUrl: data.result.publicUrl || null,
+                message: statusData.result.message || 'Error al procesar la imagen',
+                error_code: statusData.result.errorCode || 'processing_error',
+                error_details: statusData.result.errorDetails || null,
+                error: statusData.result.error || null,
+                publicUrl: statusData.result.publicUrl || null,
                 answers: [], // Inicializar answers como array vacío
-                qr_data: data.result.qrData || { examId: "", studentId: "", isValid: false },
+                qr_data: statusData.result.qrData || { examId: "", studentId: "", isValid: false },
               };
               
               setOmrResult(omrResult);
               
               if (onScanComplete) {
-                onScanComplete(omrResult, data.result.originalImage || '');
+                onScanComplete(omrResult, statusData.result.originalImage || '');
               }
             }
-          } else if (data.status === 'failed') {
+          } else if (statusData.status === 'failed') {
             completed = true;
-            throw new Error(data.error || 'El procesamiento ha fallado');
+            throw new Error(statusData.error || 'El procesamiento ha fallado');
           } else {
             // Aún procesando, esperar 2 segundos antes del siguiente intento
             await new Promise(resolve => setTimeout(resolve, 2000));
           }
         } catch (pollError) {
-          // eslint-disable-next-line no-console
-          console.error('Error en el polling:', pollError);
+          logger.error('Error en el polling:', pollError);
           
           // Si después de varios intentos seguimos teniendo errores, podría ser un problema de conexión
           if (attempts > maxAttempts / 2) {
@@ -643,8 +624,7 @@ export function ExamScanner({
       }
       
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error en processInBackground:', error);
+      logger.error('Error en processInBackground:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Error desconocido en el procesamiento');
       
       // Determinar si es un error de conexión
@@ -818,7 +798,7 @@ export function ExamScanner({
       setProcessingStatus('completed');
       
     } catch (_error) {
-      console.error('Error al procesar la imagen:', _error);
+      logger.error('Error al procesar la imagen:', _error);
       setProcessingStatus('error');
       setErrorMessage(_error instanceof Error ? _error.message : 'Error desconocido al procesar la imagen');
     }

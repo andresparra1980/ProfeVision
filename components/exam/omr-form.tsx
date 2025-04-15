@@ -42,7 +42,7 @@ export interface OMRFormProps {
   /**
    * Callback when an option is selected
    */
-  onAnswerChange?: (questionNumber: number, option: string) => void;
+  onAnswerChange?: (_questionNumber: number, _option: string) => void;
   /**
    * Size of the bubbles
    * @default "md"

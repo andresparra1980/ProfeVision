@@ -7,13 +7,13 @@ import { QRValidation, FinalOutput } from '../types';
 interface ImageContextType {
   processedImageData: string | null;
   qrValidation: QRValidation;
-  setProcessedImageData: (data: string | null) => void;
+  setProcessedImageData: (_data: string | null) => void;
   clearImageData: () => void;
-  setQrValidation: (validation: QRValidation) => void;
-  setFinalOutput: (output: FinalOutput) => void;
+  setQrValidation: (_validation: QRValidation) => void;
+  setFinalOutput: (_output: FinalOutput) => void;
   finalOutput: FinalOutput | null;
   onProcessingComplete: (() => void) | null;
-  setOnProcessingComplete: (callback: (() => void) | null) => void;
+  setOnProcessingComplete: (_callback: (() => void) | null) => void;
 }
 
 // Create the context with default values

@@ -5,6 +5,7 @@ import { CircleAlert, RefreshCcw, Server, Database, Key } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import logger from '@/lib/utils/logger';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -86,8 +87,7 @@ export default function ConnectionDiagnostic(_props: ConnectionDiagnosticProps) 
     try {
       const url = '/api/supabase-diagnostic';
       if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.log('Ejecutando diagnóstico desde:', url);
+        logger.log('Ejecutando diagnóstico desde:', url);
       }
       
       const response = await fetch(url);
@@ -98,14 +98,12 @@ export default function ConnectionDiagnostic(_props: ConnectionDiagnosticProps) 
       
       const data = await response.json();
       if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.log('Resultado del diagnóstico:', data);
+        logger.log('Resultado del diagnóstico:', data);
       }
       setDiagnosticResult(data);
     } catch (err) {
       if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.error('Error al ejecutar diagnóstico:', err);
+        logger.error('Error al ejecutar diagnóstico:', err);
       }
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
@@ -124,8 +122,7 @@ export default function ConnectionDiagnostic(_props: ConnectionDiagnosticProps) 
       
       const result = await response.json();
       if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.log('Resultado de fix-env:', result);
+        logger.log('Resultado de fix-env:', result);
       }
       
       // Ejecutar diagnóstico nuevamente para ver los cambios
@@ -134,8 +131,7 @@ export default function ConnectionDiagnostic(_props: ConnectionDiagnosticProps) 
       return result;
     } catch (err) {
       if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.error('Error al corregir variables de entorno:', err);
+        logger.error('Error al corregir variables de entorno:', err);
       }
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
