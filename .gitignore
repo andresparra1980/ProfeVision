@@ -150,3 +150,5 @@ scripts/omr/.pytest_cache/
 
 # Documentation folder (managed in separate repository)
 /docs/
+/profevision-manual/
+/profevision-manual/images/
