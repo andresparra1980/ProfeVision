@@ -476,7 +476,7 @@ export function GradesExcelModal({
     }
 
     // Filtrar componentes por grupo
-    const componentesDelGrupo = todosComponentes?.filter((g) => {
+    const _componentesDelGrupo = todosComponentes?.filter((g) => {
       // Asegurar que g tenga grupo_id antes de compararlos
       return (g as ComponenteCalificacionWithGrupo).grupo_id === grupo.id;
     }) || [];
@@ -550,11 +550,23 @@ export function GradesExcelModal({
         rowData.push(notaPonderada.toFixed(2), notaAbsoluta.toFixed(2));
       });
 
-      // Calcular nota final
-      const notaFinal = componentesDelGrupo.reduce((acc, comp) => {
-        const nota = todasCalificaciones[estudiante.id]?.[comp.id] || 0;
-        return acc + (nota * (comp.porcentaje / 100));
-      }, 0);
+      // Calcular nota final correctamente sumando las contribuciones de cada periodo
+      let notaFinal = 0;
+      
+      // Sumar las notas ponderadas de cada periodo
+      periodos.forEach(periodo => {
+        const componentesPeriodo = componentes.filter(c => c.periodo_id === periodo.id);
+        let notaPonderadaPeriodo = 0;
+        
+        // Calcular la nota ponderada del periodo
+        componentesPeriodo.forEach(componente => {
+          const nota = todasCalificaciones[estudiante.id]?.[componente.id] || 0;
+          notaPonderadaPeriodo += nota * (componente.porcentaje / 100);
+        });
+        
+        // Agregar la contribución de este periodo a la nota final
+        notaFinal += notaPonderadaPeriodo;
+      });
 
       rowData.push(notaFinal.toFixed(2));
 
