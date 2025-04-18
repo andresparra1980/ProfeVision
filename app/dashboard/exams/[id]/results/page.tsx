@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, Image as ImageIcon, FileImage, Loader2, Save, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Image as ImageIcon, FileImage, Loader2, Save, AlertCircle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,6 +22,9 @@ import Image from 'next/image';
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
+
+// Importar la biblioteca xlsx para exportar a Excel
+import * as XLSX from 'xlsx';
 
 interface Estudiante {
   id: string;
@@ -540,6 +543,70 @@ export default function ExamResultsPage() {
     }
   };
 
+  // Función para exportar resultados a Excel
+  const handleExportToExcel = () => {
+    if (!examDetails || resultados.length === 0) {
+      toast({
+        title: "Error",
+        description: "No hay resultados para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Crear datos para exportar
+      const dataToExport = resultados.map(resultado => ({
+        "Apellidos": resultado.estudiante.apellidos,
+        "Nombres": resultado.estudiante.nombres,
+        "Identificación": resultado.estudiante.identificacion,
+        "Nota": resultado.puntaje_obtenido.toFixed(2),
+        "Porcentaje": `${resultado.porcentaje.toFixed(2)}%`,
+        "Fecha de Calificación": new Date(resultado.fecha_calificacion).toLocaleDateString()
+      }));
+
+      // Agregar estudiantes sin calificación
+      todosEstudiantes
+        .filter(estudiante => !resultados.some(r => r.estudiante.id === estudiante.id))
+        .forEach(estudiante => {
+          dataToExport.push({
+            "Apellidos": estudiante.apellidos,
+            "Nombres": estudiante.nombres,
+            "Identificación": estudiante.identificacion,
+            "Nota": "No presentado",
+            "Porcentaje": "0.00%",
+            "Fecha de Calificación": ""
+          });
+        });
+      
+      // Crear un libro de trabajo
+      const wb = XLSX.utils.book_new();
+      
+      // Crear una hoja con los datos
+      const ws = XLSX.utils.json_to_sheet(dataToExport);
+      
+      // Añadir la hoja al libro
+      XLSX.utils.book_append_sheet(wb, ws, "Resultados");
+      
+      // Generar el archivo y descargarlo
+      XLSX.writeFile(wb, `resultados_${examDetails.titulo.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
+
+      toast({
+        title: "Éxito",
+        description: "Resultados exportados correctamente",
+      });
+    } catch (_error) {
+      toast({
+        title: "Error",
+        description: "No se pudieron exportar los resultados",
+        variant: "destructive",
+      });
+      if (DEBUG) {
+        // Registramos el error en un logger en lugar de la consola
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -551,15 +618,26 @@ export default function ExamResultsPage() {
   return (
     <div className="container mx-auto py-8 max-w-[95%]">
       <div className="flex flex-col space-y-2">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => router.back()} 
-          className="mb-0 w-fit"
-        >
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Volver
-        </Button>
+        <div className="flex justify-between items-center">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => router.back()} 
+            className="w-fit"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Volver
+          </Button>
+          
+          <Button 
+            onClick={handleExportToExcel}
+            variant="default"
+            className="flex items-center"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Exportar a Excel
+          </Button>
+        </div>
         
         <div className="mt-2">
           <h1 className="text-2xl font-bold tracking-tight">Resultados: {examDetails?.titulo || 'Cargando...'}</h1>
