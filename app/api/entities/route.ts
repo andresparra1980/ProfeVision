@@ -1,68 +1,107 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-const DEBUG = process.env.NODE_ENV === 'development';
+const DEBUG = process.env.NODE_ENV === "development";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
+
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: 'Error de configuración del servidor' },
+        { error: "Error de configuración del servidor" },
         { status: 500 }
       );
     }
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    });
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
+
+    // Obtener el token de autorización del header
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
-        { error: 'No autorizado' },
+        { error: "No autorizado - Token no encontrado" },
         { status: 401 }
       );
     }
-    
-    const { data: profesor, error: profesorError } = await supabase
-      .from('profesores')
-      .select('*')
-      .eq('user_id', user.id)
+    const token = authHeader.split(" ")[1];
+
+    // Crear cliente de Supabase con service role
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    // Verificar el token y obtener el usuario
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      if (DEBUG && authError) {
+        console.error("Error de autenticación:", authError);
+      }
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    // Obtener los datos del request
+    const requestData = await request.json();
+
+    // Crear la entidad educativa incluyendo el profesor_id
+    const { data: entidad, error: entidadError } = await supabase
+      .from("entidades_educativas")
+      .insert([
+        {
+          nombre: requestData.nombre,
+          tipo: requestData.tipo,
+          profesor_id: user.id,
+        },
+      ])
+      .select()
       .single();
-      
-    if (profesorError) {
+
+    if (entidadError) {
       if (DEBUG) {
-        console.error('Error al obtener profesor:', profesorError);
+        console.error("Error al crear entidad:", entidadError);
       }
       return NextResponse.json(
-        { error: 'Error al obtener datos del profesor' },
+        { error: "Error al crear la entidad educativa" },
         { status: 500 }
       );
     }
-    
-    if (!profesor) {
+
+    // Crear la relación profesor-entidad
+    const { error: relError } = await supabase.from("profesor_entidad").insert([
+      {
+        profesor_id: user.id,
+        entidad_id: entidad.id,
+        rol: "Administrador",
+      },
+    ]);
+
+    if (relError) {
+      if (DEBUG) {
+        console.error("Error al crear relación profesor-entidad:", relError);
+      }
+      // Si falla la relación, eliminamos la entidad creada
+      await supabase.from("entidades_educativas").delete().eq("id", entidad.id);
+
       return NextResponse.json(
-        { error: 'Profesor no encontrado' },
-        { status: 404 }
+        { error: "Error al asociar la entidad con el profesor" },
+        { status: 500 }
       );
     }
-    
-    return NextResponse.json({ profesor });
-    
+
+    return NextResponse.json({ entidad });
   } catch (error: unknown) {
     if (DEBUG) {
-      console.error('Error al procesar la solicitud:', error);
+      console.error("Error al procesar la solicitud:", error);
     }
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: "Error interno del servidor" },
       { status: 500 }
     );
   }
-} 
+}

@@ -121,12 +121,9 @@ export default function EntitiesPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({
-          ...formData,
-          profesorId: session.user.id,
-          userEmail: session.user.email,
-        }),
+        body: JSON.stringify(formData),
       });
 
       const result = await response.json();
@@ -153,7 +150,7 @@ export default function EntitiesPage() {
 
       // Recargar datos
       fetchEntities();
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error al crear la entidad educativa';
       setError(errorMessage);
