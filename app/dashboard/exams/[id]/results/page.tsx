@@ -582,8 +582,45 @@ export default function ExamResultsPage() {
       // Crear un libro de trabajo
       const wb = XLSX.utils.book_new();
       
-      // Crear una hoja con los datos
-      const ws = XLSX.utils.json_to_sheet(dataToExport);
+      // Preparar los datos del encabezado
+      const headerData = [
+        [`RESULTADOS: ${examDetails.titulo}`],
+        [''],
+        ['DETALLES DEL EXAMEN'],
+        [`Materia: ${examDetails.materias?.nombre || 'Sin materia'}`],
+        [`Puntaje Total: ${examDetails.puntaje_total}`],
+        [`Grupo: ${examDetails.grupos?.nombre || 'Sin grupo'}`],
+        [`Fecha de Creación: ${examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : 'No disponible'}`],
+        [''],
+        ['ESTADÍSTICAS'],
+        [`Estudiantes con examen: ${resultados.length} de ${todosEstudiantes.length}`],
+        [`Promedio: ${resultados.length > 0 ? (resultados.reduce((sum, r) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2) : 'N/A'}`],
+        [`Nota más alta: ${resultados.length > 0 ? Math.max(...resultados.map(r => r.puntaje_obtenido)).toFixed(2) : 'N/A'}`],
+        [`Nota más baja: ${resultados.length > 0 ? Math.min(...resultados.map(r => r.puntaje_obtenido)).toFixed(2) : 'N/A'}`],
+        [''],
+        [''] // Línea en blanco antes de los datos de estudiantes
+      ];
+      
+      // Crear cabeceras de columnas
+      const columnsRow = ['Apellidos', 'Nombres', 'Identificación', 'Nota', 'Porcentaje', 'Fecha de Calificación'];
+      
+      // Combinar todo en una matriz
+      const allData = [...headerData, columnsRow];
+      
+      // Agregar los datos de estudiantes convertidos a filas
+      dataToExport.forEach(row => {
+        allData.push(Object.values(row));
+      });
+      
+      // Crear hoja y añadirla al libro
+      const ws = XLSX.utils.aoa_to_sheet(allData);
+      
+      // Aplicar estilos (merge cells para título y secciones)
+      ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // Título
+        { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } }, // Detalles del examen
+        { s: { r: 8, c: 0 }, e: { r: 8, c: 5 } }  // Estadísticas
+      ];
       
       // Añadir la hoja al libro
       XLSX.utils.book_append_sheet(wb, ws, "Resultados");
