@@ -5,8 +5,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 export const supabase = clientSupabase;
 
 // Define site URL for callbacks
-export const siteUrl = 
-  typeof window !== 'undefined' 
+export const siteUrl =
+  typeof window !== 'undefined'
     ? window.location.origin
     : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
@@ -18,8 +18,8 @@ export function getServiceSupabase(): SupabaseClient {
   return createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   });
 }
 
@@ -32,9 +32,9 @@ interface UserSignupData {
 
 // Update sign-up options to include redirectTo
 export const signUpWithRedirect = (
-  email: string, 
-  password: string, 
-  userData: UserSignupData, 
+  email: string,
+  password: string,
+  userData: UserSignupData,
   captchaToken?: string
 ) => {
   return supabase.auth.signUp({
@@ -46,4 +46,4 @@ export const signUpWithRedirect = (
       captchaToken: captchaToken,
     },
   });
-}; 
+};

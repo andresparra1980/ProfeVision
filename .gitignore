@@ -147,3 +147,6 @@ scripts/omr/.pytest_cache/
 /public/uploads/omr/*.jpg
 /public/uploads/omr/*.png
 /public/uploads/omr/*.jpeg
+
+# Documentation folder (managed in separate repository)
+/docs/
