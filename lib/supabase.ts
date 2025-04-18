@@ -1,14 +1,14 @@
-import { supabase as clientSupabase } from './supabase/client';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { supabase as clientSupabase } from "./supabase/client";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 // Re-export the client instance
 export const supabase = clientSupabase;
 
 // Define site URL for callbacks
 export const siteUrl =
-  typeof window !== 'undefined'
+  typeof window !== "undefined"
     ? window.location.origin
-    : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 // For service/admin operations that need the service key
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
