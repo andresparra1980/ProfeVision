@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -19,7 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/lib/contexts/sidebar-context";
 
@@ -83,10 +82,26 @@ const navItems = [
 
 export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const { isCollapsed, toggleCollapse, isMobile } = useSidebar();
 
   const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'Usuario';
+  
+  // Función para navegar que fuerza una carga fresca
+  const handleNavigate = useCallback((href: string) => {
+    // Cerrar el menú móvil si está abierto
+    setIsOpen(false);
+    
+    // Si es la misma ruta, forzar un refresh
+    if (pathname === href) {
+      window.location.href = href; // Navegación nativa del navegador para forzar una recarga completa
+    } else {
+      router.push(href);
+      // Forzar un refresh del router para prevenir problemas de cache
+      router.refresh();
+    }
+  }, [pathname, router, setIsOpen]);
 
   return (
     <>
@@ -118,9 +133,12 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
         <div>
           <div className="flex h-16 items-center justify-between px-4">
             {(!isCollapsed || isMobile) && (
-              <Link href="/dashboard" className="hidden md:flex items-center space-x-2">
+              <button 
+                onClick={() => handleNavigate("/dashboard")} 
+                className="hidden md:flex items-center space-x-2"
+              >
                 <span className="text-xl font-bold text-secondary">ProfeVision</span>
-              </Link>
+              </button>
             )}
             <div className={cn("flex items-center", isCollapsed && !isMobile ? "mx-auto" : "ml-auto")}>
               {!isMobile && (
@@ -144,12 +162,11 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
 
           <nav className={cn("space-y-1 py-6", isCollapsed && !isMobile ? "px-2" : "px-4")}>
             {navItems.map((item) => (
-              <Link
+              <button
                 key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
+                onClick={() => handleNavigate(item.href)}
                 className={cn(
-                  "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+                  "flex w-full items-center rounded-md py-2 text-sm font-medium transition-colors",
                   isCollapsed && !isMobile ? "justify-center px-2" : "space-x-2 px-3",
                   pathname === item.href
                     ? "bg-primary/10 text-primary"
@@ -159,7 +176,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
               >
                 <item.icon className="h-5 w-5" />
                 {(!isCollapsed || isMobile) && <span>{item.title}</span>}
-              </Link>
+              </button>
             ))}
           </nav>
         </div>
@@ -172,10 +189,10 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                   <p className="text-sm font-medium text-card-foreground truncate">{userName}</p>
                   <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                 </div>
-                <Link 
-                  href="/dashboard/profile" 
+                <button 
+                  onClick={() => handleNavigate("/dashboard/profile")} 
                   className={cn(
-                    "flex items-center rounded-md px-2 py-1.5 text-sm font-medium transition-colors mb-2",
+                    "flex w-full items-center rounded-md px-2 py-1.5 text-sm font-medium transition-colors mb-2",
                     pathname === "/dashboard/profile" 
                       ? "bg-primary/10 text-primary" 
                       : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
@@ -183,7 +200,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                 >
                   <UserCircle className="mr-2 h-4 w-4" />
                   Mi perfil
-                </Link>
+                </button>
                 <Button 
                   variant="ghost"
                   size="sm" 
@@ -204,8 +221,8 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
             </>
           ) : (
             <div className="border-t py-4 flex flex-col items-center gap-2">
-              <Link
-                href="/dashboard/profile"
+              <button
+                onClick={() => handleNavigate("/dashboard/profile")}
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
                   pathname === "/dashboard/profile"
@@ -215,7 +232,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                 title="Mi perfil"
               >
                 <UserCircle className="h-5 w-5" />
-              </Link>
+              </button>
               <Button 
                 variant="ghost"
                 size="icon" 
