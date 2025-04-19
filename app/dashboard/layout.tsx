@@ -9,7 +9,6 @@ import { ScanExamFeature } from "@/components/exam/scan-exam-feature";
 import { toast } from "@/components/ui/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
 import { SidebarProvider } from "@/lib/contexts/sidebar-context";
-import { usePing } from "@/lib/hooks/use-ping";
 
 export default function DashboardLayout({
   children,
@@ -20,9 +19,6 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
-  // Usar el hook de ping para mantener la conexión activa
-  usePing();
 
   const handleLogout = async () => {
     try {
@@ -52,20 +48,15 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const checkUser = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        
-        if (!data.session) {
-          router.push("/auth/login");
-          return;
-        }
-        
-        setUser(data.session.user);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error al verificar sesión:", error);
+      const { data } = await supabase.auth.getSession();
+      
+      if (!data.session) {
         router.push("/auth/login");
+        return;
       }
+      
+      setUser(data.session.user);
+      setLoading(false);
     };
 
     checkUser();
@@ -87,7 +78,6 @@ export default function DashboardLayout({
     );
 
     return () => {
-      // Limpiar suscripciones al desmontar
       authListener.subscription.unsubscribe();
     };
   }, [router]);

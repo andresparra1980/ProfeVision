@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForceDataRefresh } from '@/lib/hooks';
 
 interface EducationalEntity {
   id: string;
@@ -37,9 +36,6 @@ export default function EntitiesPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Usar el hook para forzar recarga de datos
-  const { refreshTrigger, forceRefresh: _forceRefresh } = useForceDataRefresh();
 
   // Wrap fetchEntities in useCallback to use it in dependency arrays
   const fetchEntities = useCallback(async () => {
@@ -85,7 +81,7 @@ export default function EntitiesPage() {
 
   useEffect(() => {
     fetchEntities();
-  }, [fetchEntities, refreshTrigger]);
+  }, [fetchEntities]);
 
   // Display the error if it exists
   useEffect(() => {
