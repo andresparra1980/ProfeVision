@@ -27,6 +27,7 @@ import {
 import { format, isWithinInterval, startOfYear, endOfYear, addYears, startOfMonth, endOfMonth, setMonth, setYear } from "date-fns";
 import { es } from "date-fns/locale";
 import logger from "@/lib/utils/logger";
+import { AuthError } from "@supabase/supabase-js";
 
 type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
   materias: {
@@ -68,7 +69,7 @@ export default function GroupsPage() {
   const [editingGrupo, setEditingGrupo] = useState<Grupo | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const { profesor } = useProfesor();
+  const { profesor, loading: profesorLoading, error: profesorError } = useProfesor();
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -90,9 +91,48 @@ export default function GroupsPage() {
     label: format(setMonth(new Date(), i), 'MMMM', { locale: es })
   }));
 
+  // Helper function for consistent error logging
+  const handleSupabaseError = useCallback((context: string, error: unknown) => {
+    const errorObj = error as Error;
+    const isSupabaseError = errorObj instanceof AuthError;
+    const status = isSupabaseError ? (errorObj as AuthError).status : undefined;
+
+    // Safely access code and details
+    let code: string | undefined = undefined;
+    let details: string | undefined = undefined;
+
+    if (typeof errorObj === 'object' && errorObj !== null) {
+      if ('code' in errorObj) {
+        code = String((errorObj as { code?: unknown }).code);
+      }
+      if ('details' in errorObj) {
+        details = String((errorObj as { details?: unknown }).details);
+      }
+    }
+
+    logger.error(`[GroupsPage] ${context}:`, {
+      message: errorObj.message,
+      status: status,
+      code: code,
+      details: details,
+      errorObject: errorObj
+    });
+
+    toast({
+      variant: "destructive",
+      title: `Error en ${context}`,
+      description: `Error: ${errorObj?.message || 'Desconocido'}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`
+    });
+  }, []);
+
   const loadGrupos = useCallback(async () => {
-    if (!profesor) return;
+    if (!profesor || profesorLoading || profesorError) {
+      logger.log('[GroupsPage] Skipping loadGrupos: professor not ready.', { hasProfesor: !!profesor, profesorLoading, profesorError });
+      setLoading(false);
+      return;
+    }
     
+    logger.log('[GroupsPage] Loading grupos for professor:', profesor.id);
     try {
       setLoading(true);
       
@@ -145,24 +185,20 @@ export default function GroupsPage() {
       
       setGrupos(gruposConConteo);
     } catch (error: unknown) {
-      const err = error as Error;
-      logger.error('Error al cargar grupos:', err);
-      toast({
-        variant: "destructive",
-        title: "Error al cargar grupos",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
-      });
+      handleSupabaseError('Error al cargar grupos', error);
     } finally {
       setLoading(false);
     }
-  }, [profesor, mostrarArchivados]);
+  }, [profesor, profesorLoading, profesorError, mostrarArchivados, handleSupabaseError]);
 
   const loadMaterias = useCallback(async () => {
-    if (!profesor) return;
-    
+    if (!profesor || profesorLoading || profesorError) {
+      logger.log('[GroupsPage] Skipping loadMaterias: professor not ready.');
+      return;
+    }
+
+    logger.log('[GroupsPage] Loading materias for profesor:', profesor.id);
     try {
-      logger.log("Fetching subjects for profesor:", profesor.id);
-      
       const { data, error } = await supabase
         .from("materias")
         .select(`
@@ -177,21 +213,6 @@ export default function GroupsPage() {
 
       if (error) throw error;
       
-      logger.log("Loaded subjects from DB:", data?.length || 0);
-      
-      // Log subject data for debugging
-      if (data && data.length > 0) {
-        logger.log("Subject data structure sample:", JSON.stringify(data[0], null, 2));
-        
-        // Check if any subjects have entidades_educativas
-        const withEntidades = data.filter((m: Materia) => m.entidades_educativas !== null);
-        logger.log("Subjects with entidades:", withEntidades.length);
-        
-        // Check if any subjects have entidad_id directly
-        const withEntidadId = data.filter((m: Materia) => m.entidad_id !== null);
-        logger.log("Subjects with direct entidad_id:", withEntidadId.length);
-      }
-      
       // Ensure all materias have consistent data structure with explicit entidad_id
       const processedData = data?.map((materia: Materia) => {
         // Si el objeto ya tiene entidad_id directo, lo usamos
@@ -205,35 +226,19 @@ export default function GroupsPage() {
         };
       }) || [];
       
-      logger.log("Processed subjects count:", processedData.length);
-      if (processedData.length > 0) {
-        logger.log("First processed subject:", JSON.stringify(processedData[0], null, 2));
-        
-        // Group subjects by entity for debugging
-        const subjectsByEntity: Record<string, number> = {};
-        processedData.forEach((m: Materia) => {
-          if (m.entidad_id) {
-            subjectsByEntity[m.entidad_id] = (subjectsByEntity[m.entidad_id] || 0) + 1;
-          }
-        });
-        logger.log("Subjects by entity:", subjectsByEntity);
-      }
-      
       setMaterias(processedData);
     } catch (error: unknown) {
-      const err = error as Error;
-      logger.error('Error al cargar materias:', err);
-      toast({
-        variant: "destructive",
-        title: "Error al cargar materias",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
-      });
+      handleSupabaseError('Error al cargar materias', error);
     }
-  }, [profesor]);
+  }, [profesor, profesorLoading, profesorError, handleSupabaseError]);
 
   const loadEntidades = useCallback(async () => {
-    if (!profesor) return;
-    
+    if (!profesor || profesorLoading || profesorError) {
+      logger.log('[GroupsPage] Skipping loadEntidades: professor not ready.');
+      return;
+    }
+
+    logger.log('[GroupsPage] Loading entidades for profesor:', profesor.id);
     try {
       // Cargamos todas las entidades disponibles para el profesor
       const { data: entidadesData, error: entidadesError } = await supabase
@@ -246,32 +251,33 @@ export default function GroupsPage() {
       
       logger.log("Entidades totales disponibles:", entidadesData?.length || 0);
       setEntidades(entidadesData || []);
-    } catch (error) {
-      const err = error as Error;
-      logger.error('Error al cargar entidades educativas:', err);
-      toast({
-        variant: "destructive",
-        title: "Error al cargar entidades educativas",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
-      });
+    } catch (error: unknown) {
+      handleSupabaseError('Error al cargar entidades educativas', error);
     }
-  }, [profesor]);
+  }, [profesor, profesorLoading, profesorError, handleSupabaseError]);
 
   useEffect(() => {
-    if (profesor) {
+    if (!profesorLoading && profesor && !profesorError) {
+      logger.log('[GroupsPage] Professor ready, triggering data load.');
       loadGrupos();
       loadMaterias();
       loadEntidades();
+    } else if (profesorLoading) {
+      logger.log('[GroupsPage] Waiting for professor data...');
+      setLoading(true);
+    } else if (profesorError) {
+      logger.error('[GroupsPage] Professor hook reported an error, not loading page data.', profesorError);
+      setLoading(false);
+    } else if (!profesor && !profesorLoading) {
+       logger.log('[GroupsPage] No professor data and not loading, possibly logged out or initial state.');
+       setLoading(false);
     }
-  }, [profesor, loadGrupos, loadMaterias, loadEntidades]);
+  }, [profesor, profesorLoading, profesorError, loadGrupos, loadMaterias, loadEntidades]);
 
   useEffect(() => {
     if (editingGrupo) {
       // Primero cargar la entidad y luego la materia para mantener la consistencia
       const entidadId = editingGrupo.materias?.entidades_educativas?.id || "";
-      logger.log("Editing grupo:", editingGrupo.nombre);
-      logger.log("Setting entidad_id:", entidadId);
-      logger.log("Grupo materia_id:", editingGrupo.materia_id);
       form.setValue("entidad_id", entidadId);
       
       if (entidadId) {
@@ -290,12 +296,10 @@ export default function GroupsPage() {
           return false;
         });
         
-        logger.log("Materias filtradas para entidad:", materiasDeEntidad.length);
         setMateriasFiltradas(materiasDeEntidad);
         
         // Esperar al siguiente ciclo para que las materias se filtren
         setTimeout(() => {
-          logger.log("Setting materia_id:", editingGrupo.materia_id);
           form.setValue("materia_id", editingGrupo.materia_id);
         }, 50);
       }
@@ -329,9 +333,6 @@ export default function GroupsPage() {
   
   useEffect(() => {
     if (selectedEntidadId) {
-      logger.log("Entity change detected:", selectedEntidadId);
-      
-      // Modificamos la condición de filtrado para considerar correctamente la relación
       const materiasDeEntidad = materias.filter(m => {
         // Verificamos si la materia tiene entidad_id directamente
         if (m.entidad_id === selectedEntidadId) {
@@ -346,15 +347,11 @@ export default function GroupsPage() {
         return false;
       });
       
-      logger.log("Filtered subjects count:", materiasDeEntidad.length);
-      logger.log("Available subject IDs:", materiasDeEntidad.map(m => m.id).join(", "));
-      
       setMateriasFiltradas(materiasDeEntidad);
       
       // Resetear la materia seleccionada si no pertenece a la entidad
       const materiaActual = form.watch("materia_id");
       if (materiaActual && !materiasDeEntidad.find(m => m.id === materiaActual)) {
-        logger.log("Current subject not found in filtered list, resetting:", materiaActual);
         form.setValue("materia_id", "");
       }
     } else {
@@ -376,7 +373,7 @@ export default function GroupsPage() {
 
   const onSubmit = async (data: GrupoFormValues) => {
     if (!profesor) return;
-    
+    logger.log('[GroupsPage] Submitting group form...');
     try {
       if (editingGrupo) {
         // Actualizar
@@ -424,15 +421,7 @@ export default function GroupsPage() {
       form.reset();
       loadGrupos();
     } catch (error: unknown) {
-      const err = error as Error & { code?: string; details?: string };
-      logger.error('Error al guardar grupo:', err);
-      toast({
-        variant: "destructive",
-        title: "Error al guardar grupo",
-        description: err.message 
-          ? `${err.message} ${err.code ? `(Código: ${err.code})` : ''} ${err.details ? `- ${err.details}` : ''}`
-          : "Ha ocurrido un error. Intenta nuevamente.",
-      });
+      handleSupabaseError('Error al guardar grupo', error);
     }
   };
 
@@ -443,7 +432,7 @@ export default function GroupsPage() {
 
   const confirmDeleteGrupo = async () => {
     if (!deletingId) return;
-    
+    logger.log(`[GroupsPage] Attempting to delete group ID: ${deletingId}`);
     try {
       const { error } = await supabase
         .from("grupos")
@@ -459,12 +448,7 @@ export default function GroupsPage() {
       
       loadGrupos();
     } catch (error: unknown) {
-      const err = error as Error;
-      toast({
-        variant: "destructive",
-        title: "Error al eliminar grupo",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
-      });
+      handleSupabaseError('Error al eliminar grupo', error);
     } finally {
       setDeletingId(null);
       setConfirmDelete(false);
@@ -472,6 +456,7 @@ export default function GroupsPage() {
   };
 
   const toggleArchivarGrupo = async (grupo: Grupo) => {
+    logger.log(`[GroupsPage] Toggling archive state for group ID: ${grupo.id} to ${grupo.estado === 'activo' ? 'archivado' : 'activo'}`);
     try {
       const nuevoEstado = grupo.estado === 'activo' ? 'archivado' : 'activo';
       const { error } = await supabase
@@ -493,12 +478,7 @@ export default function GroupsPage() {
       
       loadGrupos();
     } catch (error: unknown) {
-      const err = error as Error;
-      toast({
-        variant: "destructive",
-        title: "Error al cambiar estado del grupo",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
-      });
+      handleSupabaseError('Error al cambiar estado del grupo', error);
     }
   };
 
@@ -580,6 +560,30 @@ export default function GroupsPage() {
     const periodoInterpretado = interpretarPeriodoEscolar(desde, hasta);
     form.setValue("periodo_escolar", periodoInterpretado);
   };
+
+  if (loading || profesorLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (profesorError) {
+     return (
+      <div className="flex h-screen items-center justify-center text-center text-destructive">
+        Error al cargar los datos del profesor: {profesorError.message}
+      </div>
+     );
+  }
+
+  if (!profesor) {
+     return (
+       <div className="flex h-screen items-center justify-center text-center text-muted-foreground">
+         No se pudieron cargar los datos. Por favor, intenta iniciar sesión de nuevo.
+       </div>
+     );
+  }
 
   return (
     <div className="space-y-6">

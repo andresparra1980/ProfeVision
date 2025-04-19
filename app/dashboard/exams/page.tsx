@@ -26,6 +26,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { AuthError } from "@supabase/supabase-js";
+import { logger } from "@/lib/utils/logger";
 
 interface Exam {
   id: string;
@@ -76,7 +78,19 @@ export default function ExamsPage() {
       if (error) throw error;
       setExams(data || []);
     } catch (error) {
-      console.error("Error fetching exams:", error);
+      const err = error as AuthError | Error;
+      const code = 'code' in err ? err.code : undefined;
+      const details = 'details' in err ? err.details : undefined;
+      const status = err instanceof AuthError ? err.status : undefined;
+
+      logger.error("[ExamsPage] Error fetching exams:", {
+        message: err.message,
+        status: status,
+        code: code,
+        details: details,
+        errorObject: err
+      });
+      toast.error(`Error al cargar exámenes${status ? ` (Código: ${status})` : ''}: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -129,8 +143,20 @@ export default function ExamsPage() {
       toast.success('Examen eliminado correctamente');
       // Actualizar la lista de exámenes
       setExams(exams.filter(exam => exam.id !== examId));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al eliminar el examen');
+    } catch (error) {
+      const err = error as AuthError | Error;
+      const code = 'code' in err ? err.code : undefined;
+      const details = 'details' in err ? err.details : undefined;
+      const status = err instanceof AuthError ? err.status : undefined;
+
+      logger.error("[ExamsPage] Error deleting exam:", {
+        message: err.message,
+        status: status,
+        code: code,
+        details: details,
+        errorObject: err
+      });
+      toast.error(`Error al eliminar el examen${status ? ` (Código: ${status})` : ''}: ${err.message}`);
     }
   };
 

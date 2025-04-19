@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { PlusCircle, Pencil, Trash2, School } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
+import { logger } from "@/lib/utils/logger";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,9 +48,45 @@ export default function SubjectsPage() {
     },
   });
 
+  // Helper function for consistent error logging
+  const handleSupabaseError = useCallback((context: string, error: unknown) => {
+    const errorObj = error as Error;
+    const isSupabaseError = typeof errorObj === 'object' && errorObj !== null;
+    // Safely access status, code, and details
+    let status: number | undefined = undefined;
+    let code: string | undefined = undefined;
+    let details: string | undefined = undefined;
+
+    if (isSupabaseError) {
+      if ('status' in errorObj) {
+        status = Number((errorObj as { status?: unknown }).status);
+      }
+      if ('code' in errorObj) {
+        code = String((errorObj as { code?: unknown }).code);
+      }
+      if ('details' in errorObj) {
+        details = String((errorObj as { details?: unknown }).details);
+      }
+    }
+
+    logger.error(`[SubjectsPage] ${context}:`, { 
+      message: errorObj.message, 
+      status: status,
+      code: code,
+      details: details,
+      errorObject: errorObj 
+    });
+    
+    toast({ 
+      variant: "destructive", 
+      title: `Error en ${context}`, 
+      description: `Error: ${errorObj?.message || 'Desconocido'}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`
+    });
+  }, []);
+
   const loadMaterias = useCallback(async () => {
     if (!profesor) return;
-    
+    logger.log('[SubjectsPage] Loading materias...');
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -67,18 +104,14 @@ export default function SubjectsPage() {
       if (error) throw error;
       setMaterias(data || []);
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      toast({
-        variant: "destructive",
-        title: "Error al cargar materias",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
-      });
+      handleSupabaseError('al cargar materias', error);
     } finally {
       setLoading(false);
     }
-  }, [profesor]);
+  }, [profesor, handleSupabaseError]);
 
   const loadEntidades = useCallback(async () => {
+    logger.log('[SubjectsPage] Loading entidades...');
     try {
       const { data, error } = await supabase
         .from("entidades_educativas")
@@ -88,14 +121,9 @@ export default function SubjectsPage() {
       if (error) throw error;
       setEntidades(data || []);
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      toast({
-        variant: "destructive",
-        title: "Error al cargar instituciones",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
-      });
+      handleSupabaseError('al cargar instituciones', error);
     }
-  }, []);
+  }, [handleSupabaseError]);
 
   useEffect(() => {
     if (profesor) {
@@ -122,7 +150,7 @@ export default function SubjectsPage() {
 
   const onSubmit = async (data: MateriaFormValues) => {
     if (!profesor) return;
-    
+    logger.log('[SubjectsPage] Submitting subject form...');
     try {
       const entidad_id = data.entidad_id === "none" ? null : data.entidad_id;
       
@@ -166,12 +194,7 @@ export default function SubjectsPage() {
       form.reset();
       loadMaterias();
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      toast({
-        variant: "destructive",
-        title: "Error al guardar materia",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
-      });
+      handleSupabaseError('al guardar materia', error);
     }
   };
 
@@ -182,7 +205,7 @@ export default function SubjectsPage() {
 
   const confirmDeleteMateria = async () => {
     if (!deletingId) return;
-    
+    logger.log(`[SubjectsPage] Attempting to delete subject ID: ${deletingId}`);
     try {
       const { error } = await supabase
         .from("materias")
@@ -198,12 +221,7 @@ export default function SubjectsPage() {
       
       loadMaterias();
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      toast({
-        variant: "destructive",
-        title: "Error al eliminar materia",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente.",
-      });
+      handleSupabaseError('al eliminar materia', error);
     } finally {
       setDeletingId(null);
       setConfirmDelete(false);

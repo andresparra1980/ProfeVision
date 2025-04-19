@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { logger } from "@/lib/utils/logger";
 
 interface EducationalEntity {
   id: string;
@@ -22,6 +23,12 @@ interface EducationalEntity {
 interface ProfesorEntidadRelation {
   entidad_id: string;
   entidades_educativas: EducationalEntity;
+}
+
+// Define a type for API errors
+interface ApiError extends Error {
+  status?: number;
+  details?: string;
 }
 
 export default function EntitiesPage() {
@@ -35,9 +42,43 @@ export default function EntitiesPage() {
     tipo: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // Wrap fetchEntities in useCallback to use it in dependency arrays
+  const handleSupabaseError = useCallback((context: string, error: unknown) => {
+    const errorObj = error as Error;
+    const isSupabaseError = typeof errorObj === 'object' && errorObj !== null;
+    // Safely access status, code, and details
+    let status: number | undefined = undefined;
+    let code: string | undefined = undefined;
+    let details: string | undefined = undefined;
+
+    if (isSupabaseError) {
+      if ('status' in errorObj) {
+        status = Number((errorObj as { status?: unknown }).status);
+      }
+      if ('code' in errorObj) {
+        code = String((errorObj as { code?: unknown }).code);
+      }
+      if ('details' in errorObj) {
+        details = String((errorObj as { details?: unknown }).details);
+      }
+    }
+
+    logger.error(`[EntitiesPage] ${context}:`, { 
+      message: errorObj.message, 
+      status: status,
+      code: code,
+      details: details,
+      errorObject: errorObj 
+    });
+    
+    const toastMessage = `Error: ${errorObj?.message || 'Desconocido'}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`;
+    toast({ 
+      variant: "destructive", 
+      title: `Error en ${context}`, 
+      description: toastMessage
+    });
+  }, []);
+
   const fetchEntities = useCallback(async () => {
     try {
       setLoading(true);
@@ -48,51 +89,27 @@ export default function EntitiesPage() {
         return;
       }
 
-      // Corregir la consulta para usar entidad_id en lugar de entidad_educativa_id
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from("profesor_entidad")
         .select("entidad_id, entidades_educativas(*)")
         .eq("profesor_id", session.user.id);
 
-      if (error) {
-        console.error("Error al consultar entidades:", error);
-        toast({
-          title: "Error",
-          description: "No se pudieron cargar las instituciones educativas",
-          variant: "destructive",
-        });
-        return;
+      if (fetchError) {
+        throw fetchError;
       }
       
-      // Transformar el resultado para tener un array de entidades
       const entitiesList = data.map((item: ProfesorEntidadRelation) => item.entidades_educativas);
       setEntities(entitiesList || []);
     } catch (error) {
-      console.error("Error inesperado:", error);
-      toast({
-        title: "Error",
-        description: "Ocurrió un error al cargar las instituciones educativas",
-        variant: "destructive",
-      });
+      handleSupabaseError("al cargar instituciones educativas", error);
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, handleSupabaseError]);
 
   useEffect(() => {
     fetchEntities();
   }, [fetchEntities]);
-
-  // Display the error if it exists
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: 'Error',
-        description: error,
-        variant: 'destructive',
-      });
-    }
-  }, [error]);
 
   const filteredEntities = entities.filter((entity) =>
     entity.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -102,21 +119,16 @@ export default function EntitiesPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError(null);
 
     try {
-      // Verificar usuario autenticado
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
       if (!session?.user) {
-        setError('Debes iniciar sesión para crear una entidad educativa');
-        setIsSubmitting(false);
-        return;
+        throw new Error('Debes iniciar sesión para crear una entidad educativa');
       }
 
-      // Enviar datos al endpoint de API
       const response = await fetch('/api/entities', {
         method: 'POST',
         headers: {
@@ -129,36 +141,28 @@ export default function EntitiesPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Error al crear la entidad educativa');
+        const apiError = new Error(result.error || 'Error al crear la entidad educativa');
+        (apiError as ApiError).status = response.status;
+        (apiError as ApiError).details = result.details;
+        throw apiError;
       }
 
-      // Si todo salió bien
       toast({
         title: '¡Éxito!',
         description: 'Entidad educativa creada correctamente',
         variant: 'default',
       });
 
-      // Reiniciar formulario
       setFormData({
         nombre: '',
         tipo: '',
       });
 
-      // Cerrar diálogo
       setIsOpen(false);
 
-      // Recargar datos
       fetchEntities();
     } catch (error) {
-      console.error('Error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error al crear la entidad educativa';
-      setError(errorMessage);
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      handleSupabaseError("al crear la entidad educativa", error);
     } finally {
       setIsSubmitting(false);
     }
