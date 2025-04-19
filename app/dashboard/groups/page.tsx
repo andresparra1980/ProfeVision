@@ -660,11 +660,16 @@ export default function GroupsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {entidades.length > 0 ? (
-                          entidades.map((entidad) => (
-                            <SelectItem key={entidad.id} value={entidad.id}>
-                              {entidad.nombre}
-                            </SelectItem>
-                          ))
+                          <>
+                            <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                              Solo se muestran entidades con materias asignadas
+                            </div>
+                            {entidades.map((entidad) => (
+                              <SelectItem key={entidad.id} value={entidad.id}>
+                                {entidad.nombre}
+                              </SelectItem>
+                            ))}
+                          </>
                         ) : (
                           <SelectItem value="no-entidades" disabled>
                             No hay entidades educativas registradas
