@@ -561,7 +561,8 @@ export default function GroupsPage() {
     form.setValue("periodo_escolar", periodoInterpretado);
   };
 
-  if (loading || profesorLoading) {
+  // 1. Handle Initial Professor Load (only if professor isn't loaded yet)
+  if (profesorLoading && !profesor) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
@@ -569,6 +570,7 @@ export default function GroupsPage() {
     );
   }
 
+  // 2. Handle Professor Load Error
   if (profesorError) {
      return (
       <div className="flex h-screen items-center justify-center text-center text-destructive">
@@ -577,7 +579,9 @@ export default function GroupsPage() {
      );
   }
 
+  // 3. Handle Logged Out / No Professor State
   if (!profesor) {
+     // This should be hit after SIGNED_OUT and failed refresh
      return (
        <div className="flex h-screen items-center justify-center text-center text-muted-foreground">
          No se pudieron cargar los datos. Por favor, intenta iniciar sesión de nuevo.
@@ -585,6 +589,8 @@ export default function GroupsPage() {
      );
   }
 
+  // 4. Professor is loaded, render the main content
+  //    Now, loading only refers to the local loading for groups/materias/etc.
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
@@ -859,7 +865,8 @@ export default function GroupsPage() {
         </div>
       </div>
 
-      {loading ? (
+      {/* Content Section - Spinner only depends on local 'loading' now */}
+      {loading ? ( // Use the local loading state for the content spinner
         <div className="flex h-40 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
         </div>
