@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 // Interfaz para el estado de navegación
 interface NavigationState {
@@ -28,6 +28,32 @@ export function useNavigationEvents() {
   return context;
 }
 
+// Componente que utiliza useSearchParams pero envuelto en un Client Component específico
+function NavigationEventsListener({ onNavigationChange }: { 
+  onNavigationChange: (isNavigating: boolean, timestamp: number) => void 
+}) {
+  // Usar usePathname que no requiere suspense boundary
+  const pathname = usePathname();
+  
+  // Efecto para detectar cambios de ruta usando solo pathname
+  useEffect(() => {
+    // Cuando el pathname cambia, actualizar el estado
+    onNavigationChange(true, Date.now());
+
+    // Simular un "after navigation complete"
+    const timeout = setTimeout(() => {
+      onNavigationChange(false, Date.now());
+    }, 100);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [pathname, onNavigationChange]);
+
+  // Este componente no renderiza nada
+  return null;
+}
+
 interface NavigationEventsProviderProps {
   children: React.ReactNode;
 }
@@ -39,10 +65,6 @@ export function NavigationEventsProvider({ children }: NavigationEventsProviderP
     routeChanging: false, 
     lastNavigationTime: Date.now()
   });
-
-  // Obtener el pathname y searchParams para detectar cambios de ruta
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   // Función para resetear caché
   const resetCache = () => {
@@ -56,32 +78,19 @@ export function NavigationEventsProvider({ children }: NavigationEventsProviderP
     console.log('Caché de navegación reseteada:', new Date().toISOString());
   };
 
-  // Efecto para detectar cambios de ruta
-  useEffect(() => {
-    // Cuando el pathname o los searchParams cambian, actualizar el estado
+  // Manejador para los cambios de navegación desde el listener
+  const handleNavigationChange = React.useCallback((_isNavigating: boolean, _timestamp: number) => {
     setNavigationState(prev => ({
       ...prev,
-      isNavigating: true,
-      routeChanging: true,
-      lastNavigationTime: Date.now()
+      isNavigating: _isNavigating,
+      routeChanging: _isNavigating,
+      lastNavigationTime: _timestamp
     }));
-
-    // Simular un "after navigation complete"
-    const timeout = setTimeout(() => {
-      setNavigationState(prev => ({
-        ...prev,
-        isNavigating: false,
-        routeChanging: false
-      }));
-    }, 100);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [pathname, searchParams]);
+  }, []);
 
   return (
     <NavigationEventsContext.Provider value={{ navigationState, resetCache }}>
+      <NavigationEventsListener onNavigationChange={handleNavigationChange} />
       {children}
     </NavigationEventsContext.Provider>
   );
