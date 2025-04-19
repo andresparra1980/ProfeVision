@@ -65,7 +65,7 @@ export function setupKeepAlive() {
       try {
         // Verificar el estado de la sesión (operación liviana)
         await supabase.auth.getSession();
-      } catch (error) {
+      } catch (_error) {
         // Silent fail
       }
     };
