@@ -30,7 +30,7 @@ export function useNavigationEvents() {
 
 // Componente que utiliza useSearchParams pero envuelto en un Client Component específico
 function NavigationEventsListener({ onNavigationChange }: { 
-  onNavigationChange: (isNavigating: boolean, timestamp: number) => void 
+  onNavigationChange: (_isNavigating: boolean, _timestamp: number) => void 
 }) {
   // Usar usePathname que no requiere suspense boundary
   const pathname = usePathname();
