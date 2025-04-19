@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { ClientLayout } from '@/components/shared/client-layout';
+import { AuthProvider } from '@/components/shared/auth-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,7 +22,9 @@ export default function RootLayout({
         className={`min-h-screen bg-background font-sans antialiased ${inter.className}`}
         suppressHydrationWarning
       >
-        <ClientLayout>{children}</ClientLayout>
+        <AuthProvider>
+          <ClientLayout>{children}</ClientLayout>
+        </AuthProvider>
       </body>
     </html>
   );
