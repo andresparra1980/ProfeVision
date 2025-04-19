@@ -4,7 +4,6 @@ import React, { createContext, useContext, useEffect, useState, useMemo } from '
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import type { Session, User, AuthChangeEvent, AuthError } from '@supabase/supabase-js';
-import { useKeepAliveSession } from '@/lib/hooks/useKeepAliveSession';
 import { logger } from '@/lib/utils/logger';
 
 interface AuthContextProps {
@@ -23,9 +22,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
-
-  // Initialize keep-alive hook
-  useKeepAliveSession();
 
   useEffect(() => {
     let isMounted = true;
@@ -66,6 +62,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!isMounted) return;
 
       logger.log(`Supabase auth event: ${event}`);
+
+      if (event === 'TOKEN_REFRESHED') {
+        logger.log('Auth state changed: TOKEN_REFRESHED', { hasSession: !!newSession });
+      }
+
       setSession(newSession);
       setUser(newSession?.user ?? null);
       setIsLoading(false);
@@ -74,29 +75,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (event === 'SIGNED_OUT' && !isPublicPath) {
         logger.log('User signed out, redirecting to login.');
-        // Prevent redirect loops if already on login
         if (pathname !== '/auth/login') {
            router.push('/auth/login');
         }
       }
 
-      if (event === 'SIGNED_IN' && isPublicPath && pathname !== '/') {
-        logger.log(`User signed in on public path (${pathname}), attempting redirect to dashboard.`);
-        setTimeout(() => {
-          logger.log('Executing redirect inside setTimeout');
-          router.push('/dashboard');
-        }, 0);
-        logger.log('setTimeout for redirect scheduled.');
-      }
-
-      // Handle potential token refresh failures (indicated by null session when not explicitly signing out)
       if (!newSession && event !== 'SIGNED_OUT' && event !== 'INITIAL_SESSION' && event !== 'USER_UPDATED' && !isPublicPath) {
          logger.log('Session became null (potentially token refresh failure), redirecting to login.');
          if (pathname !== '/auth/login') {
             router.push('/auth/login');
          }
       }
-
     });
 
     return () => {

@@ -1,8 +1,8 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({
+  let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -13,68 +13,101 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll: () => {
-          return Array.from(request.cookies.getAll())
-            .map(cookie => ({
-              name: cookie.name,
-              value: cookie.value
-            }));
+        get(name: string) {
+          return request.cookies.get(name)?.value;
         },
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value, options }) => {
-            response.cookies.set({
-              name,
-              value,
-              ...options,
-            });
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
           });
         },
       },
     }
   );
 
-  // Refresh session if expired
-  await supabase.auth.getSession();
+  // IMPORTANT: Avoid multiple getSession calls. Fetch session once.
+  // getSession() will automatically refresh the session if needed.
+  const { data: { session } } = await supabase.auth.getSession();
 
-  // Protected routes - redirect to login if not authenticated
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    const { data: { session } } = await supabase.auth.getSession();
-    
+  const { pathname } = request.nextUrl;
+
+  // Protected routes
+  if (pathname.startsWith('/dashboard')) {
     if (!session) {
+      // Redirect to login, preserving the intended destination
       const redirectUrl = new URL('/auth/login', request.url);
-      redirectUrl.searchParams.set('redirect', request.nextUrl.pathname);
+      redirectUrl.searchParams.set('redirect', pathname);
+      console.log(`[Middleware] No session for ${pathname}. Redirecting to login.`);
       return NextResponse.redirect(redirectUrl);
     }
+    // If session exists, allow access to dashboard routes
+    console.log(`[Middleware] Session found for ${pathname}. Allowing access.`);
+    return response; // Allow the request to proceed
   }
 
-  // Auth routes - redirect to dashboard if already authenticated
-  if (
-    request.nextUrl.pathname === '/auth/login' ||
-    request.nextUrl.pathname === '/auth/register'
-  ) {
-    const { data: { session } } = await supabase.auth.getSession();
-    
+  // Auth routes
+  if (pathname === '/auth/login' || pathname === '/auth/register') {
     if (session) {
+      // If logged in, redirect from auth pages to dashboard
+      console.log(`[Middleware] Session found on auth page (${pathname}). Redirecting to dashboard.`);
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
+    // If no session, allow access to auth routes
+    console.log(`[Middleware] No session on auth page (${pathname}). Allowing access.`);
+    return response; // Allow the request to proceed
   }
 
-  // Solo aplicar a rutas de API
-  if (!request.nextUrl.pathname.startsWith('/api/')) {
-    return response;
-  }
-  
-  // Permitir la solicitud
+  // For all other routes (including API routes, public pages, RSC fetches not covered above),
+  // let the request proceed without intervention after session refresh attempt.
+  console.log(`[Middleware] Pathname (${pathname}) not explicitly handled. Allowing access.`);
   return response;
 }
 
-// Configure matcher to only include specific routes
+// Matcher configuration remains the same
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/auth/login',
-    '/auth/register',
-    '/api/exams/:path*',
-    '/api/:path*',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - assets/ (project specific assets)
+     * - auth/callback (Supabase auth callback)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|assets/|auth/callback).*)',
+    // Apply to specific routes if preferred, but the above is common
+    // '/dashboard/:path*',
+    // '/auth/login',
+    // '/auth/register',
+    // '/api/:path*'
   ],
 }; 
