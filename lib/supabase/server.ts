@@ -46,6 +46,19 @@ export const createClient = (): SupabaseClient => {
   );
 };
 
+// Obtener la sesión del usuario desde el servidor
+export const getServerSession = async () => {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getSession();
+  
+  if (error) {
+    console.error('Error al obtener la sesión del servidor:', error.message);
+    return null;
+  }
+  
+  return data.session;
+};
+
 // Cliente de supabase con permisos de admin para el servidor
 export const createAdminSupabaseClient = (): SupabaseClient => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

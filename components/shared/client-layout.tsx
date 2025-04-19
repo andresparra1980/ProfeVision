@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from "sonner";
 import React from 'react';
 import { NavigationEventsProvider } from '@/lib/providers/navigation-events-provider';
+import { AuthSessionRefresh } from '@/components/shared/auth-session-refresh';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <NavigationEventsProvider>
+        <AuthSessionRefresh />
         {children}
         <Toaster />
         <SonnerToaster />
