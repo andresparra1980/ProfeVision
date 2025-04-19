@@ -161,6 +161,8 @@ export default function GroupsPage() {
     if (!profesor) return;
     
     try {
+      logger.log("Fetching subjects for profesor:", profesor.id);
+      
       const { data, error } = await supabase
         .from("materias")
         .select(`
@@ -177,13 +179,21 @@ export default function GroupsPage() {
       
       logger.log("Loaded subjects from DB:", data?.length || 0);
       
-      // Log a sample of the data structure
+      // Log subject data for debugging
       if (data && data.length > 0) {
-        logger.log("Sample subject data structure:", JSON.stringify(data[0], null, 2));
+        logger.log("Subject data structure sample:", JSON.stringify(data[0], null, 2));
+        
+        // Check if any subjects have entidades_educativas
+        const withEntidades = data.filter((m: Materia) => m.entidades_educativas !== null);
+        logger.log("Subjects with entidades:", withEntidades.length);
+        
+        // Check if any subjects have entidad_id directly
+        const withEntidadId = data.filter((m: Materia) => m.entidad_id !== null);
+        logger.log("Subjects with direct entidad_id:", withEntidadId.length);
       }
       
       // Ensure all materias have consistent data structure with explicit entidad_id
-      const processedData = data?.map((materia: Partial<Materia>) => {
+      const processedData = data?.map((materia: Materia) => {
         // Si el objeto ya tiene entidad_id directo, lo usamos
         // Si no, intentamos obtenerlo de la relación entidades_educativas
         const entidad_id = materia.entidad_id || 
@@ -198,11 +208,21 @@ export default function GroupsPage() {
       logger.log("Processed subjects count:", processedData.length);
       if (processedData.length > 0) {
         logger.log("First processed subject:", JSON.stringify(processedData[0], null, 2));
+        
+        // Group subjects by entity for debugging
+        const subjectsByEntity: Record<string, number> = {};
+        processedData.forEach((m: Materia) => {
+          if (m.entidad_id) {
+            subjectsByEntity[m.entidad_id] = (subjectsByEntity[m.entidad_id] || 0) + 1;
+          }
+        });
+        logger.log("Subjects by entity:", subjectsByEntity);
       }
       
       setMaterias(processedData);
     } catch (error: unknown) {
       const err = error as Error;
+      logger.error('Error al cargar materias:', err);
       toast({
         variant: "destructive",
         title: "Error al cargar materias",
@@ -215,52 +235,18 @@ export default function GroupsPage() {
     if (!profesor) return;
     
     try {
-      // Primero cargamos todas las entidades disponibles
+      // Cargamos todas las entidades disponibles para el profesor
       const { data: entidadesData, error: entidadesError } = await supabase
         .from("entidades_educativas")
         .select("*")
+        .eq("profesor_id", profesor.id)
         .order("nombre");
         
       if (entidadesError) throw entidadesError;
       
       logger.log("Entidades totales disponibles:", entidadesData?.length || 0);
-      
-      // Ahora cargamos las materias del profesor para filtrar solo las entidades que tienen materias
-      const { data: materias, error: materiasError } = await supabase
-        .from("materias")
-        .select("*, entidades_educativas(*)")
-        .eq("profesor_id", profesor.id);
-
-      if (materiasError) throw materiasError;
-
-      logger.log("Materias para filtrar entidades:", materias?.length || 0);
-      
-      // Extraer entidades únicas de las materias
-      const entidadesMap = new Map<string, EntidadEducativa>();
-      
-      materias?.forEach((materia: Materia) => {
-        // Si la materia tiene directamente un entidad_id
-        if (materia.entidad_id) {
-          // Buscar la entidad correspondiente en entidadesData
-          const entidad = entidadesData?.find((e: EntidadEducativa) => e.id === materia.entidad_id);
-          if (entidad) {
-            entidadesMap.set(entidad.id, entidad);
-          }
-        }
-        
-        // Si la materia tiene la relación entidades_educativas
-        if (materia.entidades_educativas && materia.entidades_educativas.id) {
-          entidadesMap.set(
-            materia.entidades_educativas.id, 
-            materia.entidades_educativas
-          );
-        }
-      });
-      
-      const entidadesArray = Array.from(entidadesMap.values());
-      logger.log("Entidades educativas filtradas:", entidadesArray.length);
-      setEntidades(entidadesArray);
-    } catch (error: unknown) {
+      setEntidades(entidadesData || []);
+    } catch (error) {
       const err = error as Error;
       logger.error('Error al cargar entidades educativas:', err);
       toast({
@@ -338,20 +324,22 @@ export default function GroupsPage() {
     }
   }, [editingGrupo, form, materias]);
 
+  // Watch entidad_id for changes
+  const selectedEntidadId = form.watch("entidad_id");
+  
   useEffect(() => {
-    const entidadId = form.watch("entidad_id");
-    if (entidadId) {
-      logger.log("Entity change detected:", entidadId);
+    if (selectedEntidadId) {
+      logger.log("Entity change detected:", selectedEntidadId);
       
       // Modificamos la condición de filtrado para considerar correctamente la relación
       const materiasDeEntidad = materias.filter(m => {
         // Verificamos si la materia tiene entidad_id directamente
-        if (m.entidad_id === entidadId) {
+        if (m.entidad_id === selectedEntidadId) {
           return true;
         }
         
         // Verificamos la relación anidada en entidades_educativas
-        if (m.entidades_educativas && m.entidades_educativas.id === entidadId) {
+        if (m.entidades_educativas && m.entidades_educativas.id === selectedEntidadId) {
           return true;
         }
         
@@ -373,7 +361,7 @@ export default function GroupsPage() {
       setMateriasFiltradas([]);
       form.setValue("materia_id", "");
     }
-  }, [form, materias]);
+  }, [selectedEntidadId, materias, form]);
 
   useEffect(() => {
     loadGrupos();
@@ -661,9 +649,7 @@ export default function GroupsPage() {
                       <SelectContent>
                         {entidades.length > 0 ? (
                           <>
-                            <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                              Solo se muestran entidades con materias asignadas
-                            </div>
+
                             {entidades.map((entidad) => (
                               <SelectItem key={entidad.id} value={entidad.id}>
                                 {entidad.nombre}
@@ -727,7 +713,7 @@ export default function GroupsPage() {
                     {form.watch("entidad_id") && materiasFiltradas.length === 0 && (
                       <div className="text-xs text-destructive">
                         No hay materias registradas para esta entidad educativa.
-                        <Link href="/dashboard/materias" className="ml-1 text-primary hover:underline">
+                        <Link href="/dashboard/subjects" className="ml-1 text-primary hover:underline">
                           Crear materia
                         </Link>
                       </div>
