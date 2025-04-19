@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
@@ -19,6 +19,7 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -46,20 +47,38 @@ export default function DashboardLayout({
     }
   };
 
+  // Ping periódico para mantener la sesión activa
+  const pingSession = async () => {
+    try {
+      // Verificar si hay una sesión activa sin mostrar errores
+      await supabase.auth.getSession();
+    } catch (error) {
+      console.error("Error en ping de sesión:", error);
+    }
+  };
+
   useEffect(() => {
     const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      if (!data.session) {
+      try {
+        const { data } = await supabase.auth.getSession();
+        
+        if (!data.session) {
+          router.push("/auth/login");
+          return;
+        }
+        
+        setUser(data.session.user);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error al verificar sesión:", error);
         router.push("/auth/login");
-        return;
       }
-      
-      setUser(data.session.user);
-      setLoading(false);
     };
 
     checkUser();
+
+    // Configurar un ping periódico cada 5 minutos para mantener la conexión activa
+    pingIntervalRef.current = setInterval(pingSession, 5 * 60 * 1000);
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event: string, session: Session | null) => {
@@ -78,7 +97,12 @@ export default function DashboardLayout({
     );
 
     return () => {
+      // Limpiar todas las suscripciones y timers al desmontar
       authListener.subscription.unsubscribe();
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
     };
   }, [router]);
 

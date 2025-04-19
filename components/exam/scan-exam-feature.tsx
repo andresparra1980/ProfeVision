@@ -1,22 +1,22 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { FloatingActionButton } from '../ui/floating-action-button';
 import { ScanWizard } from './scan-wizard';
 
 export function ScanExamFeature() {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
-  const openWizard = () => {
+  const openWizard = useCallback(() => {
     setIsWizardOpen(true);
-  };
+  }, []);
 
-  const closeWizard = () => {
+  const closeWizard = useCallback(() => {
     setIsWizardOpen(false);
-  };
+  }, []);
 
   return (
     <>
       {!isWizardOpen && <FloatingActionButton onClick={openWizard} />}
-      <ScanWizard isOpen={isWizardOpen} onClose={closeWizard} />
+      {isWizardOpen && <ScanWizard isOpen={isWizardOpen} onClose={closeWizard} />}
     </>
   );
 } 
