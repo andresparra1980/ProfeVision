@@ -264,7 +264,7 @@ export default function GroupsPage() {
       loadEntidades();
     } else if (profesorLoading) {
       logger.log('[GroupsPage] Waiting for professor data...');
-      setLoading(true);
+      // setLoading(true);
     } else if (profesorError) {
       logger.error('[GroupsPage] Professor hook reported an error, not loading page data.', profesorError);
       setLoading(false);
