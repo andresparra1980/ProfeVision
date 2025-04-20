@@ -11,6 +11,23 @@ import type { User, Session } from '@supabase/supabase-js';
 import { SidebarProvider } from "@/lib/contexts/sidebar-context";
 import logger from "@/lib/utils/logger";
 
+// Helper function to delete cookies by name prefix
+function deleteSupabaseCookies() {
+  const cookies = document.cookie.split(";");
+  logger.log('[DashboardLayout] Attempting to clear Supabase cookies...');
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i];
+    const eqPos = cookie.indexOf("=");
+    const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+    // Target cookies starting with sb- (common Supabase pattern)
+    if (name.startsWith('sb-')) {
+      logger.log(`[DashboardLayout] Deleting cookie: ${name}`);
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    }
+  }
+  logger.log('[DashboardLayout] Cookie clearing attempt finished.');
+}
+
 export default function DashboardLayout({
   children,
 }: {
@@ -22,28 +39,44 @@ export default function DashboardLayout({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
+    let signOutError: Error | null = null;
     try {
       setIsLoggingOut(true);
-      const { error } = await supabase.auth.signOut();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      logger.log('[DashboardLayout] Session state before logout:', { session: sessionData.session, error: sessionError });
+
+      // Attempt sign out, but don't let it block the redirect if it fails
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
       
       if (error) {
-        throw error;
+        signOutError = error; // Store error to log it
+        // Optionally: Check if it's the specific 403 and decide if user needs a toast
+        // For now, we'll just log it and proceed to redirect.
       }
       
-      toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente."
-      });
-      
-      window.location.href = "/auth/login";
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      toast({
-        variant: "destructive",
-        title: "Error al cerrar sesión",
-        description: err.message || "Ha ocurrido un error. Intenta nuevamente."
-      });
-      setIsLoggingOut(false);
+      // Catch errors from getSession or unexpected signOut issues
+      signOutError = error instanceof Error ? error : new Error(String(error));
+    } finally {
+      if (signOutError) {
+        logger.error('[DashboardLayout] Error during signOut attempt:', signOutError);
+        // Decide if you want to toast here even if redirecting
+        // toast({ variant: "destructive", title: "Error al cerrar sesión", ... }); 
+      } else {
+        // Only toast success if signOut didn't error
+        toast({ title: "Sesión cerrada", description: "Has cerrado sesión correctamente." });
+      }
+      
+      // Manually clear Supabase cookies before redirecting
+      deleteSupabaseCookies();
+      
+      // Always redirect to clear client state
+      logger.log('[DashboardLayout] Redirecting to login after logout attempt.');
+      window.location.href = "/auth/login";
+      
+      // It might take a moment for redirect, ensure isLoggingOut is reset eventually
+      // Setting it false here might be too soon if redirect hangs, but often okay.
+      setIsLoggingOut(false); 
     }
   };
 
