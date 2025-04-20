@@ -64,6 +64,7 @@ export default function DashboardLayout({
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event: string, session: Session | null) => {
+        logger.log('%%% DASHBOARD LAYOUT EVENT:', { event, session });
         logger.log(`[DashboardLayout] Auth event: ${event}`, { hasSession: !!session });
         if (event === "SIGNED_OUT") {
           logger.log('[DashboardLayout] SIGNED_OUT detected.');

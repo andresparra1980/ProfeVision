@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/types/database';
-import { Session, AuthError } from '@supabase/supabase-js';
+import { AuthError } from '@supabase/supabase-js';
 import { logger } from '@/lib/utils/logger';
 import { toast } from '@/components/ui/use-toast';
 
@@ -83,6 +83,7 @@ export function useProfesor() {
 
     loadProfesor();
 
+    /* // Comment out the listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event: string, session: Session | null) => {
         logger.log(`[useProfesor] onAuthStateChange event: ${event}`, { hasSession: !!session });
@@ -96,6 +97,7 @@ export function useProfesor() {
           logger.log('[useProfesor] Session found in onAuthStateChange, fetching/re-fetching professor data for user:', session.user.id);
           setLoading(true);
           try {
+            logger.log('[useProfesor] Listener: Attempting to fetch professor data...'); // Log before fetch
             const { data: profesorData, error: profesorError } = await supabase
               .from('profesores')
               .select('*')
@@ -111,7 +113,9 @@ export function useProfesor() {
             setError(null);
           } catch (err: unknown) {
             const errorObj = err as Error;
+            logger.error('[useProfesor] Listener: CATCH block during fetch', errorObj); // Log inside catch
             const status = errorObj instanceof AuthError ? errorObj.status : undefined;
+            // Safely access code and details
             let code: string | undefined = undefined;
             let details: string | undefined = undefined;
 
@@ -128,7 +132,7 @@ export function useProfesor() {
                message: errorObj.message, 
                status: status,
                code: code,
-               details: details,
+               details: details, 
                errorObject: errorObj 
             });
             setError(errorObj instanceof AuthError ? errorObj : errorObj);
@@ -144,6 +148,7 @@ export function useProfesor() {
       logger.log('[useProfesor] Unsubscribing auth listener.');
       authListener.subscription.unsubscribe();
     };
+    */ // End comment out
   }, []);
 
   const updateProfesor = async (updates: ProfesorUpdate) => {
