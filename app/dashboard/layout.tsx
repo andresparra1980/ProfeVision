@@ -9,6 +9,7 @@ import { ScanExamFeature } from "@/components/exam/scan-exam-feature";
 import { toast } from "@/components/ui/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
 import { SidebarProvider } from "@/lib/contexts/sidebar-context";
+import logger from "@/lib/utils/logger";
 
 export default function DashboardLayout({
   children,
@@ -63,14 +64,22 @@ export default function DashboardLayout({
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event: string, session: Session | null) => {
+        logger.log(`[DashboardLayout] Auth event: ${event}`, { hasSession: !!session });
         if (event === "SIGNED_OUT") {
+          logger.log('[DashboardLayout] SIGNED_OUT detected.');
+          setUser(null);
           if (window.location.pathname !== "/auth/login") {
+             logger.log('[DashboardLayout] Redirecting to login...');
              router.push("/auth/login");
           }
         } else if (session) {
+          logger.log('[DashboardLayout] Session updated/received.');
           setUser(session.user);
         } else {
+           logger.log('[DashboardLayout] Null session detected (and not SIGNED_OUT).');
+           setUser(null);
            if (window.location.pathname !== "/auth/login") {
+             logger.log('[DashboardLayout] Redirecting to login...');
              router.push("/auth/login");
            }
         }
