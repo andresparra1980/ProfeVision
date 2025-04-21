@@ -109,10 +109,17 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       if (error) throw error;
       
       // Organizar las opciones_respuesta dentro de cada pregunta
-      const formattedQuestions = data.map((q: Record<string, unknown>) => ({
-        ...q,
-        opciones: q.opciones_respuesta || []
-      }));
+      const formattedQuestions = data.map((q: Record<string, unknown>) => {
+        // Ordenar las opciones de respuesta por el campo orden
+        const opcionesOrdenadas = Array.isArray(q.opciones_respuesta) 
+          ? [...q.opciones_respuesta].sort((a, b) => (a.orden || 0) - (b.orden || 0))
+          : [];
+          
+        return {
+          ...q,
+          opciones: opcionesOrdenadas
+        };
+      });
       
       setQuestions(formattedQuestions);
     } catch (error) {
