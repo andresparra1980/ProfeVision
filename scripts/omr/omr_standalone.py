@@ -451,19 +451,11 @@ class StandaloneOMRProcessor:
         
         matrix = cv2.getPerspectiveTransform(rect, dst_pts)
         warped = cv2.warpPerspective(image, matrix, (maxWidth, maxHeight))
-        self.warped_image = warped
+        self.warped_image = warped  # Store original warped image for QR detection
 
         if self.debug:
             print(f"Paper extracted (original method) and warped to {maxWidth}x{maxHeight}")
             cv2.imwrite(self._get_debug_path("extract_paper_07_warped", ".jpg"), warped)
-
-        # Try to detect the main form rectangle within the extracted paper
-        form_warped = self._detect_form_rectangle(warped)
-        if form_warped is not None:
-            if self.debug:
-                print("Using refined form rectangle detection")
-            self.warped_image = form_warped
-            return form_warped
 
         return warped
 
@@ -1133,14 +1125,23 @@ class StandaloneOMRProcessor:
             warped = self._extract_paper(original_image)
             if warped is None:
                 warped = original_image
-            self.warped_image = warped
-
-            # QR detection - independent process
-            raw_qr_data = self._extract_qr_data(warped)
+                self.warped_image = warped
+                
+            # QR detection - use the original warped paper image
+            raw_qr_data = self._extract_qr_data(self.warped_image)
             qr_output = raw_qr_data if raw_qr_data else ""
+            
+            # Detect inner rectangle for bubble detection
+            form_warped = self._detect_form_rectangle(warped)
+            if form_warped is not None:
+                if self.debug:
+                    print("Using form rectangle for bubble detection")
+                bubble_warped = form_warped
+            else:
+                bubble_warped = warped
 
-            # Bubble detection - independent process using full image
-            questions_processed = self._detect_bubbles(warped)
+            # Bubble detection using the appropriate image
+            questions_processed = self._detect_bubbles(bubble_warped)
 
             answers_list = []
             valid_question_count = 0
@@ -1166,10 +1167,10 @@ class StandaloneOMRProcessor:
 
             # Always generate the final debug image, regardless of debug mode
             debug_image_path = self._get_debug_path(image_path, "questions_detected.jpeg")
-            if len(warped.shape) == 3:
-                gray_for_debug = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
+            if len(bubble_warped.shape) == 3:
+                gray_for_debug = cv2.cvtColor(bubble_warped, cv2.COLOR_BGR2GRAY)
             else:
-                gray_for_debug = warped.copy()
+                gray_for_debug = bubble_warped.copy()
             self._generate_debug_image(gray_for_debug, questions_processed, debug_image_path)
 
             return result_json
