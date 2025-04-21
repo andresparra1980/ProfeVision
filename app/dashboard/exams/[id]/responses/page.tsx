@@ -58,8 +58,10 @@ interface Exam {
     opciones_respuesta: Array<{
       id: string;
       texto: string;
+      orden?: number;
     }>;
     puntaje: number;
+    orden?: number;
   }>;
 }
 
@@ -113,9 +115,11 @@ export default function ResponseSheetsPage({ params }: PageProps) {
             id,
             texto,
             puntaje,
+            orden,
             opciones_respuesta (
               id,
-              texto
+              texto,
+              orden
             )
           )
         `)
@@ -127,6 +131,18 @@ export default function ResponseSheetsPage({ params }: PageProps) {
           // Registramos el error en un logger en lugar de la consola
         }
         throw examError;
+      }
+
+      // Ordenar las preguntas por el campo 'orden'
+      if (examData && examData.preguntas) {
+        examData.preguntas.sort((a: {orden?: number}, b: {orden?: number}) => (a.orden || 0) - (b.orden || 0));
+        
+        // Ordenar las opciones de respuesta por el campo 'orden'
+        examData.preguntas.forEach((pregunta: {opciones_respuesta?: Array<{orden?: number}>}) => {
+          if (pregunta.opciones_respuesta) {
+            pregunta.opciones_respuesta.sort((a: {orden?: number}, b: {orden?: number}) => (a.orden || 0) - (b.orden || 0));
+          }
+        });
       }
 
       // Obtener grupos asignados con sus estudiantes usando joins explícitos

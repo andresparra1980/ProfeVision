@@ -185,39 +185,40 @@ const CornerMarker = ({ position, paperSize: _paperSize = 'LETTER' }: { position
 };
 
 // Componente para una burbuja de opción mejorada
+// Reducido de 24 a 18
+// Círculo exterior más grueso para mejor detección
+// Círculo interior para guía visual
 const OptionBubble = ({ letter }: { letter: string }) => (
   <View style={styles.optionBubble}>
-    <Svg width={18} height={18}> {/* Reducido de 24 a 18 */}
-      {/* Círculo exterior más grueso para mejor detección */}
+    <Svg width={18} height={18}>
       <Circle 
-        cx={9} /* Reducido de 12 a 9 */
-        cy={9} /* Reducido de 12 a 9 */
-        r={7} /* Reducido de 9 a 7 */
+        cx={9}
+        cy={9}
+        r={7}
         stroke="#000000" 
-        strokeWidth={1.5} /* Reducido de 2 a 1.5 */
+        strokeWidth={1.5}
         fill="none" 
       />
-      {/* Círculo interior para guía visual */}
       <Circle 
-        cx={9} /* Reducido de 12 a 9 */
-        cy={9} /* Reducido de 12 a 9 */
-        r={6} /* Reducido de 8 a 6 */
+        cx={9}
+        cy={9}
+        r={6}
         stroke="#cccccc" 
         strokeWidth={0.5} 
         fill="none" 
       />
-      {/* Letra centrada */}
-      <Text 
-        x={letter.length > 1 ? 5 : 7} /* Ajustado de 6/9 a 5/7 */
-        y={12} /* Reducido de 15 a 12 */
-        style={{ 
-          fontSize: 8, /* Reducido de 10 a 8 */
-          fontWeight: 'bold',
-        }}
-      >
-        {letter}
-      </Text>
     </Svg>
+    <Text
+      style={{
+        position: 'absolute',
+        top: 4,
+        left: letter.length > 1 ? 4 : 6,
+        fontSize: 8,
+        fontWeight: 'bold',
+      }}
+    >
+      {letter}
+    </Text>
   </View>
 );
 
@@ -291,6 +292,8 @@ const QRCodeComponent = ({ data }: { data: string }) => {
 };
 
 // Componente para una hoja de respuestas individual
+// Dividir las preguntas en grupos de 40 máximo (antes 20)
+// Dividir en columnas de 20 preguntas cada una (antes 10)
 const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; group: Group }) => {
   const qrData = generateOptimizedQRData({
     examId: exam.id,
@@ -298,7 +301,6 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
     groupId: group.id
   });
 
-  // Dividir las preguntas en grupos de 40 máximo (antes 20)
   const paginasPreguntas = [];
   for (let i = 0; i < exam.preguntas.length; i += 40) {
     paginasPreguntas.push(exam.preguntas.slice(i, i + 40));
@@ -307,13 +309,11 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
   return (
     <>
       {paginasPreguntas.map((preguntasPagina, pageIndex) => {
-        // Dividir en columnas de 20 preguntas cada una (antes 10)
         const preguntasCol1 = preguntasPagina.slice(0, 20);
         const preguntasCol2 = preguntasPagina.slice(20, 40);
 
         return (
           <Page key={pageIndex} size="LETTER" style={styles.page}>
-            {/* Marcadores en forma de L externos */}
             <CornerMarker position="top-left" />
             <CornerMarker position="top-right" />
             <CornerMarker position="bottom-left" />
@@ -359,7 +359,6 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
               </View>
             </View>
 
-            {/* Instrucciones fuera del contenedor */}
             <Text style={styles.instructions}>
               Instrucciones: Rellene completamente el círculo que corresponda a la respuesta correcta.
               Use lápiz negro o azul. No use bolígrafo rojo. Asegúrese de borrar completamente si necesita cambiar una respuesta.
