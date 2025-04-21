@@ -61,6 +61,322 @@ class StandaloneOMRProcessor:
                 filename = f"{base.stem}{safe_suffix}{base.suffix}"
             return str(base.parent / filename)
 
+    def _detect_form_rectangle(self, warped_image: np.ndarray) -> Optional[np.ndarray]:
+        """
+        Detects the main form rectangle boundary after paper extraction.
+        This handles cases where extra margins are printed around the form.
+        """
+        if warped_image is None:
+            return None
+            
+        # Convert to grayscale if needed
+        if len(warped_image.shape) == 3:
+            gray = cv2.cvtColor(warped_image, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = warped_image.copy()
+            
+        height, width = gray.shape[:2]
+        
+        # Create debug image
+        if self.debug:
+            debug_img = warped_image.copy()
+            
+        # Use edge detection to find strong edges of the form
+        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        if self.debug:
+            cv2.imwrite(self._get_debug_path("form_rect_01_edges", ".jpg"), edges)
+            
+        # Dilate the edges to connect any small gaps
+        kernel = np.ones((3,3), np.uint8)
+        dilated = cv2.dilate(edges, kernel, iterations=1)
+        if self.debug:
+            cv2.imwrite(self._get_debug_path("form_rect_02_dilated", ".jpg"), dilated)
+        
+        # Find contours of the dilated edges
+        contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        if self.debug:
+            contour_img = warped_image.copy()
+            cv2.drawContours(contour_img, contours, -1, (0, 255, 0), 2)
+            cv2.imwrite(self._get_debug_path("form_rect_03_contours", ".jpg"), contour_img)
+        
+        # Filter contours by area and shape
+        min_area_ratio = 0.5  # Form should be at least 50% of the paper
+        max_area_ratio = 0.98  # And not more than 98% (allowing for some margin)
+        paper_area = width * height
+        
+        form_contour = None
+        max_valid_area = 0
+        
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            area_ratio = area / paper_area
+            
+            # Skip contours that are too small or too large
+            if area_ratio < min_area_ratio or area_ratio > max_area_ratio:
+                continue
+                
+            # Check if contour is approximately rectangular
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+            
+            # If it has 4 vertices, it's likely a rectangle
+            if len(approx) == 4:
+                # Calculate aspect ratio to ensure it's reasonable
+                x, y, w, h = cv2.boundingRect(approx)
+                aspect_ratio = w / h
+                
+                # Form should have reasonable aspect ratio (not too narrow)
+                if 0.5 <= aspect_ratio <= 2.0 and area > max_valid_area:
+                    form_contour = approx
+                    max_valid_area = area
+        
+        if form_contour is None:
+            if self.debug:
+                print("No valid form rectangle found, attempting alternative detection")
+                
+            # Try alternative method with Hough transform to find lines
+            lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=100, minLineLength=100, maxLineGap=10)
+            
+            if lines is not None and self.debug:
+                line_img = warped_image.copy()
+                for line in lines:
+                    x1, y1, x2, y2 = line[0]
+                    cv2.line(line_img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                cv2.imwrite(self._get_debug_path("form_rect_04_lines", ".jpg"), line_img)
+                
+            # Another approach: Try with more aggressive preprocessing
+            _, binary = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
+            binary = 255 - binary  # Invert
+            if self.debug:
+                cv2.imwrite(self._get_debug_path("form_rect_05_binary", ".jpg"), binary)
+                
+            # Morphological operations to close gaps
+            kernel = np.ones((5,5), np.uint8)
+            morph = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel, iterations=2)
+            if self.debug:
+                cv2.imwrite(self._get_debug_path("form_rect_06_morph", ".jpg"), morph)
+                
+            # Find contours again with the binary image
+            contours2, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            
+            if self.debug:
+                contour2_img = warped_image.copy()
+                cv2.drawContours(contour2_img, contours2, -1, (255, 0, 0), 2)
+                cv2.imwrite(self._get_debug_path("form_rect_07_contours2", ".jpg"), contour2_img)
+            
+            # Try to find a rectangular contour again
+            for cnt in contours2:
+                area = cv2.contourArea(cnt)
+                area_ratio = area / paper_area
+                
+                if area_ratio < 0.4 or area_ratio > 0.98:  # More lenient minimum area
+                    continue
+                    
+                peri = cv2.arcLength(cnt, True)
+                approx = cv2.approxPolyDP(cnt, 0.04 * peri, True)  # More lenient approximation
+                
+                # Check if it's roughly rectangular (4-6 vertices)
+                if 4 <= len(approx) <= 6:
+                    # Further simplify to get exactly 4 points if needed
+                    if len(approx) > 4:
+                        approx = cv2.approxPolyDP(cnt, 0.06 * peri, True)
+                    
+                    if len(approx) == 4 and area > max_valid_area:
+                        form_contour = approx
+                        max_valid_area = area
+                        break
+        
+        if form_contour is None:
+            if self.debug:
+                print("Could not find form rectangle with any method")
+            return None
+            
+        # Order the points and perform perspective transform
+        if self.debug:
+            rect_img = warped_image.copy()
+            cv2.drawContours(rect_img, [form_contour], -1, (0, 0, 255), 3)
+            cv2.imwrite(self._get_debug_path("form_rect_08_detected", ".jpg"), rect_img)
+            
+        # Get the corner points in the correct order
+        form_contour = form_contour.reshape(4, 2)
+        rect = self._order_points(form_contour)
+        
+        # Calculate new dimensions while preserving aspect ratio
+        width_a = np.linalg.norm(rect[1] - rect[0])
+        width_b = np.linalg.norm(rect[2] - rect[3])
+        height_a = np.linalg.norm(rect[3] - rect[0])
+        height_b = np.linalg.norm(rect[2] - rect[1])
+        
+        maxWidth = max(int(width_a), int(width_b))
+        maxHeight = max(int(height_a), int(height_b))
+        
+        # Define destination points for the transform
+        dst_pts = np.array([
+            [0, 0],
+            [maxWidth - 1, 0],
+            [maxWidth - 1, maxHeight - 1],
+            [0, maxHeight - 1]
+        ], dtype=np.float32)
+        
+        # Get the transformation matrix
+        matrix = cv2.getPerspectiveTransform(rect, dst_pts)
+        
+        # Warp the image
+        form_warped = cv2.warpPerspective(warped_image, matrix, (maxWidth, maxHeight))
+        
+        if self.debug:
+            print(f"Form outer rectangle detected and warped to {maxWidth}x{maxHeight}")
+            cv2.imwrite(self._get_debug_path("form_rect_09_warped", ".jpg"), form_warped)
+
+        # After warping the outer form, now detect the inner rectangle with answers
+        inner_form = self._detect_inner_rectangle(form_warped)
+        if inner_form is not None:
+            if self.debug:
+                print("Inner answer area rectangle detected")
+                cv2.imwrite(self._get_debug_path("form_rect_10_inner", ".jpg"), inner_form)
+            return inner_form
+            
+        return form_warped
+
+    def _detect_inner_rectangle(self, form_image: np.ndarray) -> Optional[np.ndarray]:
+        """
+        Detects the inner rectangle containing all the bubble answers.
+        """
+        if form_image is None:
+            return None
+            
+        # Convert to grayscale if needed
+        if len(form_image.shape) == 3:
+            gray = cv2.cvtColor(form_image, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = form_image.copy()
+            
+        height, width = gray.shape[:2]
+        
+        # Crop a small margin to eliminate the outer border
+        margin_percent = 0.03  # 3% margin
+        margin_x = int(width * margin_percent)
+        margin_y = int(height * margin_percent)
+        
+        if margin_x > 0 and margin_y > 0:
+            # Ensure we don't go out of bounds
+            if 2 * margin_x >= width or 2 * margin_y >= height:
+                if self.debug:
+                    print("Margins too large for cropping")
+                return None
+                
+            # Crop the image to remove the outer border
+            cropped = gray[margin_y:height-margin_y, margin_x:width-margin_x]
+            if self.debug:
+                cv2.imwrite(self._get_debug_path("inner_rect_01_cropped", ".jpg"), cropped)
+        else:
+            cropped = gray
+            
+        # Use adaptive thresholding to better handle lighting variations
+        thresh = cv2.adaptiveThreshold(
+            cropped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+            cv2.THRESH_BINARY_INV, blockSize=21, C=5
+        )
+        
+        if self.debug:
+            cv2.imwrite(self._get_debug_path("inner_rect_02_thresh", ".jpg"), thresh)
+            
+        # Apply morphology to clean the image and connect lines
+        kernel = np.ones((3, 3), np.uint8)
+        morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+        morph = cv2.morphologyEx(morph, cv2.MORPH_OPEN, kernel, iterations=1)
+        
+        if self.debug:
+            cv2.imwrite(self._get_debug_path("inner_rect_03_morph", ".jpg"), morph)
+            
+        # Find contours
+        contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        if self.debug:
+            debug_contours = cv2.cvtColor(cropped, cv2.COLOR_GRAY2BGR)
+            cv2.drawContours(debug_contours, contours, -1, (0, 255, 0), 2)
+            cv2.imwrite(self._get_debug_path("inner_rect_04_contours", ".jpg"), debug_contours)
+            
+        # Find the largest contour that is approximately rectangular
+        cropped_area = cropped.shape[0] * cropped.shape[1]
+        min_area_ratio = 0.4  # Inner rectangle typically covers at least 40% of the form
+        max_area_ratio = 0.95  # And not more than 95%
+        
+        inner_contour = None
+        max_valid_area = 0
+        
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            area_ratio = area / cropped_area
+            
+            # Skip contours that are too small or too large
+            if area_ratio < min_area_ratio or area_ratio > max_area_ratio:
+                continue
+                
+            # Check if it's approximately rectangular
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+            
+            # Check for rectangular shape - 4 vertices
+            if len(approx) != 4:
+                continue
+                
+            # Get bounding rectangle and check aspect ratio
+            x, y, w, h = cv2.boundingRect(approx)
+            aspect_ratio = w / h
+            
+            # Ensure reasonable aspect ratio for the inner form
+            if 0.5 <= aspect_ratio <= 2.0 and area > max_valid_area:
+                inner_contour = approx
+                max_valid_area = area
+                
+        if inner_contour is None:
+            if self.debug:
+                print("No inner rectangle found")
+            return None
+        
+        # Draw the inner contour on the debug image
+        if self.debug:
+            debug_inner = cv2.cvtColor(cropped, cv2.COLOR_GRAY2BGR)
+            cv2.drawContours(debug_inner, [inner_contour], -1, (0, 0, 255), 2)
+            cv2.imwrite(self._get_debug_path("inner_rect_05_detected", ".jpg"), debug_inner)
+            
+        # Get the corner points of the inner contour
+        inner_contour = inner_contour.reshape(4, 2)
+        rect = self._order_points(inner_contour)
+        
+        # Adjust coordinates to account for the cropping
+        if margin_x > 0 and margin_y > 0:
+            rect[:, 0] += margin_x
+            rect[:, 1] += margin_y
+            
+        # Calculate dimensions for the inner rectangle
+        width_a = np.linalg.norm(rect[1] - rect[0])
+        width_b = np.linalg.norm(rect[2] - rect[3])
+        height_a = np.linalg.norm(rect[3] - rect[0])
+        height_b = np.linalg.norm(rect[2] - rect[1])
+        
+        inner_width = max(int(width_a), int(width_b))
+        inner_height = max(int(height_a), int(height_b))
+        
+        # Define destination points
+        dst_pts = np.array([
+            [0, 0],
+            [inner_width - 1, 0],
+            [inner_width - 1, inner_height - 1],
+            [0, inner_height - 1]
+        ], dtype=np.float32)
+        
+        # Get the transformation matrix and warp
+        matrix = cv2.getPerspectiveTransform(rect, dst_pts)
+        inner_warped = cv2.warpPerspective(form_image, matrix, (inner_width, inner_height))
+        
+        if self.debug:
+            print(f"Inner rectangle warped to {inner_width}x{inner_height}")
+            
+        return inner_warped
+
     def _extract_paper(self, image: np.ndarray) -> Optional[np.ndarray]:
         """Extract the paper from the background using the largest contour method (original src/preprocessor logic)."""
         if self.debug:
@@ -140,6 +456,14 @@ class StandaloneOMRProcessor:
         if self.debug:
             print(f"Paper extracted (original method) and warped to {maxWidth}x{maxHeight}")
             cv2.imwrite(self._get_debug_path("extract_paper_07_warped", ".jpg"), warped)
+
+        # Try to detect the main form rectangle within the extracted paper
+        form_warped = self._detect_form_rectangle(warped)
+        if form_warped is not None:
+            if self.debug:
+                print("Using refined form rectangle detection")
+            self.warped_image = form_warped
+            return form_warped
 
         return warped
 
