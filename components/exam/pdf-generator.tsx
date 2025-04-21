@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     padding: 0,
     height: '100%',
-    border: '3pt solid black', // Aumentado a 3pt (triple de grosor original)
+    border: '0', // Usar un ancho de borde de 0 en lugar de 'none'
   },
   container: {
     margin: calculateMarkerDimensions().margin * 2, // Doble del margen de los marcadores
