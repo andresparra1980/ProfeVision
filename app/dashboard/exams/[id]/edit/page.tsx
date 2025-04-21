@@ -640,7 +640,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                                   ? 'bg-green-100 text-green-800 dark:bg-green-600 dark:text-white' 
                                   : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                               }`}>
-                                {optIndex + 1}
+                                {String.fromCharCode(65 + optIndex)}
                               </div>
                               <p className={option.es_correcta ? 'font-medium' : ''}>{option.texto}</p>
                               {option.es_correcta && (
