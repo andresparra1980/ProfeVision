@@ -371,18 +371,25 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
 };
 
 // Componente principal que genera el PDF
-const PDFDocument = ({ exam, group }: { exam: Exam; group: Group }) => (
-  <Document>
-    {group.estudiantes.map((student) => (
-      <AnswerSheet
-        key={student.id}
-        exam={exam}
-        student={student}
-        group={group}
-      />
-    ))}
-  </Document>
-);
+const PDFDocument = ({ exam, group }: { exam: Exam; group: Group }) => {
+  // Ordenar estudiantes alfabéticamente por apellido
+  const sortedStudents = [...group.estudiantes].sort((a, b) => 
+    a.apellidos.localeCompare(b.apellidos, 'es', { sensitivity: 'base' })
+  );
+
+  return (
+    <Document>
+      {sortedStudents.map((student) => (
+        <AnswerSheet
+          key={student.id}
+          exam={exam}
+          student={student}
+          group={group}
+        />
+      ))}
+    </Document>
+  );
+};
 
 export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName }: PDFGeneratorProps) {
   const [isClient, setIsClient] = useState(false);
