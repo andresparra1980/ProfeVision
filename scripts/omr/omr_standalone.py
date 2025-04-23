@@ -779,6 +779,223 @@ class StandaloneOMRProcessor:
             current_row.sort(key=lambda x: x['center_x'])
             rows.append(current_row)
 
+        # Reconstruct missing bubbles in rows
+        reconstructed_rows = []
+        
+        # First, calculate global averages for bubble dimensions and positions
+        all_bubbles = [b for row in rows for b in row]
+        if len(all_bubbles) >= 8:  # Need enough bubbles for meaningful statistics
+            global_avg_width = sum(b['width'] for b in all_bubbles) / len(all_bubbles)
+            global_avg_height = sum(b['height'] for b in all_bubbles) / len(all_bubbles)
+            
+            # Get all x-positions and sort them
+            all_x_positions = sorted([b['center_x'] for b in all_bubbles])
+            
+            # Group x-positions into clusters to identify typical bubble positions
+            x_clusters = []
+            current_cluster = [all_x_positions[0]]
+            
+            for i in range(1, len(all_x_positions)):
+                if all_x_positions[i] - current_cluster[-1] < global_avg_width * 0.5:
+                    # Same cluster
+                    current_cluster.append(all_x_positions[i])
+                else:
+                    # New cluster
+                    x_clusters.append(sum(current_cluster) / len(current_cluster))
+                    current_cluster = [all_x_positions[i]]
+            
+            if current_cluster:
+                x_clusters.append(sum(current_cluster) / len(current_cluster))
+                
+            if self.debug:
+                print(f"Global bubble statistics: width={global_avg_width:.1f}, height={global_avg_height:.1f}")
+                print(f"Found {len(x_clusters)} typical x-positions: {[f'{x:.1f}' for x in x_clusters]}")
+        else:
+            # Not enough data for global statistics, use defaults
+            global_avg_width = 65
+            global_avg_height = 65
+            x_clusters = []
+        
+        for row_idx, row in enumerate(rows):
+            # Skip rows with too few bubbles
+            if len(row) < 2:
+                reconstructed_rows.append(row)
+                continue
+                
+            # Sort bubbles by x-coordinate
+            row.sort(key=lambda b: b['center_x'])
+            
+            # Split into left and right columns
+            image_midpoint = gray_roi.shape[1] / 2
+            left_bubbles = [b for b in row if b['center_x'] < image_midpoint]
+            right_bubbles = [b for b in row if b['center_x'] >= image_midpoint]
+            
+            # Reconstruct left column (questions 1-20)
+            reconstructed_left = left_bubbles.copy()
+            if left_bubbles and len(left_bubbles) < 4:  # Only reconstruct if we're missing bubbles
+                # Use row-specific stats if available, otherwise fall back to global stats
+                avg_width = sum(b['width'] for b in left_bubbles) / len(left_bubbles)
+                avg_height = sum(b['height'] for b in left_bubbles) / len(left_bubbles)
+                
+                # Calculate expected x-spacing between bubbles
+                x_positions = [b['center_x'] for b in left_bubbles]
+                
+                if len(x_positions) >= 2:
+                    # Calculate spacing based on this row
+                    avg_x_spacing = (max(x_positions) - min(x_positions)) / (len(x_positions) - 1)
+                    
+                    # Expected positions for all 4 options
+                    expected_x = []
+                    min_x = min(x_positions)
+                    
+                    # If we have global x-clusters, use them to better place reconstructed bubbles
+                    if len(x_clusters) >= 4:
+                        # Find which global clusters match our existing bubbles
+                        matching_clusters = []
+                        for x_pos in x_positions:
+                            closest_cluster = min(x_clusters, key=lambda c: abs(c - x_pos))
+                            matching_clusters.append(closest_cluster)
+                        
+                        # Get all clusters for left column
+                        left_clusters = [c for c in x_clusters if c < image_midpoint]
+                        if len(left_clusters) >= 4:  # We have enough clusters for all options
+                            expected_x = left_clusters[:4]
+                    
+                    # Fallback to simple spacing if we couldn't use global clusters
+                    if not expected_x:
+                        for i in range(4):  # 4 options
+                            expected_x.append(min_x + i * avg_x_spacing)
+                    
+                    # Find missing bubbles
+                    reconstructed_left = []
+                    for i, exp_x in enumerate(expected_x):
+                        # Look for existing bubble near this position
+                        found = False
+                        for b in left_bubbles:
+                            if abs(b['center_x'] - exp_x) < avg_width * 0.5:  # Increased tolerance
+                                reconstructed_left.append(b)
+                                found = True
+                                break
+                        
+                        # If no bubble found at this position, create a placeholder
+                        if not found:
+                            if self.debug:
+                                print(f"Reconstructing missing bubble at position {i} (option {chr(65+i)}) for question {row_idx+1}")
+                            
+                            placeholder = {
+                                'id': f'reconstructed_left_{row_idx}_{i}',
+                                'contour': None,  # No actual contour
+                                'bounds': (int(exp_x - avg_width/2), int(left_bubbles[0]['center_y'] - avg_height/2), 
+                                           int(avg_width), int(avg_height)),
+                                'center_x': exp_x,
+                                'center_y': left_bubbles[0]['center_y'],
+                                'width': avg_width,
+                                'height': avg_height,
+                                'circularity': 0.8,  # Reasonable default
+                                'area': avg_width * avg_height,
+                                'is_reconstructed': True  # Mark as reconstructed
+                            }
+                            reconstructed_left.append(placeholder)
+                    
+                    # Sort reconstructed bubbles by x position
+                    reconstructed_left.sort(key=lambda b: b['center_x'])
+            
+            # Reconstruct right column (questions 21-40)
+            reconstructed_right = right_bubbles.copy()
+            if right_bubbles and len(right_bubbles) < 4:  # Only reconstruct if we're missing bubbles
+                # Calculate average bubble dimensions
+                avg_width = sum(b['width'] for b in right_bubbles) / len(right_bubbles)
+                avg_height = sum(b['height'] for b in right_bubbles) / len(right_bubbles)
+                
+                # Calculate expected x-spacing between bubbles
+                x_positions = [b['center_x'] for b in right_bubbles]
+                
+                if len(x_positions) >= 2:
+                    # Calculate spacing based on this row
+                    avg_x_spacing = (max(x_positions) - min(x_positions)) / (len(x_positions) - 1)
+                    
+                    # All questions have 4 options by default
+                    num_options = 4
+                    
+                    # Expected positions for all options
+                    expected_x = []
+                    min_x = min(x_positions)
+                    
+                    # If we have global x-clusters, use them for better placement
+                    if len(x_clusters) >= 8:  # Need at least 8 clusters (4 for each column)
+                        # Find which global clusters match our existing bubbles
+                        matching_clusters = []
+                        for x_pos in x_positions:
+                            closest_cluster = min(x_clusters, key=lambda c: abs(c - x_pos))
+                            matching_clusters.append(closest_cluster)
+                        
+                        # Get all clusters for right column
+                        right_clusters = [c for c in x_clusters if c >= image_midpoint]
+                        if len(right_clusters) >= 4:  # We have enough clusters for all options
+                            expected_x = right_clusters[:4]
+                    
+                    # Fallback to simple spacing if we couldn't use global clusters
+                    if not expected_x:
+                        for i in range(num_options):
+                            expected_x.append(min_x + i * avg_x_spacing)
+                    
+                    # Find missing bubbles
+                    reconstructed_right = []
+                    for i, exp_x in enumerate(expected_x):
+                        found = False
+                        for b in right_bubbles:
+                            if abs(b['center_x'] - exp_x) < avg_width * 0.5:  # Increased tolerance
+                                reconstructed_right.append(b)
+                                found = True
+                                break
+                        
+                        if not found:
+                            if self.debug:
+                                print(f"Reconstructing missing bubble at position {i} (option {chr(65+i)}) for question {row_idx+21}")
+                            
+                            placeholder = {
+                                'id': f'reconstructed_right_{row_idx}_{i}',
+                                'contour': None,
+                                'bounds': (int(exp_x - avg_width/2), int(right_bubbles[0]['center_y'] - avg_height/2), 
+                                           int(avg_width), int(avg_height)),
+                                'center_x': exp_x,
+                                'center_y': right_bubbles[0]['center_y'],
+                                'width': avg_width,
+                                'height': avg_height,
+                                'circularity': 0.8,
+                                'area': avg_width * avg_height,
+                                'is_reconstructed': True
+                            }
+                            reconstructed_right.append(placeholder)
+                    
+                    # Sort reconstructed bubbles by x position
+                    reconstructed_right.sort(key=lambda b: b['center_x'])
+            
+            # Combine left and right columns
+            new_row = reconstructed_left + reconstructed_right
+            reconstructed_rows.append(new_row)
+        
+        # Replace original rows with reconstructed ones
+        rows = reconstructed_rows
+        
+        # Debug visualization for reconstructed rows
+        if self.debug:
+            debug_reconstructed = cv2.cvtColor(gray_roi, cv2.COLOR_GRAY2BGR)
+            for row_idx, row in enumerate(rows):
+                for bubble in row:
+                    x, y, w, h = bubble['bounds']
+                    # Use different color for reconstructed bubbles
+                    if bubble.get('is_reconstructed', False):
+                        color = (255, 0, 255)  # Magenta for reconstructed
+                    else:
+                        color = (0, 255, 0)  # Green for original
+                    
+                    cv2.rectangle(debug_reconstructed, (x,y), (x+w,y+h), color, 2)
+                    # Draw center point
+                    center = (int(bubble['center_x']), int(bubble['center_y']))
+                    cv2.circle(debug_reconstructed, center, 2, (255,255,0), -1)
+            cv2.imwrite(self._get_debug_path("07_reconstructed_bubbles", ".png"), debug_reconstructed)
+
         if self.debug:
             print(f"\nFound {len(rows)} rows")
             for i, row in enumerate(rows):
@@ -926,6 +1143,14 @@ class StandaloneOMRProcessor:
         filled_pixels_list = []
 
         for i, bubble in enumerate(bubbles):
+            # Check if this is a reconstructed bubble
+            if bubble.get('is_reconstructed', False):
+                # For reconstructed bubbles, set fill ratio to 0
+                fill_ratios.append(0.0)
+                total_pixels_list.append(0)
+                filled_pixels_list.append(0)
+                continue
+                
             bx, by, bw, bh = bubble.get('bounds', (0,0,0,0))
             x_rel = int(bx - roi_x)
             y_rel = int(by - roi_y)
@@ -1075,9 +1300,22 @@ class StandaloneOMRProcessor:
                     contour = bubble_data.get('contour')
                     bounds = bubble_data.get('bounds')
                     letter = self._get_option_letter(b_idx)
+                    
+                    # Default color is green
                     color = (0, 255, 0)
+                    
+                    # Change color to blue if this is the selected answer
                     if question.get('value') == letter:
                         color = (0, 0, 255)
+                        
+                    # Use magenta for reconstructed bubbles
+                    is_reconstructed = bubble_data.get('is_reconstructed', False)
+                    if is_reconstructed:
+                        if question.get('value') == letter:
+                            color = (255, 0, 255)  # Magenta if selected
+                        else:
+                            color = (180, 0, 180)  # Darker magenta if not selected
+                    
                     try:
                         if contour is not None:
                             cnt = np.array(contour, dtype=np.int32)
@@ -1089,12 +1327,35 @@ class StandaloneOMRProcessor:
                                         (x + x_offset, y + y_offset),
                                         (x + w + x_offset, y + h + y_offset),
                                         color, 2)
+                            
+                            # For reconstructed bubbles, draw dashed lines
+                            if is_reconstructed:
+                                for i in range(0, h, 4):  # Draw dashed vertical lines
+                                    cv2.line(debug_img, 
+                                           (x + x_offset, y + y_offset + i),
+                                           (x + x_offset, min(y + y_offset + i + 2, y + y_offset + h)),
+                                           color, 1)
+                                    cv2.line(debug_img, 
+                                           (x + w + x_offset, y + y_offset + i),
+                                           (x + w + x_offset, min(y + y_offset + i + 2, y + y_offset + h)),
+                                           color, 1)
+                                for i in range(0, w, 4):  # Draw dashed horizontal lines
+                                    cv2.line(debug_img, 
+                                           (x + x_offset + i, y + y_offset),
+                                           (min(x + x_offset + i + 2, x + x_offset + w), y + y_offset),
+                                           color, 1)
+                                    cv2.line(debug_img, 
+                                           (x + x_offset + i, y + h + y_offset),
+                                           (min(x + x_offset + i + 2, x + x_offset + w), y + h + y_offset),
+                                           color, 1)
+                        
                         if bounds:
                             x, y = map(int, bounds[:2])
                             fill_ratio = question.get('fill_ratios', [])[b_idx] if b_idx < len(question.get('fill_ratios', [])) else 0
+                            text_color = color
                             cv2.putText(debug_img, f"{letter}:{fill_ratio:.2f}", 
                                       (x + x_offset, y + y_offset - 5),
-                                      cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+                                      cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color, 1)
                     except Exception as e:
                         pass
             
