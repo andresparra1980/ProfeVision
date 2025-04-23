@@ -378,17 +378,17 @@ const PDFDocument = ({ exam, group }: { exam: Exam; group: Group }) => {
   );
 
   return (
-    <Document>
+  <Document>
       {sortedStudents.map((student) => (
-        <AnswerSheet
-          key={student.id}
-          exam={exam}
-          student={student}
-          group={group}
-        />
-      ))}
-    </Document>
-  );
+      <AnswerSheet
+        key={student.id}
+        exam={exam}
+        student={student}
+        group={group}
+      />
+    ))}
+  </Document>
+);
 };
 
 export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName }: PDFGeneratorProps) {

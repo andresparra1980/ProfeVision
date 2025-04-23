@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, Image as ImageIcon, FileImage, Loader2, Save, AlertCircle, Download } from 'lucide-react';
+import { ChevronLeft, Loader2, Save, AlertCircle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,12 +19,31 @@ import { supabase } from '@/lib/supabase';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from 'next/image';
+import * as XLSX from 'xlsx';
+import dynamic from 'next/dynamic';
+
+// Import react-pdf components (but disable due to client-only usage)
+// These imports are only referenced in code that is disabled for ESLint
+// and are actually imported dynamically through PDFExportButton
+
+import { Document, Page, Text, View, StyleSheet, Image as PDFImage } from '@react-pdf/renderer';
+
+// Dynamic import for PDF generator component (client-side only)
+const PDFExportButton = dynamic(
+  () => import('@/components/exam/pdf-export-button').then(mod => mod.PDFExportButton),
+  { 
+    ssr: false,
+    loading: () => (
+      <Button variant="secondary" disabled className="flex items-center">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        Cargando PDF...
+      </Button>
+    )
+  }
+);
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
-
-// Importar la biblioteca xlsx para exportar a Excel
-import * as XLSX from 'xlsx';
 
 interface Estudiante {
   id: string;
@@ -72,6 +91,7 @@ interface ResultadoExamen {
     ruta_s3_original: string;
     ruta_s3_procesado: string;
   };
+  imagenBase64?: string;
 }
 
 interface ExamDetails {
@@ -468,9 +488,112 @@ export default function ExamResultsPage() {
   };
 
   // Función para mostrar el diálogo de detalles
-  const handleShowDetails = (resultado: ResultadoExamen) => {
-    setSelectedResultado(resultado);
+  const handleShowDetails = async (resultado: ResultadoExamen) => {
+    // Load the base64 image if needed and not already loaded
+    let resultadoWithImage = resultado;
+    if (resultado.examen_escaneado?.ruta_s3_procesado && !resultado.imagenBase64) {
+      try {
+        const signedUrl = await getStorageUrl(resultado.examen_escaneado.ruta_s3_procesado);
+        if (signedUrl) {
+          const base64Image = await fetchImageAsBase64(signedUrl);
+          if (base64Image) {
+            resultadoWithImage = {
+              ...resultado,
+              imagenBase64: base64Image
+            };
+          }
+        }
+      } catch (_error) {
+        if (DEBUG) {
+          // Log the error
+        }
+      }
+    }
+    
+    setSelectedResultado(resultadoWithImage);
     setShowDetailsDialog(true);
+  };
+
+  // Función para obtener URL firmada
+  const getStorageUrl = async (filePath: string | null | undefined) => {
+    if (!filePath) return '';
+    
+    try {
+      const { data, error: _error } = await supabase
+        .storage
+        .from('examenes-escaneados')
+        .createSignedUrl(filePath, 3600);
+
+      if (_error) {
+        return '';
+      }
+
+      return data.signedUrl;
+    } catch (_error) {
+      return '';
+    }
+  };
+
+  // Función para convertir imagen a base64
+  const fetchImageAsBase64 = async (url: string): Promise<string | null> => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          // Extract only the base64 data part without the prefix
+          const base64Data = base64String.split(',')[1];
+          resolve(base64Data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (_error) {
+      if (DEBUG) {
+        // Log the error
+      }
+      return null;
+    }
+  };
+
+  // Función para cargar imágenes en base64 para todas las resultusos
+  const loadImagesForPDF = async (): Promise<ResultadoExamen[]> => {
+    const resultadosWithImages = [...resultados];
+    
+    // Process images in batches to avoid too many parallel requests
+    const batchSize = 3;
+    for (let i = 0; i < resultadosWithImages.length; i += batchSize) {
+      const batch = resultadosWithImages.slice(i, i + batchSize);
+      
+      await Promise.all(
+        batch.map(async (resultado, index) => {
+          const actualIndex = i + index;
+          if (resultado.examen_escaneado?.ruta_s3_procesado && !resultado.imagenBase64) {
+            try {
+              const signedUrl = await getStorageUrl(resultado.examen_escaneado.ruta_s3_procesado);
+              if (signedUrl) {
+                const base64Image = await fetchImageAsBase64(signedUrl);
+                if (base64Image) {
+                  resultadosWithImages[actualIndex] = {
+                    ...resultado,
+                    imagenBase64: base64Image
+                  };
+                }
+              }
+            } catch (_error) {
+              if (DEBUG) {
+                // Log the error
+              }
+            }
+          }
+        })
+      );
+    }
+    
+    return resultadosWithImages;
   };
 
   // Función para mostrar el diálogo de calificación manual
@@ -644,6 +767,321 @@ export default function ExamResultsPage() {
     }
   };
 
+  // Función para exportar resultados a PDF
+  // These components are defined but not used directly in this file
+  // They are only defined for reference and used in PDFExportButton
+  const _AnonymizedExamPDF = ({ resultados }: { resultados: ResultadoExamen[] }) => {
+    // Estilos para el PDF
+    const styles = StyleSheet.create({
+      page: {
+        padding: 30,
+        backgroundColor: '#ffffff',
+      },
+      header: {
+        fontSize: 18,
+        marginBottom: 20,
+        textAlign: 'center',
+        fontWeight: 'bold',
+      },
+      section: {
+        margin: 10,
+        padding: 10,
+        flexGrow: 1,
+      },
+      subHeader: {
+        fontSize: 14,
+        marginBottom: 10,
+        fontWeight: 'bold',
+      },
+      row: {
+        flexDirection: 'row',
+        borderBottomColor: '#EEEEEE',
+        borderBottomWidth: 1,
+        alignItems: 'center',
+        paddingTop: 5,
+        paddingBottom: 5,
+      },
+      studentInfo: {
+        marginBottom: 20,
+      },
+      label: {
+        width: 150,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
+      value: {
+        flex: 1,
+        fontSize: 12,
+      },
+      answersGrid: {
+        marginTop: 20,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+      },
+      answersHeader: {
+        fontSize: 14,
+        marginBottom: 10,
+        fontWeight: 'bold',
+      },
+      answerItem: {
+        width: '25%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+      },
+      questionNumber: {
+        width: 30,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
+      answerLetter: {
+        fontSize: 12,
+        marginRight: 4,
+      },
+      indicator: {
+        fontSize: 12,
+        marginLeft: 4,
+      },
+      image: {
+        marginTop: 20,
+        width: '100%',
+        height: 350,
+        objectFit: 'contain',
+      },
+    });
+
+    return (
+      <Document>
+        {resultados.map((resultado, _index) => (
+          <Page key={resultado.id} size="A4" style={styles.page}>
+            <Text style={styles.header}>NOMBRE DEL LA INSTITUCION</Text>
+            
+            <View style={styles.studentInfo}>
+              <View style={styles.row}>
+                <Text style={styles.label}>Materia:</Text>
+                <Text style={styles.value}>{examDetails?.materias?.nombre || 'Sin materia'}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.label}>Grupo:</Text>
+                <Text style={styles.value}>{examDetails?.grupos?.nombre || 'Sin grupo'}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.label}>Identificacion Estudiante:</Text>
+                <Text style={styles.value}>{resultado.estudiante.identificacion}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.label}>Nota:</Text>
+                <Text style={styles.value}>{resultado.puntaje_obtenido.toFixed(2)}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.label}>Porcentaje:</Text>
+                <Text style={styles.value}>{resultado.porcentaje.toFixed(1)}%</Text>
+              </View>
+            </View>
+            
+            <Text style={styles.answersHeader}>Respuestas Detectadas</Text>
+            <View style={styles.answersGrid}>
+              {resultado.respuestas_estudiante
+                .sort((a: RespuestaEstudiante, b: RespuestaEstudiante) => a.pregunta.orden - b.pregunta.orden)
+                .map((respuesta: RespuestaEstudiante) => (
+                  <View key={respuesta.id} style={styles.answerItem}>
+                    <Text style={styles.questionNumber}>{respuesta.pregunta.orden}.</Text>
+                    <Text style={styles.answerLetter}>
+                      {OPTION_LETTERS[respuesta.opcion_respuesta.orden - 1]}
+                    </Text>
+                    <Text style={styles.indicator}>
+                      {respuesta.es_correcta ? '✓' : '✗'}
+                    </Text>
+                  </View>
+                ))}
+            </View>
+
+            {resultado.imagenBase64 && (
+              <PDFImage 
+                src={`data:image/png;base64,${resultado.imagenBase64}`} 
+                style={styles.image} 
+              />
+            )}
+          </Page>
+        ))}
+      </Document>
+    );
+  };
+
+  // Función individual para un único examen
+  const _SingleExamPDF = ({ resultado }: { resultado: ResultadoExamen }) => {
+    const styles = StyleSheet.create({
+      page: {
+        padding: 30,
+        backgroundColor: '#ffffff',
+      },
+      header: {
+        fontSize: 18,
+        marginBottom: 20,
+        textAlign: 'center',
+        fontWeight: 'bold',
+      },
+      section: {
+        margin: 10,
+        padding: 10,
+        flexGrow: 1,
+      },
+      subHeader: {
+        fontSize: 14,
+        marginBottom: 10,
+        fontWeight: 'bold',
+      },
+      row: {
+        flexDirection: 'row',
+        borderBottomColor: '#EEEEEE',
+        borderBottomWidth: 1,
+        alignItems: 'center',
+        paddingTop: 5,
+        paddingBottom: 5,
+      },
+      studentInfo: {
+        marginBottom: 20,
+      },
+      label: {
+        width: 150,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
+      value: {
+        flex: 1,
+        fontSize: 12,
+      },
+      answersGrid: {
+        marginTop: 20,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+      },
+      answersHeader: {
+        fontSize: 14,
+        marginBottom: 10,
+        fontWeight: 'bold',
+      },
+      answerItem: {
+        width: '25%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+      },
+      questionNumber: {
+        width: 30,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
+      answerLetter: {
+        fontSize: 12,
+        marginRight: 4,
+      },
+      indicator: {
+        fontSize: 12,
+        marginLeft: 4,
+      },
+      image: {
+        marginTop: 20,
+        width: '100%',
+        height: 350,
+        objectFit: 'contain',
+      },
+    });
+
+    return (
+      <Document>
+        <Page size="A4" style={styles.page}>
+          <Text style={styles.header}>NOMBRE DEL LA INSTITUCION</Text>
+          
+          <View style={styles.studentInfo}>
+            <View style={styles.row}>
+              <Text style={styles.label}>Materia:</Text>
+              <Text style={styles.value}>{examDetails?.materias?.nombre || 'Sin materia'}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Grupo:</Text>
+              <Text style={styles.value}>{examDetails?.grupos?.nombre || 'Sin grupo'}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Identificacion Estudiante:</Text>
+              <Text style={styles.value}>{resultado.estudiante.identificacion}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Nota:</Text>
+              <Text style={styles.value}>{resultado.puntaje_obtenido.toFixed(2)}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Porcentaje:</Text>
+              <Text style={styles.value}>{resultado.porcentaje.toFixed(1)}%</Text>
+            </View>
+          </View>
+          
+          <Text style={styles.answersHeader}>Respuestas Detectadas</Text>
+          <View style={styles.answersGrid}>
+            {resultado.respuestas_estudiante
+              .sort((a: RespuestaEstudiante, b: RespuestaEstudiante) => a.pregunta.orden - b.pregunta.orden)
+              .map((respuesta: RespuestaEstudiante) => (
+                <View key={respuesta.id} style={styles.answerItem}>
+                  <Text style={styles.questionNumber}>{respuesta.pregunta.orden}.</Text>
+                  <Text style={styles.answerLetter}>
+                    {OPTION_LETTERS[respuesta.opcion_respuesta.orden - 1]}
+                  </Text>
+                  <Text style={styles.indicator}>
+                    {respuesta.es_correcta ? '✓' : '✗'}
+                  </Text>
+                </View>
+              ))}
+          </View>
+
+          {resultado.imagenBase64 && (
+            <PDFImage 
+              src={`data:image/png;base64,${resultado.imagenBase64}`} 
+              style={styles.image} 
+            />
+          )}
+        </Page>
+      </Document>
+    );
+  };
+
+  const handleExportToPDF = async () => {
+    if (!examDetails || resultados.length === 0) {
+      toast({
+        title: "Error",
+        description: "No hay resultados para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: "Preparando PDF",
+        description: "Cargando imágenes y preparando el reporte. Esto puede tardar un momento...",
+      });
+      
+      // Cargar imágenes para los resultados
+      const updatedResultados = await loadImagesForPDF();
+      
+      // Actualizar los resultados con las imágenes cargadas
+      setResultados(updatedResultados);
+      
+      toast({
+        title: "PDF Listo",
+        description: "Haga clic en el botón para descargar el reporte PDF.",
+      });
+    } catch (_error) {
+      toast({
+        title: "Error",
+        description: "No se pudo generar el PDF",
+        variant: "destructive",
+      });
+      if (DEBUG) {
+        // Registramos el error en un logger en lugar de la consola
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -666,14 +1104,26 @@ export default function ExamResultsPage() {
             Volver
           </Button>
           
-          <Button 
-            onClick={handleExportToExcel}
-            variant="default"
-            className="flex items-center"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Exportar a Excel
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              onClick={handleExportToExcel}
+              variant="default"
+              className="flex items-center"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Exportar a Excel
+            </Button>
+            
+            {resultados.length > 0 && (
+              <PDFExportButton 
+                resultados={resultados} 
+                examDetails={examDetails}
+                fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
+                buttonText="Reporte en PDF"
+                onPrepare={handleExportToPDF}
+              />
+            )}
+          </div>
         </div>
         
         <div className="mt-2">
@@ -899,34 +1349,32 @@ export default function ExamResultsPage() {
         open={showDetailsDialog} 
         onOpenChange={setShowDetailsDialog}
       >
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {selectedResultado?.estudiante.apellidos}, {selectedResultado?.estudiante.nombres}
-            </DialogTitle>
+            <DialogTitle>Detalles del Examen</DialogTitle>
             <DialogDescription>
-              Calificación: {selectedResultado?.puntaje_obtenido.toFixed(2)}/{examDetails?.puntaje_total} ({selectedResultado?.porcentaje.toFixed(1)}%)
+              Resultados detallados para {selectedResultado?.estudiante.nombres} {selectedResultado?.estudiante.apellidos}
             </DialogDescription>
           </DialogHeader>
           
           {selectedResultado && (
-            <Tabs defaultValue="answers" className="w-full">
+            <Tabs defaultValue="answers" className="mt-2">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="answers">Respuestas</TabsTrigger>
-                <TabsTrigger value="original" className="flex items-center gap-2">
-                  <ImageIcon className="h-[16px] w-[16px] md:hidden shrink-0" />
-                  <span className="hidden md:inline">Imagen Original</span>
-                  <span className="md:hidden">Original</span>
-                </TabsTrigger>
-                <TabsTrigger value="processed" className="flex items-center gap-2">
-                  <FileImage className="h-[16px] w-[16px] md:hidden shrink-0" />
-                  <span className="hidden md:inline">Imagen Procesada</span>
-                  <span className="md:hidden">Procesada</span>
-                </TabsTrigger>
+                <TabsTrigger value="original">Imagen Original</TabsTrigger>
+                <TabsTrigger value="processed">Imagen Procesada</TabsTrigger>
               </TabsList>
               
               <TabsContent value="answers">
                 <div className="pt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <p className="font-medium">Nota: {selectedResultado.puntaje_obtenido.toFixed(2)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Porcentaje: {selectedResultado.porcentaje.toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
                       {selectedResultado.respuestas_estudiante
@@ -1139,7 +1587,7 @@ function ImageWithSignedUrl({ path, alt }: { path: string, alt: string }) {
   const [imageUrl, setImageUrl] = useState<string>('');
   const [error, setError] = useState<boolean>(false);
 
-  // Mover la función getStorageUrl dentro del componente
+  // Usar la función getStorageUrl del componente principal
   const getStorageUrl = async (filePath: string | null | undefined) => {
     if (!filePath) return '';
     
