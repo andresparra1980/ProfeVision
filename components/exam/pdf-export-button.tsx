@@ -62,6 +62,7 @@ interface PDFExportButtonProps {
   buttonText?: string;
   onPrepare: () => Promise<void>;
   className?: string;
+  totalPreguntas?: number;
 }
 
 // Styles for the PDF
@@ -147,10 +148,11 @@ const styles = StyleSheet.create({
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
 // PDF Document Component
-const ExamPDF = ({ resultados, examDetails, institucionNombre }: { 
+const ExamPDF = ({ resultados, examDetails, institucionNombre, totalPreguntas = 0 }: { 
   resultados: ResultadoExamen[]; 
   examDetails: ExamDetails | null; 
-  institucionNombre: string 
+  institucionNombre: string;
+  totalPreguntas: number;
 }) => {
   return (
     <Document>
@@ -183,19 +185,43 @@ const ExamPDF = ({ resultados, examDetails, institucionNombre }: {
           
           <Text style={styles.answersHeader}>Respuestas Detectadas</Text>
           <View style={styles.answersGrid}>
-            {resultado.respuestas_estudiante
-              .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
-              .map((respuesta) => (
-                <View key={respuesta.id} style={styles.answerItem}>
-                  <Text style={styles.questionNumber}>{respuesta.pregunta.orden}.</Text>
-                  <Text style={styles.answerLetter}>
-                    {OPTION_LETTERS[respuesta.opcion_respuesta.orden - 1]}
-                  </Text>
-                  <Text style={styles.indicator}>
-                    {respuesta.es_correcta ? '(Correcta)' : '(Incorrecta)'}
-                  </Text>
-                </View>
-              ))}
+            {/* Generar un array con todas las preguntas de 1 a totalPreguntas */}
+            {Array.from({ length: Math.max(totalPreguntas, 
+              ...resultado.respuestas_estudiante.map(r => r.pregunta.orden)) }, 
+              (_, i) => i + 1)
+              .map((ordenPregunta) => {
+                // Buscar si existe respuesta para esta pregunta
+                const respuesta = resultado.respuestas_estudiante
+                  .find(r => r.pregunta.orden === ordenPregunta);
+                
+                if (respuesta) {
+                  // Si hay respuesta, mostrarla normalmente
+                  return (
+                    <View key={`pregunta-${ordenPregunta}`} style={styles.answerItem}>
+                      <Text style={styles.questionNumber}>{ordenPregunta}.</Text>
+                      <Text style={styles.answerLetter}>
+                        {OPTION_LETTERS[respuesta.opcion_respuesta.orden - 1]}
+                      </Text>
+                      <Text style={styles.indicator}>
+                        {respuesta.es_correcta ? '(Correcta)' : '(Incorrecta)'}
+                      </Text>
+                    </View>
+                  );
+                } else {
+                  // Si no hay respuesta, mostrar N/A e Incorrecta
+                  return (
+                    <View key={`pregunta-sin-respuesta-${ordenPregunta}`} style={styles.answerItem}>
+                      <Text style={styles.questionNumber}>{ordenPregunta}.</Text>
+                      <Text style={styles.answerLetter}>
+                        N/A
+                      </Text>
+                      <Text style={styles.indicator}>
+                        (Incorrecta)
+                      </Text>
+                    </View>
+                  );
+                }
+              })}
           </View>
 
           {resultado.imagenBase64 && (
@@ -212,7 +238,15 @@ const ExamPDF = ({ resultados, examDetails, institucionNombre }: {
 };
 
 // The exported button component
-export function PDFExportButton({ resultados, examDetails, fileName, buttonText = 'Reporte en PDF', onPrepare, className }: PDFExportButtonProps) {
+export function PDFExportButton({ 
+  resultados, 
+  examDetails, 
+  fileName, 
+  buttonText = 'Reporte en PDF', 
+  onPrepare, 
+  className,
+  totalPreguntas = 0 
+}: PDFExportButtonProps) {
   const [isClient, setIsClient] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -364,7 +398,7 @@ export function PDFExportButton({ resultados, examDetails, fileName, buttonText 
                 
                 <div className="flex justify-center mt-4">
                   <PDFDownloadLink 
-                    document={<ExamPDF resultados={resultados} examDetails={examDetails} institucionNombre={institucionNombre} />} 
+                    document={<ExamPDF resultados={resultados} examDetails={examDetails} institucionNombre={institucionNombre} totalPreguntas={totalPreguntas} />} 
                     fileName={fileName}
                     className={cn(
                       "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium",

@@ -139,6 +139,7 @@ export default function ExamResultsPage() {
   } | null>(null);
   const [updatingAnswer, setUpdatingAnswer] = useState(false);
   const [verSoloConExamen, setVerSoloConExamen] = useState(false);
+  const [totalPreguntas, setTotalPreguntas] = useState<number>(0);
 
   // Definir fetchExamResults con useCallback para usarlo en el useEffect
   const fetchExamResults = useCallback(async () => {
@@ -164,6 +165,23 @@ export default function ExamResultsPage() {
       }
 
       setExamDetails(examData);
+
+      // Obtener el número total de preguntas del examen
+      const { data: preguntasData, error: preguntasError } = await supabase
+        .from('preguntas')
+        .select('orden')
+        .eq('examen_id', examId)
+        .order('orden', { ascending: false })
+        .limit(1);
+
+      if (preguntasError) {
+        if (DEBUG) {
+          // Registramos el error en un logger en lugar de la consola
+        }
+      } else if (preguntasData && preguntasData.length > 0) {
+        // El orden más alto representa el número total de preguntas
+        setTotalPreguntas(preguntasData[0].orden);
+      }
 
       // Obtener la relación con el grupo a través de examen_grupo
       const { data: examenGrupoData, error: examenGrupoError } = await supabase
@@ -1121,6 +1139,7 @@ export default function ExamResultsPage() {
                 fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
                 buttonText="Reporte en PDF"
                 onPrepare={handleExportToPDF}
+                totalPreguntas={totalPreguntas}
               />
             )}
           </div>
@@ -1374,99 +1393,175 @@ export default function ExamResultsPage() {
                         Porcentaje: {selectedResultado.porcentaje.toFixed(1)}%
                       </p>
                     </div>
+                    {DEBUG && (
+                      <div className="text-xs text-muted-foreground">
+                        Total preguntas: {totalPreguntas} | Validas: {selectedResultado.respuestas_estudiante.length}
+                      </div>
+                    )}
                   </div>
+
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      {selectedResultado.respuestas_estudiante
-                        .filter(r => r.pregunta.orden <= 20)
-                        .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
-                        .map((respuesta) => (
-                          <div 
-                            key={respuesta.id} 
-                            className={`flex items-center`}
-                          >
-                            <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
-                              {respuesta.pregunta.orden}.
-                            </span>
-                            <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                              {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
-                                const letter = getLetterFromNumber(num);
-                                const isSelected = respuesta.opcion_respuesta.orden === num;
-                                const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
-                                
-                                return (
-                                  <div 
-                                    key={`bubble-${respuesta.id}-${num}`}
-                                    className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                      ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
-                                      ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
-                                    `}
-                                    onClick={() => {
-                                      if (!respuesta.pregunta.habilitada || !opcion) return;
-                                      handleBubbleClick(
-                                        respuesta,
-                                        num,
-                                        selectedResultado.id,
-                                        opcion.id
-                                      );
-                                    }}
-                                  >
-                                    {isSelected ? letter : ''}
-                                  </div>
-                                );
-                              })}
+                      {/* Primera columna: preguntas hasta 20 */}
+                      {Array.from({ length: Math.min(20, totalPreguntas) }, (_, i) => i + 1).map(ordenPregunta => {
+                        // Buscar si existe respuesta para esta pregunta
+                        const respuesta = selectedResultado.respuestas_estudiante.find(
+                          r => r.pregunta.orden === ordenPregunta
+                        );
+                        
+                        if (respuesta) {
+                          // Si la pregunta tiene respuesta, mostrarla normalmente
+                          return (
+                            <div 
+                              key={respuesta.id} 
+                              className={`flex items-center`}
+                            >
+                              <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
+                                {respuesta.pregunta.orden}.
+                              </span>
+                              <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
+                                {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
+                                  const letter = getLetterFromNumber(num);
+                                  const isSelected = respuesta.opcion_respuesta.orden === num;
+                                  const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
+                                  
+                                  return (
+                                    <div 
+                                      key={`bubble-${respuesta.id}-${num}`}
+                                      className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
+                                        ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
+                                        ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
+                                      `}
+                                      onClick={() => {
+                                        if (!respuesta.pregunta.habilitada || !opcion) return;
+                                        handleBubbleClick(
+                                          respuesta,
+                                          num,
+                                          selectedResultado.id,
+                                          opcion.id
+                                        );
+                                      }}
+                                    >
+                                      {isSelected ? letter : ''}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
+                                {respuesta.es_correcta ? '✓' : '✗'}
+                              </span>
                             </div>
-                            <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                              {respuesta.es_correcta ? '✓' : '✗'}
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        } else {
+                          // Si la pregunta no tiene respuesta, mostrar burbujas vacías con X
+                          return (
+                            <div 
+                              key={`pregunta-sin-respuesta-${ordenPregunta}`} 
+                              className="flex items-center"
+                              data-testid={`pregunta-sin-respuesta-${ordenPregunta}`}
+                            >
+                              <span className="text-sm font-medium min-w-[25px]">
+                                {ordenPregunta}.
+                              </span>
+                              <div className="flex items-center space-x-1">
+                                {[1, 2, 3, 4].map((num) => (
+                                  <div 
+                                    key={`bubble-sin-respuesta-${ordenPregunta}-${num}`}
+                                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold bg-gray-200"
+                                  >
+                                    {/* Burbuja vacía */}
+                                  </div>
+                                ))}
+                              </div>
+                              <span className="ml-2 text-xs text-red-600">
+                                ✗
+                              </span>
+                            </div>
+                          );
+                        }
+                      })}
                     </div>
                     <div className="space-y-2">
-                      {selectedResultado.respuestas_estudiante
-                        .filter(r => r.pregunta.orden > 20)
-                        .sort((a, b) => a.pregunta.orden - b.pregunta.orden)
-                        .map((respuesta) => (
-                          <div 
-                            key={respuesta.id} 
-                            className={`flex items-center`}
-                          >
-                            <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
-                              {respuesta.pregunta.orden}.
-                            </span>
-                            <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                              {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
-                                const letter = getLetterFromNumber(num);
-                                const isSelected = respuesta.opcion_respuesta.orden === num;
-                                const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
-                                
-                                return (
-                                  <div 
-                                    key={`bubble-${respuesta.id}-${num}`}
-                                    className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                      ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
-                                      ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
-                                    `}
-                                    onClick={() => {
-                                      if (!respuesta.pregunta.habilitada || !opcion) return;
-                                      handleBubbleClick(
-                                        respuesta,
-                                        num,
-                                        selectedResultado.id,
-                                        opcion.id
-                                      );
-                                    }}
-                                  >
-                                    {isSelected ? letter : ''}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                              {respuesta.es_correcta ? '✓' : '✗'}
-                            </span>
-                          </div>
-                        ))}
+                      {/* Segunda columna: preguntas mayores a 20 */}
+                      {totalPreguntas > 20 && (
+                        Array.from({ length: totalPreguntas - 20 }, (_, i) => i + 21).map(ordenPregunta => {
+                          // Buscar si existe respuesta para esta pregunta
+                          const respuesta = selectedResultado.respuestas_estudiante.find(
+                            r => r.pregunta.orden === ordenPregunta
+                          );
+                          
+                          if (respuesta) {
+                            // Si la pregunta tiene respuesta, mostrarla normalmente
+                            return (
+                              <div 
+                                key={respuesta.id} 
+                                className={`flex items-center`}
+                              >
+                                <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
+                                  {respuesta.pregunta.orden}.
+                                </span>
+                                <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
+                                  {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
+                                    const letter = getLetterFromNumber(num);
+                                    const isSelected = respuesta.opcion_respuesta.orden === num;
+                                    const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
+                                    
+                                    return (
+                                      <div 
+                                        key={`bubble-${respuesta.id}-${num}`}
+                                        className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
+                                          ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
+                                          ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
+                                        `}
+                                        onClick={() => {
+                                          if (!respuesta.pregunta.habilitada || !opcion) return;
+                                          handleBubbleClick(
+                                            respuesta,
+                                            num,
+                                            selectedResultado.id,
+                                            opcion.id
+                                          );
+                                        }}
+                                      >
+                                        {isSelected ? letter : ''}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
+                                  {respuesta.es_correcta ? '✓' : '✗'}
+                                </span>
+                              </div>
+                            );
+                          } else {
+                            // Si la pregunta no tiene respuesta, mostrar burbujas vacías con X
+                            return (
+                              <div 
+                                key={`pregunta-sin-respuesta-${ordenPregunta}`} 
+                                className="flex items-center"
+                                data-testid={`pregunta-sin-respuesta-${ordenPregunta}`}
+                              >
+                                <span className="text-sm font-medium min-w-[25px]">
+                                  {ordenPregunta}.
+                                </span>
+                                <div className="flex items-center space-x-1">
+                                  {[1, 2, 3, 4].map((num) => (
+                                    <div 
+                                      key={`bubble-sin-respuesta-${ordenPregunta}-${num}`}
+                                      className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold bg-gray-200"
+                                    >
+                                      {/* Burbuja vacía */}
+                                    </div>
+                                  ))}
+                                </div>
+                                <span className="ml-2 text-xs text-red-600">
+                                  ✗
+                                </span>
+                              </div>
+                            );
+                          }
+                        })
+                      )}
                     </div>
                   </div>
                 </div>
