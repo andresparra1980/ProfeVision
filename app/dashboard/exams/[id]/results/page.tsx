@@ -1393,11 +1393,9 @@ export default function ExamResultsPage() {
                         Porcentaje: {selectedResultado.porcentaje.toFixed(1)}%
                       </p>
                     </div>
-                    {DEBUG && (
-                      <div className="text-xs text-muted-foreground">
-                        Total preguntas: {totalPreguntas} | Validas: {selectedResultado.respuestas_estudiante.length}
-                      </div>
-                    )}
+                    <div className="text-xs text-muted-foreground">
+                      Total preguntas: {totalPreguntas} | Válidas: {selectedResultado.respuestas_estudiante.length}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-6">
