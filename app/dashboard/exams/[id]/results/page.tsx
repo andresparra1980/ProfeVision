@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, Loader2, Save, AlertCircle, Download } from 'lucide-react';
+import { ChevronLeft, Loader2, Save, AlertCircle, Download, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -94,6 +94,12 @@ interface ResultadoExamen {
   imagenBase64?: string;
 }
 
+interface GrupoExamen {
+  id: string;
+  grupo_id: string;
+  nombre: string;
+}
+
 interface ExamDetails {
   id: string;
   titulo: string;
@@ -109,11 +115,33 @@ interface ExamDetails {
     id: string;
     nombre: string;
   };
+  grupos_asignados?: GrupoExamen[];
   [key: string]: unknown;
 }
 
 // Constante para las letras de las opciones
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+// Define interfaces for the Supabase results
+interface ExamenGrupoItem {
+  id: string;
+  grupo_id: string;
+  grupos?: {
+    id: string;
+    nombre: string;
+  };
+}
+
+interface ResultadoExamenItem {
+  id: string;
+  estudiante_id: string;
+  puntaje_obtenido: number;
+  porcentaje: number;
+  fecha_calificacion: string;
+  estudiante: Estudiante;
+  respuestas_estudiante: Record<string, unknown>[];
+  examenes_escaneados?: Record<string, unknown>[];
+}
 
 export default function ExamResultsPage() {
   const params = useParams();
@@ -140,12 +168,23 @@ export default function ExamResultsPage() {
   const [updatingAnswer, setUpdatingAnswer] = useState(false);
   const [verSoloConExamen, setVerSoloConExamen] = useState(false);
   const [totalPreguntas, setTotalPreguntas] = useState<number>(0);
+  
+  // New state for group selection
+  const [showGroupSelectionModal, setShowGroupSelectionModal] = useState(false);
+  const [availableGroups, setAvailableGroups] = useState<GrupoExamen[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
-  // Definir fetchExamResults con useCallback para usarlo en el useEffect
-  const fetchExamResults = useCallback(async () => {
+  // New state to track if we're initializing from storage
+  const [initializing, setInitializing] = useState(true);
+
+  // Define fetchExamResults with useCallback para usarlo en el useEffect
+  const fetchExamResults = useCallback(async (groupIdOverride?: string) => {
     try {
       setLoading(true);
       const examId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
+      
+      // Usar el groupIdOverride si se proporciona, de lo contrario usar selectedGroupId
+      const groupIdToUse = groupIdOverride || selectedGroupId;
 
       // Obtener detalles del examen
       const { data: examData, error: examError } = await supabase
@@ -183,30 +222,97 @@ export default function ExamResultsPage() {
         setTotalPreguntas(preguntasData[0].orden);
       }
 
-      // Obtener la relación con el grupo a través de examen_grupo
-      const { data: examenGrupoData, error: examenGrupoError } = await supabase
+      // Obtener todas las relaciones con grupos a través de examen_grupo
+      const { data: examenGruposData, error: examenGruposError } = await supabase
         .from('examen_grupo')
         .select(`
+          id,
           grupo_id,
           grupos(id, nombre)
         `)
-        .eq('examen_id', examId)
-        .maybeSingle();
+        .eq('examen_id', examId);
 
-      if (examenGrupoError) {
+      if (examenGruposError) {
         if (DEBUG) {
           // Registramos el error en un logger en lugar de la consola
         }
-      } else if (examenGrupoData) {
-        // Agregar información del grupo al objeto de detalles del examen
-        setExamDetails((prevDetails) => prevDetails ? {
-          ...prevDetails,
-          grupo_id: examenGrupoData.grupo_id,
-          grupos: examenGrupoData.grupos
-        } : null);
+      } else if (examenGruposData && examenGruposData.length > 0) {
+        // Transformar los datos de grupos para manejarlos más fácilmente
+        const grupos = examenGruposData.map((item: ExamenGrupoItem) => ({
+          id: item.id,
+          grupo_id: item.grupo_id,
+          nombre: item.grupos?.nombre || 'Sin nombre'
+        }));
+        
+        setAvailableGroups(grupos);
+        
+        // Si hay más de un grupo y no hay grupo seleccionado o se proporcionó un override
+        let grupoToUse: GrupoExamen | undefined;
+        
+        if (groupIdOverride) {
+          // Si hay un ID de grupo específico para usar, buscar ese grupo
+          grupoToUse = grupos.find((g: GrupoExamen) => g.grupo_id === groupIdOverride);
+        } else if (initializing && grupos.length > 0) {
+          // Si estamos inicializando, intentar cargar desde localStorage
+          try {
+            const storedGroupId = localStorage.getItem(`exam_${examId}_selected_group`);
+            
+            if (storedGroupId) {
+              // Verificar que el grupo guardado exista en los grupos disponibles
+              const storedGroup = grupos.find((g: GrupoExamen) => g.grupo_id === storedGroupId);
+              if (storedGroup) {
+                grupoToUse = storedGroup;
+              } else {
+                // Si el grupo guardado ya no existe, usar el primero
+                grupoToUse = grupos[0];
+              }
+            } else {
+              // Si no hay grupo guardado, usar el primero
+              grupoToUse = grupos[0];
+            }
+          } catch (_error) {
+            // Si hay un error al acceder a localStorage (ej. en modo privado), usar el primer grupo
+            grupoToUse = grupos[0];
+          }
+          
+          // Ya no estamos inicializando
+          setInitializing(false);
+        } else if (selectedGroupId) {
+          // Si hay un grupo seleccionado, usarlo
+          grupoToUse = grupos.find((g: GrupoExamen) => g.grupo_id === selectedGroupId);
+        } else if (grupos.length > 0) {
+          // Si no hay grupo seleccionado, usar el primer grupo por defecto
+          grupoToUse = grupos[0];
+        }
+          
+        if (grupoToUse) {
+          // Actualizar el ID de grupo seleccionado si es necesario
+          if (grupoToUse.grupo_id !== selectedGroupId) {
+            setSelectedGroupId(grupoToUse.grupo_id);
+            
+            // Guardar el grupo seleccionado en localStorage
+            try {
+              localStorage.setItem(`exam_${examId}_selected_group`, grupoToUse.grupo_id);
+            } catch (_error) {
+              // Manejar el error silenciosamente
+              if (DEBUG) {
+                // Registramos el error en un logger en lugar de la consola
+              }
+            }
+          }
+          
+          // Agregar información del grupo al objeto de detalles del examen
+          setExamDetails(prevDetails => prevDetails ? {
+            ...prevDetails,
+            grupo_id: grupoToUse!.grupo_id,
+            grupos: {
+              id: grupoToUse!.grupo_id,
+              nombre: grupoToUse!.nombre
+            },
+            grupos_asignados: grupos
+          } : null);
 
-        // Obtener todos los estudiantes del grupo
-        if (examenGrupoData.grupo_id) {
+          // Obtener todos los estudiantes del grupo
           const { data: estudiantesGrupo, error: estudiantesError } = await supabase
             .from('estudiantes')
             .select('*')
@@ -214,7 +320,7 @@ export default function ExamResultsPage() {
               await supabase
                 .from('estudiante_grupo')
                 .select('estudiante_id')
-                .eq('grupo_id', examenGrupoData.grupo_id)
+                .eq('grupo_id', grupoToUse.grupo_id)
             ).data?.map((row: { estudiante_id: string }) => row.estudiante_id) || [])
             .order('apellidos', { ascending: true })
             .order('nombres', { ascending: true });
@@ -273,8 +379,7 @@ export default function ExamResultsPage() {
             ruta_s3_procesado
           )
         `)
-        .eq('examen_id', examId)
-        .order('fecha_calificacion', { ascending: false });
+        .eq('examen_id', examId);
 
       if (resultsError) {
         if (DEBUG) {
@@ -285,11 +390,29 @@ export default function ExamResultsPage() {
 
       if (!resultsData || resultsData.length === 0) {
         setResultados([]);
+        setLoading(false);
         return;
       }
 
+      // Si hay un grupo seleccionado, filtramos los resultados para ese grupo
+      let filteredResults = resultsData;
+      if (groupIdToUse) {
+        // Obtener los IDs de estudiantes del grupo seleccionado
+        const { data: estudiantesDelGrupo } = await supabase
+          .from('estudiante_grupo')
+          .select('estudiante_id')
+          .eq('grupo_id', groupIdToUse);
+        
+        const estudianteIds = estudiantesDelGrupo?.map((e: { estudiante_id: string }) => e.estudiante_id) || [];
+        
+        // Filtrar resultados solo para los estudiantes del grupo seleccionado
+        filteredResults = resultsData.filter((result: ResultadoExamenItem) => 
+          estudianteIds.includes(result.estudiante_id)
+        );
+      }
+
       // Asegurarnos de que los datos coincidan con el tipo ResultadoExamen
-      const typedResults: ResultadoExamen[] = resultsData
+      const typedResults: ResultadoExamen[] = filteredResults
         .map((result: Record<string, unknown>): ResultadoExamen | null => {
           const estudiante = result.estudiante as Estudiante | undefined;
           if (!estudiante) return null;
@@ -365,7 +488,7 @@ export default function ExamResultsPage() {
     } finally {
       setLoading(false);
     }
-  }, [params.id, toast]);
+  }, [params.id, toast, selectedGroupId, initializing]);
 
   useEffect(() => {
     fetchExamResults();
@@ -735,9 +858,9 @@ export default function ExamResultsPage() {
         [''],
         ['ESTADÍSTICAS'],
         [`Estudiantes con examen: ${resultados.length} de ${todosEstudiantes.length}`],
-        [`Promedio: ${resultados.length > 0 ? (resultados.reduce((sum, r) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2) : 'N/A'}`],
-        [`Nota más alta: ${resultados.length > 0 ? Math.max(...resultados.map(r => r.puntaje_obtenido)).toFixed(2) : 'N/A'}`],
-        [`Nota más baja: ${resultados.length > 0 ? Math.min(...resultados.map(r => r.puntaje_obtenido)).toFixed(2) : 'N/A'}`],
+        [`Promedio: ${resultados.length > 0 ? (resultados.reduce((sum, r: ResultadoExamen) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2) : 'N/A'}`],
+        [`Nota más alta: ${resultados.length > 0 ? Math.max(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2) : 'N/A'}`],
+        [`Nota más baja: ${resultados.length > 0 ? Math.min(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2) : 'N/A'}`],
         [''],
         [''] // Línea en blanco antes de los datos de estudiantes
       ];
@@ -1100,6 +1223,55 @@ export default function ExamResultsPage() {
     }
   };
 
+  // Nueva función para manejar la selección de grupo
+  const handleGroupSelect = (grupoId: string) => {
+    // Solo tomar acción si el grupo seleccionado es diferente al actual
+    if (grupoId !== selectedGroupId) {
+      // Cerrar el modal primero
+      setShowGroupSelectionModal(false);
+      
+      // Actualizar la UI para mostrar que estamos cargando
+      setLoading(true);
+      
+      // Guardar el grupo seleccionado en localStorage
+      try {
+        const examId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
+        localStorage.setItem(`exam_${examId}_selected_group`, grupoId);
+      } catch (_error) {
+        // Manejar el error silenciosamente
+        if (DEBUG) {
+          // Registramos el error en un logger en lugar de la consola
+        }
+      }
+      
+      // Llamar a fetchExamResults con el nuevo ID de grupo
+      fetchExamResults(grupoId);
+    } else {
+      // Si es el mismo grupo, solo cerrar el modal
+      setShowGroupSelectionModal(false);
+    }
+  };
+
+  const handleToggleGroupSelectionModal = () => {
+    setShowGroupSelectionModal(prev => !prev);
+  };
+
+  // Manejar el cierre del modal con X
+  const handleModalOpenChange = (open: boolean) => {
+    if (!open) {
+      // Si se cierra y no hay grupo seleccionado pero hay grupos disponibles
+      if (!selectedGroupId && availableGroups.length > 0) {
+        const defaultGroupId = availableGroups[0].grupo_id;
+        // Actualizar la UI para mostrar que estamos cargando
+        setLoading(true);
+        
+        // Llamar a fetchExamResults con el grupo por defecto
+        fetchExamResults(defaultGroupId);
+      }
+    }
+    setShowGroupSelectionModal(open);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -1123,6 +1295,17 @@ export default function ExamResultsPage() {
           </Button>
           
           <div className="flex space-x-2">
+            {availableGroups.length > 1 && (
+              <Button 
+                onClick={handleToggleGroupSelectionModal}
+                variant="outline"
+                className="flex items-center"
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Cambiar grupo: {examDetails?.grupos?.nombre || 'Sin grupo'}
+              </Button>
+            )}
+            
             <Button 
               onClick={handleExportToExcel}
               variant="default"
@@ -1196,7 +1379,7 @@ export default function ExamResultsPage() {
                     <div className="font-medium">Promedio:</div>
                     <div>
                       {resultados.length > 0
-                        ? (resultados.reduce((sum, r) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2)
+                        ? (resultados.reduce((sum, r: ResultadoExamen) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2)
                         : 'N/A'
                       }
                     </div>
@@ -1205,7 +1388,7 @@ export default function ExamResultsPage() {
                     <div className="font-medium">Nota más alta:</div>
                     <div>
                       {resultados.length > 0
-                        ? Math.max(...resultados.map(r => r.puntaje_obtenido)).toFixed(2)
+                        ? Math.max(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
                         : 'N/A'
                       }
                     </div>
@@ -1214,7 +1397,7 @@ export default function ExamResultsPage() {
                     <div className="font-medium">Nota más baja:</div>
                     <div>
                       {resultados.length > 0
-                        ? Math.min(...resultados.map(r => r.puntaje_obtenido)).toFixed(2)
+                        ? Math.min(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
                         : 'N/A'
                       }
                     </div>
@@ -1388,23 +1571,23 @@ export default function ExamResultsPage() {
                 <div className="pt-4">
                   <div className="flex justify-between items-center mb-4">
                     <div>
-                      <p className="font-medium">Nota: {selectedResultado.puntaje_obtenido.toFixed(2)}</p>
+                      <p className="font-medium">Nota: {selectedResultado?.puntaje_obtenido.toFixed(2)}</p>
                       <p className="text-sm text-muted-foreground">
-                        Porcentaje: {selectedResultado.porcentaje.toFixed(1)}%
+                        Porcentaje: {selectedResultado?.porcentaje.toFixed(1)}%
                       </p>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Total preguntas: {totalPreguntas} | Válidas: {selectedResultado.respuestas_estudiante.length}
+                      Total preguntas: {totalPreguntas} | Válidas: {selectedResultado?.respuestas_estudiante.length}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
                       {/* Primera columna: preguntas hasta 20 */}
-                      {Array.from({ length: Math.min(20, totalPreguntas) }, (_, i) => i + 1).map(ordenPregunta => {
+                      {selectedResultado && Array.from({ length: Math.min(20, totalPreguntas) }, (_, i) => i + 1).map((orden: number) => {
                         // Buscar si existe respuesta para esta pregunta
                         const respuesta = selectedResultado.respuestas_estudiante.find(
-                          r => r.pregunta.orden === ordenPregunta
+                          r => r.pregunta.orden === orden
                         );
                         
                         if (respuesta) {
@@ -1454,17 +1637,17 @@ export default function ExamResultsPage() {
                           // Si la pregunta no tiene respuesta, mostrar burbujas vacías con X
                           return (
                             <div 
-                              key={`pregunta-sin-respuesta-${ordenPregunta}`} 
+                              key={`pregunta-sin-respuesta-${orden}`} 
                               className="flex items-center"
-                              data-testid={`pregunta-sin-respuesta-${ordenPregunta}`}
+                              data-testid={`pregunta-sin-respuesta-${orden}`}
                             >
                               <span className="text-sm font-medium min-w-[25px]">
-                                {ordenPregunta}.
+                                {orden}.
                               </span>
                               <div className="flex items-center space-x-1">
                                 {[1, 2, 3, 4].map((num) => (
                                   <div 
-                                    key={`bubble-sin-respuesta-${ordenPregunta}-${num}`}
+                                    key={`bubble-sin-respuesta-${orden}-${num}`}
                                     className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold bg-gray-200"
                                   >
                                     {/* Burbuja vacía */}
@@ -1481,11 +1664,11 @@ export default function ExamResultsPage() {
                     </div>
                     <div className="space-y-2">
                       {/* Segunda columna: preguntas mayores a 20 */}
-                      {totalPreguntas > 20 && (
-                        Array.from({ length: totalPreguntas - 20 }, (_, i) => i + 21).map(ordenPregunta => {
+                      {selectedResultado && totalPreguntas > 20 && (
+                        Array.from({ length: totalPreguntas - 20 }, (_, i) => i + 21).map((orden: number) => {
                           // Buscar si existe respuesta para esta pregunta
                           const respuesta = selectedResultado.respuestas_estudiante.find(
-                            r => r.pregunta.orden === ordenPregunta
+                            r => r.pregunta.orden === orden
                           );
                           
                           if (respuesta) {
@@ -1535,17 +1718,17 @@ export default function ExamResultsPage() {
                             // Si la pregunta no tiene respuesta, mostrar burbujas vacías con X
                             return (
                               <div 
-                                key={`pregunta-sin-respuesta-${ordenPregunta}`} 
+                                key={`pregunta-sin-respuesta-${orden}`} 
                                 className="flex items-center"
-                                data-testid={`pregunta-sin-respuesta-${ordenPregunta}`}
+                                data-testid={`pregunta-sin-respuesta-${orden}`}
                               >
                                 <span className="text-sm font-medium min-w-[25px]">
-                                  {ordenPregunta}.
+                                  {orden}.
                                 </span>
                                 <div className="flex items-center space-x-1">
                                   {[1, 2, 3, 4].map((num) => (
                                     <div 
-                                      key={`bubble-sin-respuesta-${ordenPregunta}-${num}`}
+                                      key={`bubble-sin-respuesta-${orden}-${num}`}
                                       className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold bg-gray-200"
                                     >
                                       {/* Burbuja vacía */}
@@ -1670,6 +1853,30 @@ export default function ExamResultsPage() {
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Group Selection Dialog */}
+      <Dialog open={showGroupSelectionModal} onOpenChange={handleModalOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Seleccionar Grupo</DialogTitle>
+            <DialogDescription>
+              Este examen está asignado a múltiples grupos. Seleccione el grupo para ver sus resultados.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {availableGroups.map((grupo) => (
+              <Button
+                key={grupo.grupo_id}
+                onClick={() => handleGroupSelect(grupo.grupo_id)}
+                variant={selectedGroupId === grupo.grupo_id ? "default" : "outline"}
+                className="w-full justify-start"
+              >
+                {grupo.nombre}
+              </Button>
+            ))}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
