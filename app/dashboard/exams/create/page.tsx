@@ -91,12 +91,12 @@ export default function CreateExamPage() {
   const form = useForm<ExamFormValues>({
     resolver: zodResolver(examSchema),
     defaultValues: {
-    titulo: "",
-    descripcion: "",
-    instrucciones: "",
-    materia_id: "",
+      titulo: "",
+      descripcion: "",
+      instrucciones: "",
+      materia_id: "",
       grupo_id: "",
-    duracion: 60,
+      duracion: 60,
       puntaje_total: 5,
       numero_preguntas: 10,
     },
@@ -493,7 +493,7 @@ export default function CreateExamPage() {
             <div className="space-y-2">
                 <Label htmlFor="materia">Materia*</Label>
                 <Select
-                  onValueChange={(value) => form.setValue("materia_id", value)}
+                  onValueChange={(value: string) => form.setValue("materia_id", value)}
                   value={form.watch("materia_id")}
                 >
                   <SelectTrigger>
@@ -515,7 +515,7 @@ export default function CreateExamPage() {
               <div className="space-y-2">
                 <Label htmlFor="grupo">Grupo*</Label>
                 <Select
-                  onValueChange={(value) => form.setValue("grupo_id", value)}
+                  onValueChange={(value: string) => form.setValue("grupo_id", value)}
                   value={form.watch("grupo_id")}
                   disabled={!form.watch("materia_id")}
                 >

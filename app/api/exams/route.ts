@@ -106,12 +106,27 @@ export async function POST(request: Request) {
 
     // Obtener los datos del body
     const body = await request.json();
-    const { titulo, descripcion, preguntas, materia_id, duracion_minutos } =
-      body;
+    const {
+      titulo,
+      descripcion,
+      preguntas,
+      materia_id,
+      grupo_id,
+      duracion_minutos,
+      puntaje_total,
+    } = body;
 
     if (!titulo || !materia_id) {
       return NextResponse.json(
         { error: "Faltan campos requeridos (título o materia_id)" },
+        { status: 400 }
+      );
+    }
+
+    // Validar que hay un grupo seleccionado
+    if (!grupo_id) {
+      return NextResponse.json(
+        { error: "Debe seleccionar un grupo" },
         { status: 400 }
       );
     }
@@ -128,6 +143,7 @@ export async function POST(request: Request) {
         profesor_id,
         estado: "borrador",
         duracion_minutos: duracion_minutos,
+        puntaje_total: puntaje_total,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -143,10 +159,28 @@ export async function POST(request: Request) {
       );
     }
 
+    const examenId = data.id;
+
+    // Crear la asociación examen-grupo
+    const { error: grupoError } = await supabaseAdmin
+      .from("examen_grupo")
+      .insert({
+        examen_id: examenId,
+        grupo_id: grupo_id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
+    if (grupoError) {
+      logger.error(
+        `Error al asociar el examen al grupo ${grupo_id}:`,
+        grupoError
+      );
+      // Continuamos aunque haya error en la asociación
+    }
+
     // Si hay preguntas, las procesamos
     if (preguntas && Array.isArray(preguntas) && preguntas.length > 0) {
-      const examenId = data.id;
-
       // Insertar cada pregunta
       for (let i = 0; i < preguntas.length; i++) {
         const pregunta = preguntas[i];
