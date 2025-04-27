@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -87,6 +87,16 @@ export default function CreateExamPage() {
   const { profesor } = useProfesor();
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [gruposFiltrados, setGruposFiltrados] = useState<Grupo[]>([]);
+  const [isClient, setIsClient] = useState(false);
+  
+  // Keep track of all stored questions, regardless of display count
+  const [allStoredQuestions, setAllStoredQuestions] = useState<Pregunta[]>([]);
+  const initializationDoneRef = useRef(false);
+
+  // Mark client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<ExamFormValues>({
     resolver: zodResolver(examSchema),
@@ -101,6 +111,43 @@ export default function CreateExamPage() {
       numero_preguntas: 10,
     },
   });
+
+  // Function to load saved questions from localStorage
+  const loadSavedQuestions = useCallback(() => {
+    if (typeof window === 'undefined') return [];
+    
+    try {
+      const savedQuestions = localStorage.getItem('examQuestions');
+      if (savedQuestions) {
+        return JSON.parse(savedQuestions) as Pregunta[];
+      }
+    } catch (error) {
+      console.error('Error loading questions from localStorage:', error);
+    }
+    return [];
+  }, []);
+
+  // Function to save all questions to localStorage
+  const _saveQuestionsToLocalStorage = useCallback((questions: Pregunta[]) => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem('examQuestions', JSON.stringify(questions));
+    } catch (error) {
+      console.error('Error saving questions to localStorage:', error);
+    }
+  }, []);
+
+  // Initialize stored questions from localStorage on first client render
+  useEffect(() => {
+    if (isClient && !initializationDoneRef.current) {
+      const savedQuestions = loadSavedQuestions();
+      if (savedQuestions.length > 0) {
+        setAllStoredQuestions(savedQuestions);
+        initializationDoneRef.current = true;
+      }
+    }
+  }, [isClient, loadSavedQuestions]);
 
   // Definir las funciones con useCallback para usarlas en useEffect sin recrearlas
   const checkEntities = useCallback(async () => {
@@ -134,6 +181,10 @@ export default function CreateExamPage() {
       setIsCheckingEntities(false);
     }
   }, [router]);
+
+  useEffect(() => {
+    checkEntities();
+  }, [checkEntities]);
 
   const loadMaterias = useCallback(async () => {
     if (!profesor) return;
@@ -186,36 +237,72 @@ export default function CreateExamPage() {
     }
   }, [profesor]);
 
-  const crearPreguntasIniciales = useCallback((cantidad: number) => {
-    const puntajeTotal = form.getValues("puntaje_total");
-    const puntajePorPregunta = parseFloat((puntajeTotal / cantidad).toFixed(4));
-    
-    const nuevasPreguntas: Pregunta[] = Array.from({ length: cantidad }, (_, index) => ({
-      id: `pregunta-${index + 1}`,
-      texto: "",
-      tipo: "opcion_multiple",
-      puntaje: puntajePorPregunta,
-      opciones: [
-        { id: `opcion-${index}-1`, texto: "", esCorrecta: false },
-        { id: `opcion-${index}-2`, texto: "", esCorrecta: false },
-        { id: `opcion-${index}-3`, texto: "", esCorrecta: false },
-        { id: `opcion-${index}-4`, texto: "", esCorrecta: false },
-      ],
-    }));
-    
-    setPreguntas(nuevasPreguntas);
-  }, [form]);
-
-  useEffect(() => {
-    checkEntities();
-  }, [checkEntities]);
-
   useEffect(() => {
     if (profesor) {
       loadMaterias();
       loadGrupos();
     }
   }, [profesor, loadMaterias, loadGrupos]);
+
+  // Modified to ensure we never lose question data
+  const updateDisplayedQuestions = useCallback((count: number) => {
+    if (count <= 0 || count > 40) return;
+    
+    const puntajeTotal = form.getValues("puntaje_total");
+    const puntajePorPregunta = parseFloat((puntajeTotal / count).toFixed(4));
+    
+    // Make sure we have enough questions in our stored array
+    let updatedStoredQuestions = [...allStoredQuestions];
+    let needsUpdate = false;
+    
+    // If we need more questions than we have stored, create new ones
+    if (updatedStoredQuestions.length < count) {
+      const newQuestions = Array.from(
+        { length: count - updatedStoredQuestions.length }, 
+        (_, index) => {
+          const newIndex = updatedStoredQuestions.length + index;
+          return {
+            id: `pregunta-${newIndex + 1}`,
+            texto: "",
+            tipo: "opcion_multiple" as TipoPregunta,
+            puntaje: puntajePorPregunta,
+            opciones: [
+              { id: `opcion-${newIndex}-1`, texto: "", esCorrecta: false },
+              { id: `opcion-${newIndex}-2`, texto: "", esCorrecta: false },
+              { id: `opcion-${newIndex}-3`, texto: "", esCorrecta: false },
+              { id: `opcion-${newIndex}-4`, texto: "", esCorrecta: false },
+            ],
+          };
+        }
+      );
+      
+      updatedStoredQuestions = [...updatedStoredQuestions, ...newQuestions];
+      needsUpdate = true;
+    }
+    
+    // Update puntaje for all questions
+    const updatedQuestionsWithPoints = updatedStoredQuestions.map(q => ({
+      ...q,
+      puntaje: puntajePorPregunta
+    }));
+    
+    // Only display the number of questions requested in the form
+    setPreguntas(updatedQuestionsWithPoints.slice(0, count));
+    
+    // Only update stored questions if we added new ones or changed puntaje
+    if (needsUpdate || Math.abs(updatedQuestionsWithPoints[0]?.puntaje - puntajePorPregunta) > 0.0001) {
+      setAllStoredQuestions(updatedQuestionsWithPoints);
+      
+      // Save to localStorage only when the stored questions actually change
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('examQuestions', JSON.stringify(updatedQuestionsWithPoints));
+        } catch (error) {
+          console.error('Error saving questions to localStorage:', error);
+        }
+      }
+    }
+  }, [allStoredQuestions, form]);
 
   // Extraer el valor para evitar expresiones complejas en las dependencias
   const materiaId = form.watch("materia_id");
@@ -237,12 +324,91 @@ export default function CreateExamPage() {
 
   // Extraer el valor para evitar expresiones complejas en las dependencias
   const numeroPreguntas = form.watch("numero_preguntas");
+  const puntajeTotal = form.watch("puntaje_total");
 
+  // Update displayed questions when numero_preguntas changes
   useEffect(() => {
+    if (!isClient) return;
+
     if (numeroPreguntas > 0) {
-      crearPreguntasIniciales(numeroPreguntas);
+      if (!initializationDoneRef.current) {
+        // First time initialization
+        const savedQuestions = loadSavedQuestions();
+        
+        if (savedQuestions.length > 0) {
+          setAllStoredQuestions(savedQuestions);
+          const puntajePerQuestion = parseFloat((puntajeTotal / numeroPreguntas).toFixed(4));
+          
+          // Set displayed questions
+          setPreguntas(savedQuestions.slice(0, numeroPreguntas).map(q => ({
+            ...q,
+            puntaje: puntajePerQuestion
+          })));
+          
+          initializationDoneRef.current = true;
+        } else {
+          // No saved questions, create initial set without using updateDisplayedQuestions
+          const puntajePerQuestion = parseFloat((puntajeTotal / numeroPreguntas).toFixed(4));
+          const initialQuestions = Array.from(
+            { length: numeroPreguntas }, 
+            (_, index) => ({
+              id: `pregunta-${index + 1}`,
+              texto: "",
+              tipo: "opcion_multiple" as TipoPregunta,
+              puntaje: puntajePerQuestion,
+              opciones: [
+                { id: `opcion-${index}-1`, texto: "", esCorrecta: false },
+                { id: `opcion-${index}-2`, texto: "", esCorrecta: false },
+                { id: `opcion-${index}-3`, texto: "", esCorrecta: false },
+                { id: `opcion-${index}-4`, texto: "", esCorrecta: false },
+              ],
+            })
+          );
+          
+          setAllStoredQuestions(initialQuestions);
+          setPreguntas(initialQuestions);
+          initializationDoneRef.current = true;
+        }
+      } else {
+        // Normal update - just update the displayed questions
+        updateDisplayedQuestions(numeroPreguntas);
+      }
     }
-  }, [numeroPreguntas, crearPreguntasIniciales]);
+  }, [numeroPreguntas, isClient, loadSavedQuestions, puntajeTotal, updateDisplayedQuestions]);
+
+  // Update questions when puntaje total changes
+  useEffect(() => {
+    if (isClient && initializationDoneRef.current && numeroPreguntas > 0) {
+      updateDisplayedQuestions(numeroPreguntas);
+    }
+  }, [puntajeTotal, isClient, numeroPreguntas, updateDisplayedQuestions]);
+
+  // Handle updates to the preguntas array (e.g., when user edits a question)
+  const _updatePregunta = useCallback((index: number, updatedPregunta: Pregunta) => {
+    // Update displayed questions array
+    setPreguntas(prevPreguntas => {
+      const updatedPreguntas = [...prevPreguntas];
+      updatedPreguntas[index] = updatedPregunta;
+      return updatedPreguntas;
+    });
+    
+    // Also update the stored questions array
+    setAllStoredQuestions(prevStored => {
+      const updatedStored = [...prevStored];
+      // Only update if the index exists
+      if (index < updatedStored.length) {
+        updatedStored[index] = updatedPregunta;
+      }
+      return updatedStored;
+    });
+  }, []);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      // Any cleanup needed
+    };
+  }, []);
 
   const onSubmit = async (data: ExamFormValues) => {
     try {
@@ -253,7 +419,7 @@ export default function CreateExamPage() {
         throw new Error('No autorizado');
       }
 
-      // Crear el examen
+      // Crear el examen only with the displayed questions
       const response = await fetch('/api/exams', {
         method: 'POST',
         headers: {
@@ -267,7 +433,7 @@ export default function CreateExamPage() {
           puntaje_total: data.puntaje_total,
           materia_id: data.materia_id,
           grupo_id: data.grupo_id,
-          preguntas: preguntas,
+          preguntas: preguntas, // Only send the displayed questions
         }),
       });
 
@@ -277,6 +443,9 @@ export default function CreateExamPage() {
       }
 
       const _examData = await response.json();
+
+      // Clear localStorage after successful creation
+      localStorage.removeItem('examQuestions');
 
       toast({
         title: "Éxito",
@@ -456,13 +625,13 @@ export default function CreateExamPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
+    <div className="space-y-4">
       <Button variant="ghost" onClick={() => router.push('/dashboard/exams')} className="mb-0">
         <ChevronLeft className="mr-2 h-4 w-4" />
         Volver a Exámenes
       </Button>
 
-      <div className="flex justify-between items-center mt-2">
+      <div className="flex justify-between items-center">
       <div>
           <h1 className="text-3xl font-bold tracking-tight">Crear Examen</h1>
           <p className="text-sm text-muted-foreground">
@@ -483,6 +652,7 @@ export default function CreateExamPage() {
               <Input
                 id="titulo"
                   placeholder="Ej: Examen Final de Matemáticas"
+                  className="placeholder:text-muted-foreground/50"
                   {...form.register("titulo")}
                 />
                 {form.formState.errors.titulo && (
@@ -606,6 +776,7 @@ export default function CreateExamPage() {
               <Textarea
                 id="descripcion"
                 placeholder="Describe el propósito o contenido general del examen"
+                className="placeholder:text-muted-foreground/50"
                 {...form.register("descripcion")}
               />
             </div>
@@ -615,6 +786,7 @@ export default function CreateExamPage() {
               <Textarea
                 id="instrucciones"
                 placeholder="Instrucciones específicas para los estudiantes"
+                className="placeholder:text-muted-foreground/50"
                 {...form.register("instrucciones")}
               />
             </div>
@@ -650,7 +822,9 @@ export default function CreateExamPage() {
                         
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                           <CardTitle className="text-lg font-medium">
-                            Pregunta {index + 1}
+                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent text-accent-foreground font-bold text-sm">
+                              Pregunta {index + 1} de {numeroPreguntas}
+                            </span>
                           </CardTitle>
                           <div className="flex items-center gap-2">
                             <DropdownMenu>
@@ -682,49 +856,21 @@ export default function CreateExamPage() {
                             <Textarea
                               value={pregunta.texto}
                               onChange={(e) => {
+                                // Update displayed questions
                                 const nuevasPreguntas = [...preguntas];
                                 nuevasPreguntas[index].texto = e.target.value;
                                 setPreguntas(nuevasPreguntas);
+                                
+                                // Also update stored questions
+                                const storedQuestions = [...allStoredQuestions];
+                                if (index < storedQuestions.length) {
+                                  storedQuestions[index].texto = e.target.value;
+                                  setAllStoredQuestions(storedQuestions);
+                                }
                               }}
                               placeholder="Escribe aquí tu pregunta"
+                              className="placeholder:text-muted-foreground/50"
                             />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label>Tipo de Pregunta</Label>
-                            <Select
-                              value={pregunta.tipo}
-                              onValueChange={(value: TipoPregunta) => {
-                                const nuevasPreguntas = [...preguntas];
-                                nuevasPreguntas[index].tipo = value;
-                                // Si cambia a verdadero/falso, ajustar las opciones
-                                if (value === 'verdadero_falso') {
-                                  nuevasPreguntas[index].opciones = [
-                                    { id: `opcion-${pregunta.id}-1`, texto: "Verdadero", esCorrecta: false },
-                                    { id: `opcion-${pregunta.id}-2`, texto: "Falso", esCorrecta: false },
-                                  ];
-                                }
-                                // Si cambia a opción múltiple y no tiene opciones, crear las básicas
-                                else if (value === 'opcion_multiple' && nuevasPreguntas[index].opciones.length < 2) {
-                                  nuevasPreguntas[index].opciones = [
-                                    { id: `opcion-${pregunta.id}-1`, texto: "", esCorrecta: false },
-                                    { id: `opcion-${pregunta.id}-2`, texto: "", esCorrecta: false },
-                                    { id: `opcion-${pregunta.id}-3`, texto: "", esCorrecta: false },
-                                    { id: `opcion-${pregunta.id}-4`, texto: "", esCorrecta: false },
-                                  ];
-                                }
-                                setPreguntas(nuevasPreguntas);
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecciona el tipo de pregunta" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="opcion_multiple">Opción múltiple</SelectItem>
-                                <SelectItem value="seleccion_multiple">Selección múltiple</SelectItem>
-                                <SelectItem value="verdadero_falso">Verdadero/Falso</SelectItem>
-                              </SelectContent>
-                            </Select>
                           </div>
 
                           <div className="space-y-2">
@@ -735,6 +881,7 @@ export default function CreateExamPage() {
                                   type={pregunta.tipo === 'seleccion_multiple' ? "checkbox" : "radio"}
                                   checked={opcion.esCorrecta}
                                   onChange={() => {
+                                    // Update displayed questions
                                     const nuevasPreguntas = [...preguntas];
                                     if (pregunta.tipo === 'seleccion_multiple') {
                                       // Para selección múltiple, toggle la opción
@@ -748,6 +895,21 @@ export default function CreateExamPage() {
                                       }));
                                     }
                                     setPreguntas(nuevasPreguntas);
+                                    
+                                    // Also update stored questions
+                                    const storedQuestions = [...allStoredQuestions];
+                                    if (index < storedQuestions.length) {
+                                      if (pregunta.tipo === 'seleccion_multiple') {
+                                        storedQuestions[index].opciones[opcionIndex].esCorrecta = 
+                                          !storedQuestions[index].opciones[opcionIndex].esCorrecta;
+                                      } else {
+                                        storedQuestions[index].opciones = storedQuestions[index].opciones.map((op, i) => ({
+                                          ...op,
+                                          esCorrecta: i === opcionIndex,
+                                        }));
+                                      }
+                                      setAllStoredQuestions(storedQuestions);
+                                    }
                                   }}
                                   className="h-4 w-4"
                                   disabled={pregunta.tipo === 'verdadero_falso' && opcion.texto !== ""}
@@ -755,11 +917,20 @@ export default function CreateExamPage() {
                                 <Input
                                   value={opcion.texto}
                                   onChange={(e) => {
+                                    // Update displayed questions
                                     const nuevasPreguntas = [...preguntas];
                                     nuevasPreguntas[index].opciones[opcionIndex].texto = e.target.value;
                                     setPreguntas(nuevasPreguntas);
+                                    
+                                    // Also update stored questions
+                                    const storedQuestions = [...allStoredQuestions];
+                                    if (index < storedQuestions.length) {
+                                      storedQuestions[index].opciones[opcionIndex].texto = e.target.value;
+                                      setAllStoredQuestions(storedQuestions);
+                                    }
                                   }}
                                   placeholder={`Opción ${opcionIndex + 1}`}
+                                  className="placeholder:text-muted-foreground/50"
                                   disabled={pregunta.tipo === 'verdadero_falso'}
                                 />
                                 <Button
@@ -767,10 +938,19 @@ export default function CreateExamPage() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => {
+                                    // Update displayed questions
                                     const nuevasPreguntas = [...preguntas];
                                     nuevasPreguntas[index].opciones = nuevasPreguntas[index].opciones
                                       .filter((_, i) => i !== opcionIndex);
                                     setPreguntas(nuevasPreguntas);
+                                    
+                                    // Also update stored questions
+                                    const storedQuestions = [...allStoredQuestions];
+                                    if (index < storedQuestions.length) {
+                                      storedQuestions[index].opciones = storedQuestions[index].opciones
+                                        .filter((_, i) => i !== opcionIndex);
+                                      setAllStoredQuestions(storedQuestions);
+                                    }
                                   }}
                                   disabled={pregunta.opciones.length <= 2 || pregunta.tipo === 'verdadero_falso'}
                                 >
@@ -784,6 +964,7 @@ export default function CreateExamPage() {
               variant="outline" 
                                 size="sm"
                                 onClick={() => {
+                                  // Update displayed questions
                                   const nuevasPreguntas = [...preguntas];
                                   nuevasPreguntas[index].opciones.push({
                                     id: `opcion-${pregunta.id}-${nuevasPreguntas[index].opciones.length + 1}`,
@@ -791,25 +972,23 @@ export default function CreateExamPage() {
                                     esCorrecta: false,
                                   });
                                   setPreguntas(nuevasPreguntas);
+                                  
+                                  // Also update stored questions
+                                  const storedQuestions = [...allStoredQuestions];
+                                  if (index < storedQuestions.length) {
+                                    storedQuestions[index].opciones.push({
+                                      id: `opcion-${pregunta.id}-${storedQuestions[index].opciones.length + 1}`,
+                                      texto: "",
+                                      esCorrecta: false,
+                                    });
+                                    setAllStoredQuestions(storedQuestions);
+                                  }
                                 }}
                               >
                                 <Plus className="h-4 w-4 mr-2" />
                                 Añadir opción
                               </Button>
                             )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label>Retroalimentación (opcional)</Label>
-                            <Textarea
-                              value={pregunta.retroalimentacion || ""}
-                              onChange={(e) => {
-                                const nuevasPreguntas = [...preguntas];
-                                nuevasPreguntas[index].retroalimentacion = e.target.value;
-                                setPreguntas(nuevasPreguntas);
-                              }}
-                              placeholder="Retroalimentación para esta pregunta"
-                            />
                           </div>
                         </CardContent>
                       </Card>
