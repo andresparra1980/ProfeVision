@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { QuestionContent } from "@/components/exam/question-content";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -45,6 +45,7 @@ interface Examen {
   materias?: {
     nombre: string;
   };
+  puntaje_total?: number;
   [key: string]: unknown;
 }
 
@@ -73,13 +74,14 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       { texto: "", es_correcta: false },
     ],
   });
+  const [editorKey, setEditorKey] = useState(0);
 
   const fetchExamDetails = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from("examenes")
-        .select("*, materias(nombre)")
+        .select("*, materias(nombre), puntaje_total")
         .eq("id", examId)
         .single();
 
@@ -161,7 +163,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   }, [fetchExamDetails, fetchQuestions, fetchQuestionTypes]);
 
   // Función para manejar el cambio en los campos de la pregunta actual
-  const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const _handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCurrentQuestion(prev => ({
       ...prev,
@@ -170,7 +172,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   };
 
   // Función para manejar cambios en selects
-  const handleSelectChange = (name: string, value: string) => {
+  const _handleSelectChange = (name: string, value: string) => {
     setCurrentQuestion(prev => ({
       ...prev,
       [name]: value
@@ -215,13 +217,9 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         return;
       }
 
-      if (!currentQuestion.tipo_id) {
-        toast({
-          title: "Error",
-          description: "Debes seleccionar un tipo de pregunta",
-          variant: "destructive",
-        });
-        return;
+      // Set default type if not already set
+      if (!currentQuestion.tipo_id && tiposPregunta.length > 0) {
+        currentQuestion.tipo_id = tiposPregunta[0].id;
       }
 
       // Validar que al menos una opción tenga texto
@@ -240,6 +238,12 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         ? Math.max(...questions.map(q => q.orden || 0)) + 1 
         : 1;
 
+      // Calculate the initial points for the new question
+      // After adding, we'll recalculate points for all questions
+      const totalExamPoints = exam?.puntaje_total || 5;
+      const newQuestionCount = questions.length + 1;
+      const initialPointValue = parseFloat((totalExamPoints / newQuestionCount).toFixed(4));
+
       // Insertar pregunta
       const { data: questionData, error: questionError } = await supabase
         .from("preguntas")
@@ -247,7 +251,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           examen_id: examId,
           texto: currentQuestion.texto,
           tipo_id: currentQuestion.tipo_id,
-          puntaje: currentQuestion.puntaje,
+          puntaje: initialPointValue, // Use calculated initial value
           dificultad: currentQuestion.dificultad,
           retroalimentacion: currentQuestion.retroalimentacion,
           orden: orden
@@ -276,6 +280,9 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         if (optionsError) throw optionsError;
       }
 
+      // Recalculate points for all questions including the new one
+      await recalculatePointsPerQuestion(questions.length + 1);
+
       // Actualizar el estado
       toast({
         title: "Éxito",
@@ -285,7 +292,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       // Recargar preguntas
       fetchQuestions();
 
-      // Reiniciar el formulario
+      // Create a completely new question object to ensure the RichTextEditor resets
       setCurrentQuestion({
         texto: "",
         tipo_id: tiposPregunta.length > 0 ? tiposPregunta[0].id : "",
@@ -299,6 +306,9 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           { texto: "", es_correcta: false },
         ],
       });
+      
+      // Force a complete remount of the rich text editor by changing its key
+      setEditorKey(prevKey => prevKey + 1);
     } catch (error) {
       console.error("Error adding question:", error);
       toast({
@@ -331,6 +341,15 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         .eq("id", questionId);
 
       if (questionError) throw questionError;
+
+      // Calculate the new question count after deletion
+      const newQuestionCount = questions.length - 1;
+      
+      // Recalculate points if there are questions left
+      if (newQuestionCount > 0) {
+        // Pass the new question count to recalculate based on the updated count
+        await recalculatePointsPerQuestion(newQuestionCount);
+      }
 
       toast({
         title: "Éxito",
@@ -520,6 +539,60 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
     }
   };
 
+  // A function to recalculate the point value per question based on total score / number of questions
+  const recalculatePointsPerQuestion = useCallback(async (customQuestionCount?: number) => {
+    if (!exam) return;
+    
+    // Get total points from exam
+    const totalPoints = exam.puntaje_total ? exam.puntaje_total : 5;
+    
+    // Use custom count if provided, otherwise use current questions length
+    const questionCount = customQuestionCount || questions.length;
+    if (questionCount === 0) return;
+    
+    // Calculate points per question (rounded to 4 decimal places)
+    const pointsPerQuestion = parseFloat((totalPoints / questionCount).toFixed(4));
+    
+    // Update state for UI
+    setQuestions(prevQuestions => 
+      prevQuestions.map(q => ({
+        ...q,
+        puntaje: pointsPerQuestion
+      }))
+    );
+    
+    // Also update database for all questions with new point value
+    try {
+      setSaving(true);
+      
+      // Get IDs of all questions that are not new (have a valid DB ID)
+      const questionIds = questions
+        .filter(q => q.id && typeof q.id === 'string' && !q.id.startsWith('temp-'))
+        .map(q => q.id);
+      
+      if (questionIds.length > 0) {
+        // Batch update all questions with the new point value
+        const { error } = await supabase
+          .from("preguntas")
+          .update({ puntaje: pointsPerQuestion })
+          .in("id", questionIds as string[]);
+        
+        if (error) {
+          console.error("Error updating question points:", error);
+          toast({
+            title: "Advertencia",
+            description: "No se pudieron actualizar los puntajes de las preguntas en la base de datos",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error in recalculatePointsPerQuestion:", error);
+    } finally {
+      setSaving(false);
+    }
+  }, [exam, questions, setSaving]);
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -621,11 +694,14 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <p className="font-medium">{question.texto}</p>
+                      <QuestionContent html={question.texto} />
                       {question.retroalimentacion && (
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          <span className="font-medium">Retroalimentación:</span> {question.retroalimentacion}
-                        </p>
+                        <div className="mt-3 text-sm">
+                          <span className="font-medium text-muted-foreground">Retroalimentación:</span>
+                          <div className="mt-1">
+                            <QuestionContent html={question.retroalimentacion} className="text-muted-foreground" />
+                          </div>
+                        </div>
                       )}
                     </div>
                     
@@ -671,76 +747,16 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="texto">Texto de la Pregunta*</Label>
-              <Textarea
-                id="texto"
-                name="texto"
-                value={currentQuestion.texto}
-                onChange={handleQuestionChange}
-                placeholder="Ej. ¿Cuál es la capital de Francia?"
-                rows={3}
-                required
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="tipo_id">Tipo de Pregunta*</Label>
-                <Select
-                  value={currentQuestion.tipo_id}
-                  onValueChange={(value) => handleSelectChange("tipo_id", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tiposPregunta.map((tipo) => (
-                      <SelectItem key={tipo.id} value={tipo.id}>
-                        {tipo.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="puntaje">Puntaje</Label>
-                <Input
-                  id="puntaje"
-                  name="puntaje"
-                  type="number"
-                  min={1}
-                  value={currentQuestion.puntaje}
-                  onChange={handleQuestionChange}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dificultad">Dificultad</Label>
-                <Select
-                  value={currentQuestion.dificultad}
-                  onValueChange={(value) => handleSelectChange("dificultad", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar dificultad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="baja">Baja</SelectItem>
-                    <SelectItem value="media">Media</SelectItem>
-                    <SelectItem value="alta">Alta</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="retroalimentacion">Retroalimentación (opcional)</Label>
-              <Textarea
-                id="retroalimentacion"
-                name="retroalimentacion"
-                value={currentQuestion.retroalimentacion}
-                onChange={handleQuestionChange}
-                placeholder="Explicación o retroalimentación para mostrar después de contestar"
-                rows={2}
+              <RichTextEditor
+                key={editorKey}
+                _value={currentQuestion.texto}
+                onChange={(html) => {
+                  setCurrentQuestion(prev => ({
+                    ...prev,
+                    texto: html
+                  }));
+                }}
+                placeholder="Escribe aquí tu pregunta"
               />
             </div>
 
@@ -749,6 +765,12 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
               <div className="space-y-3">
                 {currentQuestion.opciones.map((option, index) => (
                   <div key={index} className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      checked={option.es_correcta}
+                      onChange={() => handleCorrectOption(index)}
+                      className="h-4 w-4"
+                    />
                     <div className="flex-1">
                       <Input
                         value={option.texto}
@@ -756,14 +778,6 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                         placeholder={`Opción ${index + 1}`}
                       />
                     </div>
-                    <Button
-                      type="button"
-                      variant={option.es_correcta ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleCorrectOption(index)}
-                    >
-                      {option.es_correcta ? "Correcta" : "Marcar como correcta"}
-                    </Button>
                   </div>
                 ))}
               </div>

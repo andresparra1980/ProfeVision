@@ -27,6 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 // Tipos
 type Materia = {
@@ -252,57 +253,54 @@ export default function CreateExamPage() {
     const puntajePorPregunta = parseFloat((puntajeTotal / count).toFixed(4));
     
     // Make sure we have enough questions in our stored array
-    let updatedStoredQuestions = [...allStoredQuestions];
-    let needsUpdate = false;
-    
-    // If we need more questions than we have stored, create new ones
-    if (updatedStoredQuestions.length < count) {
-      const newQuestions = Array.from(
-        { length: count - updatedStoredQuestions.length }, 
-        (_, index) => {
-          const newIndex = updatedStoredQuestions.length + index;
-          return {
-            id: `pregunta-${newIndex + 1}`,
-            texto: "",
-            tipo: "opcion_multiple" as TipoPregunta,
-            puntaje: puntajePorPregunta,
-            opciones: [
-              { id: `opcion-${newIndex}-1`, texto: "", esCorrecta: false },
-              { id: `opcion-${newIndex}-2`, texto: "", esCorrecta: false },
-              { id: `opcion-${newIndex}-3`, texto: "", esCorrecta: false },
-              { id: `opcion-${newIndex}-4`, texto: "", esCorrecta: false },
-            ],
-          };
-        }
-      );
+    // Use function form of setState to avoid dependency on allStoredQuestions
+    setAllStoredQuestions(prevStoredQuestions => {
+      let updatedStoredQuestions = [...prevStoredQuestions];
+      let _needsUpdate = false;
       
-      updatedStoredQuestions = [...updatedStoredQuestions, ...newQuestions];
-      needsUpdate = true;
-    }
-    
-    // Update puntaje for all questions
-    const updatedQuestionsWithPoints = updatedStoredQuestions.map(q => ({
-      ...q,
-      puntaje: puntajePorPregunta
-    }));
-    
-    // Only display the number of questions requested in the form
-    setPreguntas(updatedQuestionsWithPoints.slice(0, count));
-    
-    // Only update stored questions if we added new ones or changed puntaje
-    if (needsUpdate || Math.abs(updatedQuestionsWithPoints[0]?.puntaje - puntajePorPregunta) > 0.0001) {
-      setAllStoredQuestions(updatedQuestionsWithPoints);
-      
-      // Save to localStorage only when the stored questions actually change
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem('examQuestions', JSON.stringify(updatedQuestionsWithPoints));
-        } catch (error) {
-          console.error('Error saving questions to localStorage:', error);
-        }
+      // If we need more questions than we have stored, create new ones
+      if (updatedStoredQuestions.length < count) {
+        const newQuestions = Array.from(
+          { length: count - updatedStoredQuestions.length }, 
+          (_, index) => {
+            const newIndex = updatedStoredQuestions.length + index;
+            return {
+              id: `pregunta-${newIndex + 1}`,
+              texto: "",
+              tipo: "opcion_multiple" as TipoPregunta,
+              puntaje: puntajePorPregunta,
+              opciones: [
+                { id: `opcion-${newIndex}-1`, texto: "", esCorrecta: false },
+                { id: `opcion-${newIndex}-2`, texto: "", esCorrecta: false },
+                { id: `opcion-${newIndex}-3`, texto: "", esCorrecta: false },
+                { id: `opcion-${newIndex}-4`, texto: "", esCorrecta: false },
+              ],
+            };
+          }
+        );
+        
+        updatedStoredQuestions = [...updatedStoredQuestions, ...newQuestions];
+        _needsUpdate = true;
       }
-    }
-  }, [allStoredQuestions, form]);
+      
+      // Always update puntaje for all questions to ensure consistency
+      const updatedQuestionsWithPoints = updatedStoredQuestions.map(q => ({
+        ...q,
+        puntaje: puntajePorPregunta
+      }));
+      
+      // Only display the number of questions requested in the form
+      setPreguntas(updatedQuestionsWithPoints.slice(0, count));
+      
+      // Also save to localStorage with updated points
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('examQuestions', JSON.stringify(updatedQuestionsWithPoints));
+      }
+      
+      // Return the updated state
+      return updatedQuestionsWithPoints;
+    });
+  }, [form]);
 
   // Extraer el valor para evitar expresiones complejas en las dependencias
   const materiaId = form.watch("materia_id");
@@ -498,6 +496,9 @@ export default function CreateExamPage() {
     } else {
       setPreguntas([...preguntas, nuevaPregunta]);
     }
+    
+    // Immediately recalculate points for all questions after adding a new one
+    setTimeout(recalcularPuntajes, 0);
   };
 
   const recalcularPuntajes = () => {
@@ -506,12 +507,26 @@ export default function CreateExamPage() {
     const puntajeTotal = form.getValues("puntaje_total");
     const puntajePorPregunta = parseFloat((puntajeTotal / preguntas.length).toFixed(4));
     
+    // Update displayed questions
     const preguntasActualizadas = preguntas.map(pregunta => ({
       ...pregunta,
       puntaje: puntajePorPregunta
     }));
     
     setPreguntas(preguntasActualizadas);
+    
+    // Also update stored questions
+    const allQuestionsUpdated = allStoredQuestions.map(pregunta => ({
+      ...pregunta,
+      puntaje: puntajePorPregunta
+    }));
+    
+    setAllStoredQuestions(allQuestionsUpdated);
+    
+    // Save to localStorage with updated points
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('examQuestions', JSON.stringify(allQuestionsUpdated));
+    }
   };
 
   const duplicarPregunta = (index: number) => {
@@ -529,7 +544,7 @@ export default function CreateExamPage() {
     nuevasPreguntas.splice(index + 1, 0, preguntaDuplicada);
     setPreguntas(nuevasPreguntas);
     
-    // Recalcular puntajes después de agregar una pregunta
+    // Immediately recalculate points for all questions
     setTimeout(recalcularPuntajes, 0);
   };
 
@@ -537,7 +552,7 @@ export default function CreateExamPage() {
     const nuevasPreguntas = preguntas.filter((_, i) => i !== index);
     setPreguntas(nuevasPreguntas);
     
-    // Recalcular puntajes después de eliminar una pregunta
+    // Immediately recalculate points if we still have questions
     if (nuevasPreguntas.length > 0) {
       setTimeout(recalcularPuntajes, 0);
     }
@@ -853,23 +868,22 @@ export default function CreateExamPage() {
                         <CardContent className="space-y-4">
                           <div className="space-y-2">
                             <Label>Texto de la pregunta</Label>
-                            <Textarea
-                              value={pregunta.texto}
-                              onChange={(e) => {
+                            <RichTextEditor
+                              _value={pregunta.texto}
+                              onChange={(html) => {
                                 // Update displayed questions
                                 const nuevasPreguntas = [...preguntas];
-                                nuevasPreguntas[index].texto = e.target.value;
+                                nuevasPreguntas[index].texto = html;
                                 setPreguntas(nuevasPreguntas);
                                 
                                 // Also update stored questions
                                 const storedQuestions = [...allStoredQuestions];
                                 if (index < storedQuestions.length) {
-                                  storedQuestions[index].texto = e.target.value;
+                                  storedQuestions[index].texto = html;
                                   setAllStoredQuestions(storedQuestions);
                                 }
                               }}
                               placeholder="Escribe aquí tu pregunta"
-                              className="placeholder:text-muted-foreground/50"
                             />
                           </div>
 

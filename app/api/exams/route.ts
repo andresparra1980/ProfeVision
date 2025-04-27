@@ -181,6 +181,17 @@ export async function POST(request: Request) {
 
     // Si hay preguntas, las procesamos
     if (preguntas && Array.isArray(preguntas) && preguntas.length > 0) {
+      // Calculate points per question based on total exam points
+      const totalExamPoints = puntaje_total || 5;
+      const validPreguntas = preguntas.filter((p) => p.texto.trim() !== "");
+      const pointsPerQuestion = parseFloat(
+        (totalExamPoints / validPreguntas.length).toFixed(2)
+      );
+
+      logger.log(
+        `Distribuyendo ${totalExamPoints} puntos entre ${validPreguntas.length} preguntas: ${pointsPerQuestion} por pregunta`
+      );
+
       // Insertar cada pregunta
       for (let i = 0; i < preguntas.length; i++) {
         const pregunta = preguntas[i];
@@ -197,7 +208,7 @@ export async function POST(request: Request) {
             examen_id: examenId,
             texto: pregunta.texto,
             tipo_id: pregunta.tipo || "opcion_multiple",
-            puntaje: pregunta.puntaje || 1,
+            puntaje: pointsPerQuestion, // Use the calculated points per question
             orden: i + 1,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),

@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { htmlToPlainText } from "@/lib/utils/htmlToPlainText";
 
 // Tamaños de papel en puntos (1 punto = 1/72 pulgada)
 // Used for type inference, keeping with underscore prefix
@@ -211,7 +212,7 @@ export function ExamPDF({ exam, paperSize = "letter", selectedGroup }: ExamPDFPr
               <View wrap={false} style={styles.question}>
                 <View style={styles.questionHeader}>
                   <Text style={styles.questionText}>
-                    {index + 1}. {pregunta.texto}
+                    {index + 1}. {htmlToPlainText(pregunta.texto)}
                   </Text>
                   <Text style={styles.points}>{pregunta.puntaje} pts</Text>
                 </View>
@@ -222,7 +223,7 @@ export function ExamPDF({ exam, paperSize = "letter", selectedGroup }: ExamPDFPr
                         <Text style={styles.optionLetter}>
                           {String.fromCharCode(65 + optIndex)})
                         </Text>
-                        <Text>{opcion.texto}</Text>
+                        <Text>{htmlToPlainText(opcion.texto)}</Text>
                       </View>
                     ))}
                   </View>
