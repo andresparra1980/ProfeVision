@@ -19,7 +19,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useProfesor } from "@/lib/hooks/useProfesor";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Grip, Trash2, Copy, MoreVertical, Info } from "lucide-react";
 import {
   DropdownMenu,
@@ -460,18 +459,6 @@ export default function CreateExamPage() {
     }
   };
 
-  // The 'result' param uses DropResult type from @hello-pangea/dnd
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const items = Array.from(preguntas);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setPreguntas(items);
-  };
-
   const agregarPregunta = (index?: number) => {
     const puntajeTotal = form.getValues("puntaje_total");
     const puntajePorPregunta = parseFloat((puntajeTotal / (preguntas.length + 1)).toFixed(4));
@@ -526,35 +513,6 @@ export default function CreateExamPage() {
     // Save to localStorage with updated points
     if (typeof window !== 'undefined') {
       localStorage.setItem('examQuestions', JSON.stringify(allQuestionsUpdated));
-    }
-  };
-
-  const duplicarPregunta = (index: number) => {
-    const preguntaOriginal = preguntas[index];
-    const preguntaDuplicada = {
-      ...preguntaOriginal,
-      id: `pregunta-${preguntas.length + 1}`,
-      opciones: preguntaOriginal.opciones.map((opcion) => ({
-        ...opcion,
-        id: `opcion-${preguntas.length + 1}-${Math.random()}`,
-      })),
-    };
-
-    const nuevasPreguntas = [...preguntas];
-    nuevasPreguntas.splice(index + 1, 0, preguntaDuplicada);
-    setPreguntas(nuevasPreguntas);
-    
-    // Immediately recalculate points for all questions
-    setTimeout(recalcularPuntajes, 0);
-  };
-
-  const eliminarPregunta = (index: number) => {
-    const nuevasPreguntas = preguntas.filter((_, i) => i !== index);
-    setPreguntas(nuevasPreguntas);
-    
-    // Immediately recalculate points if we still have questions
-    if (nuevasPreguntas.length > 0) {
-      setTimeout(recalcularPuntajes, 0);
     }
   };
 
@@ -808,215 +766,145 @@ export default function CreateExamPage() {
           </CardContent>
         </Card>
 
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="preguntas">
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className="space-y-4"
-              >
-                {preguntas.map((pregunta, index) => (
-                  <Draggable
-                    key={pregunta.id}
-                    draggableId={pregunta.id}
-                    index={index}
-                  >
-                    {(provided) => (
-                      <Card
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className="relative"
+        {/* Renderizado de preguntas */}
+        <div className="space-y-4">
+          {preguntas.map((pregunta, index) => (
+            <Card key={pregunta.id} className="relative">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-medium">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent text-accent-foreground font-bold text-sm">
+                    Pregunta {index + 1} de {numeroPreguntas}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Texto de la pregunta</Label>
+                  <RichTextEditor
+                    _value={pregunta.texto}
+                    onChange={(html) => {
+                      const nuevasPreguntas = [...preguntas];
+                      nuevasPreguntas[index].texto = html;
+                      setPreguntas(nuevasPreguntas);
+                      const storedQuestions = [...allStoredQuestions];
+                      if (index < storedQuestions.length) {
+                        storedQuestions[index].texto = html;
+                        setAllStoredQuestions(storedQuestions);
+                      }
+                    }}
+                    placeholder="Escribe aquí tu pregunta"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Opciones</Label>
+                  {pregunta.opciones.map((opcion, opcionIndex) => (
+                    <div key={opcion.id} className="flex items-center gap-2">
+                      <input
+                        type={pregunta.tipo === 'seleccion_multiple' ? "checkbox" : "radio"}
+                        checked={opcion.esCorrecta}
+                        onChange={() => {
+                          const nuevasPreguntas = [...preguntas];
+                          if (pregunta.tipo === 'seleccion_multiple') {
+                            nuevasPreguntas[index].opciones[opcionIndex].esCorrecta = 
+                              !nuevasPreguntas[index].opciones[opcionIndex].esCorrecta;
+                          } else {
+                            nuevasPreguntas[index].opciones = nuevasPreguntas[index].opciones.map((op, i) => ({
+                              ...op,
+                              esCorrecta: i === opcionIndex,
+                            }));
+                          }
+                          setPreguntas(nuevasPreguntas);
+                          const storedQuestions = [...allStoredQuestions];
+                          if (index < storedQuestions.length) {
+                            if (pregunta.tipo === 'seleccion_multiple') {
+                              storedQuestions[index].opciones[opcionIndex].esCorrecta = 
+                                !storedQuestions[index].opciones[opcionIndex].esCorrecta;
+                            } else {
+                              storedQuestions[index].opciones = storedQuestions[index].opciones.map((op, i) => ({
+                                ...op,
+                                esCorrecta: i === opcionIndex,
+                              }));
+                            }
+                            setAllStoredQuestions(storedQuestions);
+                          }
+                        }}
+                        className="h-4 w-4"
+                        disabled={pregunta.tipo === 'verdadero_falso' && opcion.texto !== ""}
+                      />
+                      <Input
+                        value={opcion.texto}
+                        onChange={(e) => {
+                          const nuevasPreguntas = [...preguntas];
+                          nuevasPreguntas[index].opciones[opcionIndex].texto = e.target.value;
+                          setPreguntas(nuevasPreguntas);
+                          const storedQuestions = [...allStoredQuestions];
+                          if (index < storedQuestions.length) {
+                            storedQuestions[index].opciones[opcionIndex].texto = e.target.value;
+                            setAllStoredQuestions(storedQuestions);
+                          }
+                        }}
+                        placeholder={`Opción ${opcionIndex + 1}`}
+                        className="placeholder:text-muted-foreground/50"
+                        disabled={pregunta.tipo === 'verdadero_falso'}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const nuevasPreguntas = [...preguntas];
+                          nuevasPreguntas[index].opciones = nuevasPreguntas[index].opciones
+                            .filter((_, i) => i !== opcionIndex);
+                          setPreguntas(nuevasPreguntas);
+                          const storedQuestions = [...allStoredQuestions];
+                          if (index < storedQuestions.length) {
+                            storedQuestions[index].opciones = storedQuestions[index].opciones
+                              .filter((_, i) => i !== opcionIndex);
+                            setAllStoredQuestions(storedQuestions);
+                          }
+                        }}
+                        disabled={pregunta.opciones.length <= 2 || pregunta.tipo === 'verdadero_falso'}
                       >
-                        <div
-                          {...provided.dragHandleProps}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 cursor-move"
-                        >
-                          <Grip className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-lg font-medium">
-                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent text-accent-foreground font-bold text-sm">
-                              Pregunta {index + 1} de {numeroPreguntas}
-                            </span>
-                          </CardTitle>
-                          <div className="flex items-center gap-2">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => duplicarPregunta(index)}>
-                                  <Copy className="h-4 w-4 mr-2" />
-                                  Duplicar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => eliminarPregunta(index)}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Eliminar
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </CardHeader>
-                        
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2">
-                            <Label>Texto de la pregunta</Label>
-                            <RichTextEditor
-                              _value={pregunta.texto}
-                              onChange={(html) => {
-                                // Update displayed questions
-                                const nuevasPreguntas = [...preguntas];
-                                nuevasPreguntas[index].texto = html;
-                                setPreguntas(nuevasPreguntas);
-                                
-                                // Also update stored questions
-                                const storedQuestions = [...allStoredQuestions];
-                                if (index < storedQuestions.length) {
-                                  storedQuestions[index].texto = html;
-                                  setAllStoredQuestions(storedQuestions);
-                                }
-                              }}
-                              placeholder="Escribe aquí tu pregunta"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label>Opciones</Label>
-                            {pregunta.opciones.map((opcion, opcionIndex) => (
-                              <div key={opcion.id} className="flex items-center gap-2">
-                                <input
-                                  type={pregunta.tipo === 'seleccion_multiple' ? "checkbox" : "radio"}
-                                  checked={opcion.esCorrecta}
-                                  onChange={() => {
-                                    // Update displayed questions
-                                    const nuevasPreguntas = [...preguntas];
-                                    if (pregunta.tipo === 'seleccion_multiple') {
-                                      // Para selección múltiple, toggle la opción
-                                      nuevasPreguntas[index].opciones[opcionIndex].esCorrecta = 
-                                        !nuevasPreguntas[index].opciones[opcionIndex].esCorrecta;
-                                    } else {
-                                      // Para opción múltiple y verdadero/falso, solo una correcta
-                                      nuevasPreguntas[index].opciones = nuevasPreguntas[index].opciones.map((op, i) => ({
-                                        ...op,
-                                        esCorrecta: i === opcionIndex,
-                                      }));
-                                    }
-                                    setPreguntas(nuevasPreguntas);
-                                    
-                                    // Also update stored questions
-                                    const storedQuestions = [...allStoredQuestions];
-                                    if (index < storedQuestions.length) {
-                                      if (pregunta.tipo === 'seleccion_multiple') {
-                                        storedQuestions[index].opciones[opcionIndex].esCorrecta = 
-                                          !storedQuestions[index].opciones[opcionIndex].esCorrecta;
-                                      } else {
-                                        storedQuestions[index].opciones = storedQuestions[index].opciones.map((op, i) => ({
-                                          ...op,
-                                          esCorrecta: i === opcionIndex,
-                                        }));
-                                      }
-                                      setAllStoredQuestions(storedQuestions);
-                                    }
-                                  }}
-                                  className="h-4 w-4"
-                                  disabled={pregunta.tipo === 'verdadero_falso' && opcion.texto !== ""}
-                                />
-                                <Input
-                                  value={opcion.texto}
-                                  onChange={(e) => {
-                                    // Update displayed questions
-                                    const nuevasPreguntas = [...preguntas];
-                                    nuevasPreguntas[index].opciones[opcionIndex].texto = e.target.value;
-                                    setPreguntas(nuevasPreguntas);
-                                    
-                                    // Also update stored questions
-                                    const storedQuestions = [...allStoredQuestions];
-                                    if (index < storedQuestions.length) {
-                                      storedQuestions[index].opciones[opcionIndex].texto = e.target.value;
-                                      setAllStoredQuestions(storedQuestions);
-                                    }
-                                  }}
-                                  placeholder={`Opción ${opcionIndex + 1}`}
-                                  className="placeholder:text-muted-foreground/50"
-                                  disabled={pregunta.tipo === 'verdadero_falso'}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => {
-                                    // Update displayed questions
-                                    const nuevasPreguntas = [...preguntas];
-                                    nuevasPreguntas[index].opciones = nuevasPreguntas[index].opciones
-                                      .filter((_, i) => i !== opcionIndex);
-                                    setPreguntas(nuevasPreguntas);
-                                    
-                                    // Also update stored questions
-                                    const storedQuestions = [...allStoredQuestions];
-                                    if (index < storedQuestions.length) {
-                                      storedQuestions[index].opciones = storedQuestions[index].opciones
-                                        .filter((_, i) => i !== opcionIndex);
-                                      setAllStoredQuestions(storedQuestions);
-                                    }
-                                  }}
-                                  disabled={pregunta.opciones.length <= 2 || pregunta.tipo === 'verdadero_falso'}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ))}
-                            {pregunta.tipo !== 'verdadero_falso' && pregunta.opciones.length < 4 && (
-            <Button 
-                                type="button"
-              variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  // Update displayed questions
-                                  const nuevasPreguntas = [...preguntas];
-                                  nuevasPreguntas[index].opciones.push({
-                                    id: `opcion-${pregunta.id}-${nuevasPreguntas[index].opciones.length + 1}`,
-                                    texto: "",
-                                    esCorrecta: false,
-                                  });
-                                  setPreguntas(nuevasPreguntas);
-                                  
-                                  // Also update stored questions
-                                  const storedQuestions = [...allStoredQuestions];
-                                  if (index < storedQuestions.length) {
-                                    storedQuestions[index].opciones.push({
-                                      id: `opcion-${pregunta.id}-${storedQuestions[index].opciones.length + 1}`,
-                                      texto: "",
-                                      esCorrecta: false,
-                                    });
-                                    setAllStoredQuestions(storedQuestions);
-                                  }
-                                }}
-                              >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Añadir opción
-                              </Button>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-2">
-                          <Info className="inline h-4 w-4 mr-1" /> Solo se guardarán las opciones que tengan texto
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {pregunta.tipo !== 'verdadero_falso' && pregunta.opciones.length < 4 && (
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        const nuevasPreguntas = [...preguntas];
+                        nuevasPreguntas[index].opciones.push({
+                          id: `opcion-${pregunta.id}-${nuevasPreguntas[index].opciones.length + 1}`,
+                          texto: "",
+                          esCorrecta: false,
+                        });
+                        setPreguntas(nuevasPreguntas);
+                        const storedQuestions = [...allStoredQuestions];
+                        if (index < storedQuestions.length) {
+                          storedQuestions[index].opciones.push({
+                            id: `opcion-${pregunta.id}-${storedQuestions[index].opciones.length + 1}`,
+                            texto: "",
+                            esCorrecta: false,
+                          });
+                          setAllStoredQuestions(storedQuestions);
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Añadir opción
+                    </Button>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  <Info className="inline h-4 w-4 mr-1" /> Solo se guardarán las opciones que tengan texto
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
         <div className="flex justify-center">
           <Button
