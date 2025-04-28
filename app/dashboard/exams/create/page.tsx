@@ -19,13 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useProfesor } from "@/lib/hooks/useProfesor";
-import { Grip, Trash2, Copy, MoreVertical, Info } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Trash2, Info } from "lucide-react";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 // Tipos
