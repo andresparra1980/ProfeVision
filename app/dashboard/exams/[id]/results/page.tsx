@@ -864,6 +864,9 @@ export default function ExamResultsPage() {
           });
         });
       
+      // Ordenar datos por apellidos en orden ascendente
+      dataToExport.sort((a, b) => a["Apellidos"].localeCompare(b["Apellidos"], 'es'));
+      
       // Crear un libro de trabajo
       const wb = XLSX.utils.book_new();
       
