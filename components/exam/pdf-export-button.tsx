@@ -60,7 +60,7 @@ interface PDFExportButtonProps {
   examDetails: ExamDetails | null;
   fileName: string;
   buttonText?: string;
-  onPrepare: () => Promise<void>;
+  onPrepare: (_updateProgress: (_progress: number) => void) => Promise<void>;
   className?: string;
   totalPreguntas?: number;
 }
@@ -276,16 +276,10 @@ export function PDFExportButton({
     setProgress(0);
 
     try {
-      // Start progress simulation
-      const intervalId = setInterval(() => {
-        setProgress(prev => {
-          const newValue = prev + Math.random() * 8;
-          return newValue > 90 ? 90 : newValue;
-        });
-      }, 300);
-
-      // Call the actual prepare function
-      await onPrepare();
+      // Use the real progress updates from image loading
+      await onPrepare((newProgress) => {
+        setProgress(newProgress);
+      });
 
       // For debugging - log the examDetails structure
       logger.log("examDetails:", examDetails);
@@ -315,8 +309,7 @@ export function PDFExportButton({
         }
       }
 
-      // Finish progress
-      clearInterval(intervalId);
+      // Set to 100% when complete
       setProgress(100);
       setIsPrepared(true);
     } catch (error) {

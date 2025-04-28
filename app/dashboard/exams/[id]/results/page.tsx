@@ -24,23 +24,11 @@ import dynamic from 'next/dynamic';
 
 // Import react-pdf components (but disable due to client-only usage)
 // These imports are only referenced in code that is disabled for ESLint
-// and are actually imported dynamically through PDFExportButton
 
-import { Document, Page, Text, View, StyleSheet, Image as PDFImage } from '@react-pdf/renderer';
+//import { Document, Page, Text, View, StyleSheet, Image as PDFImage } from '@react-pdf/renderer';
 
-// Dynamic import for PDF generator component (client-side only)
-const PDFExportButton = dynamic(
-  () => import('@/components/exam/pdf-export-button').then(mod => mod.PDFExportButton),
-  { 
-    ssr: false,
-    loading: () => (
-      <Button variant="secondary" disabled className="flex items-center">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Cargando PDF...
-      </Button>
-    )
-  }
-);
+// We've replaced the dynamic PDFExportButton with a regular Button component
+// to avoid issues with passing JSX elements to a string prop
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -142,6 +130,20 @@ interface ResultadoExamenItem {
   respuestas_estudiante: Record<string, unknown>[];
   examenes_escaneados?: Record<string, unknown>[];
 }
+
+// Dynamic import for PDF generator component (client-side only)
+const PDFExportButton = dynamic(
+  () => import('@/components/exam/pdf-export-button').then(mod => mod.PDFExportButton),
+  { 
+    ssr: false,
+    loading: () => (
+      <Button variant="secondary" disabled className="flex items-center">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        Cargando PDF...
+      </Button>
+    )
+  }
+);
 
 export default function ExamResultsPage() {
   const params = useParams();
@@ -700,9 +702,22 @@ export default function ExamResultsPage() {
     }
   };
 
-  // Función para cargar imágenes en base64 para todas las resultusos
-  const loadImagesForPDF = async (): Promise<ResultadoExamen[]> => {
+  // Función para cargar imágenes en base64 para todas las resultusos con progreso real
+  const loadImagesForPDF = async (updateProgress: (_progress: number) => void): Promise<ResultadoExamen[]> => {
     const resultadosWithImages = [...resultados];
+    
+    // Calculate total images to track progress
+    const imagesToProcess = resultados.filter(r => r.examen_escaneado?.ruta_s3_procesado && !r.imagenBase64).length;
+    let processedImages = 0;
+    
+    // Update initial progress
+    updateProgress(0);
+    
+    // If no images to process, return immediately
+    if (imagesToProcess === 0) {
+      updateProgress(100);
+      return resultadosWithImages;
+    }
     
     // Process images in batches to avoid too many parallel requests
     const batchSize = 3;
@@ -728,6 +743,12 @@ export default function ExamResultsPage() {
               if (DEBUG) {
                 // Log the error
               }
+            } finally {
+              // Increment processed count
+              processedImages++;
+              // Update progress - calculate percentage
+              const progressPercentage = Math.round((processedImages / imagesToProcess) * 100);
+              updateProgress(progressPercentage);
             }
           }
         })
@@ -908,284 +929,8 @@ export default function ExamResultsPage() {
     }
   };
 
-  // Función para exportar resultados a PDF
-  // These components are defined but not used directly in this file
-  // They are only defined for reference and used in PDFExportButton
-  const _AnonymizedExamPDF = ({ resultados }: { resultados: ResultadoExamen[] }) => {
-    // Estilos para el PDF
-    const styles = StyleSheet.create({
-      page: {
-        padding: 30,
-        backgroundColor: '#ffffff',
-      },
-      header: {
-        fontSize: 18,
-        marginBottom: 20,
-        textAlign: 'center',
-        fontWeight: 'bold',
-      },
-      section: {
-        margin: 10,
-        padding: 10,
-        flexGrow: 1,
-      },
-      subHeader: {
-        fontSize: 14,
-        marginBottom: 10,
-        fontWeight: 'bold',
-      },
-      row: {
-        flexDirection: 'row',
-        borderBottomColor: '#EEEEEE',
-        borderBottomWidth: 1,
-        alignItems: 'center',
-        paddingTop: 5,
-        paddingBottom: 5,
-      },
-      studentInfo: {
-        marginBottom: 20,
-      },
-      label: {
-        width: 150,
-        fontSize: 12,
-        fontWeight: 'bold',
-      },
-      value: {
-        flex: 1,
-        fontSize: 12,
-      },
-      answersGrid: {
-        marginTop: 20,
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-      },
-      answersHeader: {
-        fontSize: 14,
-        marginBottom: 10,
-        fontWeight: 'bold',
-      },
-      answerItem: {
-        width: '25%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-      },
-      questionNumber: {
-        width: 30,
-        fontSize: 12,
-        fontWeight: 'bold',
-      },
-      answerLetter: {
-        fontSize: 12,
-        marginRight: 4,
-      },
-      indicator: {
-        fontSize: 12,
-        marginLeft: 4,
-      },
-      image: {
-        marginTop: 20,
-        width: '100%',
-        height: 350,
-        objectFit: 'contain',
-      },
-    });
 
-    return (
-      <Document>
-        {resultados.map((resultado, _index) => (
-          <Page key={resultado.id} size="A4" style={styles.page}>
-            <Text style={styles.header}>NOMBRE DEL LA INSTITUCION</Text>
-            
-            <View style={styles.studentInfo}>
-              <View style={styles.row}>
-                <Text style={styles.label}>Materia:</Text>
-                <Text style={styles.value}>{examDetails?.materias?.nombre || 'Sin materia'}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.label}>Grupo:</Text>
-                <Text style={styles.value}>{examDetails?.grupos?.nombre || 'Sin grupo'}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.label}>Identificacion Estudiante:</Text>
-                <Text style={styles.value}>{resultado.estudiante.identificacion}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.label}>Nota:</Text>
-                <Text style={styles.value}>{resultado.puntaje_obtenido.toFixed(2)}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.label}>Porcentaje:</Text>
-                <Text style={styles.value}>{resultado.porcentaje.toFixed(1)}%</Text>
-              </View>
-            </View>
-            
-            <Text style={styles.answersHeader}>Respuestas Detectadas</Text>
-            <View style={styles.answersGrid}>
-              {resultado.respuestas_estudiante
-                .sort((a: RespuestaEstudiante, b: RespuestaEstudiante) => a.pregunta.orden - b.pregunta.orden)
-                .map((respuesta: RespuestaEstudiante) => (
-                  <View key={respuesta.id} style={styles.answerItem}>
-                    <Text style={styles.questionNumber}>{respuesta.pregunta.orden}.</Text>
-                    <Text style={styles.answerLetter}>
-                      {OPTION_LETTERS[respuesta.opcion_respuesta.orden - 1]}
-                    </Text>
-                    <Text style={styles.indicator}>
-                      {respuesta.es_correcta ? '✓' : '✗'}
-                    </Text>
-                  </View>
-                ))}
-            </View>
-
-            {resultado.imagenBase64 && (
-              <PDFImage 
-                src={`data:image/png;base64,${resultado.imagenBase64}`} 
-                style={styles.image} 
-              />
-            )}
-          </Page>
-        ))}
-      </Document>
-    );
-  };
-
-  // Función individual para un único examen
-  const _SingleExamPDF = ({ resultado }: { resultado: ResultadoExamen }) => {
-    const styles = StyleSheet.create({
-      page: {
-        padding: 30,
-        backgroundColor: '#ffffff',
-      },
-      header: {
-        fontSize: 18,
-        marginBottom: 20,
-        textAlign: 'center',
-        fontWeight: 'bold',
-      },
-      section: {
-        margin: 10,
-        padding: 10,
-        flexGrow: 1,
-      },
-      subHeader: {
-        fontSize: 14,
-        marginBottom: 10,
-        fontWeight: 'bold',
-      },
-      row: {
-        flexDirection: 'row',
-        borderBottomColor: '#EEEEEE',
-        borderBottomWidth: 1,
-        alignItems: 'center',
-        paddingTop: 5,
-        paddingBottom: 5,
-      },
-      studentInfo: {
-        marginBottom: 20,
-      },
-      label: {
-        width: 150,
-        fontSize: 12,
-        fontWeight: 'bold',
-      },
-      value: {
-        flex: 1,
-        fontSize: 12,
-      },
-      answersGrid: {
-        marginTop: 20,
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-      },
-      answersHeader: {
-        fontSize: 14,
-        marginBottom: 10,
-        fontWeight: 'bold',
-      },
-      answerItem: {
-        width: '25%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-      },
-      questionNumber: {
-        width: 30,
-        fontSize: 12,
-        fontWeight: 'bold',
-      },
-      answerLetter: {
-        fontSize: 12,
-        marginRight: 4,
-      },
-      indicator: {
-        fontSize: 12,
-        marginLeft: 4,
-      },
-      image: {
-        marginTop: 20,
-        width: '100%',
-        height: 350,
-        objectFit: 'contain',
-      },
-    });
-
-    return (
-      <Document>
-        <Page size="A4" style={styles.page}>
-          <Text style={styles.header}>NOMBRE DEL LA INSTITUCION</Text>
-          
-          <View style={styles.studentInfo}>
-            <View style={styles.row}>
-              <Text style={styles.label}>Materia:</Text>
-              <Text style={styles.value}>{examDetails?.materias?.nombre || 'Sin materia'}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Grupo:</Text>
-              <Text style={styles.value}>{examDetails?.grupos?.nombre || 'Sin grupo'}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Identificacion Estudiante:</Text>
-              <Text style={styles.value}>{resultado.estudiante.identificacion}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Nota:</Text>
-              <Text style={styles.value}>{resultado.puntaje_obtenido.toFixed(2)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Porcentaje:</Text>
-              <Text style={styles.value}>{resultado.porcentaje.toFixed(1)}%</Text>
-            </View>
-          </View>
-          
-          <Text style={styles.answersHeader}>Respuestas Detectadas</Text>
-          <View style={styles.answersGrid}>
-            {resultado.respuestas_estudiante
-              .sort((a: RespuestaEstudiante, b: RespuestaEstudiante) => a.pregunta.orden - b.pregunta.orden)
-              .map((respuesta: RespuestaEstudiante) => (
-                <View key={respuesta.id} style={styles.answerItem}>
-                  <Text style={styles.questionNumber}>{respuesta.pregunta.orden}.</Text>
-                  <Text style={styles.answerLetter}>
-                    {OPTION_LETTERS[respuesta.opcion_respuesta.orden - 1]}
-                  </Text>
-                  <Text style={styles.indicator}>
-                    {respuesta.es_correcta ? '✓' : '✗'}
-                  </Text>
-                </View>
-              ))}
-          </View>
-
-          {resultado.imagenBase64 && (
-            <PDFImage 
-              src={`data:image/png;base64,${resultado.imagenBase64}`} 
-              style={styles.image} 
-            />
-          )}
-        </Page>
-      </Document>
-    );
-  };
-
-  const handleExportToPDF = async () => {
+  const handleExportToPDF = async (updateProgress: (_progress: number) => void) => {
     if (!examDetails || resultados.length === 0) {
       toast({
         title: "Error",
@@ -1198,18 +943,18 @@ export default function ExamResultsPage() {
     try {
       toast({
         title: "Preparando PDF",
-        description: "Cargando imágenes y preparando el reporte. Esto puede tardar un momento...",
+        description: "Cargando imágenes y preparando el reporte...",
       });
       
-      // Cargar imágenes para los resultados
-      const updatedResultados = await loadImagesForPDF();
+      // Cargar imágenes para los resultados con seguimiento de progreso real
+      const updatedResultados = await loadImagesForPDF(updateProgress);
       
       // Actualizar los resultados con las imágenes cargadas
       setResultados(updatedResultados);
       
       toast({
-        title: "PDF Listo",
-        description: "Haga clic en el botón para descargar el reporte PDF.",
+        title: "PDF Generado",
+        description: "El reporte PDF se ha generado correctamente.",
       });
     } catch (_error) {
       toast({
@@ -1281,64 +1026,78 @@ export default function ExamResultsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-[95%]">
-      <div className="flex flex-col space-y-2">
-        <div className="flex justify-between items-center">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Resultados: {examDetails?.titulo || 'Cargando...'}</h2>
+          <p className="text-muted-foreground">
+            Detalles de calificaciones y respuestas de los estudiantes
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
           <Button 
             variant="ghost" 
             size="sm"
             onClick={() => router.back()} 
-            className="w-fit"
+            className="h-9"
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
             Volver
           </Button>
           
-          <div className="flex space-x-2">
-            {availableGroups.length > 1 && (
-              <Button 
-                onClick={handleToggleGroupSelectionModal}
-                variant="outline"
-                className="flex items-center"
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Cambiar grupo: {examDetails?.grupos?.nombre || 'Sin grupo'}
-              </Button>
-            )}
-            
+          {availableGroups.length > 1 && (
             <Button 
-              onClick={handleExportToExcel}
-              variant="default"
-              className="flex items-center"
+              onClick={handleToggleGroupSelectionModal}
+              variant="outline"
+              className="flex items-center text-xs sm:text-sm"
             >
-              <Download className="mr-2 h-4 w-4" />
-              Exportar a Excel
+              <Users className="mr-2 h-4 w-4" />
+              <span className="truncate max-w-[100px] sm:max-w-none">
+                {examDetails?.grupos?.nombre || 'Sin grupo'}
+              </span>
             </Button>
-            
-            {resultados.length > 0 && (
-              <PDFExportButton 
-                resultados={resultados} 
-                examDetails={examDetails}
-                fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
-                buttonText="Reporte en PDF"
-                onPrepare={handleExportToPDF}
-                totalPreguntas={totalPreguntas}
-              />
-            )}
-          </div>
-        </div>
-        
-        <div className="mt-2">
-          <h1 className="text-2xl font-bold tracking-tight">Resultados: {examDetails?.titulo || 'Cargando...'}</h1>
-          <p className="text-sm text-muted-foreground">
-            Detalles de calificaciones y respuestas de los estudiantes
-          </p>
+          )}
+          
+          <Button 
+            onClick={handleExportToExcel}
+            variant="default"
+            className="flex items-center"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Descargar notas en Excel</span>
+            <span className="inline sm:hidden">Reporte Excel</span>
+          </Button>
+          
+          {resultados.length > 0 && (
+            <div>
+              <div className="hidden sm:block">
+                <PDFExportButton 
+                  resultados={resultados} 
+                  examDetails={examDetails}
+                  fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
+                  buttonText="Generar reporte en PDF"
+                  onPrepare={(updateProgress) => handleExportToPDF(updateProgress)}
+                  totalPreguntas={totalPreguntas}
+                />
+              </div>
+              <div className="sm:hidden block">
+                <PDFExportButton 
+                  resultados={resultados} 
+                  examDetails={examDetails}
+                  fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
+                  buttonText="Reporte PDF"
+                  onPrepare={(updateProgress) => handleExportToPDF(updateProgress)}
+                  totalPreguntas={totalPreguntas}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="space-y-6 mt-6">
+      <div className="space-y-4">
         {examDetails && (
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Card className="flex-1">
               <CardHeader>
                 <CardTitle>Detalles del Examen</CardTitle>
@@ -1408,8 +1167,8 @@ export default function ExamResultsPage() {
           </div>
         )}
 
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2">
+        <div>
+          <div className="flex items-center space-x-2 mb-4">
             <input
               type="checkbox"
               id="ver-solo-con-examen"
