@@ -1027,6 +1027,33 @@ export default function ExamResultsPage() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center mb-4">
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => router.back()} 
+          className="h-9"
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Volver
+        </Button>
+
+        {availableGroups.length > 1 && (
+          <Button 
+            onClick={handleToggleGroupSelectionModal}
+            variant="outline"
+            className="flex items-center text-xs sm:text-sm bg-card text-foreground dark:text-foreground dark:hover:text-background"
+          >
+            <div className="flex items-center px-3 py-2 w-full h-full">
+              <Users className="mr-2 h-4 w-4 " />
+              <span className="truncate max-w-[150px] sm:max-w-[200px] md:max-w-none">
+                GRUPO: {examDetails?.grupos?.nombre || 'Sin grupo'}
+              </span>
+            </div>
+          </Button>
+        )}
+      </div>
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Resultados: {examDetails?.titulo || 'Cargando...'}</h2>
@@ -1035,29 +1062,6 @@ export default function ExamResultsPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => router.back()} 
-            className="h-9"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
-          
-          {availableGroups.length > 1 && (
-            <Button 
-              onClick={handleToggleGroupSelectionModal}
-              variant="outline"
-              className="flex items-center text-xs sm:text-sm"
-            >
-              <Users className="mr-2 h-4 w-4" />
-              <span className="truncate max-w-[100px] sm:max-w-none">
-                {examDetails?.grupos?.nombre || 'Sin grupo'}
-              </span>
-            </Button>
-          )}
-          
           <Button 
             onClick={handleExportToExcel}
             variant="default"
@@ -1095,176 +1099,174 @@ export default function ExamResultsPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
-        {examDetails && (
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Card className="flex-1">
-              <CardHeader>
-                <CardTitle>Detalles del Examen</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Materia:</div>
-                    <div>{examDetails.materias?.nombre || 'Sin materia'}</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Puntaje Total:</div>
-                    <div>{examDetails.puntaje_total}</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Grupo:</div>
-                    <div>{examDetails.grupos?.nombre || 'Sin grupo'}</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Fecha de Creación:</div>
-                    <div>{examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : 'No disponible'}</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-1">
-              <CardHeader>
-                <CardTitle>Estadísticas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Estudiantes con examen:</div>
-                    <div>{resultados.length} de {todosEstudiantes.length}</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Promedio:</div>
-                    <div>
-                      {resultados.length > 0
-                        ? (resultados.reduce((sum, r: ResultadoExamen) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2)
-                        : 'N/A'
-                      }
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Nota más alta:</div>
-                    <div>
-                      {resultados.length > 0
-                        ? Math.max(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
-                        : 'N/A'
-                      }
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Nota más baja:</div>
-                    <div>
-                      {resultados.length > 0
-                        ? Math.min(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
-                        : 'N/A'
-                      }
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        <div>
-          <div className="flex items-center space-x-2 mb-4">
-            <input
-              type="checkbox"
-              id="ver-solo-con-examen"
-              checked={verSoloConExamen}
-              onChange={(e) => setVerSoloConExamen(e.target.checked)}
-              className="rounded border-gray-300 text-primary focus:ring-primary"
-            />
-            <label htmlFor="ver-solo-con-examen" className="text-sm">
-              Ver solo estudiantes con examen calificado
-            </label>
-          </div>
-          
-          <Card>
+      {examDetails && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Card className="flex-1">
             <CardHeader>
-              <CardTitle>Estudiantes</CardTitle>
-              <CardDescription>
-                Resultados de los estudiantes en este examen
-              </CardDescription>
+              <CardTitle>Detalles del Examen</CardTitle>
             </CardHeader>
-            
             <CardContent>
-              {todosEstudiantes.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No hay estudiantes en este grupo
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">Materia:</div>
+                  <div>{examDetails.materias?.nombre || 'Sin materia'}</div>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-muted/50">
-                        <th className="py-2 px-4 text-left">Nombre</th>
-                        <th className="py-2 px-4 text-left">Identificación</th>
-                        <th className="py-2 px-4 text-center">Nota</th>
-                        <th className="py-2 px-4 text-center">Porcentaje</th>
-                        <th className="py-2 px-4 text-center">Estado</th>
-                        <th className="py-2 px-4 text-center">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {todosEstudiantes
-                        .filter(estudiante => {
-                          if (!verSoloConExamen) return true;
-                          return resultados.some(r => r.estudiante.id === estudiante.id);
-                        })
-                        .map(estudiante => {
-                          const resultado = resultados.find(r => r.estudiante.id === estudiante.id);
-                          return (
-                            <tr key={estudiante.id} className="border-b hover:bg-muted/50">
-                              <td className="py-2 px-4">{estudiante.apellidos}, {estudiante.nombres}</td>
-                              <td className="py-2 px-4">{estudiante.identificacion}</td>
-                              <td className="py-2 px-4 text-center">
-                                {resultado ? resultado.puntaje_obtenido.toFixed(2) : '-'}
-                              </td>
-                              <td className="py-2 px-4 text-center">
-                                {resultado ? resultado.porcentaje.toFixed(1) + '%' : '-'}
-                              </td>
-                              <td className="py-2 px-4 text-center">
-                                {resultado ? (
-                                  <span className="px-2 py-1 rounded-full text-xs bg-primary text-primary-foreground font-medium shadow-sm">
-                                    Calificado
-                                  </span>
-                                ) : (
-                                  <span className="px-2 py-1 rounded-full text-xs bg-accent text-accent-foreground font-medium shadow-sm">
-                                    Pendiente
-                                  </span>
-                                )}
-                              </td>
-                              <td className="py-2 px-4 text-center">
-                                {resultado ? (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleShowDetails(resultado)}
-                                  >
-                                    Ver detalles
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleShowManualGradeDialog(estudiante)}
-                                  >
-                                    Ingresar Nota
-                                  </Button>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </table>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">Puntaje Total:</div>
+                  <div>{examDetails.puntaje_total}</div>
                 </div>
-              )}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">Grupo:</div>
+                  <div>{examDetails.grupos?.nombre || 'Sin grupo'}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">Fecha de Creación:</div>
+                  <div>{examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : 'No disponible'}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="flex-1">
+            <CardHeader>
+              <CardTitle>Estadísticas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">Estudiantes con examen:</div>
+                  <div>{resultados.length} de {todosEstudiantes.length}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">Promedio:</div>
+                  <div>
+                    {resultados.length > 0
+                      ? (resultados.reduce((sum, r: ResultadoExamen) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2)
+                      : 'N/A'
+                    }
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">Nota más alta:</div>
+                  <div>
+                    {resultados.length > 0
+                      ? Math.max(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
+                      : 'N/A'
+                    }
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">Nota más baja:</div>
+                  <div>
+                    {resultados.length > 0
+                      ? Math.min(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
+                      : 'N/A'
+                    }
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
+      )}
+
+      <div>
+        <div className="flex items-center space-x-2 mb-4">
+          <input
+            type="checkbox"
+            id="ver-solo-con-examen"
+            checked={verSoloConExamen}
+            onChange={(e) => setVerSoloConExamen(e.target.checked)}
+            className="rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <label htmlFor="ver-solo-con-examen" className="text-sm">
+            Ver solo estudiantes con examen calificado
+          </label>
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Estudiantes</CardTitle>
+            <CardDescription>
+              Resultados de los estudiantes en este examen
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            {todosEstudiantes.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No hay estudiantes en este grupo
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-muted/50">
+                      <th className="py-2 px-4 text-left">Nombre</th>
+                      <th className="py-2 px-4 text-left">Identificación</th>
+                      <th className="py-2 px-4 text-center">Nota</th>
+                      <th className="py-2 px-4 text-center">Porcentaje</th>
+                      <th className="py-2 px-4 text-center">Estado</th>
+                      <th className="py-2 px-4 text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {todosEstudiantes
+                      .filter(estudiante => {
+                        if (!verSoloConExamen) return true;
+                        return resultados.some(r => r.estudiante.id === estudiante.id);
+                      })
+                      .map(estudiante => {
+                        const resultado = resultados.find(r => r.estudiante.id === estudiante.id);
+                        return (
+                          <tr key={estudiante.id} className="border-b hover:bg-muted/50">
+                            <td className="py-2 px-4">{estudiante.apellidos}, {estudiante.nombres}</td>
+                            <td className="py-2 px-4">{estudiante.identificacion}</td>
+                            <td className="py-2 px-4 text-center">
+                              {resultado ? resultado.puntaje_obtenido.toFixed(2) : '-'}
+                            </td>
+                            <td className="py-2 px-4 text-center">
+                              {resultado ? resultado.porcentaje.toFixed(1) + '%' : '-'}
+                            </td>
+                            <td className="py-2 px-4 text-center">
+                              {resultado ? (
+                                <span className="px-2 py-1 rounded-full text-xs bg-primary text-primary-foreground font-medium shadow-sm">
+                                  Calificado
+                                </span>
+                              ) : (
+                                <span className="px-2 py-1 rounded-full text-xs bg-accent text-accent-foreground font-medium shadow-sm">
+                                  Pendiente
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 px-4 text-center">
+                              {resultado ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleShowDetails(resultado)}
+                                >
+                                  Ver detalles
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleShowManualGradeDialog(estudiante)}
+                                >
+                                  Ingresar Nota
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
