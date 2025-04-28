@@ -1035,7 +1035,7 @@ export default function ExamResultsPage() {
           className="h-9"
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
-          Volver
+          Volver a Exámenes
         </Button>
 
         {availableGroups.length > 1 && (
