@@ -20,7 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Grip, Trash2, Copy, MoreVertical } from "lucide-react";
+import { Grip, Trash2, Copy, MoreVertical, Info } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1004,6 +1004,9 @@ export default function CreateExamPage() {
                               </Button>
                             )}
                           </div>
+                          <p className="text-sm text-muted-foreground mt-2">
+                          <Info className="inline h-4 w-4 mr-1" /> Solo se guardarán las opciones que tengan texto
+                          </p>
                         </CardContent>
                       </Card>
                     )}

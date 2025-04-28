@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Plus, Save, Trash2, GripVertical } from "lucide-react";
+import { ChevronLeft, Plus, Save, Trash2, GripVertical, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -782,7 +782,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                 ))}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                *Solo se guardarán las opciones que tengan texto
+              <Info className="inline h-4 w-4 mr-1" /> Solo se guardarán las opciones que tengan texto
               </p>
             </div>
           </CardContent>
