@@ -694,7 +694,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <QuestionContent html={question.texto} />
+                      <QuestionContent html={question.texto} className="text-foreground" />
                       {question.retroalimentacion && (
                         <div className="mt-3 text-sm">
                           <span className="font-medium text-muted-foreground">Retroalimentación:</span>
