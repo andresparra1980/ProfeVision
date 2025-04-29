@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FileText, Eye, Printer, Users, FileOutput, Trash2, Link } from "lucide-react";
+import { Plus, FileText, Eye, Printer, Users, FileOutput, Trash2, Link, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -169,9 +169,21 @@ export default function ExamsPage() {
             Crea, gestiona y califica exámenes para tus estudiantes
           </p>
         </div>
-        <Button onClick={() => router.push("/dashboard/exams/create")}>
-          <Plus className="mr-2 h-4 w-4" /> Crear Examen
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => router.push("/dashboard/exams/create")}> 
+            <Plus className="mr-2 h-4 w-4" /> Crear Examen
+          </Button>
+          <Button
+            onClick={() => router.push("/dashboard/exams/create-with-ai")}
+            className="relative overflow-hidden border-2 border-primary/60 shadow-lg group"
+            style={{ position: 'relative' }}
+          >
+            <span className="absolute -inset-1 z-0 rounded-lg bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 opacity-60 blur-lg animate-shimmer group-hover:opacity-80" />
+            <span className="relative z-10 flex items-center">
+              <Sparkles className="mr-2 h-4 w-4 drop-shadow-glow" /> Crear Examen con IA
+            </span>
+          </Button>
+        </div>
       </div>
 
       <Card>
