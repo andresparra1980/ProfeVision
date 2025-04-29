@@ -19,8 +19,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useProfesor } from "@/lib/hooks/useProfesor";
-import { Trash2, Info } from "lucide-react";
+import { Trash2, Info, Sparkles } from "lucide-react";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AuroraText } from "@/components/magicui/aurora-text";
+import { useTheme } from 'next-themes';
 
 // Tipos
 type Materia = {
@@ -82,13 +85,15 @@ export default function CreateExamPage() {
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [gruposFiltrados, setGruposFiltrados] = useState<Grupo[]>([]);
   const [isClient, setIsClient] = useState(false);
-  
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   // Keep track of all stored questions, regardless of display count
   const [allStoredQuestions, setAllStoredQuestions] = useState<Pregunta[]>([]);
   const initializationDoneRef = useRef(false);
 
   // Mark client-side rendering
   useEffect(() => {
+    setMounted(true);
     setIsClient(true);
   }, []);
 
@@ -761,9 +766,58 @@ export default function CreateExamPage() {
         </Card>
 
         {/* Renderizado de preguntas */}
+        <TooltipProvider>
         <div className="space-y-4">
           {preguntas.map((pregunta, index) => (
             <Card key={pregunta.id} className="relative">
+              <div className="absolute top-4 right-4 z-10 bg- rounded-full">
+                <Tooltip>
+                  <TooltipTrigger asChild>               
+                    <button
+                      className="p-2 mt-2 bg-rose-400 dark:bg-fuchsia-200 rounded-full hover:bg-rose-500 dark:hover:bg-fuchsia-300 transition-colors text-xs"
+                      style={{ position: 'relative' }}
+                    >
+                    <span className="relative z-10 flex items-center">
+                      <Sparkles className="mr-2 h-4 w-4 text-white dark:text-black" />
+                      {mounted && (
+                        <AuroraText
+                          colors={
+                            theme === 'dark'
+                              ? [
+                                  '#ffe600', // intense yellow
+                                  '#ff00c8', // magenta
+                                  '#7c00ff', // vivid purple
+                                  '#00c3ff', // electric blue
+                                  '#ff7b00', // orange
+                                  '#ff0059', // hot pink
+                                  '#ff7b00', // orange
+                                  '#ff0059', // hot pink
+                                ]
+                              : [
+                                  '#ffadad', // pink
+                                  '#ffd6a5', // peach
+                                  '#fdffb6', // lemon
+                                  '#caffbf', // light green
+                                  '#9bf6ff', // cyan
+                                  '#a0c4ff', // blue
+                                  '#d7aefb', // purple
+                                  '#fdcce9', // pink
+                                  '#fdcce9', // pink
+                                ]
+                          }
+                          speed={1}
+                        >
+                          Generar con IA
+                        </AuroraText>
+                      )}
+                    </span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" align="center">
+                    Crear con Inteligencia Artificial
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-lg font-medium">
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent text-accent-foreground font-bold text-sm">
@@ -899,6 +953,7 @@ export default function CreateExamPage() {
             </Card>
           ))}
         </div>
+        </TooltipProvider>
 
         <div className="flex justify-center">
           <Button

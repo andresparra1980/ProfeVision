@@ -28,6 +28,8 @@ import {
 import { toast } from "sonner";
 import { AuthError } from "@supabase/supabase-js";
 import { logger } from "@/lib/utils/logger";
+import { AuroraText } from "@/components/magicui/aurora-text";
+import { useTheme } from 'next-themes';
 
 interface Exam {
   id: string;
@@ -51,11 +53,14 @@ interface Exam {
 
 export default function ExamsPage() {
   const router = useRouter();
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    setMounted(true);
     fetchExams();
   }, []);
 
@@ -178,9 +183,39 @@ export default function ExamsPage() {
             className="relative overflow-hidden border-2 border-primary/60 shadow-lg group"
             style={{ position: 'relative' }}
           >
-            <span className="absolute -inset-1 z-0 rounded-lg bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 opacity-60 blur-lg animate-shimmer group-hover:opacity-80" />
             <span className="relative z-10 flex items-center">
-              <Sparkles className="mr-2 h-4 w-4 drop-shadow-glow" /> Crear Examen con IA
+              <Sparkles className="mr-2 h-4 w-4" />
+              {mounted && (
+                <AuroraText
+                  colors={
+                    theme === 'dark'
+                      ? [
+                          '#ffe600', // intense yellow
+                          '#ff00c8', // magenta
+                          '#7c00ff', // vivid purple
+                          '#00c3ff', // electric blue
+                          '#ff7b00', // orange
+                          '#ff0059', // hot pink
+                          '#ff7b00', // orange
+                          '#ff0059', // hot pink
+                        ]
+                      : [
+                          '#ffadad', // pink
+                          '#ffd6a5', // peach
+                          '#fdffb6', // lemon
+                          '#caffbf', // light green
+                          '#9bf6ff', // cyan
+                          '#a0c4ff', // blue
+                          '#d7aefb', // purple
+                          '#fdcce9', // pink
+                          '#fdcce9', // pink
+                        ]
+                  }
+                  speed={2}
+                >
+                  Crear Examen con IA
+                </AuroraText>
+              )}
             </span>
           </Button>
         </div>
