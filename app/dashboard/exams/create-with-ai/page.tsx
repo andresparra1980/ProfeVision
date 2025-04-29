@@ -24,6 +24,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { useTheme } from 'next-themes';
+import { ModalGenerateAI } from '@/components/exam/modal-generate-ai';
 
 // Tipos
 type Materia = {
@@ -90,6 +91,8 @@ export default function CreateExamPage() {
   // Keep track of all stored questions, regardless of display count
   const [allStoredQuestions, setAllStoredQuestions] = useState<Pregunta[]>([]);
   const initializationDoneRef = useRef(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalIndex, setModalIndex] = useState<number | null>(null);
 
   // Mark client-side rendering
   useEffect(() => {
@@ -515,6 +518,48 @@ export default function CreateExamPage() {
     }
   };
 
+  // Handler para abrir el modal y saber a qué pregunta aplica
+  const handleOpenModal = (index: number) => {
+    setModalIndex(index);
+    setModalOpen(true);
+  };
+
+  // Handler para inyectar la pregunta generada
+  const handleSuccessAI = (preguntaGenerada: Pregunta) => {
+    if (modalIndex === null) return;
+    // Convertir texto plano a HTML simple para el RichTextEditor
+    const textoHTML = preguntaGenerada.texto
+      ? `<p>${preguntaGenerada.texto.replace(/\n/g, '<br>')}</p>`
+      : '';
+    setPreguntas(prev => {
+      const nuevas = [...prev];
+      nuevas[modalIndex] = {
+        ...nuevas[modalIndex],
+        texto: textoHTML,
+        opciones: preguntaGenerada.opciones,
+        tipo: preguntaGenerada.tipo,
+      };
+      return nuevas;
+    });
+    setAllStoredQuestions(prev => {
+      const nuevas = [...prev];
+      if (modalIndex < nuevas.length) {
+        nuevas[modalIndex] = {
+          ...nuevas[modalIndex],
+          texto: textoHTML,
+          opciones: preguntaGenerada.opciones,
+          tipo: preguntaGenerada.tipo,
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('examQuestions', JSON.stringify(nuevas));
+        }
+      }
+      return nuevas;
+    });
+    setModalOpen(false);
+    setModalIndex(null);
+  };
+
   // Si está cargando la verificación de entidades, mostrar spinner
   if (isCheckingEntities) {
     return (
@@ -772,45 +817,47 @@ export default function CreateExamPage() {
             <Card key={pregunta.id} className="relative">
               <div className="absolute top-4 right-4 z-10 bg- rounded-full">
                 <Tooltip>
-                  <TooltipTrigger asChild>               
+                  <TooltipTrigger asChild>
                     <button
+                      type="button"
                       className="p-2 mt-2 bg-rose-400 dark:bg-fuchsia-200 rounded-full hover:bg-rose-500 dark:hover:bg-fuchsia-300 transition-colors text-xs"
                       style={{ position: 'relative' }}
+                      onClick={() => handleOpenModal(index)}
                     >
-                    <span className="relative z-10 flex items-center">
-                      <Sparkles className="mr-2 h-4 w-4 text-white dark:text-black" />
-                      {mounted && (
-                        <AuroraText
-                          colors={
-                            theme === 'dark'
-                              ? [
-                                  '#ffe600', // intense yellow
-                                  '#ff00c8', // magenta
-                                  '#7c00ff', // vivid purple
-                                  '#00c3ff', // electric blue
-                                  '#ff7b00', // orange
-                                  '#ff0059', // hot pink
-                                  '#ff7b00', // orange
-                                  '#ff0059', // hot pink
-                                ]
-                              : [
-                                  '#ffadad', // pink
-                                  '#ffd6a5', // peach
-                                  '#fdffb6', // lemon
-                                  '#caffbf', // light green
-                                  '#9bf6ff', // cyan
-                                  '#a0c4ff', // blue
-                                  '#d7aefb', // purple
-                                  '#fdcce9', // pink
-                                  '#fdcce9', // pink
-                                ]
-                          }
-                          speed={1}
-                        >
-                          Generar con IA
-                        </AuroraText>
-                      )}
-                    </span>
+                      <span className="relative z-10 flex items-center">
+                        <Sparkles className="mr-2 h-4 w-4 text-white dark:text-black" />
+                        {mounted && (
+                          <AuroraText
+                            colors={
+                              theme === 'dark'
+                                ? [
+                                    '#ffe600',
+                                    '#ff00c8',
+                                    '#7c00ff',
+                                    '#00c3ff',
+                                    '#ff7b00',
+                                    '#ff0059',
+                                    '#ff7b00',
+                                    '#ff0059',
+                                  ]
+                                : [
+                                    '#ffadad',
+                                    '#ffd6a5',
+                                    '#fdffb6',
+                                    '#caffbf',
+                                    '#9bf6ff',
+                                    '#a0c4ff',
+                                    '#d7aefb',
+                                    '#fdcce9',
+                                    '#fdcce9',
+                                  ]
+                            }
+                            speed={1}
+                          >
+                            Generar con IA
+                          </AuroraText>
+                        )}
+                      </span>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="left" align="center">
@@ -841,6 +888,7 @@ export default function CreateExamPage() {
                       }
                     }}
                     placeholder="Escribe aquí tu pregunta"
+                    key={pregunta.texto}
                   />
                 </div>
                 <div className="space-y-2">
@@ -973,6 +1021,14 @@ export default function CreateExamPage() {
             </Button>
         </div>
       </form>
+      <ModalGenerateAI
+        open={modalOpen}
+        onOpenChange={(open) => {
+          setModalOpen(open);
+          if (!open) setModalIndex(null);
+        }}
+        onSuccess={handleSuccessAI}
+      />
     </div>
   );
 } 

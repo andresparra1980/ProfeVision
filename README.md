@@ -78,3 +78,17 @@ Con ProfeVision, los docentes pueden:
 ## Contribuciones
 
 Consulta [CONTRIBUTING.md](./CONTRIBUTING.md) para conocer nuestras pautas de contribución.
+
+## Configuración de entorno para generación de preguntas con IA
+
+Asegúrate de tener las siguientes variables en tu `.env.local`:
+
+```
+OPENROUTER_API_KEY=tu_api_key_de_openrouter
+OPENAI_MODEL=gpt-4
+```
+
+- `OPENROUTER_API_KEY`: Obtén tu API Key en https://openrouter.ai/
+- `OPENAI_MODEL`: Modelo recomendado: `gpt-4` o `claude-3-opus` (puedes cambiarlo según disponibilidad y calidad deseada).
+
+No se requiere configuración adicional en Supabase para esta funcionalidad.
