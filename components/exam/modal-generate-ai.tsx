@@ -115,11 +115,12 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
 
   // Limpiar el foco antes de cerrar el modal
   const handleCloseModal = useCallback(() => {
-    // Aquí puedes limpiar el formulario o errores si es necesario
-    // No llamar a onOpenChange aquí para evitar loops
+    // Limpiar el formulario y errores
     form.reset();
     setError(null);
-  }, [form]);
+    // Cerrar el modal
+    onOpenChange(false);
+  }, [form, onOpenChange]);
 
   const handleSubmit = async (values: GenerateIAForm) => {
     setLoading(true);
