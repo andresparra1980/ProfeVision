@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
+import logger from "@/lib/utils/logger";
 
 interface TipoPregunta {
   id: string;
@@ -57,6 +58,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showDisableDialog, setShowDisableDialog] = useState(false);
+  const [showCorrectAnswerDialog, setShowCorrectAnswerDialog] = useState(false);
+  const [pendingCorrectAnswer, setPendingCorrectAnswer] = useState<{
+    questionId: string;
+    optionId: string;
+    optionIndex: number;
+    questionIndex: number;
+  } | null>(null);
   const [questionToToggle, setQuestionToToggle] = useState<{id: string, habilitada: boolean} | null>(null);
   const [tiposPregunta, setTiposPregunta] = useState<TipoPregunta[]>([]);
   const [exam, setExam] = useState<Examen | null>(null);
@@ -88,7 +96,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       if (error) throw error;
       setExam(data);
     } catch (error) {
-      console.error("Error fetching exam details:", error);
+      logger.error("Error fetching exam details:", error);
       toast({
         title: "Error",
         description: "No se pudo cargar la información del examen",
@@ -125,7 +133,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       
       setQuestions(formattedQuestions);
     } catch (error) {
-      console.error("Error fetching questions:", error);
+      logger.error("Error fetching questions:", error);
       toast({
         title: "Error",
         description: "No se pudieron cargar las preguntas del examen",
@@ -152,7 +160,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         }));
       }
     } catch (error) {
-      console.error("Error fetching question types:", error);
+      logger.error("Error fetching question types:", error);
     }
   }, []);
 
@@ -310,7 +318,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       // Force a complete remount of the rich text editor by changing its key
       setEditorKey(prevKey => prevKey + 1);
     } catch (error) {
-      console.error("Error adding question:", error);
+      logger.error("Error adding question:", error);
       toast({
         title: "Error",
         description: "No se pudo agregar la pregunta",
@@ -359,7 +367,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       // Recargar preguntas
       fetchQuestions();
     } catch (error) {
-      console.error("Error deleting question:", error);
+      logger.error("Error deleting question:", error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la pregunta",
@@ -416,7 +424,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       // Recargar datos del examen
       fetchExamDetails();
     } catch (error) {
-      console.error("Error publishing exam:", error);
+      logger.error("Error publishing exam:", error);
       toast({
         title: "Error",
         description: "No se pudo publicar el examen",
@@ -498,6 +506,12 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           // Hacer un cast seguro de los datos
           const respuestasTyped = (respuestas as unknown) as RespuestaEstudiante[];
 
+          // Si no hay respuestas registradas, omitir recálculo (examen calificado manualmente)
+          if (respuestasTyped.length === 0) {
+            logger.log(`Omitiendo recálculo para resultado ${resultado.id}: evaluación manual`);
+            continue;
+          }
+
           // Filtrar solo las respuestas de preguntas habilitadas
           const respuestasHabilitadas = respuestasTyped.filter(r => r.pregunta.habilitada);
           const respuestasCorrectas = respuestasHabilitadas.filter(r => r.es_correcta).length;
@@ -528,7 +542,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         description: `Pregunta ${newStatus ? "habilitada" : "deshabilitada"} correctamente`,
       });
     } catch (error) {
-      console.error("Error toggling question status:", error);
+      logger.error("Error toggling question status:", error);
       toast({
         title: "Error",
         description: `No se pudo ${newStatus ? "habilitar" : "deshabilitar"} la pregunta`,
@@ -578,7 +592,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           .in("id", questionIds as string[]);
         
         if (error) {
-          console.error("Error updating question points:", error);
+          logger.warn("Error updating question points:", error);
           toast({
             title: "Advertencia",
             description: "No se pudieron actualizar los puntajes de las preguntas en la base de datos",
@@ -587,11 +601,86 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         }
       }
     } catch (error) {
-      console.error("Error in recalculatePointsPerQuestion:", error);
+      logger.error("Error in recalculatePointsPerQuestion:", error);
     } finally {
       setSaving(false);
     }
   }, [exam, questions, setSaving]);
+
+  // Función para confirmar cambio de respuesta correcta
+  const confirmChangeCorrectAnswer = async () => {
+    if (!pendingCorrectAnswer) return;
+    try {
+      setSaving(true);
+      
+      // Obtener la sesión actual
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No autorizado');
+      }
+
+      // Llamar al endpoint para actualizar la respuesta correcta
+      const response = await fetch(`/api/exams/${examId}/update-correct-answer`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          questionId: pendingCorrectAnswer.questionId,
+          optionId: pendingCorrectAnswer.optionId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al actualizar la respuesta correcta');
+      }
+
+      // Actualizar estado local para reflejar el cambio
+      const updatedQuestions = [...questions];
+      const questionIndex = pendingCorrectAnswer.questionIndex;
+      
+      if (updatedQuestions[questionIndex] && updatedQuestions[questionIndex].opciones) {
+        // Actualizar todas las opciones para esta pregunta
+        updatedQuestions[questionIndex].opciones = updatedQuestions[questionIndex].opciones.map((option, idx) => ({
+          ...option,
+          es_correcta: idx === pendingCorrectAnswer.optionIndex
+        }));
+        
+        setQuestions(updatedQuestions);
+      }
+
+      toast({
+        title: "Éxito",
+        description: "Respuesta correcta actualizada y calificaciones recalculadas",
+      });
+    } catch (error) {
+      logger.error("Error updating correct answer:", error);
+      toast({
+        title: "Error",
+        description: typeof error === 'object' && error !== null && 'message' in error 
+          ? String(error.message) 
+          : "No se pudo actualizar la respuesta correcta",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+      setShowCorrectAnswerDialog(false);
+      setPendingCorrectAnswer(null);
+    }
+  };
+  
+  // Función para manejar el clic en una opción para cambiar la respuesta correcta
+  const handleCorrectAnswerChange = (questionId: string, optionId: string, optionIndex: number, questionIndex: number) => {
+    setPendingCorrectAnswer({
+      questionId,
+      optionId,
+      optionIndex,
+      questionIndex
+    });
+    setShowCorrectAnswerDialog(true);
+  };
 
   if (loading) {
     return (
@@ -711,13 +800,41 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                         <div className="space-y-2">
                           {question.opciones.map((option: OpcionRespuesta, optIndex: number) => (
                             <div key={option.id} className="flex items-center gap-2">
-                              <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                                option.es_correcta 
-                                  ? 'bg-green-100 text-green-800 dark:bg-green-600 dark:text-white' 
-                                  : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                              }`}>
-                                {String.fromCharCode(65 + optIndex)}
-                              </div>
+                              {exam && exam.estado === "publicado" ? (
+                                // Para exámenes publicados, mostrar las opciones como burbujas clickeables
+                                <div 
+                                  className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
+                                    ${option.es_correcta 
+                                      ? 'bg-green-500' 
+                                      : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                                    }
+                                    ${question.habilitada ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'opacity-50'}
+                                  `}
+                                  onClick={() => {
+                                    if (!question.habilitada || !option.id) return;
+                                    // Solo permitir cambiar si no es ya la opción correcta
+                                    if (!option.es_correcta) {
+                                      handleCorrectAnswerChange(
+                                        question.id as string,
+                                        option.id as string,
+                                        optIndex,
+                                        index
+                                      );
+                                    }
+                                  }}
+                                >
+                                  {String.fromCharCode(65 + optIndex)}
+                                </div>
+                              ) : (
+                                // Para borradores, mantener el estilo actual
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                                  option.es_correcta 
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-600 dark:text-white' 
+                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                }`}>
+                                  {String.fromCharCode(65 + optIndex)}
+                                </div>
+                              )}
                               <p className={option.es_correcta ? 'font-medium' : ''}>{option.texto}</p>
                               {option.es_correcta && (
                                 <span className="text-xs text-green-600 dark:text-green-400">(Correcta)</span>
@@ -810,6 +927,32 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={confirmQuestionToggle}>
+              {saving ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+              ) : (
+                'Confirmar'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal de confirmación para cambiar respuesta correcta */}
+      <AlertDialog open={showCorrectAnswerDialog} onOpenChange={setShowCorrectAnswerDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿{pendingCorrectAnswer ? 'Actualizar' : 'Cancelar'} respuesta correcta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingCorrectAnswer ? (
+                '¿Estás seguro de que deseas actualizar la respuesta correcta para esta pregunta?'
+              ) : (
+                '¿Estás seguro de que deseas cancelar la actualización de la respuesta correcta?'
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={pendingCorrectAnswer ? confirmChangeCorrectAnswer : () => setShowCorrectAnswerDialog(false)}>
               {saving ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
               ) : (
