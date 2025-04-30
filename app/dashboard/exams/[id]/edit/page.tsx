@@ -944,7 +944,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
             <AlertDialogTitle>¿{pendingCorrectAnswer ? 'Actualizar' : 'Cancelar'} respuesta correcta?</AlertDialogTitle>
             <AlertDialogDescription>
               {pendingCorrectAnswer ? (
-                '¿Estás seguro de que deseas actualizar la respuesta correcta para esta pregunta?'
+                'Al hacer click en Confirmar se recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen.'
               ) : (
                 '¿Estás seguro de que deseas cancelar la actualización de la respuesta correcta?'
               )}
