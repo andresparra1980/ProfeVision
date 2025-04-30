@@ -25,7 +25,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { useTheme } from 'next-themes';
 import { ModalGenerateAI } from '@/components/exam/modal-generate-ai';
-
+import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 // Tipos
 type Materia = {
   id: string;
@@ -651,8 +651,15 @@ export default function CreateExamPage() {
       <div className="flex justify-between items-center">
       <div>
           <h1 className="text-3xl font-bold tracking-tight">Crear Examen</h1>
-          <p className="text-sm text-muted-foreground">
-            Diseña un nuevo examen para tus estudiantes
+          <p className="text-sm text-muted-foreground mt-2">
+            Diseña un nuevo examen para tus estudiantes. Puedes crear un examen desde cero agregando tus propias preguntas, o bien utilizar el botón
+            <AnimatedGradientText
+              className="font-semibold"
+              speed={1}
+            > 
+              <span className="font-semibold"> Generar con IA </span>
+            </AnimatedGradientText> para obtener preguntas sugeridas 
+            automáticamente por un modelo de lenguaje avanzado (LLM). Esta opción te permite ahorrar tiempo y personalizar el contenido según tus necesidades.
           </p>
         </div>
       </div>
@@ -828,6 +835,7 @@ export default function CreateExamPage() {
                         <Sparkles className="mr-2 h-4 w-4 text-white dark:text-black" />
                         {mounted && (
                           <AuroraText
+                            className="font-semibold"
                             colors={
                               theme === 'dark'
                                 ? [
@@ -1028,6 +1036,7 @@ export default function CreateExamPage() {
           if (!open) setModalIndex(null);
         }}
         onSuccess={handleSuccessAI}
+        questionNumber={modalIndex ?? undefined}
       />
     </div>
   );

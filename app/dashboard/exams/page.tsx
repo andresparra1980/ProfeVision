@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FileText, Eye, Printer, Users, FileOutput, Trash2, Link, Sparkles } from "lucide-react";
+import { FileText, Eye, Printer, Users, FileOutput, Trash2, Link, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -175,9 +175,9 @@ export default function ExamsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => router.push("/dashboard/exams/create")}> 
+          {/* <Button onClick={() => router.push("/dashboard/exams/create")}> 
             <Plus className="mr-2 h-4 w-4" /> Crear Examen
-          </Button>
+          </Button> */}
           <Button
             onClick={() => router.push("/dashboard/exams/create-with-ai")}
             className="relative overflow-hidden border-2 border-primary/60 shadow-lg group"
@@ -187,6 +187,7 @@ export default function ExamsPage() {
               <Sparkles className="mr-2 h-4 w-4" />
               {mounted && (
                 <AuroraText
+                  speed={3}
                   colors={
                     theme === 'dark'
                       ? [
@@ -211,7 +212,6 @@ export default function ExamsPage() {
                           '#fdcce9', // pink
                         ]
                   }
-                  speed={2}
                 >
                   Crear Examen con IA
                 </AuroraText>

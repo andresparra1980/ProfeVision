@@ -66,9 +66,10 @@ interface ModalGenerateAIProps {
   open: boolean;
   onOpenChange: (_open: boolean) => void;
   onSuccess: (_pregunta: Pregunta) => void;
+  questionNumber?: number;
 }
 
-export function ModalGenerateAI({ onOpenChange, onSuccess, open }: ModalGenerateAIProps) {
+export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber }: ModalGenerateAIProps) {
   const modalContentRef = useRef<HTMLDivElement>(null);
   const [planDefault, setPlanDefault] = useState('');
   const [loading, setLoading] = useState(false);
@@ -218,7 +219,10 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open }: ModalGenerate
       <DialogContent ref={modalContentRef}>
         <DialogHeader>
           <DialogTitle>
-            <Sparkles className="inline mr-2 text-yellow-500" /> Generar pregunta con IA
+            <Sparkles className="inline mr-2 text-rose-600 dark:text-fuchsia-400" /> Generar pregunta con IA
+            {typeof questionNumber === 'number' && (
+              <span className="ml-2 text-xs text-muted-foreground">(Pregunta {questionNumber + 1})</span>
+            )}
           </DialogTitle>
           <DialogDescription>
             Completa los campos para generar una pregunta personalizada.
