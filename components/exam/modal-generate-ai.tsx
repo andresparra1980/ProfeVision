@@ -162,7 +162,7 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
     <Dialog 
       open={open} 
       onOpenChange={onOpenChange}
-      modal={false}
+      modal={true}
     >
       <DialogContent ref={modalContentRef}>
         <DialogHeader>

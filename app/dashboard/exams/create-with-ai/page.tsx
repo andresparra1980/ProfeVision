@@ -46,6 +46,7 @@ type Pregunta = {
   tipo: TipoPregunta;
   puntaje: number;
   retroalimentacion?: string;
+  version?: number;
 };
 
 type Opcion = {
@@ -270,6 +271,7 @@ export default function CreateExamPage() {
               texto: "",
               tipo: "opcion_multiple" as TipoPregunta,
               puntaje: puntajePorPregunta,
+              version: 0, // Initialize version
               opciones: [
                 { id: `opcion-${newIndex}-1`, texto: "", esCorrecta: false },
                 { id: `opcion-${newIndex}-2`, texto: "", esCorrecta: false },
@@ -355,6 +357,7 @@ export default function CreateExamPage() {
               texto: "",
               tipo: "opcion_multiple" as TipoPregunta,
               puntaje: puntajePerQuestion,
+              version: 0, // Initialize version
               opciones: [
                 { id: `opcion-${index}-1`, texto: "", esCorrecta: false },
                 { id: `opcion-${index}-2`, texto: "", esCorrecta: false },
@@ -470,6 +473,7 @@ export default function CreateExamPage() {
       texto: "",
       tipo: "opcion_multiple",
       puntaje: puntajePorPregunta,
+      version: 0, // Initialize version
       opciones: [
         { id: `opcion-nueva-1`, texto: "", esCorrecta: false },
         { id: `opcion-nueva-2`, texto: "", esCorrecta: false },
@@ -538,6 +542,7 @@ export default function CreateExamPage() {
         texto: textoHTML,
         opciones: preguntaGenerada.opciones,
         tipo: preguntaGenerada.tipo,
+        version: (nuevas[modalIndex].version || 0) + 1 // Increment version to force re-render
       };
       return nuevas;
     });
@@ -549,6 +554,7 @@ export default function CreateExamPage() {
           texto: textoHTML,
           opciones: preguntaGenerada.opciones,
           tipo: preguntaGenerada.tipo,
+          version: (nuevas[modalIndex].version || 0) + 1 // Increment version to force re-render
         };
         if (typeof window !== 'undefined') {
           localStorage.setItem('examQuestions', JSON.stringify(nuevas));
@@ -896,7 +902,7 @@ export default function CreateExamPage() {
                       }
                     }}
                     placeholder="Escribe aquí tu pregunta"
-                    key={pregunta.texto}
+                    key={`${pregunta.id}-${pregunta.version || 0}`}
                   />
                 </div>
                 <div className="space-y-2">

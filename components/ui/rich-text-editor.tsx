@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -75,6 +75,32 @@ export function RichTextEditor(props: RichTextEditorProps) {
   if (!editor) {
     return null;
   }
+  
+  // Workaround for TypeScript errors with TipTap's focus() method
+  const onBoldClick = () => {
+    // @ts-expect-error - focus exists at runtime but not in types
+    editor.chain().focus().toggleBold().run();
+  };
+  
+  const onItalicClick = () => {
+    // @ts-expect-error - focus exists at runtime but not in types
+    editor.chain().focus().toggleItalic().run();
+  };
+  
+  const onUnderlineClick = () => {
+    // @ts-expect-error - focus exists at runtime but not in types
+    editor.chain().focus().toggleUnderline().run();
+  };
+  
+  const onBulletListClick = () => {
+    // @ts-expect-error - focus exists at runtime but not in types
+    editor.chain().focus().toggleBulletList().run();
+  };
+  
+  const onOrderedListClick = () => {
+    // @ts-expect-error - focus exists at runtime but not in types
+    editor.chain().focus().toggleOrderedList().run();
+  };
 
   return (
     <div className={cn("rich-text-editor w-full", className)}>
@@ -84,7 +110,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
             variant="ghost"
             size="icon"
             type="button"
-            onClick={() => editor.chain().focus().toggleBold().run()}
+            onClick={onBoldClick}
             className={cn("h-8 w-8 p-0", editor.isActive('bold') ? 'bg-muted' : '')}
             title="Negrita"
           >
@@ -94,7 +120,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
             variant="ghost"
             size="icon"
             type="button"
-            onClick={() => editor.chain().focus().toggleItalic().run()}
+            onClick={onItalicClick}
             className={cn("h-8 w-8 p-0", editor.isActive('italic') ? 'bg-muted' : '')}
             title="Cursiva"
           >
@@ -104,7 +130,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
             variant="ghost"
             size="icon"
             type="button"
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            onClick={onUnderlineClick}
             className={cn("h-8 w-8 p-0", editor.isActive('underline') ? 'bg-muted' : '')}
             title="Subrayado"
           >
@@ -114,7 +140,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
             variant="ghost"
             size="icon"
             type="button"
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            onClick={onBulletListClick}
             className={cn("h-8 w-8 p-0", editor.isActive('bulletList') ? 'bg-muted' : '')}
             title="Lista de viñetas"
           >
@@ -124,7 +150,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
             variant="ghost"
             size="icon"
             type="button"
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            onClick={onOrderedListClick}
             className={cn("h-8 w-8 p-0", editor.isActive('orderedList') ? 'bg-muted' : '')}
             title="Lista numerada"
           >
@@ -208,37 +234,6 @@ export function RichTextEditor(props: RichTextEditorProps) {
           color: var(--foreground) !important;
         }
       `}</style>
-
-      {editor && (
-        <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
-          <div className="flex items-center rounded-md border bg-background shadow-md">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("h-8 w-8 p-0", editor.isActive('bold') ? 'bg-muted' : '')}
-              onClick={() => editor.chain().focus().toggleBold().run()}
-            >
-              <Bold className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("h-8 w-8 p-0", editor.isActive('italic') ? 'bg-muted' : '')}
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-            >
-              <Italic className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("h-8 w-8 p-0", editor.isActive('underline') ? 'bg-muted' : '')}
-              onClick={() => editor.chain().focus().toggleUnderline().run()}
-            >
-              <UnderlineIcon className="h-4 w-4" />
-            </Button>
-          </div>
-        </BubbleMenu>
-      )}
     </div>
   );
 } 

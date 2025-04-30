@@ -534,7 +534,7 @@ export default function GradesPage({ params }: GradesPageProps) {
       </div>
 
       {/* Modal para importar/exportar calificaciones */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen} modal={false}>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen} modal={true}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>

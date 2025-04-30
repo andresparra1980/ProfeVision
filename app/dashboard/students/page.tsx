@@ -472,7 +472,7 @@ export default function StudentsPage() {
           </TableBody>
         </Table>
 
-        <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <Dialog open={showDetails} onOpenChange={setShowDetails} modal={true}>
           <DialogContent className="bg-[#FAFAF4] dark:bg-[#171717]">
             <DialogHeader>
               <DialogTitle>Detalles del Estudiante</DialogTitle>

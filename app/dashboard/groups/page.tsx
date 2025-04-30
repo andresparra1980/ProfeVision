@@ -617,7 +617,7 @@ export default function GroupsPage() {
             )}
           </Button>
           {!mostrarArchivados && (
-            <Dialog open={openDialog} onOpenChange={setOpenDialog} modal={false}>
+            <Dialog open={openDialog} onOpenChange={setOpenDialog} modal={true}>
               <DialogTrigger asChild>
                 <Button onClick={() => setEditingGrupo(null)}>
                   <PlusCircle className="mr-2 h-4 w-4" />
@@ -992,7 +992,7 @@ export default function GroupsPage() {
       )}
 
       {/* Diálogo de confirmación de eliminación */}
-      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete} modal={false}>
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete} modal={true}>
         <DialogContent className="sm:max-w-[425px] bg-[#FAFAF4] dark:bg-[#171717]">
           <DialogHeader>
             <DialogTitle>Confirmar eliminación</DialogTitle>
