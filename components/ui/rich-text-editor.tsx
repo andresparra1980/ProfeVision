@@ -211,6 +211,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
           float: left;
           height: 0;
           pointer-events: none;
+          opacity: 0.6;
         }
         /* Override Tailwind prose styles */
         .prose {
