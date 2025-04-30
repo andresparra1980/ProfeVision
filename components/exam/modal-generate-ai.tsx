@@ -123,45 +123,8 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
 
   // Limpiar el foco antes de cerrar el modal
   const handleCloseModal = useCallback(() => {
-    // 1. Bloquear cualquier elemento interactivo con inert
-    if (modalContentRef.current) {
-      const interactiveElements = modalContentRef.current.querySelectorAll(
-        'button, input, select, textarea, a[href], [tabindex], [contenteditable]'
-      );
-      
-      // Establecer inert en todos los elementos interactivos
-      interactiveElements.forEach((el) => {
-        if (el instanceof HTMLElement) {
-          el.blur();
-          // Intentar hacer que el elemento no sea enfocable temporalmente
-          el.setAttribute('tabindex', '-1');
-        }
-      });
-    }
-
-    // 2. Forzar el foco al documento body
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-    
-    // 3. Usar un hack para mover el foco fuera del modal
-    try {
-      const dummy = document.createElement('button');
-      dummy.style.position = 'fixed';
-      dummy.style.opacity = '0';
-      dummy.style.pointerEvents = 'none';
-      dummy.style.top = '-1000px';
-      document.body.appendChild(dummy);
-      dummy.focus();
-      dummy.blur();
-      document.body.removeChild(dummy);
-    } catch (e) {
-      console.error('Error al quitar foco:', e);
-    }
-    
-    // 4. Pequeño delay antes de cerrar completamente
+    // Solo cerrar el modal después de un pequeño delay para animaciones si es necesario
     setTimeout(() => {
-      setIsInternalOpen(false);
       onOpenChange(false);
     }, 50);
   }, [onOpenChange]);
