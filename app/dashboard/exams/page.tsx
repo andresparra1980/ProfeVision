@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FileText, Eye, Printer, Users, FileOutput, Trash2, Link } from "lucide-react";
+import { FileText, Eye, Printer, Users, FileOutput, Trash2, Link, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,8 @@ import {
 import { toast } from "sonner";
 import { AuthError } from "@supabase/supabase-js";
 import { logger } from "@/lib/utils/logger";
+import { AuroraText } from "@/components/magicui/aurora-text";
+import { useTheme } from 'next-themes';
 
 interface Exam {
   id: string;
@@ -51,11 +53,14 @@ interface Exam {
 
 export default function ExamsPage() {
   const router = useRouter();
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    setMounted(true);
     fetchExams();
   }, []);
 
@@ -169,9 +174,51 @@ export default function ExamsPage() {
             Crea, gestiona y califica exámenes para tus estudiantes
           </p>
         </div>
-        <Button onClick={() => router.push("/dashboard/exams/create")}>
-          <Plus className="mr-2 h-4 w-4" /> Crear Examen
-        </Button>
+        <div className="flex gap-2">
+          {/* <Button onClick={() => router.push("/dashboard/exams/create")}> 
+            <Plus className="mr-2 h-4 w-4" /> Crear Examen
+          </Button> */}
+          <Button
+            onClick={() => router.push("/dashboard/exams/create-with-ai")}
+            className="relative overflow-hidden border-2 border-primary/60 shadow-lg group"
+            style={{ position: 'relative' }}
+          >
+            <span className="relative z-10 flex items-center">
+              <Sparkles className="mr-2 h-4 w-4" />
+              {mounted && (
+                <AuroraText
+                  speed={3}
+                  colors={
+                    theme === 'dark'
+                      ? [
+                          '#ffe600', // intense yellow
+                          '#ff00c8', // magenta
+                          '#7c00ff', // vivid purple
+                          '#00c3ff', // electric blue
+                          '#ff7b00', // orange
+                          '#ff0059', // hot pink
+                          '#ff7b00', // orange
+                          '#ff0059', // hot pink
+                        ]
+                      : [
+                          '#ffadad', // pink
+                          '#ffd6a5', // peach
+                          '#fdffb6', // lemon
+                          '#caffbf', // light green
+                          '#9bf6ff', // cyan
+                          '#a0c4ff', // blue
+                          '#d7aefb', // purple
+                          '#fdcce9', // pink
+                          '#fdcce9', // pink
+                        ]
+                  }
+                >
+                  Crear Examen con IA
+                </AuroraText>
+              )}
+            </span>
+          </Button>
+        </div>
       </div>
 
       <Card>

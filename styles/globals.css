@@ -11,30 +11,30 @@
     --accent: #ffd60a;
 
     --foreground: var(--text);
-    --card: #F8F9FA;
+    --card: #f8f9fa;
     --card-foreground: #1e293b;
- 
+
     --popover: #ffffff;
     --popover-foreground: #1e293b;
- 
+
     --primary-foreground: #f8fafc;
     --secondary-foreground: #1e293b;
- 
+
     --muted: #f5f3ee;
     --input: #f5f3ee;
     --muted-foreground: #64748b;
- 
+
     --accent-foreground: #1e293b;
- 
+
     --destructive: #ef4444;
     --destructive-foreground: #f8fafc;
 
     --border: #e9e6e0;
     --ring: #1e293b;
- 
+
     --radius: 0.5rem;
   }
- 
+
   .dark {
     --text: #f0e9d9;
     --background: #171717;
@@ -45,29 +45,29 @@
     --foreground: var(--text);
     --card: #333334;
     --card-foreground: #f0e9d9;
- 
+
     --popover: #222223;
     --popover-foreground: #f0e9d9;
- 
+
     --primary-foreground: #171717;
     --secondary-foreground: #171717;
- 
+
     --muted: #222223;
     --muted-foreground: #d5cbb8;
- 
+
     --accent-foreground: #171717;
- 
+
     --destructive: #991b1b;
     --destructive-foreground: #fecaca;
- 
+
     --border: #555555;
     --input: #222223;
     --ring: #d4d4d8;
- 
+
     --radius: 0.5rem;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
@@ -76,20 +76,42 @@
     @apply bg-background text-foreground;
   }
   :root:not(.dark) main {
-    background-color: #F8F9FA !important;
+    background-color: #f8f9fa !important;
   }
-  :root:not(.dark) header, :root:not(.dark) aside {
-    background-color: #F8F9FA !important;
+  :root:not(.dark) header,
+  :root:not(.dark) aside {
+    background-color: #f8f9fa !important;
   }
-  :root.dark header, :root.dark aside {
+  :root.dark header,
+  :root.dark aside {
     background-color: #333334 !important;
   }
   :root.dark main {
     background-color: #333334 !important;
   }
   @media (max-width: 768px) {
-    main h1, main h2, main .title {
+    main h1,
+    main h2,
+    main .title {
       margin-top: 1.5rem;
     }
   }
-} 
+}
+
+@layer utilities {
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  .drop-shadow-glow {
+    filter: drop-shadow(0 0 6px #fbbf24) drop-shadow(0 0 12px #f472b6)
+      drop-shadow(0 0 18px #a78bfa);
+  }
+}

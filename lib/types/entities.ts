@@ -98,3 +98,19 @@ export interface EntityApiResponse {
   count: number;
   error: string | null;
 }
+
+export const QUESTION_DIFFICULTY = {
+  BASICO: "básico",
+  INTERMEDIO: "intermedio",
+  AVANZADO: "avanzado",
+} as const;
+export type QuestionDifficulty =
+  (typeof QUESTION_DIFFICULTY)[keyof typeof QUESTION_DIFFICULTY];
+
+export const QUESTION_STYLE = {
+  FORMAL: "formal",
+  INFORMAL: "informal",
+  CASO_CLINICO: "caso clínico",
+} as const;
+export type QuestionStyle =
+  (typeof QUESTION_STYLE)[keyof typeof QUESTION_STYLE];
