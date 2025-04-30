@@ -302,7 +302,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
 
 export function ScanWizard({ isOpen, onClose }: ScanWizardProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose} modal={false}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
         <ImageProvider>
           <ScanWizardContent onClose={onClose} />

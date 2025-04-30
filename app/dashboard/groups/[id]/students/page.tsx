@@ -288,7 +288,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
             </CardDescription>
           </div>
           <div className="flex space-x-2">
-            <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
+            <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen} modal={false}>
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <FileSpreadsheet className="mr-2 h-4 w-4" /> Importar desde Excel
@@ -307,7 +307,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
               </DialogContent>
             </Dialog>
 
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="mr-2 h-4 w-4" /> Agregar Estudiante

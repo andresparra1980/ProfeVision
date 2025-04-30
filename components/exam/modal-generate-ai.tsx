@@ -162,6 +162,7 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
     <Dialog 
       open={open} 
       onOpenChange={onOpenChange}
+      modal={false}
     >
       <DialogContent ref={modalContentRef}>
         <DialogHeader>
@@ -190,7 +191,10 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
               <FormItem>
                 <FormLabel>Dificultad*</FormLabel>
                 <FormControl>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                  <Select 
+                    defaultValue={field.value} 
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona dificultad" />
                     </SelectTrigger>
@@ -226,7 +230,10 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
               <FormItem>
                 <FormLabel>Estilo (opcional)</FormLabel>
                 <FormControl>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                  <Select 
+                    defaultValue={field.value} 
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona estilo" />
                     </SelectTrigger>
