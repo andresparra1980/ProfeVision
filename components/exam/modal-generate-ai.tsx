@@ -234,7 +234,7 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
               <FormItem>
                 <FormLabel>Tema*</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Ej: Fotosíntesis" />
+                  <Input {...field} placeholder="Ej: Fotosíntesis" className="placeholder:text-muted-foreground/50" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -261,7 +261,7 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
               <FormItem>
                 <FormLabel>Número de opciones*</FormLabel>
                 <FormControl>
-                  <Input type="number" min={2} max={4} {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input type="number" min={2} max={4} {...field} onChange={e => field.onChange(Number(e.target.value))} className="placeholder:text-muted-foreground/50" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -270,7 +270,7 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
               <FormItem>
                 <FormLabel>Instrucciones para generar la pregunta*</FormLabel>
                 <FormControl>
-                  <Textarea {...field} placeholder="Describe la pregunta que deseas generar, el enfoque, etc." rows={2} />
+                  <Textarea {...field} placeholder="Describe la pregunta que deseas generar, el enfoque, etc." rows={2} className="placeholder:text-muted-foreground/50" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -297,7 +297,7 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
               <FormItem>
                 <FormLabel>Sección del plan de estudios*</FormLabel>
                 <FormControl>
-                  <Textarea {...field} placeholder="Pega aquí la sección relevante del plan de estudios" rows={4} />
+                  <Textarea {...field} placeholder="Pega aquí la sección relevante del plan de estudios" rows={4} className="placeholder:text-muted-foreground/50" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
