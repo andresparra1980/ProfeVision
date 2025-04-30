@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, type ChainedCommands } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -14,6 +14,11 @@ import {
   Underline as UnderlineIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Define extended chain commands with focus method
+interface ExtendedChainedCommands extends ChainedCommands {
+  focus(): ExtendedChainedCommands;
+}
 
 /* eslint-disable */
 interface RichTextEditorProps {
@@ -42,6 +47,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
       Underline,
       Placeholder.configure({
         placeholder,
+        emptyEditorClass: 'is-editor-empty',
       }),
     ],
     content: initialContent,
@@ -78,28 +84,23 @@ export function RichTextEditor(props: RichTextEditorProps) {
   
   // Workaround for TypeScript errors with TipTap's focus() method
   const onBoldClick = () => {
-    // @ts-expect-error - focus exists at runtime but not in types
-    editor.chain().focus().toggleBold().run();
+    (editor.chain() as ExtendedChainedCommands).focus().toggleBold().run();
   };
   
   const onItalicClick = () => {
-    // @ts-expect-error - focus exists at runtime but not in types
-    editor.chain().focus().toggleItalic().run();
+    (editor.chain() as ExtendedChainedCommands).focus().toggleItalic().run();
   };
   
   const onUnderlineClick = () => {
-    // @ts-expect-error - focus exists at runtime but not in types
-    editor.chain().focus().toggleUnderline().run();
+    (editor.chain() as ExtendedChainedCommands).focus().toggleUnderline().run();
   };
   
   const onBulletListClick = () => {
-    // @ts-expect-error - focus exists at runtime but not in types
-    editor.chain().focus().toggleBulletList().run();
+    (editor.chain() as ExtendedChainedCommands).focus().toggleBulletList().run();
   };
   
   const onOrderedListClick = () => {
-    // @ts-expect-error - focus exists at runtime but not in types
-    editor.chain().focus().toggleOrderedList().run();
+    (editor.chain() as ExtendedChainedCommands).focus().toggleOrderedList().run();
   };
 
   return (
