@@ -75,14 +75,6 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Estado local para controlar la apertura/cierre sin delegar en Dialog
-  const [isInternalOpen, setIsInternalOpen] = useState(open);
-  
-  // Sincronizar estado interno con prop externo
-  useEffect(() => {
-    setIsInternalOpen(open);
-  }, [open]);
-
   // Recuperar sección del plan de estudios de localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -123,11 +115,11 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
 
   // Limpiar el foco antes de cerrar el modal
   const handleCloseModal = useCallback(() => {
-    // Solo cerrar el modal después de un pequeño delay para animaciones si es necesario
-    setTimeout(() => {
-      onOpenChange(false);
-    }, 50);
-  }, [onOpenChange]);
+    // Aquí puedes limpiar el formulario o errores si es necesario
+    // No llamar a onOpenChange aquí para evitar loops
+    form.reset();
+    setError(null);
+  }, [form]);
 
   const handleSubmit = async (values: GenerateIAForm) => {
     setLoading(true);
@@ -158,7 +150,6 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
       handleCloseModal();
       // Notificar éxito
       onSuccess(data as Pregunta);
-      form.reset();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Error inesperado';
       setError(errorMessage);
@@ -169,15 +160,8 @@ export function ModalGenerateAI({ onOpenChange, onSuccess, open, questionNumber 
 
   return (
     <Dialog 
-      open={isInternalOpen} 
-      onOpenChange={(newState) => {
-        if (!newState) {
-          handleCloseModal();
-        } else {
-          setIsInternalOpen(true);
-          onOpenChange(true);
-        }
-      }}
+      open={open} 
+      onOpenChange={onOpenChange}
     >
       <DialogContent ref={modalContentRef}>
         <DialogHeader>
