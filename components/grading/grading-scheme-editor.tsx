@@ -65,8 +65,22 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
     try {
       setSaving(true);
 
-      // Validar que las fechas estén establecidas
+      // Si faltan fechas en el esquema, intentar extraerlas de los periodos
+      let updatedScheme = { ...scheme };
       if (!scheme.fecha_inicio || !scheme.fecha_fin) {
+        const periodosOrdenados = [...scheme.periodos].sort((a, b) => a.orden - b.orden);
+        if (periodosOrdenados.length > 0) {
+          if (!scheme.fecha_inicio) {
+            updatedScheme.fecha_inicio = periodosOrdenados[0].fecha_inicio;
+          }
+          if (!scheme.fecha_fin) {
+            updatedScheme.fecha_fin = periodosOrdenados[periodosOrdenados.length - 1].fecha_fin;
+          }
+        }
+      }
+
+      // Validar que las fechas estén establecidas
+      if (!updatedScheme.fecha_inicio || !updatedScheme.fecha_fin) {
         toast({
           title: 'Error',
           description: 'Debes establecer las fechas de inicio y fin del esquema',
@@ -76,7 +90,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       }
 
       // Validar que la fecha de fin sea posterior a la de inicio
-      if (new Date(scheme.fecha_fin) <= new Date(scheme.fecha_inicio)) {
+      if (new Date(updatedScheme.fecha_fin) <= new Date(updatedScheme.fecha_inicio)) {
         toast({
           title: 'Error',
           description: 'La fecha de fin debe ser posterior a la fecha de inicio',
@@ -86,7 +100,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       }
       
       // Validar que los porcentajes de los periodos sumen 100%
-      const periodosTotal = scheme.periodos.reduce((sum, p) => sum + p.porcentaje, 0);
+      const periodosTotal = updatedScheme.periodos.reduce((sum, p) => sum + p.porcentaje, 0);
       if (Math.abs(periodosTotal - 100) > 0.01) {
         toast({
           title: 'Error',
@@ -97,7 +111,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       }
 
       // Validar que los componentes de cada periodo sumen el porcentaje del periodo
-      for (const periodo of scheme.periodos) {
+      for (const periodo of updatedScheme.periodos) {
         const componentesTotal = periodo.componentes.reduce((sum, c) => sum + c.porcentaje, 0);
         if (Math.abs(componentesTotal - periodo.porcentaje) > 0.01) {
           toast({
@@ -109,11 +123,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
         }
       }
 
-      await onSave(scheme);
-      toast({
-        title: 'Éxito',
-        description: 'Esquema de calificaciones guardado correctamente',
-      });
+      await onSave(updatedScheme);
     } catch (error) {
       console.error('Error al guardar:', error);
       toast({

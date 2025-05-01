@@ -8,6 +8,7 @@ import type { GradingScheme } from '@/lib/types/grading';
 import type { Database } from '@/lib/types/database';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 // Prefijo _ para indicar que no se utiliza
 type _EsquemaCalificacion = Database['public']['Tables']['esquemas_calificacion']['Row'] & {
@@ -41,6 +42,7 @@ interface ComponenteCalificacion {
 export default function GradingSchemePage() {
   const params = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const groupId = params.id as string;
   const [initialScheme, setInitialScheme] = useState<GradingScheme | null>(null);
   const [loading, setLoading] = useState(true);
@@ -152,6 +154,13 @@ export default function GradingSchemePage() {
 
       const updatedScheme = await response.json();
       setInitialScheme(updatedScheme as GradingScheme);
+
+      toast({
+        title: 'Éxito',
+        description: 'Esquema de calificaciones guardado correctamente',
+      });
+
+      router.push(`/dashboard/groups/${groupId}/grades`);
     } catch (error) {
       console.error('Error:', error);
       throw error; // El componente GradingSchemeEditor manejará este error
