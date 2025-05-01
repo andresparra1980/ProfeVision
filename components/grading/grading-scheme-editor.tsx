@@ -66,7 +66,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       setSaving(true);
 
       // Si faltan fechas en el esquema, intentar extraerlas de los periodos
-      let updatedScheme = { ...scheme };
+      const updatedScheme = { ...scheme };
       if (!scheme.fecha_inicio || !scheme.fecha_fin) {
         const periodosOrdenados = [...scheme.periodos].sort((a, b) => a.orden - b.orden);
         if (periodosOrdenados.length > 0) {
