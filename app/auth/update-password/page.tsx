@@ -227,9 +227,32 @@ function UpdatePasswordContent() {
     try {
       logger.auth("Attempting to update password");
       
-      const { error } = await supabase.auth.updateUser({
-        password: data.password,
-      });
+      // Get access token from URL if available
+      const accessToken = searchParams.get('access_token');
+      let updateResult;
+      
+      if (accessToken) {
+        // When using access token from URL
+        logger.auth("Using access token from URL for password update");
+        
+        // First set the session with the access token
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: "" // No refresh token needed for this operation
+        });
+        
+        // Then update the password
+        updateResult = await supabase.auth.updateUser({
+          password: data.password
+        });
+      } else {
+        // Regular update using existing session (if any)
+        updateResult = await supabase.auth.updateUser({
+          password: data.password,
+        });
+      }
+      
+      const { error } = updateResult;
 
       if (error) {
         logger.auth("Error updating password", { error });
