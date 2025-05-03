@@ -30,13 +30,13 @@ export default function DashboardHeader() {
       
       {/* Contenedor derecho para íconos */}
       <div className="ml-auto flex items-center space-x-2">
-        <a href="https://docs.profevision.com" target="_blank" rel="noopener noreferrer">
+        <a href="https://docs.profevision.com" target="_blank" rel="noopener noreferrer" className="hidden md:block">
           <Button variant="ghost" size="icon">
             <HelpCircle className="h-5 w-5" />
             <span className="sr-only">Documentación</span>
           </Button>
         </a>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="hidden md:flex">
           <Bell className="h-5 w-5" />
           <span className="sr-only">Notificaciones</span>
         </Button>

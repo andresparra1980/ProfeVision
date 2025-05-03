@@ -18,6 +18,7 @@ import {
   UserCircle,
   ChevronLeft,
   ChevronRight,
+  HelpCircle,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,12 @@ const navItems = [
     title: "Configuración",
     href: "/dashboard/settings",
     icon: Settings,
+  },
+  {
+    title: "Manual de Usuario",
+    href: "https://docs.profevision.com",
+    icon: HelpCircle,
+    external: true,
   },
 ];
 
@@ -144,22 +151,41 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
 
           <nav className={cn("space-y-1 py-6", isCollapsed && !isMobile ? "px-2" : "px-4")}>
             {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={cn(
-                  "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
-                  isCollapsed && !isMobile ? "justify-center px-2" : "space-x-2 px-3",
-                  pathname === item.href
-                    ? "bg-primary/10 text-primary"
-                    : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-                title={isCollapsed && !isMobile ? item.title : undefined}
-              >
-                <item.icon className="h-5 w-5" />
-                {(!isCollapsed || isMobile) && <span>{item.title}</span>}
-              </Link>
+              item.external ? (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+                    isCollapsed && !isMobile ? "justify-center px-2" : "space-x-2 px-3",
+                    "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                  title={isCollapsed && !isMobile ? item.title : undefined}
+                >
+                  <item.icon className="h-5 w-5" />
+                  {(!isCollapsed || isMobile) && <span>{item.title}</span>}
+                </a>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+                    isCollapsed && !isMobile ? "justify-center px-2" : "space-x-2 px-3",
+                    pathname === item.href
+                      ? "bg-primary/10 text-primary"
+                      : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                  title={isCollapsed && !isMobile ? item.title : undefined}
+                >
+                  <item.icon className="h-5 w-5" />
+                  {(!isCollapsed || isMobile) && <span>{item.title}</span>}
+                </Link>
+              )
             ))}
           </nav>
         </div>
