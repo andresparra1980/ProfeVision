@@ -47,15 +47,18 @@ function UpdatePasswordContent() {
     const checkSession = async () => {
       logger.auth("Checking session in update-password page", {
         source: searchParams.get('source'),
-        type: searchParams.get('type')
+        type: searchParams.get('type'),
+        timestamp: searchParams.get('timestamp'),
+        hasCode: !!searchParams.get('code')
       });
       
-      // Check if we have a direct access token in the URL
+      // Try multiple approaches to get a valid session
+      
+      // Approach 1: Direct tokens from URL
       const accessToken = searchParams.get('access_token');
       const refreshToken = searchParams.get('refresh_token');
       const type = searchParams.get('type');
       
-      // If we have direct tokens, set the session
       if (accessToken && refreshToken && type === 'recovery') {
         logger.auth("Found direct recovery tokens in URL", {
           type,
@@ -71,32 +74,60 @@ function UpdatePasswordContent() {
           
           if (error) {
             logger.auth("Error setting session from URL tokens", { error });
-            setError("El enlace de restablecimiento no es válido o ha expirado. Por favor, solicita un nuevo enlace.");
-            return;
+          } else {
+            logger.auth("Successfully set session from URL tokens");
+            // Check if session was actually set
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (sessionData.session) {
+              logger.auth("Verified session was set correctly");
+              return; // Session is set, we can continue
+            } else {
+              logger.auth("Token was accepted but no session created");
+            }
           }
-          
-          logger.auth("Successfully set session from URL tokens");
-          return; // Session is set, we can continue
+          // If error or no session, continue to next approach
         } catch (e) {
           logger.auth("Exception setting session from URL tokens", { error: e });
-          setError("Ocurrió un error al procesar el enlace de restablecimiento.");
-          return;
         }
       }
       
-      // Otherwise check for existing session (from callback flow)
+      // Approach 2: Try code exchange if code is present
+      const code = searchParams.get('code');
+      if (code) {
+        logger.auth("Found code in URL, attempting exchange", { hasCode: true });
+        try {
+          const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          
+          if (exchangeError) {
+            logger.auth("Error exchanging code for session", { error: exchangeError });
+          } else if (exchangeData.session) {
+            logger.auth("Successfully exchanged code for session");
+            return; // Session is set, we can continue
+          }
+          // If error or no session, continue to next approach
+        } catch (e) {
+          logger.auth("Exception exchanging code for session", { error: e });
+        }
+      }
+      
+      // Approach 3: Check for existing session
       const { data, error } = await supabase.auth.getSession();
       
       logger.auth("Session check result", { 
         hasSession: !!data.session, 
         hasError: !!error,
         errorMessage: error?.message,
-        flowType: accessToken ? 'direct' : 'callback'
+        flowType: accessToken ? 'direct' : (code ? 'code' : 'callback')
       });
       
       // If there's an error or no session, show error message
       if (error || !data.session) {
-        logger.auth("No valid session for password update", { hasError: !!error });
+        logger.auth("No valid session for password update", { 
+          hasError: !!error,
+          accessToken: !!accessToken,
+          refreshToken: !!refreshToken,
+          code: !!code
+        });
         setError("El enlace de restablecimiento no es válido o ha expirado. Por favor, solicita un nuevo enlace.");
       } else {
         logger.auth("Valid session found for password update");

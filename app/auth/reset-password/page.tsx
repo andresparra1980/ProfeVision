@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabase";
+import { resetPassword } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { ModeToggle } from "@/components/shared/mode-toggle";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
@@ -27,9 +27,6 @@ const resetSchema = z.object({
 });
 
 type ResetFormValues = z.infer<typeof resetSchema>;
-
-// Get the site URL from environment or default to localhost
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -58,13 +55,9 @@ export default function ResetPasswordPage() {
     try {
       logger.auth("Attempting to reset password", { 
         email: data.email,
-        redirectTo: `${SITE_URL}/auth/direct-recovery?debug=true` 
       });
       
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${SITE_URL}/auth/direct-recovery?debug=true`,
-        captchaToken,
-      });
+      const { error } = await resetPassword(data.email, captchaToken);
 
       if (error) {
         logger.auth("Error resetting password", { error, email: data.email });

@@ -47,3 +47,15 @@ export const signUpWithRedirect = (
     },
   });
 };
+
+// Helper function specifically for password reset
+export const resetPassword = (email: string, captchaToken?: string) => {
+  // Use the direct-recovery endpoint specifically
+  const resetRedirectUrl = `${siteUrl}/auth/direct-recovery`;
+
+  // Make sure we're using the correct URL format
+  return supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: resetRedirectUrl,
+    captchaToken,
+  });
+};
