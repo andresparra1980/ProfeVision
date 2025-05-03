@@ -14,7 +14,13 @@ interface AuthContextProps {
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-const PUBLIC_PATHS = ['/auth/login', '/auth/register', '/']; // Public paths include login, register and home
+const PUBLIC_PATHS = [
+  '/auth/login', 
+  '/auth/register', 
+  '/auth/reset-password',
+  '/auth/update-password',
+  '/'
+]; // Public paths include login, register, password reset, and home
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);

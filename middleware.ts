@@ -1,5 +1,5 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
         remove(name: string, options: CookieOptions) {
           request.cookies.set({
             name,
-            value: '',
+            value: "",
             ...options,
           });
           response = NextResponse.next({
@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
           });
           response.cookies.set({
             name,
-            value: '',
+            value: "",
             ...options,
           });
         },
@@ -56,17 +56,21 @@ export async function middleware(request: NextRequest) {
 
   // IMPORTANT: Avoid multiple getSession calls. Fetch session once.
   // getSession() will automatically refresh the session if needed.
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   const { pathname } = request.nextUrl;
 
   // Protected routes
-  if (pathname.startsWith('/dashboard')) {
+  if (pathname.startsWith("/dashboard")) {
     if (!session) {
       // Redirect to login, preserving the intended destination
-      const redirectUrl = new URL('/auth/login', request.url);
-      redirectUrl.searchParams.set('redirect', pathname);
-      console.log(`[Middleware] No session for ${pathname}. Redirecting to login.`);
+      const redirectUrl = new URL("/auth/login", request.url);
+      redirectUrl.searchParams.set("redirect", pathname);
+      console.log(
+        `[Middleware] No session for ${pathname}. Redirecting to login.`
+      );
       return NextResponse.redirect(redirectUrl);
     }
     // If session exists, allow access to dashboard routes
@@ -75,20 +79,26 @@ export async function middleware(request: NextRequest) {
   }
 
   // Auth routes
-  if (pathname === '/auth/login' || pathname === '/auth/register') {
+  if (pathname.startsWith("/auth/") && pathname !== "/auth/callback") {
     if (session) {
       // If logged in, redirect from auth pages to dashboard
-      console.log(`[Middleware] Session found on auth page (${pathname}). Redirecting to dashboard.`);
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      console.log(
+        `[Middleware] Session found on auth page (${pathname}). Redirecting to dashboard.`
+      );
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
     // If no session, allow access to auth routes
-    console.log(`[Middleware] No session on auth page (${pathname}). Allowing access.`);
+    console.log(
+      `[Middleware] No session on auth page (${pathname}). Allowing access.`
+    );
     return response; // Allow the request to proceed
   }
 
   // For all other routes (including API routes, public pages, RSC fetches not covered above),
   // let the request proceed without intervention after session refresh attempt.
-  console.log(`[Middleware] Pathname (${pathname}) not explicitly handled. Allowing access.`);
+  console.log(
+    `[Middleware] Pathname (${pathname}) not explicitly handled. Allowing access.`
+  );
   return response;
 }
 
@@ -103,11 +113,11 @@ export const config = {
      * - assets/ (project specific assets)
      * - auth/callback (Supabase auth callback)
      */
-    '/((?!_next/static|_next/image|favicon.ico|assets/|auth/callback).*)',
+    "/((?!_next/static|_next/image|favicon.ico|assets/|auth/callback).*)",
     // Apply to specific routes if preferred, but the above is common
     // '/dashboard/:path*',
     // '/auth/login',
     // '/auth/register',
     // '/api/:path*'
   ],
-}; 
+};
