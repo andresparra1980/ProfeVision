@@ -12,6 +12,7 @@ import { ModeToggle } from "@/components/shared/mode-toggle";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/utils/logger";
+import Cookies from 'js-cookie';
 import {
   Card,
   CardContent,
@@ -35,12 +36,64 @@ const updatePasswordSchema = z
 
 type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
 
+// Add this type definition near the top of the file
+interface DebugInfo {
+  url: string;
+  source: string | null;
+  timestamp: string | null;
+  uid: string | null;
+  cookieCount: number;
+  cookieNames: string;
+  hasAuthCookie: boolean;
+  hasIdCookie: boolean;
+  userAgent: string;
+}
+
 // Client component that uses useSearchParams
 function UpdatePasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+
+  // Get URL and cookie info for debugging
+  useEffect(() => {
+    // Only run in development or if a debug param is present
+    const showDebug = process.env.NODE_ENV === 'development' || 
+                     searchParams.get('debug') === 'true';
+    
+    if (showDebug) {
+      try {
+        // Get cookie info safely
+        const cookieNames = Object.keys(Cookies.get());
+        const hasAuthCookie = cookieNames.some(name => name.includes('sb-auth'));
+        const hasIdCookie = cookieNames.some(name => name.includes('sb-id'));
+        
+        setDebugInfo({
+          url: window.location.href,
+          source: searchParams.get('source'),
+          timestamp: searchParams.get('timestamp'),
+          uid: searchParams.get('uid'),
+          cookieCount: cookieNames.length,
+          cookieNames: cookieNames.join(', '),
+          hasAuthCookie,
+          hasIdCookie,
+          userAgent: navigator.userAgent,
+        });
+        
+        // Log for additional visibility
+        logger.auth("Debug info in update-password", {
+          cookieCount: cookieNames.length,
+          hasAuthCookie,
+          hasIdCookie,
+          source: searchParams.get('source')
+        });
+      } catch (e) {
+        console.error("Error getting debug info:", e);
+      }
+    }
+  }, [searchParams]);
 
   // Check if we have any tokens in URL
   useEffect(() => {
@@ -177,6 +230,20 @@ function UpdatePasswordContent() {
     }
   }
 
+  // Show debug info if available
+  const renderDebugInfo = () => {
+    if (!debugInfo) return null;
+    
+    return (
+      <div className="mt-4 p-4 border border-dashed border-gray-300 rounded text-xs">
+        <h3 className="font-bold mb-2">Debug Info</h3>
+        <pre className="whitespace-pre-wrap overflow-auto max-h-40">
+          {JSON.stringify(debugInfo, null, 2)}
+        </pre>
+      </div>
+    );
+  };
+
   if (error) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
@@ -191,10 +258,11 @@ function UpdatePasswordContent() {
                 {error}
               </CardDescription>
             </CardHeader>
-            <CardFooter className="flex justify-center">
-              <Button asChild variant="outline" className="w-full">
+            <CardFooter className="flex flex-col justify-center">
+              <Button asChild variant="outline" className="w-full mb-4">
                 <a href="/auth/reset-password">Solicitar nuevo enlace</a>
               </Button>
+              {renderDebugInfo()}
             </CardFooter>
           </Card>
         </div>
@@ -249,6 +317,8 @@ function UpdatePasswordContent() {
               </Button>
             </form>
           </CardContent>
+          
+          {renderDebugInfo()}
         </Card>
       </div>
     </div>

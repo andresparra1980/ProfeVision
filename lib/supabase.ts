@@ -4,11 +4,31 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 // Re-export the client instance
 export const supabase = clientSupabase;
 
-// Define site URL for callbacks
-export const siteUrl =
-  typeof window !== "undefined"
-    ? window.location.origin
-    : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+// Improved site URL detection with better fallbacks
+export const getSiteUrl = () => {
+  // Browser context: Use actual origin
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
+  // Server context: Use env var with double-checking the URL format
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (
+    envUrl &&
+    (envUrl.startsWith("http://") || envUrl.startsWith("https://"))
+  ) {
+    // Remove any trailing slash for consistency
+    return envUrl.replace(/\/$/, "");
+  }
+
+  // Localhost fallback (only for development)
+  return process.env.NODE_ENV === "production"
+    ? "https://www.profevision.com" // Production fallback
+    : "http://localhost:3000"; // Dev fallback
+};
+
+// Get the site URL
+export const siteUrl = getSiteUrl();
 
 // For service/admin operations that need the service key
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -50,8 +70,10 @@ export const signUpWithRedirect = (
 
 // Helper function specifically for password reset
 export const resetPassword = (email: string, captchaToken?: string) => {
+  // Always recalculate the URL to ensure we have the correct origin
+  const currentSiteUrl = getSiteUrl();
   // Use the direct-recovery endpoint specifically
-  const resetRedirectUrl = `${siteUrl}/auth/direct-recovery`;
+  const resetRedirectUrl = `${currentSiteUrl}/auth/direct-recovery`;
 
   // Make sure we're using the correct URL format
   return supabase.auth.resetPasswordForEmail(email, {
