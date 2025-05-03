@@ -229,30 +229,51 @@ function UpdatePasswordContent() {
       
       // Get access token from URL if available
       const accessToken = searchParams.get('access_token');
-      let updateResult;
+      let error = null;
       
       if (accessToken) {
-        // When using access token from URL
-        logger.auth("Using access token from URL for password update");
+        // Direct approach using fetch when we have an access token from URL
+        logger.auth("Using direct API approach with access token for password update");
         
-        // First set the session with the access token
-        await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: "" // No refresh token needed for this operation
-        });
-        
-        // Then update the password
-        updateResult = await supabase.auth.updateUser({
-          password: data.password
-        });
+        try {
+          // Direct API call to Supabase
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+              'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+            },
+            body: JSON.stringify({
+              password: data.password
+            })
+          });
+          
+          const result = await response.json();
+          logger.auth("Direct API response", { 
+            status: response.status,
+            success: response.ok 
+          });
+          
+          if (!response.ok) {
+            error = {
+              message: result.error || "Error updating password through direct API"
+            };
+          }
+        } catch (e) {
+          logger.auth("Exception calling direct API", { error: e });
+          error = {
+            message: e instanceof Error ? e.message : "Error updating password through direct API"
+          };
+        }
       } else {
         // Regular update using existing session (if any)
-        updateResult = await supabase.auth.updateUser({
+        const updateResult = await supabase.auth.updateUser({
           password: data.password,
         });
+        error = updateResult.error;
       }
-      
-      const { error } = updateResult;
 
       if (error) {
         logger.auth("Error updating password", { error });
