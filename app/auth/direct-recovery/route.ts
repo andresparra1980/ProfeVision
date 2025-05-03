@@ -6,11 +6,11 @@ import { getSiteUrl } from "@/lib/supabase";
 // Use the more reliable URL getter
 const SITE_URL = getSiteUrl();
 
-// Enhanced cookie options for better persistence
+// Enhanced cookie options for better persistence across domains
 const COOKIE_OPTIONS = {
   path: "/",
-  sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
+  sameSite: "none" as const, // Allow cross-site cookies
+  secure: true, // Required for sameSite=none
   maxAge: 60 * 60 * 24 * 7, // 7 days
   httpOnly: true,
 };
@@ -124,8 +124,16 @@ export async function GET(request: NextRequest) {
           finalRedirectUrl.searchParams.set("uid", partialId);
         }
 
+        // Extract the session token as a fallback in case cookies don't work
+        // This is for browser compatibility - some browsers may not correctly handle cookies in redirects
+        if (sessionResult.data.session.access_token) {
+          finalRedirectUrl.searchParams.set(
+            "access_token",
+            sessionResult.data.session.access_token
+          );
+        }
+
         // Create response with the final URL
-        // We don't need to pass tokens in the URL as we have cookies set
         response = NextResponse.redirect(finalRedirectUrl);
 
         // Manually copy all cookies from the previous response to ensure they're preserved

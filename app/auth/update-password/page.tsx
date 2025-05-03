@@ -102,26 +102,50 @@ function UpdatePasswordContent() {
         source: searchParams.get('source'),
         type: searchParams.get('type'),
         timestamp: searchParams.get('timestamp'),
-        hasCode: !!searchParams.get('code')
+        hasCode: !!searchParams.get('code'),
+        hasAccessToken: !!searchParams.get('access_token')
       });
       
-      // Try multiple approaches to get a valid session
-      
-      // Approach 1: Direct tokens from URL
+      // Prioritize access token from URL (used as fallback when cookies fail)
       const accessToken = searchParams.get('access_token');
+      
+      if (accessToken) {
+        logger.auth("Found access token in URL, attempting to use it directly");
+        
+        try {
+          // Try to create a session using just the access token
+          const { data, error } = await supabase.auth.getUser(accessToken);
+          
+          if (error) {
+            logger.auth("Error using access token from URL", { error });
+          } else if (data.user) {
+            logger.auth("Successfully authenticated with access token from URL", { 
+              userId: data.user.id.substring(0, 6) // Only log partial ID for privacy
+            });
+            // We have authenticated successfully
+            return;
+          }
+        } catch (e) {
+          logger.auth("Exception using access token from URL", { error: e });
+        }
+      }
+      
+      // Continue with other approaches if direct token use didn't work
+      
+      // Approach 1: Direct tokens from URL (refresh + access token pair)
       const refreshToken = searchParams.get('refresh_token');
       const type = searchParams.get('type');
       
-      if (accessToken && refreshToken && type === 'recovery') {
+      if (refreshToken && type === 'recovery') {
         logger.auth("Found direct recovery tokens in URL", {
           type,
-          hasAccessToken: true,
+          hasAccessToken: !!accessToken,
           hasRefreshToken: true
         });
         
         try {
           const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
+            access_token: accessToken || '',
             refresh_token: refreshToken
           });
           
