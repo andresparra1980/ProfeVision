@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell } from "lucide-react";
+import { Bell, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/shared/mode-toggle";
 import { useSidebar } from "@/lib/contexts/sidebar-context";
@@ -30,6 +30,12 @@ export default function DashboardHeader() {
       
       {/* Contenedor derecho para íconos */}
       <div className="ml-auto flex items-center space-x-2">
+        <a href="https://docs.profevision.com" target="_blank" rel="noopener noreferrer">
+          <Button variant="ghost" size="icon">
+            <HelpCircle className="h-5 w-5" />
+            <span className="sr-only">Documentación</span>
+          </Button>
+        </a>
         <Button variant="ghost" size="icon">
           <Bell className="h-5 w-5" />
           <span className="sr-only">Notificaciones</span>
