@@ -45,7 +45,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL("/auth/email-confirmed", SITE_URL));
     }
 
-    // For other auth types like recovery, etc.
+    // Handle password recovery
+    if (type === "recovery") {
+      return NextResponse.redirect(new URL("/auth/update-password", SITE_URL));
+    }
+
+    // For other auth types
     return NextResponse.redirect(new URL("/auth/login", SITE_URL));
   } catch (error: unknown) {
     if (DEBUG) {
