@@ -27,6 +27,9 @@ const resetSchema = z.object({
 
 type ResetFormValues = z.infer<typeof resetSchema>;
 
+// Get the site URL from environment or default to localhost
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -52,8 +55,10 @@ export default function ResetPasswordPage() {
 
     setIsLoading(true);
     try {
+      console.log("Attempting to reset password with redirect to:", `${SITE_URL}/auth/direct-recovery?debug=true`);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${SITE_URL}/auth/direct-recovery?debug=true`,
         captchaToken,
       });
 

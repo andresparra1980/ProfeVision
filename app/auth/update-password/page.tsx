@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,21 +37,64 @@ type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
 export default function UpdatePasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
-  // Check if we have a hash in the URL
+  // Check if we have any tokens in URL
   useEffect(() => {
     const checkSession = async () => {
+      console.log("Checking session in update-password page");
+      
+      // Check if we have a direct access token in the URL
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      const type = searchParams.get('type');
+      
+      // If we have direct tokens, set the session
+      if (accessToken && refreshToken && type === 'recovery') {
+        console.log("Found direct recovery tokens in URL, setting session");
+        try {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (error) {
+            console.error("Error setting session from URL tokens:", error);
+            setError("El enlace de restablecimiento no es válido o ha expirado. Por favor, solicita un nuevo enlace.");
+            return;
+          }
+          
+          console.log("Successfully set session from URL tokens");
+          return; // Session is set, we can continue
+        } catch (e) {
+          console.error("Exception setting session from URL tokens:", e);
+          setError("Ocurrió un error al procesar el enlace de restablecimiento.");
+          return;
+        }
+      }
+      
+      // Otherwise check for existing session (from callback flow)
       const { data, error } = await supabase.auth.getSession();
+      
+      console.log("Session check result:", { 
+        hasSession: !!data.session, 
+        hasError: !!error,
+        errorMessage: error?.message,
+        flowType: accessToken ? 'direct' : 'callback'
+      });
       
       // If there's an error or no session, show error message
       if (error || !data.session) {
+        console.log("No valid session for password update, showing error");
         setError("El enlace de restablecimiento no es válido o ha expirado. Por favor, solicita un nuevo enlace.");
+      } else {
+        console.log("Valid session found for password update");
       }
     };
     
     checkSession();
-  }, []);
+  }, [searchParams]);
 
   const form = useForm<UpdatePasswordFormValues>({
     resolver: zodResolver(updatePasswordSchema),

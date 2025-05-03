@@ -112,8 +112,9 @@ export const config = {
      * - favicon.ico (favicon file)
      * - assets/ (project specific assets)
      * - auth/callback (Supabase auth callback)
+     * - auth/direct-recovery (Our direct recovery handler)
      */
-    "/((?!_next/static|_next/image|favicon.ico|assets/|auth/callback).*)",
+    "/((?!_next/static|_next/image|favicon.ico|assets/|auth/callback|auth/direct-recovery).*)",
     // Apply to specific routes if preferred, but the above is common
     // '/dashboard/:path*',
     // '/auth/login',
