@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -10,11 +11,12 @@ export async function GET(request: NextRequest) {
   const accessToken = requestUrl.searchParams.get("access_token");
   const refreshToken = requestUrl.searchParams.get("refresh_token");
 
-  console.log("[Direct Recovery] Request received:", {
+  logger.auth("Direct recovery request received", {
     token: token ? "exists" : "missing",
     type,
     hasAccessToken: !!accessToken,
     hasRefreshToken: !!refreshToken,
+    url: request.url,
   });
 
   // Build the redirect URL with all available tokens
@@ -29,7 +31,10 @@ export async function GET(request: NextRequest) {
   // Add debugging flag
   redirectUrl.searchParams.set("source", "direct-recovery");
 
-  console.log("[Direct Recovery] Redirecting to:", redirectUrl.toString());
+  logger.auth("Direct recovery redirecting", {
+    destination: redirectUrl.toString(),
+    type,
+  });
 
   // Redirect to update-password with all tokens
   return NextResponse.redirect(redirectUrl);

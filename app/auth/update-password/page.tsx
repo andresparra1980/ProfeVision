@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { ModeToggle } from "@/components/shared/mode-toggle";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/utils/logger";
 import {
   Card,
   CardContent,
@@ -34,7 +35,8 @@ const updatePasswordSchema = z
 
 type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
 
-export default function UpdatePasswordPage() {
+// Client component that uses useSearchParams
+function UpdatePasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,7 +45,10 @@ export default function UpdatePasswordPage() {
   // Check if we have any tokens in URL
   useEffect(() => {
     const checkSession = async () => {
-      console.log("Checking session in update-password page");
+      logger.auth("Checking session in update-password page", {
+        source: searchParams.get('source'),
+        type: searchParams.get('type')
+      });
       
       // Check if we have a direct access token in the URL
       const accessToken = searchParams.get('access_token');
@@ -52,7 +57,12 @@ export default function UpdatePasswordPage() {
       
       // If we have direct tokens, set the session
       if (accessToken && refreshToken && type === 'recovery') {
-        console.log("Found direct recovery tokens in URL, setting session");
+        logger.auth("Found direct recovery tokens in URL", {
+          type,
+          hasAccessToken: true,
+          hasRefreshToken: true
+        });
+        
         try {
           const { error } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -60,15 +70,15 @@ export default function UpdatePasswordPage() {
           });
           
           if (error) {
-            console.error("Error setting session from URL tokens:", error);
+            logger.auth("Error setting session from URL tokens", { error });
             setError("El enlace de restablecimiento no es válido o ha expirado. Por favor, solicita un nuevo enlace.");
             return;
           }
           
-          console.log("Successfully set session from URL tokens");
+          logger.auth("Successfully set session from URL tokens");
           return; // Session is set, we can continue
         } catch (e) {
-          console.error("Exception setting session from URL tokens:", e);
+          logger.auth("Exception setting session from URL tokens", { error: e });
           setError("Ocurrió un error al procesar el enlace de restablecimiento.");
           return;
         }
@@ -77,7 +87,7 @@ export default function UpdatePasswordPage() {
       // Otherwise check for existing session (from callback flow)
       const { data, error } = await supabase.auth.getSession();
       
-      console.log("Session check result:", { 
+      logger.auth("Session check result", { 
         hasSession: !!data.session, 
         hasError: !!error,
         errorMessage: error?.message,
@@ -86,10 +96,10 @@ export default function UpdatePasswordPage() {
       
       // If there's an error or no session, show error message
       if (error || !data.session) {
-        console.log("No valid session for password update, showing error");
+        logger.auth("No valid session for password update", { hasError: !!error });
         setError("El enlace de restablecimiento no es válido o ha expirado. Por favor, solicita un nuevo enlace.");
       } else {
-        console.log("Valid session found for password update");
+        logger.auth("Valid session found for password update");
       }
     };
     
@@ -107,14 +117,18 @@ export default function UpdatePasswordPage() {
   async function onSubmit(data: UpdatePasswordFormValues) {
     setIsLoading(true);
     try {
+      logger.auth("Attempting to update password");
+      
       const { error } = await supabase.auth.updateUser({
         password: data.password,
       });
 
       if (error) {
+        logger.auth("Error updating password", { error });
         throw error;
       }
 
+      logger.auth("Password successfully updated");
       toast({
         title: "Contraseña actualizada",
         description: "Tu contraseña ha sido actualizada correctamente.",
@@ -207,5 +221,20 @@ export default function UpdatePasswordPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+// Wrapper component
+export default function UpdatePasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen flex-col items-center justify-center">
+        <div className="text-center">
+          <p>Cargando...</p>
+        </div>
+      </div>
+    }>
+      <UpdatePasswordContent />
+    </Suspense>
   );
 } 

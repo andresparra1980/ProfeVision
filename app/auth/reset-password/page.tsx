@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { ModeToggle } from "@/components/shared/mode-toggle";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
+import { logger } from "@/lib/utils/logger";
 import {
   Card,
   CardContent,
@@ -55,7 +56,10 @@ export default function ResetPasswordPage() {
 
     setIsLoading(true);
     try {
-      console.log("Attempting to reset password with redirect to:", `${SITE_URL}/auth/direct-recovery?debug=true`);
+      logger.auth("Attempting to reset password", { 
+        email: data.email,
+        redirectTo: `${SITE_URL}/auth/direct-recovery?debug=true` 
+      });
       
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
         redirectTo: `${SITE_URL}/auth/direct-recovery?debug=true`,
@@ -63,15 +67,22 @@ export default function ResetPasswordPage() {
       });
 
       if (error) {
+        logger.auth("Error resetting password", { error, email: data.email });
         throw error;
       }
 
+      logger.auth("Password reset email sent", { email: data.email });
       setIsSubmitted(true);
       toast({
         title: "Correo enviado",
         description: "Se ha enviado un enlace para restablecer tu contraseña.",
       });
     } catch (error: unknown) {
+      logger.auth("Exception resetting password", { 
+        error: error instanceof Error ? error : new Error('Unknown error'),
+        email: data.email
+      });
+      
       toast({
         variant: "destructive",
         title: "Error",
