@@ -16,13 +16,17 @@ import {
   Folders,
   LogOut,
   UserCircle,
-  ChevronLeft,
-  ChevronRight,
   HelpCircle,
+  Columns2,
+  FoldHorizontal,
+  UnfoldHorizontal,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/lib/contexts/sidebar-context";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Definir un tipo más específico para el usuario
 interface User {
@@ -131,20 +135,29 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
             )}
             <div className={cn("flex items-center", isCollapsed && !isMobile ? "mx-auto" : "ml-auto")}>
               {!isMobile && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleCollapse}
-                  className="hidden md:flex"
-                >
-                  {isCollapsed ? 
-                    <ChevronRight className="h-5 w-5" /> : 
-                    <ChevronLeft className="h-5 w-5" />
-                  }
-                  <span className="sr-only">
-                    {isCollapsed ? "Expandir menú" : "Contraer menú"}
-                  </span>
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={toggleCollapse}
+                        className="hidden md:flex"
+                      >
+                        {isCollapsed ? 
+                          <PanelLeftOpen className="h-5 w-5" /> : 
+                          <PanelLeftClose className="h-5 w-5" />
+                        }
+                        <span className="sr-only">
+                          {isCollapsed ? "Expandir menú" : "Contraer menú"}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {isCollapsed ? "Expandir menú" : "Contraer menú"}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
             </div>
           </div>
