@@ -17,9 +17,6 @@ import {
   LogOut,
   UserCircle,
   HelpCircle,
-  Columns2,
-  FoldHorizontal,
-  UnfoldHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
