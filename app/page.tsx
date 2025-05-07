@@ -207,7 +207,7 @@ export default function Home() {
                         <p className="font-medium">3.2</p>
                       </div>
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90">Ver Detalles</Button>
+                    <Button variant="outline" className="w-full">Ver Detalles</Button>
                   </div>
                 </div>
               </div>
@@ -630,7 +630,7 @@ export default function Home() {
                         </tbody>
                       </table>
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90">
+                    <Button variant="outline" className="w-full">
                       Exportar Calificaciones
                     </Button>
                   </div>
