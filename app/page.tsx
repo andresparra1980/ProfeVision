@@ -158,7 +158,7 @@ export default function Home() {
                     {avatarSeeds.map((seed) => (
                       <Image
                         key={seed}
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`}
+                        src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`}
                         alt="Avatar"
                         width={32}
                         height={32}
