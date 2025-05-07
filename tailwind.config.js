@@ -9,121 +9,122 @@ module.exports = {
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
+    "*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-  	container: {
-  		center: true,
-  		padding: '2rem',
-  		screens: {
-  			'2xl': '1400px'
-  		}
-  	},
-  	extend: {
-  		backgroundImage: {
-                ...backgroundPatterns
-  		},
-  		colors: {
-  			border: 'var(--border)',
-  			input: 'var(--input)',
-  			ring: 'var(--ring)',
-  			background: 'var(--background)',
-  			foreground: 'var(--text)',
-  			text: 'var(--text)',
-  			primary: {
-  				DEFAULT: 'var(--primary)',
-  				foreground: 'var(--primary-foreground)'
-  			},
-  			secondary: {
-  				DEFAULT: 'var(--secondary)',
-  				foreground: 'var(--secondary-foreground)'
-  			},
-  			destructive: {
-  				DEFAULT: 'var(--destructive)',
-  				foreground: 'var(--destructive-foreground)'
-  			},
-  			muted: {
-  				DEFAULT: 'var(--muted)',
-  				foreground: 'var(--muted-foreground)'
-  			},
-  			accent: {
-  				DEFAULT: 'var(--accent)',
-  				foreground: 'var(--accent-foreground)'
-  			},
-  			popover: {
-  				DEFAULT: 'var(--popover)',
-  				foreground: 'var(--popover-foreground)'
-  			},
-  			card: {
-  				DEFAULT: 'var(--card)',
-  				foreground: 'var(--card-foreground)'
-  			}
-  		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		},
-  		keyframes: {
-  			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
-  			},
-  			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
-  			},
-  			aurora: {
-  				'0%': {
-  					backgroundPosition: '0% 50%',
-  					transform: 'rotate(-5deg) scale(0.9)'
-  				},
-  				'25%': {
-  					backgroundPosition: '50% 100%',
-  					transform: 'rotate(5deg) scale(1.1)'
-  				},
-  				'50%': {
-  					backgroundPosition: '100% 50%',
-  					transform: 'rotate(-3deg) scale(0.95)'
-  				},
-  				'75%': {
-  					backgroundPosition: '50% 0%',
-  					transform: 'rotate(3deg) scale(1.05)'
-  				},
-  				'100%': {
-  					backgroundPosition: '0% 50%',
-  					transform: 'rotate(-5deg) scale(0.9)'
-  				}
-  			},
-  			'shiny-text': {
-  				'0%, 90%, 100%': {
-  					'background-position': 'calc(-100% - var(--shiny-width)) 0'
-  				},
-  				'30%, 60%': {
-  					'background-position': 'calc(100% + var(--shiny-width)) 0'
-  				}
-  			},
-  			gradient: {
-  				to: {
-  					backgroundPosition: 'var(--bg-size, 300%) 0'
-  				}
-  			}
-  		},
-  		animation: {
-  			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out',
-  			aurora: 'aurora 8s ease-in-out infinite alternate',
-  			'shiny-text': 'shiny-text 8s infinite',
-  			gradient: 'gradient 8s linear infinite'
-  		}
-  	}
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      backgroundImage: {
+        ...backgroundPatterns,
+      },
+      colors: {
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+        background: "var(--background)",
+        foreground: "var(--text)",
+        text: "var(--text)",
+        primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+        },
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
+        },
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
+        },
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
+        },
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
+        },
+        "accordion-up": {
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
+        },
+        aurora: {
+          "0%": {
+            backgroundPosition: "0% 50%",
+            transform: "rotate(-5deg) scale(0.9)",
+          },
+          "25%": {
+            backgroundPosition: "50% 100%",
+            transform: "rotate(5deg) scale(1.1)",
+          },
+          "50%": {
+            backgroundPosition: "100% 50%",
+            transform: "rotate(-3deg) scale(0.95)",
+          },
+          "75%": {
+            backgroundPosition: "50% 0%",
+            transform: "rotate(3deg) scale(1.05)",
+          },
+          "100%": {
+            backgroundPosition: "0% 50%",
+            transform: "rotate(-5deg) scale(0.9)",
+          },
+        },
+        "shiny-text": {
+          "0%, 90%, 100%": {
+            "background-position": "calc(-100% - var(--shiny-width)) 0",
+          },
+          "30%, 60%": {
+            "background-position": "calc(100% + var(--shiny-width)) 0",
+          },
+        },
+        gradient: {
+          to: {
+            backgroundPosition: "var(--bg-size, 300%) 0",
+          },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        aurora: "aurora 8s ease-in-out infinite alternate",
+        "shiny-text": "shiny-text 8s infinite",
+        gradient: "gradient 8s linear infinite",
+      },
+    },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 };
