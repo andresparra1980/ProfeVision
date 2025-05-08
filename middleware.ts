@@ -114,7 +114,7 @@ export const config = {
      * - auth/callback (Supabase auth callback)
      * - auth/direct-recovery (Our direct recovery handler)
      */
-    "/((?!_next/static|_next/image|favicon.ico|assets/|auth/callback|auth/direct-recovery).*)",
+    "/((?!_next/static|_next/image|favicon.ico|assets/|auth/callback|auth/direct-recovery|auth/verify-email).*)",
     // Apply to specific routes if preferred, but the above is common
     // '/dashboard/:path*',
     // '/auth/login',
