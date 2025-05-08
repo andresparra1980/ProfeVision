@@ -31,6 +31,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 import { useSearchParams } from "next/navigation";
 
+import { Suspense } from "react";
+
 export default function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -92,7 +94,8 @@ export default function Page() {
   const isVerified = searchParams.get("type") === "signup";
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
+    <Suspense fallback={null}>
+      <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div className="absolute top-4 right-4">
         <ModeToggle />
       </div>
@@ -187,5 +190,6 @@ export default function Page() {
         </Card>
       </div>
     </div>
+    </Suspense>
   );
 } 
