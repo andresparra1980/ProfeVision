@@ -29,6 +29,8 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+import { useSearchParams } from "next/navigation";
+
 export default function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -86,6 +88,9 @@ export default function Page() {
     }
   }
 
+  const searchParams = useSearchParams();
+  const isVerified = searchParams.get("type") === "signup";
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div className="absolute top-4 right-4">
@@ -98,6 +103,11 @@ export default function Page() {
             <CardDescription className="text-center">
               Ingresa tus credenciales para acceder a tu cuenta
             </CardDescription>
+            {isVerified && (
+              <div className="mt-4 p-2 rounded bg-green-100 text-green-800 text-center text-sm">
+                ¡Correo verificado exitosamente! Ya puedes iniciar sesión.
+              </div>
+            )}
           </CardHeader>
           
           <CardContent>
