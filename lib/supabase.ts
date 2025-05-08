@@ -62,7 +62,7 @@ export const signUpWithRedirect = (
     password,
     options: {
       data: userData,
-      emailRedirectTo: `${siteUrl}/auth/login`,
+      emailRedirectTo: `${siteUrl}/auth/email-confirmed`,
       captchaToken: captchaToken,
     },
   });

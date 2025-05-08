@@ -20,6 +20,7 @@ const PUBLIC_PATHS = [
   '/auth/reset-password',
   '/auth/update-password',
   '/auth/verify-email',
+  '/auth/email-confirmed',
   '/'
 ]; // Public paths include login, register, password reset, and home
 
