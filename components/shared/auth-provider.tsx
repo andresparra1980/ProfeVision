@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!currentSession && !isPublicPath) {
           logger.log('No initial session and not on public path, redirecting to login.');
           router.push('/auth/login');
-        } else if (currentSession && isPublicPath && pathname !== '/') {
+        } else if (currentSession && isPublicPath && pathname !== '/' && pathname !== '/auth/email-confirmed') {
             logger.log('Initial session found on public path (not home), redirecting to dashboard.');
             setTimeout(() => router.push('/dashboard'), 0);
         }
