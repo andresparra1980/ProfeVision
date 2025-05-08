@@ -173,7 +173,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/20 to-[#ffd60a]/20 rounded-2xl blur-xl -z-10" />
+                {/* <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/20 to-[#ffd60a]/20 rounded-2xl blur-xl -z-10" /> */}
                 <div className="relative bg-card backdrop-blur-sm border rounded-2xl shadow-xl overflow-hidden w-full max-w-md mx-auto">
                   <div className="p-4 border-b">
                     <h3 className="font-medium">Calificación Automática</h3>
@@ -585,7 +585,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="relative flex items-center justify-center lg:order-first">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/20 to-[#ffd60a]/20 rounded-2xl blur-xl -z-10" />
+                {/* <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/20 to-[#ffd60a]/20 rounded-2xl blur-xl -z-10" /> */}
                 <div className="relative bg-card backdrop-blur-sm border rounded-2xl shadow-xl overflow-hidden w-full max-w-md mx-auto">
                   <div className="p-4 border-b">
                     <h3 className="font-medium">Tabulado de Notas</h3>
