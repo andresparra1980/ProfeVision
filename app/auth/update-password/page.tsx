@@ -34,6 +34,12 @@ const updatePasswordSchema = z
 
 type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
 
+interface PasswordUpdateError {
+  code: number;
+  error_code: string;
+  msg: string;
+}
+
 // Client component that uses useSearchParams
 function UpdatePasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +116,7 @@ function UpdatePasswordContent() {
     try {
       // Get access token from URL if available
       const accessToken = searchParams.get('access_token');
-      let error = null;
+      let error: PasswordUpdateError | Error | null = null;
       
       if (accessToken) {
         // Direct approach using fetch when we have an access token from URL
@@ -132,14 +138,10 @@ function UpdatePasswordContent() {
           const result = await response.json();
           
           if (!response.ok) {
-            error = {
-              message: result.error || "Error al actualizar la contraseña"
-            };
+            error = new Error(result.error || "Error al actualizar la contraseña");
           }
         } catch (e) {
-          error = {
-            message: e instanceof Error ? e.message : "Error al actualizar la contraseña"
-          };
+          error = new Error(e instanceof Error ? e.message : "Error al actualizar la contraseña");
         }
       } else {
         // Regular update using existing session (if any)
@@ -160,10 +162,20 @@ function UpdatePasswordContent() {
       
       router.push("/auth/login");
     } catch (error: unknown) {
+      let errorMsg = "Ha ocurrido un error. Intenta nuevamente.";
+      const typedError = error as PasswordUpdateError;
+      if (
+        typedError.error_code === "same_password" ||
+        typedError.msg === "New password should be different from the old password."
+      ) {
+        errorMsg = "La nueva contraseña debe ser diferente a la anterior.";
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Ha ocurrido un error. Intenta nuevamente.",
+        title: "Error al actualizar la contraseña, la nueva contraseña debe ser diferente a la anterior.",
+        description: errorMsg,
       });
     } finally {
       setIsLoading(false);
