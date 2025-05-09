@@ -678,22 +678,53 @@ export default function ExamResultsPage() {
   };
 
   // Función para convertir imagen a base64
+  // Descarga una imagen y retorna base64 PNG (si la imagen es webp, la convierte a png)
   const fetchImageAsBase64 = async (url: string): Promise<string | null> => {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
-      
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64String = reader.result as string;
-          // Extract only the base64 data part without the prefix
-          const base64Data = base64String.split(',')[1];
-          resolve(base64Data);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
+      // Detectar tipo de imagen por content-type o extensión
+      const contentType = blob.type;
+      const isWebp = contentType === 'image/webp' || url.toLowerCase().endsWith('.webp');
+      // Si es webp, convertir a png usando canvas
+      if (isWebp) {
+        return await new Promise((resolve, reject) => {
+          const img = new window.Image();
+          img.crossOrigin = 'Anonymous';
+          img.onload = function () {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) throw new Error('No 2D context');
+              ctx.drawImage(img, 0, 0);
+              // Exportar a PNG y extraer base64
+              const pngDataUrl = canvas.toDataURL('image/png');
+              const base64Data = pngDataUrl.split(',')[1];
+              resolve(base64Data);
+            } catch (e) {
+              reject(e);
+            }
+          };
+          img.onerror = reject;
+          // Para cargar desde blob
+          img.src = URL.createObjectURL(blob);
+        });
+      } else {
+        // Si ya es png u otro formato soportado, retornar base64 directo
+        return await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64String = reader.result as string;
+            // Extraer solo la parte base64
+            const base64Data = base64String.split(',')[1];
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
     } catch (_error) {
       if (DEBUG) {
         // Log the error
@@ -720,7 +751,7 @@ export default function ExamResultsPage() {
     }
     
     // Process images in batches to avoid too many parallel requests
-    const batchSize = 3;
+    const batchSize = 5;
     for (let i = 0; i < resultadosWithImages.length; i += batchSize) {
       const batch = resultadosWithImages.slice(i, i + batchSize);
       
