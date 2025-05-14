@@ -157,6 +157,10 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
   };
   
   const handleImport = async () => {
+  // Loggear el auth.uid antes de importar
+  const { data: { user } } = await supabase.auth.getUser();
+  logger.log(`[IMPORT] Usuario autenticado: ${user?.id}`);
+  logger.log(`[IMPORT] GroupId: ${groupId}`);
     if (preview.length === 0) {
       toast({
         title: "Error",
@@ -165,134 +169,112 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       });
       return;
     }
-    
+
     setIsLoading(true);
     let shouldNotifyParent = false;
-    
+
     try {
-      // Si estamos importando dentro de un grupo, usamos una estrategia diferente
       if (groupId) {
-        // Preparamos un array para guardar los IDs de estudiantes (nuevos y existentes)
+        // Evitar duplicados por profesor: buscar solo los estudiantes accesibles (por RLS) con la misma identificación
         const estudianteIds: string[] = [];
-        
-        // Primero, buscamos estudiantes que ya existan por identificación
         const identificaciones = preview.map(s => s.identificacion);
-        const { data: existingStudents, error: existingError } = await supabase
+
+        // Buscar estudiantes accesibles al profesor por identificacion
+        const { data: myStudents, error: myStudentsError } = await supabase
           .from("estudiantes")
           .select("id, identificacion")
           .in("identificacion", identificaciones);
-        
-        if (existingError) throw existingError;
-        
-        // Mapeamos los IDs y creamos un mapa para buscar rápidamente
-        const existingMap = new Map();
-        if (existingStudents && existingStudents.length > 0) {
-          existingStudents.forEach((student: { identificacion: string, id: string }) => {
-            existingMap.set(student.identificacion, student.id);
-            estudianteIds.push(student.id);
+        if (myStudentsError) throw myStudentsError;
+
+        // Crear un mapa para acceso rápido
+        const myStudentsMap = new Map<string, string>();
+        if (myStudents && myStudents.length > 0) {
+          myStudents.forEach((student: { identificacion: string; id: string }) => {
+            myStudentsMap.set(student.identificacion, student.id);
           });
         }
-        
-        // Filtramos los estudiantes que no existen aún
-        const newStudents = preview.filter((student: Student) => !existingMap.has(student.identificacion));
-        
-        // Si hay nuevos estudiantes, los insertamos
-        if (newStudents.length > 0) {
-          // Usamos una función RPC para insertar estudiantes (una alternativa segura)
-          const { data: insertedStudents, error: insertError } = await supabase
-            .rpc('insertar_estudiantes', {
-              estudiantes: newStudents
-            });
-          
-          if (insertError) {
-            // Si no existe la función RPC, intentamos la inserción directa
-            logger.warn("Error usando RPC, intentando inserción directa:", insertError);
-            
-            // Inserción directa como fallback
-            const { data, error } = await supabase
-              .from("estudiantes")
-              .insert(newStudents)
-              .select();
-              
-            if (error) throw error;
-            
-            if (data && data.length > 0) {
-              data.forEach((student: { id: string }) => estudianteIds.push(student.id));
-            }
-          } else if (insertedStudents && insertedStudents.length > 0) {
-            // Si usamos RPC, añadimos los IDs devueltos
-            insertedStudents.forEach((id: string) => estudianteIds.push(id));
+
+        // Para cada estudiante del preview, usar el existente si lo hay, si no crear uno nuevo
+        const studentsToInsert: Student[] = [];
+        preview.forEach((student: Student) => {
+          if (myStudentsMap.has(student.identificacion)) {
+            estudianteIds.push(myStudentsMap.get(student.identificacion)!);
           } else {
-            // Si no hay error pero tampoco datos, buscamos los estudiantes recién insertados
-            const { data: freshStudents, error: freshError } = await supabase
-              .from("estudiantes")
-              .select("id, identificacion")
-              .in("identificacion", newStudents.map(s => s.identificacion));
-              
-            if (freshError) throw freshError;
-            
-            if (freshStudents && freshStudents.length > 0) {
-              freshStudents.forEach((student: { id: string }) => {
-                if (!estudianteIds.includes(student.id)) {
-                  estudianteIds.push(student.id);
-                }
+            studentsToInsert.push(student);
+          }
+        });
+
+        // Insertar solo los que no existen para el profesor usando RPC
+        logger.log(`[IMPORT] Estudiantes a insertar: ${studentsToInsert.length}`, studentsToInsert);
+        if (studentsToInsert.length > 0) {
+          logger.log(`[IMPORT] Usando RPC crear_estudiante_en_grupo para ${studentsToInsert.length} estudiantes`);
+          
+          let successCount = 0;
+          for (const student of studentsToInsert) {
+            try {
+              const { data, error } = await supabase.rpc('crear_estudiante_en_grupo', {
+                p_nombres: student.nombres,
+                p_apellidos: student.apellidos,
+                p_identificacion: student.identificacion,
+                p_email: student.email || '',
+                p_grupo_id: groupId
               });
+              
+              if (error) {
+                logger.error(`[IMPORT] Error al crear estudiante ${student.nombres}:`, error);
+                throw error;
+              }
+              
+              if (data) {
+                estudianteIds.push(data); // data es el ID del estudiante
+                successCount++;
+              }
+            } catch (err) {
+              logger.error(`[IMPORT] Error al crear estudiante ${student.nombres}:`, err);
+              // Continuar con el siguiente estudiante si uno falla
             }
           }
+          
+          logger.log(`[IMPORT] Estudiantes insertados exitosamente: ${successCount}`);
         }
+
+        // Verificar que tenemos IDs para relacionar
+        logger.log(`[IMPORT] Total estudianteIds: ${estudianteIds.length}`, estudianteIds);
         
-        // Si tenemos IDs de estudiantes, creamos las relaciones con el grupo
-        if (estudianteIds.length > 0) {
-          const estudiante_grupo_data = estudianteIds.map(studentId => ({
-            estudiante_id: studentId,
-            grupo_id: groupId
-          }));
-          
-          const { error: relationError } = await supabase
-            .from("estudiante_grupo")
-            .upsert(estudiante_grupo_data, {
-              onConflict: 'estudiante_id,grupo_id',
-              ignoreDuplicates: true
-            });
-            
-          if (relationError && relationError.code !== '23505') {
-            throw relationError;
-          }
-          
-          toast({
-            title: "Éxito",
-            description: `Se importaron y asignaron ${estudianteIds.length} estudiantes al grupo`,
-            variant: "default",
+        // Relacionar todos los IDs al grupo (sin duplicados)
+        const estudiante_grupo_data = estudianteIds.map((studentId) => ({
+          estudiante_id: studentId,
+          grupo_id: groupId,
+        }));
+        const { error: relationError } = await supabase
+          .from("estudiante_grupo")
+          .upsert(estudiante_grupo_data, {
+            onConflict: "estudiante_id,grupo_id",
+            ignoreDuplicates: true,
           });
-          shouldNotifyParent = true;
-        } else {
-          toast({
-            title: "Información",
-            description: "No se pudieron importar estudiantes nuevos",
-            variant: "default",
-          });
+        if (relationError && relationError.code !== "23505") {
+          throw relationError;
         }
+
+        toast({
+          title: "Éxito",
+          description: `Se importaron y asignaron ${estudianteIds.length} estudiantes al grupo`,
+          variant: "default",
+        });
+        shouldNotifyParent = true;
       } else {
-        // Estrategia original para cuando no hay grupo
+        // Si no hay grupo, simplemente insertar todos
         const { data, error } = await supabase
           .from("estudiantes")
           .insert(preview)
           .select();
-        
         logger.log("Resultado de importación:", { data, error, preview_length: preview.length });
-        
         if (error) {
-          if (error.code === "23505") {
-            toast({
-              title: "Advertencia",
-              description: "Algunos estudiantes ya existen en el sistema (identificación duplicada)",
-              variant: "destructive",
-            });
-            // Consideramos este caso como parcialmente exitoso
-            shouldNotifyParent = true;
-          } else {
-            throw error;
-          }
+          toast({
+            title: "Error",
+            description: error.message || "No se pudieron importar los estudiantes",
+            variant: "destructive",
+          });
         } else {
           const successCount = data?.length || 0;
           toast({
@@ -303,13 +285,11 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
           shouldNotifyParent = true;
         }
       }
-      
       // Limpiar el formulario
       setFile(null);
       setPreview([]);
-      const fileInput = document.getElementById('file-input') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
-      
+      const fileInput = document.getElementById("file-input") as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
     } catch (error: Error | unknown) {
       logger.error("Error importing students:", error);
       toast({
@@ -319,14 +299,12 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       });
     } finally {
       setIsLoading(false);
-      
-      // Siempre notificamos al componente padre
       if (shouldNotifyParent) {
         onImportComplete();
       }
     }
   };
-  
+
   const downloadTemplate = () => {
     // Crear un libro de trabajo
     const wb = XLSX.utils.book_new();
