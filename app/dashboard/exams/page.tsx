@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Eye, Printer, Users, FileOutput, Trash2, Link, Sparkles } from "lucide-react";
+import { FileText, Eye, Printer, Users, FileOutput, Trash2, Link, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,7 @@ import { toast } from "sonner";
 import { AuthError } from "@supabase/supabase-js";
 import { logger } from "@/lib/utils/logger";
 import { AuroraText } from "@/components/magicui/aurora-text";
-import { useTheme } from 'next-themes';
+import ImportExamDialog from "./components/ImportExamDialog";
 
 interface Exam {
   id: string;
@@ -51,16 +51,29 @@ interface Exam {
   }>;
 }
 
+interface ImportResult {
+  total_preguntas: number;
+  preguntas: Array<{
+    numero: number;
+    pregunta: string;
+    opciones: {
+      a: string;
+      b: string;
+      c?: string;
+      d?: string;
+    };
+    respuesta_correcta: string | null;
+  }>;
+}
+
 export default function ExamsPage() {
   const router = useRouter();
-  const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     fetchExams();
   }, []);
 
@@ -168,55 +181,29 @@ export default function ExamsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Exámenes</h2>
+        <div className="flex flex-col gap-2">
+          <AuroraText className="text-2xl font-bold tracking-tight">
+            Exámenes
+          </AuroraText>
           <p className="text-muted-foreground">
-            Crea, gestiona y califica exámenes para tus estudiantes
+            Gestiona y crea exámenes para tus estudiantes
           </p>
         </div>
         <div className="flex gap-2">
-          {/* <Button onClick={() => router.push("/dashboard/exams/create")}> 
-            <Plus className="mr-2 h-4 w-4" /> Crear Examen
-          </Button> */}
-          <Button
+          <Button 
             onClick={() => router.push("/dashboard/exams/create-with-ai")}
-            className="relative overflow-hidden border-2 border-primary/60 shadow-lg group"
-            style={{ position: 'relative' }}
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
           >
-            <span className="relative z-10 flex items-center">
-              <Sparkles className="mr-2 h-4 w-4" />
-              {mounted && (
-                <AuroraText
-                  speed={3}
-                  colors={
-                    theme === 'dark'
-                      ? [
-                          '#ffe600', // intense yellow
-                          '#ff00c8', // magenta
-                          '#7c00ff', // vivid purple
-                          '#00c3ff', // electric blue
-                          '#ff7b00', // orange
-                          '#ff0059', // hot pink
-                          '#ff7b00', // orange
-                          '#ff0059', // hot pink
-                        ]
-                      : [
-                          '#ffadad', // pink
-                          '#ffd6a5', // peach
-                          '#fdffb6', // lemon
-                          '#caffbf', // light green
-                          '#9bf6ff', // cyan
-                          '#a0c4ff', // blue
-                          '#d7aefb', // purple
-                          '#fdcce9', // pink
-                          '#fdcce9', // pink
-                        ]
-                  }
-                >
-                  Crear Examen con IA
-                </AuroraText>
-              )}
-            </span>
+            <Plus className="h-4 w-4 mr-2" />
+            Crear Examen con IA
+          </Button>
+          <Button 
+            variant="ghost"
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white hover:text-white"
+            onClick={() => setShowImportDialog(true)}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Importar Examen
           </Button>
         </div>
       </div>
@@ -450,6 +437,16 @@ export default function ExamsPage() {
           )}
         </CardContent>
       </Card>
+
+      <ImportExamDialog 
+        _open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+        onImportSuccess={(examData: ImportResult & { importId: string }) => {
+          // Usar importId para navegar a la página de creación
+          // Los datos completos ya están en localStorage
+          router.push(`/dashboard/exams/create?importId=${examData.importId}`);
+        }}
+      />
     </div>
   );
-} 
+}

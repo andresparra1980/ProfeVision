@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,6 +57,19 @@ type Grupo = {
   estado: 'activo' | 'archivado';
 };
 
+// Formato de datos en localStorage al importar
+interface ImportedQuestion {
+  numero: number;
+  pregunta: string;
+  opciones: {
+    a: string;
+    b: string;
+    c?: string;
+    d?: string;
+  };
+  respuesta_correcta: string | null;
+}
+
 // Schema de validación
 const examSchema = z.object({
   titulo: z.string().min(3, { message: "El título debe tener al menos 3 caracteres" }),
@@ -73,7 +86,7 @@ type ExamFormValues = z.infer<typeof examSchema>;
 
 export default function CreateExamPage() {
   const router = useRouter();
-  const [loading, _setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const [hasEntities, setHasEntities] = useState(false);
@@ -403,6 +416,7 @@ export default function CreateExamPage() {
 
   const onSubmit = async (data: ExamFormValues) => {
     try {
+      setLoading(true);
       // Obtener la sesión actual
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -450,6 +464,8 @@ export default function CreateExamPage() {
         title: "Error",
         description: error instanceof Error ? error.message : 'Error al crear el examen',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -510,6 +526,73 @@ export default function CreateExamPage() {
     }
   };
 
+  // Procesar datos importados desde URL params
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const importId = searchParams.get('importId');
+    if (importId && isClient) {
+      try {
+        // Obtener datos del localStorage usando el ID de importación
+        const importData = localStorage.getItem(`examImport_${importId}`);
+        if (!importData) {
+          throw new Error('Datos de importación no encontrados');
+        }
+        
+        const parsedData = JSON.parse(importData);
+        
+        // Convertir datos importados al formato de preguntas
+        const preguntasImportadas: Pregunta[] = parsedData.preguntas.map((p: ImportedQuestion, index: number) => {
+          const opciones: Opcion[] = Object.entries(p.opciones).map(([key, value], opIndex) => ({
+            id: `opcion-${index}-${opIndex}`,
+            texto: value as string,
+            esCorrecta: p.respuesta_correcta === key
+          }));
+          
+          return {
+            id: `pregunta-${index + 1}`,
+            texto: p.pregunta,
+            tipo: "opcion_multiple" as TipoPregunta,
+            puntaje: 1, // Se recalculará automáticamente
+            opciones
+          };
+        });
+        
+        // Actualizar el formulario con datos importados
+        form.setValue('numero_preguntas', preguntasImportadas.length);
+        form.setValue('titulo', `Examen Importado - ${parsedData.total_preguntas} preguntas`);
+        
+        // Establecer las preguntas
+        setAllStoredQuestions(preguntasImportadas);
+        setPreguntas(preguntasImportadas.slice(0, form.getValues('numero_preguntas')));
+        
+        // Guardar en localStorage
+        localStorage.setItem('examQuestions', JSON.stringify(preguntasImportadas));
+        
+        // Limpiar URL params y datos del localStorage
+        const url = new URL(window.location.href);
+        url.searchParams.delete('importId');
+        window.history.replaceState({}, '', url.toString());
+        
+        // Eliminar datos del localStorage después de procesarlos
+        localStorage.removeItem(`examImport_${importId}`);
+        
+        toast({
+          title: "Examen importado",
+          description: `Se han importado ${preguntasImportadas.length} preguntas correctamente`,
+        });
+        
+      } catch (error) {
+        console.error('Error al procesar datos importados:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudieron procesar los datos importados",
+        });
+      }
+    }
+  }, [isClient, searchParams, form]);
+
   // Si está cargando la verificación de entidades, mostrar spinner
   if (isCheckingEntities) {
     return (
@@ -536,6 +619,9 @@ export default function CreateExamPage() {
         </div>
 
         <Card>
+          <CardHeader>
+            <CardTitle>Información General</CardTitle>
+          </CardHeader>
           <CardContent className="pt-6 text-center flex flex-col items-center justify-center space-y-4">
             <Building2 className="h-16 w-16 text-muted-foreground" />
             <h3 className="text-xl font-semibold">Entidad Educativa Requerida</h3>
@@ -914,7 +1000,14 @@ export default function CreateExamPage() {
 
         <div className="flex justify-end gap-4">
             <Button type="submit" disabled={loading}>
-              {loading ? "Creando..." : "Crear Examen"}
+              {loading ? (
+                <>
+                  <span className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Creando...
+                </>
+              ) : (
+                "Crear Examen"
+              )}
             </Button>
         </div>
       </form>

@@ -78,7 +78,7 @@ type ExamFormValues = z.infer<typeof examSchema>;
 
 export default function CreateExamPage() {
   const router = useRouter();
-  const [loading, _setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const [hasEntities, setHasEntities] = useState(false);
@@ -414,6 +414,7 @@ export default function CreateExamPage() {
 
   const onSubmit = async (data: ExamFormValues) => {
     try {
+      setLoading(true);
       // Obtener la sesión actual
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -461,6 +462,8 @@ export default function CreateExamPage() {
         title: "Error",
         description: error instanceof Error ? error.message : 'Error al crear el examen',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1031,7 +1034,14 @@ export default function CreateExamPage() {
 
         <div className="flex justify-end gap-4">
             <Button type="submit" disabled={loading}>
-              {loading ? "Creando..." : "Crear Examen"}
+              {loading ? (
+                <>
+                  <span className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Creando...
+                </>
+              ) : (
+                "Crear Examen"
+              )}
             </Button>
         </div>
       </form>
