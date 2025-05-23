@@ -195,10 +195,11 @@ export default function ExamsPage() {
             className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Crear Examen
+            Crear Examen con IA
           </Button>
           <Button 
-            variant="outline"
+            variant="ghost"
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white hover:text-white"
             onClick={() => setShowImportDialog(true)}
           >
             <Upload className="h-4 w-4 mr-2" />

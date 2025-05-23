@@ -58,7 +58,7 @@ async function processPDFWithAI(
                       1. Si el documento adjunto está vacío o no contiene preguntas, devuelve un array vacío: []
                       2. No inventes preguntas ni respuestas que no estén en el documento
                       3. Si la respuesta correcta no está claramente marcada, establece "respuesta_correcta" como null
-                      4. Si la respuesta correcta está claramente marcada, establece "razon" como la razón por la que crees que es la respuesta correcta
+                      4. Si la respuesta correcta está claramente marcada.
                       
                       El formato de salida debe ser un array de objetos JSON con la siguiente estructura:
                       [
@@ -70,8 +70,7 @@ async function processPDFWithAI(
                                   "b": "texto opción b",
                                   ...
                               },
-                              "respuesta_correcta": "letra" | null,
-                              "razon": "razón por la que decidiste que es la respuesta correcta"
+                              "respuesta_correcta": "letra" | null
                           },
                           ...
                       ]`,
@@ -249,8 +248,8 @@ async function processPDF(
   fileName: string
 ): Promise<ImportedQuestion[]> {
   try {
-    console.log('Procesando archivo PDF...');
-    
+    console.log("Procesando archivo PDF...");
+
     // Usar procesamiento directo con IA
     return await processPDFWithAI(buffer, fileName);
   } catch (error) {
@@ -263,31 +262,31 @@ export async function POST(request: NextRequest) {
   try {
     if (!OPENROUTER_API_KEY) {
       return NextResponse.json(
-        { message: 'API Key de OpenRouter no configurada' },
+        { message: "API Key de OpenRouter no configurada" },
         { status: 500 }
       );
     }
 
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get("file") as File;
 
     if (!file) {
       return NextResponse.json(
-        { message: 'No se proporcionó archivo' },
+        { message: "No se proporcionó archivo" },
         { status: 400 }
       );
     }
 
     // Validar tipo de archivo
     const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { message: 'Tipo de archivo no soportado. Use PDF, DOC o DOCX.' },
+        { message: "Tipo de archivo no soportado. Use PDF, DOC o DOCX." },
         { status: 400 }
       );
     }
@@ -295,7 +294,7 @@ export async function POST(request: NextRequest) {
     // Validar tamaño (10MB max)
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { message: 'El archivo es demasiado grande. Máximo 10MB.' },
+        { message: "El archivo es demasiado grande. Máximo 10MB." },
         { status: 400 }
       );
     }
@@ -307,7 +306,7 @@ export async function POST(request: NextRequest) {
     let preguntas: ImportedQuestion[] = [];
 
     // Procesar según el tipo de archivo
-    if (file.type === 'application/pdf') {
+    if (file.type === "application/pdf") {
       preguntas = await processPDF(buffer, file.name);
     } else {
       // DOC o DOCX
@@ -317,16 +316,17 @@ export async function POST(request: NextRequest) {
     // Crear el resultado final
     const result: ProcessResult = {
       total_preguntas: preguntas.length,
-      preguntas: preguntas
+      preguntas: preguntas,
     };
 
-    console.log(`✅ Procesamiento completado: ${preguntas.length} preguntas extraídas`);
+    console.log(
+      `✅ Procesamiento completado: ${preguntas.length} preguntas extraídas`
+    );
 
     return NextResponse.json(result);
-
   } catch (error) {
-    console.error('Error general en import-exam:', error);
-    
+    console.error("Error general en import-exam:", error);
+
     if (error instanceof Error) {
       return NextResponse.json(
         { message: `Error al procesar archivo: ${error.message}` },
@@ -335,7 +335,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: 'Error interno del servidor' },
+      { message: "Error interno del servidor" },
       { status: 500 }
     );
   }

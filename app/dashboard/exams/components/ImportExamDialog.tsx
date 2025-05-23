@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, FileText, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,60 @@ export default function ImportExamDialog({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [processedData, setProcessedData] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [processingStage, setProcessingStage] = useState(0);
+  const [tipIndex, setTipIndex] = useState(0);
+  const [estimatedSeconds, setEstimatedSeconds] = useState(0);
+  
+  // Mensajes para cada etapa del procesamiento
+  const stageMessages = [
+    "Analizando documento...",
+    "Extrayendo preguntas con IA...",
+    "Identificando opciones de respuesta...",
+    "Procesando formato final..."
+  ];
+  
+  // Consejos útiles para mostrar durante la carga
+  const processingTips = [
+    "Asegúrate de validar antes de guardar el examen que las respuestas correctas que fueron marcadas por la IA son las correctas.",
+    "Preferiblemente usa un PDF con las respuestas correctas resaltadas de un color brillante (ej. verde fosforescente) o pon un asterisco (*) al final de la respuesta correcta.",
+    "Para mejores resultados, asegúrate que tu documento tenga un formato claro con preguntas numeradas.",
+    "Las preguntas con opciones claramente etiquetadas (A, B, C, D) son más fáciles de procesar.",
+    "Se obtienen mejores resultados con documentos que tienen un buen contraste y texto nítido.",
+    "El sistema puede reconocer varios formatos, pero es ideal si todas las preguntas siguen un patrón uniforme."
+  ];
+
+  // Efecto para rotar los consejos cada 5 segundos durante la carga
+  useEffect(() => {
+    let tipRotationInterval: NodeJS.Timeout;
+    
+    if (isUploading) {
+      // Estimar el tiempo basado en el tipo de archivo
+      const estimatedTime = 45; // Tiempo base en segundos
+      setEstimatedSeconds(estimatedTime);
+      
+      // Configurar intervalo para rotar consejos
+      tipRotationInterval = setInterval(() => {
+        setTipIndex(prevIndex => (prevIndex + 1) % processingTips.length);
+      }, 5000);
+      
+      // Configurar intervalo para avanzar las etapas
+      const stageInterval = setInterval(() => {
+        setProcessingStage(prevStage => {
+          const nextStage = prevStage + 1;
+          return nextStage < stageMessages.length ? nextStage : prevStage;
+        });
+      }, estimatedTime * 250); // Distribuir las etapas a lo largo del tiempo estimado
+      
+      return () => {
+        clearInterval(tipRotationInterval);
+        clearInterval(stageInterval);
+      };
+    }
+    
+    return () => {
+      if (tipRotationInterval) clearInterval(tipRotationInterval);
+    };
+  }, [isUploading, processingTips.length, stageMessages.length]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -59,14 +113,31 @@ export default function ImportExamDialog({
     setUploadProgress(0);
     setError(null);
     setProcessedData(null);
+    setProcessingStage(0);
+    setTipIndex(0);
+    
+    // Estimar tiempo basado en el tipo de archivo
+    const fileType = file.type;
+    const fileSize = file.size / (1024 * 1024); // tamaño en MB
+    
+    // Ajustar tiempo estimado basado en tipo y tamaño
+    const baseTime = fileType.includes('pdf') ? 50 : 40; // PDF suele tomar más tiempo
+    const sizeMultiplier = Math.min(fileSize * 2, 10); // Máximo 10 segundos extra por tamaño
+    setEstimatedSeconds(Math.round(baseTime + sizeMultiplier));
 
     try {
       const formData = new FormData();
       formData.append('file', file);
 
-      // Simular progreso de subida
+      // Simular progreso de subida con etapas
       const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 10, 90));
+        setUploadProgress(prev => {
+          // Crear saltos en el progreso para cada etapa
+          if (prev < 25) return Math.min(prev + 2, 25);
+          if (prev < 50) return Math.min(prev + 1, 50);
+          if (prev < 75) return Math.min(prev + 0.5, 75);
+          return Math.min(prev + 0.2, 90);
+        });
       }, 200);
 
       const response = await fetch('/api/import-exam', {
@@ -179,12 +250,50 @@ export default function ImportExamDialog({
           )}
 
           {isUploading && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Procesando...</span>
-                <span>{uploadProgress}%</span>
+            <div className="space-y-4">
+              {/* Barra de progreso con etapa actual */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="font-medium">{stageMessages[processingStage]}</span>
+                  <span>{Math.round(uploadProgress)}%</span>
+                </div>
+                <Progress value={uploadProgress} className="w-full" />
               </div>
-              <Progress value={uploadProgress} className="w-full" />
+              
+              {/* Indicadores de etapas */}
+              <div className="flex justify-between px-1">
+                {stageMessages.map((_, index) => (
+                  <div 
+                    key={index} 
+                    className={`relative flex h-2 w-2 rounded-full ${index <= processingStage ? 'bg-primary' : 'bg-gray-200'}`}
+                  >
+                    {index <= processingStage && (
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-50"></span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Tiempo estimado */}
+              <div className="text-xs text-gray-500 text-center">
+                Tiempo estimado: aproximadamente {Math.round(estimatedSeconds * (1 - uploadProgress/100))} segundos restantes
+              </div>
+              
+              {/* Consejos rotativos */}
+              <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-blue-700">
+                      {processingTips[tipIndex]}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
