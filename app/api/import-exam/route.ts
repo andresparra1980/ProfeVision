@@ -98,7 +98,7 @@ async function processPDFWithAI(
           {
             id: "file-parser",
             pdf: {
-              engine: "native",
+              engine: "mistral-ocr",
             },
           },
         ],
