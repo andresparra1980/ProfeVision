@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import mammoth from "mammoth";
+import logger from "@/lib/utils/logger";
 
 // Interfaces
 interface ImportedQuestion {
@@ -36,14 +37,21 @@ async function processPDFWithAI(
     const base64Data = pdfBuffer.toString("base64");
     const base64File = `data:application/pdf;base64,${base64Data}`;
 
-    console.log("Enviando PDF para análisis con IA...");
+    logger.api("OpenRouter OCR - Inicio", {
+      fileName,
+      fileSize: `${(pdfBuffer.length / 1024).toFixed(2)} KB`,
+      model: AI_MODEL,
+    });
+    logger.log("Enviando PDF para análisis con IA...");
+
+    const startTime = performance.now();
 
     const response = await fetch(OPENROUTER_API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://localhost:3000",
+        "HTTP-Referer": "https://profevision.com",
         "X-Title": "Extractor de Preguntas PDF",
       },
       body: JSON.stringify({
@@ -80,7 +88,7 @@ async function processPDFWithAI(
             content: [
               {
                 type: "text",
-                text: 'Extrae todas las preguntas y sus opciones de este examen. Para cada pregunta, identifica cuál es la opción que está claramente marcada como correcta (resaltada, subrayada, en negrita, etc.). Si ninguna opción está marcada claramente como correcta, establece "respuesta_correcta" como null.',
+                text: 'Extrae todas las preguntas y sus opciones de este examen. Para cada pregunta, identifica cuál es la opción que está claramente marcada como correcta (resaltada, subrayada, en negrita, etc.). No tomar decisiones basadas en el texto de la pregunta, solo analiza si alguna opción está marcada con el asterisco o resaltada. Si ninguna opción está marcada claramente como correcta, establece "respuesta_correcta" como null.',
               },
               {
                 type: "file",
@@ -98,12 +106,18 @@ async function processPDFWithAI(
           {
             id: "file-parser",
             pdf: {
-              engine: "mistral-ocr",
+              engine: "native",
             },
           },
         ],
       }),
     });
+
+    const endTime = performance.now();
+    logger.perf(
+      "OpenRouter OCR - Tiempo de respuesta",
+      `${(endTime - startTime).toFixed(2)}ms`
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -125,14 +139,25 @@ async function processPDFWithAI(
     const result = JSON.parse(jsonString);
 
     // Asegurarse de que el resultado sea un array
+    let preguntas = [];
+
     if (result.preguntas && Array.isArray(result.preguntas)) {
-      return result.preguntas;
+      preguntas = result.preguntas;
     } else if (Array.isArray(result)) {
-      return result;
+      preguntas = result;
     } else {
-      return [result];
+      preguntas = [result];
     }
+
+    // Log del resultado final
+    logger.api("OpenRouter OCR - Resultado final", {
+      num_preguntas: preguntas.length,
+      primer_pregunta: preguntas.length > 0 ? preguntas[0] : null,
+    });
+
+    return preguntas;
   } catch (error) {
+    logger.error("OpenRouter OCR - Error crítico", error);
     console.error("Error al procesar PDF con IA:", error);
     throw error;
   }
@@ -141,6 +166,13 @@ async function processPDFWithAI(
 // Función para procesar texto con OpenRouter
 async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
   try {
+    logger.api("OpenRouter Text - Inicio", {
+      longitud_texto: text.length,
+      primeros_caracteres: text.substring(0, 100) + "...",
+      modelo: AI_MODEL,
+    });
+
+    const startTime = performance.now();
     const prompt = `Analiza el siguiente texto de examen y extrae las preguntas con sus opciones de respuesta.
     
     INSTRUCCIONES IMPORTANTES:
@@ -173,7 +205,7 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
       headers: {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://localhost:3000",
+        "HTTP-Referer": "https://profevision.com",
         "X-Title": "Extractor de Preguntas",
       },
       body: JSON.stringify({
@@ -191,6 +223,12 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
       }),
     });
 
+    const endTime = performance.now();
+    logger.perf(
+      "OpenRouter Text - Tiempo de respuesta",
+      `${(endTime - startTime).toFixed(2)}ms`
+    );
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(`Error en la API: ${JSON.stringify(errorData)}`);
@@ -206,14 +244,21 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
     // Parsear la respuesta JSON
     const result = JSON.parse(responseContent);
 
+    let preguntas = [];
+
     if (result.preguntas && Array.isArray(result.preguntas)) {
-      return result.preguntas;
+      preguntas = result.preguntas;
     } else if (Array.isArray(result)) {
-      return result;
-    } else {
-      return [];
+      preguntas = result;
     }
+
+    logger.api("OpenRouter Text - Resultado final", {
+      num_preguntas: preguntas.length,
+    });
+
+    return preguntas;
   } catch (error) {
+    logger.error("OpenRouter Text - Error crítico", error);
     console.error("Error al procesar texto con IA:", error);
     throw error;
   }
@@ -222,6 +267,7 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
 // Función para procesar archivos DOC/DOCX
 async function processDOCX(buffer: Buffer): Promise<ImportedQuestion[]> {
   try {
+    logger.log("Extrayendo texto de documento DOCX...");
     console.log("Extrayendo texto de documento DOCX...");
 
     // Usar mammoth para extraer texto del DOCX
@@ -237,6 +283,7 @@ async function processDOCX(buffer: Buffer): Promise<ImportedQuestion[]> {
     // Procesar el texto extraído con IA
     return await processTextWithAI(text);
   } catch (error) {
+    logger.error("DOCX - Error de procesamiento", error);
     console.error("Error al procesar archivo DOCX:", error);
     throw error;
   }
@@ -248,11 +295,13 @@ async function processPDF(
   fileName: string
 ): Promise<ImportedQuestion[]> {
   try {
+    logger.log("Procesando archivo PDF...");
     console.log("Procesando archivo PDF...");
 
     // Usar procesamiento directo con IA
     return await processPDFWithAI(buffer, fileName);
   } catch (error) {
+    logger.error("PDF - Error de procesamiento", error);
     console.error("Error al procesar archivo PDF:", error);
     throw error;
   }
@@ -260,6 +309,7 @@ async function processPDF(
 
 export async function POST(request: NextRequest) {
   try {
+    logger.api("Import Exam - Inicio de solicitud", { url: request.url });
     if (!OPENROUTER_API_KEY) {
       return NextResponse.json(
         { message: "API Key de OpenRouter no configurada" },
@@ -319,12 +369,18 @@ export async function POST(request: NextRequest) {
       preguntas: preguntas,
     };
 
+    logger.api("Import Exam - Procesamiento completado", {
+      total_preguntas: preguntas.length,
+      tipo_archivo: file.type,
+    });
+
     console.log(
       `✅ Procesamiento completado: ${preguntas.length} preguntas extraídas`
     );
 
     return NextResponse.json(result);
   } catch (error) {
+    logger.error("Import Exam - Error general", error);
     console.error("Error general en import-exam:", error);
 
     if (error instanceof Error) {
