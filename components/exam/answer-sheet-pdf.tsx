@@ -297,7 +297,7 @@ export const AnswerSheetPDF = ({ exam, student, group, paperSize = 'LETTER' }: A
         {/* Instrucciones fuera del contenedor */}
         <Text style={styles.instructions}>
           Instrucciones: Rellene completamente el círculo que corresponda a la respuesta correcta.
-          Use lápiz negro o azul. No use bolígrafo rojo. Asegúrese de borrar completamente si necesita cambiar una respuesta.
+          Use bolígrafo negro o azul. No use bolígrafo rojo o lápiz. Asegúrese de borrar completamente si necesita cambiar una respuesta.
         </Text>
       </Page>
     </Document>

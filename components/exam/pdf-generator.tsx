@@ -361,7 +361,7 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
 
             <Text style={styles.instructions}>
               Instrucciones: Rellene completamente el círculo que corresponda a la respuesta correcta.
-              Use lápiz negro o azul. No use bolígrafo rojo. Asegúrese de borrar completamente si necesita cambiar una respuesta.
+              Use bolígrafo negro o azul. No use bolígrafo rojo o lápiz. Asegúrese de borrar completamente si necesita cambiar una respuesta.
             </Text>
           </Page>
         );
