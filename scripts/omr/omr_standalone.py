@@ -11,13 +11,14 @@ Example:
   python omr_standalone.py /path/to/image.jpg --output-json results.json
   python omr_standalone.py /path/to/image.jpg --debug
 """
-
 import sys
 import json
 import argparse
 import cv2
 import numpy as np
 import os
+import os.path
+import shutil
 from typing import Dict, Any, List, Optional, Tuple
 import pathlib
 from pyzbar.pyzbar import decode, ZBarSymbol
@@ -556,10 +557,10 @@ class StandaloneOMRProcessor:
         """Return the QR code region of interest if available."""
         return self.qr_roi
 
-    def _detect_bubbles(self, image: np.ndarray) -> List[Dict[str, Any]]:
+    def _detect_bubbles(self, image: np.ndarray) -> Tuple[List[Dict[str, Any]], Optional[np.ndarray]]:
         """Detect and process answer bubbles using the full image."""
         if image is None:
-            return []
+            return [], None
         
         if len(image.shape) == 3:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -569,8 +570,14 @@ class StandaloneOMRProcessor:
         height, width = gray.shape[:2]
         
         # First find the large rectangle ROI that contains all answers
+        # Apply multiple preprocessing strategies to better handle damaged forms
+        
+        # Collection of binary images with different processing parameters
+        thresh_methods = []
+        
+        # Strategy 1: Standard adaptive threshold with moderate morphology
         blurred = cv2.GaussianBlur(gray, (9, 9), 0)
-        thresh = cv2.adaptiveThreshold(
+        thresh1 = cv2.adaptiveThreshold(
             blurred,
             255,
             cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -578,11 +585,34 @@ class StandaloneOMRProcessor:
             blockSize=51,
             C=7
         )
-        
         kernel = np.ones((3,3), np.uint8)
-        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
-        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
-
+        thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_OPEN, kernel, iterations=2)
+        thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE, kernel, iterations=1)
+        thresh_methods.append(thresh1)
+        
+        # Strategy 2: Stronger morphological operations to close larger gaps
+        thresh2 = cv2.adaptiveThreshold(
+            blurred,
+            255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV,
+            blockSize=51,
+            C=9  # Higher C value for stronger thresholding
+        )
+        kernel_large = np.ones((5,5), np.uint8)  # Larger kernel for closing bigger gaps
+        thresh2 = cv2.morphologyEx(thresh2, cv2.MORPH_CLOSE, kernel_large, iterations=2)
+        thresh2 = cv2.morphologyEx(thresh2, cv2.MORPH_OPEN, kernel, iterations=1)
+        thresh_methods.append(thresh2)
+        
+        # Strategy 3: Otsu thresholding as a fallback
+        _, thresh3 = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+        thresh3 = cv2.morphologyEx(thresh3, cv2.MORPH_CLOSE, kernel_large, iterations=3)
+        thresh_methods.append(thresh3)
+        
+        # Use the first method for initial processing
+        thresh = thresh_methods[0]
+        
+        # Find contours with the first threshold method
         contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         if self.debug:
@@ -590,34 +620,92 @@ class StandaloneOMRProcessor:
             cv2.drawContours(debug_all_contours, contours, -1, (0,255,0), 2)
             cv2.imwrite(self._get_debug_path("05_all_contours", ".png"), debug_all_contours)
 
-        # Find the largest rectangle in the middle of the page
+        # Try all thresholding methods to find a suitable ROI
         main_roi = None
         max_area = 0
         image_area = height * width
         
-        for cnt in contours:
-            area = cv2.contourArea(cnt)
-            if area < image_area * 0.2:  # Skip if too small
-                continue
+        # Variables to track which method was successful
+        successful_method_idx = 0
+        successful_contours = contours
+        
+        for method_idx, method_thresh in enumerate(thresh_methods):
+            # Skip first method if already processed
+            if method_idx == 0:
+                current_contours = contours
+            else:
+                # Find contours with alternative threshold method
+                current_contours, _ = cv2.findContours(method_thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                
+                if self.debug:
+                    debug_alt_contours = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+                    cv2.drawContours(debug_alt_contours, current_contours, -1, (0,255,0), 2)
+                    cv2.imwrite(self._get_debug_path(f"05_contours_method_{method_idx+1}", ".png"), debug_alt_contours)
+                    cv2.imwrite(self._get_debug_path(f"05_thresh_method_{method_idx+1}", ".png"), method_thresh)
             
-            x, y, w, h = cv2.boundingRect(cnt)
-            ar = w / float(h)
+            # For fallback methods, use more lenient criteria
+            min_area_ratio = 0.2 if method_idx == 0 else 0.15
+            min_y_percent = 0.2 if method_idx == 0 else 0.1
+            max_y_percent = 0.8 if method_idx == 0 else 0.9
+            min_aspect = 0.5 if method_idx == 0 else 0.3
+            max_aspect = 2.0 if method_idx == 0 else 2.5
             
-            # Check if it's roughly in the middle vertically and has reasonable aspect ratio
-            center_y = y + h/2
-            if not (height * 0.2 < center_y < height * 0.8):
-                continue
-            if not (0.5 < ar < 2.0):
-                continue
+            # Look for valid ROIs with current method
+            for cnt in current_contours:
+                area = cv2.contourArea(cnt)
+                if area < image_area * min_area_ratio:  # Skip if too small
+                    continue
+                
+                x, y, w, h = cv2.boundingRect(cnt)
+                ar = w / float(h)
+                
+                # Check if it's roughly in the middle vertically and has reasonable aspect ratio
+                center_y = y + h/2
+                if not (height * min_y_percent < center_y < height * max_y_percent):
+                    continue
+                if not (min_aspect < ar < max_aspect):
+                    continue
+                
+                if area > max_area:
+                    max_area = area
+                    main_roi = (x, y, w, h)
             
-            if area > max_area:
-                max_area = area
-                main_roi = (x, y, w, h)
+            # If we found a valid ROI with this method, no need to try other methods
+            if main_roi is not None and method_idx > 0:
+                if self.debug:
+                    print(f"Found main answer region using threshold method {method_idx+1}")
+                # Store which method was successful for later use
+                successful_method_idx = method_idx
+                successful_contours = current_contours
+                break
+        
+        # Update detection method if we're using fallback grid
         
         if main_roi is None:
             if self.debug:
-                print("Could not find main answer region")
-            return []
+                print("Could not find main answer region, trying fallback grid approach")
+            
+            # Fallback approach: Use a grid estimation based on typical OMR layout
+            # In most OMR forms, the answer region covers a large central portion of the form
+            margin_x = int(width * 0.1)  # 10% margin from edges
+            margin_top = int(height * 0.3)  # Top 30% often contains headers/instructions
+            margin_bottom = int(height * 0.1)  # Bottom often has less content
+            
+            fallback_x = margin_x
+            fallback_y = margin_top
+            fallback_w = width - (2 * margin_x)
+            fallback_h = height - margin_top - margin_bottom
+            
+            # Use this fallback grid as our ROI
+            main_roi = (fallback_x, fallback_y, fallback_w, fallback_h)
+            successful_method_idx = -1  # Indicate we're using fallback grid
+            
+            if self.debug:
+                print(f"Using fallback grid estimation for answer region: x={fallback_x}, y={fallback_y}, w={fallback_w}, h={fallback_h}")
+                fallback_img = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+                cv2.rectangle(fallback_img, (fallback_x, fallback_y), 
+                             (fallback_x + fallback_w, fallback_y + fallback_h), (0, 255, 255), 3)
+                cv2.imwrite(self._get_debug_path("05_fallback_grid", ".png"), fallback_img)
         
         x, y, w, h = main_roi
         if self.debug:
@@ -626,13 +714,95 @@ class StandaloneOMRProcessor:
             cv2.rectangle(debug_main_roi, (x,y), (x+w,y+h), (0,0,255), 2)
             cv2.imwrite(self._get_debug_path("05_main_roi", ".png"), debug_main_roi)
         
-        # Extract the ROI for bubble detection
-        gray_roi = gray[y:y+h, x:x+w]
-        self.bubble_roi_x_offset = x
-        self.bubble_roi_y_offset = y
+        # If we used an alternative detection method and found a good contour, perform perspective warp
+        if successful_method_idx > 0:
+            # Find the contour that matches our main_roi
+            target_contour = None
+            for cnt in successful_contours:
+                cnt_x, cnt_y, cnt_w, cnt_h = cv2.boundingRect(cnt)
+                if abs(cnt_x - x) < 5 and abs(cnt_y - y) < 5 and abs(cnt_w - w) < 5 and abs(cnt_h - h) < 5:
+                    target_contour = cnt
+                    break
+            
+            if target_contour is not None:
+                if self.debug:
+                    print(f"Applying perspective warp to detected rectangle from method {successful_method_idx+1}")
+                
+                # Approximate the contour to get a clean quadrilateral
+                peri = cv2.arcLength(target_contour, True)
+                approx = cv2.approxPolyDP(target_contour, 0.02 * peri, True)
+                
+                # If it's roughly a quadrilateral, perform perspective warp
+                if 4 <= len(approx) <= 6:
+                    # If more than 4 points, further simplify
+                    if len(approx) > 4:
+                        approx = cv2.approxPolyDP(target_contour, 0.04 * peri, True)
+                    
+                    if len(approx) == 4:
+                        # Order points in correct sequence
+                        rect_points = approx.reshape(4, 2)
+                        rect = self._order_points(rect_points)
+                        
+                        # Calculate new dimensions
+                        width_a = np.linalg.norm(rect[1] - rect[0])
+                        width_b = np.linalg.norm(rect[2] - rect[3])
+                        height_a = np.linalg.norm(rect[3] - rect[0])
+                        height_b = np.linalg.norm(rect[2] - rect[1])
+                        
+                        maxWidth = max(int(width_a), int(width_b))
+                        maxHeight = max(int(height_a), int(height_b))
+                        
+                        # Define destination points
+                        dst_pts = np.array([
+                            [0, 0],
+                            [maxWidth - 1, 0],
+                            [maxWidth - 1, maxHeight - 1],
+                            [0, maxHeight - 1]
+                        ], dtype=np.float32)
+                        
+                        # Get transformation matrix and warp the image
+                        matrix = cv2.getPerspectiveTransform(rect, dst_pts)
+                        warped_roi = cv2.warpPerspective(gray, matrix, (maxWidth, maxHeight))
+                        
+                        if self.debug:
+                            cv2.imwrite(self._get_debug_path("05_warped_roi", ".png"), warped_roi)
+                        
+                        # Use the warped ROI instead of just cropping
+                        gray_roi = warped_roi
+                        self.bubble_roi_x_offset = 0
+                        self.bubble_roi_y_offset = 0
+                        # Set a flag to indicate that we've used perspective warping
+                        self.perspective_warped = True
+                    else:
+                        # Fall back to simple cropping if we can't get exactly 4 points
+                        gray_roi = gray[y:y+h, x:x+w]
+                        self.bubble_roi_x_offset = x
+                        self.bubble_roi_y_offset = y
+                else:
+                    # Fall back to simple cropping
+                    gray_roi = gray[y:y+h, x:x+w]
+                    self.bubble_roi_x_offset = x
+                    self.bubble_roi_y_offset = y
+            else:
+                # Fall back to simple cropping
+                gray_roi = gray[y:y+h, x:x+w]
+                self.bubble_roi_x_offset = x
+                self.bubble_roi_y_offset = y
+        else:
+            # For method 0 (standard) or fallback grid, use simple cropping
+            gray_roi = gray[y:y+h, x:x+w]
+            self.bubble_roi_x_offset = x
+            self.bubble_roi_y_offset = y
+            # Set flag to indicate no perspective warping was used
+            self.perspective_warped = False
         
         if self.debug:
             cv2.imwrite(self._get_debug_path("01_gray_roi", ".png"), gray_roi)
+            
+            # Save a color version of the warped ROI to draw bubbles on for debugging
+            if getattr(self, 'perspective_warped', False):
+                warped_roi_debug = cv2.cvtColor(gray_roi.copy(), cv2.COLOR_GRAY2BGR)
+                cv2.imwrite(self._get_debug_path("05_warped_roi_color", ".png"), warped_roi_debug)
 
         # 1. Moderate blur to preserve bubble edges
         blurred_roi = cv2.GaussianBlur(gray_roi, (5, 5), 1)
@@ -1070,7 +1240,7 @@ class StandaloneOMRProcessor:
 
         # Sort questions by question number
         questions.sort(key=lambda q: q['question_number'])
-        return questions
+        return questions, gray_roi
 
     def _calculate_average_dims(self, elements: List[Dict]) -> Tuple[float, float]:
         if not elements:
@@ -1261,6 +1431,23 @@ class StandaloneOMRProcessor:
         if gray_image is None or not questions:
             return
         
+        # Check if we used perspective warping - if so, use the warped ROI directly instead of the original image
+        perspective_warped = getattr(self, 'perspective_warped', False)
+        
+        if perspective_warped and self.debug:
+            # For warped images, use the same debug image we created in _generate_warped_debug_image
+            try:
+                warped_debug_path = self._get_debug_path("warped_bubbles_overlay", ".png")
+                if os.path.exists(warped_debug_path):
+                    # Copy the warped debug image to the output path
+                    shutil.copy(warped_debug_path, output_image_path)
+                    return
+            except Exception as e:
+                if self.debug:
+                    print(f"Error using warped debug image: {e}")
+        
+        # If we couldn't use the warped debug image or perspective warping wasn't used,
+        # generate the debug image on the original image
         debug_img = cv2.cvtColor(gray_image, cv2.COLOR_GRAY2BGR)
         x_offset = getattr(self, 'bubble_roi_x_offset', 0)
         y_offset = getattr(self, 'bubble_roi_y_offset', 0)
@@ -1281,10 +1468,10 @@ class StandaloneOMRProcessor:
                         cv2.drawContours(debug_img, [cnt_offset], -1, (255, 0, 0), 2)
                     elif bounds:
                         x, y, w, h = map(int, bounds)
-                        cv2.rectangle(debug_img, 
-                                    (x + x_offset, y + y_offset),
+                        cv2.rectangle(debug_img, (x + x_offset, y + y_offset),
                                     (x + w + x_offset, y + h + y_offset),
                                     (255, 0, 0), 2)
+                    
                     if bounds:
                         x, y, w, h = map(int, bounds)
                         cv2.putText(debug_img, str(q_num), 
@@ -1297,6 +1484,7 @@ class StandaloneOMRProcessor:
                 for b_idx, bubble_data in enumerate(question['bubbles']):
                     if not isinstance(bubble_data, dict):
                         continue
+                    
                     contour = bubble_data.get('contour')
                     bounds = bubble_data.get('bounds')
                     letter = self._get_option_letter(b_idx)
@@ -1323,13 +1511,13 @@ class StandaloneOMRProcessor:
                             cv2.drawContours(debug_img, [cnt_offset], -1, color, 2)
                         elif bounds:
                             x, y, w, h = map(int, bounds)
-                            cv2.rectangle(debug_img, 
-                                        (x + x_offset, y + y_offset),
+                            cv2.rectangle(debug_img, (x + x_offset, y + y_offset),
                                         (x + w + x_offset, y + h + y_offset),
                                         color, 2)
                             
                             # For reconstructed bubbles, draw dashed lines
                             if is_reconstructed:
+                                # Always apply offsets for consistent positioning
                                 for i in range(0, h, 4):  # Draw dashed vertical lines
                                     cv2.line(debug_img, 
                                            (x + x_offset, y + y_offset + i),
@@ -1354,8 +1542,8 @@ class StandaloneOMRProcessor:
                             fill_ratio = question.get('fill_ratios', [])[b_idx] if b_idx < len(question.get('fill_ratios', [])) else 0
                             text_color = color
                             cv2.putText(debug_img, f"{letter}:{fill_ratio:.2f}", 
-                                      (x + x_offset, y + y_offset - 5),
-                                      cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color, 1)
+                                       (x + x_offset, y + y_offset - 5),
+                                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color, 1)
                     except Exception as e:
                         pass
             
@@ -1376,6 +1564,116 @@ class StandaloneOMRProcessor:
         except Exception as e:
             pass
 
+    def _generate_warped_debug_image(self, questions: List[Dict[str, Any]]) -> None:
+        """Generate a debug image showing detected bubbles directly on the warped ROI."""
+        if not hasattr(self, 'perspective_warped') or not self.perspective_warped:
+            return  # Only create this debug for perspective warped images
+        
+        if not questions or not self.debug:
+            return
+            
+        # Get the warped ROI image (should be grayscale)
+        try:
+            warped_roi_path = self._get_debug_path("05_warped_roi_color", ".png")
+            warped_debug = cv2.imread(warped_roi_path)
+            if warped_debug is None:
+                # Try to create it from the grayscale warped ROI
+                warped_roi_gray_path = self._get_debug_path("05_warped_roi", ".png")
+                if os.path.exists(warped_roi_gray_path):
+                    warped_roi_gray = cv2.imread(warped_roi_gray_path, cv2.IMREAD_GRAYSCALE)
+                    if warped_roi_gray is not None:
+                        warped_debug = cv2.cvtColor(warped_roi_gray, cv2.COLOR_GRAY2BGR)
+                        cv2.imwrite(warped_roi_path, warped_debug)
+                    else:
+                        return
+                else:
+                    return
+        except Exception as e:
+            if self.debug:
+                print(f"Error loading warped ROI for debug: {e}")
+            return
+            
+        # Draw bubbles directly on the warped image without any offsets
+        for question in questions:
+            q_num = question.get('question_number')
+            if q_num is None:
+                continue
+                
+            # Draw question bounds
+            contour = question.get('contour')
+            bounds = question.get('bounds')
+            
+            if contour is not None:
+                cnt = np.array(contour, dtype=np.int32)
+                cv2.drawContours(warped_debug, [cnt], -1, (255, 0, 0), 2)
+            elif bounds:
+                x, y, w, h = map(int, bounds)
+                cv2.rectangle(warped_debug, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            
+            # Draw question number at top-left in BLUE (BGR format)
+            if bounds:
+                x, y, w, h = map(int, bounds)
+                # Draw prominent question number label with better visibility
+                # First draw a black background for contrast
+                cv2.putText(warped_debug, str(q_num), 
+                           (x - 20, y + 30),  # Position to left of question
+                           cv2.FONT_HERSHEY_DUPLEX, 1.0, (0, 0, 0), 4)  # Black outline for visibility
+                # Then draw the blue number on top
+                cv2.putText(warped_debug, str(q_num), 
+                           (x - 20, y + 30),  # Position to left of question
+                           cv2.FONT_HERSHEY_DUPLEX, 1.0, (255, 0, 0), 2)  # BLUE in BGR format
+            
+            # Draw bubbles
+            if isinstance(question.get('bubbles'), list):
+                for b_idx, bubble_data in enumerate(question['bubbles']):
+                    if not isinstance(bubble_data, dict):
+                        continue
+                    
+                    contour = bubble_data.get('contour')
+                    bounds = bubble_data.get('bounds')
+                    letter = self._get_option_letter(b_idx)
+                    
+                    # Determine if this bubble is filled
+                    is_filled = False
+                    is_selected = False
+                    fill_ratio = 0.0
+                    
+                    if b_idx < len(question.get('fill_ratios', [])):
+                        fill_ratio = question['fill_ratios'][b_idx]
+                        # Use a default threshold of 0.6 if fill_threshold is not defined
+                        threshold = getattr(self, 'fill_threshold', 0.6)
+                        is_filled = fill_ratio >= threshold
+                    
+                    if question.get('answer_index') == b_idx:
+                        is_selected = True
+                        
+                    # Choose color based on status
+                    if is_filled:
+                        color = (0, 0, 255)  # RED for filled bubbles (BGR format)
+                    else:
+                        color = (0, 255, 0)  # GREEN for non-filled bubbles (BGR format)
+                    
+                    # Draw the bubble directly on warped image (no offsets)
+                    if contour is not None:
+                        cnt = np.array(contour, dtype=np.int32)
+                        cv2.drawContours(warped_debug, [cnt], -1, color, 2)
+                    elif bounds:
+                        x, y, w, h = map(int, bounds)
+                        cv2.rectangle(warped_debug, (x, y), (x + w, y + h), color, 2)
+                        
+                    # Add fill ratio label
+                    if bounds:
+                        x, y = map(int, bounds[:2])
+                        cv2.putText(warped_debug, f"{letter}:{fill_ratio:.2f}", 
+                                   (x, y - 5),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+        
+        # Save the debug image
+        output_path = self._get_debug_path("warped_bubbles_overlay", ".png")
+        cv2.imwrite(output_path, warped_debug)
+        if self.debug:
+            print(f"Saved warped debug overlay to {output_path}")
+    
     def process_image(self, image_path: str) -> Dict[str, Any]:
         """Process the OMR image and return results."""
         try:
@@ -1385,24 +1683,36 @@ class StandaloneOMRProcessor:
 
             warped = self._extract_paper(original_image)
             if warped is None:
+                # If paper extraction failed, try to use the original image directly
+                # This might happen for already well-cropped images or very damaged ones
                 warped = original_image
-                self.warped_image = warped
-                
-            # QR detection - use the original warped paper image
+                # Ensure self.warped_image is set for QR detection if _extract_paper didn't set it
+                if self.warped_image is None:
+                    self.warped_image = warped
+                if self.debug:
+                    cv2.imwrite(self._get_debug_path("00_original_as_warped", ".png"), warped)
+            
+            # QR detection - use the original warped paper image (self.warped_image is set by _extract_paper)
             raw_qr_data = self._extract_qr_data(self.warped_image)
             qr_output = raw_qr_data if raw_qr_data else ""
             
             # Detect inner rectangle for bubble detection
-            form_warped = self._detect_form_rectangle(warped)
+            # Try to find the form rectangle first
+            form_warped = self._detect_form_rectangle(warped) # 'warped' is from _extract_paper or original
+            
+            bubble_warped_source_image: Optional[np.ndarray] = None
             if form_warped is not None:
                 if self.debug:
-                    print("Using form rectangle for bubble detection")
-                bubble_warped = form_warped
+                    print("Using detected form rectangle as base for bubble detection")
+                bubble_warped_source_image = form_warped
             else:
-                bubble_warped = warped
+                if self.debug:
+                    print("No form rectangle detected, using extracted paper (or original) as base for bubble detection")
+                bubble_warped_source_image = warped # This is the fallback
 
             # Bubble detection using the appropriate image
-            questions_processed = self._detect_bubbles(bubble_warped)
+            # _detect_bubbles might further refine the ROI, e.g., by perspective warping
+            questions_processed, final_gray_roi_for_bubbles = self._detect_bubbles(bubble_warped_source_image)
 
             answers_list = []
             valid_question_count = 0
@@ -1428,11 +1738,30 @@ class StandaloneOMRProcessor:
 
             # Always generate the final debug image, regardless of debug mode
             debug_image_path = self._get_debug_path(image_path, "questions_detected.jpeg")
-            if len(bubble_warped.shape) == 3:
-                gray_for_debug = cv2.cvtColor(bubble_warped, cv2.COLOR_BGR2GRAY)
+            
+            image_to_pass_to_generate_debug: Optional[np.ndarray] = None
+            if getattr(self, 'perspective_warped', False) and final_gray_roi_for_bubbles is not None:
+                # If perspective warping occurred, use the exact ROI that bubbles were detected on.
+                # Offsets (self.bubble_roi_x_offset, self.bubble_roi_y_offset) should be 0 in this case,
+                # as set by _detect_bubbles when perspective_warped is True.
+                image_to_pass_to_generate_debug = final_gray_roi_for_bubbles
+            elif bubble_warped_source_image is not None:
+                # Otherwise, use the broader bubble_warped_source_image (could be form_warped or original warped)
+                # Offsets will be used by _generate_debug_image to place bubbles correctly.
+                if len(bubble_warped_source_image.shape) == 3:
+                    image_to_pass_to_generate_debug = cv2.cvtColor(bubble_warped_source_image, cv2.COLOR_BGR2GRAY)
+                else:
+                    image_to_pass_to_generate_debug = bubble_warped_source_image.copy()
+
+            if image_to_pass_to_generate_debug is not None:
+                self._generate_debug_image(image_to_pass_to_generate_debug, questions_processed, debug_image_path)
             else:
-                gray_for_debug = bubble_warped.copy()
-            self._generate_debug_image(gray_for_debug, questions_processed, debug_image_path)
+                if self.debug:
+                    print("Skipping _generate_debug_image as the base image for it is None.")
+            
+            # Generate a debug image showing bubbles directly on the warped ROI if perspective warping was used
+            if self.debug and getattr(self, 'perspective_warped', False):
+                self._generate_warped_debug_image(questions_processed)
 
             return result_json
 
