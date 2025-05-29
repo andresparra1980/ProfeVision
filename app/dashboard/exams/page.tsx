@@ -1,19 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FileText, Eye, Printer, Users, FileOutput, Trash2, Link, Upload, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { AuthError } from "@supabase/supabase-js";
+import { logger } from "@/lib/utils/logger";
+import { Upload, Plus } from "lucide-react"; // Added for page header buttons
+import ImportExamDialog from "./components/ImportExamDialog";
+import ExamsTableDesktop from "./components/ExamsTableDesktop";
+import ExamsTableMobile from "./components/ExamsTableMobile";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,13 +19,36 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-import { AuthError } from "@supabase/supabase-js";
-import { logger } from "@/lib/utils/logger";
 import { AuroraText } from "@/components/magicui/aurora-text";
-import ImportExamDialog from "./components/ImportExamDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button"; // Added for dialogs
+
+// Define a simple useMediaQuery hook
+const useMediaQuery = (query: string) => {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    // Asegurarse de que window está definido (para SSR/SSG)
+    if (typeof window === 'undefined') return;
+
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    const listener = () => setMatches(media.matches);
+    window.addEventListener("resize", listener);
+    return () => window.removeEventListener("resize", listener);
+  }, [matches, query]);
+
+  return matches;
+};
 
 interface Exam {
   id: string;
@@ -68,16 +87,17 @@ interface ImportResult {
 
 export default function ExamsPage() {
   const router = useRouter();
-  const [exams, setExams] = useState<Exam[]>([]);
+  const [rawExams, setRawExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [examToDelete, setExamToDelete] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  useEffect(() => {
-    fetchExams();
-  }, []);
+  const isDesktop = useMediaQuery("(min-width: 768px)"); // md breakpoint (Tailwind)
 
-  async function fetchExams() {
+  const fetchExams = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -94,7 +114,7 @@ export default function ExamsPage() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setExams(data || []);
+      setRawExams(data || []);
     } catch (error) {
       const err = error as AuthError | Error;
       const code = 'code' in err ? err.code : undefined;
@@ -112,341 +132,206 @@ export default function ExamsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  const filteredExams = exams.filter((exam) =>
+  useEffect(() => {
+    fetchExams();
+  }, [fetchExams]);
+
+  const filteredExams = rawExams.filter((exam) =>
     exam.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (exam.descripcion && exam.descripcion.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (exam.materias?.nombre && exam.materias.nombre.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "borrador":
-        return <span className="rounded-full bg-accent text-accent-foreground px-2 py-1 text-xs font-medium shadow-sm">Borrador</span>;
-      case "publicado":
-        return <span className="rounded-full bg-primary text-primary-foreground px-2 py-1 text-xs font-medium shadow-sm">Publicado</span>;
-      case "cerrado":
-        return <span className="rounded-full bg-destructive text-destructive-foreground px-2 py-1 text-xs font-medium shadow-sm">Cerrado</span>;
-      default:
-        return <span className="rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium shadow-sm">{status}</span>;
-    }
-  };
 
   const handleExamClick = (examId: string) => {
     router.push(`/dashboard/exams/${examId}/edit`);
   };
 
-  const handleDelete = async (examId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      // Obtener la sesión actual
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No autorizado');
-      }
+  const handleOpenDeleteDialog = (examId: string) => {
+    setExamToDelete(examId);
+    setShowDeleteDialog(true);
+  };
 
-      const response = await fetch(`/api/exams/${examId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
+  const confirmAndDeleteExam = async (examId: string) => {
+    // 1. Delete from examen_grupo_preguntas_respuestas (if applicable, direct relation might not exist)
+    // This step might be complex depending on schema, assuming examen_grupo_preguntas is the link
+    const { data: egpDataForResp, error: egpErrorSelectForResp } = await supabase
+      .from('examen_grupo_preguntas')
+      .select('id')
+      .eq('examen_id', examId);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Error al eliminar el examen');
-      }
-
-      toast.success('Examen eliminado correctamente');
-      // Actualizar la lista de exámenes
-      setExams(exams.filter(exam => exam.id !== examId));
-    } catch (error) {
-      const err = error as AuthError | Error;
-      const code = 'code' in err ? err.code : undefined;
-      const details = 'details' in err ? err.details : undefined;
-      const status = err instanceof AuthError ? err.status : undefined;
-
-      logger.error("[ExamsPage] Error deleting exam:", {
-        message: err.message,
-        status: status,
-        code: code,
-        details: details,
-        errorObject: err
-      });
-      toast.error(`Error al eliminar el examen${status ? ` (Código: ${status})` : ''}: ${err.message}`);
+    if (egpErrorSelectForResp) {
+      throw new Error(`Error selecting examen_grupo_preguntas for responses: ${egpErrorSelectForResp.message}`);
     }
+
+    if (egpDataForResp && egpDataForResp.length > 0) {
+      const egpIds = egpDataForResp.map((item: { id: string }) => item.id);
+      // Assuming a direct link from examen_grupo_preguntas_respuestas to examen_grupo_preguntas.id
+      // If not, this part needs adjustment based on actual schema for student responses.
+      const { error: egprError } = await supabase
+        .from('examen_grupo_preguntas_respuestas') // This table might be named differently or structured via examen_aplicacion_id
+        .delete()
+        .in('examen_grupo_pregunta_id', egpIds); // This foreign key needs to be correct
+      if (egprError) {
+        logger.warn(`Warning deleting examen_grupo_preguntas_respuestas (might be normal if no responses yet): ${egprError.message}`);
+      }
+    }
+
+    // 2. Delete from examen_grupo_preguntas
+    const { error: egpError } = await supabase
+      .from('examen_grupo_preguntas')
+      .delete()
+      .eq('examen_id', examId);
+    if (egpError) {
+      logger.warn(`Warning deleting examen_grupo_preguntas (might be normal if not configured for groups): ${egpError.message}`);
+    }
+
+    // 3. Delete from examen_grupo
+    const { error: egError } = await supabase
+      .from("examen_grupo")
+      .delete()
+      .eq("examen_id", examId);
+    if (egError) {
+      logger.warn(`Warning deleting examen_grupo (might be normal if not assigned to groups): ${egError.message}`);
+    }
+
+    // 4. Delete from opciones_respuesta (via preguntas)
+    const { data: preguntasData, error: preguntasError } = await supabase
+      .from("preguntas")
+      .select("id")
+      .eq("examen_id", examId);
+
+    if (preguntasError) throw new Error(`Error fetching preguntas for deleting opciones: ${preguntasError.message}`);
+
+    if (preguntasData && preguntasData.length > 0) {
+      const preguntaIds = preguntasData.map((p: { id: string }) => p.id);
+      const { error: opcionesError } = await supabase
+        .from("opciones_respuesta")
+        .delete()
+        .in("pregunta_id", preguntaIds);
+      if (opcionesError) throw new Error(`Error deleting opciones_respuesta: ${opcionesError.message}`);
+    }
+
+    // 5. Delete from preguntas
+    const { error: preguntasDelError } = await supabase
+      .from("preguntas")
+      .delete()
+      .eq("examen_id", examId);
+    if (preguntasDelError) throw new Error(`Error deleting preguntas: ${preguntasDelError.message}`);
+
+    // 6. Delete from examenes
+    const { error: examError } = await supabase
+      .from("examenes")
+      .delete()
+      .eq("id", examId);
+    if (examError) throw new Error(`Error deleting exam: ${examError.message}`);
+
+    fetchExams(); // Re-fetch exams after deletion
+  };
+
+  const handleCreateExam = () => {
+    router.push("/dashboard/exams/create-with-ai");
   };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-2">
-          <AuroraText className="text-2xl font-bold tracking-tight">
+        <AuroraText className="text-2xl font-bold tracking-tight">
             Exámenes
-          </AuroraText>
-          <p className="text-muted-foreground">
-            Gestiona y crea exámenes para tus estudiantes
-          </p>
+        </AuroraText>
+          <p className="text-muted-foreground">Gestiona y crea exámenes para tus estudiantes.</p>
         </div>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => router.push("/dashboard/exams/create-with-ai")}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Crear Examen con IA
-          </Button>
-          <Button 
-            variant="ghost"
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white hover:text-white"
-            onClick={() => setShowImportDialog(true)}
-          >
-            <Upload className="h-4 w-4 mr-2" />
+        <div className="flex items-center space-x-2 flex-shrink-0">
+          <Button onClick={() => setShowImportDialog(true)} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+            <Upload className="mr-2 h-4 w-4" />
             Importar Examen
+          </Button>
+          <Button onClick={handleCreateExam} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+            <Plus className="mr-2 h-4 w-4" />
+            Crear Examen con IA
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Todos los Exámenes</CardTitle>
-          <CardDescription>
-            Lista de todos los exámenes creados
-          </CardDescription>
-          <div className="mt-4">
-            <Input
-              placeholder="Buscar examen..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-            </div>
-          ) : filteredExams.length === 0 ? (
-            <div className="py-8 text-center">
-              <p className="text-muted-foreground">No hay exámenes disponibles</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Título</TableHead>
-                    <TableHead>Materia</TableHead>
-                    <TableHead>Grupos Asignados</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Duración</TableHead>
-                    <TableHead>Creado</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredExams.map((exam) => (
-                    <TableRow key={exam.id} className="cursor-pointer" onClick={() => handleExamClick(exam.id)}>
-                      <TableCell className="font-medium">{exam.titulo}</TableCell>
-                      <TableCell>{exam.materias?.nombre || "Sin materia"}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {exam.examen_grupo?.map((asignacion) => (
-                            <span
-                              key={asignacion.grupo.id}
-                              className="inline-flex items-center justify-center rounded-full bg-secondary text-white px-2 py-1 text-xs font-medium shadow-sm text-center"
-                            >
-                              {asignacion.grupo.nombre}
-                            </span>
-                          ))}
-                          {(!exam.examen_grupo || exam.examen_grupo.length === 0) && (
-                            <span className="text-xs text-muted-foreground">Sin grupos asignados</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(exam.estado)}</TableCell>
-                      <TableCell>{exam.duracion_minutos} min</TableCell>
-                      <TableCell>{new Date(exam.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <div className="flex space-x-2">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/edit`)}
-                                >
-                                  <FileText className="h-4 w-4" />
-                                  <span className="sr-only">Editar</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Editar examen</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+      {isDesktop ? (
+        <ExamsTableDesktop
+          filteredExams={filteredExams}
+          loading={loading}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handleExamClick={handleExamClick}
+          onOpenDeleteDialog={handleOpenDeleteDialog}
+        />
+      ) : (
+        <ExamsTableMobile
+          filteredExams={filteredExams}
+          loading={loading}
+          onOpenDeleteDialog={handleOpenDeleteDialog}
+          setShowImportDialog={setShowImportDialog}
+          handleCreateExam={handleCreateExam}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+      )}
 
-                          {exam.estado === 'borrador' && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                        <span className="sr-only">Eliminar</span>
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Esta acción eliminará permanentemente el examen y todos sus elementos relacionados.
-                                          Esta acción no se puede deshacer.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
-                                          Cancelar
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction 
-                                          onClick={(e) => handleDelete(exam.id, e)}
-                                        >
-                                          Eliminar
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Eliminar examen</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/export`)}
-                                >
-                                  <Printer className="h-4 w-4" />
-                                  <span className="sr-only">Exportar formatos</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Exportar hojas de preguntas</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/responses`)}
-                                >
-                                  <FileOutput className="h-4 w-4" />
-                                  <span className="sr-only">Hojas de respuesta</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Generar hojas de respuesta</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/assign`)}
-                                >
-                                  <Users className="h-4 w-4" />
-                                  <span className="sr-only">Asignar grupos</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Asignar más grupos a este examen</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/results`)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                  <span className="sr-only">Ver resultados</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Ver resultados del examen</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => router.push(`/dashboard/exams/${exam.id}/link-grade-component`)}
-                                >
-                                  <Link className="h-4 w-4" />
-                                  <span className="sr-only">Vincular a Componente de Nota</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Vincular a Componente de Nota</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <ImportExamDialog 
+      <ImportExamDialog
         _open={showImportDialog}
         onOpenChange={setShowImportDialog}
         onImportSuccess={(examData: ImportResult & { importId: string }) => {
-          // Usar importId para navegar a la página de creación
-          // Los datos completos ya están en localStorage
           router.push(`/dashboard/exams/create?importId=${examData.importId}`);
         }}
       />
+
+      {showDeleteDialog && examToDelete && (
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Confirmar Eliminación?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este examen?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  toast.promise(confirmAndDeleteExam(examToDelete), {
+                    loading: "Eliminando examen...",
+                    success: "Examen eliminado exitosamente.",
+                    error: (err: Error) => err.message || "Error al eliminar el examen.",
+                  });
+                  setShowDeleteDialog(false);
+                }}
+                className="bg-destructive hover:bg-destructive/90"
+              >
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+
+      {showCreateDialog && (
+         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Crear Nuevo Examen</DialogTitle>
+              <DialogDescription>
+                (Este diálogo sería para un formulario de creación directa, si es necesario)
+              </DialogDescription>
+            </DialogHeader>
+            <Button onClick={() => {
+              setShowCreateDialog(false);
+              router.push("/dashboard/exams/create");
+            }}>Ir a Crear</Button>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancelar</Button>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
