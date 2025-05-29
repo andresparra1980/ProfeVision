@@ -228,7 +228,15 @@ const getQuestionOptions = (pregunta: Exam['preguntas'][0]): string[] => {
   if (pregunta.opciones_respuesta.length === 2 && 
       pregunta.opciones_respuesta.some(o => o.texto.toLowerCase().includes('falso')) &&
       pregunta.opciones_respuesta.some(o => o.texto.toLowerCase().includes('verdadero'))) {
-    return ['F', 'V'];
+    // Determinar el orden V/F basado en el texto de la primera opción
+    const firstOptionText = pregunta.opciones_respuesta[0].texto.toLowerCase().trim();
+    if (firstOptionText === 'v' || firstOptionText.includes('verdadero')) {
+      return ['V', 'F'];
+    } else {
+      // Si la primera opción no es 'v' ni 'verdadero',
+      // se asume que es 'f' o 'falso' (dado el some() check anterior que confirma una opción de cada tipo)
+      return ['F', 'V'];
+    }
   }
   
   // Para otras preguntas, usar letras según la cantidad de opciones
