@@ -225,7 +225,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                   size="sm" 
                   disabled={isLoggingOut} 
                   onClick={handleLogout}
-                  className="w-full justify-start px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  className="w-full justify-start px-2 hover:bg-destructive/10 text-red-600 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
@@ -257,7 +257,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                 size="icon" 
                 disabled={isLoggingOut} 
                 onClick={handleLogout}
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                className="text-destructive hover:bg-destructive/10 text-red-600 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
                 title="Cerrar sesión"
               >
                 <LogOut className="h-5 w-5" />
