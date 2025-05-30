@@ -1,9 +1,11 @@
 "use client";
 
 import { FileText, Eye, Printer, Users, FileOutput, Trash2, Link, Pencil } from "lucide-react";
+import logger from '@/lib/utils/logger';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import EditableExamTitle from './EditableExamTitle';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Tooltip,
@@ -13,7 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 // AlertDialog components are no longer used directly in this file
 import { useRouter } from "next/navigation";
-import React from "react";
+import React from "react"; // useState is no longer needed here
 
 // Interface para los exámenes (idealmente, importar desde un archivo de tipos compartido)
 interface Exam {
@@ -56,6 +58,48 @@ export default function ExamsTableDesktop({
   handleExamClick,
 }: ExamsTableDesktopProps) {
   const router = useRouter();
+
+  // Placeholder function for handling the save action from EditableExamTitle
+  // TODO: Implement the actual API call to update the exam title in your backend.
+  // This function will be passed to EditableExamTitle as the onSave prop.
+  const handleUpdateExamTitle = async (examId: string, newTitle: string) => {
+    logger.log(`Updating title for exam ${examId} to: ${newTitle}`);
+    try {
+      const response = await fetch(`/api/exams/${examId}/edit-name`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title: newTitle }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        logger.error('Failed to update exam title:', errorData);
+        throw new Error(errorData.error || 'Failed to update exam title');
+      }
+
+      // If successful, the parent component (or this component if it manages the exam list directly)
+      // should ideally refresh the list of exams or update the specific exam item in its state
+      // to reflect the change immediately in the UI without a full page reload.
+      // For example, if `filteredExams` was a state variable managed here or passed from parent:
+      // setFilteredExams(prevExams => 
+      //   prevExams.map(exam => 
+      //     exam.id === examId ? { ...exam, titulo: newTitle } : exam
+      //   )
+      // );
+      // Or, call a prop function like: props.onExamUpdated(updatedExamDataFromResponse);
+      logger.log('Exam title updated successfully via API.');
+      // Consider adding a user notification (e.g., a toast message) here for better UX.
+
+    } catch (error) {
+      logger.error('Error calling API to update exam title:', error);
+      // Re-throw the error so EditableExamTitle can catch it and revert the UI if needed.
+      throw error; 
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -127,26 +171,33 @@ export default function ExamsTableDesktop({
                 {filteredExams.map((exam: Exam) => (
                   <TableRow key={exam.id} onClick={() => handleExamClick(exam.id)} className="cursor-pointer hover:bg-muted/50">
                     <TableCell>
-                      <div className="font-medium">{exam.titulo}</div>
-                      <div className="text-xs text-muted-foreground">{exam.descripcion || "Sin descripción"}</div>
+                      <div className="font-medium min-w-[200px]">
+                        <EditableExamTitle 
+                          examId={exam.id} 
+                          initialTitle={exam.titulo} 
+                          onSave={handleUpdateExamTitle} 
+                        />
+                      </div>
+                      <div className="text-xs text-muted-foreground">{exam.descripcion || ""}</div>
                     </TableCell>
                     <TableCell>{exam.materias?.nombre || "N/A"}</TableCell>
                     <TableCell>{getStatusBadge(exam.estado)}</TableCell>
                     <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {exam.examen_grupo?.map((asignacion) => (
-                            <span
-                              key={asignacion.grupo.id}
-                              className="inline-flex items-center justify-center rounded-full bg-secondary text-white px-2 py-1 text-xs font-medium shadow-sm text-center"
-                            >
-                              {asignacion.grupo.nombre}
-                            </span>
-                          ))}
-                          {(!exam.examen_grupo || exam.examen_grupo.length === 0) && (
-                            <span className="text-xs text-muted-foreground">Sin grupos asignados</span>
-                          )}
-                        </div>
-                      </TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {exam.examen_grupo?.map((asignacion) => (
+                          <span
+                            key={asignacion.grupo.id}
+                            className="inline-flex items-center justify-center rounded-full bg-secondary text-white px-2 py-1 text-xs font-medium shadow-sm text-center"
+                          >
+                            {asignacion.grupo.nombre}
+                          </span>
+                        ))}
+                        {(!exam.examen_grupo || exam.examen_grupo.length === 0) && (
+                          <span className="text-xs text-muted-foreground">Sin grupos asignados</span>
+                        )}
+                      </div>
+                    </TableCell>
+
                     <TableCell>{exam.duracion_minutos} min</TableCell>
                     <TableCell>{new Date(exam.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
