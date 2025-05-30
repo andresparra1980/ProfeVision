@@ -23,7 +23,7 @@ export const dynamic = 'force-dynamic'; // Ensures the route is not statically c
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Params } // Destructure params directly
+  { params }: { params: Promise<Params> } // Destructure params directly
 ) {
   const examId = (await params).id;
 
