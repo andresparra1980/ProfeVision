@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect, useCallback, use } from 'react';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
 import { Student } from '@/lib/types/database';
+import { useRouter } from 'next/navigation';
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -85,10 +88,12 @@ interface PageProps {
   }>;
 }
 
-export default function ResponseSheetsPage({ params }: PageProps) {
-  const { id } = use(params);
+export default function ResponseSheetsPage({ params: pageParams }: PageProps) {
+  const { id } = use(pageParams);
+  const router = useRouter();
+  // const params = useParams(); // Removed as 'id' from pageParams is used
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
-  const [paperSize, setPaperSize] = useState<'LETTER' | 'A4'>('LETTER');
+  const [_paperSize, _setPaperSize] = useState<'LETTER' | 'A4'>('LETTER');
   const [exam, setExam] = useState<Exam | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
@@ -234,19 +239,30 @@ export default function ResponseSheetsPage({ params }: PageProps) {
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-6">Generar Hojas de Respuesta</h1>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => router.back()} 
+            className="h-9"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Volver a Exámenes
+          </Button>
+          <h2 className="text-2xl font-bold mt-6">Generar Hojas de Respuesta</h2>
+          <p className="text-muted-foreground">Selecciona el grupo al que le deseas generar las hojas de respuesta</p>
+        </div>
+      </div>
       
       <div className="grid gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Configuración</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="group">Grupo</Label>
+          <CardContent className="grid gap-4 mt-4">
+            <div className="flex gap-2 items-center">
+              <Label htmlFor="group" className="text-sm font-semibold">Grupo: </Label>
               <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-                <SelectTrigger id="group">
+                <SelectTrigger id="group" className="w-64">
                   <SelectValue placeholder="Selecciona un grupo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -259,7 +275,7 @@ export default function ResponseSheetsPage({ params }: PageProps) {
               </Select>
             </div>
             
-            <div className="grid gap-2">
+            {/* <div className="grid gap-2">
               <Label>Tamaño de papel</Label>
               <RadioGroup value={paperSize} onValueChange={(value: 'LETTER' | 'A4') => setPaperSize(value)}>
                 <div className="flex items-center space-x-2">
@@ -271,7 +287,7 @@ export default function ResponseSheetsPage({ params }: PageProps) {
                   <Label htmlFor="a4">A4</Label>
                 </div>
               </RadioGroup>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 
@@ -285,7 +301,7 @@ export default function ResponseSheetsPage({ params }: PageProps) {
                 <AllAnswerSheets 
                   exam={exam} 
                   group={selectedGroup} 
-                  paperSize={paperSize} 
+                  paperSize={"LETTER"} 
                 />
               )}
             </CardContent>

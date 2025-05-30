@@ -380,13 +380,15 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
   }
   
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-2">
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver
-        </Button>
-        <h1 className="text-2xl font-bold">Vincular Examen a Componentes de Calificación</h1>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <Button variant="outline" size="sm" onClick={() => router.back()}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver a Exámenes
+          </Button>
+        <h1 className="text-2xl font-bold mt-6">Vincular Examen a Componentes de Calificación</h1>
+        </div>
       </div>
       
       <Card>

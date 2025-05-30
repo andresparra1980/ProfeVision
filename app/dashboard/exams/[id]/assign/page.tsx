@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save } from "lucide-react";
+import { ChevronLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -222,16 +222,16 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/dashboard/exams")}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver
-        </Button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/dashboard/exams")}
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Volver a Exámenes
+          </Button>
           <h2 className="text-3xl font-bold tracking-tight">
             Asignar Grupos - {exam?.titulo ?? ""}
           </h2>

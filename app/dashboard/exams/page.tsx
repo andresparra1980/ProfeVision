@@ -155,55 +155,40 @@ export default function ExamsPage() {
   };
 
   const confirmAndDeleteExam = async (examId: string) => {
-    // 1. Delete from examen_grupo_preguntas_respuestas (if applicable, direct relation might not exist)
-    // This step might be complex depending on schema, assuming examen_grupo_preguntas is the link
-    const { data: egpDataForResp, error: egpErrorSelectForResp } = await supabase
-      .from('examen_grupo_preguntas')
-      .select('id')
-      .eq('examen_id', examId);
-
-    if (egpErrorSelectForResp) {
-      throw new Error(`Error selecting examen_grupo_preguntas for responses: ${egpErrorSelectForResp.message}`);
-    }
-
-    if (egpDataForResp && egpDataForResp.length > 0) {
-      const egpIds = egpDataForResp.map((item: { id: string }) => item.id);
-      // Assuming a direct link from examen_grupo_preguntas_respuestas to examen_grupo_preguntas.id
-      // If not, this part needs adjustment based on actual schema for student responses.
-      const { error: egprError } = await supabase
-        .from('examen_grupo_preguntas_respuestas') // This table might be named differently or structured via examen_aplicacion_id
-        .delete()
-        .in('examen_grupo_pregunta_id', egpIds); // This foreign key needs to be correct
-      if (egprError) {
-        logger.warn(`Warning deleting examen_grupo_preguntas_respuestas (might be normal if no responses yet): ${egprError.message}`);
-      }
-    }
-
-    // 2. Delete from examen_grupo_preguntas
-    const { error: egpError } = await supabase
-      .from('examen_grupo_preguntas')
+    // IMPORTANT: Student response deletion logic needs to be added here.
+    // Please provide the correct table name for student responses and its relation to exams.
+    /*
+    // Example placeholder for student responses:
+    const { error: studentResponsesError } = await supabase
+      .from('TABLE_FOR_STUDENT_RESPONSES') // Replace with actual table name
       .delete()
-      .eq('examen_id', examId);
-    if (egpError) {
-      logger.warn(`Warning deleting examen_grupo_preguntas (might be normal if not configured for groups): ${egpError.message}`);
+      .eq('examen_id', examId); // Or link through pregunta_id, or another relevant foreign key
+    if (studentResponsesError) {
+      logger.error(`Error deleting student responses: ${studentResponsesError.message}`);
+      // Consider if this should throw an error and stop the deletion process
+      // throw new Error(`Error deleting student responses: ${studentResponsesError.message}`);
     }
+    */
 
-    // 3. Delete from examen_grupo
+    // 1. Delete from examen_grupo (associations between exams and groups)
     const { error: egError } = await supabase
       .from("examen_grupo")
       .delete()
       .eq("examen_id", examId);
     if (egError) {
-      logger.warn(`Warning deleting examen_grupo (might be normal if not assigned to groups): ${egError.message}`);
+      logger.warn(`Warning or error deleting examen_grupo entries: ${egError.message}. This might be normal if the exam was not in any group.`);
     }
 
-    // 4. Delete from opciones_respuesta (via preguntas)
+    // 2. Delete from opciones_respuesta (answer options for questions)
     const { data: preguntasData, error: preguntasError } = await supabase
       .from("preguntas")
       .select("id")
       .eq("examen_id", examId);
 
-    if (preguntasError) throw new Error(`Error fetching preguntas for deleting opciones: ${preguntasError.message}`);
+    if (preguntasError) {
+      logger.error(`Error fetching preguntas for deleting opciones: ${preguntasError.message}`);
+      throw new Error(`Error fetching preguntas for deleting opciones: ${preguntasError.message}`);
+    }
 
     if (preguntasData && preguntasData.length > 0) {
       const preguntaIds = preguntasData.map((p: { id: string }) => p.id);
@@ -211,22 +196,54 @@ export default function ExamsPage() {
         .from("opciones_respuesta")
         .delete()
         .in("pregunta_id", preguntaIds);
-      if (opcionesError) throw new Error(`Error deleting opciones_respuesta: ${opcionesError.message}`);
+      if (opcionesError) {
+        logger.error(`Error deleting opciones_respuesta: ${opcionesError.message}`);
+        throw new Error(`Error deleting opciones_respuesta: ${opcionesError.message}`);
+      }
     }
 
-    // 5. Delete from preguntas
+    // 3. Delete from preguntas (questions belonging to the exam)
     const { error: preguntasDelError } = await supabase
       .from("preguntas")
       .delete()
       .eq("examen_id", examId);
-    if (preguntasDelError) throw new Error(`Error deleting preguntas: ${preguntasDelError.message}`);
+    if (preguntasDelError) {
+      logger.error(`Error deleting preguntas: ${preguntasDelError.message}`);
+      throw new Error(`Error deleting preguntas: ${preguntasDelError.message}`);
+    }
 
-    // 6. Delete from examenes
+    // 4. Delete from other related tables if necessary (e.g., examen_asignaciones, examenes_favoritos)
+    /*
+    // Example for examen_asignaciones:
+    const { error: asignacionesError } = await supabase
+      .from('examen_asignaciones') // Replace with actual table name if it exists
+      .delete()
+      .eq('examen_id', examId);
+    if (asignacionesError) {
+       logger.warn(`Warning or error deleting examen_asignaciones: ${asignacionesError.message}`);
+    }
+    */
+
+    /*
+    // Example for examenes_favoritos:
+    const { error: favoritosError } = await supabase
+      .from('examenes_favoritos') // Replace with actual table name if it exists
+      .delete()
+      .eq('examen_id', examId);
+    if (favoritosError) {
+       logger.warn(`Warning or error deleting examenes_favoritos: ${favoritosError.message}`);
+    }
+    */
+
+    // 5. Delete from examenes (the main exam record)
     const { error: examError } = await supabase
       .from("examenes")
       .delete()
       .eq("id", examId);
-    if (examError) throw new Error(`Error deleting exam: ${examError.message}`);
+    if (examError) {
+      logger.error(`Error deleting exam: ${examError.message}`);
+      throw new Error(`Error deleting exam: ${examError.message}`);
+    }
 
     fetchExams(); // Re-fetch exams after deletion
   };

@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
-import { Building2 } from "lucide-react";
+import { Building2, Save } from "lucide-react";
 import { Plus } from "lucide-react";
 import { BookOpen } from "lucide-react";
 import { ChevronLeft } from "lucide-react";
@@ -1006,7 +1006,10 @@ export default function CreateExamPage() {
                   Creando...
                 </>
               ) : (
-                "Crear Examen"
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Crear Examen
+                </>
               )}
             </Button>
         </div>
