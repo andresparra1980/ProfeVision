@@ -280,7 +280,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
         )}
         {step === 5 && (
           <Confirmation
-            onScanAnother={handleReset}
+            onScanAnother={handleRetake}
             onFinish={handleClose}
           />
         )}
