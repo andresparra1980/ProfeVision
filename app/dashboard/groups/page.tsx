@@ -1010,7 +1010,7 @@ export default function GroupsPage() {
       >
         <DialogContent className="sm:max-w-md border-red-500 dark:border-red-700 shadow-xl rounded-lg bg-card dark:bg-background">
           <DialogHeader>
-            <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold flex items-center">
+            <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold">
               <TriangleAlert className="h-7 w-7 mr-2 text-red-600 dark:text-red-400" />
               ¡ADVERTENCIA! Eliminación Permanente
             </DialogTitle>
