@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import { OMRForm } from '@/components/exam/omr-form';
@@ -33,6 +33,14 @@ interface ResultsProps {
   onSaved: (_resultadoId: string) => void;
 }
 
+// Local definition if OpcionRespuesta was removed from shared types
+interface OpcionRespuesta {
+  id: string;
+  orden: number;
+  pregunta_id: string;
+  es_correcta: boolean;
+}
+
 interface RawAnswer {
   number?: number;
   questionNumber?: number;
@@ -51,13 +59,6 @@ interface RawAnswer {
   pregunta_id?: string;
   opcion_id?: string;
   es_correcta?: boolean;
-}
-
-interface OpcionRespuesta {
-  id: string;
-  orden: number;
-  pregunta_id: string;
-  es_correcta: boolean;
 }
 
 // Función para normalizar las respuestas
@@ -113,67 +114,40 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   const [duplicateInfo, setDuplicateInfo] = useState<DuplicateInfo | null>(null);
   const { toast } = useToast();
 
-  // Usar useMemo para evitar recálculos innecesarios
-  const normalizedAnswers = useMemo(() => {
-    return Array.isArray(answers) ? answers.map((answer: RawAnswer) => {
-      // Si la respuesta tiene structure de {question, answer} (formato antiguo)
-      if ('question' in answer && 'answer' in answer) {
-        return {
-          number: answer.question || 0,
-          value: answer.answer || '',
-          confidence: answer.confidence || 100,
-          num_options: answer.num_options || DEFAULT_NUM_OPTIONS
-        };
+  const selectedAnswersForOMR = useMemo(() => {
+    // if (DEBUG) console.log('[Results] Memoizing selectedAnswersForOMR', answers);
+    const record: Record<number, string> = {};
+    answers.forEach(answer => {
+      if (answer.value && answer.value !== '-') {
+        record[answer.number] = answer.value;
       }
-      // Si la respuesta ya tiene el formato correcto {number, value}
-      else if ('number' in answer && 'value' in answer) {
-        return {
-          ...answer,
-          number: answer.number || 0,
-          value: answer.value || '',
-          num_options: answer.num_options || DEFAULT_NUM_OPTIONS
-        };
-      }
-      // Intentar extraer campos si los nombres son diferentes
-      else {
-        const number = answer.number || answer.questionNumber || answer.question_number || answer.question || answer.num || 0;
-        const value = answer.value || answer.answerValue || answer.answer_value || answer.answer || '';
-        const confidence = answer.confidence || 100;
-        const num_options = answer.num_options || answer.numOptions || answer.options_count || DEFAULT_NUM_OPTIONS;
-        
-        return { number, value, confidence, num_options };
-      }
-    }).filter(a => a.number > 0 && a.value !== '').sort((a, b) => a.number - b.number) : [];
+    });
+    return record;
   }, [answers]);
 
-  // Crear un arreglo con las 40 posibles preguntas
-  const answersMap = useMemo(() => {
-    const map = new Map();
-    normalizedAnswers.forEach(answer => {
-      map.set(answer.number, {
-        value: answer.value,
-        num_options: answer.num_options || DEFAULT_NUM_OPTIONS,
-        disabled: answer.disabled || false
-      });
+  const disabledQuestionsForOMR = useMemo(() => {
+    // if (DEBUG) console.log('[Results] Memoizing disabledQuestionsForOMR', answers);
+    return answers
+      .filter(answer => answer.disabled)
+      .map(answer => answer.number);
+  }, [answers]);
+
+  const omrDisplayNumQuestions = useMemo(() => {
+    // if (DEBUG) console.log('[Results] Memoizing omrDisplayNumQuestions', answers);
+    return answers && answers.length > 0 ? Math.max(0, ...answers.map(a => a.number)) : 0;
+  }, [answers]);
+
+  const correctnessMap = useMemo(() => {
+    // if (DEBUG) console.log('[Results] Memoizing correctnessMap', answers);
+    const map: Record<number, boolean | undefined> = {};
+    answers.forEach(answer => {
+      map[answer.number] = answer.es_correcta;
     });
     return map;
-  }, [normalizedAnswers]);
-  
-  // Crear arrays para las dos columnas
-  const _answersForDisplay = useMemo(() => {
-    const map = new Map();
-    for (let i = 1; i <= 40; i++) {
-      map.set(i, {
-        number: i,
-        value: answersMap.has(i) ? answersMap.get(i).value : '-',
-        num_options: answersMap.has(i) ? answersMap.get(i).num_options : DEFAULT_NUM_OPTIONS,
-        disabled: answersMap.has(i) ? answersMap.get(i).disabled : false
-      });
-    }
-    return map;
-  }, [answersMap]);
+  }, [answers]);
 
   // Al cargar el componente, comprobar si es un duplicado
+
   useEffect(() => {
     if (qrData && 'isDuplicate' in qrData && qrData.isDuplicate) {
       setIsDuplicate(true);
@@ -839,7 +813,6 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       
       {entityNames.error && (
         <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             {entityNames.error}
           </AlertDescription>
@@ -899,23 +872,12 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         
         <OMRForm
           title=""
-          numQuestions={40}
+          numQuestions={omrDisplayNumQuestions}
           numOptions={DEFAULT_NUM_OPTIONS}
           questionsPerColumn={20}
-          selectedAnswers={useMemo(() => {
-            const answerMap: Record<number, string> = {};
-            normalizedAnswers.forEach(answer => {
-              if (answer.value && answer.value !== '-') {
-                answerMap[answer.number] = answer.value;
-              }
-            });
-            return answerMap;
-          }, [normalizedAnswers])}
-          disabledQuestions={useMemo(() => {
-            return normalizedAnswers
-              .filter(answer => answer.disabled)
-              .map(answer => answer.number);
-          }, [normalizedAnswers])}
+          selectedAnswers={selectedAnswersForOMR}
+          disabledQuestions={disabledQuestionsForOMR}
+          correctnessMap={correctnessMap}
           showHeaders={false}
         />
         

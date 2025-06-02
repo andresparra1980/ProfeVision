@@ -1,3 +1,4 @@
+import { Check, X } from 'lucide-react';
 import { DEFAULT_NUM_OPTIONS, OPTION_LETTERS } from './types';
 
 export interface MultipleChoiceOptionsProps {
@@ -10,6 +11,7 @@ export interface MultipleChoiceOptionsProps {
   size?: 'sm' | 'md' | 'lg';
   showLabels?: boolean;
   className?: string;
+  isCorrect?: boolean;
 }
 
 export function MultipleChoiceOptions({
@@ -22,6 +24,7 @@ export function MultipleChoiceOptions({
   size = 'md',
   showLabels = false,
   className = '',
+  isCorrect,
 }: MultipleChoiceOptionsProps) {
   const selectedIndex = OPTION_LETTERS.indexOf(selectedOption.toUpperCase());
   
@@ -71,7 +74,7 @@ export function MultipleChoiceOptions({
               ? 'bg-gray-200 text-gray-400 opacity-30' 
               : isSelected 
                 ? `${getAnswerBubbleStyle(optionLetter)} text-white`
-                : 'bg-gray-100 text-gray-600'
+                : 'bg-gray-200 text-gray-800 dark:text-gray-400 dark:bg-gray-800'
             } ${!readOnly ? 'cursor-pointer hover:opacity-80' : ''}`}
           onClick={handleClick}
           role={!readOnly ? "button" : undefined}
@@ -93,8 +96,10 @@ export function MultipleChoiceOptions({
       <div className="flex items-center space-x-1">
         {renderOptions()}
       </div>
+      {!disabled && isCorrect === true && <Check className="text-green-600 dark:text-green-400 ml-1" size={18} />}
+      {!disabled && isCorrect === false && <X className="text-red-600 dark:text-red-400 ml-1" size={18} />}
       {showLabels && (
-        <div className="flex ml-2 text-xs text-gray-500 space-x-2">
+        <div className="flex ml-2 text-xs text-gray-500 dark:text-gray-400 space-x-2">
           {Array.from({ length: numOptions }).map((_, i) => (
             <span key={`label-${i}`}>{OPTION_LETTERS[i]}</span>
           ))}

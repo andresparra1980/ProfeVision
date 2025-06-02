@@ -67,6 +67,10 @@ export interface OMRFormProps {
    * @default true
    */
   showQuestionNumbers?: boolean;
+  /**
+   * Object mapping question numbers to their correctness status (true=correct, false=incorrect, undefined=not set)
+   */
+  correctnessMap?: Record<number, boolean | undefined>;
 }
 
 export function OMRForm({
@@ -83,6 +87,7 @@ export function OMRForm({
   className = '',
   startingQuestionNumber = 1,
   showQuestionNumbers = true,
+  correctnessMap = {},
 }: OMRFormProps) {
   // Calculate the number of columns needed
   const numColumns = Math.ceil(numQuestions / questionsPerColumn);
@@ -133,6 +138,7 @@ export function OMRForm({
                   readOnly={!editable}
                   onSelect={(option) => handleOptionSelect(questionNumber, option)}
                   size={size}
+                  isCorrect={correctnessMap?.[questionNumber]}
                 />
               ))}
             </div>
