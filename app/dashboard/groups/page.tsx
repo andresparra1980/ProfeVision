@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { PlusCircle, Pencil, Trash2, Users, BookOpen, Calendar, Archive, ArchiveRestore, Calculator, MoreVertical, ChevronLeft } from "lucide-react";
+import { PlusCircle, Pencil, Trash2, Users, BookOpen, Calendar, Archive, ArchiveRestore, Calculator, MoreVertical, ChevronLeft, TriangleAlert } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -69,6 +69,8 @@ export default function GroupsPage() {
   const [editingGrupo, setEditingGrupo] = useState<Grupo | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [groupNameToConfirmDelete, setGroupNameToConfirmDelete] = useState<string | null>(null);
+  const [typedGroupName, setTypedGroupName] = useState("");
   const { profesor, loading: profesorLoading, error: profesorError } = useProfesor();
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -448,10 +450,12 @@ export default function GroupsPage() {
       
       loadGrupos();
     } catch (error: unknown) {
-      handleSupabaseError('Error al eliminar grupo', error);
+      handleSupabaseError('al eliminar grupo', error);
     } finally {
       setDeletingId(null);
       setConfirmDelete(false);
+      setGroupNameToConfirmDelete(null);
+      setTypedGroupName("");
     }
   };
 
@@ -958,6 +962,7 @@ export default function GroupsPage() {
                       <DropdownMenuItem 
                         onClick={() => {
                           setDeletingId(grupo.id);
+                          setGroupNameToConfirmDelete(grupo.nombre);
                           setConfirmDelete(true);
                         }}
                         className="text-destructive"
@@ -991,21 +996,77 @@ export default function GroupsPage() {
         </div>
       )}
 
-      {/* Diálogo de confirmación de eliminación */}
-      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete} modal={true}>
-        <DialogContent className="sm:max-w-[425px] bg-[#FAFAF4] dark:bg-[#171717]">
+      {/* Enhanced Delete Confirmation Dialog */}
+      <Dialog 
+        open={confirmDelete} 
+        onOpenChange={(isOpen) => {
+          setConfirmDelete(isOpen);
+          if (!isOpen) {
+            setGroupNameToConfirmDelete(null);
+            setTypedGroupName("");
+          }
+        }} 
+        modal={true}
+      >
+        <DialogContent className="sm:max-w-md border-red-500 dark:border-red-700 shadow-xl rounded-lg bg-card dark:bg-background">
           <DialogHeader>
-            <DialogTitle>Confirmar eliminación</DialogTitle>
-            <DialogDescription>
-              ¿Estás seguro de que deseas eliminar este grupo? Esta acción no se puede deshacer y eliminará la relación con todos los estudiantes asociados.
+            <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold flex items-center">
+              <TriangleAlert className="h-7 w-7 mr-2 text-red-600 dark:text-red-400" />
+              ¡ADVERTENCIA! Eliminación Permanente
+            </DialogTitle>
+            <DialogDescription className="mt-2 space-y-2">
+              <p>
+                Está a punto de eliminar el grupo{" "}
+                <span className="font-semibold">{groupNameToConfirmDelete || "seleccionado"}</span>.
+              </p>
+              <p>
+                Esta acción es <span className="font-semibold uppercase">IRREVERSIBLE</span> y resultará en:
+              </p>
+              <ul className="list-disc list-inside ml-4 text-sm">
+                <li>Eliminación de todas las <span className="font-semibold">inscripciones de estudiantes</span> a este grupo.</li>
+                <li>Eliminación de todos los <span className="font-semibold">esquemas de calificación</span> asociados.</li>
+                <li>Eliminación de todas las <span className="font-semibold">asignaciones de exámenes</span> a este grupo.</li>
+                <li>Las referencias a este grupo en los <span className="font-semibold">escaneos de exámenes</span> existentes se perderán (se marcarán como NULAS).</li>
+              </ul>
+              <p className="mt-3">
+                Para confirmar esta acción y proceder con la eliminación, por favor escriba el nombre exacto del grupo en el campo de abajo.
+              </p>
+              <p className="mt-3">
+                Recuerde que puede <span className="font-semibold">Archivar</span> el grupo para evitar la eliminación permanente.
+              </p>
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmDelete(false)}>
+          <div className="grid gap-3 py-3">
+            <Label htmlFor="group-confirm-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Escriba &quot;<span className="font-semibold text-red-600 dark:text-red-400">{groupNameToConfirmDelete}</span>&quot; para confirmar:
+            </Label>
+            <Input
+              id="group-confirm-name"
+              value={typedGroupName}
+              onChange={(e) => setTypedGroupName(e.target.value)}
+              placeholder="Nombre exacto del grupo"
+              className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-red-500 focus:ring-red-500"
+              autoFocus
+            />
+          </div>
+          <DialogFooter className="mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setConfirmDelete(false);
+                setGroupNameToConfirmDelete(null);
+                setTypedGroupName("");
+              }}
+            >
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={confirmDeleteGrupo}>
-              Eliminar
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteGrupo}
+              disabled={typedGroupName !== groupNameToConfirmDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Sí, eliminar este grupo y sus datos
             </Button>
           </DialogFooter>
         </DialogContent>
