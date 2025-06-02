@@ -1010,19 +1010,20 @@ export default function GroupsPage() {
       >
         <DialogContent className="sm:max-w-md border-red-500 dark:border-red-700 shadow-xl rounded-lg bg-card dark:bg-background">
           <DialogHeader>
-            <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold">
+            <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold flex items-center">
               <TriangleAlert className="h-7 w-7 mr-2 text-red-600 dark:text-red-400" />
               ¡ADVERTENCIA! Eliminación Permanente
             </DialogTitle>
-            <DialogDescription className="mt-2 space-y-2">
-              <p>
+          </DialogHeader>
+          <div className="text-gray-600 dark:text-white">
+          <p>
                 Está a punto de eliminar el grupo{" "}
                 <span className="font-semibold">{groupNameToConfirmDelete || "seleccionado"}</span>.
               </p>
               <p>
                 Esta acción es <span className="font-semibold uppercase">IRREVERSIBLE</span> y resultará en:
               </p>
-              <ul className="list-disc list-inside ml-4 text-sm">
+              <ul className="list-disc list-inside ml-4 text-sm mt-2">
                 <li>Eliminación de todas las <span className="font-semibold">inscripciones de estudiantes</span> a este grupo.</li>
                 <li>Eliminación de todos los <span className="font-semibold">esquemas de calificación</span> asociados.</li>
                 <li>Eliminación de todas las <span className="font-semibold">asignaciones de exámenes</span> a este grupo.</li>
@@ -1034,8 +1035,7 @@ export default function GroupsPage() {
               <p className="mt-3">
                 Recuerde que puede <span className="font-semibold">Archivar</span> el grupo para evitar la eliminación permanente.
               </p>
-            </DialogDescription>
-          </DialogHeader>
+          </div>
           <div className="grid gap-3 py-3">
             <Label htmlFor="group-confirm-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Escriba &quot;<span className="font-semibold text-red-600 dark:text-red-400">{groupNameToConfirmDelete}</span>&quot; para confirmar:

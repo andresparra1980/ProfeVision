@@ -401,12 +401,13 @@ export default function SubjectsPage() {
       >
         <DialogContent className="sm:max-w-md border-red-500 dark:border-red-700 shadow-xl rounded-lg bg-card dark:bg-background">
           <DialogHeader>
-            <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold">
+            <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold flex items-center">
               <TriangleAlert className="h-7 w-7 mr-2 text-red-600 dark:text-red-400" />
               ¡ADVERTENCIA! Eliminación Permanente
             </DialogTitle>
-            <DialogDescription className="mt-2 space-y-2">
-              <p>
+          </DialogHeader>
+          <div className="text-gray-600 dark:text-white">
+            <p>
                 Está a punto de eliminar la materia{" "}
                 <span className="font-semibold">{materiaNameToConfirmDelete || "seleccionada"}</span>.
               </p>
@@ -421,8 +422,7 @@ export default function SubjectsPage() {
               <p className="mt-3">
                 Para confirmar esta acción y proceder con la eliminación, por favor escriba el nombre exacto de la materia en el campo de abajo.
               </p>
-            </DialogDescription>
-          </DialogHeader>
+          </div>
           <div className="grid gap-3 py-3">
             <Label htmlFor="materia-confirm-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Escriba &quot;<span className="font-semibold text-red-600 dark:text-red-400">{materiaNameToConfirmDelete}</span>&quot; para confirmar:
