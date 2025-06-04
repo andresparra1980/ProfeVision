@@ -152,3 +152,6 @@ scripts/omr/.pytest_cache/
 /docs/
 /profevision-manual/
 /profevision-manual/images/
+
+# ZED
+.zed/*
