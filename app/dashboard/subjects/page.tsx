@@ -2,32 +2,19 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { PlusCircle, Pencil, Trash2, School, TriangleAlert } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 import type { Database } from "@/lib/types/database";
+import { SubjectCard } from "./components/SubjectCard";
+import { SubjectFormModal } from "./components/SubjectFormModal";
+import { DeleteConfirmationModal } from "./components/DeleteConfirmationModal";
 
 type Materia = Database["public"]["Tables"]["materias"]["Row"];
 type EntidadEducativa = Database["public"]["Tables"]["entidades_educativas"]["Row"];
-
-const materiaSchema = z.object({
-  nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
-  descripcion: z.string().optional(),
-  entidad_id: z.string().optional(),
-});
-
-type MateriaFormValues = z.infer<typeof materiaSchema>;
 
 export default function SubjectsPage() {
   const [materias, setMaterias] = useState<Materia[]>([]);
@@ -35,20 +22,9 @@ export default function SubjectsPage() {
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingMateria, setEditingMateria] = useState<Materia | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingMateria, setDeletingMateria] = useState<Materia | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [materiaNameToConfirmDelete, setMateriaNameToConfirmDelete] = useState<string | null>(null);
-  const [typedMateriaName, setTypedMateriaName] = useState<string>("");
   const { profesor } = useProfesor();
-  
-  const form = useForm<MateriaFormValues>({
-    resolver: zodResolver(materiaSchema),
-    defaultValues: {
-      nombre: "",
-      descripcion: "",
-      entidad_id: "none",
-    },
-  });
 
   // Helper function for consistent error logging
   const handleSupabaseError = useCallback((context: string, error: unknown) => {
@@ -134,23 +110,7 @@ export default function SubjectsPage() {
     }
   }, [profesor, loadMaterias, loadEntidades]);
 
-  useEffect(() => {
-    if (editingMateria) {
-      form.reset({
-        nombre: editingMateria.nombre,
-        descripcion: editingMateria.descripcion || "",
-        entidad_id: editingMateria.entidad_id || "none",
-      });
-    } else {
-      form.reset({
-        nombre: "",
-        descripcion: "",
-        entidad_id: "none",
-      });
-    }
-  }, [editingMateria, form]);
-
-  const onSubmit = async (data: MateriaFormValues) => {
+  const handleSubmit = async (data: { nombre: string; descripcion?: string; entidad_id?: string }) => {
     if (!profesor) return;
     logger.log('[SubjectsPage] Submitting subject form...');
     try {
@@ -193,7 +153,6 @@ export default function SubjectsPage() {
       
       setOpenDialog(false);
       setEditingMateria(null);
-      form.reset();
       loadMaterias();
     } catch (error: unknown) {
       handleSupabaseError('al guardar materia', error);
@@ -205,14 +164,19 @@ export default function SubjectsPage() {
     setOpenDialog(true);
   };
 
+  const handleDelete = (materia: Materia) => {
+    setDeletingMateria(materia);
+    setConfirmDelete(true);
+  };
+
   const confirmDeleteMateria = async () => {
-    if (!deletingId) return;
-    logger.log(`[SubjectsPage] Attempting to delete subject ID: ${deletingId}`);
+    if (!deletingMateria) return;
+    logger.log(`[SubjectsPage] Attempting to delete subject ID: ${deletingMateria.id}`);
     try {
       const { error } = await supabase
         .from("materias")
         .delete()
-        .eq("id", deletingId);
+        .eq("id", deletingMateria.id);
 
       if (error) throw error;
       
@@ -225,11 +189,19 @@ export default function SubjectsPage() {
     } catch (error: unknown) {
       handleSupabaseError('al eliminar materia', error);
     } finally {
-      setDeletingId(null);
+      setDeletingMateria(null);
       setConfirmDelete(false);
-      setMateriaNameToConfirmDelete(null);
-      setTypedMateriaName("");
     }
+  };
+
+  const handleCancel = () => {
+    setEditingMateria(null);
+    setOpenDialog(false);
+  };
+
+  const handleCancelDelete = () => {
+    setDeletingMateria(null);
+    setConfirmDelete(false);
   };
 
   return (
@@ -241,86 +213,14 @@ export default function SubjectsPage() {
             Administra las materias que impartes
           </p>
         </div>
-        <Dialog open={openDialog} onOpenChange={setOpenDialog} modal={true}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setEditingMateria(null)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Nueva materia
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[525px] bg-[#FAFAF4] dark:bg-[#171717]">
-            <DialogHeader>
-              <DialogTitle>{editingMateria ? "Editar materia" : "Nueva materia"}</DialogTitle>
-              <DialogDescription>
-                {editingMateria 
-                  ? "Actualiza la información de la materia." 
-                  : "Ingresa los datos de la nueva materia."}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="nombre">Nombre*</Label>
-                <Input
-                  id="nombre"
-                  className="bg-white dark:bg-[#1E1E1F]"
-                  {...form.register("nombre")}
-                />
-                {form.formState.errors.nombre && (
-                  <p className="text-sm text-destructive">{form.formState.errors.nombre.message}</p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="descripcion">Descripción</Label>
-                <Textarea
-                  id="descripcion"
-                  placeholder="Breve descripción de la materia"
-                  className="bg-white dark:bg-[#1E1E1F]"
-                  {...form.register("descripcion")}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="entidad">Institución educativa</Label>
-                <Select
-                  onValueChange={(value: string) => form.setValue("entidad_id", value)}
-                  value={form.watch("entidad_id")}
-                >
-                  <SelectTrigger id="entidad" className="bg-white dark:bg-[#1E1E1F]">
-                    <SelectValue placeholder="Selecciona una institución" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Ninguna</SelectItem>
-                    {entidades.map((entidad) => (
-                      <SelectItem key={entidad.id} value={entidad.id}>
-                        {entidad.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  Si no asocias la materia con una institución, se considerará como privada.
-                </p>
-              </div>
-              
-              <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => {
-                    setOpenDialog(false);
-                    setEditingMateria(null);
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {editingMateria ? "Actualizar" : "Crear"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <SubjectFormModal
+          open={openDialog}
+          onOpenChange={setOpenDialog}
+          editingMateria={editingMateria}
+          entidades={entidades}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+        />
       </div>
 
       {loading ? (
@@ -342,122 +242,23 @@ export default function SubjectsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {materias.map((materia) => (
-            <Card key={materia.id}>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between">
-                  <CardTitle className="text-xl">{materia.nombre}</CardTitle>
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleEdit(materia)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => {
-                        setDeletingId(materia.id);
-                        setMateriaNameToConfirmDelete(materia.nombre);
-                        setTypedMateriaName("");
-                        setConfirmDelete(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                {/* @ts-expect-error - entidades_educativas puede existir pero TypeScript no lo reconoce */}
-                {materia.entidades_educativas && (
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <School className="mr-1 h-3 w-3" />
-                    {/* @ts-expect-error - entidades_educativas.nombre puede existir pero TypeScript no lo reconoce */}
-                    <span>{materia.entidades_educativas.nombre}</span>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                {materia.descripcion && (
-                  <p className="text-sm text-muted-foreground">{materia.descripcion}</p>
-                )}
-              </CardContent>
-            </Card>
+            <SubjectCard
+              key={materia.id}
+              materia={materia}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}
 
-      {/* Delete confirmation dialog */}
-      <Dialog 
-        open={confirmDelete} 
-        onOpenChange={(isOpen) => {
-          setConfirmDelete(isOpen);
-          if (!isOpen) {
-            setMateriaNameToConfirmDelete(null);
-            setTypedMateriaName("");
-          }
-        }} 
-        modal={true}
-      >
-        <DialogContent className="sm:max-w-md border-red-500 dark:border-red-700 shadow-xl rounded-lg bg-card dark:bg-background">
-          <DialogHeader>
-            <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold flex items-center">
-              <TriangleAlert className="h-7 w-7 mr-2 text-red-600 dark:text-red-400" />
-              ¡ADVERTENCIA! Eliminación Permanente
-            </DialogTitle>
-          </DialogHeader>
-          <div className="text-gray-600 dark:text-white">
-            <p>
-                Está a punto de eliminar la materia{" "}
-                <span className="font-semibold">{materiaNameToConfirmDelete || "seleccionada"}</span>.
-              </p>
-              <p>
-                Esta acción es <span className="font-semibold uppercase">IRREVERSIBLE</span> y resultará en:
-              </p>
-              <ul className="list-disc list-inside ml-4 text-sm">
-                <li>Eliminación de todos los <span className="font-semibold">grupos</span> asociados.</li>
-                <li>Eliminación de todos los <span className="font-semibold">exámenes</span> creados para esta materia.</li>
-                <li>Eliminación de todos los <span className="font-semibold">resultados de exámenes y calificaciones</span> vinculadas.</li>
-              </ul>
-              <p className="mt-3">
-                Para confirmar esta acción y proceder con la eliminación, por favor escriba el nombre exacto de la materia en el campo de abajo.
-              </p>
-          </div>
-          <div className="grid gap-3 py-3">
-            <Label htmlFor="materia-confirm-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Escriba &quot;<span className="font-semibold text-red-600 dark:text-red-400">{materiaNameToConfirmDelete}</span>&quot; para confirmar:
-            </Label>
-            <Input
-              id="materia-confirm-name"
-              value={typedMateriaName}
-              onChange={(e) => setTypedMateriaName(e.target.value)}
-              placeholder="Nombre exacto de la materia"
-              className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-red-500 focus:ring-red-500"
-              autoFocus
-            />
-          </div>
-          <DialogFooter className="mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setConfirmDelete(false);
-                setMateriaNameToConfirmDelete(null);
-                setTypedMateriaName("");
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDeleteMateria}
-              disabled={typedMateriaName !== materiaNameToConfirmDelete}
-            >
-              <Trash2 className="mr-2 h-4 w-4 " />
-              Sí, eliminar esta materia y sus datos
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteConfirmationModal
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        subjectName={deletingMateria?.nombre || null}
+        onConfirm={confirmDeleteMateria}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
-} 
+}
