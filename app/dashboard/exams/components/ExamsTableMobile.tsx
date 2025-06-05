@@ -209,16 +209,16 @@ const getStatusBadge = (status: string) => {
   }
 };
 
-const getStatusBorderColorClass = (status: string): string => {
+const getStatusBorderStyle = (status: string): React.CSSProperties => {
   switch (status) {
     case "borrador":
-      return "border-accent";
+      return { borderColor: `color-mix(in srgb, var(--accent) 50%, transparent)` };
     case "publicado":
-      return "border-primary";
+      return { borderColor: `color-mix(in srgb, var(--primary) 50%, transparent)` };
     case "cerrado":
-      return "border-destructive";
+      return { borderColor: `color-mix(in srgb, var(--destructive) 50%, transparent)` };
     default:
-      return "border-muted";
+      return { borderColor: `color-mix(in srgb, var(--muted) 50%, transparent)` };
   }
 };
 
@@ -299,7 +299,8 @@ export default function ExamsTableMobile({
           {filteredExams.map((exam) => (
             <div
               key={exam.id}
-              className={`border-2 ${getStatusBorderColorClass(exam.estado)} rounded-md shadow-sm bg-card h-fit`}
+              className="border-2 rounded-md shadow-sm bg-card h-fit"
+              style={getStatusBorderStyle(exam.estado)}
             >
               <div className="p-4">
                 <ExamCardHeader exam={exam} />
@@ -321,7 +322,8 @@ export default function ExamsTableMobile({
             <AccordionItem
               value={exam.id}
               key={exam.id}
-              className={`border ${getStatusBorderColorClass(exam.estado)} rounded-md shadow-sm bg-card h-fit`}
+              className="border rounded-md shadow-sm bg-card h-fit"
+              style={getStatusBorderStyle(exam.estado)}
             >
               <AccordionTrigger className="p-4 hover:no-underline">
                 <ExamCardHeader exam={exam} />
