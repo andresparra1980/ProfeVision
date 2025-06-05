@@ -31,24 +31,24 @@ import {
 import { Button } from "@/components/ui/button"; // Added for dialogs
 
 // Define a simple useMediaQuery hook
-const useMediaQuery = (query: string) => {
-  const [matches, setMatches] = useState(false);
+// const useMediaQuery = (query: string) => {
+//   const [matches, setMatches] = useState(false);
 
-  useEffect(() => {
-    // Asegurarse de que window está definido (para SSR/SSG)
-    if (typeof window === 'undefined') return;
+//   useEffect(() => {
+//     // Asegurarse de que window está definido (para SSR/SSG)
+//     if (typeof window === "undefined") return;
 
-    const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
-    const listener = () => setMatches(media.matches);
-    window.addEventListener("resize", listener);
-    return () => window.removeEventListener("resize", listener);
-  }, [matches, query]);
+//     const media = window.matchMedia(query);
+//     if (media.matches !== matches) {
+//       setMatches(media.matches);
+//     }
+//     const listener = () => setMatches(media.matches);
+//     window.addEventListener("resize", listener);
+//     return () => window.removeEventListener("resize", listener);
+//   }, [matches, query]);
 
-  return matches;
-};
+//   return matches;
+// };
 
 interface Exam {
   id: string;
@@ -95,14 +95,15 @@ export default function ExamsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  const isDesktop = useMediaQuery("(min-width: 768px)"); // md breakpoint (Tailwind)
+  const isDesktop = false; //useMediaQuery("(min-width: 768px)"); // md breakpoint (Tailwind)
 
   const fetchExams = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from("examenes")
-        .select(`
+        .select(
+          `
           *,
           materias(nombre),
           examen_grupo(
@@ -110,15 +111,16 @@ export default function ExamsPage() {
             fecha_aplicacion,
             estado
           )
-        `)
+        `,
+        )
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       setRawExams(data || []);
     } catch (error) {
       const err = error as AuthError | Error;
-      const code = 'code' in err ? err.code : undefined;
-      const details = 'details' in err ? err.details : undefined;
+      const code = "code" in err ? err.code : undefined;
+      const details = "details" in err ? err.details : undefined;
       const status = err instanceof AuthError ? err.status : undefined;
 
       logger.error("[ExamsPage] Error fetching exams:", {
@@ -126,9 +128,11 @@ export default function ExamsPage() {
         status: status,
         code: code,
         details: details,
-        errorObject: err
+        errorObject: err,
       });
-      toast.error(`Error al cargar exámenes${status ? ` (Código: ${status})` : ''}: ${err.message}`);
+      toast.error(
+        `Error al cargar exámenes${status ? ` (Código: ${status})` : ""}: ${err.message}`,
+      );
     } finally {
       setLoading(false);
     }
@@ -138,12 +142,14 @@ export default function ExamsPage() {
     fetchExams();
   }, [fetchExams]);
 
-  const filteredExams = rawExams.filter((exam) =>
-    exam.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (exam.descripcion && exam.descripcion.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (exam.materias?.nombre && exam.materias.nombre.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredExams = rawExams.filter(
+    (exam) =>
+      exam.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (exam.descripcion &&
+        exam.descripcion.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (exam.materias?.nombre &&
+        exam.materias.nombre.toLowerCase().includes(searchQuery.toLowerCase())),
   );
-
 
   const handleExamClick = (examId: string) => {
     router.push(`/dashboard/exams/${examId}/edit`);
@@ -176,7 +182,9 @@ export default function ExamsPage() {
       .delete()
       .eq("examen_id", examId);
     if (egError) {
-      logger.warn(`Warning or error deleting examen_grupo entries: ${egError.message}. This might be normal if the exam was not in any group.`);
+      logger.warn(
+        `Warning or error deleting examen_grupo entries: ${egError.message}. This might be normal if the exam was not in any group.`,
+      );
     }
 
     // 2. Delete from opciones_respuesta (answer options for questions)
@@ -186,8 +194,12 @@ export default function ExamsPage() {
       .eq("examen_id", examId);
 
     if (preguntasError) {
-      logger.error(`Error fetching preguntas for deleting opciones: ${preguntasError.message}`);
-      throw new Error(`Error fetching preguntas for deleting opciones: ${preguntasError.message}`);
+      logger.error(
+        `Error fetching preguntas for deleting opciones: ${preguntasError.message}`,
+      );
+      throw new Error(
+        `Error fetching preguntas for deleting opciones: ${preguntasError.message}`,
+      );
     }
 
     if (preguntasData && preguntasData.length > 0) {
@@ -197,8 +209,12 @@ export default function ExamsPage() {
         .delete()
         .in("pregunta_id", preguntaIds);
       if (opcionesError) {
-        logger.error(`Error deleting opciones_respuesta: ${opcionesError.message}`);
-        throw new Error(`Error deleting opciones_respuesta: ${opcionesError.message}`);
+        logger.error(
+          `Error deleting opciones_respuesta: ${opcionesError.message}`,
+        );
+        throw new Error(
+          `Error deleting opciones_respuesta: ${opcionesError.message}`,
+        );
       }
     }
 
@@ -256,17 +272,25 @@ export default function ExamsPage() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-2">
-        <AuroraText className="text-2xl font-bold tracking-tight">
+          <AuroraText className="text-2xl font-bold tracking-tight">
             Exámenes
-        </AuroraText>
-          <p className="text-muted-foreground">Gestiona y crea exámenes para tus estudiantes.</p>
+          </AuroraText>
+          <p className="text-muted-foreground">
+            Gestiona y crea exámenes para tus estudiantes.
+          </p>
         </div>
         <div className="flex items-center space-x-2 flex-shrink-0">
-          <Button onClick={() => setShowImportDialog(true)} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+          <Button
+            onClick={() => setShowImportDialog(true)}
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+          >
             <Upload className="mr-2 h-4 w-4" />
             Importar Examen
           </Button>
-          <Button onClick={handleCreateExam} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+          <Button
+            onClick={handleCreateExam}
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Crear Examen con IA
           </Button>
@@ -308,17 +332,21 @@ export default function ExamsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>¿Confirmar Eliminación?</AlertDialogTitle>
               <AlertDialogDescription>
-                Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este examen?
+                Esta acción no se puede deshacer. ¿Estás seguro de que quieres
+                eliminar este examen?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>Cancelar</AlertDialogCancel>
+              <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
+                Cancelar
+              </AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => {
                   toast.promise(confirmAndDeleteExam(examToDelete), {
                     loading: "Eliminando examen...",
                     success: "Examen eliminado exitosamente.",
-                    error: (err: Error) => err.message || "Error al eliminar el examen.",
+                    error: (err: Error) =>
+                      err.message || "Error al eliminar el examen.",
                   });
                   setShowDeleteDialog(false);
                 }}
@@ -331,21 +359,30 @@ export default function ExamsPage() {
         </AlertDialog>
       )}
 
-
       {showCreateDialog && (
-         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Crear Nuevo Examen</DialogTitle>
               <DialogDescription>
-                (Este diálogo sería para un formulario de creación directa, si es necesario)
+                (Este diálogo sería para un formulario de creación directa, si
+                es necesario)
               </DialogDescription>
             </DialogHeader>
-            <Button onClick={() => {
-              setShowCreateDialog(false);
-              router.push("/dashboard/exams/create");
-            }}>Ir a Crear</Button>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancelar</Button>
+            <Button
+              onClick={() => {
+                setShowCreateDialog(false);
+                router.push("/dashboard/exams/create");
+              }}
+            >
+              Ir a Crear
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowCreateDialog(false)}
+            >
+              Cancelar
+            </Button>
           </DialogContent>
         </Dialog>
       )}
