@@ -19,6 +19,7 @@ import {
   Plus,
   FileText, // Kept for empty state
   Link,
+  Calendar,
 } from "lucide-react";
 
 // Reusable components
@@ -56,7 +57,8 @@ function ExamCardHeader({ exam }: ExamCardHeaderProps) {
       {/* Bottom row: Status left, Date right */}
       <div className="flex justify-between items-center">
         <div>{getStatusBadge(exam.estado)}</div>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground flex items-center">
+          <Calendar className="h-3 w-3 mr-1" />
           {new Date(exam.created_at).toLocaleDateString("en-GB", {
             day: "2-digit",
             month: "2-digit",
@@ -181,28 +183,73 @@ interface ExamsTableMobileProps {
 }
 
 const getStatusBadge = (status: string) => {
+  const baseStyle: React.CSSProperties = {
+    padding: "3px 8px",
+    fontSize: "12px",
+    fontWeight: "800",
+    letterSpacing: "0.025em",
+    transform: "rotate(-5deg)",
+    display: "inline-block",
+    position: "relative",
+    borderRadius: "3px",
+    textTransform: "uppercase" as const,
+  };
+
   switch (status) {
     case "borrador":
       return (
-        <span className="rounded-full bg-accent text-accent-foreground px-2 py-1 text-xs font-medium shadow-sm">
+        <span
+          style={{
+            ...baseStyle,
+            background: "color-mix(in srgb, var(--accent) 80%, transparent)",
+            color: "black",
+            boxShadow:
+              "inset 0 -2px 0 color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
+          }}
+        >
           Borrador
         </span>
       );
     case "publicado":
       return (
-        <span className="rounded-full bg-primary text-primary-foreground px-2 py-1 text-xs font-medium shadow-sm">
+        <span
+          style={{
+            ...baseStyle,
+            background: "color-mix(in srgb, var(--primary) 80%, transparent)",
+            color: "black",
+            boxShadow:
+              "inset 0 -2px 0 color-mix(in srgb, var(--primary) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
+          }}
+        >
           Publicado
         </span>
       );
     case "cerrado":
       return (
-        <span className="rounded-full bg-destructive text-destructive-foreground px-2 py-1 text-xs font-medium shadow-sm">
+        <span
+          style={{
+            ...baseStyle,
+            background:
+              "color-mix(in srgb, var(--destructive) 80%, transparent)",
+            color: "black",
+            boxShadow:
+              "inset 0 -2px 0 color-mix(in srgb, var(--destructive) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
+          }}
+        >
           Cerrado
         </span>
       );
     default:
       return (
-        <span className="rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium shadow-sm">
+        <span
+          style={{
+            ...baseStyle,
+            background: "color-mix(in srgb, var(--muted) 80%, transparent)",
+            color: "black",
+            boxShadow:
+              "inset 0 -2px 0 color-mix(in srgb, var(--muted) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
+          }}
+        >
           {status}
         </span>
       );
@@ -212,13 +259,21 @@ const getStatusBadge = (status: string) => {
 const getStatusBorderStyle = (status: string): React.CSSProperties => {
   switch (status) {
     case "borrador":
-      return { borderColor: `color-mix(in srgb, var(--accent) 50%, transparent)` };
+      return {
+        borderColor: `color-mix(in srgb, var(--accent) 50%, transparent)`,
+      };
     case "publicado":
-      return { borderColor: `color-mix(in srgb, var(--primary) 50%, transparent)` };
+      return {
+        borderColor: `color-mix(in srgb, var(--primary) 50%, transparent)`,
+      };
     case "cerrado":
-      return { borderColor: `color-mix(in srgb, var(--destructive) 50%, transparent)` };
+      return {
+        borderColor: `color-mix(in srgb, var(--destructive) 50%, transparent)`,
+      };
     default:
-      return { borderColor: `color-mix(in srgb, var(--muted) 50%, transparent)` };
+      return {
+        borderColor: `color-mix(in srgb, var(--muted) 50%, transparent)`,
+      };
   }
 };
 
@@ -295,7 +350,7 @@ export default function ExamsTableMobile({
         </div>
       ) : isMultiColumn ? (
         // Multi-column layout: always expanded
-        <div className="w-full grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 items-start auto-rows-min">
+        <div className="w-full grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 items-start auto-rows-min">
           {filteredExams.map((exam) => (
             <div
               key={exam.id}
