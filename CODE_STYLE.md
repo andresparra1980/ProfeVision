@@ -27,8 +27,8 @@ Este documento define los estándares de codificación y guías de estilo para P
 ```
 profevision/
 ├── app/                      # Next.js App Router
-│   ├── (auth)/               # Rutas de autenticación agrupadas
-│   ├── (dashboard)/          # Rutas del dashboard agrupadas
+│   ├── auth/                 # Rutas de autenticación 
+│   ├── dashboard/            # Rutas del dashboard 
 │   ├── api/                  # API Routes
 │   ├── layout.tsx            # Root layout
 │   └── page.tsx              # Home page
