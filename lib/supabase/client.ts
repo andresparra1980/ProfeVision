@@ -1,5 +1,5 @@
-import { createBrowserClient } from '@supabase/ssr';
-import type { Database } from '@/lib/types/database';
+import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "@/lib/types/database";
 
 // Singleton instance
 let client: ReturnType<typeof createBrowserClient<Database>> | null = null;
@@ -13,7 +13,7 @@ export function getSupabaseClient() {
 
   client = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
-      flowType: 'pkce',
+      flowType: "pkce",
       autoRefreshToken: true,
       detectSessionInUrl: true,
       persistSession: true,
@@ -21,7 +21,7 @@ export function getSupabaseClient() {
     global: {
       fetch: fetch.bind(globalThis),
       headers: {
-        'X-Client-Info': 'profevision',
+        "X-Client-Info": "profevision",
       },
     },
   });
@@ -30,4 +30,4 @@ export function getSupabaseClient() {
 }
 
 // Export a single instance of the client
-export const supabase = getSupabaseClient(); 
+export const supabase = getSupabaseClient();

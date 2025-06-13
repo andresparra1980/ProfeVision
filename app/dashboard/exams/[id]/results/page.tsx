@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ChevronLeft, Loader2, Save, AlertCircle, Download, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -1679,43 +1679,98 @@ export default function ExamResultsPage() {
 }
 
 function ImageWithSignedUrl({ path, alt }: { path: string, alt: string }) {
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageSrc, setImageSrc] = useState<string>(''); // Blob URL state
   const [error, setError] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const blobUrlRef = useRef<string>('');
 
-  // Usar la función getStorageUrl del componente principal
   const getStorageUrl = async (filePath: string | null | undefined) => {
     if (!filePath) return '';
     
     try {
-      // Usar la ruta exactamente como viene de la base de datos
       const { data, error: _error } = await supabase
         .storage
         .from('examenes-escaneados')
         .createSignedUrl(filePath, 3600);
 
-      if (_error) {
-        // Registramos el error en un logger en lugar de la consola
-        return '';
-      }
-
+      if (_error) return '';
       return data.signedUrl;
     } catch (_error) {
-      // Registramos el error en un logger en lugar de la consola
       return '';
     }
   };
 
   useEffect(() => {
-    async function fetchSignedUrl() {
-      const url = await getStorageUrl(path);
-      if (url) {
-        setImageUrl(url);
-      } else {
-        setError(true);
+    let isMounted = true;
+    const controller = new AbortController();
+
+    async function fetchImage() {
+      try {
+        setLoading(true);
+        setError(false);
+
+        const url = await getStorageUrl(path);
+        if (!url) {
+          if (isMounted) setError(true);
+          return;
+        }
+
+        // Fetch la imagen sin cookies para evitar problemas de Cloudflare
+        const response = await fetch(url, {
+          credentials: 'omit',  // No enviar cookies
+          mode: 'cors',
+          signal: controller.signal,
+          headers: {
+            'Accept': 'image/*',
+          }
+        });
+
+        if (!response.ok) {
+          if (isMounted) setError(true);
+          return;
+        }
+
+        const blob = await response.blob();
+        
+        // Verificar que sea una imagen válida
+        if (!blob.type.startsWith('image/')) {
+          if (isMounted) setError(true);
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        blobUrlRef.current = blobUrl;
+        
+        if (isMounted) {
+          setImageSrc(blobUrl);
+          setLoading(false);
+        } else {
+          // Si el componente se desmontó, limpiar el blob URL inmediatamente
+          URL.revokeObjectURL(blobUrl);
+        }
+
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          // Request fue cancelado, no mostrar error
+          return;
+        }
+        if (isMounted) {
+          setError(true);
+          setLoading(false);
+        }
       }
     }
 
-    fetchSignedUrl();
+    fetchImage();
+
+         // Cleanup function
+     return () => {
+       isMounted = false;
+       controller.abort();
+       if (blobUrlRef.current) {
+         URL.revokeObjectURL(blobUrlRef.current);
+       }
+     };
   }, [path]);
 
   if (error) {
@@ -1726,7 +1781,7 @@ function ImageWithSignedUrl({ path, alt }: { path: string, alt: string }) {
     );
   }
 
-  if (!imageUrl) {
+  if (loading || !imageSrc) {
     return (
       <div className="flex justify-center items-center h-full">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
@@ -1736,13 +1791,13 @@ function ImageWithSignedUrl({ path, alt }: { path: string, alt: string }) {
 
   return (
     <Image
-      src={imageUrl}
+      src={imageSrc} // Usar blob URL en lugar de signed URL
       alt={alt}
       className="w-full h-full object-contain"
       width={800}
       height={600}
       onError={() => setError(true)}
-      unoptimized  // Usar unoptimized para URLs firmadas
+      unoptimized // Necesario para blob URLs
     />
   );
 } 
