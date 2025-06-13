@@ -20,7 +20,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/lib/contexts/sidebar-context";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -91,8 +90,7 @@ const navItems = [
 
 export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const { isCollapsed, toggleCollapse, isMobile } = useSidebar();
+  const { isCollapsed, toggleCollapse, isMobile, isOpen, setIsOpen } = useSidebar();
 
   const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'Usuario';
 

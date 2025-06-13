@@ -6,6 +6,8 @@ interface SidebarContextType {
   isCollapsed: boolean;
   toggleCollapse: () => void;
   isMobile: boolean;
+  isOpen: boolean;
+  setIsOpen: (_isOpen: boolean) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -13,6 +15,7 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   
   // Detectar tamaño de pantalla
   useEffect(() => {
@@ -49,6 +52,13 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     }
   }, [isMobile, isCollapsed]);
 
+  // Cerrar el sidebar cuando se cambia a desktop
+  useEffect(() => {
+    if (!isMobile && isOpen) {
+      setIsOpen(false);
+    }
+  }, [isMobile, isOpen]);
+
   const toggleCollapse = () => {
     // En móvil no permitir contraer
     if (isMobile) return;
@@ -59,7 +69,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <SidebarContext.Provider value={{ isCollapsed, toggleCollapse, isMobile }}>
+    <SidebarContext.Provider value={{ isCollapsed, toggleCollapse, isMobile, isOpen, setIsOpen }}>
       {children}
     </SidebarContext.Provider>
   );
