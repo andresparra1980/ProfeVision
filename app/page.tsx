@@ -136,7 +136,7 @@ export default function Home() {
                   ¡Nuevo! Calificación con Visión Artificial (OMR)
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                La Mejor Aplicacion <span className="text-[#0b890f]"> para Escanear y Calificar Examenes en Papel (OMR)</span>
+                La Mejor Aplicación <span className="text-[#0b890f]"> para Escanear y Calificar Exámenes en Papel</span>
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
                 En ProfeVisión, entendemos los desafíos de la educación moderna. Hemos desarrollado la solución todo en uno que automatiza la creación, 
