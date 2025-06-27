@@ -8,7 +8,7 @@ import Script from 'next/script';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'ProfeVision - Plataforma de Evaluación Educativa',
+  title: 'Profevision: Aplicación para Escanear y Calificar Exámenes en Papel (OMR)',
   description: 'Crea, administra y califica exámenes de forma eficiente con ProfeVision',
 };
 
