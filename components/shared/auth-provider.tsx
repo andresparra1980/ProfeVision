@@ -21,8 +21,11 @@ const PUBLIC_PATHS = [
   '/auth/update-password',
   '/auth/verify-email',
   '/auth/email-confirmed',
-  '/'
-]; // Public paths include login, register, password reset, and home
+  '/',
+  '/privacy',
+  '/terms',
+  '/cookies'
+]; // Public paths include login, register, password reset, home, and legal pages
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);

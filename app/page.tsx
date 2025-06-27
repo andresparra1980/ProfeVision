@@ -34,12 +34,12 @@ export default function Home() {
       {/* Header */}
       <header className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b">
         <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
               <span className="font-bold text-white dark:text-background">PV</span>
             </div>
             <span className="font-bold text-xl text-secondary">ProfeVision</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex items-center gap-6">
               <Link href="#caracteristicas" className="text-sm font-medium hover:text-[#0b890f] transition-colors">
@@ -698,12 +698,12 @@ export default function Home() {
         <div className="container px-4 md:px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
             <div className="col-span-2 lg:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
+              <Link href="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity w-fit">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0b890f] to-[#0b890f]/70 flex items-center justify-center">
                   <span className="font-bold text-white">PV</span>
                 </div>
                 <span className="font-bold text-xl">ProfeVision</span>
-              </div>
+              </Link>
               <p className="text-sm text-muted-foreground mb-4 max-w-xs">
                 La plataforma integral que simplifica la gestión educativa para profesores e instituciones.
               </p>
@@ -811,17 +811,17 @@ export default function Home() {
               <h3 className="font-medium mb-4">Legal</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground">
                     Términos
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">
                     Privacidad
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="/cookies" className="text-sm text-muted-foreground hover:text-foreground">
                     Cookies
                   </Link>
                 </li>
@@ -838,10 +838,10 @@ export default function Home() {
               &copy; {new Date().getFullYear()} ProfeVision. Todos los derechos reservados.
             </p>
             <div className="flex gap-4 mt-4 md:mt-0">
-              <Link href="#" className="text-xs text-muted-foreground hover:text-foreground">
+              <Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground">
                 Términos de Servicio
               </Link>
-              <Link href="#" className="text-xs text-muted-foreground hover:text-foreground">
+              <Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground">
                 Política de Privacidad
               </Link>
             </div>
