@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "@/components/ui/use-toast";
-import { ModeToggle } from "@/components/shared/mode-toggle";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   Card,
@@ -87,12 +86,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-      <div className="absolute top-4 right-4">
-        <ModeToggle />
-      </div>
-      <div className="mx-auto w-full max-w-md">
-        <Card>
+    <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Iniciar Sesión</CardTitle>
             <CardDescription className="text-center">
@@ -174,8 +168,6 @@ export default function Page() {
               </Link>
             </div>
           </CardFooter>
-        </Card>
-      </div>
-    </div>
+            </Card>
   );
 } 

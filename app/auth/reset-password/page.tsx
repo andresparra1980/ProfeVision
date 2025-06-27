@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { resetPassword } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
-import { ModeToggle } from "@/components/shared/mode-toggle";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { logger } from "@/lib/utils/logger";
 import {
@@ -94,107 +93,93 @@ export default function ResetPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-        <div className="absolute top-4 right-4">
-          <ModeToggle />
-        </div>
-        <div className="mx-auto w-full max-w-md">
-          <Card>
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-center">Revisa tu correo</CardTitle>
-              <CardDescription className="text-center">
-                Hemos enviado un enlace para restablecer tu contraseña a tu dirección de correo.
-                Por favor, revisa tu bandeja de entrada.
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Si no has recibido el correo en unos minutos, revisa tu carpeta de spam
-                o intenta nuevamente.
-              </p>
-            </CardContent>
-            
-            <CardFooter className="flex justify-center">
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/auth/login">
-                  Volver a iniciar sesión
-                </Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      </div>
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-center">Revisa tu correo</CardTitle>
+          <CardDescription className="text-center">
+            Hemos enviado un enlace para restablecer tu contraseña a tu dirección de correo.
+            Por favor, revisa tu bandeja de entrada.
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="text-center">
+          <p className="text-sm text-muted-foreground">
+            Si no has recibido el correo en unos minutos, revisa tu carpeta de spam
+            o intenta nuevamente.
+          </p>
+        </CardContent>
+        
+        <CardFooter className="flex justify-center">
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/auth/login">
+              Volver a iniciar sesión
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-      <div className="absolute top-4 right-4">
-        <ModeToggle />
-      </div>
-      <div className="mx-auto w-full max-w-md">
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Restablecer contraseña</CardTitle>
-            <CardDescription className="text-center">
-              Ingresa tu correo electrónico para recibir instrucciones para restablecer tu contraseña
-            </CardDescription>
-          </CardHeader>
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl text-center">Restablecer contraseña</CardTitle>
+        <CardDescription className="text-center">
+          Ingresa tu correo electrónico para recibir instrucciones para restablecer tu contraseña
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Correo electrónico</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="tu@ejemplo.com"
+              {...form.register("email")}
+              disabled={isLoading}
+            />
+            {form.formState.errors.email && (
+              <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+            )}
+          </div>
           
-          <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@ejemplo.com"
-                  {...form.register("email")}
-                  disabled={isLoading}
-                />
-                {form.formState.errors.email && (
-                  <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
-                )}
-              </div>
-              
-              <div className="flex justify-center">
-                <Turnstile
-                  ref={turnstileRef}
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
-                  onSuccess={(token) => setCaptchaToken(token)}
-                  onError={() => {
-                    setCaptchaToken(null);
-                    toast({
-                      variant: "destructive",
-                      title: "Error de CAPTCHA",
-                      description: "Error al validar el CAPTCHA. Por favor, inténtalo de nuevo.",
-                    });
-                  }}
-                  onExpire={() => setCaptchaToken(null)}
-                  className="mx-auto"
-                  options={{
-                    language: "es",
-                    theme: "auto",
-                  }}
-                />
-              </div>
-              
-              <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
-                {isLoading ? "Enviando..." : "Enviar instrucciones"}
-              </Button>
-            </form>
-          </CardContent>
+          <div className="flex justify-center">
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
+              onSuccess={(token) => setCaptchaToken(token)}
+              onError={() => {
+                setCaptchaToken(null);
+                toast({
+                  variant: "destructive",
+                  title: "Error de CAPTCHA",
+                  description: "Error al validar el CAPTCHA. Por favor, inténtalo de nuevo.",
+                });
+              }}
+              onExpire={() => setCaptchaToken(null)}
+              className="mx-auto"
+              options={{
+                language: "es",
+                theme: "auto",
+              }}
+            />
+          </div>
           
-          <CardFooter className="flex justify-center">
-            <div className="text-center text-sm">
-              <Link href="/auth/login" className="text-primary hover:underline">
-                Volver a iniciar sesión
-              </Link>
-            </div>
-          </CardFooter>
-        </Card>
-      </div>
-    </div>
+          <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
+            {isLoading ? "Enviando..." : "Enviar instrucciones"}
+          </Button>
+        </form>
+      </CardContent>
+      
+      <CardFooter className="flex justify-center">
+        <div className="text-center text-sm">
+          <Link href="/auth/login" className="text-primary hover:underline">
+            Volver a iniciar sesión
+          </Link>
+        </div>
+      </CardFooter>
+    </Card>
   );
 } 

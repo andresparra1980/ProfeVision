@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signUpWithRedirect } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
-import { ModeToggle } from "@/components/shared/mode-toggle";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   Card,
@@ -102,132 +101,122 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="absolute top-4 right-4 z-10">
-        <ModeToggle />
-      </div>
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
+        <CardDescription className="text-center">
+          Regístrate para acceder a todas las funcionalidades
+        </CardDescription>
+      </CardHeader>
       
-      <div className="flex-1 flex items-start justify-center pt-24 pb-36 px-4">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
-              <CardDescription className="text-center">
-                Regístrate para acceder a todas las funcionalidades
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nombres">Nombres</Label>
-                  <Input
-                    id="nombres"
-                    placeholder="Juan"
-                    {...form.register("nombres")}
-                    disabled={isLoading}
-                  />
-                  {form.formState.errors.nombres && (
-                    <p className="text-sm text-destructive">{form.formState.errors.nombres.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="apellidos">Apellidos</Label>
-                  <Input
-                    id="apellidos"
-                    placeholder="Pérez González"
-                    {...form.register("apellidos")}
-                    disabled={isLoading}
-                  />
-                  {form.formState.errors.apellidos && (
-                    <p className="text-sm text-destructive">{form.formState.errors.apellidos.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Correo electrónico</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="tu@ejemplo.com"
-                    {...form.register("email")}
-                    disabled={isLoading}
-                  />
-                  {form.formState.errors.email && (
-                    <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Contraseña</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    {...form.register("password")}
-                    disabled={isLoading}
-                  />
-                  {form.formState.errors.password && (
-                    <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    {...form.register("confirmPassword")}
-                    disabled={isLoading}
-                  />
-                  {form.formState.errors.confirmPassword && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.confirmPassword.message}
-                    </p>
-                  )}
-                </div>
-                
-                <div className="flex justify-center mt-6 mb-6">
-                  <Turnstile
-                    ref={turnstileRef}
-                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
-                    onSuccess={(token) => setCaptchaToken(token)}
-                    onError={() => {
-                      setCaptchaToken(null);
-                      toast({
-                        variant: "destructive",
-                        title: "Error de CAPTCHA",
-                        description: "Error al validar el CAPTCHA. Por favor, inténtalo de nuevo.",
-                      });
-                    }}
-                    onExpire={() => setCaptchaToken(null)}
-                    className="mx-auto"
-                    options={{
-                      language: "es",
-                      theme: "auto",
-                    }}
-                  />
-                </div>
-                
-                <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
-                  {isLoading ? "Registrando..." : "Registrarse"}
-                </Button>
-              </form>
-            </CardContent>
-            
-            <CardFooter className="flex justify-center pt-2 pb-8">
-              <div className="text-center text-sm">
-                ¿Ya tienes una cuenta?{" "}
-                <Link href="/auth/login" className="text-primary hover:underline">
-                  Iniciar sesión
-                </Link>
-              </div>
-            </CardFooter>
-          </Card>
+      <CardContent>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="nombres">Nombres</Label>
+            <Input
+              id="nombres"
+              placeholder="Juan"
+              {...form.register("nombres")}
+              disabled={isLoading}
+            />
+            {form.formState.errors.nombres && (
+              <p className="text-sm text-destructive">{form.formState.errors.nombres.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="apellidos">Apellidos</Label>
+            <Input
+              id="apellidos"
+              placeholder="Pérez González"
+              {...form.register("apellidos")}
+              disabled={isLoading}
+            />
+            {form.formState.errors.apellidos && (
+              <p className="text-sm text-destructive">{form.formState.errors.apellidos.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">Correo electrónico</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="tu@ejemplo.com"
+              {...form.register("email")}
+              disabled={isLoading}
+            />
+            {form.formState.errors.email && (
+              <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="password">Contraseña</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              {...form.register("password")}
+              disabled={isLoading}
+            />
+            {form.formState.errors.password && (
+              <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              {...form.register("confirmPassword")}
+              disabled={isLoading}
+            />
+            {form.formState.errors.confirmPassword && (
+              <p className="text-sm text-destructive">
+                {form.formState.errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
+          
+          <div className="flex justify-center mt-6 mb-6">
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
+              onSuccess={(token) => setCaptchaToken(token)}
+              onError={() => {
+                setCaptchaToken(null);
+                toast({
+                  variant: "destructive",
+                  title: "Error de CAPTCHA",
+                  description: "Error al validar el CAPTCHA. Por favor, inténtalo de nuevo.",
+                });
+              }}
+              onExpire={() => setCaptchaToken(null)}
+              className="mx-auto"
+              options={{
+                language: "es",
+                theme: "auto",
+              }}
+            />
+          </div>
+          
+          <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
+            {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
+          </Button>
+        </form>
+      </CardContent>
+      
+      <CardFooter className="flex justify-center">
+        <div className="text-center text-sm">
+          ¿Ya tienes una cuenta?{" "}
+          <Link href="/auth/login" className="text-primary hover:underline">
+            Inicia sesión
+          </Link>
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 } 

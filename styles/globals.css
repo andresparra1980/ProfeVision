@@ -75,7 +75,7 @@
   body {
     @apply bg-background text-foreground;
   }
-  :root:not(.dark) main {
+  :root:not(.dark) main:not(.auth-main) {
     background-color: #f8f9fa !important;
   }
   :root:not(.dark) header,
@@ -86,7 +86,7 @@
   :root.dark aside {
     background-color: #333334 !important;
   }
-  :root.dark main {
+  :root.dark main:not(.auth-main) {
     background-color: #333334 !important;
   }
   @media (max-width: 768px) {
