@@ -26,9 +26,30 @@ const nextConfig: NextConfig = {
     return [];
   },
 
-  // Configure custom headers if needed
+  // Configure custom headers for better caching
   async headers() {
-    return [];
+    return [
+      {
+        // Cache static assets aggressively
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache images
+        source: '/(.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg))',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400',
+          },
+        ],
+      },
+    ];
   },
 
   // Explicitly enabling App Router is not necessary in Next.js 14+
