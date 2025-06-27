@@ -7,8 +7,14 @@ export default function CookiesPage() {
       <AuthHeader />
 
       {/* Content */}
-      <main className="flex-1 bg-background">
-        <div className="container max-w-5xl mx-auto py-8 px-4 md:px-6">
+      <main className="legal-main flex-1 bg-background relative overflow-hidden">
+        {/* Background gradient - same as hero section */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5" />
+        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#ffd60a]/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[#0b890f]/10 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
+        
+        <div className="relative z-10">
+          <div className="container max-w-5xl mx-auto py-8 px-4 md:px-6">
         <div className="prose prose-gray dark:prose-invert max-w-none">
           <h1 className="text-4xl font-bold tracking-tight mb-8">Política de Cookies</h1>
           
@@ -299,8 +305,9 @@ export default function CookiesPage() {
               </p>
             </div>
           </section>
+          </div>
         </div>
-        </div>
+      </div>
       </main>
       <AuthFooter />
     </div>
