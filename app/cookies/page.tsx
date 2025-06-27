@@ -246,10 +246,10 @@ export default function CookiesPage() {
               <div className="bg-card border rounded-lg p-4">
                 <h4 className="font-medium mb-2">Chrome</h4>
                 <a 
-                  href="chrome://settings/cookies" 
+                  href="https://support.google.com/chrome/answer/95647?hl=en&co=GENIE.Platform%3DDesktop" 
                   className="text-sm text-primary hover:underline"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="nofollow noopener noreferrer"
                 >
                   Ayuda de Chrome
                 </a>
@@ -257,10 +257,10 @@ export default function CookiesPage() {
               <div className="bg-card border rounded-lg p-4">
                 <h4 className="font-medium mb-2">Firefox</h4>
                 <a 
-                  href="https://support.mozilla.org/en-US/kb/delete-cookies-and-site-data-firefox" 
+                  href="https://support.mozilla.org/es/kb/cookies-informacion-que-los-sitios-web-guardan-en-" 
                   className="text-sm text-primary hover:underline"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="nofollow noopener noreferrer"
                 >
                   Ayuda de Firefox
                 </a>
@@ -268,21 +268,21 @@ export default function CookiesPage() {
               <div className="bg-card border rounded-lg p-4">
                 <h4 className="font-medium mb-2">Safari</h4>
                 <a 
-                  href="https://support.apple.com/guide/safari/manage-cookies-and-website-data-sfri11471/mac" 
+                  href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac" 
                   className="text-sm text-primary hover:underline"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="nofollow noopener noreferrer"
                 >
                   Ayuda de Safari
                 </a>
               </div>
               <div className="bg-card border rounded-lg p-4">
-                <h4 className="font-medium mb-2">Internet Explorer</h4>
+                <h4 className="font-medium mb-2">Microsoft Edge</h4>
                 <a 
-                  href="https://support.microsoft.com/en-us/windows/manage-cookies-in-internet-explorer-8c14c9da-6691-cac8-2391-331622712328" 
+                  href="https://support.microsoft.com/en-us/windows/manage-cookies-in-microsoft-edge-view-allow-block-delete-and-use-168dab11-0753-043d-7c16-ede5947fc64d" 
                   className="text-sm text-primary hover:underline"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="nofollow noopener noreferrer"
                 >
                   Ayuda de IE
                 </a>

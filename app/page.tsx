@@ -305,7 +305,7 @@ export default function Home() {
                     <a
                       href="https://docs.profevision.com/dashboard-entities"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
                     >
                       <span>Más información</span>
@@ -341,7 +341,7 @@ export default function Home() {
                     <a
                       href="https://docs.profevision.com/dashboard-subjects"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
                     >
                       <span>Más información</span>
@@ -377,7 +377,7 @@ export default function Home() {
                     <a
                       href="https://docs.profevision.com/dashboard-groups"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
                     >
                       <span>Más información</span>
@@ -413,7 +413,7 @@ export default function Home() {
                     <a
                       href="https://docs.profevision.com/dashboard-groups#sistema-de-calificaciones"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
                     >
                       <span>Más información</span>
@@ -449,7 +449,7 @@ export default function Home() {
                     <a
                       href="https://docs.profevision.com/dashboard-exams"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
                     >
                       <span>Más información</span>
@@ -485,7 +485,7 @@ export default function Home() {
                     <a
                       href="https://docs.profevision.com/dashboard-exams#ver-resultados-del-examen"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
                     >
                       <span>Más información</span>
