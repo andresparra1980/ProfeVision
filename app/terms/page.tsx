@@ -229,8 +229,8 @@ export default function TermsPage() {
               </p>
               <div className="text-sm text-muted-foreground">
                 <p className="font-medium">ProfeVision</p>
-                <p>Apartado postal 729</p>
-                <p>New Lenox, IL 60451</p>
+                <p>647 Santino Meadows Apt. 525</p>
+                <p>Jeaniebury, Wisconsin 49368-5863</p>
               </div>
             </div>
           </section>
