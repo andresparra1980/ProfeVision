@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { ClientLayout } from '@/components/shared/client-layout';
 import { AuthProvider } from '@/components/shared/auth-provider';
+import { CookieBanner } from '@/components/shared/cookie-banner';
 import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -50,6 +51,7 @@ export default function RootLayout({
         
         <AuthProvider>
           <ClientLayout>{children}</ClientLayout>
+          <CookieBanner />
         </AuthProvider>
       </body>
     </html>
