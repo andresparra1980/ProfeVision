@@ -31,7 +31,7 @@ export default function TermsPage() {
           
           <div className="bg-card rounded-lg p-6 border mb-8">
             <p className="text-base leading-relaxed">
-              Gracias por tu interés en ProfeVision ("ProfeVision", "nosotros", "nuestro"), que ofrece los servicios 
+              Gracias por tu interés en ProfeVision (&ldquo;ProfeVision&rdquo;, &ldquo;nosotros&rdquo;, &ldquo;nuestro&rdquo;), que ofrece los servicios 
               disponibles en www.profevision.com y en nuestras aplicaciones móviles. Al usar ProfeVision, aceptas estos 
               Términos y nuestra Política de Privacidad. Por favor, léelos con atención.
             </p>
@@ -163,7 +163,7 @@ export default function TermsPage() {
             <h2 className="text-2xl font-semibold mb-4">9. Limitación de responsabilidad</h2>
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
               <ul className="space-y-2 text-sm text-yellow-700 dark:text-yellow-300">
-                <li>• ProfeVision se ofrece "tal cual", sin garantías de que siempre estará disponible o libre de errores.</li>
+                <li>• ProfeVision se ofrece &ldquo;tal cual&rdquo;, sin garantías de que siempre estará disponible o libre de errores.</li>
                 <li>• No somos responsables de daños indirectos, pérdidas de datos o cualquier daño que surja del uso o la imposibilidad de usar ProfeVision.</li>
                 <li>• Nuestra responsabilidad máxima hacia ti no superará el monto que hayas pagado por el servicio en los últimos 12 meses o $100 USD, lo que sea mayor.</li>
               </ul>
@@ -192,7 +192,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">12. Cancelación de la cuenta</h2>
             <p className="text-base leading-relaxed">
-              Puedes cancelar tu cuenta en cualquier momento desde la sección "Mi cuenta" o escribiéndonos a info@profevision.com. 
+              Puedes cancelar tu cuenta en cualquier momento desde la sección &ldquo;Mi cuenta&rdquo; o escribiéndonos a info@profevision.com. 
               Nosotros también podemos suspender o cancelar tu cuenta si incumples estos Términos.
             </p>
           </section>

@@ -150,7 +150,7 @@ export default function PrivacyPage() {
               <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
                 <li>• Puedes usar ProfeVision sin sincronizar tus datos con nuestros servidores.</li>
                 <li>• Puedes eliminar o editar la información de tus estudiantes, clases y exámenes en cualquier momento.</li>
-                <li>• Si quieres eliminar tu cuenta y todos tus datos, puedes hacerlo desde la sección "Mi cuenta".</li>
+                <li>• Si quieres eliminar tu cuenta y todos tus datos, puedes hacerlo desde la sección &ldquo;Mi cuenta&rdquo;.</li>
               </ul>
             </div>
           </section>

@@ -46,7 +46,7 @@ export default function CookiesPage() {
               <p className="text-base leading-relaxed mb-4">
                 Las cookies utilizadas en el navegador del usuario se han instalado con su autorización. Si en algún momento 
                 desea revocar esta autorización, podrá hacerlo sin obstáculo alguno consultando la sección 
-                "Desactivación o eliminación de cookies".
+&ldquo;Desactivación o eliminación de cookies&rdquo;.
               </p>
               <p className="text-base leading-relaxed">
                 El Editor está en total libertad de realizar cambios en el sitio web, por lo que se aconseja al usuario 
