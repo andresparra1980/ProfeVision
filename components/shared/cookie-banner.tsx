@@ -97,53 +97,53 @@ export function CookieBanner({ className }: CookieBannerProps) {
       "animate-in slide-in-from-bottom-5 duration-300",
       className
     )}>
-      <div className="container mx-auto p-4 md:p-6">
+      <div className="container mx-auto p-3 md:p-4">
         {!showPreferences ? (
           // Main banner
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-            <div className="flex items-start gap-3 flex-1">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0b890f] to-[#0b890f]/70 flex items-center justify-center flex-shrink-0 mt-1">
-                <Cookie className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-2">🍪 Respetamos tu privacidad</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Utilizamos cookies para mejorar tu experiencia en ProfeVision, analizar el tráfico y personalizar el contenido. 
-                  Puedes gestionar tus preferencias en cualquier momento.{" "}
-                  <Link href="/cookies" className="text-[#0b890f] hover:underline font-medium">
-                    Más información
-                  </Link>
-                </p>
-              </div>
-            </div>
+                     <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
+             <div className="flex items-start gap-2 flex-1">
+               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#0b890f] to-[#0b890f]/70 flex items-center justify-center flex-shrink-0 mt-0.5">
+                 <Cookie className="h-3 w-3 text-white" />
+               </div>
+               <div className="flex-1">
+                 <h3 className="font-medium text-base mb-1">🍪 Respetamos tu privacidad</h3>
+                 <p className="text-xs text-muted-foreground leading-snug">
+                   Utilizamos cookies para mejorar tu experiencia en ProfeVision, analizar el tráfico y personalizar el contenido. 
+                   Puedes gestionar tus preferencias en cualquier momento.{" "}
+                   <Link href="/cookies" className="text-[#0b890f] hover:underline font-medium">
+                     Más información
+                   </Link>
+                 </p>
+               </div>
+             </div>
             
-            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPreferences(true)}
-                className="flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                Configurar
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={rejectAll}
-                className="hover:bg-muted"
-              >
-                Rechazar todo
-              </Button>
-              <Button
-                size="sm"
-                onClick={acceptAll}
-                className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f] text-white"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                Aceptar todo
-              </Button>
-            </div>
+                         <div className="flex flex-col sm:flex-row gap-1.5 w-full md:w-auto">
+               <Button
+                 variant="outline"
+                 size="sm"
+                 onClick={() => setShowPreferences(true)}
+                 className="flex items-center gap-1 h-8 px-3 text-xs"
+               >
+                 <Settings className="h-3 w-3" />
+                 Configurar
+               </Button>
+               <Button
+                 variant="outline"
+                 size="sm"
+                 onClick={rejectAll}
+                 className="hover:bg-muted h-8 px-3 text-xs"
+               >
+                 Rechazar todo
+               </Button>
+               <Button
+                 size="sm"
+                 onClick={acceptAll}
+                 className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f] text-white h-8 px-3 text-xs"
+               >
+                 <Check className="h-3 w-3 mr-1" />
+                 Aceptar todo
+               </Button>
+             </div>
           </div>
         ) : (
           // Preferences panel
