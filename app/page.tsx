@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/shared/mode-toggle"
+import { FeatureSlideshow } from "@/components/shared/feature-slideshow"
 import {
   BookOpen,
   ScanText,
@@ -135,11 +136,12 @@ export default function Home() {
                   ¡Nuevo! Calificación con Visión Artificial (OMR)
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                  Transforma tu <span className="text-[#0b890f]">experiencia educativa</span>
+                La Mejor Aplicacion <span className="text-[#0b890f]"> para Escanear y Calificar Examenes en Papel (OMR)</span>
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  La plataforma integral que simplifica la gestión de instituciones, materias, grupos, estudiantes y
-                  exámenes para profesores e instituciones educativas.
+                En ProfeVisión, entendemos los desafíos de la educación moderna. Hemos desarrollado la solución todo en uno que automatiza la creación, 
+                calificación y gestión de exámenes con IA, liberando tu valioso tiempo para que te concentres en lo que realmente importa: enseñar y potenciar 
+                el aprendizaje de tus estudiantes.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button
@@ -147,7 +149,7 @@ export default function Home() {
                     size="lg"
                     className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
-                    <Link href="/auth/register">Comenzar Ahora</Link>
+                    <Link href="/auth/register">Comenzar Gratis!</Link>
                   </Button>
                   <Button asChild variant="outline" size="lg">
                     <Link href="#caracteristicas">Conocer Más</Link>
@@ -172,45 +174,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="relative flex items-center justify-center">
-                {/* <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/20 to-[#ffd60a]/20 rounded-2xl blur-xl -z-10" /> */}
-                <div className="relative bg-card backdrop-blur-sm border rounded-2xl shadow-xl overflow-hidden w-full max-w-md mx-auto">
-                  <div className="p-4 border-b">
-                    <h3 className="font-medium">Calificación Automática</h3>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#0b890f]/10 flex items-center justify-center">
-                        <ScanText className="h-6 w-6 text-[#0b890f]" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Examen de Matemáticas</h4>
-                        <p className="text-sm text-muted-foreground">30 estudiantes · 95% completado</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Promedio de la clase</span>
-                        <span className="font-medium">4.3/5</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-[#0b890f] to-[#ffd60a] w-[87%]" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 pt-2">
-                      <div className="rounded-lg bg-muted p-3">
-                        <p className="text-xs text-muted-foreground">Calificación más alta</p>
-                        <p className="font-medium">5.0</p>
-                      </div>
-                      <div className="rounded-lg bg-muted p-3">
-                        <p className="text-xs text-muted-foreground">Calificación más baja</p>
-                        <p className="font-medium">3.2</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" className="w-full">Ver Detalles</Button>
-                  </div>
-                </div>
-              </div>
+              <FeatureSlideshow />
             </div>
           </div>
         </section>
