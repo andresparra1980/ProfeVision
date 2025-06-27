@@ -22,9 +22,9 @@ export function CookieBanner({ className }: CookieBannerProps) {
   const [showPreferences, setShowPreferences] = useState(false)
   const [preferences, setPreferences] = useState({
     necessary: true, // Always true, can't be disabled
-    analytics: false,
-    marketing: false,
-    functional: false,
+    analytics: true,
+    marketing: true,
+    functional: true,
   })
 
   useEffect(() => {
