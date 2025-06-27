@@ -1,23 +1,14 @@
-import Link from "next/link"
+import { AuthHeader } from '@/components/shared/auth-header'
+import { AuthFooter } from '@/components/shared/auth-footer'
 
 export default function CookiesPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-              <span className="font-bold text-white dark:text-background">PV</span>
-            </div>
-            <span className="font-bold text-xl text-secondary">ProfeVision</span>
-          </Link>
-
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col">
+      <AuthHeader />
 
       {/* Content */}
-      <div className="container max-w-5xl mx-auto py-8 px-4 md:px-6">
+      <main className="flex-1 bg-background">
+        <div className="container max-w-5xl mx-auto py-8 px-4 md:px-6">
         <div className="prose prose-gray dark:prose-invert max-w-none">
           <h1 className="text-4xl font-bold tracking-tight mb-8">Política de Cookies</h1>
           
@@ -309,7 +300,9 @@ export default function CookiesPage() {
             </div>
           </section>
         </div>
-      </div>
+        </div>
+      </main>
+      <AuthFooter />
     </div>
   )
 } 
