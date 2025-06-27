@@ -14,12 +14,7 @@ export default function CookiesPage() {
             </div>
             <span className="font-bold text-xl text-secondary">ProfeVision</span>
           </Link>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Volver al inicio
-            </Link>
-          </Button>
+
         </div>
       </header>
 
