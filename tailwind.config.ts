@@ -18,6 +18,24 @@ const config: Config = {
   mode: "jit",
   // Safelist common colors that might be used dynamically
   safelist: [
+    // Custom hex colors used in the application
+    "bg-[#bc152b]",
+    "bg-[#ea4359]",
+    "bg-[#ea4359]/70",
+    "from-[#bc152b]",
+    "to-[#ea4359]/70",
+    "bg-gradient-to-br",
+    "from-[#0b890f]",
+    "to-[#0b890f]/70",
+    "from-[#0b890f]/70",
+    "via-[#ffd60a]/70",
+    "to-[#bc152b]/70",
+    "from-[#0b890f]/40",
+    "via-[#ffd60a]/40",
+    "to-[#bc152b]/40",
+    "from-[#0b890f]/50",
+    "via-[#ffd60a]/50",
+    "to-[#bc152b]/50",
     // Common Tailwind color patterns
     {
       pattern:
