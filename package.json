@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rm -rf .next"
+    "clean": "rm -rf .next",
+    "dev:fresh": "rm -rf .next && rm -rf node_modules/.cache && next dev --turbopack"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
