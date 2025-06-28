@@ -13,7 +13,15 @@ export function SiteFooter() {
               <span className="font-bold text-secondary dark:text-white text-xl">ProfeVision</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto md:mx-0">
-              La plataforma integral que simplifica la gestión educativa para profesores e instituciones.
+            ProfeVisión es la plataforma integral para educadores.
+            Automatiza la creación y calificación de exámenes con IA y
+            tecnología OMR, permitiéndote escanear y corregir pruebas
+            en papel al instante con tu móvil. Además, centraliza la
+            gestión completa de instituciones, materias, grupos y
+            estudiantes. Ahorra tiempo, optimiza la evaluación
+            educativa y obtén insights precisos para una enseñanza
+            más efectiva. Es tu herramienta definitiva para transformar
+            la gestión académica.
             </p>
             <div className="flex gap-4 justify-center md:justify-start">
               <Link href="#" className="text-muted-foreground hover:text-foreground">
