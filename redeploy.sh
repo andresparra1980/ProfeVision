@@ -13,6 +13,11 @@ echo "Fetching latest changes..."
 git fetch
 git pull
 
+# Clean up previous build cache
+echo "Cleaning up previous build cache..."
+rm -rf .next
+echo "✅ Removed .next directory"
+
 # Install dependencies (using yarn with legacy peer deps)
 echo "Installing dependencies..."
 yarn install --legacy-peer-deps
