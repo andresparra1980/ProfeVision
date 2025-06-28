@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/shared/mode-toggle"
 import { Menu, X } from "lucide-react"
 
-export function AuthHeader() {
+export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
@@ -14,13 +14,13 @@ export function AuthHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-              <span className="font-bold text-white dark:text-background">PV</span>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
+              <span className="font-bold text-white">PV</span>
             </div>
-            <span className="font-bold text-xl text-secondary">ProfeVision</span>
+            <span className="font-bold text-xl text-secondary dark:text-white">ProfeVision</span>
           </Link>
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex items-center gap-6">

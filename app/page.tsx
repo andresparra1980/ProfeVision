@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ModeToggle } from "@/components/shared/mode-toggle"
+import { SiteHeader } from "@/components/shared/site-header"
+import { SiteFooter } from "@/components/shared/site-footer"
 import { FeatureSlideshow } from "@/components/shared/feature-slideshow"
 import {
   BookOpen,
@@ -13,116 +14,26 @@ import {
   FileSpreadsheet,
   CheckCircle,
   ArrowRight,
-  Smartphone,
-  Menu,
-  X
+  Smartphone
 } from "lucide-react"
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 export default function Home() {
   const avatarSeeds = useMemo(
     () => Array.from({ length: 4 }, () => Math.random().toString(36).substring(2, 10)),
     []
   )
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
-  const closeMenu = () => setIsMenuOpen(false)
-
-  return (
+    return (
     <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b">
-        <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-              <span className="font-bold text-white dark:text-background">PV</span>
-            </div>
-            <span className="font-bold text-xl text-secondary">ProfeVision</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <nav className="hidden md:flex items-center gap-6">
-              <Link href="#caracteristicas" className="text-sm font-medium hover:text-[#0b890f] transition-colors">
-                Características
-              </Link>
-              <Link href="#modulos" className="text-sm font-medium hover:text-[#0b890f] transition-colors">
-                Módulos
-              </Link>
-              <Link href="#beneficios" className="text-sm font-medium hover:text-[#0b890f] transition-colors">
-                Beneficios
-              </Link>
-            </nav>
-            <div className="hidden md:flex items-center gap-2">
-              <Button asChild size="sm" className="bg-accent text-black dark:text-black">
-                <Link href="/auth/login">Iniciar Sesión</Link>
-              </Button>
-              <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90">
-                <Link href="/auth/register">Registrarse</Link>
-              </Button>
-            </div>
-            <ModeToggle />
-            <button 
-              onClick={toggleMenu}
-              className="md:hidden p-2 rounded-md hover:bg-muted"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-card border-b shadow-lg animate-in slide-in-from-top-5 duration-300 z-50">
-            <div className="container py-4 flex flex-col gap-3">
-              <Link 
-                href="#caracteristicas" 
-                className="text-base font-medium hover:text-[#0b890f] transition-colors py-2"
-                onClick={closeMenu}
-              >
-                Características
-              </Link>
-              <Link 
-                href="#modulos" 
-                className="text-base font-medium hover:text-[#0b890f] transition-colors py-2"
-                onClick={closeMenu}
-              >
-                Módulos
-              </Link>
-              <Link 
-                href="#beneficios" 
-                className="text-base font-medium hover:text-[#0b890f] transition-colors py-2"
-                onClick={closeMenu}
-              >
-                Beneficios
-              </Link>
-              <div className="pt-2 flex flex-col gap-2 border-t">
-                <Button asChild variant="outline" size="sm" className="bg-accent text-black dark:text-black justify-center text-base" onClick={closeMenu}>
-                  <Link href="/auth/login">Iniciar Sesión</Link>
-                </Button>
-                <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90 text-base" onClick={closeMenu}>
-                  <Link href="/auth/register">Registrarse</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
+      <SiteHeader />
 
       {/* Empty spacer div to push content below fixed header */}
       <div className="h-16"></div>
       
       {/* Content wrapper - applying blur when menu is open */}
-      <div 
-        className={`flex-1 transition-all duration-200 ${isMenuOpen ? 'blur-xl' : ''}`} 
-        onClick={isMenuOpen ? closeMenu : undefined}
-        style={{ opacity: isMenuOpen ? 0.6 : 1 }}
-      >
+      <div className="flex-1 transition-all duration-200">
         {/* Hero Section */}
         <section className="py-12 md:py-20 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5 -z-10" />
@@ -198,30 +109,47 @@ export default function Home() {
                 <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
                   <BookOpen className="h-6 w-6 text-[#0b890f]" />
                 </div>
-                <h3 className="text-xl font-bold">Creación de Exámenes</h3>
+                <h3 className="text-xl text-center font-bold">Creación de Exámenes Inteligente</h3>
                 <p className="text-center text-muted-foreground">
-                  Genera exámenes personalizados con nuestra asistencia de IA. Múltiples formatos, preguntas de calidad y
-                  plantillas reutilizables.
+                Genera pruebas educativas personalizadas con asistencia de IA. Disfruta de múltiples formatos (selección múltiple,
+                verdadero/falso, etc.), preguntas de calidad y plantillas reutilizables. Ahorra tiempo y asegura evaluaciones precisas y relevantes.
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md">
                 <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
                   <Smartphone className="h-6 w-6 text-[#0b890f]" />
                 </div>
-                <h3 className="text-xl font-bold">Calificación con IA</h3>
+                <h3 className="text-xl text-center font-bold">Calificación con IA y Visión Artificial (OMR)</h3>
                 <p className="text-center text-muted-foreground">
-                  Califica exámenes en minutos con tecnología OMR (Optical Mark Recognition). Escanea y procesa hojas de
-                  respuestas automáticamente con tu smartphone.
+                Transforma tu proceso de
+                corrección. Nuestra plataforma de
+                evaluación te permite calificar
+                exámenes con celular en minutos
+                con nuestra tecnología OMR
+                avanzada. Simplemente escanea y
+                procesa hojas de respuestas
+                automáticamente con tu
+                smartphone o tablet. La IA se
+                encarga de la corrección
+                instantánea de pruebas online y la
+                lectura precisa del papel.
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md">
                 <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
                   <BarChart3 className="h-6 w-6 text-[#0b890f]" />
                 </div>
-                <h3 className="text-xl font-bold">Análisis de Resultados</h3>
+                <h3 className="text-xl text-center font-bold">Análisis de Resultados Detallado</h3>
                 <p className="text-center text-muted-foreground">
-                  Obtén insights valiosos sobre el desempeño de tus estudiantes. Identifica áreas de mejora y tendencias
-                  con nuestros reportes detallados.
+                Obtén insights valiosos sobre el
+                desempeño de tus estudiantes.
+                Identifica áreas de mejora,
+                fortalezas y tendencias con
+                nuestros reportes gráficos y
+                detallados. Toma decisiones
+                pedagógicas informadas para
+                potenciar el aprendizaje
+                adaptativo.
                 </p>
               </div>
             </div>
@@ -474,8 +402,9 @@ export default function Home() {
                   Ahorra tiempo y mejora la calidad educativa
                 </h2>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  ProfeVision te permite enfocarte en lo que realmente importa: la enseñanza y el aprendizaje de tus
-                  estudiantes.
+                ProfeVision te permite enfocarte en lo que realmente importa: la enseñanza y el
+                aprendizaje de tus estudiantes, impulsando la transformación digital en
+                educación. Somos la plataforma para profesores que estabas buscando.
                 </p>
                 <ul className="space-y-2">
                   <li className="flex items-start gap-3">
@@ -485,7 +414,9 @@ export default function Home() {
                     <div>
                       <h3 className="font-medium">Automatización Inteligente</h3>
                       <p className="text-sm text-muted-foreground">
-                        Reduce el tiempo dedicado a tareas administrativas y de calificación.
+                      Reduce drásticamente el tiempo dedicado a
+                      tareas administrativas y de calificación gracias a la IA y nuestra
+                      aplicación para escanear exámenes.
                       </p>
                     </div>
                   </li>
@@ -496,7 +427,9 @@ export default function Home() {
                     <div>
                       <h3 className="font-medium">Organización Centralizada</h3>
                       <p className="text-sm text-muted-foreground">
-                        Toda la información educativa en un solo lugar, accesible cuando la necesites.
+                      Ten toda la información educativa en un solo
+                      lugar, accesible cuando la necesites, mejorando la gestión de
+                      evaluaciones académicas.
                       </p>
                     </div>
                   </li>
@@ -507,7 +440,9 @@ export default function Home() {
                     <div>
                       <h3 className="font-medium">Insights Valiosos</h3>
                       <p className="text-sm text-muted-foreground">
-                        Toma decisiones basadas en datos para mejorar el rendimiento académico.
+                      Toma decisiones pedagógicas basadas en datos
+                      confiables para mejorar el rendimiento estudiantil y adaptar tus
+                      estrategias.
                       </p>
                     </div>
                   </li>
@@ -518,7 +453,9 @@ export default function Home() {
                     <div>
                       <h3 className="font-medium">Flexibilidad Total</h3>
                       <p className="text-sm text-muted-foreground">
-                        Adapta la plataforma a tus necesidades específicas y flujo de trabajo.
+                      Adapta esta plataforma de exámenes a tus
+                      necesidades específicas y flujo de trabajo, desde primaria hasta la
+                      universidad.
                       </p>
                     </div>
                   </li>
@@ -529,8 +466,10 @@ export default function Home() {
                     <div>
                       <h3 className="font-medium">Calificación en Minutos, No en Horas</h3>
                       <p className="text-sm text-muted-foreground">
-                        La tecnología OMR (Optical Mark Recognition) convierte horas de calificación manual en minutos,
-                        permitiéndote enfocarte en la enseñanza.
+                      La tecnología OMR (Optical Mark
+                      Recognition) convierte horas de calificación manual en minutos,
+                      permitiéndote enfocarte en la enseñanza y el feedback automático.
+                      ProfeVisión es una de las mejores herramientas digitales para docentes.
                       </p>
                     </div>
                   </li>
@@ -542,9 +481,6 @@ export default function Home() {
                     className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
                     <Link href="/auth/register">Comenzar Gratis</Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg">
-                    <Link href="#contacto">Solicitar Demo</Link>
                   </Button>
                 </div>
               </div>
@@ -628,10 +564,7 @@ export default function Home() {
                   size="lg"
                   className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                 >
-                  <Link href="/auth/register">Registrarse Gratis</Link>
-                </Button>
-                <Button asChild variant="outline" size="lg">
-                  <Link href="#contacto">Solicitar Demo</Link>
+                  <Link href="/auth/register">Inicia Prueba Gratis</Link>
                 </Button>
               </div>
               <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
@@ -657,161 +590,7 @@ export default function Home() {
         </section>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t bg-card">
-        <div className="container px-4 md:px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-            <div className="col-span-2 lg:col-span-2">
-              <Link href="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity w-fit">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0b890f] to-[#0b890f]/70 flex items-center justify-center">
-                  <span className="font-bold text-white">PV</span>
-                </div>
-                <span className="font-bold text-xl">ProfeVision</span>
-              </Link>
-              <p className="text-sm text-muted-foreground mb-4 max-w-xs">
-                La plataforma integral que simplifica la gestión educativa para profesores e instituciones.
-              </p>
-              <div className="flex gap-4">
-                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                  </svg>
-                </Link>
-                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-                  </svg>
-                </Link>
-                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                  </svg>
-                </Link>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-medium mb-4">Producto</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Características
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Precios
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Testimonios
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Guías
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-medium mb-4">Empresa</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Acerca de
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Contacto
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Carreras
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-medium mb-4">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground">
-                    Términos
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">
-                    Privacidad
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cookies" className="text-sm text-muted-foreground hover:text-foreground">
-                    Cookies
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Licencias
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t mt-12 pt-6 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-xs text-muted-foreground">
-              &copy; {new Date().getFullYear()} ProfeVision. Todos los derechos reservados.
-            </p>
-            <div className="flex gap-4 mt-4 md:mt-0">
-              <Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground">
-                Términos de Servicio
-              </Link>
-              <Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground">
-                Política de Privacidad
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

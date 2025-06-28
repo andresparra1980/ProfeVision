@@ -1,5 +1,5 @@
-import { AuthHeader } from '@/components/shared/auth-header';
-import { AuthFooter } from '@/components/shared/auth-footer';
+import { SiteHeader } from '@/components/shared/site-header';
+import { SiteFooter } from '@/components/shared/site-footer';
 
 export default function AuthLayout({
   children,
@@ -8,7 +8,11 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <AuthHeader />
+      <SiteHeader />
+      
+      {/* Empty spacer div to push content below fixed header */}
+      <div className="h-16"></div>
+      
       <main className="auth-main flex-1 flex items-center justify-center px-4 py-12 relative overflow-hidden bg-background">
         {/* Background gradient - same as hero section */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5" />
@@ -19,7 +23,7 @@ export default function AuthLayout({
           {children}
         </div>
       </main>
-      <AuthFooter />
+      <SiteFooter />
     </div>
   );
 } 

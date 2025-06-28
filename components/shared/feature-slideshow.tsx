@@ -32,16 +32,8 @@ export function FeatureSlideshow({
       title: "Calificación en Minutos",
       subtitle: "Tecnología OMR + IA",
       description: "Nuestra aplicación para escanear exámenes con tecnología OMR (Visión Artificial) para papel y la IA para online te dan resultados instantáneos.",
-      color: "text-[#0b890f]",
-      bgColor: "bg-[#0b890f]/10"
-    },
-    {
-      icon: Brain,
-      title: "Creación de Exámenes con IA",
-      subtitle: "Generación Inteligente",
-      description: "Genera pruebas de calidad rápidamente, adaptadas a tus necesidades.",
-      color: "text-[#bc152b]",
-      bgColor: "bg-[#bc152b]/10"
+      color: "text-purple-600",
+      bgColor: "bg-purple-600/10"
     },
     {
       icon: School,
@@ -50,6 +42,14 @@ export function FeatureSlideshow({
       description: "Centraliza instituciones, materias, grupos y estudiantes sin esfuerzo.",
       color: "text-[#ffd60a]",
       bgColor: "bg-[#ffd60a]/10"
+    },
+    {
+      icon: Brain,
+      title: "Creación de Exámenes con IA",
+      subtitle: "Generación Inteligente",
+      description: "Genera pruebas de calidad rápidamente, adaptadas a tus necesidades.",
+      color: "text-purple-600",
+      bgColor: "bg-purple-600/10"
     },
     {
       icon: Target,

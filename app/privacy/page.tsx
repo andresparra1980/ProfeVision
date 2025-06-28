@@ -1,10 +1,13 @@
-import { AuthHeader } from '@/components/shared/auth-header'
-import { AuthFooter } from '@/components/shared/auth-footer'
+import { SiteHeader } from '@/components/shared/site-header'
+import { SiteFooter } from '@/components/shared/site-footer'
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <AuthHeader />
+      <SiteHeader />
+
+      {/* Empty spacer div to push content below fixed header */}
+      <div className="h-16"></div>
 
       {/* Content */}
       <main className="legal-main flex-1 bg-background relative overflow-hidden">
@@ -189,7 +192,7 @@ export default function PrivacyPage() {
         </div>
       </div>
       </main>
-      <AuthFooter />
+      <SiteFooter />
     </div>
   )
 } 
