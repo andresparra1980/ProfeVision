@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://profevision.com'),
+  metadataBase: new URL('https://www.profevision.com'),
   alternates: {
     canonical: '/',
     languages: {
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_ES',
-    url: 'https://profevision.com',
+    url: 'https://www.profevision.com',
     title: 'ProfeVisión - La Mejor Aplicación para Escanear y Calificar Exámenes en Papel con IA',
     description: 'ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Resgistrate gratis!',
     siteName: 'ProfeVisión',
@@ -140,7 +140,7 @@ export default function RootLayout({
               "@type": "SoftwareApplication",
               "name": "ProfeVisión",
               "description": "ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes.",
-              "url": "https://profevision.com",
+                             "url": "https://www.profevision.com",
               "applicationCategory": "EducationalApplication",
               "operatingSystem": "Web, iOS, Android",
               "offers": {

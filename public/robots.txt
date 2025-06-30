@@ -16,7 +16,7 @@ Allow: /terms
 Allow: /cookies
 
 # Sitemap location
-Sitemap: https://profevision.com/sitemap.xml
+Sitemap: https://www.profevision.com/sitemap.xml
 
 # Crawl delay
 Crawl-delay: 1 
