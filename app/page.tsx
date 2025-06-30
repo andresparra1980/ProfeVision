@@ -200,6 +200,7 @@ export default function Home() {
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title="Ver documentación sobre gestión de entidades en ProfeVisión"
                     >
                       <span>Más información</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -236,6 +237,7 @@ export default function Home() {
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title="Ver documentación sobre gestión de materias en ProfeVisión"
                     >
                       <span>Más información</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -272,6 +274,7 @@ export default function Home() {
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title="Ver documentación sobre gestión de grupos de estudiantes en ProfeVisión"
                     >
                       <span>Más información</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -308,6 +311,7 @@ export default function Home() {
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title="Ver documentación sobre sistema de calificaciones en ProfeVisión"
                     >
                       <span>Más información</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -344,6 +348,7 @@ export default function Home() {
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title="Ver documentación sobre gestión de exámenes en ProfeVisión"
                     >
                       <span>Más información</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -380,6 +385,7 @@ export default function Home() {
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title="Ver documentación sobre análisis y resultados de exámenes en ProfeVisión"
                     >
                       <span>Más información</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
