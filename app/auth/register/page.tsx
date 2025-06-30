@@ -212,7 +212,7 @@ export default function RegisterPage() {
       <CardFooter className="flex justify-center">
         <div className="text-center text-sm">
           ¿Ya tienes una cuenta?{" "}
-          <Link href="/auth/login" className="text-primary hover:underline">
+          <Link href="/auth/login" className="text-primary hover:underline" title="Iniciar sesión en ProfeVisión - Acceder a tu cuenta existente">
             Inicia sesión
           </Link>
         </div>

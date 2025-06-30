@@ -60,10 +60,10 @@ export default function Home() {
                     size="lg"
                     className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
-                    <Link href="/auth/register">Comenzar Gratis!</Link>
+                    <Link href="/auth/register" title="Registrarse gratis en ProfeVisión - Crear cuenta sin costo">Comenzar Gratis!</Link>
                   </Button>
                   <Button asChild variant="outline" size="lg">
-                    <Link href="#caracteristicas">Conocer Más</Link>
+                    <Link href="#caracteristicas" title="Conocer más sobre las características de ProfeVisión">Conocer Más</Link>
                   </Button>
                 </div>
                 <div className="flex items-center gap-4 pt-4">
@@ -480,7 +480,7 @@ export default function Home() {
                     size="lg"
                     className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
-                    <Link href="/auth/register">Comenzar Gratis</Link>
+                    <Link href="/auth/register" title="Comenzar gratis con ProfeVisión - Registro sin costo">Comenzar Gratis</Link>
                   </Button>
                 </div>
               </div>
@@ -564,7 +564,7 @@ export default function Home() {
                   size="lg"
                   className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                 >
-                  <Link href="/auth/register">Inicia Prueba Gratis</Link>
+                  <Link href="/auth/register" title="Iniciar prueba gratuita de ProfeVisión - Sin compromisos">Inicia Prueba Gratis</Link>
                 </Button>
               </div>
               <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">

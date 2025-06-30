@@ -163,7 +163,7 @@ export default function Page() {
           <CardFooter className="flex justify-center">
             <div className="text-center text-sm">
               ¿No tienes una cuenta?{" "}
-              <Link href="/auth/register" className="text-primary hover:underline">
+              <Link href="/auth/register" className="text-primary hover:underline" title="Crear cuenta nueva en ProfeVisión - Registro gratuito">
                 Regístrate
               </Link>
             </div>
