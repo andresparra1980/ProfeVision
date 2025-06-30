@@ -68,11 +68,12 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-4 pt-4">
                   <div className="flex -space-x-2">
-                    {avatarSeeds.map((seed) => (
+                    {avatarSeeds.map((seed, index) => (
                       <Image
                         key={seed}
                         src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`}
-                        alt="Avatar"
+                        alt={`Avatar de profesor ${index + 1} que usa ProfeVisión`}
+                        title={`Profesor que confía en ProfeVisión para automatizar la calificación de exámenes`}
                         width={32}
                         height={32}
                         className="w-8 h-8 rounded-full border-2 border-background"
