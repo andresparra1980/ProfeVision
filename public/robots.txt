@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Disallow sensitive areas
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /uploads/
+Disallow: /_next/
+Disallow: /admin/
+
+# Allow important pages
+Allow: /
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+
+# Sitemap location
+Sitemap: https://profevision.com/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1 
