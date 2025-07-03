@@ -63,7 +63,28 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes that should always be accessible
-  const publicRoutes = ["/", "/privacy", "/terms", "/cookies"];
+  const publicRoutes = [
+    "/", 
+    "/privacy", 
+    "/terms", 
+    "/cookies",
+    // Website public pages
+    "/how-it-works",
+    "/institutions-management",
+    "/subjects-management",
+    "/groups-management",
+    "/students-management",
+    "/reports",
+    "/mobile-app",
+    "/pricing",
+    "/contact",
+    "/blog",
+    // Exams pages
+    "/exams/manual-generator",
+    "/exams/ai-generator",
+    "/exams/paper-exams",
+    "/exams"
+  ];
   if (publicRoutes.includes(pathname)) {
     console.log(`[Middleware] Public route (${pathname}). Allowing access.`);
     return response;

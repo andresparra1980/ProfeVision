@@ -24,8 +24,25 @@ const PUBLIC_PATHS = [
   '/',
   '/privacy',
   '/terms',
-  '/cookies'
-]; // Public paths include login, register, password reset, home, and legal pages
+  '/cookies',
+  // Website public pages
+  '/how-it-works',
+  '/institutions-management',
+  '/subjects-management',
+  '/groups-management',
+  '/students-management',
+  '/reports',
+  '/mobile-app',
+  '/pricing',
+  '/contact',
+  '/blog',
+  // Exams pages
+  '/exams/manual-generator',
+  '/exams/ai-generator',
+  '/exams/paper-exams',
+  '/exams'
+
+]; // Public paths include login, register, password reset, home, legal pages, and all website public pages
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
