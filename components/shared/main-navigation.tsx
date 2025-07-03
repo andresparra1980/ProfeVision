@@ -19,8 +19,7 @@ import {
   Brain, 
   ScanLine,
   BarChart3,
-  Smartphone,
-  ArrowRight
+  Smartphone
 } from "lucide-react"
 
 interface ListItemProps {
@@ -112,7 +111,7 @@ export function MainNavigation() {
                 <ul className="space-y-1">
                   {/* Cómo funciona - Primer item clickeable */}
                   <ListItem 
-                    href="/como-funciona" 
+                    href="/how-it-works" 
                     title="¿Cómo Funciona ProfeVision?"
                     icon={BookOpen}
                   >
@@ -120,21 +119,21 @@ export function MainNavigation() {
                   </ListItem>
                   
                   <ListItem 
-                    href="/gestion-instituciones" 
+                    href="/institutions-management" 
                     title="Gestión de Instituciones"
                     icon={Building}
                   >
                     Administra múltiples instituciones educativas
                   </ListItem>
                   <ListItem 
-                    href="/gestion-materias" 
+                    href="/subjects-management" 
                     title="Gestión de Materias"
                     icon={BookOpen}
                   >
                     Organiza y gestiona todas tus materias
                   </ListItem>
                   <ListItem 
-                    href="/gestion-grupos" 
+                    href="/groups-management" 
                     title="Gestión de Grupos"
                     icon={Users}
                   >
@@ -159,21 +158,21 @@ export function MainNavigation() {
                   
                   {/* Sub-items de Exámenes */}
                   <ExamenSubItem 
-                    href="/examenes/generador-manual" 
+                    href="/exams/manual-generator" 
                     title="Generador Manual"
                     icon={FileText}
                   >
                     Crea exámenes paso a paso de forma manual
                   </ExamenSubItem>
                   <ExamenSubItem 
-                    href="/examenes/generador-ai" 
+                    href="/exams/ai-generator" 
                     title="Generador con IA"
                     icon={Brain}
                   >
                     Genera exámenes automáticamente con inteligencia artificial
                   </ExamenSubItem>
                   <ExamenSubItem 
-                    href="/examenes/papel" 
+                    href="/exams/paper-exams" 
                     title="Exámenes en Papel"
                     icon={ScanLine}
                   >
@@ -184,21 +183,21 @@ export function MainNavigation() {
                 {/* Columna 3 */}
                 <ul className="space-y-1">
                   <ListItem 
-                    href="/gestion-estudiantes" 
+                    href="/students-management" 
                     title="Gestión de Estudiantes"
                     icon={GraduationCap}
                   >
                     Control completo de información estudiantil
                   </ListItem>
                   <ListItem 
-                    href="/reportes" 
+                    href="/reports" 
                     title="Gestión de Reportes"
                     icon={BarChart3}
                   >
                     Análisis detallado del desempeño estudiantil
                   </ListItem>
                   <ListItem 
-                    href="/app-movil" 
+                    href="/mobile-app" 
                     title="Aplicación Móvil"
                     icon={Smartphone}
                   >
@@ -213,7 +212,7 @@ export function MainNavigation() {
         {/* Precios */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href="/precios" className={navigationMenuTriggerStyle()}>
+            <Link href="/pricing" className={navigationMenuTriggerStyle()}>
               Precios
             </Link>
           </NavigationMenuLink>
@@ -231,7 +230,7 @@ export function MainNavigation() {
         {/* Contacto */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href="/contacto" className={navigationMenuTriggerStyle()}>
+            <Link href="/contact" className={navigationMenuTriggerStyle()}>
               Contacto
             </Link>
           </NavigationMenuLink>

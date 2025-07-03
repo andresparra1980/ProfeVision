@@ -141,25 +141,25 @@ export function SiteHeader() {
                 {isFuncionesOpen && (
                   <div className="bg-muted/30 py-2">
                     <MobileMenuItem 
-                      href="/como-funciona" 
+                      href="/how-it-works" 
                       title="¿Cómo Funciona ProfeVision?" 
                       icon={BookOpen}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href="/gestion-instituciones" 
+                      href="/institutions-management" 
                       title="Gestión de Instituciones" 
                       icon={Building}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href="/gestion-materias" 
+                      href="/subjects-management" 
                       title="Gestión de Materias" 
                       icon={BookOpen}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href="/gestion-grupos" 
+                      href="/groups-management" 
                       title="Gestión de Grupos" 
                       icon={Users}
                       isSubItem
@@ -181,19 +181,19 @@ export function SiteHeader() {
                       {isExamenesOpen && (
                         <div className="bg-muted/50 py-1">
                           <MobileMenuItem 
-                            href="/examenes/generador-manual" 
+                            href="/exams/manual-generator" 
                             title="Generador Manual" 
                             icon={FileText}
                             isSubSubItem
                           />
                           <MobileMenuItem 
-                            href="/examenes/generador-ai" 
+                            href="/exams/ai-generator" 
                             title="Generador con IA" 
                             icon={Brain}
                             isSubSubItem
                           />
                           <MobileMenuItem 
-                            href="/examenes/papel" 
+                            href="/exams/paper-exams" 
                             title="Exámenes en Papel" 
                             icon={ScanLine}
                             isSubSubItem
@@ -203,19 +203,19 @@ export function SiteHeader() {
                     </div>
                     
                     <MobileMenuItem 
-                      href="/gestion-estudiantes" 
+                      href="/students-management" 
                       title="Gestión de Estudiantes" 
                       icon={GraduationCap}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href="/reportes" 
+                      href="/reports" 
                       title="Gestión de Reportes" 
                       icon={BarChart3}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href="/app-movil" 
+                      href="/mobile-app" 
                       title="Aplicación Móvil" 
                       icon={Smartphone}
                       isSubItem
@@ -225,13 +225,13 @@ export function SiteHeader() {
               </div>
               
               {/* Precios */}
-              <MobileMenuItem href="/precios" title="Precios" />
+              <MobileMenuItem href="/pricing" title="Precios" />
               
               {/* Blog */}
               <MobileMenuItem href="/blog" title="Blog" />
               
               {/* Contacto */}
-              <MobileMenuItem href="/contacto" title="Contacto" />
+              <MobileMenuItem href="/contact" title="Contacto" />
               
               {/* Botones de autenticación */}
               <div className="pt-4 mt-4 flex flex-col gap-3 border-t">

@@ -78,23 +78,23 @@ export function SiteFooter() {
               <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">Producto</h3>
               <ul className="space-y-1 md:space-y-2">
                 <li>
-                              <Link href="/#caracteristicas" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Características de ProfeVisión">
-              Características
-            </Link>
+                  <Link href="/how-it-works" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="¿Cómo funciona ProfeVisión?">
+                    ¿Cómo funciona?
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-xs md:text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="/pricing" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Precios de ProfeVisión">
                     Precios
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-xs md:text-sm text-muted-foreground hover:text-foreground">
-                    Testimonios
+                  <Link href="/exams/ai-generator" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Generador de exámenes con IA">
+                    Generador IA
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-xs md:text-sm text-muted-foreground hover:text-foreground">
-                    Guías
+                  <Link href="/mobile-app" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Aplicación móvil">
+                    App Móvil
                   </Link>
                 </li>
               </ul>
@@ -103,17 +103,17 @@ export function SiteFooter() {
               <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">Empresa</h3>
               <ul className="space-y-1 md:space-y-2">
                 <li>
-                  <Link href="#" className="text-xs md:text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="/how-it-works" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Acerca de ProfeVisión">
                     Acerca de
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-xs md:text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="/blog" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Blog de ProfeVisión">
                     Blog
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-xs md:text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="/contact" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Contacto ProfeVisión">
                     Contacto
                   </Link>
                 </li>

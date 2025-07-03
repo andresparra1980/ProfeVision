@@ -1,17 +1,8 @@
 import Link from "next/link"
-import { SiteHeader } from '@/components/shared/site-header'
-import { SiteFooter } from '@/components/shared/site-footer'
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <SiteHeader />
-
-      {/* Empty spacer div to push content below fixed header */}
-      <div className="h-16"></div>
-
-      {/* Content */}
-      <main className="legal-main flex-1 bg-background relative overflow-hidden">
+    <div className="legal-main bg-background relative overflow-hidden">
         {/* Background gradient - same as hero section */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5" />
         <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#ffd60a]/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
@@ -228,11 +219,9 @@ export default function TermsPage() {
               </div>
             </div>
           </section>
-          </div>
         </div>
       </div>
-      </main>
-      <SiteFooter />
+    </div>
     </div>
   )
 } 

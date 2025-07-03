@@ -2,8 +2,6 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { SiteHeader } from "@/components/shared/site-header"
-import { SiteFooter } from "@/components/shared/site-footer"
 import { FeatureSlideshow } from "@/components/shared/feature-slideshow"
 import {
   BookOpen,
@@ -27,11 +25,6 @@ export default function Home() {
 
     return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader />
-
-      {/* Empty spacer div to push content below fixed header */}
-      <div className="h-16"></div>
-      
       {/* Content wrapper - applying blur when menu is open */}
       <div className="flex-1 transition-all duration-200">
         {/* Hero Section */}
@@ -596,8 +589,6 @@ export default function Home() {
           </div>
         </section>
       </div>
-
-      <SiteFooter />
     </div>
   )
 }
