@@ -82,7 +82,8 @@ export async function middleware(request: NextRequest) {
     // Exams pages
     "/exams/manual-generator",
     "/exams/ai-generator",
-    "/exams/paper-exams"
+    "/exams/paper-exams",
+    "/exams"
   ];
   if (publicRoutes.includes(pathname)) {
     console.log(`[Middleware] Public route (${pathname}). Allowing access.`);

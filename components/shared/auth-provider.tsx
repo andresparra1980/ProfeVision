@@ -39,7 +39,9 @@ const PUBLIC_PATHS = [
   // Exams pages
   '/exams/manual-generator',
   '/exams/ai-generator',
-  '/exams/paper-exams'
+  '/exams/paper-exams',
+  '/exams'
+
 ]; // Public paths include login, register, password reset, home, legal pages, and all website public pages
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

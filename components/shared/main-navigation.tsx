@@ -158,21 +158,21 @@ export function MainNavigation() {
                   
                   {/* Sub-items de Exámenes */}
                   <ExamenSubItem 
-                    href="/exams/manual-generator" 
+                    href="/exams" 
                     title="Generador Manual"
                     icon={FileText}
                   >
                     Crea exámenes paso a paso de forma manual
                   </ExamenSubItem>
                   <ExamenSubItem 
-                    href="/exams/ai-generator" 
+                    href="/exams" 
                     title="Generador con IA"
                     icon={Brain}
                   >
                     Genera exámenes automáticamente con inteligencia artificial
                   </ExamenSubItem>
                   <ExamenSubItem 
-                    href="/exams/paper-exams" 
+                    href="/exams" 
                     title="Exámenes en Papel"
                     icon={ScanLine}
                   >

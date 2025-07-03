@@ -181,19 +181,19 @@ export function SiteHeader() {
                       {isExamenesOpen && (
                         <div className="bg-muted/50 py-1">
                           <MobileMenuItem 
-                            href="/exams/manual-generator" 
+                            href="/exams" 
                             title="Generador Manual" 
                             icon={FileText}
                             isSubSubItem
                           />
                           <MobileMenuItem 
-                            href="/exams/ai-generator" 
+                            href="/exams" 
                             title="Generador con IA" 
                             icon={Brain}
                             isSubSubItem
                           />
                           <MobileMenuItem 
-                            href="/exams/paper-exams" 
+                            href="/exams" 
                             title="Exámenes en Papel" 
                             icon={ScanLine}
                             isSubSubItem

@@ -88,7 +88,7 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/exams/ai-generator" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Generador de exámenes con IA">
+                  <Link href="/exams" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Generador de exámenes con IA">
                     Generador IA
                   </Link>
                 </li>
