@@ -20,8 +20,9 @@ ProfeVision es una plataforma integral que transforma la forma en que los profes
   ```
   profevision/
   ├── app/                      # Next.js App Router
-  │   ├── (auth)/               # Rutas de autenticación agrupadas
-  │   ├── (dashboard)/          # Rutas del dashboard agrupadas
+  │   ├── auth/                 # Rutas de autenticación
+  │   ├── dashboard/            # Rutas del dashboard
+  │   ├── (website)/            # Rutas agrupadas de la pagina web publica
   │   ├── api/                  # API Routes
   │   ├── layout.tsx            # Root layout
   │   └── page.tsx              # Home page
