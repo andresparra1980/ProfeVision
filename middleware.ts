@@ -82,7 +82,7 @@ export async function middleware(request: NextRequest) {
     // Exams pages
     "/exams/manual-generator",
     "/exams/ai-generator",
-    "/exams/paper-exams",
+    "/paper-exams",
     "/exams"
   ];
   if (publicRoutes.includes(pathname)) {

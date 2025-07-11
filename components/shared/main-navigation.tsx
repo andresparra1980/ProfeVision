@@ -118,7 +118,7 @@ export function MainNavigation() {
                     Descubre cómo transformar tu forma de crear, administrar y calificar exámenes
                   </ListItem>
                   
-                  <ListItem 
+                  {/* <ListItem 
                     href="/institutions-management" 
                     title="Gestión de Instituciones"
                     icon={Building}
@@ -138,7 +138,7 @@ export function MainNavigation() {
                     icon={Users}
                   >
                     Administra grupos y estudiantes eficientemente
-                  </ListItem>
+                  </ListItem> */}
                 </ul>
 
                 {/* Columna 2 - Exámenes (Central) */}
@@ -172,7 +172,7 @@ export function MainNavigation() {
                     Genera exámenes automáticamente con inteligencia artificial
                   </ExamenSubItem>
                   <ExamenSubItem 
-                    href="/exams" 
+                    href="/paper-exams" 
                     title="Exámenes en Papel"
                     icon={ScanLine}
                   >
@@ -182,7 +182,7 @@ export function MainNavigation() {
 
                 {/* Columna 3 */}
                 <ul className="space-y-1">
-                  <ListItem 
+                  {/* <ListItem 
                     href="/students-management" 
                     title="Gestión de Estudiantes"
                     icon={GraduationCap}
@@ -195,7 +195,7 @@ export function MainNavigation() {
                     icon={BarChart3}
                   >
                     Análisis detallado del desempeño estudiantil
-                  </ListItem>
+                  </ListItem> */}
                   <ListItem 
                     href="/mobile-app" 
                     title="Aplicación Móvil"

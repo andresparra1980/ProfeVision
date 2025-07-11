@@ -146,7 +146,7 @@ export function SiteHeader() {
                       icon={BookOpen}
                       isSubItem
                     />
-                    <MobileMenuItem 
+                    {/* <MobileMenuItem 
                       href="/institutions-management" 
                       title="Gestión de Instituciones" 
                       icon={Building}
@@ -163,7 +163,7 @@ export function SiteHeader() {
                       title="Gestión de Grupos" 
                       icon={Users}
                       isSubItem
-                    />
+                    /> */}
                     
                     {/* Exámenes - Sub-dropdown */}
                     <div className="ml-4">
@@ -193,7 +193,7 @@ export function SiteHeader() {
                             isSubSubItem
                           />
                           <MobileMenuItem 
-                            href="/exams" 
+                            href="/paper-exams" 
                             title="Exámenes en Papel" 
                             icon={ScanLine}
                             isSubSubItem
@@ -202,7 +202,7 @@ export function SiteHeader() {
                       )}
                     </div>
                     
-                    <MobileMenuItem 
+                    {/* <MobileMenuItem 
                       href="/students-management" 
                       title="Gestión de Estudiantes" 
                       icon={GraduationCap}
@@ -213,7 +213,7 @@ export function SiteHeader() {
                       title="Gestión de Reportes" 
                       icon={BarChart3}
                       isSubItem
-                    />
+                    /> */}
                     <MobileMenuItem 
                       href="/mobile-app" 
                       title="Aplicación Móvil" 
