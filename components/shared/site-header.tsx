@@ -8,13 +8,9 @@ import { MainNavigation } from "@/components/shared/main-navigation"
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react"
 import { 
   BookOpen, 
-  Building, 
-  Users, 
-  GraduationCap, 
   FileText, 
   Brain, 
   ScanLine,
-  BarChart3,
   Smartphone
 } from "lucide-react"
 

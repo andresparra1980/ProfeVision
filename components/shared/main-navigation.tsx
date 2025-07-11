@@ -12,13 +12,9 @@ import {
 } from "@/components/ui/navigation-menu"
 import { 
   BookOpen, 
-  Building, 
-  Users, 
-  GraduationCap, 
   FileText, 
   Brain, 
   ScanLine,
-  BarChart3,
   Smartphone
 } from "lucide-react"
 

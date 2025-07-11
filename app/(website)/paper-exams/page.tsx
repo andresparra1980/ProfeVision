@@ -1,15 +1,11 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
   FileText,
   CheckCircle,
   QrCode,
-  Smartphone,
   Zap,
-  Eye,
-  Save,
   XCircle,
   AlertCircle,
   Lightbulb,
@@ -264,7 +260,7 @@ export default function PaperExamsPage() {
                   </h4>
                   <ul className="space-y-1 text-sm text-muted-foreground">
                     <li>• Ingresa a la plataforma desde tu smartphone</li>
-                    <li>• Haz clic en el botón "Califica Ya!"</li>
+                    <li>• Haz clic en el botón &quot;Califica Ya!&quot;</li>
                     <li>• Escanea cada hoja de respuesta con la cámara</li>
                   </ul>
                 </div>
