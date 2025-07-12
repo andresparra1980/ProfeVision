@@ -88,7 +88,7 @@ export default function Home() {
         <section id="caracteristicas" className="py-16 md:py-24 bg-muted/50">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+              <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
                 Características Principales
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -155,7 +155,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-[#ffd60a]/5 to-[#0b890f]/5 -z-10" />
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+              <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
                 Módulos Principales
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Gestión educativa completa</h2>
@@ -395,7 +395,7 @@ export default function Home() {
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_500px]">
               <div className="flex flex-col justify-center space-y-4">
-                <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground w-fit">
+                <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground w-fit">
                   Beneficios Clave
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -541,20 +541,13 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section id="contacto" className="py-16 md:py-24 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 -z-10" />
-          <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#ffd60a]/10 rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[#0b890f]/10 rounded-full blur-3xl -z-10 transform -translate-x-1/2 translate-y-1/2" />
-
+        <section id="contacto" className="py-16 md:py-24 bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90">
           <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center text-center space-y-4 max-w-3xl mx-auto">
-              <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-[#0b890f] text-white hover:bg-[#0b890f]/80 w-fit">
-                ¡Comienza Hoy!
-              </div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-white">
                 Transforma tu experiencia educativa con ProfeVision
               </h2>
-              <p className="text-muted-foreground md:text-xl">
+              <p className="max-w-[600px] text-white/90 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 Únete a miles de educadores que ya están optimizando su trabajo y mejorando los resultados de sus
                 estudiantes.
               </p>
@@ -562,27 +555,35 @@ export default function Home() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
+                  variant="secondary"
+                  className="bg-white text-[#0b890f] hover:bg-white/90"
                 >
                   <Link href="/auth/register" title="Iniciar prueba gratuita de ProfeVisión - Sin compromisos">Inicia Prueba Gratis</Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-white/10 text-white hover:bg-white/20 border border-white/20 backdrop-blur-sm"
+                >
+                  <Link href="/how-it-works">Conocer Más</Link>
                 </Button>
               </div>
               <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
                 <div className="flex flex-col items-center">
-                  <div className="text-3xl font-bold">1000+</div>
-                  <p className="text-sm text-muted-foreground">Profesores Activos</p>
+                  <div className="text-3xl font-bold text-white">1000+</div>
+                  <p className="text-sm text-white/80">Profesores Activos</p>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="text-3xl font-bold">50+</div>
-                  <p className="text-sm text-muted-foreground">Instituciones</p>
+                  <div className="text-3xl font-bold text-white">50+</div>
+                  <p className="text-sm text-white/80">Instituciones</p>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="text-3xl font-bold">100K+</div>
-                  <p className="text-sm text-muted-foreground">Exámenes Calificados</p>
+                  <div className="text-3xl font-bold text-white">100K+</div>
+                  <p className="text-sm text-white/80">Exámenes Calificados</p>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="text-3xl font-bold">98%</div>
-                  <p className="text-sm text-muted-foreground">Satisfacción</p>
+                  <div className="text-3xl font-bold text-white">98%</div>
+                  <p className="text-sm text-white/80">Satisfacción</p>
                 </div>
               </div>
             </div>

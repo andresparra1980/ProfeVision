@@ -64,7 +64,7 @@ export default function HowItWorksPage() {
       <section className="py-16 md:py-24 bg-muted/50">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
               Funcionalidades Principales
             </div>
             <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
@@ -193,7 +193,7 @@ export default function HowItWorksPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-[#ffd60a]/5 to-[#0b890f]/5 -z-10" />
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
               Ventajas
             </div>
             <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
@@ -259,7 +259,7 @@ export default function HowItWorksPage() {
       <section className="py-16 md:py-24 bg-muted/50">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
               Comparación
             </div>
                          <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
@@ -408,7 +408,7 @@ export default function HowItWorksPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/5 to-[#ffd60a]/5 -z-10" />
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
               La Mejor Elección
             </div>
                          <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
@@ -428,7 +428,7 @@ export default function HowItWorksPage() {
       <section className="py-16 md:py-24 bg-muted/50">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
               Preguntas Frecuentes
             </div>
                          <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
@@ -498,21 +498,30 @@ export default function HowItWorksPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5 -z-10" />
+      <section className="py-16 md:py-24 bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-                         <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
-               ProfeVision es la herramienta ideal para profesores y escuelas que quieren modernizar 
-               la evaluación escolar digital.
-             </h2>
+            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-white">
+              ProfeVision es la herramienta ideal para modernizar la evaluación escolar digital
+            </h2>
+            <p className="max-w-[600px] text-white/90 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              Únete a miles de profesores y escuelas que ya están transformando sus procesos de evaluación con tecnología avanzada.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button
                 asChild
                 size="lg"
-                className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
+                variant="secondary"
+                className="bg-white text-[#0b890f] hover:bg-white/90"
               >
                 <Link href="/auth/register">Prueba ProfeVision gratis</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                className="bg-white/10 text-white hover:bg-white/20 border border-white/20 backdrop-blur-sm"
+              >
+                <Link href="/pricing">Ver Precios</Link>
               </Button>
             </div>
           </div>

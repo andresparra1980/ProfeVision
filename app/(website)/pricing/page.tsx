@@ -103,7 +103,7 @@ export default function PricingPage() {
             </h2>
             <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               Cuando finalice el período de lanzamiento, ofreceremos planes flexibles para 
-              instituciones de todos los tamaños.
+              docentes e instituciones de todos los tamaños.
             </p>
           </div>
           

@@ -64,7 +64,7 @@ export default function PaperExamsPage() {
       <section className="py-16 md:py-24 bg-muted/50">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
               Hojas de Respuesta
             </div>
             <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
@@ -72,7 +72,7 @@ export default function PaperExamsPage() {
             </h2>
           </div>
           
-          
+          {/* Primera fila: Imagen y Formato Personalizado */}
           <div className="grid gap-8 lg:grid-cols-2 items-center mt-12">
             {/* Imagen de la hoja de respuesta */}
             <div className="flex justify-center">
@@ -88,8 +88,8 @@ export default function PaperExamsPage() {
             </div>
 
             {/* Formato Personalizado */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-[#0b890f] mb-4">
+            <div className="bg-card backdrop-blur-sm rounded-lg border border-[#0b890f]/20 p-6 shadow-lg">
+              <h3 className="text-2xl font-bold text-[#0b890f] mb-6">
                 Formato Personalizado
               </h3>
               
@@ -126,25 +126,20 @@ export default function PaperExamsPage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Instrucciones de Llenado */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#ffd60a]/5 to-[#0b890f]/5 -z-10" />
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-8 lg:grid-cols-2">
+          {/* Segunda fila: Instrucciones y Áreas Restringidas */}
+          <div className="grid gap-8 lg:grid-cols-2 mt-12">
             {/* Instrucciones */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-[#0b890f]">
+            <div className="bg-card backdrop-blur-sm rounded-lg border border-[#0b890f]/20 p-6 shadow-lg">
+              <h3 className="text-2xl font-bold text-[#0b890f] mb-6">
                 Instrucciones de Llenado
               </h3>
               
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-[#0b890f]/70 shrink-0 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-[#0b890f]/80">Usar bolígrafo negro o azul</h4>
+                    <h4 className="font-semibold text-[#0b890f] mb-2">Usar bolígrafo negro o azul</h4>
                     <p className="text-sm text-muted-foreground">
                       para rellenar completamente las burbujas
                     </p>
@@ -152,9 +147,9 @@ export default function PaperExamsPage() {
                 </div>
                 
                 <div className="flex items-start gap-3">
-                  <XCircle className="h-5 w-5 text-[#bc152b]/70 shrink-0 mt-0.5" />
+                  <XCircle className="h-5 w-5 text-[#bc152b] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-[#bc152b]/80">Evitar lápiz</h4>
+                    <h4 className="font-semibold text-[#bc152b] mb-2">Evitar lápiz</h4>
                     <p className="text-sm text-muted-foreground">
                       puede generar brillos y causar errores en la calificación
                     </p>
@@ -162,9 +157,9 @@ export default function PaperExamsPage() {
                 </div>
                 
                 <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-[#0b890f]/70 shrink-0 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-[#0b890f]/80">Para corregir</h4>
+                    <h4 className="font-semibold text-[#0b890f] mb-2">Para corregir</h4>
                     <p className="text-sm text-muted-foreground">
                       Borrar completamente el interior de la burbuja incorrecta
                     </p>
@@ -174,41 +169,45 @@ export default function PaperExamsPage() {
             </div>
 
             {/* Áreas Restringidas */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-[#bc152b]/80">
+            <div className="bg-card backdrop-blur-sm rounded-lg border border-[#bc152b]/20 p-6 shadow-lg">
+              <h3 className="text-2xl font-bold text-[#bc152b] mb-6">
                 Áreas Restringidas - No Escribir
               </h3>
               
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 text-[#bc152b]/70 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-[#bc152b]/80">Sobre el código QR</h4>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-[#bc152b] shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-[#bc152b]">Sobre el código QR</h4>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-[#bc152b] shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-[#bc152b]">En los bordes del formato</h4>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-[#bc152b] shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-[#bc152b]">Dentro de la sección de respuestas</h4>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 text-[#bc152b]/70 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-[#bc152b]/80">En los bordes del formato</h4>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 text-[#bc152b]/70 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-[#bc152b]/80">Dentro de la sección de respuestas</h4>
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex items-start gap-3 p-4 bg-[#ffd60a]/10 rounded-lg border border-[#ffd60a]/30">
-                <Lightbulb className="h-5 w-5 text-[#ffd60a]/80 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-[#ffd60a]/90">Tip</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Para notas adicionales, utiliza una hoja separada
-                  </p>
+                <div className="bg-[#ffd60a]/10 dark:bg-[#ffd60a]/20 backdrop-blur-sm rounded-lg border border-[#ffd60a]/30 p-4 mt-4">
+                  <div className="flex items-start gap-3">
+                    <Lightbulb className="h-5 w-5 text-[#ffd60a]/80 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-[#ffd60a]/90 mb-2">Tip</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Para notas adicionales, utiliza una hoja separada
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -217,10 +216,11 @@ export default function PaperExamsPage() {
       </section>
 
       {/* Calificación Automática */}
-      <section className="py-16 md:py-24 bg-muted/50">
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#ffd60a]/5 to-[#0b890f]/5 -z-10" />
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
               Tecnología Avanzada
             </div>
             <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
@@ -243,7 +243,7 @@ export default function PaperExamsPage() {
             </div>
 
             {/* Proceso */}
-            <div className="space-y-8">
+            <div className="bg-card backdrop-blur-sm rounded-lg border border-[#0b890f]/20 p-6 shadow-lg space-y-8">
               <h3 className="text-2xl font-bold text-[#0b890f] mb-6">
                 Proceso Simple en 3 Pasos
               </h3>
@@ -310,16 +310,15 @@ export default function PaperExamsPage() {
         </div>
       </section>
 
-      {/* Resultado Final */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/5 to-[#ffd60a]/5 -z-10" />
+      {/* Ahorra tiempo y esfuerzo */}
+      <section className="py-16 md:py-24 bg-muted/50">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
               Resultado Final
             </div>
             <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
-              Resultado Final
+              Ahorra tiempo y esfuerzo
             </h2>
           </div>
           
@@ -344,23 +343,30 @@ export default function PaperExamsPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5 -z-10" />
+      <section className="py-16 md:py-24 bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
+            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-white">
               Califica exámenes en segundos con las hojas de respuesta de ProfeVisión
             </h2>
-            <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            <p className="max-w-[600px] text-white/90 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               Digitaliza tu proceso de evaluación con tecnología de escaneo automático y obtén resultados precisos al instante.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button
                 asChild
                 size="lg"
-                className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
+                variant="secondary"
+                className="bg-white text-[#0b890f] hover:bg-white/90"
               >
                 <Link href="/auth/register">Comenzar Ahora</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                className="bg-white/10 text-white hover:bg-white/20 border border-white/20 backdrop-blur-sm"
+              >
+                <Link href="/paper-exams">Ver Más Detalles</Link>
               </Button>
             </div>
           </div>
