@@ -125,7 +125,12 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
           <div className="flex h-16 items-center justify-between px-4">
             {(!isCollapsed || isMobile) && (
               <Link href="/dashboard" className="hidden md:flex items-center space-x-2">
-                <span className="text-xl font-bold text-secondary">ProfeVision</span>
+                <div className="relative">
+                  <span className="font-bold text-xl text-secondary dark:text-secondary">ProfeVision</span>
+                  <div className="absolute  -right-1 text-[8px] dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
+                    Beta
+                  </div>
+                </div>
               </Link>
             )}
             <div className={cn("flex items-center", isCollapsed && !isMobile ? "mx-auto" : "ml-auto")}>

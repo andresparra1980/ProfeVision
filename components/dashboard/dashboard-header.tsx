@@ -16,15 +16,23 @@ export default function DashboardHeader() {
     )}>
       {/* Logo para móviles - siempre en el centro */}
       <span className="absolute left-1/2 transform -translate-x-1/2 text-xl font-bold text-secondary md:hidden">
-        ProfeVision
+          <div className="relative">
+            <span className="font-bold text-xl text-secondary dark:text-secondary">ProfeVision</span>
+            <div className="absolute  -right-1 text-[8px] text-black dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
+              Beta
+            </div>
+          </div>
       </span>
       
       {/* Logo para desktop - visible y centrado solo cuando el sidebar está contraído */}
       {isCollapsed && !isMobile && (
         <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
-          <span className="text-xl font-bold text-secondary">
-            ProfeVision
-          </span>
+          <div className="relative">
+            <span className="font-bold text-xl text-secondary dark:text-secondary">ProfeVision</span>
+            <div className="absolute  -right-1 text-[8px] dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
+              Beta
+            </div>
+          </div>
         </div>
       )}
       
