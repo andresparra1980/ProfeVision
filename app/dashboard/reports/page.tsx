@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileBarChart, Users, BookOpen, FileText } from "lucide-react";
+import { DevelopmentOverlay } from "@/components/shared/development-overlay";
 
 export default function ReportsPage() {
   const stats = [
@@ -44,66 +45,72 @@ export default function ReportsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <div className={`${stat.color} rounded-full p-2`}>
-                <stat.icon className="h-4 w-4" />
-              </div>
+      <DevelopmentOverlay>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat, index) => (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <div className={`${stat.color} rounded-full p-2`}>
+                  <stat.icon className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <p className="text-xs text-muted-foreground">{stat.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </DevelopmentOverlay>
+
+      <DevelopmentOverlay>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Rendimiento por Examen</CardTitle>
+              <CardDescription>
+                Puntuaciones promedio en exámenes recientes
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">{stat.description}</p>
+              <div className="h-80 flex items-center justify-center border rounded">
+                <p className="text-muted-foreground">No hay datos disponibles</p>
+              </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Rendimiento por Examen</CardTitle>
-            <CardDescription>
-              Puntuaciones promedio en exámenes recientes
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80 flex items-center justify-center border rounded">
-              <p className="text-muted-foreground">No hay datos disponibles</p>
-            </div>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Distribución de Calificaciones</CardTitle>
+              <CardDescription>
+                Distribución de calificaciones por rango
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80 flex items-center justify-center border rounded">
+                <p className="text-muted-foreground">No hay datos disponibles</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DevelopmentOverlay>
 
+      <DevelopmentOverlay>
         <Card>
           <CardHeader>
-            <CardTitle>Distribución de Calificaciones</CardTitle>
+            <CardTitle>Rendimiento por Estudiante</CardTitle>
             <CardDescription>
-              Distribución de calificaciones por rango
+              Análisis del rendimiento individual de los estudiantes
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-80 flex items-center justify-center border rounded">
+            <div className="h-96 flex items-center justify-center border rounded">
               <p className="text-muted-foreground">No hay datos disponibles</p>
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Rendimiento por Estudiante</CardTitle>
-          <CardDescription>
-            Análisis del rendimiento individual de los estudiantes
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-96 flex items-center justify-center border rounded">
-            <p className="text-muted-foreground">No hay datos disponibles</p>
-          </div>
-        </CardContent>
-      </Card>
+      </DevelopmentOverlay>
     </div>
   );
 } 
