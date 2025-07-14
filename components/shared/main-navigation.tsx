@@ -47,7 +47,7 @@ const ListItem = React.forwardRef<
             <div className="text-xs font-medium leading-none">{title}</div>
           </div>
           {children && (
-            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors">
+            <p className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors">
               {children}
             </p>
           )}
@@ -72,7 +72,7 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
             <div className="text-xs font-medium leading-none">{title}</div>
           </div>
           {children && (
-            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors">
+            <p className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors">
               {children}
             </p>
           )}
@@ -142,9 +142,12 @@ export function MainNavigation() {
                   {/* Exámenes - Categoría principal */}
                   <li className="mb-1">
                     <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                      <FileText className="h-3 w-3" />
+                      
                       <div>
-                        <div className="text-xs font-medium">Exámenes</div>
+                        <div className="text-xs font-medium flex items-center gap-2">
+                          <FileText className="h-3 w-3" />
+                          Exámenes
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           Crea y administra exámenes de múltiples formas
                         </p>
@@ -153,16 +156,16 @@ export function MainNavigation() {
                   </li>
                   
                   {/* Sub-items de Exámenes */}
-                  <ExamenSubItem 
+                  {/* <ExamenSubItem 
                     href="/exams" 
                     title="Generador Manual"
                     icon={FileText}
                   >
                     Crea exámenes paso a paso de forma manual
-                  </ExamenSubItem>
+                  </ExamenSubItem> */}
                   <ExamenSubItem 
                     href="/exams" 
-                    title="Generador con IA"
+                    title="Generar Exámenes con IA"
                     icon={Brain}
                   >
                     Genera exámenes automáticamente con inteligencia artificial
