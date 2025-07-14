@@ -5,13 +5,18 @@ export function SiteFooter() {
     <footer className="border-t bg-card mt-auto">
       <div className="container px-4 md:px-6 py-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
-                  <div className="col-span-1 md:col-span-2 lg:col-span-2 text-center md:text-left">
-          <Link href="/" className="flex items-center gap-2 mb-3 hover:opacity-80 transition-opacity justify-center md:justify-start w-fit mx-auto md:mx-0" title="ProfeVisión - Página principal">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
-              <span className="font-bold text-white">PV</span>
-            </div>
-            <span className="font-bold text-secondary dark:text-white text-xl">ProfeVision</span>
-          </Link>
+          <div className="col-span-1 md:col-span-2 lg:col-span-2 text-center md:text-left">
+            <Link href="/" className="flex items-center gap-2 mb-3 hover:opacity-80 transition-opacity justify-center md:justify-start w-fit mx-auto md:mx-0" title="ProfeVisión - Página principal">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
+                <span className="font-bold text-white">PV</span>
+              </div>
+              <div className="relative">
+                <span className="font-bold text-secondary dark:text-white text-xl">ProfeVision</span>
+                <div className="absolute -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full leading-none">
+                  Beta
+                </div>
+              </div>
+            </Link>
             <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto md:mx-0">
             ProfeVisión es la plataforma integral para educadores.
             Automatiza la creación y calificación de exámenes con IA y

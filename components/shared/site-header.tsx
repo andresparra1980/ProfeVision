@@ -86,7 +86,12 @@ export function SiteHeader() {
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
               <span className="font-bold text-white">PV</span>
             </div>
-            <span className="font-bold text-xl text-secondary dark:text-white">ProfeVision</span>
+            <div className="relative">
+              <span className="font-bold text-xl text-secondary dark:text-white">ProfeVision</span>
+              <div className="absolute  -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full leading-none">
+                Beta
+              </div>
+            </div>
           </Link>
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex items-center gap-6 relative overflow-visible">
