@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/shared/mode-toggle"
+import { LanguageSwitcher } from "@/components/shared/language-switcher"
 import { MainNavigation } from "@/components/shared/main-navigation"
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react"
 import { 
@@ -48,11 +49,20 @@ export function SiteHeader() {
     const baseClasses = "flex items-center gap-3 py-3 px-4 text-base font-medium hover:text-[#0b890f] transition-colors"
     const subItemClasses = isSubItem ? "ml-4 text-sm py-2" : ""
     const subSubItemClasses = isSubSubItem ? "ml-8 text-xs py-2 border-l-2 border-muted pl-3" : ""
-    
+
     const content = (
       <>
-        {Icon && <Icon className={`${isSubSubItem ? 'h-3 w-3' : isSubItem ? 'h-4 w-4' : 'h-5 w-5'}`} />}
-        <span className="flex-1">{title}</span>
+        {Icon && <Icon className="h-4 w-4 text-[#0b890f]" />}
+        <span>{title}</span>
+        {onClick && (
+          <span className="ml-auto">
+            {(title === "Funciones" && isFuncionesOpen) || (title === "Exámenes" && isExamenesOpen) ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </span>
+        )}
       </>
     )
 
@@ -105,6 +115,7 @@ export function SiteHeader() {
                 <Link href="/auth/register" title="Registrarse en ProfeVisión - Crear cuenta gratuita">Registrarse</Link>
               </Button>
             </div>
+            <LanguageSwitcher />
             <ModeToggle />
             <button 
               onClick={toggleMenu}
@@ -120,30 +131,86 @@ export function SiteHeader() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-card border-b shadow-lg animate-in slide-in-from-top-5 duration-300 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto">
-            <div className="container py-4">
-              {/* Inicio */}
-              <MobileMenuItem href="/" title="Inicio" />
+          <div className="absolute top-16 inset-x-0 bg-background/95 backdrop-blur-md border-b md:hidden z-40">
+            <div className="container py-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
+              {/* Cómo funciona */}
+              <MobileMenuItem href="/how-it-works" title="¿Cómo funciona?" />
               
-              {/* Funciones - Dropdown */}
+              {/* Exámenes */}
               <div>
-                <div className="flex items-center gap-3 py-3 px-4 text-base font-medium hover:text-[#0b890f] transition-colors">
-                  <button 
-                    className="flex items-center gap-3 w-full text-left"
-                    onClick={toggleFunciones}
-                  >
-                    <span className="flex-1">Funciones</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${isFuncionesOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                
-                {isFuncionesOpen && (
-                  <div className="bg-muted/30 py-2">
+                <MobileMenuItem 
+                  title="Exámenes" 
+                  icon={FileText}
+                  onClick={toggleExamenes}
+                />
+                {isExamenesOpen && (
+                  <div className="border-l-2 border-muted ml-4">
                     <MobileMenuItem 
-                      href="/how-it-works" 
-                      title="¿Cómo Funciona ProfeVision?" 
+                      href="/exams" 
+                      title="Exámenes"
+                      icon={FileText}
+                      isSubItem
+                    />
+                    <MobileMenuItem 
+                      href="/exams/manual-generator" 
+                      title="Generador Manual"
+                      icon={FileText}
+                      isSubItem
+                    />
+                    <MobileMenuItem 
+                      href="/exams/ai-generator" 
+                      title="Generador con IA"
+                      icon={Brain}
+                      isSubItem
+                    />
+                    <MobileMenuItem 
+                      href="/paper-exams" 
+                      title="Exámenes en Papel"
+                      icon={ScanLine}
+                      isSubItem
+                    />
+                  </div>
+                )}
+              </div>
+              
+              {/* Funciones */}
+              <div>
+                <MobileMenuItem 
+                  title="Funciones" 
+                  icon={BookOpen}
+                  onClick={toggleFunciones}
+                />
+                {isFuncionesOpen && (
+                  <div className="border-l-2 border-muted ml-4">
+                    <MobileMenuItem 
+                      href="/institutions-management" 
+                      title="Gestión de Instituciones" 
+                      icon={BookOpen}
+                      isSubItem
+                    />
+                    <MobileMenuItem 
+                      href="/subjects-management" 
+                      title="Gestión de Materias" 
+                      icon={BookOpen}
+                      isSubItem
+                    />
+                    <MobileMenuItem 
+                      href="/groups-management" 
+                      title="Gestión de Grupos" 
+                      icon={BookOpen}
+                      isSubItem
+                    />
+                    <MobileMenuItem 
+                      href="/students-management" 
+                      title="Gestión de Estudiantes" 
+                      icon={BookOpen}
+                      isSubItem
+                    />
+                    <MobileMenuItem 
+                      href="/reports" 
+                      title="Gestión de Reportes" 
                       icon={BookOpen}
                       isSubItem
                     />
@@ -164,40 +231,8 @@ export function SiteHeader() {
                       title="Gestión de Grupos" 
                       icon={Users}
                       isSubItem
-                    /> */}
-                    
-                    {/* Exámenes - Sub-dropdown */}
-                    <div className="ml-4">
-                      <div className="flex items-center gap-3 py-2 px-4 text-sm font-medium hover:text-[#0b890f] transition-colors">
-                        <button 
-                          className="flex items-center gap-3 w-full text-left"
-                          onClick={toggleExamenes}
-                        >
-                          <FileText className="h-4 w-4" />
-                          <span className="flex-1">Exámenes</span>
-                          <ChevronRight className={`h-3 w-3 transition-transform ${isExamenesOpen ? 'rotate-90' : ''}`} />
-                        </button>
-                      </div>
-                      
-                      {isExamenesOpen && (
-                        <div className="bg-muted/50 py-1">
-                          <MobileMenuItem 
-                            href="/exams" 
-                            title="Generador de Exámenes con IA" 
-                            icon={Brain}
-                            isSubSubItem
-                          />
-                          <MobileMenuItem 
-                            href="/paper-exams" 
-                            title="Exámenes en Papel" 
-                            icon={ScanLine}
-                            isSubSubItem
-                          />
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* <MobileMenuItem 
+                    />
+                    <MobileMenuItem 
                       href="/students-management" 
                       title="Gestión de Estudiantes" 
                       icon={GraduationCap}
@@ -228,8 +263,16 @@ export function SiteHeader() {
               {/* Contacto */}
               <MobileMenuItem href="/contact" title="Contacto" />
               
+              {/* Selector de idioma en mobile */}
+              <div className="py-3 px-4 border-t mt-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Idioma</span>
+                  <LanguageSwitcher />
+                </div>
+              </div>
+              
               {/* Botones de autenticación */}
-              <div className="pt-4 mt-4 flex flex-col gap-3 border-t">
+              <div className="pt-4 flex flex-col gap-3">
                 <Button asChild variant="outline" size="sm" className="bg-accent text-black dark:text-black justify-center text-base">
                   <Link href="/auth/login" onClick={closeMenu} title="Iniciar sesión en ProfeVisión">Iniciar Sesión</Link>
                 </Button>
