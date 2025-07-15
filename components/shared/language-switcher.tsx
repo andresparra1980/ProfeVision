@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { locales, localeNames } from '@/i18n/config';
+import { locales } from '@/i18n/config';
 import { routing } from '@/i18n/routing';
 import {
   Select,
