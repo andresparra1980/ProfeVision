@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { supabase } from '@/lib/supabase/client';
 import type { Session, User, AuthChangeEvent, AuthError } from '@supabase/supabase-js';
 import { logger } from '@/lib/utils/logger';
@@ -14,58 +15,94 @@ interface AuthContextProps {
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-const PUBLIC_PATHS = [
-  '/auth/login', 
-  '/auth/register', 
-  '/auth/reset-password',
-  '/auth/update-password',
-  '/auth/verify-email',
-  '/auth/email-confirmed',
-  '/',
-  '/privacy',
-  '/terms',
-  '/cookies',
-  // Website public pages
-  '/how-it-works',
-  '/institutions-management',
-  '/subjects-management',
-  '/groups-management',
-  '/students-management',
-  '/reports',
-  '/mobile-app',
-  '/pricing',
-  '/contact',
-  '/blog',
-  // Exams pages
-  '/exams/manual-generator',
-  '/exams/ai-generator',
-  '/paper-exams',
-  '/exams'
-
-]; // Public paths include login, register, password reset, home, legal pages, and all website public pages
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const locale = useLocale();
+
+  // 🌍 Generar rutas localizadas dinámicamente
+  const getLocalizedRoutes = useMemo(() => ({
+    login: `/${locale}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
+    dashboard: `/${locale}/${locale === 'es' ? 'panel' : 'dashboard'}`,
+  }), [locale]);
+
+  // 🔐 Rutas públicas localizadas
+  const getPublicPaths = useMemo(() => [
+    `/${locale}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
+    `/${locale}/auth/${locale === 'es' ? 'registro' : 'register'}`,
+    `/${locale}/auth/${locale === 'es' ? 'restablecer-contrasena' : 'reset-password'}`,
+    `/${locale}/auth/${locale === 'es' ? 'actualizar-contrasena' : 'update-password'}`,
+    `/${locale}/auth/${locale === 'es' ? 'verificar-email' : 'verify-email'}`,
+    `/${locale}/auth/${locale === 'es' ? 'email-confirmado' : 'email-confirmed'}`,
+    `/${locale}`,
+    `/${locale}/`,
+    `/${locale}/${locale === 'es' ? 'privacidad' : 'privacy'}`,
+    `/${locale}/${locale === 'es' ? 'terminos' : 'terms'}`,
+    `/${locale}/${locale === 'es' ? 'cookies' : 'cookies'}`,
+    `/${locale}/${locale === 'es' ? 'como-funciona' : 'how-it-works'}`,
+    `/${locale}/${locale === 'es' ? 'gestion-instituciones' : 'institutions-management'}`,
+    `/${locale}/${locale === 'es' ? 'gestion-materias' : 'subjects-management'}`,
+    `/${locale}/${locale === 'es' ? 'gestion-grupos' : 'groups-management'}`,
+    `/${locale}/${locale === 'es' ? 'gestion-estudiantes' : 'students-management'}`,
+    `/${locale}/${locale === 'es' ? 'reportes' : 'reports'}`,
+    `/${locale}/${locale === 'es' ? 'aplicacion-movil' : 'mobile-app'}`,
+    `/${locale}/${locale === 'es' ? 'precios' : 'pricing'}`,
+    `/${locale}/${locale === 'es' ? 'contacto' : 'contact'}`,
+    `/${locale}/${locale === 'es' ? 'blog' : 'blog'}`,
+    `/${locale}/${locale === 'es' ? 'examenes' : 'exams'}`,
+    `/${locale}/${locale === 'es' ? 'examenes/generador-manual' : 'exams/manual-generator'}`,
+    `/${locale}/${locale === 'es' ? 'examenes/generador-ia' : 'exams/ai-generator'}`,
+    `/${locale}/${locale === 'es' ? 'examenes-papel' : 'paper-exams'}`,
+    
+    // Rutas sin prefijo de idioma para el locale por defecto (español)
+    ...(locale === 'es' ? [
+      '/',
+      '/privacy',
+      '/terms',
+      '/cookies',
+      '/how-it-works',
+      '/institutions-management',
+      '/subjects-management',
+      '/groups-management',
+      '/students-management',
+      '/reports',
+      '/mobile-app',
+      '/pricing',
+      '/contact',
+      '/blog',
+      '/exams/manual-generator',
+      '/exams/ai-generator',
+      '/paper-exams',
+      '/exams',
+      '/auth/login',
+      '/auth/register',
+      '/auth/reset-password',
+      '/auth/update-password',
+      '/auth/verify-email',
+      '/auth/email-confirmed'
+    ] : [])
+  ], [locale]);
 
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
 
-    // Check initial session with explicit typing for the result
+    // 🔐 Verificar sesión inicial (lógica preservada)
     supabase.auth.getSession().then(({ data, error }: { data: { session: Session | null }, error: AuthError | null }) => {
       if (isMounted) {
         if (error) {
           logger.error("Error fetching initial session:", error.message);
           setIsLoading(false);
-           // Handle case where getSession fails - potentially redirect to login
-           if (!PUBLIC_PATHS.includes(pathname)) {
-               router.push('/auth/login');
-           }
-           return;
+          const routes = getLocalizedRoutes;
+          const publicPaths = getPublicPaths;
+          
+          if (!publicPaths.includes(pathname)) {
+            router.push(routes.login);
+          }
+          return;
         }
 
         const currentSession = data.session;
@@ -73,65 +110,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(currentSession?.user ?? null);
         setIsLoading(false);
 
-        const isPublicPath = PUBLIC_PATHS.includes(pathname);
+        const routes = getLocalizedRoutes;
+        const publicPaths = getPublicPaths;
+        const isPublicPath = publicPaths.includes(pathname);
+        
         if (!currentSession && !isPublicPath) {
           logger.log('No initial session and not on public path, redirecting to login.');
-          router.push('/auth/login');
-        } else if (currentSession && isPublicPath && pathname !== '/' && pathname !== '/auth/email-confirmed') {
-            logger.log('Initial session found on public path (not home), redirecting to dashboard.');
-            setTimeout(() => router.push('/dashboard'), 0);
+          router.push(routes.login);
+        } else if (currentSession && isPublicPath && pathname !== `/${locale}` && pathname !== `/${locale}/auth/${locale === 'es' ? 'email-confirmado' : 'email-confirmed'}`) {
+          logger.log('Initial session found on public path (not home), redirecting to dashboard.');
+          setTimeout(() => router.push(routes.dashboard), 0);
         }
       }
     });
 
-    // Set up the auth state change listener
+    // 🔐 Listener de cambios de autenticación (lógica preservada)
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, newSession: Session | null) => {
-      if (!isMounted) return;
+        if (!isMounted) return;
 
-      logger.log(`Supabase auth event: ${event}`);
+        logger.log(`Supabase auth event: ${event}`);
 
-      if (event === 'TOKEN_REFRESHED') {
-        logger.log('Auth state changed: TOKEN_REFRESHED', { hasSession: !!newSession });
-      }
+        if (event === 'TOKEN_REFRESHED') {
+          logger.log('Auth state changed: TOKEN_REFRESHED', { hasSession: !!newSession });
+        }
 
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      setIsLoading(false);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        setIsLoading(false);
 
-      const isPublicPath = PUBLIC_PATHS.includes(pathname);
+        const routes = getLocalizedRoutes;
+        const publicPaths = getPublicPaths;
+        const isPublicPath = publicPaths.includes(pathname);
 
-      if (event === 'SIGNED_OUT' && !isPublicPath) {
-        logger.log('User signed out, redirecting to login.');
-        if (pathname !== '/auth/login') {
-           router.push('/auth/login');
+        if (event === 'SIGNED_OUT' && !isPublicPath) {
+          logger.log('User signed out, redirecting to login.');
+          if (pathname !== routes.login) {
+            router.push(routes.login);
+          }
+        }
+
+        if (!newSession && event !== 'SIGNED_OUT' && event !== 'INITIAL_SESSION' && event !== 'USER_UPDATED' && !isPublicPath) {
+          logger.log('Session became null (potentially token refresh failure), redirecting to login.');
+          if (pathname !== routes.login) {
+            router.push(routes.login);
+          }
         }
       }
-
-      if (!newSession && event !== 'SIGNED_OUT' && event !== 'INITIAL_SESSION' && event !== 'USER_UPDATED' && !isPublicPath) {
-         logger.log('Session became null (potentially token refresh failure), redirecting to login.');
-         if (pathname !== '/auth/login') {
-            router.push('/auth/login');
-         }
-      }
-    });
+    );
 
     return () => {
       isMounted = false;
       authListener?.subscription.unsubscribe();
     };
-  }, [router, pathname]);
+  }, [router, pathname, locale, getLocalizedRoutes, getPublicPaths]);
 
   const value = useMemo(() => ({
     session,
     user,
     isLoading,
   }), [session, user, isLoading]);
-
-  // Optionally, show a loading indicator while checking session
-  // if (isLoading) {
-  //   return <div>Loading authentication...</div>;
-  // }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
