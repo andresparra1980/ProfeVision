@@ -1,0 +1,45 @@
+{
+  "buttons": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "close": "Cerrar",
+    "continue": "Continuar",
+    "confirm": "Confirmar"
+  },
+  "labels": {
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "description": "Descripción",
+    "date": "Fecha",
+    "status": "Estado",
+    "actions": "Acciones"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "completed": "Completado",
+    "draft": "Borrador"
+  },
+  "messages": {
+    "loading": "Cargando...",
+    "success": "Operación exitosa",
+    "error": "Ha ocurrido un error",
+    "noData": "No hay datos disponibles",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar este elemento?",
+    "sessionExpired": "Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
+  },
+  "language": {
+    "switch": "Cambiar idioma",
+    "spanish": "Español",
+    "english": "English"
+  }
+}

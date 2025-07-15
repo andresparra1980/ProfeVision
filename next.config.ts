@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin';
+
+// Crear plugin de next-intl
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
   // Disable strict mode in development for demo purposes
@@ -90,4 +94,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
