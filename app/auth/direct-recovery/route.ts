@@ -26,6 +26,13 @@ export async function GET(request: NextRequest) {
   const refreshToken = requestUrl.searchParams.get("refresh_token");
   const code = requestUrl.searchParams.get("code");
 
+  // 🌍 Detectar idioma preferido del usuario
+  const acceptLanguage = request.headers.get('accept-language');
+  const preferredLocale = acceptLanguage?.startsWith('en') ? 'en' : 'es';
+  
+  // 🌍 Construir URL localizada para update-password
+  const localizedUpdatePassword = `/${preferredLocale}/auth/${preferredLocale === 'es' ? 'actualizar-contrasena' : 'update-password'}`;
+
   // Log all parameters to help debug
   logger.auth("Direct recovery request received", {
     token: token ? "exists" : "missing",
@@ -33,13 +40,14 @@ export async function GET(request: NextRequest) {
     hasAccessToken: !!accessToken,
     hasRefreshToken: !!refreshToken,
     hasCode: !!code,
+    preferredLocale,
     url: request.url,
     siteUrl: SITE_URL,
   });
 
-  // Initialize response
+  // Initialize response with localized URL
   let response = NextResponse.redirect(
-    new URL("/auth/update-password?source=direct-recovery-flow", SITE_URL)
+    new URL(`${localizedUpdatePassword}?source=direct-recovery-flow`, SITE_URL)
   );
 
   // If we have a code, try to exchange it for a session
@@ -109,8 +117,8 @@ export async function GET(request: NextRequest) {
           "Successfully obtained session, redirecting to update-password"
         );
 
-        // Create URL for update-password with some debug info but without tokens
-        const finalRedirectUrl = new URL("/auth/update-password", SITE_URL);
+        // 🌍 Create URL for localized update-password with some debug info but without tokens
+        const finalRedirectUrl = new URL(localizedUpdatePassword, SITE_URL);
         finalRedirectUrl.searchParams.set(
           "source",
           "direct-recovery-with-session"
@@ -168,8 +176,8 @@ export async function GET(request: NextRequest) {
   }
 
   // If we get here, we need to try passing tokens directly
-  // Build the redirect URL with all available tokens
-  const redirectUrl = new URL("/auth/update-password", SITE_URL);
+  // 🌍 Build the redirect URL with all available tokens using localized URL
+  const redirectUrl = new URL(localizedUpdatePassword, SITE_URL);
 
   // Add any tokens we have to the redirect
   if (token) redirectUrl.searchParams.set("token", token);
@@ -188,6 +196,7 @@ export async function GET(request: NextRequest) {
       .toString()
       .replace(/token=[^&]+/, "token=REDACTED"),
     type,
+    locale: preferredLocale,
   });
 
   // Return the redirect response

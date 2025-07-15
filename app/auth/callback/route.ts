@@ -8,17 +8,29 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const type = requestUrl.searchParams.get("type");
-
+  
+  // 🌍 Detectar idioma preferido del usuario
+  const acceptLanguage = request.headers.get('accept-language');
+  const preferredLocale = acceptLanguage?.startsWith('en') ? 'en' : 'es';
+  
   logger.auth("Auth callback received", {
     type,
     hasCode: !!code,
+    preferredLocale,
     url: request.url,
   });
+  
+  // 🌍 Construir URLs localizadas
+  const localizedUrls = {
+    login: `/${preferredLocale}/auth/${preferredLocale === 'es' ? 'iniciar-sesion' : 'login'}`,
+    emailConfirmed: `/${preferredLocale}/auth/${preferredLocale === 'es' ? 'email-confirmado' : 'email-confirmed'}`,
+    updatePassword: `/${preferredLocale}/auth/${preferredLocale === 'es' ? 'actualizar-contrasena' : 'update-password'}`,
+  };
 
   // If no code or not a verification type, redirect to login
   if (!code || !type) {
     logger.auth("Missing code or type, redirecting to login", { type });
-    return NextResponse.redirect(new URL("/auth/login", SITE_URL));
+    return NextResponse.redirect(new URL(localizedUrls.login, SITE_URL));
   }
 
   try {
@@ -53,30 +65,28 @@ export async function GET(request: NextRequest) {
       errorMessage: sessionResult.error?.message,
     });
 
-    // Redirect to a confirmation page instead of directly to login
+    // 🌍 Redirect to localized confirmation page
     if (type === "email_confirmation" || type === "signup") {
-      logger.auth("Confirmation type, redirecting to email-confirmed", {
-        type,
-      });
-      return NextResponse.redirect(new URL("/auth/email-confirmed", SITE_URL));
+      logger.auth("Confirmation type, redirecting to email-confirmed", { type });
+      return NextResponse.redirect(new URL(localizedUrls.emailConfirmed, SITE_URL));
     }
 
-    // Handle password recovery
+    // 🌍 Handle password recovery
     if (type === "recovery") {
       logger.auth("Recovery type, redirecting to update-password", { type });
-      return NextResponse.redirect(new URL("/auth/update-password", SITE_URL));
+      return NextResponse.redirect(new URL(localizedUrls.updatePassword, SITE_URL));
     }
 
-    // For other auth types
+    // 🌍 For other auth types
     logger.auth("Other auth type, redirecting to login", { type });
-    return NextResponse.redirect(new URL("/auth/login", SITE_URL));
+    return NextResponse.redirect(new URL(localizedUrls.login, SITE_URL));
   } catch (error: unknown) {
     logger.auth("Error during auth callback", {
       error: error instanceof Error ? error : new Error("Unknown error"),
       type,
     });
     return NextResponse.redirect(
-      new URL("/auth/login?error=auth_callback_error", SITE_URL)
+      new URL(`${localizedUrls.login}?error=auth_callback_error`, SITE_URL)
     );
   }
 }
