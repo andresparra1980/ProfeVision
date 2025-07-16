@@ -2,12 +2,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
-import { nonLocalizedRoutes } from './i18n/config';
+import { nonLocalizedRoutes } from './i18n/routing';
 
 // Crear el middleware de i18n
 const intlMiddleware = createIntlMiddleware({
   ...routing,
-  localeDetection: true,
+  localeDetection: false, // Deshabilitar detección automática para evitar flash
   localePrefix: 'as-needed',
   alternateLinks: false,
 });

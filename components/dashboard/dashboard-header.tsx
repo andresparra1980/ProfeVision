@@ -7,11 +7,13 @@ import { useSidebar } from "@/lib/contexts/sidebar-context";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTranslations } from 'next-intl';
 
 export default function DashboardHeader() {
   const { isCollapsed, isMobile } = useSidebar();
   const [showNotification, setShowNotification] = useState(false);
   const [notificationDismissed, setNotificationDismissed] = useState(false);
+  const t = useTranslations('dashboard');
 
   // Cargar estado de la notificación desde localStorage
   useEffect(() => {
@@ -88,7 +90,7 @@ export default function DashboardHeader() {
           <a href="https://docs.profevision.com" target="_blank" rel="noopener noreferrer" className="hidden md:block">
             <Button variant="ghost" size="icon">
               <HelpCircle className="h-5 w-5" />
-              <span className="sr-only">Documentación</span>
+              <span className="sr-only">{t('header.documentation', { defaultValue: 'Documentación' })}</span>
             </Button>
           </a>
           <div className="relative">
@@ -97,14 +99,14 @@ export default function DashboardHeader() {
               {!notificationDismissed && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               )}
-              <span className="sr-only">Notificaciones</span>
+              <span className="sr-only">{t('header.notifications', { defaultValue: 'Notificaciones' })}</span>
             </Button>
             <Button variant="ghost" size="icon" className="md:hidden" onClick={handleNotificationToggle}>
               <Bell className="h-5 w-5" />
               {!notificationDismissed && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               )}
-              <span className="sr-only">Notificaciones</span>
+              <span className="sr-only">{t('header.notifications', { defaultValue: 'Notificaciones' })}</span>
             </Button>
           </div>
           <ModeToggle />
@@ -118,7 +120,7 @@ export default function DashboardHeader() {
             <Alert className="border bg-card shadow-lg">
               <Bell className="h-4 w-4 text-primary" />
               <AlertDescription className="text-sm text-foreground pr-8">
-                <strong>Recordatorio:</strong> Para calificar exámenes en papel, accede a{" "}
+                <strong>{t('header.notification.reminder', { defaultValue: 'Recordatorio' })}:</strong> {t('header.notification.message', { defaultValue: 'Para calificar exámenes en papel, accede a' })}{' '}
                 <a 
                   href="https://www.profevision.com" 
                   target="_blank" 
@@ -126,8 +128,8 @@ export default function DashboardHeader() {
                   className="underline font-medium text-primary hover:text-primary/80 transition-colors"
                 >
                   www.profevision.com
-                </a>{" "}
-                desde tu celular.
+                </a>{' '}
+                {t('header.notification.fromPhone', { defaultValue: 'desde tu celular' })}.
               </AlertDescription>
               <div className="flex items-center justify-end">
                 <Button
@@ -137,7 +139,7 @@ export default function DashboardHeader() {
                   onClick={handleDismissNotification}
                 >
                   <X className="size-3" />
-                  <span className="sr-only">Cerrar notificación</span>
+                  <span className="sr-only">{t('header.notification.close', { defaultValue: 'Cerrar notificación' })}</span>
                 </Button>
               </div>
             </Alert>

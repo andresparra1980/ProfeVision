@@ -1,0 +1,295 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "exams": "Exámenes",
+    "students": "Estudiantes",
+    "groups": "Grupos",
+    "subjects": "Materias",
+    "reports": "Reportes",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "entities": "Entidades Educativas",
+    "userManual": "Manual de Usuario"
+  },
+  "common": {
+    "create": "Crear",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  },
+  "ui": {
+    "toggleMenu": "Alternar menú",
+    "expandMenu": "Expandir menú",
+    "collapseMenu": "Contraer menú"
+  },
+  "user": {
+    "defaultName": "Usuario",
+    "myProfile": "Mi perfil",
+    "logout": "Cerrar sesión",
+    "loggingOut": "Cerrando sesión..."
+  },
+  "header": {
+    "documentation": "Documentación",
+    "notifications": "Notificaciones",
+    "notification": {
+      "reminder": "Recordatorio",
+      "message": "Para calificar exámenes en papel, accede a",
+      "fromPhone": "desde tu celular",
+      "close": "Cerrar notificación"
+    }
+  },
+  "exams": {
+    "title": "Exámenes",
+    "description": "Gestiona y crea exámenes para tus estudiantes.",
+    "create": "Crear Examen",
+    "createWithAI": "Crear Examen con IA",
+    "import": "Importar Examen",
+    "edit": "Editar Examen",
+    "actions": {
+      "create": "Crear",
+      "createWithAI": "Crear con IA",
+      "import": "Importar",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "view": "Ver",
+      "assign": "Asignar",
+      "export": "Exportar"
+    },
+    "form": {
+      "title": "Título del examen",
+      "description": "Descripción",
+      "subject": "Materia",
+      "group": "Grupo",
+      "duration": "Duración (minutos)",
+      "totalScore": "Puntaje total",
+      "titlePlaceholder": "Ingresa el título del examen",
+      "descriptionPlaceholder": "Describe brevemente el examen"
+    },
+    "table": {
+      "name": "Nombre",
+      "subject": "Materia",
+      "group": "Grupo",
+      "students": "Estudiantes",
+      "createdAt": "Creado",
+      "actions": "Acciones",
+      "duration": "Duración",
+      "status": "Estado",
+      "search": "Buscar exámenes..."
+    },
+    "status": {
+      "draft": "Borrador",
+      "published": "Publicado",
+      "active": "Activo",
+      "completed": "Completado",
+      "archived": "Archivado"
+    },
+    "delete": {
+      "title": "¿Confirmar Eliminación?",
+      "description": "Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este examen?",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar",
+      "loading": "Eliminando examen...",
+      "success": "Examen eliminado exitosamente.",
+      "error": "Error al eliminar el examen."
+    },
+    "validation": {
+      "titleRequired": "El título es requerido",
+      "subjectRequired": "La materia es requerida",
+      "durationRequired": "La duración es requerida",
+      "durationMin": "La duración debe ser mayor a 0 minutos"
+    },
+    "messages": {
+      "loadingError": "Error al cargar exámenes",
+      "createSuccess": "Examen creado exitosamente",
+      "updateSuccess": "Examen actualizado exitosamente",
+      "noExams": "No hay exámenes disponibles",
+      "noResults": "No se encontraron exámenes que coincidan con tu búsqueda",
+      "tryDifferentSearch": "Intenta con otra búsqueda o ajusta los filtros.",
+      "noExamsDescription": "Aún no has creado o importado ningún examen."
+    },
+    "details": {
+      "title": "Detalles del Examen",
+      "loading": "Cargando...",
+      "error": "Error",
+      "errorMessage": "No se pudo cargar el examen",
+      "unauthorized": "No autorizado",
+      "loadingError": "Error al cargar los datos del examen",
+      "deleteSuccess": "Examen eliminado correctamente",
+      "deleteError": "Error al eliminar el examen",
+      "scanResponses": "Escanear Respuestas",
+      "deleteConfirm": {
+        "title": "¿Estás seguro?",
+        "description": "Esta acción eliminará permanentemente el examen y todos sus elementos relacionados. Esta acción no se puede deshacer.",
+        "cancel": "Cancelar",
+        "confirm": "Eliminar"
+      }
+    },
+    "createWithAI": {
+      "title": "Crear Examen con IA",
+      "description": "Utiliza inteligencia artificial para generar exámenes personalizados",
+      "form": {
+        "topic": "Tema del examen",
+        "topicPlaceholder": "Ej: Matemáticas básicas, Historia de Colombia...",
+        "difficulty": "Nivel de dificultad",
+        "difficultyOptions": {
+          "easy": "Fácil",
+          "medium": "Medio",
+          "hard": "Difícil"
+        },
+        "questionCount": "Número de preguntas",
+        "questionType": "Tipo de preguntas",
+        "questionTypeOptions": {
+          "multiple": "Opción múltiple",
+          "truefalse": "Verdadero/Falso",
+          "mixed": "Mixto"
+        },
+        "generate": "Generar Examen",
+        "generating": "Generando examen...",
+        "entityRequired": "Entidad Educativa Requerida",
+        "entityRequiredDescription": "Debes crear o unirte a al menos una entidad educativa antes de poder crear exámenes. Los exámenes deben estar asociados a una materia, y las materias a una entidad educativa.",
+        "createEntity": "Crear Entidad Educativa",
+        "subjectRequired": "Materia Requerida",
+        "subjectRequiredDescription": "Debes crear al menos una materia antes de poder crear exámenes. Los exámenes deben estar asociados a una materia.",
+        "createSubject": "Crear Materia",
+        "backToExams": "Volver a Exámenes",
+        "createExam": "Crear Examen",
+        "basicInfo": "Define la información básica del examen",
+        "instructions": "Instrucciones (opcional)",
+        "instructionsPlaceholder": "Instrucciones específicas para los estudiantes"
+      },
+      "messages": {
+        "generateSuccess": "Examen generado exitosamente",
+        "generateError": "Error al generar el examen"
+      }
+    },
+    "assign": {
+      "title": "Asignar Examen",
+      "description": "Asigna este examen a grupos de estudiantes",
+      "title": "Asignar Grupos",
+      "description": "Selecciona los grupos a los que se aplicará este examen",
+      "backToExams": "Volver a Exámenes",
+      "selectGroup": "Grupos Disponibles",
+      "selectGroupDescription": "Marca los grupos a los que deseas asignar este examen",
+      "assignDate": "Fecha de aplicación",
+      "duration": "Duración (minutos)",
+      "dueDate": "Fecha límite",
+      "assign": "Guardar Asignaciones",
+      "assigning": "Asignando...",
+      "success": "Grupos asignados correctamente",
+      "error": "Error al guardar las asignaciones"
+    },
+    "edit": {
+      "title": "Editar Examen",
+      "description": "Modifica las preguntas y configuración del examen",
+      "addQuestion": "Agregar Pregunta",
+      "questionTitle": "Pregunta",
+      "questionPlaceholder": "Escribe tu pregunta aquí...",
+      "addOption": "Agregar Opción",
+      "correctAnswer": "Respuesta Correcta",
+      "points": "Puntos",
+      "deleteQuestion": "Eliminar Pregunta",
+      "save": "Guardar Cambios",
+      "saving": "Guardando...",
+      "success": "Examen actualizado exitosamente",
+      "error": "Error al actualizar el examen"
+    },
+    "export": {
+      "title": "Exportar Examen",
+      "description": "Exporta el examen en diferentes formatos",
+      "formats": {
+        "pdf": "PDF",
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "includeAnswers": "Incluir respuestas",
+      "includeResults": "Incluir resultados",
+      "export": "Exportar",
+      "exporting": "Exportando...",
+      "success": "Examen exportado exitosamente",
+      "error": "Error al exportar el examen"
+    },
+    "results": {
+      "title": "Resultados del Examen",
+      "description": "Revisa los resultados y estadísticas del examen",
+      "statistics": {
+        "totalStudents": "Total de estudiantes",
+        "completed": "Completados",
+        "pending": "Pendientes",
+        "averageScore": "Promedio",
+        "highestScore": "Puntaje más alto",
+        "lowestScore": "Puntaje más bajo"
+      },
+      "studentResults": "Resultados por Estudiante",
+      "student": "Estudiante",
+      "score": "Puntaje",
+      "percentage": "Porcentaje",
+      "completedAt": "Completado",
+      "viewDetails": "Ver Detalles",
+      "downloadResults": "Descargar Resultados",
+      "noResults": "No hay resultados disponibles"
+    },
+    "responses": {
+      "title": "Respuestas del Examen",
+      "description": "Revisa las respuestas individuales de los estudiantes",
+      "selectStudent": "Seleccionar Estudiante",
+      "question": "Pregunta",
+      "studentAnswer": "Respuesta del Estudiante",
+      "correctAnswer": "Respuesta Correcta",
+      "points": "Puntos",
+      "correct": "Correcto",
+      "incorrect": "Incorrecto",
+      "noResponses": "No hay respuestas disponibles"
+    },
+    "linkGrade": {
+      "title": "Vincular Calificaciones",
+      "description": "Vincula las calificaciones del examen con el sistema de notas",
+      "selectPeriod": "Seleccionar Período",
+      "selectComponent": "Seleccionar Componente",
+      "percentage": "Porcentaje",
+      "link": "Vincular",
+      "linking": "Vinculando...",
+      "success": "Calificaciones vinculadas exitosamente",
+      "error": "Error al vincular las calificaciones"
+    }
+  },
+  "main": {
+    "title": "Dashboard",
+    "welcome": "Bienvenido a ProfeVision, tu plataforma de gestión de exámenes.",
+    "metrics": {
+      "examsCreated": "Exámenes creados",
+      "studentsEvaluated": "Estudiantes evaluados",
+      "averageScore": "Promedio general",
+      "completionRate": "Tasa de finalización",
+      "timeSaved": "Tiempo ahorrado",
+      "sinceLastMonth": "desde el último mes"
+    },
+    "recentActivity": "Actividad reciente",
+    "recentActivityDesc": "Últimas actividades en tu cuenta",
+    "activity": {
+      "examCreated": "Examen de Matemáticas creado",
+      "examCreatedDesc": "Has creado un nuevo examen de Matemáticas para 9° grado.",
+      "groupAdded": "Grupo de estudiantes añadido",
+      "groupAddedDesc": "Has añadido 24 estudiantes a la clase de Física.",
+      "examGraded": "Examen calificado",
+      "examGradedDesc": "Has calificado el examen de Biología para 32 estudiantes.",
+      "ago2h": "Hace 2 horas",
+      "ago1d": "Hace 1 día",
+      "ago3d": "Hace 3 días"
+    },
+    "upcomingExams": "Próximos exámenes",
+    "upcomingExamsDesc": "Exámenes programados para los próximos días",
+    "upcoming": {
+      "chemistry": "Química - 10° Grado",
+      "chemistryDate": "22 de Mayo, 2024",
+      "history": "Historia - 11° Grado",
+      "historyDate": "24 de Mayo, 2024",
+      "physics": "Física - 9° Grado",
+      "physicsDate": "27 de Mayo, 2024"
+    }
+  }
+}

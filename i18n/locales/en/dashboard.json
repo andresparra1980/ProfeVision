@@ -1,0 +1,295 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "exams": "Exams",
+    "students": "Students",
+    "groups": "Groups",
+    "subjects": "Subjects",
+    "reports": "Reports",
+    "settings": "Settings",
+    "profile": "Profile",
+    "entities": "Educational Entities",
+    "userManual": "User Manual"
+  },
+  "common": {
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "ui": {
+    "toggleMenu": "Toggle Menu",
+    "expandMenu": "Expand menu",
+    "collapseMenu": "Collapse menu"
+  },
+  "user": {
+    "defaultName": "User",
+    "myProfile": "My profile",
+    "logout": "Logout",
+    "loggingOut": "Logging out..."
+  },
+  "header": {
+    "documentation": "Documentation",
+    "notifications": "Notifications",
+    "notification": {
+      "reminder": "Reminder",
+      "message": "To grade paper exams, access",
+      "fromPhone": "from your phone",
+      "close": "Close notification"
+    }
+  },
+  "exams": {
+    "title": "Exams",
+    "description": "Manage and create exams for your students.",
+    "create": "Create Exam",
+    "createWithAI": "Create Exam with AI",
+    "import": "Import Exam",
+    "edit": "Edit Exam",
+    "actions": {
+      "create": "Create",
+      "createWithAI": "Create with AI",
+      "import": "Import",
+      "edit": "Edit",
+      "delete": "Delete",
+      "view": "View",
+      "assign": "Assign",
+      "export": "Export"
+    },
+    "form": {
+      "title": "Exam title",
+      "description": "Description",
+      "subject": "Subject",
+      "group": "Group",
+      "duration": "Duration (minutes)",
+      "totalScore": "Total score",
+      "titlePlaceholder": "Enter exam title",
+      "descriptionPlaceholder": "Briefly describe the exam"
+    },
+    "table": {
+      "name": "Name",
+      "subject": "Subject",
+      "group": "Group",
+      "students": "Students",
+      "createdAt": "Created",
+      "actions": "Actions",
+      "duration": "Duration",
+      "status": "Status",
+      "search": "Search exams..."
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "active": "Active",
+      "completed": "Completed",
+      "archived": "Archived"
+    },
+    "delete": {
+      "title": "Confirm Deletion?",
+      "description": "This action cannot be undone. Are you sure you want to delete this exam?",
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "loading": "Deleting exam...",
+      "success": "Exam deleted successfully.",
+      "error": "Error deleting exam."
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "subjectRequired": "Subject is required",
+      "durationRequired": "Duration is required",
+      "durationMin": "Duration must be greater than 0 minutes"
+    },
+    "messages": {
+      "loadingError": "Error loading exams",
+      "createSuccess": "Exam created successfully",
+      "updateSuccess": "Exam updated successfully",
+      "noExams": "No exams available",
+      "noResults": "No exams found matching your search",
+      "tryDifferentSearch": "Try a different search or adjust filters.",
+      "noExamsDescription": "You haven't created or imported any exams yet."
+    },
+    "details": {
+      "title": "Exam Details",
+      "loading": "Loading...",
+      "error": "Error",
+      "errorMessage": "Could not load exam",
+      "unauthorized": "Unauthorized",
+      "loadingError": "Error loading exam data",
+      "deleteSuccess": "Exam deleted successfully",
+      "deleteError": "Error deleting exam",
+      "scanResponses": "Scan Responses",
+      "deleteConfirm": {
+        "title": "Are you sure?",
+        "description": "This action will permanently delete the exam and all its related elements. This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      }
+    },
+    "createWithAI": {
+      "title": "Create Exam with AI",
+      "description": "Use artificial intelligence to generate personalized exams",
+      "form": {
+        "topic": "Exam topic",
+        "topicPlaceholder": "E.g: Basic Mathematics, History of Colombia...",
+        "difficulty": "Difficulty level",
+        "difficultyOptions": {
+          "easy": "Easy",
+          "medium": "Medium",
+          "hard": "Hard"
+        },
+        "questionCount": "Number of questions",
+        "questionType": "Question type",
+        "questionTypeOptions": {
+          "multiple": "Multiple choice",
+          "truefalse": "True/False",
+          "mixed": "Mixed"
+        },
+        "generate": "Generate Exam",
+        "generating": "Generating exam...",
+        "entityRequired": "Educational Entity Required",
+        "entityRequiredDescription": "You must create or join at least one educational entity before creating exams. Exams must be associated with a subject, and subjects with an educational entity.",
+        "createEntity": "Create Educational Entity",
+        "subjectRequired": "Subject Required",
+        "subjectRequiredDescription": "You must create at least one subject before creating exams. Exams must be associated with a subject.",
+        "createSubject": "Create Subject",
+        "backToExams": "Back to Exams",
+        "createExam": "Create Exam",
+        "basicInfo": "Define basic exam information",
+        "instructions": "Instructions (optional)",
+        "instructionsPlaceholder": "Specific instructions for students"
+      },
+      "messages": {
+        "generateSuccess": "Exam generated successfully",
+        "generateError": "Error generating exam"
+      }
+    },
+    "assign": {
+      "title": "Assign Exam",
+      "description": "Assign this exam to student groups",
+      "title": "Assign Groups",
+      "description": "Select the groups to which this exam will be applied",
+      "backToExams": "Back to Exams",
+      "selectGroup": "Available Groups",
+      "selectGroupDescription": "Mark the groups to which you want to assign this exam",
+      "assignDate": "Application date",
+      "duration": "Duration (minutes)",
+      "dueDate": "Due date",
+      "assign": "Save Assignments",
+      "assigning": "Assigning...",
+      "success": "Groups assigned successfully",
+      "error": "Error saving assignments"
+    },
+    "edit": {
+      "title": "Edit Exam",
+      "description": "Modify exam questions and settings",
+      "addQuestion": "Add Question",
+      "questionTitle": "Question",
+      "questionPlaceholder": "Write your question here...",
+      "addOption": "Add Option",
+      "correctAnswer": "Correct Answer",
+      "points": "Points",
+      "deleteQuestion": "Delete Question",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "success": "Exam updated successfully",
+      "error": "Error updating exam"
+    },
+    "export": {
+      "title": "Export Exam",
+      "description": "Export exam in different formats",
+      "formats": {
+        "pdf": "PDF",
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "includeAnswers": "Include answers",
+      "includeResults": "Include results",
+      "export": "Export",
+      "exporting": "Exporting...",
+      "success": "Exam exported successfully",
+      "error": "Error exporting exam"
+    },
+    "results": {
+      "title": "Exam Results",
+      "description": "Review exam results and statistics",
+      "statistics": {
+        "totalStudents": "Total students",
+        "completed": "Completed",
+        "pending": "Pending",
+        "averageScore": "Average",
+        "highestScore": "Highest score",
+        "lowestScore": "Lowest score"
+      },
+      "studentResults": "Student Results",
+      "student": "Student",
+      "score": "Score",
+      "percentage": "Percentage",
+      "completedAt": "Completed",
+      "viewDetails": "View Details",
+      "downloadResults": "Download Results",
+      "noResults": "No results available"
+    },
+    "responses": {
+      "title": "Exam Responses",
+      "description": "Review individual student responses",
+      "selectStudent": "Select Student",
+      "question": "Question",
+      "studentAnswer": "Student Answer",
+      "correctAnswer": "Correct Answer",
+      "points": "Points",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "noResponses": "No responses available"
+    },
+    "linkGrade": {
+      "title": "Link Grades",
+      "description": "Link exam grades with the grading system",
+      "selectPeriod": "Select Period",
+      "selectComponent": "Select Component",
+      "percentage": "Percentage",
+      "link": "Link",
+      "linking": "Linking...",
+      "success": "Grades linked successfully",
+      "error": "Error linking grades"
+    }
+  },
+  "main": {
+    "title": "Dashboard",
+    "welcome": "Welcome to ProfeVision, your exam management platform.",
+    "metrics": {
+      "examsCreated": "Exams created",
+      "studentsEvaluated": "Students evaluated",
+      "averageScore": "Average score",
+      "completionRate": "Completion rate",
+      "timeSaved": "Time saved",
+      "sinceLastMonth": "since last month"
+    },
+    "recentActivity": "Recent Activity",
+    "recentActivityDesc": "Latest activities in your account",
+    "activity": {
+      "examCreated": "Math Exam created",
+      "examCreatedDesc": "You have created a new Math exam for 9th grade.",
+      "groupAdded": "Student group added",
+      "groupAddedDesc": "You have added 24 students to the Physics class.",
+      "examGraded": "Exam graded",
+      "examGradedDesc": "You have graded the Biology exam for 32 students.",
+      "ago2h": "2 hours ago",
+      "ago1d": "1 day ago",
+      "ago3d": "3 days ago"
+    },
+    "upcomingExams": "Upcoming Exams",
+    "upcomingExamsDesc": "Exams scheduled for the coming days",
+    "upcoming": {
+      "chemistry": "Chemistry - 10th Grade",
+      "chemistryDate": "May 22, 2024",
+      "history": "History - 11th Grade",
+      "historyDate": "May 24, 2024",
+      "physics": "Physics - 9th Grade",
+      "physicsDate": "May 27, 2024"
+    }
+  }
+}

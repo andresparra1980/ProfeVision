@@ -114,38 +114,43 @@ export const routing = defineRouting({
     // ⚠️ IMPORTANTE: /auth/callback y /auth/direct-recovery NO se localizan
     // Estas rutas deben permanecer sin prefijo para que Supabase funcione
     
-    // Dashboard
-    '/dashboard': {
-      es: '/panel',
-      en: '/dashboard'
+    // Dashboard rutas principales
+    '/dashboard': '/dashboard',
+    '/dashboard/exams': { 
+      es: '/dashboard/examenes', 
+      en: '/dashboard/exams' 
     },
-    '/dashboard/exams': {
-      es: '/panel/examenes',
-      en: '/dashboard/exams'
+    '/dashboard/exams/create': { 
+      es: '/dashboard/examenes/crear', 
+      en: '/dashboard/exams/create' 
     },
-    '/dashboard/students': {
-      es: '/panel/estudiantes',
-      en: '/dashboard/students'
+    '/dashboard/exams/create-with-ai': { 
+      es: '/dashboard/examenes/crear-con-ia', 
+      en: '/dashboard/exams/create-with-ai' 
     },
-    '/dashboard/groups': {
-      es: '/panel/grupos',
-      en: '/dashboard/groups'
+    '/dashboard/students': { 
+      es: '/dashboard/estudiantes', 
+      en: '/dashboard/students' 
     },
-    '/dashboard/subjects': {
-      es: '/panel/materias',
-      en: '/dashboard/subjects'
+    '/dashboard/groups': { 
+      es: '/dashboard/grupos', 
+      en: '/dashboard/groups' 
     },
-    '/dashboard/reports': {
-      es: '/panel/reportes',
-      en: '/dashboard/reports'
+    '/dashboard/subjects': { 
+      es: '/dashboard/materias', 
+      en: '/dashboard/subjects' 
     },
-    '/dashboard/settings': {
-      es: '/panel/configuracion',
-      en: '/dashboard/settings'
+    '/dashboard/reports': { 
+      es: '/dashboard/reportes', 
+      en: '/dashboard/reports' 
     },
-    '/dashboard/profile': {
-      es: '/panel/perfil',
-      en: '/dashboard/profile'
+    '/dashboard/settings': { 
+      es: '/dashboard/configuracion', 
+      en: '/dashboard/settings' 
+    },
+    '/dashboard/profile': { 
+      es: '/dashboard/perfil', 
+      en: '/dashboard/profile' 
     },
     '/dashboard/entities': {
       es: '/panel/entidades',
