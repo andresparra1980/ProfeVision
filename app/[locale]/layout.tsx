@@ -17,20 +17,18 @@ export async function generateMetadata({
 }: {
   params: { locale: string }
 }): Promise<Metadata> {
-  const { locale } = params;
-  
   // Fallback metadata for when translations are not available
   const fallbackMetadata = {
     title: {
-      default: locale === 'en' 
+      default: params.locale === 'en' 
         ? 'ProfeVision - The Best App to Scan and Grade Paper Exams with AI'
         : 'ProfeVisión - La Mejor Aplicación para Escanear y Calificar Exámenes en Papel con IA',
-      template: locale === 'en' ? '%s | ProfeVision' : '%s | ProfeVisión'
+      template: params.locale === 'en' ? '%s | ProfeVision' : '%s | ProfeVisión'
     },
-    description: locale === 'en'
+    description: params.locale === 'en'
       ? "ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students' education. Sign up for free!"
       : "ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Resgistrate gratis!",
-    keywords: locale === 'en' 
+    keywords: params.locale === 'en' 
       ? [
           'scan exams',
           'grade exams',
@@ -62,7 +60,7 @@ export async function generateMetadata({
           'automatización educativa'
         ],
     alternates: {
-      canonical: `/${locale}`,
+      canonical: `/${params.locale}`,
       languages: {
         'es-ES': '/es',
         'es': '/',
@@ -71,21 +69,21 @@ export async function generateMetadata({
     },
     openGraph: {
       type: 'website',
-      locale: locale === 'en' ? 'en_US' : 'es_ES',
-      url: `https://www.profevision.com/${locale}`,
-      title: locale === 'en' 
+      locale: params.locale === 'en' ? 'en_US' : 'es_ES',
+      url: `https://www.profevision.com/${params.locale}`,
+      title: params.locale === 'en' 
         ? 'ProfeVision - The Best App to Scan and Grade Paper Exams with AI'
         : 'ProfeVisión - La Mejor Aplicación para Escanear y Calificar Exámenes en Papel con IA',
-      description: locale === 'en'
+      description: params.locale === 'en'
         ? "ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students' education. Sign up for free!"
         : "ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Resgistrate gratis!",
-      siteName: locale === 'en' ? 'ProfeVision' : 'ProfeVisión',
+      siteName: params.locale === 'en' ? 'ProfeVision' : 'ProfeVisión',
       images: [
         {
           url: '/android-chrome-512x512.png',
           width: 512,
           height: 512,
-          alt: locale === 'en' ? 'ProfeVision - App to Scan and Grade Exams' : 'ProfeVisión - Aplicación para Escanear y Calificar Exámenes',
+          alt: params.locale === 'en' ? 'ProfeVision - App to Scan and Grade Exams' : 'ProfeVisión - Aplicación para Escanear y Calificar Exámenes',
         }
       ],
     },
