@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -198,7 +199,7 @@ function UpdatePasswordContent() {
             </CardHeader>
             <CardFooter className="flex justify-center">
               <Button asChild variant="outline" className="w-full">
-                <a href="/auth/reset-password">Solicitar nuevo enlace</a>
+                <Link href="/auth/reset-password">Solicitar nuevo enlace</Link>
               </Button>
             </CardFooter>
           </Card>

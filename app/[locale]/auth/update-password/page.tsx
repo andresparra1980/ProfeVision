@@ -31,7 +31,6 @@ interface PasswordUpdateError {
 function UpdatePasswordContent() {
   const t = useTranslations('auth.updatePassword');
   const tErrors = useTranslations('auth.errors');
-  const tCommon = useTranslations('common');
   const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();

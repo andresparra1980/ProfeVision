@@ -26,7 +26,6 @@ import {
 export default function LoginPage() {
   const t = useTranslations('auth.login');
   const tErrors = useTranslations('auth.errors');
-  const tCommon = useTranslations('common');
   const router = useRouter();
   const locale = useLocale();
   const routes = useLocalizedRoute(locale);

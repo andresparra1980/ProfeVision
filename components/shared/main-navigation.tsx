@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useTranslations, useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { Link as IntlLink } from '@/i18n/navigation'
 import { cn } from "@/lib/utils"
 import {
@@ -42,6 +42,7 @@ const ListItem = React.forwardRef<
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group",
             className
           )}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           href={href as any || "#"}
           {...props}
         >
@@ -68,6 +69,7 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
       <NavigationMenuLink asChild>
         <IntlLink
           className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group border-l-2 border-muted/50 pl-3"
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           href={href as any || "#"}
         >
           <div className="flex items-center gap-2">
@@ -87,7 +89,6 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
 
 export function MainNavigation() {
   const t = useTranslations('common')
-  const locale = useLocale()
 
 
 

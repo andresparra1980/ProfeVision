@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Link from "next/link";
 
 export default function TermsPage() {
   const t = useTranslations('common');

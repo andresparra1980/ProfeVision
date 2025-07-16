@@ -158,7 +158,7 @@ export default function CookiesPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {(t.raw('cookies.section4.cookies') as any[]).map((cookie, index) => (
+                    {(t.raw('cookies.section4.cookies') as Array<{name: string, provider: string, description: string, duration: string, type: string}>).map((cookie, index) => (
                       <tr key={index}>
                         <td className="px-4 py-3 font-mono text-sm">{cookie.name}</td>
                         <td className="px-4 py-3 text-sm">{cookie.provider}</td>
