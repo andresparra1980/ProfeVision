@@ -34,7 +34,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 // AlertDialog components are no longer used directly in this file
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import React from 'react'; // useState is no longer needed here
 import { useTranslations } from 'next-intl';
 
@@ -79,7 +79,7 @@ export default function ExamsTableDesktop({
   handleExamClick,
 }: ExamsTableDesktopProps) {
   const router = useRouter();
-  const t = useTranslations('dashboard');
+  const t = useTranslations('dashboard.exams');
 
   // Placeholder function for handling the save action from EditableExamTitle
   // TODO: Implement the actual API call to update the exam title in your backend.
@@ -125,19 +125,19 @@ export default function ExamsTableDesktop({
       case 'borrador':
         return (
           <span className="rounded-full bg-accent text-accent-foreground px-2 py-1 text-xs font-medium shadow-sm">
-            {t('exams.status.draft')}
+            {t('status.draft')}
           </span>
         );
       case 'publicado':
         return (
           <span className="rounded-full bg-primary text-primary-foreground px-2 py-1 text-xs font-medium shadow-sm">
-            {t('exams.status.published')}
+            {t('status.published')}
           </span>
         );
       case 'cerrado':
         return (
           <span className="rounded-full bg-destructive text-destructive-foreground px-2 py-1 text-xs font-medium shadow-sm">
-            {t('exams.status.closed', { defaultValue: 'Cerrado' })}
+            {t('status.completed')}
           </span>
         );
       default:
@@ -158,14 +158,14 @@ export default function ExamsTableDesktop({
           <div>
             {' '}
             {/* Title/Desc block */}
-            <CardTitle>{t('exams.table.allExams', { defaultValue: 'Todos los Exámenes' })}</CardTitle>
+            <CardTitle>{t('table.allExams', { defaultValue: 'Todos los Exámenes' })}</CardTitle>
             <CardDescription>
-              {t('exams.table.allExamsDesc', { defaultValue: 'Lista de todos los exámenes creados.' })}
+              {t('table.allExamsDesc', { defaultValue: 'Lista de todos los exámenes creados.' })}
             </CardDescription>
           </div>
           <div className="mt-4">
             <Input
-              placeholder={t('exams.table.search')}
+              placeholder={t('table.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="max-w-sm"
@@ -182,20 +182,20 @@ export default function ExamsTableDesktop({
           <div className="text-center py-10">
             <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-2 text-sm font-medium">
-              {t('exams.messages.noResults')}
+              {t('messages.noResults')}
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              {t('exams.messages.adjustSearch', { defaultValue: 'Intenta ajustar tu búsqueda.' })}
+              {t('messages.adjustSearch', { defaultValue: 'Intenta ajustar tu búsqueda.' })}
             </p>
           </div>
         ) : filteredExams.length === 0 ? (
           <div className="text-center py-10">
             <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-2 text-sm font-medium">
-              {t('exams.messages.noExams')}
+              {t('messages.noExams')}
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              {t('exams.messages.createFirst', { defaultValue: 'Empieza importando o creando tu primer examen desde las opciones en la parte superior.' })}
+              {t('messages.createFirst', { defaultValue: 'Empieza importando o creando tu primer examen desde las opciones en la parte superior.' })}
             </p>
           </div>
         ) : (
@@ -203,13 +203,13 @@ export default function ExamsTableDesktop({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('exams.table.title', { defaultValue: 'Título' })}</TableHead>
-                  <TableHead>{t('exams.table.subject')}</TableHead>
-                  <TableHead>{t('exams.table.status')}</TableHead>
-                  <TableHead>{t('exams.table.assignedGroups', { defaultValue: 'Grupos Asignados' })}</TableHead>
-                  <TableHead>{t('exams.table.duration')}</TableHead>
-                  <TableHead>{t('exams.table.createdAt')}</TableHead>
-                  <TableHead>{t('exams.table.actions')}</TableHead>
+                  <TableHead>{t('table.title', { defaultValue: 'Título' })}</TableHead>
+                  <TableHead>{t('table.subject')}</TableHead>
+                  <TableHead>{t('table.status')}</TableHead>
+                  <TableHead>{t('table.assignedGroups', { defaultValue: 'Grupos Asignados' })}</TableHead>
+                  <TableHead>{t('table.duration')}</TableHead>
+                  <TableHead>{t('table.createdAt')}</TableHead>
+                  <TableHead>{t('table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -246,7 +246,7 @@ export default function ExamsTableDesktop({
                         {(!exam.examen_grupo ||
                           exam.examen_grupo.length === 0) && (
                           <span className="text-xs text-muted-foreground">
-                            {t('exams.table.noGroups', { defaultValue: 'Sin grupos asignados' })}
+                            {t('table.noGroups', { defaultValue: 'Sin grupos asignados' })}
                           </span>
                         )}
                       </div>
@@ -267,17 +267,18 @@ export default function ExamsTableDesktop({
                                 className="h-8 w-8 p-0"
                                 onClick={(e: React.MouseEvent) => {
                                   e.stopPropagation();
-                                  router.push(
-                                    `/dashboard/exams/${exam.id}/edit`,
-                                  );
+                                  router.push({
+                                    pathname: '/dashboard/exams/[id]/edit',
+                                    params: { id: exam.id },
+                                  });
                                 }}
                               >
                                 <Pencil className="h-4 w-4" />
-                                <span className="sr-only">{t('exams.actions.edit')}</span>
+                                <span className="sr-only">{t('actions.edit')}</span>
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{t('exams.actions.edit')}</p>
+                              <p>{t('actions.edit')}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -296,11 +297,11 @@ export default function ExamsTableDesktop({
                                   }}
                                 >
                                   <Trash2 className="h-4 w-4" />
-                                  <span className="sr-only">{t('exams.actions.delete')}</span>
+                                  <span className="sr-only">{t('actions.delete')}</span>
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>{t('exams.actions.delete')}</p>
+                                <p>{t('actions.delete')}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -315,17 +316,18 @@ export default function ExamsTableDesktop({
                                 className="h-8 w-8 p-0"
                                 onClick={(e: React.MouseEvent) => {
                                   e.stopPropagation();
-                                  router.push(
-                                    `/dashboard/exams/${exam.id}/export`,
-                                  );
+                                  router.push({
+                                    pathname: '/dashboard/exams/[id]/export',
+                                    params: { id: exam.id },
+                                  });
                                 }}
                               >
                                 <Printer className="h-4 w-4" />
-                                <span className="sr-only">{t('exams.actions.print', { defaultValue: 'Imprimir' })}</span>
+                                <span className="sr-only">{t('actions.print', { defaultValue: 'Imprimir' })}</span>
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{t('exams.actions.print', { defaultValue: 'Imprimir' })}</p>
+                              <p>{t('actions.print', { defaultValue: 'Imprimir' })}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -339,19 +341,20 @@ export default function ExamsTableDesktop({
                                 className="h-8 w-8 p-0"
                                 onClick={(e: React.MouseEvent) => {
                                   e.stopPropagation();
-                                  router.push(
-                                    `/dashboard/exams/${exam.id}/responses`,
-                                  );
+                                  router.push({
+                                    pathname: '/dashboard/exams/[id]/responses',
+                                    params: { id: exam.id },
+                                  });
                                 }}
                               >
                                 <FileOutput className="h-4 w-4" />
                                 <span className="sr-only">
-                                  {t('exams.actions.generateSheets', { defaultValue: 'Generar Hojas de Respuesta' })}
+                                  {t('actions.generateSheets', { defaultValue: 'Generar Hojas de Respuesta' })}
                                 </span>
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{t('exams.actions.generateSheets', { defaultValue: 'Generar Hojas de Respuesta' })}</p>
+                              <p>{t('actions.generateSheets', { defaultValue: 'Generar Hojas de Respuesta' })}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -365,17 +368,18 @@ export default function ExamsTableDesktop({
                                 className="h-8 w-8 p-0"
                                 onClick={(e: React.MouseEvent) => {
                                   e.stopPropagation();
-                                  router.push(
-                                    `/dashboard/exams/${exam.id}/assign`,
-                                  );
+                                  router.push({
+                                    pathname: '/dashboard/exams/[id]/assign',
+                                    params: { id: exam.id },
+                                  });
                                 }}
                               >
                                 <Users className="h-4 w-4" />
-                                <span className="sr-only">{t('exams.actions.assignGroups', { defaultValue: 'Asignar Grupos' })}</span>
+                                <span className="sr-only">{t('actions.assignGroups', { defaultValue: 'Asignar Grupos' })}</span>
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{t('exams.actions.assignGroups', { defaultValue: 'Asignar Grupos' })}</p>
+                              <p>{t('actions.assignGroups', { defaultValue: 'Asignar Grupos' })}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -389,17 +393,18 @@ export default function ExamsTableDesktop({
                                 className="h-8 w-8 p-0"
                                 onClick={(e: React.MouseEvent) => {
                                   e.stopPropagation();
-                                  router.push(
-                                    `/dashboard/exams/${exam.id}/results`,
-                                  );
+                                  router.push({
+                                    pathname: '/dashboard/exams/[id]/results',
+                                    params: { id: exam.id },
+                                  });
                                 }}
                               >
                                 <Eye className="h-4 w-4" />
-                                <span className="sr-only">{t('exams.actions.viewResults', { defaultValue: 'Ver resultados' })}</span>
+                                <span className="sr-only">{t('actions.viewResults', { defaultValue: 'Ver resultados' })}</span>
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{t('exams.actions.viewResults', { defaultValue: 'Ver resultados' })}</p>
+                              <p>{t('actions.viewResults', { defaultValue: 'Ver resultados' })}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -413,19 +418,20 @@ export default function ExamsTableDesktop({
                                 className="h-8 w-8 p-0"
                                 onClick={(e: React.MouseEvent) => {
                                   e.stopPropagation();
-                                  router.push(
-                                    `/dashboard/exams/${exam.id}/link-grade-component`,
-                                  );
+                                  router.push({
+                                    pathname: '/dashboard/exams/[id]/link-grade-component',
+                                    params: { id: exam.id },
+                                  });
                                 }}
                               >
                                 <Link className="h-4 w-4" />
                                 <span className="sr-only">
-                                  {t('exams.actions.linkComponent', { defaultValue: 'Vincular Componente' })}
+                                  {t('actions.linkComponent', { defaultValue: 'Vincular Componente' })}
                                 </span>
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{t('exams.actions.linkComponentFull', { defaultValue: 'Vincular a Componente de Nota' })}</p>
+                              <p>{t('actions.linkComponentFull', { defaultValue: 'Vincular a Componente de Nota' })}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>

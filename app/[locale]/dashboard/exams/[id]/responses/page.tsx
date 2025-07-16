@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
 import { Student } from '@/lib/types/database';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -22,7 +23,7 @@ const PDFGenerator = dynamic(
     ssr: false,
     loading: () => (
       <div className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-        Cargando...
+        Loading...
       </div>
     )
   }
@@ -91,6 +92,7 @@ interface PageProps {
 export default function ResponseSheetsPage({ params: pageParams }: PageProps) {
   const { id } = use(pageParams);
   const router = useRouter();
+  const t = useTranslations('dashboard.exams.responses');
   // const params = useParams(); // Removed as 'id' from pageParams is used
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [_paperSize, _setPaperSize] = useState<'LETTER' | 'A4'>('LETTER');
@@ -227,7 +229,7 @@ export default function ResponseSheetsPage({ params: pageParams }: PageProps) {
   if (!exam) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500">Error al cargar el examen</p>
+        <p className="text-red-500">{t('loadingError')}</p>
       </div>
     );
   }
@@ -249,10 +251,10 @@ export default function ResponseSheetsPage({ params: pageParams }: PageProps) {
             className="h-9"
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
-            Volver a Exámenes
+            {t('backToExams')}
           </Button>
-          <h2 className="text-2xl font-bold mt-6">Generar Hojas de Respuesta</h2>
-          <p className="text-muted-foreground">Selecciona el grupo al que le deseas generar las hojas de respuesta</p>
+          <h2 className="text-2xl font-bold mt-6">{t('title')}</h2>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
       </div>
       
@@ -260,10 +262,10 @@ export default function ResponseSheetsPage({ params: pageParams }: PageProps) {
         <Card>
           <CardContent className="grid gap-4 mt-4">
             <div className="flex gap-2 items-center">
-              <Label htmlFor="group" className="text-sm font-semibold">Grupo: </Label>
+              <Label htmlFor="group" className="text-sm font-semibold">{t('group')}: </Label>
               <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
                 <SelectTrigger id="group" className="w-64">
-                  <SelectValue placeholder="Selecciona un grupo" />
+                  <SelectValue placeholder={t('selectGroup')} />
                 </SelectTrigger>
                 <SelectContent>
                   {groups.map((group) => (
@@ -294,7 +296,7 @@ export default function ResponseSheetsPage({ params: pageParams }: PageProps) {
         {selectedGroupId && exam && (
           <Card>
             <CardHeader>
-              <CardTitle>Generar PDF</CardTitle>
+              <CardTitle>{t('generatePDF')}</CardTitle>
             </CardHeader>
             <CardContent>
               {selectedGroup && (

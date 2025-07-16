@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { AuthError } from "@supabase/supabase-js";
 import { logger } from "@/lib/utils/logger";
@@ -30,27 +30,25 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button"; // Added for dialogs
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 
-// Define a simple useMediaQuery hook
-// const useMediaQuery = (query: string) => {
-//   const [matches, setMatches] = useState(false);
+const useMediaQuery = (query: string) => {
+  const [matches, setMatches] = useState(false);
 
-//   useEffect(() => {
-//     // Asegurarse de que window está definido (para SSR/SSG)
-//     if (typeof window === "undefined") return;
+  useEffect(() => {
+    // Asegurarse de que window está definido (para SSR/SSG)
+    if (typeof window === "undefined") return;
 
-//     const media = window.matchMedia(query);
-//     if (media.matches !== matches) {
-//       setMatches(media.matches);
-//     }
-//     const listener = () => setMatches(media.matches);
-//     window.addEventListener("resize", listener);
-//     return () => window.removeEventListener("resize", listener);
-//   }, [matches, query]);
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    const listener = () => setMatches(media.matches);
+    window.addEventListener("resize", listener);
+    return () => window.removeEventListener("resize", listener);
+  }, [matches, query]);
 
-//   return matches;
-// };
+  return matches;
+};
 
 interface Exam {
   id: string;
@@ -88,8 +86,8 @@ interface ImportResult {
 }
 
 export default function ExamsPage() {
-  const router = useRouter();
   const t = useTranslations("dashboard");
+  const router = useRouter();
   const [rawExams, setRawExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -98,7 +96,7 @@ export default function ExamsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  const isDesktop = false; //useMediaQuery("(min-width: 768px)"); // md breakpoint (Tailwind)
+  const isDesktop = useMediaQuery("(min-width: 768px)"); // md breakpoint (Tailwind)
 
   const fetchExams = useCallback(async () => {
     try {
@@ -134,7 +132,9 @@ export default function ExamsPage() {
         errorObject: err,
       });
       toast.error(
-        `${t("exams.messages.loadingError")}${status ? ` (${t("common.error")}: ${status})` : ""}: ${err.message}`,
+        `${t("exams.messages.loadingError")}${
+          status ? ` (${t("common.error")}: ${status})` : ""
+        }: ${err.message}`,
       );
     } finally {
       setLoading(false);
@@ -155,7 +155,10 @@ export default function ExamsPage() {
   );
 
   const handleExamClick = (examId: string) => {
-    router.push(`/dashboard/exams/${examId}/edit`);
+    router.push({
+      pathname: '/dashboard/exams/[id]/edit',
+      params: { id: examId },
+    });
   };
 
   const handleOpenDeleteDialog = (examId: string) => {
@@ -288,7 +291,7 @@ export default function ExamsPage() {
             className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
           >
             <Upload className="mr-2 h-4 w-4" />
-            {t("exams.import")}
+            {t("exams.import.actions.import")}
           </Button>
           <Button
             onClick={handleCreateExam}
@@ -325,7 +328,10 @@ export default function ExamsPage() {
         _open={showImportDialog}
         onOpenChange={setShowImportDialog}
         onImportSuccess={(examData: ImportResult & { importId: string }) => {
-          router.push(`/dashboard/exams/create?importId=${examData.importId}`);
+          router.push({
+            pathname: '/dashboard/exams/create',
+            query: { importId: examData.importId },
+          });
         }}
       />
 

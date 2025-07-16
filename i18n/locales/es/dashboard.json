@@ -45,9 +45,10 @@
   },
   "exams": {
     "title": "Exámenes",
-    "description": "Gestiona y crea exámenes para tus estudiantes.",
-    "create": "Crear Examen",
-    "createWithAI": "Crear Examen con IA",
+          "description": "Gestiona y crea exámenes para tus estudiantes.",
+      "create": "Crear Examen",
+      "createWithAI": "Crear Examen con IA",
+      "createNewDesc": "Diseña un nuevo examen para tus estudiantes",
     "import": "Importar Examen",
     "edit": "Editar Examen",
     "actions": {
@@ -58,7 +59,14 @@
       "delete": "Eliminar",
       "view": "Ver",
       "assign": "Asignar",
-      "export": "Exportar"
+      "export": "Exportar",
+      "print": "Imprimir",
+      "generateSheets": "Generar Hojas de Respuesta",
+      "assignGroups": "Asignar Grupos",
+      "viewResults": "Ver Resultados",
+      "linkComponent": "Vincular Componente",
+      "linkComponentFull": "Vincular a Componente de Nota",
+      "backToExams": "Volver a Exámenes"
     },
     "form": {
       "title": "Título del examen",
@@ -68,7 +76,26 @@
       "duration": "Duración (minutos)",
       "totalScore": "Puntaje total",
       "titlePlaceholder": "Ingresa el título del examen",
-      "descriptionPlaceholder": "Describe brevemente el examen"
+      "descriptionPlaceholder": "Describe brevemente el examen",
+      "generalInfo": "Información General",
+      "numberOfQuestions": "Número de Preguntas",
+      "selectSubject": "Selecciona una materia",
+      "selectGroup": "Selecciona un grupo",
+      "selectSubjectFirst": "Primero selecciona una materia",
+      "noGroupsForSubject": "No hay grupos disponibles para esta materia",
+      "noGroupsAvailable": "No hay grupos disponibles para esta materia",
+      "createGroup": "Crear grupo",
+      "instructions": "Instrucciones (opcional)",
+      "instructionsPlaceholder": "Instrucciones específicas para los estudiantes",
+      "questionNumber": "Pregunta {current} de {total}",
+      "questionText": "Texto de la pregunta",
+      "options": "Opciones",
+      "questionPlaceholder": "Escribe aquí tu pregunta",
+      "optionPlaceholder": "Opción {number}",
+      "addOption": "Añadir opción",
+      "addQuestion": "Añadir pregunta",
+      "creating": "Creando...",
+      "optionsNote": "Solo se guardarán las opciones que tengan texto"
     },
     "table": {
       "name": "Nombre",
@@ -79,7 +106,12 @@
       "actions": "Acciones",
       "duration": "Duración",
       "status": "Estado",
-      "search": "Buscar exámenes..."
+      "search": "Buscar exámenes...",
+      "title": "Título",
+      "allExams": "Todos los Exámenes",
+      "allExamsDesc": "Lista de todos los exámenes creados.",
+      "assignedGroups": "Grupos Asignados",
+      "noGroups": "Sin grupos asignados"
     },
     "status": {
       "draft": "Borrador",
@@ -110,7 +142,14 @@
       "noExams": "No hay exámenes disponibles",
       "noResults": "No se encontraron exámenes que coincidan con tu búsqueda",
       "tryDifferentSearch": "Intenta con otra búsqueda o ajusta los filtros.",
-      "noExamsDescription": "Aún no has creado o importado ningún examen."
+      "noExamsDescription": "Aún no has creado o importado ningún examen.",
+      "adjustSearch": "Intenta ajustar tu búsqueda.",
+      "createFirst": "Empieza importando o creando tu primer examen desde las opciones en la parte superior.",
+      "unauthorized": "No autorizado",
+      "createError": "Error al crear el examen",
+      "success": "Éxito",
+      "examCreated": "Examen creado correctamente",
+      "error": "Error"
     },
     "details": {
       "title": "Detalles del Examen",
@@ -131,7 +170,32 @@
     },
     "createWithAI": {
       "title": "Crear Examen con IA",
-      "description": "Utiliza inteligencia artificial para generar exámenes personalizados",
+      "description": "Diseña un nuevo examen para tus estudiantes. Puedes crear un examen desde cero agregando tus propias preguntas, o bien utilizar el botón",
+      "generateWithAI": "Generar con IA",
+      "descriptionContinued": "para obtener preguntas sugeridas automáticamente por un modelo de lenguaje avanzado (LLM). Esta opción te permite ahorrar tiempo y personalizar el contenido según tus necesidades.",
+      "createWithAI": "Crear con Inteligencia Artificial",
+      "questionNumber": "Pregunta {current} de {total}",
+      "questionText": "Texto de la pregunta",
+      "questionPlaceholder": "Escribe aquí tu pregunta",
+      "options": "Opciones",
+      "optionPlaceholder": "Opción {number}",
+      "addOption": "Añadir opción",
+      "onlyTextOptionsWillBeSaved": "Solo se guardarán las opciones que tengan texto",
+      "addQuestion": "Añadir pregunta",
+      "creating": "Creando...",
+      "createExam": "Crear Examen",
+      "entityRequired": "Entidad Educativa Requerida",
+      "entityRequiredDescription": "Debes crear o unirte a al menos una entidad educativa antes de poder crear exámenes. Los exámenes deben estar asociados a una materia, y las materias a una entidad educativa.",
+      "entityRequiredDesc": "Debes crear o unirte a al menos una entidad educativa antes de poder crear exámenes. Los exámenes deben estar asociados a una materia, y las materias a una entidad educativa.",
+      "createEntity": "Crear Entidad Educativa",
+      "subjectRequired": "Materia Requerida",
+      "subjectRequiredDescription": "Debes crear al menos una materia antes de poder crear exámenes. Los exámenes deben estar asociados a una materia.",
+      "subjectRequiredDesc": "Debes crear al menos una materia antes de poder crear exámenes. Los exámenes deben estar asociados a una materia.",
+      "createSubject": "Crear Materia",
+      "importedTitle": "Examen Importado",
+      "importedDesc": "Se han importado",
+      "questionsImported": "preguntas correctamente",
+      "importError": "No se pudieron procesar los datos importados",
       "form": {
         "topic": "Tema del examen",
         "topicPlaceholder": "Ej: Matemáticas básicas, Historia de Colombia...",
@@ -150,12 +214,6 @@
         },
         "generate": "Generar Examen",
         "generating": "Generando examen...",
-        "entityRequired": "Entidad Educativa Requerida",
-        "entityRequiredDescription": "Debes crear o unirte a al menos una entidad educativa antes de poder crear exámenes. Los exámenes deben estar asociados a una materia, y las materias a una entidad educativa.",
-        "createEntity": "Crear Entidad Educativa",
-        "subjectRequired": "Materia Requerida",
-        "subjectRequiredDescription": "Debes crear al menos una materia antes de poder crear exámenes. Los exámenes deben estar asociados a una materia.",
-        "createSubject": "Crear Materia",
         "backToExams": "Volver a Exámenes",
         "createExam": "Crear Examen",
         "basicInfo": "Define la información básica del examen",
@@ -181,7 +239,9 @@
       "assign": "Guardar Asignaciones",
       "assigning": "Asignando...",
       "success": "Grupos asignados correctamente",
-      "error": "Error al guardar las asignaciones"
+      "error": "Error al guardar las asignaciones",
+      "loadingError": "Error al cargar los detalles del examen",
+      "loadingGroupsError": "Error al cargar los grupos"
     },
     "edit": {
       "title": "Editar Examen",
@@ -196,7 +256,61 @@
       "save": "Guardar Cambios",
       "saving": "Guardando...",
       "success": "Examen actualizado exitosamente",
-      "error": "Error al actualizar el examen"
+      "error": "Error al actualizar el examen",
+      "backToExams": "Volver a Exámenes",
+      "publishExam": "Publicar Examen",
+      "questions": "Preguntas",
+      "questionsCount": "Preguntas ({count})",
+      "noQuestions": "Este examen aún no tiene preguntas.",
+      "addNewQuestion": "Agregar Nueva Pregunta",
+      "addNewQuestionDesc": "Define el contenido y opciones de respuesta para la pregunta",
+      "questionText": "Texto de la Pregunta",
+      "questionTextRequired": "Texto de la Pregunta*",
+      "questionTextPlaceholder": "Escribe aquí tu pregunta",
+      "responseOptions": "Opciones de Respuesta",
+      "optionPlaceholder": "Opción {number}",
+      "optionsInfo": "Solo se guardarán las opciones que tengan texto",
+      "feedback": "Retroalimentación",
+      "difficulty": "Dificultad",
+      "enabled": "Habilitada",
+      "disabled": "Deshabilitada",
+      "correct": "(Correcta)",
+      "unknownType": "Tipo desconocido",
+      "confirmToggle": "¿{action} pregunta?",
+      "confirmToggleDesc": "Al {action} esta pregunta, se {effect} en la calificación de los estudiantes.",
+      "confirmToggleEnable": "habilitar",
+      "confirmToggleDisable": "deshabilitar",
+      "confirmToggleEnableEffect": "volverá a considerar",
+      "confirmToggleDisableEffect": "recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen, excluyendo esta pregunta del cálculo",
+      "confirmUpdateAnswer": "¿Actualizar respuesta correcta?",
+      "confirmUpdateAnswerDesc": "Al hacer click en Confirmar se recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen.",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "status": {
+        "draft": "Borrador",
+        "published": "Publicado"
+      },
+      "validation": {
+        "questionRequired": "El texto de la pregunta es obligatorio",
+        "optionsRequired": "Debes agregar al menos una opción con texto",
+        "cantPublishNoQuestions": "No puedes publicar un examen sin preguntas"
+      },
+      "messages": {
+        "questionAdded": "Pregunta agregada correctamente",
+        "questionDeleted": "Pregunta eliminada correctamente",
+        "questionEnabled": "Pregunta habilitada correctamente",
+        "questionDisabled": "Pregunta deshabilitada correctamente",
+        "answerUpdated": "Respuesta correcta actualizada y calificaciones recalculadas",
+        "examPublished": "Examen publicado correctamente",
+        "loadError": "No se pudo cargar la información del examen",
+        "addError": "No se pudo agregar la pregunta",
+        "deleteError": "No se pudo eliminar la pregunta",
+        "toggleError": "No se pudo {action} la pregunta",
+        "updateAnswerError": "No se pudo actualizar la respuesta correcta",
+        "publishError": "No se pudo publicar el examen",
+        "examNotFound": "No se encontró el examen solicitado.",
+        "unauthorized": "No autorizado"
+      }
     },
     "export": {
       "title": "Exportar Examen",
@@ -214,8 +328,31 @@
       "error": "Error al exportar el examen"
     },
     "results": {
-      "title": "Resultados del Examen",
-      "description": "Revisa los resultados y estadísticas del examen",
+      "title": "Resultados",
+      "description": "Detalles de calificaciones y respuestas de los estudiantes",
+      "loading": "Cargando...",
+      "error": "Error",
+      "loadingError": "Error al cargar los resultados del examen",
+      "backToExams": "Volver a Exámenes",
+      "downloadExcel": "Descargar notas en Excel",
+      "excelReport": "Reporte Excel",
+      "generatePDFReport": "Generar reporte en PDF",
+      "pdfReport": "Reporte PDF",
+      "examDetails": "Detalles del Examen",
+      "subject": "Materia",
+      "totalScore": "Puntaje Total",
+      "group": "Grupo",
+      "creationDate": "Fecha de Creación",
+      "noSubject": "Sin materia",
+      "noGroup": "Sin grupo",
+      "notAvailable": "No disponible",
+      "statisticsTitle": "Estadísticas",
+      "studentsWithExam": "Estudiantes con examen",
+      "of": "de",
+      "average": "Promedio",
+      "highestScore": "Nota más alta",
+      "lowestScore": "Nota más baja",
+      "na": "N/A",
       "statistics": {
         "totalStudents": "Total de estudiantes",
         "completed": "Completados",
@@ -225,17 +362,93 @@
         "lowestScore": "Puntaje más bajo"
       },
       "studentResults": "Resultados por Estudiante",
+      "studentsSection": "Estudiantes",
+      "studentsSectionDescription": "Resultados de los estudiantes en este examen",
       "student": "Estudiante",
       "score": "Puntaje",
       "percentage": "Porcentaje",
       "completedAt": "Completado",
       "viewDetails": "Ver Detalles",
+      "viewDetailsButton": "Ver detalles",
       "downloadResults": "Descargar Resultados",
-      "noResults": "No hay resultados disponibles"
+      "noResults": "No hay resultados disponibles",
+      "toast": {
+        "answerUpdated": "Respuesta actualizada",
+        "updateError": "Error al actualizar",
+        "updateErrorDesc": "No se pudo actualizar la respuesta",
+        "gradeSaved": "Calificación guardada",
+        "saveError": "Error al guardar",
+        "saveErrorDesc": "No se pudo guardar la calificación",
+        "noResultsError": "No hay resultados para exportar",
+        "exportSuccess": "Resultados exportados correctamente",
+        "exportError": "No se pudieron exportar los resultados",
+        "preparingPDF": "Preparando PDF",
+        "pdfGenerated": "PDF Generado",
+        "pdfError": "No se pudo generar el PDF"
+      },
+      "table": {
+        "name": "Nombre",
+        "identification": "Identificación",
+        "score": "Nota",
+        "percentage": "Porcentaje",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "status": {
+        "graded": "Calificado",
+        "notPresented": "No presentado"
+      },
+      "excel": {
+        "lastName": "Apellidos",
+        "firstName": "Nombres",
+        "identification": "Identificación",
+        "score": "Nota",
+        "percentage": "Porcentaje",
+        "gradedDate": "Fecha de Calificación",
+        "notPresented": "No presentado",
+        "sheetName": "Resultados",
+        "examDetailsHeader": "DETALLES DEL EXAMEN",
+        "resultsHeader": "RESULTADOS",
+        "subjectLabel": "Materia",
+        "totalScoreLabel": "Puntaje Total",
+        "groupLabel": "Grupo", 
+        "creationDateLabel": "Fecha de Creación",
+        "noSubjectAvailable": "Sin materia",
+        "noGroupAvailable": "Sin grupo",
+        "noDateAvailable": "No disponible",
+        "statisticsHeader": "ESTADÍSTICAS",
+        "studentsWithExamLabel": "Estudiantes con examen",
+        "of": "de",
+        "averageLabel": "Promedio",
+        "highestScoreLabel": "Nota más alta",
+        "lowestScoreLabel": "Nota más baja"
+      },
+      "modal": {
+        "responses": "Respuestas",
+        "originalImage": "Imagen Original",
+        "processedImage": "Imagen Procesada",
+        "scoreLabel": "Nota",
+        "gradedOn": "Calificado el",
+        "title": "Detalles del Examen",
+        "description": "Resultados detallados para",
+        "totalQuestions": "Total preguntas",
+        "validQuestions": "Válidas"
+      },
+      "checkbox": {
+        "showOnlyGraded": "Ver solo estudiantes con examen calificado"
+      },
+      "emptyState": {
+        "noResultsMessage": "No hay resultados disponibles para este examen."
+      }
     },
     "responses": {
-      "title": "Respuestas del Examen",
-      "description": "Revisa las respuestas individuales de los estudiantes",
+      "title": "Generar Hojas de Respuesta",
+      "description": "Selecciona el grupo al que le deseas generar las hojas de respuesta",
+      "backToExams": "Volver a Exámenes",
+      "group": "Grupo",
+      "selectGroup": "Selecciona un grupo",
+      "generatePDF": "Generar PDF",
+      "loadingError": "Error al cargar el examen",
       "selectStudent": "Seleccionar Estudiante",
       "question": "Pregunta",
       "studentAnswer": "Respuesta del Estudiante",
@@ -255,6 +468,90 @@
       "linking": "Vinculando...",
       "success": "Calificaciones vinculadas exitosamente",
       "error": "Error al vincular las calificaciones"
+    },
+    "export": {
+      "title": "Exportar Formatos",
+      "examNotFound": "No se encontró el examen solicitado.",
+      "backToExams": "Volver a Exámenes",
+      "toast": {
+        "success": "Éxito",
+        "error": "Error",
+        "errorFetchingExam": "No se pudo cargar la información del examen",
+        "questionsGenerated": "El formato de preguntas ha sido generado",
+        "errorGeneratingFormat": "No se pudo generar el formato"
+      },
+      "actions": {
+        "back": "Volver",
+        "downloadPDF": "Descargar PDF",
+        "preview": "Vista Previa",
+        "generateAnswerSheets": "Generar Hojas de Respuesta"
+      },
+      "formats": {
+        "title": "Formatos Disponibles",
+        "description": "Selecciona el tipo de formato que deseas generar",
+        "questions": {
+          "title": "Hoja de Preguntas",
+          "description": "Formato con las preguntas del examen para entregar a los estudiantes"
+        },
+        "answers": {
+          "title": "Hojas de Respuesta",
+          "description": "Formatos personalizados para cada estudiante con código QR y marcas de alineación"
+        }
+      },
+      "configuration": {
+        "title": "Configuración de Exportación",
+        "description": "Selecciona el grupo y el tamaño de papel para exportar",
+        "group": "Grupo",
+        "paperSize": "Tamaño de Papel",
+        "letter": "Carta (Letter)",
+        "a4": "A4",
+        "legal": "Legal",
+        "noGroupsAssigned": "No hay grupos asignados a este examen.",
+        "assignGroups": "Asignar grupos"
+      }
+    },
+    "import": {
+      "title": "Importar Examen",
+      "description": "Sube un archivo PDF, DOC o DOCX con preguntas de examen para procesarlo automáticamente",
+      "stages": {
+        "analyzing": "Analizando documento...",
+        "extracting": "Extrayendo preguntas con IA...",
+        "identifying": "Identificando opciones de respuesta...",
+        "processing": "Procesando formato final..."
+      },
+      "tips": {
+        "validateAnswers": "Asegúrate de validar antes de guardar el examen que las respuestas correctas que fueron marcadas por la IA son las correctas.",
+        "highlightAnswers": "Preferiblemente usa un PDF con las respuestas correctas resaltadas de un color brillante (ej. verde fosforescente) o pon un asterisco (*) al final de la respuesta correcta.",
+        "clearFormat": "Para mejores resultados, asegúrate que tu documento tenga un formato claro con preguntas numeradas.",
+        "labeledOptions": "Las preguntas con opciones claramente etiquetadas (A, B, C, D) son más fáciles de procesar.",
+        "goodContrast": "Se obtienen mejores resultados con documentos que tienen un buen contraste y texto nítido.",
+        "uniformPattern": "El sistema puede reconocer varios formatos, pero es ideal si todas las preguntas siguen un patrón uniforme."
+      },
+      "upload": {
+        "dragActive": "Suelta el archivo aquí...",
+        "processing": "Procesando archivo...",
+        "dragDrop": "Arrastra un archivo aquí o haz clic para seleccionar",
+        "supportedFiles": "Archivos soportados: PDF, DOC, DOCX (máx. 10MB)",
+        "estimatedTime": "Tiempo estimado: aproximadamente {seconds} segundos restantes"
+      },
+      "errors": {
+        "processingFile": "Error al procesar el archivo",
+        "unknown": "Error desconocido"
+      },
+      "success": {
+        "examProcessed": "Examen procesado exitosamente: {count} preguntas encontradas",
+        "examProcessedTitle": "Examen Procesado",
+        "questionsCount": "{count} preguntas",
+        "questionsDetected": "Se han detectado las siguientes preguntas:",
+        "optionsLabel": "Opciones",
+        "correctAnswerLabel": "Respuesta correcta",
+        "notDetected": "No detectada",
+        "moreQuestions": "... y {count} preguntas más"
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "import": "Importar Examen"
+      }
     }
   },
   "main": {

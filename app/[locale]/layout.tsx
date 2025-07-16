@@ -1,21 +1,23 @@
-import type { Metadata } from 'next';
-
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import '@/styles/globals.css';
-import { ClientLayout } from '@/components/shared/client-layout';
 import { AuthProvider } from '@/components/shared/auth-provider';
+import { ClientLayout } from '@/components/shared/client-layout';
 import { CookieBanner } from '@/components/shared/cookie-banner';
 import Script from 'next/script';
+import type { Metadata } from 'next';
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params
 }: {
-  params: Promise<{ locale: string }>
+  params: { locale: string }
 }): Promise<Metadata> {
-  const { locale } = await params;
+  const { locale } = params;
   
   // Fallback metadata for when translations are not available
   const fallbackMetadata = {
@@ -26,8 +28,8 @@ export async function generateMetadata({
       template: locale === 'en' ? '%s | ProfeVision' : '%s | ProfeVisión'
     },
     description: locale === 'en'
-      ? 'ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students\' education. Sign up for free!'
-      : 'ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Resgistrate gratis!',
+      ? "ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students' education. Sign up for free!"
+      : "ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Resgistrate gratis!",
     keywords: locale === 'en' 
       ? [
           'scan exams',
@@ -75,8 +77,8 @@ export async function generateMetadata({
         ? 'ProfeVision - The Best App to Scan and Grade Paper Exams with AI'
         : 'ProfeVisión - La Mejor Aplicación para Escanear y Calificar Exámenes en Papel con IA',
       description: locale === 'en'
-        ? 'ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students\' education. Sign up for free!'
-        : 'ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Resgistrate gratis!',
+        ? "ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students' education. Sign up for free!"
+        : "ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Resgistrate gratis!",
       siteName: locale === 'en' ? 'ProfeVision' : 'ProfeVisión',
       images: [
         {
@@ -92,24 +94,27 @@ export async function generateMetadata({
   return fallbackMetadata;
 }
 
+
 export default async function LocaleLayout({
   children,
-  params
+  params: { locale },
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 }) {
-  const { locale } = await params;
-  
-  // Validate locale
-  if (!routing.locales.includes(locale as 'es' | 'en')) {
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!routing.locales.includes(locale as any)) {
     notFound();
   }
+
+  setRequestLocale(locale);
 
   const messages = await getMessages();
 
   return (
-    <>
+    <html lang={locale}>
+      <body>
       <Script
         id="gtm-script"
         strategy="afterInteractive"
@@ -166,13 +171,13 @@ export default async function LocaleLayout({
           style={{ display: 'none', visibility: 'hidden' }}
         />
       </noscript>
-      
-      <NextIntlClientProvider messages={messages}>
-        <AuthProvider>
-          <ClientLayout>{children}</ClientLayout>
-          <CookieBanner />
-        </AuthProvider>
-      </NextIntlClientProvider>
-    </>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AuthProvider>
+            <ClientLayout>{children}</ClientLayout>
+            <CookieBanner />
+          </AuthProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 } 

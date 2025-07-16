@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from 'next-intl';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -217,7 +217,7 @@ export default function CreateExamPage() {
         description: errorMessage,
       });
     }
-  }, [profesor]);
+  }, [profesor, t]);
 
   const loadGrupos = useCallback(async () => {
     if (!profesor) return;
@@ -240,7 +240,7 @@ export default function CreateExamPage() {
         description: errorMessage,
       });
     }
-  }, [profesor]);
+  }, [profesor, t]);
 
   useEffect(() => {
     if (profesor) {
@@ -421,7 +421,7 @@ export default function CreateExamPage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        throw new Error('No autorizado');
+        throw new Error(t('messages.unauthorized'));
       }
 
       // Crear el examen only with the displayed questions
@@ -444,7 +444,7 @@ export default function CreateExamPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al crear el examen');
+        throw new Error(errorData.error || t('messages.createError'));
       }
 
       const _examData = await response.json();
@@ -453,16 +453,16 @@ export default function CreateExamPage() {
       localStorage.removeItem('examQuestions');
 
       toast({
-        title: "Éxito",
-        description: "Examen creado correctamente",
+        title: t('messages.success'),
+        description: t('messages.examCreated'),
       });
       router.push('/dashboard/exams');
     } catch (error) {
       console.error('Error al crear el examen:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : 'Error al crear el examen',
+        title: t('messages.error'),
+        description: error instanceof Error ? error.message : t('messages.createError'),
       });
     } finally {
       setLoading(false);
@@ -586,28 +586,28 @@ export default function CreateExamPage() {
       <div className="space-y-4">
         <Button variant="ghost" onClick={() => router.push('/dashboard/exams')} className="mb-4">
           <ChevronLeft className="mr-2 h-4 w-4" />
-          Volver a Exámenes
+          {t('actions.backToExams')}
         </Button>
 
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Crear Examen</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('createWithAI.title')}</h2>
           <p className="text-muted-foreground">
-            Define la información básica del examen
+            {t('createWithAI.description')}
           </p>
         </div>
 
         <Card>
           <CardContent className="pt-6 text-center flex flex-col items-center justify-center space-y-4">
             <Building2 className="h-16 w-16 text-muted-foreground" />
-            <h3 className="text-xl font-semibold">{t('createWithAI.form.entityRequired')}</h3>
+            <h3 className="text-xl font-semibold">{t('createWithAI.entityRequired')}</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              {t('createWithAI.form.entityRequiredDescription')}
+              {t('createWithAI.entityRequiredDescription')}
             </p>
             <Button 
               onClick={() => router.push("/dashboard/entities")}
               className="mt-2"
             >
-              <Plus className="mr-2 h-4 w-4" /> {t('createWithAI.form.createEntity')}
+              <Plus className="mr-2 h-4 w-4" /> {t('createWithAI.createEntity')}
             </Button>
           </CardContent>
         </Card>
@@ -621,28 +621,28 @@ export default function CreateExamPage() {
       <div className="space-y-4">
         <Button variant="ghost" onClick={() => router.push('/dashboard/exams')} className="mb-4">
           <ChevronLeft className="mr-2 h-4 w-4" />
-          {t('createWithAI.form.backToExams')}
+          {t('actions.backToExams')}
         </Button>
 
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t('createWithAI.form.createExam')}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('createWithAI.title')}</h2>
           <p className="text-muted-foreground">
-            {t('createWithAI.form.basicInfo')}
+            {t('createWithAI.description')}
           </p>
         </div>
 
         <Card>
           <CardContent className="pt-6 text-center flex flex-col items-center justify-center space-y-4">
             <BookOpen className="h-16 w-16 text-muted-foreground" />
-            <h3 className="text-xl font-semibold">{t('createWithAI.form.subjectRequired')}</h3>
+            <h3 className="text-xl font-semibold">{t('createWithAI.subjectRequired')}</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              {t('createWithAI.form.subjectRequiredDescription')}
+              {t('createWithAI.subjectRequiredDescription')}
             </p>
             <Button 
-              onClick={() => router.push("/dashboard/subjects/create")}
+              onClick={() => router.push("/dashboard/subjects")}
               className="mt-2"
             >
-              <Plus className="mr-2 h-4 w-4" /> {t('createWithAI.form.createSubject')}
+              <Plus className="mr-2 h-4 w-4" /> {t('createWithAI.createSubject')}
             </Button>
           </CardContent>
         </Card>
@@ -654,21 +654,21 @@ export default function CreateExamPage() {
     <div className="space-y-4">
       <Button variant="ghost" onClick={() => router.push('/dashboard/exams')} className="mb-0">
         <ChevronLeft className="mr-2 h-4 w-4" />
-        Volver a Exámenes
+        {t('actions.backToExams')}
       </Button>
 
       <div className="flex justify-between items-center">
-      <div>
-          <h1 className="text-3xl font-bold tracking-tight">Crear Examen</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t('createWithAI.title')}</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            Diseña un nuevo examen para tus estudiantes. Puedes crear un examen desde cero agregando tus propias preguntas, o bien utilizar el botón
+            {t('createWithAI.description')}
             <AnimatedGradientText
               className="font-semibold"
               speed={1}
             > 
-              <span className="font-semibold"> Generar con IA </span>
-            </AnimatedGradientText> para obtener preguntas sugeridas 
-            automáticamente por un modelo de lenguaje avanzado (LLM). Esta opción te permite ahorrar tiempo y personalizar el contenido según tus necesidades.
+              <span className="font-semibold"> {t('createWithAI.generateWithAI')} </span>
+            </AnimatedGradientText>
+            {t('createWithAI.descriptionContinued')}
           </p>
         </div>
       </div>
@@ -676,31 +676,31 @@ export default function CreateExamPage() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <Card>
           <CardHeader>
-            <CardTitle>Información General</CardTitle>
+            <CardTitle>{t('form.generalInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-                <Label htmlFor="titulo">Título del Examen*</Label>
-              <Input
-                id="titulo"
-                  placeholder="Ej: Examen Final de Matemáticas"
+              <div className="space-y-2">
+                <Label htmlFor="titulo">{t('form.title')}*</Label>
+                <Input
+                  id="titulo"
+                  placeholder={t('form.titlePlaceholder')}
                   className="placeholder:text-muted-foreground/50"
                   {...form.register("titulo")}
                 />
                 {form.formState.errors.titulo && (
                   <p className="text-sm text-destructive">{form.formState.errors.titulo.message}</p>
                 )}
-            </div>
+              </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="materia">Materia*</Label>
+              <div className="space-y-2">
+                <Label htmlFor="materia">{t('form.subject')}*</Label>
                 <Select
                   onValueChange={(value: string) => form.setValue("materia_id", value)}
                   value={form.watch("materia_id")}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una materia" />
+                    <SelectValue placeholder={t('form.selectSubject')} />
                   </SelectTrigger>
                   <SelectContent>
                     {materias.map((materia) => (
@@ -713,10 +713,10 @@ export default function CreateExamPage() {
                 {form.formState.errors.materia_id && (
                   <p className="text-sm text-destructive">{form.formState.errors.materia_id.message}</p>
                 )}
-            </div>
+              </div>
 
               <div className="space-y-2">
-                <Label htmlFor="grupo">Grupo*</Label>
+                <Label htmlFor="grupo">{t('form.group')}*</Label>
                 <Select
                   onValueChange={(value: string) => form.setValue("grupo_id", value)}
                   value={form.watch("grupo_id")}
@@ -726,9 +726,9 @@ export default function CreateExamPage() {
                     <SelectValue placeholder={
                       form.watch("materia_id")
                         ? gruposFiltrados.length > 0
-                          ? "Selecciona un grupo"
-                          : "No hay grupos disponibles para esta materia"
-                        : "Primero selecciona una materia"
+                          ? t('form.selectGroup')
+                          : t('form.noGroupsForSubject')
+                        : t('form.selectSubjectFirst')
                     } />
                   </SelectTrigger>
                   <SelectContent>
@@ -741,8 +741,8 @@ export default function CreateExamPage() {
                     ) : (
                       <SelectItem value="no-grupos" disabled>
                         {form.watch("materia_id")
-                          ? "No hay grupos disponibles para esta materia"
-                          : "Selecciona primero una materia"
+                          ? t('form.noGroupsForSubject')
+                          : t('form.selectSubjectFirst')
                         }
                       </SelectItem>
                     )}
@@ -753,16 +753,16 @@ export default function CreateExamPage() {
                 )}
                 {form.watch("materia_id") && gruposFiltrados.length === 0 && (
                   <div className="text-xs text-destructive">
-                    No hay grupos disponibles para esta materia.
+                    {t('form.noGroupsForSubject')}.
                     <Link href="/dashboard/groups" className="ml-1 text-primary hover:underline">
-                      Crear grupo
+                      {t('form.createGroup')}
                     </Link>
                   </div>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="duracion">Duración (minutos)*</Label>
+                <Label htmlFor="duracion">{t('form.duration')}*</Label>
                 <Input
                   id="duracion"
                   type="number"
@@ -776,7 +776,7 @@ export default function CreateExamPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="puntaje_total">Puntaje Total*</Label>
+                <Label htmlFor="puntaje_total">{t('form.totalScore')}*</Label>
                 <Input
                   id="puntaje_total"
                   type="number"
@@ -790,7 +790,7 @@ export default function CreateExamPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="numero_preguntas">Número de Preguntas*</Label>
+                <Label htmlFor="numero_preguntas">{t('form.numberOfQuestions')}*</Label>
                 <Input
                   id="numero_preguntas"
                   type="number"
@@ -815,10 +815,10 @@ export default function CreateExamPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="instrucciones">{t('createWithAI.form.instructions')}</Label>
+              <Label htmlFor="instrucciones">{t('form.instructions')}</Label>
               <Textarea
                 id="instrucciones"
-                placeholder={t('createWithAI.form.instructionsPlaceholder')}
+                placeholder={t('form.instructionsPlaceholder')}
                 className="placeholder:text-muted-foreground/50"
                 {...form.register("instrucciones")}
               />
@@ -828,224 +828,224 @@ export default function CreateExamPage() {
 
         {/* Renderizado de preguntas */}
         <TooltipProvider>
-        <div className="space-y-4">
-          {preguntas.map((pregunta, index) => (
-            <Card key={pregunta.id} className="relative">
-              <div className="absolute top-4 right-4 z-10 bg- rounded-full">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="p-2 mt-2 bg-rose-400 dark:bg-fuchsia-200 rounded-full hover:bg-rose-500 dark:hover:bg-fuchsia-300 transition-colors text-xs"
-                      style={{ position: 'relative' }}
-                      onClick={() => handleOpenModal(index)}
-                    >
-                      <span className="relative z-10 flex items-center">
-                        <Sparkles className="mr-2 h-4 w-4 text-white dark:text-black" />
-                        {mounted && (
-                          <AuroraText
-                            className="font-semibold"
-                            colors={
-                              theme === 'dark'
-                                ? [
-                                    '#ffe600',
-                                    '#ff00c8',
-                                    '#7c00ff',
-                                    '#00c3ff',
-                                    '#ff7b00',
-                                    '#ff0059',
-                                    '#ff7b00',
-                                    '#ff0059',
-                                  ]
-                                : [
-                                    '#ffadad',
-                                    '#ffd6a5',
-                                    '#fdffb6',
-                                    '#caffbf',
-                                    '#9bf6ff',
-                                    '#a0c4ff',
-                                    '#d7aefb',
-                                    '#fdcce9',
-                                    '#fdcce9',
-                                  ]
-                            }
-                            speed={1}
-                          >
-                            Generar con IA
-                          </AuroraText>
-                        )}
-                      </span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="left" align="center">
-                    Crear con Inteligencia Artificial
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-medium">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent text-accent-foreground font-bold text-sm">
-                    Pregunta {index + 1} de {numeroPreguntas}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Texto de la pregunta</Label>
-                  <RichTextEditor
-                    _value={pregunta.texto}
-                    onChange={(html) => {
-                      const nuevasPreguntas = [...preguntas];
-                      nuevasPreguntas[index].texto = html;
-                      setPreguntas(nuevasPreguntas);
-                      const storedQuestions = [...allStoredQuestions];
-                      if (index < storedQuestions.length) {
-                        storedQuestions[index].texto = html;
-                        setAllStoredQuestions(storedQuestions);
-                      }
-                    }}
-                    placeholder="Escribe aquí tu pregunta"
-                    key={`${pregunta.id}-${pregunta.version || 0}`}
-                  />
+          <div className="space-y-4">
+            {preguntas.map((pregunta, index) => (
+              <Card key={pregunta.id} className="relative">
+                <div className="absolute top-4 right-4 z-10 bg- rounded-full">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="p-2 mt-2 bg-rose-400 dark:bg-fuchsia-200 rounded-full hover:bg-rose-500 dark:hover:bg-fuchsia-300 transition-colors text-xs"
+                        style={{ position: 'relative' }}
+                        onClick={() => handleOpenModal(index)}
+                      >
+                        <span className="relative z-10 flex items-center">
+                          <Sparkles className="mr-2 h-4 w-4 text-white dark:text-black" />
+                          {mounted && (
+                            <AuroraText
+                              className="font-semibold"
+                              colors={
+                                theme === 'dark'
+                                  ? [
+                                      '#ffe600',
+                                      '#ff00c8',
+                                      '#7c00ff',
+                                      '#00c3ff',
+                                      '#ff7b00',
+                                      '#ff0059',
+                                      '#ff7b00',
+                                      '#ff0059',
+                                    ]
+                                  : [
+                                      '#ffadad',
+                                      '#ffd6a5',
+                                      '#fdffb6',
+                                      '#caffbf',
+                                      '#9bf6ff',
+                                      '#a0c4ff',
+                                      '#d7aefb',
+                                      '#fdcce9',
+                                      '#fdcce9',
+                                    ]
+                              }
+                              speed={1}
+                            >
+                              {t('createWithAI.generateWithAI')}
+                            </AuroraText>
+                          )}
+                        </span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" align="center">
+                      {t('createWithAI.createWithAI')}
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
-                <div className="space-y-2">
-                  <Label>Opciones</Label>
-                  {pregunta.opciones.map((opcion, opcionIndex) => (
-                    <div key={opcion.id} className="flex items-center gap-2">
-                      <input
-                        type={pregunta.tipo === 'seleccion_multiple' ? "checkbox" : "radio"}
-                        checked={opcion.esCorrecta}
-                        onChange={() => {
-                          const nuevasPreguntas = [...preguntas];
-                          if (pregunta.tipo === 'seleccion_multiple') {
-                            nuevasPreguntas[index].opciones[opcionIndex].esCorrecta = 
-                              !nuevasPreguntas[index].opciones[opcionIndex].esCorrecta;
-                          } else {
-                            nuevasPreguntas[index].opciones = nuevasPreguntas[index].opciones.map((op, i) => ({
-                              ...op,
-                              esCorrecta: i === opcionIndex,
-                            }));
-                          }
-                          setPreguntas(nuevasPreguntas);
-                          const storedQuestions = [...allStoredQuestions];
-                          if (index < storedQuestions.length) {
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-lg font-medium">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent text-accent-foreground font-bold text-sm">
+                      {t('createWithAI.questionNumber', { current: index + 1, total: numeroPreguntas })}
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>{t('createWithAI.questionText')}</Label>
+                    <RichTextEditor
+                      _value={pregunta.texto}
+                      onChange={(html) => {
+                        const nuevasPreguntas = [...preguntas];
+                        nuevasPreguntas[index].texto = html;
+                        setPreguntas(nuevasPreguntas);
+                        const storedQuestions = [...allStoredQuestions];
+                        if (index < storedQuestions.length) {
+                          storedQuestions[index].texto = html;
+                          setAllStoredQuestions(storedQuestions);
+                        }
+                      }}
+                      placeholder={t('createWithAI.questionPlaceholder')}
+                      key={`${pregunta.id}-${pregunta.version || 0}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('createWithAI.options')}</Label>
+                    {pregunta.opciones.map((opcion, opcionIndex) => (
+                      <div key={opcion.id} className="flex items-center gap-2">
+                        <input
+                          type={pregunta.tipo === 'seleccion_multiple' ? "checkbox" : "radio"}
+                          checked={opcion.esCorrecta}
+                          onChange={() => {
+                            const nuevasPreguntas = [...preguntas];
                             if (pregunta.tipo === 'seleccion_multiple') {
-                              storedQuestions[index].opciones[opcionIndex].esCorrecta = 
-                                !storedQuestions[index].opciones[opcionIndex].esCorrecta;
+                              nuevasPreguntas[index].opciones[opcionIndex].esCorrecta = 
+                                !nuevasPreguntas[index].opciones[opcionIndex].esCorrecta;
                             } else {
-                              storedQuestions[index].opciones = storedQuestions[index].opciones.map((op, i) => ({
+                              nuevasPreguntas[index].opciones = nuevasPreguntas[index].opciones.map((op, i) => ({
                                 ...op,
                                 esCorrecta: i === opcionIndex,
                               }));
                             }
-                            setAllStoredQuestions(storedQuestions);
-                          }
-                        }}
-                        className="h-4 w-4"
-                        disabled={pregunta.tipo === 'verdadero_falso' && opcion.texto !== ""}
-                      />
-                      <Input
-                        value={opcion.texto}
-                        onChange={(e) => {
-                          const nuevasPreguntas = [...preguntas];
-                          nuevasPreguntas[index].opciones[opcionIndex].texto = e.target.value;
-                          setPreguntas(nuevasPreguntas);
-                          const storedQuestions = [...allStoredQuestions];
-                          if (index < storedQuestions.length) {
-                            storedQuestions[index].opciones[opcionIndex].texto = e.target.value;
-                            setAllStoredQuestions(storedQuestions);
-                          }
-                        }}
-                        placeholder={`Opción ${opcionIndex + 1}`}
-                        className="placeholder:text-muted-foreground/50"
-                        disabled={pregunta.tipo === 'verdadero_falso'}
-                      />
-                      <Button
+                            setPreguntas(nuevasPreguntas);
+                            const storedQuestions = [...allStoredQuestions];
+                            if (index < storedQuestions.length) {
+                              if (pregunta.tipo === 'seleccion_multiple') {
+                                storedQuestions[index].opciones[opcionIndex].esCorrecta = 
+                                  !storedQuestions[index].opciones[opcionIndex].esCorrecta;
+                              } else {
+                                storedQuestions[index].opciones = storedQuestions[index].opciones.map((op, i) => ({
+                                  ...op,
+                                  esCorrecta: i === opcionIndex,
+                                }));
+                              }
+                              setAllStoredQuestions(storedQuestions);
+                            }
+                          }}
+                          className="h-4 w-4"
+                          disabled={pregunta.tipo === 'verdadero_falso' && opcion.texto !== ""}
+                        />
+                        <Input
+                          value={opcion.texto}
+                          onChange={(e) => {
+                            const nuevasPreguntas = [...preguntas];
+                            nuevasPreguntas[index].opciones[opcionIndex].texto = e.target.value;
+                            setPreguntas(nuevasPreguntas);
+                            const storedQuestions = [...allStoredQuestions];
+                            if (index < storedQuestions.length) {
+                              storedQuestions[index].opciones[opcionIndex].texto = e.target.value;
+                              setAllStoredQuestions(storedQuestions);
+                            }
+                          }}
+                          placeholder={t('createWithAI.optionPlaceholder', { number: opcionIndex + 1 })}
+                          className="placeholder:text-muted-foreground/50"
+                          disabled={pregunta.tipo === 'verdadero_falso'}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const nuevasPreguntas = [...preguntas];
+                            nuevasPreguntas[index].opciones = nuevasPreguntas[index].opciones
+                              .filter((_, i) => i !== opcionIndex);
+                            setPreguntas(nuevasPreguntas);
+                            const storedQuestions = [...allStoredQuestions];
+                            if (index < storedQuestions.length) {
+                              storedQuestions[index].opciones = storedQuestions[index].opciones
+                                .filter((_, i) => i !== opcionIndex);
+                              setAllStoredQuestions(storedQuestions);
+                            }
+                          }}
+                          disabled={pregunta.opciones.length <= 2 || pregunta.tipo === 'verdadero_falso'}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    {pregunta.tipo !== 'verdadero_falso' && pregunta.opciones.length < 4 && (
+                      <Button 
                         type="button"
-                        variant="ghost"
-                        size="icon"
+                        variant="outline" 
+                        size="sm"
                         onClick={() => {
                           const nuevasPreguntas = [...preguntas];
-                          nuevasPreguntas[index].opciones = nuevasPreguntas[index].opciones
-                            .filter((_, i) => i !== opcionIndex);
-                          setPreguntas(nuevasPreguntas);
-                          const storedQuestions = [...allStoredQuestions];
-                          if (index < storedQuestions.length) {
-                            storedQuestions[index].opciones = storedQuestions[index].opciones
-                              .filter((_, i) => i !== opcionIndex);
-                            setAllStoredQuestions(storedQuestions);
-                          }
-                        }}
-                        disabled={pregunta.opciones.length <= 2 || pregunta.tipo === 'verdadero_falso'}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  {pregunta.tipo !== 'verdadero_falso' && pregunta.opciones.length < 4 && (
-                    <Button 
-                      type="button"
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        const nuevasPreguntas = [...preguntas];
-                        nuevasPreguntas[index].opciones.push({
-                          id: `opcion-${pregunta.id}-${nuevasPreguntas[index].opciones.length + 1}`,
-                          texto: "",
-                          esCorrecta: false,
-                        });
-                        setPreguntas(nuevasPreguntas);
-                        const storedQuestions = [...allStoredQuestions];
-                        if (index < storedQuestions.length) {
-                          storedQuestions[index].opciones.push({
-                            id: `opcion-${pregunta.id}-${storedQuestions[index].opciones.length + 1}`,
+                          nuevasPreguntas[index].opciones.push({
+                            id: `opcion-${pregunta.id}-${nuevasPreguntas[index].opciones.length + 1}`,
                             texto: "",
                             esCorrecta: false,
                           });
-                          setAllStoredQuestions(storedQuestions);
-                        }
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Añadir opción
-                    </Button>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  <Info className="inline h-4 w-4 mr-1" /> Solo se guardarán las opciones que tengan texto
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                          setPreguntas(nuevasPreguntas);
+                          const storedQuestions = [...allStoredQuestions];
+                          if (index < storedQuestions.length) {
+                            storedQuestions[index].opciones.push({
+                              id: `opcion-${pregunta.id}-${storedQuestions[index].opciones.length + 1}`,
+                              texto: "",
+                              esCorrecta: false,
+                            });
+                            setAllStoredQuestions(storedQuestions);
+                          }
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        {t('createWithAI.addOption')}
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    <Info className="inline h-4 w-4 mr-1" /> {t('createWithAI.onlyTextOptionsWillBeSaved')}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TooltipProvider>
 
         <div className="flex justify-center">
           <Button
-              type="button"
+            type="button"
             variant="outline"
             onClick={() => agregarPregunta()}
             disabled={preguntas.length >= 40}
-            >
+          >
             <Plus className="h-4 w-4 mr-2" />
-            Añadir pregunta
-            </Button>
+            {t('createWithAI.addQuestion')}
+          </Button>
         </div>
 
         <div className="flex justify-end gap-4">
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Creando...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Crear Examen
-                </>
-              )}
-            </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? (
+              <>
+                <span className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                {t('createWithAI.creating')}
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                {t('createWithAI.createExam')}
+              </>
+            )}
+          </Button>
         </div>
       </form>
       <ModalGenerateAI

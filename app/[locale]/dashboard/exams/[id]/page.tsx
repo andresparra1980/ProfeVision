@@ -3,7 +3,6 @@
 import { useState, useEffect, use } from 'react';
 import { Button } from '@/components/ui/button';
 import { PDFGenerator } from '@/components/exam/pdf-generator';
-import Link from 'next/link';
 import { toast } from 'sonner';
 import { Camera, Trash2 } from 'lucide-react';
 import { Grupo as BaseGrupo, Student } from '@/lib/types/database';
@@ -100,7 +99,7 @@ export default function ExamPage({ params }: { params: Promise<{ id: string }> }
     };
 
     fetchData();
-  }, [id]);
+  }, [id, t]);
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -169,7 +168,7 @@ export default function ExamPage({ params }: { params: Promise<{ id: string }> }
               ? 'bg-green-100 text-green-800'
               : 'bg-gray-100 text-gray-800'
           }`}>
-            {exam.estado.charAt(0).toUpperCase() + exam.estado.slice(1)}
+            {t(`status.${exam.estado}`)}
           </span>
         </div>
         <div className="flex gap-4">
@@ -196,11 +195,10 @@ export default function ExamPage({ params }: { params: Promise<{ id: string }> }
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <Button asChild>
-            <Link href={`/dashboard/exams/${id}/scan`} className="flex items-center gap-2">
-              <Camera className="w-4 h-4" />
-              {t('details.scanResponses')}
-            </Link>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Button onClick={() => router.push(`/dashboard/exams/${id}/scan` as any)} className="flex items-center gap-2">
+            <Camera className="w-4 h-4" />
+            {t('details.scanResponses')}
           </Button>
           <PDFGenerator 
             exam={exam} 

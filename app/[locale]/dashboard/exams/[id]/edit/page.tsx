@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, use, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, Plus, Save, Trash2, GripVertical, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +56,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   const examId = resolvedParams.id;
   
   const router = useRouter();
+  const t = useTranslations('dashboard.exams.edit');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showDisableDialog, setShowDisableDialog] = useState(false);
@@ -99,14 +101,14 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       logger.error("Error fetching exam details:", error);
       toast({
         title: "Error",
-        description: "No se pudo cargar la información del examen",
+        description: t('messages.loadError'),
         variant: "destructive",
       });
       router.push("/dashboard/exams");
     } finally {
       setLoading(false);
     }
-  }, [examId, router]);
+  }, [examId, router, t]);
 
   const fetchQuestions = useCallback(async () => {
     try {
@@ -135,12 +137,12 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
     } catch (error) {
       logger.error("Error fetching questions:", error);
       toast({
-        title: "Error",
-        description: "No se pudieron cargar las preguntas del examen",
+        title: t('errors.error'),
+        description: t('errors.loadQuestions'),
         variant: "destructive",
       });
     }
-  }, [examId]);
+  }, [examId, t]);
 
   const fetchQuestionTypes = useCallback(async () => {
     try {
@@ -219,7 +221,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       if (!currentQuestion.texto.trim()) {
         toast({
           title: "Error",
-          description: "El texto de la pregunta es obligatorio",
+          description: t('validation.questionRequired'),
           variant: "destructive",
         });
         return;
@@ -235,7 +237,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       if (!hasValidOptions) {
         toast({
           title: "Error",
-          description: "Debes agregar al menos una opción con texto",
+          description: t('validation.optionsRequired'),
           variant: "destructive",
         });
         return;
@@ -294,7 +296,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       // Actualizar el estado
       toast({
         title: "Éxito",
-        description: "Pregunta agregada correctamente",
+        description: t('messages.questionAdded'),
       });
 
       // Recargar preguntas
@@ -321,7 +323,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       logger.error("Error adding question:", error);
       toast({
         title: "Error",
-        description: "No se pudo agregar la pregunta",
+        description: t('messages.addError'),
         variant: "destructive",
       });
     } finally {
@@ -361,7 +363,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
       toast({
         title: "Éxito",
-        description: "Pregunta eliminada correctamente",
+        description: t('messages.questionDeleted'),
       });
 
       // Recargar preguntas
@@ -370,7 +372,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       logger.error("Error deleting question:", error);
       toast({
         title: "Error",
-        description: "No se pudo eliminar la pregunta",
+        description: t('messages.deleteError'),
         variant: "destructive",
       });
     } finally {
@@ -387,7 +389,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       if (questions.length === 0) {
         toast({
           title: "Error",
-          description: "No puedes publicar un examen sin preguntas",
+          description: t('validation.cantPublishNoQuestions'),
           variant: "destructive",
         });
         return;
@@ -418,7 +420,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
       toast({
         title: "Éxito",
-        description: "Examen publicado correctamente",
+        description: t('messages.examPublished'),
       });
 
       // Recargar datos del examen
@@ -427,7 +429,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       logger.error("Error publishing exam:", error);
       toast({
         title: "Error",
-        description: "No se pudo publicar el examen",
+        description: t('messages.publishError'),
         variant: "destructive",
       });
     } finally {
@@ -539,13 +541,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
       toast({
         title: "Éxito",
-        description: `Pregunta ${newStatus ? "habilitada" : "deshabilitada"} correctamente`,
+        description: newStatus ? t('messages.questionEnabled') : t('messages.questionDisabled'),
       });
     } catch (error) {
       logger.error("Error toggling question status:", error);
       toast({
         title: "Error",
-        description: `No se pudo ${newStatus ? "habilitar" : "deshabilitar"} la pregunta`,
+        description: t('messages.toggleError', { action: newStatus ? 'habilitar' : 'deshabilitar' }),
         variant: "destructive",
       });
     } finally {
@@ -653,7 +655,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
       toast({
         title: "Éxito",
-        description: "Respuesta correcta actualizada y calificaciones recalculadas",
+        description: t('messages.answerUpdated'),
       });
     } catch (error) {
       logger.error("Error updating correct answer:", error);
@@ -661,7 +663,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         title: "Error",
         description: typeof error === 'object' && error !== null && 'message' in error 
           ? String(error.message) 
-          : "No se pudo actualizar la respuesta correcta",
+          : t('messages.updateAnswerError'),
         variant: "destructive",
       });
     } finally {
@@ -693,12 +695,12 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   if (!exam) {
     return (
       <div className="text-center py-8">
-        <p>No se encontró el examen solicitado.</p>
+        <p>{t('messages.examNotFound')}</p>
         <Button 
           className="mt-4"
           onClick={() => router.push("/dashboard/exams")}
         >
-          Volver a Exámenes
+          {t('backToExams')}
         </Button>
       </div>
     );
@@ -714,30 +716,30 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
             onClick={() => router.push("/dashboard/exams")}
             className="mb-2"
           >
-            <ChevronLeft className="mr-2 h-4 w-4" /> Volver a Exámenes
+            <ChevronLeft className="mr-2 h-4 w-4" /> {t('backToExams')}
           </Button>
           <h2 className="text-3xl font-bold tracking-tight">{exam.titulo}</h2>
           <p className="text-muted-foreground">
-            {exam.materias?.nombre} | {exam.estado === "borrador" ? "Borrador" : "Publicado"}
+            {exam.materias?.nombre} | {exam.estado === "borrador" ? t('status.draft') : t('status.published')}
           </p>
         </div>
         {exam.estado === "borrador" && (
           <Button onClick={publishExam} disabled={saving}>
-            <Save className="mr-2 h-4 w-4" /> Publicar Examen
+            <Save className="mr-2 h-4 w-4" /> {t('publishExam')}
           </Button>
         )}
       </div>
 
       {/* Preguntas existentes */}
       <div className="space-y-4">
-        <h3 className="text-xl font-semibold">Preguntas ({questions.length})</h3>
+        <h3 className="text-xl font-semibold">{t('questionsCount', { count: questions.length })}</h3>
         
         {questions.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center">
-              <p className="text-muted-foreground">Este examen aún no tiene preguntas.</p>
-            </CardContent>
-          </Card>
+                      <Card>
+              <CardContent className="py-8 text-center">
+                <p className="text-muted-foreground">{t('noQuestions')}</p>
+              </CardContent>
+            </Card>
         ) : (
           <div className="space-y-4">
             {questions.map((question, index) => (
@@ -748,17 +750,17 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                 <CardHeader className="pl-14">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-base">Pregunta {index + 1}</CardTitle>
+                      <CardTitle className="text-base">{t('questionTitle')} {index + 1}</CardTitle>
                       <CardDescription>
-                        {tiposPregunta.find(t => t.id === question.tipo_id)?.nombre || "Tipo desconocido"} | 
-                        {question.puntaje} puntos
+                        {tiposPregunta.find(t => t.id === question.tipo_id)?.nombre || t('unknownType')} | 
+                        {question.puntaje} {t('points')}
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-4">
                       {exam && exam.estado === "publicado" && (
                         <div className="flex items-center gap-2">
                           <Label htmlFor={`question-${question.id ? question.id : index}-enabled`} className="text-sm">
-                            {question.habilitada ? "Habilitada" : "Deshabilitada"}
+                            {question.habilitada ? t('enabled') : t('disabled')}
                           </Label>
                           <Switch
                             id={`question-${question.id ? question.id : index}-enabled`}
@@ -786,7 +788,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                       <QuestionContent html={question.texto} className="text-foreground" />
                       {question.retroalimentacion && (
                         <div className="mt-3 text-sm">
-                          <span className="font-medium text-muted-foreground">Retroalimentación:</span>
+                          <span className="font-medium text-muted-foreground">{t('feedback')}:</span>
                           <div className="mt-1">
                             <QuestionContent html={question.retroalimentacion} className="text-muted-foreground" />
                           </div>
@@ -796,7 +798,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                     
                     {question.opciones && question.opciones.length > 0 && (
                       <div>
-                        <p className="text-sm font-medium mb-2">Opciones:</p>
+                        <p className="text-sm font-medium mb-2">{t('responseOptions')}:</p>
                         <div className="space-y-2">
                           {question.opciones.map((option: OpcionRespuesta, optIndex: number) => (
                             <div key={option.id} className="flex items-center gap-2">
@@ -837,7 +839,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                               )}
                               <p className={option.es_correcta ? 'font-medium' : ''}>{option.texto}</p>
                               {option.es_correcta && (
-                                <span className="text-xs text-green-600 dark:text-green-400">(Correcta)</span>
+                                <span className="text-xs text-green-600 dark:text-green-400">{t('correct')}</span>
                               )}
                             </div>
                           ))}
@@ -854,16 +856,16 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
       {/* Formulario para agregar nueva pregunta */}
       {exam && exam.estado === "borrador" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Agregar Nueva Pregunta</CardTitle>
-            <CardDescription>
-              Define el contenido y opciones de respuesta para la pregunta
-            </CardDescription>
-          </CardHeader>
+                  <Card>
+            <CardHeader>
+              <CardTitle>{t('addNewQuestion')}</CardTitle>
+              <CardDescription>
+                {t('addNewQuestionDesc')}
+              </CardDescription>
+            </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="texto">Texto de la Pregunta*</Label>
+              <Label htmlFor="texto">{t('questionTextRequired')}</Label>
               <RichTextEditor
                 key={editorKey}
                 _value={currentQuestion.texto}
@@ -873,12 +875,12 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                     texto: html
                   }));
                 }}
-                placeholder="Escribe aquí tu pregunta"
+                placeholder={t('questionTextPlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Opciones de Respuesta</Label>
+              <Label>{t('responseOptions')}</Label>
               <div className="space-y-3">
                 {currentQuestion.opciones.map((option, index) => (
                   <div key={index} className="flex items-center space-x-2">
@@ -889,23 +891,23 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                       className="h-4 w-4"
                     />
                     <div className="flex-1">
-                      <Input
-                        value={option.texto}
-                        onChange={(e) => handleOptionChange(index, e)}
-                        placeholder={`Opción ${index + 1}`}
-                      />
+                                              <Input
+                          value={option.texto}
+                          onChange={(e) => handleOptionChange(index, e)}
+                          placeholder={t('optionPlaceholder', { number: index + 1 })}
+                        />
                     </div>
                   </div>
                 ))}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-              <Info className="inline h-4 w-4 mr-1" /> Solo se guardarán las opciones que tengan texto
+              <Info className="inline h-4 w-4 mr-1" /> {t('optionsInfo')}
               </p>
             </div>
           </CardContent>
           <CardFooter>
             <Button onClick={addQuestion} disabled={saving} className="ml-auto">
-              <Plus className="mr-2 h-4 w-4" /> Agregar Pregunta
+              <Plus className="mr-2 h-4 w-4" /> {t('addQuestion')}
             </Button>
           </CardFooter>
         </Card>
@@ -915,22 +917,32 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       <AlertDialog open={showDisableDialog} onOpenChange={setShowDisableDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿{questionToToggle?.habilitada ? 'Habilitar' : 'Deshabilitar'} pregunta?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t('confirmToggle', { 
+                action: questionToToggle?.habilitada ? t('confirmToggleEnable') : t('confirmToggleDisable')
+              })}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {questionToToggle?.habilitada ? (
-                'Al habilitar esta pregunta, se volverá a considerar en la calificación de los estudiantes.'
+                t('confirmToggleDesc', { 
+                  action: t('confirmToggleEnable'), 
+                  effect: t('confirmToggleEnableEffect') 
+                })
               ) : (
-                'Al deshabilitar esta pregunta, se recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen, excluyendo esta pregunta del cálculo.'
+                t('confirmToggleDesc', { 
+                  action: t('confirmToggleDisable'), 
+                  effect: t('confirmToggleDisableEffect') 
+                })
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmQuestionToggle}>
               {saving ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
               ) : (
-                'Confirmar'
+                t('confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -941,22 +953,18 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       <AlertDialog open={showCorrectAnswerDialog} onOpenChange={setShowCorrectAnswerDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿{pendingCorrectAnswer ? 'Actualizar' : 'Cancelar'} respuesta correcta?</AlertDialogTitle>
+            <AlertDialogTitle>{t('confirmUpdateAnswer')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {pendingCorrectAnswer ? (
-                'Al hacer click en Confirmar se recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen.'
-              ) : (
-                '¿Estás seguro de que deseas cancelar la actualización de la respuesta correcta?'
-              )}
+              {t('confirmUpdateAnswerDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={pendingCorrectAnswer ? confirmChangeCorrectAnswer : () => setShowCorrectAnswerDialog(false)}>
               {saving ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
               ) : (
-                'Confirmar'
+                t('confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

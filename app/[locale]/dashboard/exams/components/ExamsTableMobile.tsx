@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from 'next-intl';
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +26,7 @@ import {
 // Reusable components
 interface ExamCardHeaderProps {
   exam: Exam;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any;
 }
 
@@ -91,7 +92,12 @@ function ExamCardContent({
         variant="ghost"
         size="sm"
         className="w-full justify-start h-auto py-2 px-2"
-        onClick={() => router.push(`/dashboard/exams/${exam.id}/edit`)}
+        onClick={() => {
+          router.push({
+            pathname: '/dashboard/exams/[id]/edit',
+            params: { id: exam.id },
+          });
+        }}
       >
         <Pencil className="mr-2 h-4 w-4" /> {t('actions.edit')}
       </Button>
@@ -105,50 +111,71 @@ function ExamCardContent({
           <Trash2 className="mr-2 h-4 w-4" /> {t('actions.delete')}
         </Button>
       )}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start h-auto py-2 px-2"
-        onClick={() => router.push(`/dashboard/exams/${exam.id}/export`)}
-      >
-        <Printer className="mr-2 h-4 w-4" /> {t('actions.export')}
+              <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start h-auto py-2 px-2"
+          onClick={() => {
+            router.push({
+              pathname: '/dashboard/exams/[id]/export',
+              params: { id: exam.id },
+            });
+          }}
+        >
+          <Printer className="mr-2 h-4 w-4" /> {t('actions.print')}
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start h-auto py-2 px-2"
-        onClick={() => router.push(`/dashboard/exams/${exam.id}/responses`)}
-      >
-        <FileOutput className="mr-2 h-4 w-4" /> {t('actions.export')}
+                             <Button
+           variant="ghost"
+           size="sm"
+           className="w-full justify-start h-auto py-2 px-2"
+           onClick={() => {
+             router.push({
+               pathname: '/dashboard/exams/[id]/responses',
+               params: { id: exam.id },
+             });
+           }}
+         >
+           <FileOutput className="mr-2 h-4 w-4" /> {t('actions.generateSheets')}
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start h-auto py-2 px-2"
-        onClick={() => router.push(`/dashboard/exams/${exam.id}/assign`)}
-      >
-        <Users className="mr-2 h-4 w-4" /> {t('actions.assign')}
+              <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start h-auto py-2 px-2"
+          onClick={() => {
+            router.push({
+              pathname: '/dashboard/exams/[id]/assign',
+              params: { id: exam.id },
+            });
+          }}
+        >
+          <Users className="mr-2 h-4 w-4" /> {t('actions.assignGroups')}
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start h-auto py-2 px-2"
-        onClick={() =>
-          router.push(`/dashboard/exams/${exam.id}/link-grade-component`)
-        }
-      >
-        <Link className="mr-2 h-4 w-4" /> {t('linkGrade.title')}
+              <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start h-auto py-2 px-2"
+          onClick={() => {
+            router.push({
+              pathname: '/dashboard/exams/[id]/link-grade-component',
+              params: { id: exam.id },
+            });
+          }}
+        >
+          <Link className="mr-2 h-4 w-4" /> {t('actions.linkComponentFull')}
       </Button>
       {exam.estado === "publicado" && (
         <Button
           variant="ghost"
           size="sm"
           className="w-full justify-start h-auto py-2 px-2 text-purple-500 font-semibold"
-          onClick={() =>
-            router.push(`/dashboard/exams/${exam.id}/results`) + "#results"
-          }
+          onClick={() => {
+            router.push({
+              pathname: '/dashboard/exams/[id]/results',
+              params: { id: exam.id },
+            });
+          }}
         >
-          <Eye className="mr-2 h-4 w-4" /> {t('results.title')}
+          <Eye className="mr-2 h-4 w-4" /> {t('actions.viewResults')}
         </Button>
       )}
     </div>
@@ -186,6 +213,7 @@ interface ExamsTableMobileProps {
   setSearchQuery: (_query: string) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getStatusBadge = (status: string, t: any) => {
   const baseStyle: React.CSSProperties = {
     padding: "3px 8px",

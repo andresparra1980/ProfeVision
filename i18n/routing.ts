@@ -128,6 +128,34 @@ export const routing = defineRouting({
       es: '/dashboard/examenes/crear-con-ia', 
       en: '/dashboard/exams/create-with-ai' 
     },
+    '/dashboard/exams/[id]': {
+      es: '/dashboard/examenes/[id]',
+      en: '/dashboard/exams/[id]'
+    },
+    '/dashboard/exams/[id]/edit': {
+      es: '/dashboard/examenes/[id]/editar',
+      en: '/dashboard/exams/[id]/edit'
+    },
+    '/dashboard/exams/[id]/export': {
+      es: '/dashboard/examenes/[id]/exportar',
+      en: '/dashboard/exams/[id]/export'
+    },
+    '/dashboard/exams/[id]/responses': {
+      es: '/dashboard/examenes/[id]/respuestas',
+      en: '/dashboard/exams/[id]/responses'
+    },
+    '/dashboard/exams/[id]/assign': {
+      es: '/dashboard/examenes/[id]/asignar',
+      en: '/dashboard/exams/[id]/assign'
+    },
+    '/dashboard/exams/[id]/link-grade-component': {
+      es: '/dashboard/examenes/[id]/vincular-calificacion',
+      en: '/dashboard/examenes/[id]/link-grade-component'
+    },
+    '/dashboard/exams/[id]/results': {
+      es: '/dashboard/examenes/[id]/resultados',
+      en: '/dashboard/exams/[id]/results'
+    },
     '/dashboard/students': { 
       es: '/dashboard/estudiantes', 
       en: '/dashboard/students' 
@@ -159,6 +187,7 @@ export const routing = defineRouting({
   }
 });
 
+// A comment to trigger recompilation
 // 🔐 Rutas que NO deben ser localizadas (para callbacks de Supabase)
 export const nonLocalizedRoutes = [
   '/auth/callback',

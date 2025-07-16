@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, Loader2, Save, AlertCircle, Download, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -136,12 +138,12 @@ const PDFExportButton = dynamic(
   () => import('@/components/exam/pdf-export-button').then(mod => mod.PDFExportButton),
   { 
     ssr: false,
-    loading: () => (
-      <Button variant="secondary" disabled className="flex items-center">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Cargando PDF...
-      </Button>
-    )
+          loading: () => (
+        <Button variant="secondary" disabled className="flex items-center">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Loading PDF...
+        </Button>
+      )
   }
 );
 
@@ -149,6 +151,7 @@ export default function ExamResultsPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('dashboard.exams.results');
   const [loading, setLoading] = useState(true);
   const [examDetails, setExamDetails] = useState<ExamDetails | null>(null);
   const [resultados, setResultados] = useState<ResultadoExamen[]>([]);
@@ -483,14 +486,14 @@ export default function ExamResultsPage() {
         // Registramos el error en un logger en lugar de la consola
       }
       toast({
-        title: "Error",
-        description: "Error al cargar los resultados del examen",
+        title: t('error'),
+        description: t('loadingError'),
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [params.id, toast, selectedGroupId, initializing]);
+  }, [params.id, toast, selectedGroupId, initializing, t]);
 
   useEffect(() => {
     fetchExamResults();
@@ -605,23 +608,23 @@ export default function ExamResultsPage() {
       });
 
       toast({
-        title: "Respuesta actualizada",
+        title: t('toast.answerUpdated'),
         description: "La calificación ha sido recalculada correctamente.",
       });
 
     } catch (error) {
       if (typeof error === 'object' && error !== null && 'message' in error) {
         toast({
-          title: "Error al actualizar",
-          description: String(error.message) || "No se pudo actualizar la respuesta",
+          title: t('toast.updateError'),
+          description: String(error.message) || t('toast.updateErrorDesc'),
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Error al actualizar",
-          description: "No se pudo actualizar la respuesta",
-          variant: "destructive",
-        });
+              toast({
+        title: t('toast.updateError'),
+        description: t('toast.updateErrorDesc'),
+        variant: "destructive",
+      });
       }
     } finally {
       setUpdatingAnswer(false);
@@ -834,7 +837,7 @@ export default function ExamResultsPage() {
       await fetchExamResults();
       
       toast({
-        title: "Calificación guardada",
+        title: t('toast.gradeSaved'),
         description: "La calificación ha sido registrada correctamente.",
       });
       
@@ -843,8 +846,8 @@ export default function ExamResultsPage() {
     } catch (error) {
       if (typeof error === 'object' && error !== null && 'message' in error) {
         toast({
-          title: "Error al guardar",
-          description: String(error.message) || "No se pudo guardar la calificación",
+          title: t('toast.saveError'),
+          description: String(error.message) || t('toast.saveErrorDesc'),
           variant: "destructive",
         });
       } else {
@@ -863,8 +866,8 @@ export default function ExamResultsPage() {
   const handleExportToExcel = () => {
     if (!examDetails || resultados.length === 0) {
       toast({
-        title: "Error",
-        description: "No hay resultados para exportar",
+        title: t('common.error'),
+        description: t('toast.noResultsError'),
         variant: "destructive",
       });
       return;
@@ -873,12 +876,12 @@ export default function ExamResultsPage() {
     try {
       // Crear datos para exportar
       const dataToExport = resultados.map(resultado => ({
-        "Apellidos": resultado.estudiante.apellidos,
-        "Nombres": resultado.estudiante.nombres,
-        "Identificación": resultado.estudiante.identificacion,
-        "Nota": resultado.puntaje_obtenido.toFixed(2),
-        "Porcentaje": `${resultado.porcentaje.toFixed(2)}%`,
-        "Fecha de Calificación": new Date(resultado.fecha_calificacion).toLocaleDateString()
+        [t('excel.lastName')]: resultado.estudiante.apellidos,
+        [t('excel.firstName')]: resultado.estudiante.nombres,
+        [t('excel.identification')]: resultado.estudiante.identificacion,
+        [t('excel.score')]: resultado.puntaje_obtenido.toFixed(2),
+        [t('excel.percentage')]: `${resultado.porcentaje.toFixed(2)}%`,
+        [t('excel.gradedDate')]: new Date(resultado.fecha_calificacion).toLocaleDateString()
       }));
 
       // Agregar estudiantes sin calificación
@@ -886,12 +889,12 @@ export default function ExamResultsPage() {
         .filter(estudiante => !resultados.some(r => r.estudiante.id === estudiante.id))
         .forEach(estudiante => {
           dataToExport.push({
-            "Apellidos": estudiante.apellidos,
-            "Nombres": estudiante.nombres,
-            "Identificación": estudiante.identificacion,
-            "Nota": "No presentado",
-            "Porcentaje": "0.00%",
-            "Fecha de Calificación": ""
+                    [t('excel.lastName')]: estudiante.apellidos,
+        [t('excel.firstName')]: estudiante.nombres,
+        [t('excel.identification')]: estudiante.identificacion,
+        [t('excel.score')]: t('excel.notPresented'),
+        [t('excel.percentage')]: "0.00%",
+        [t('excel.gradedDate')]: ""
           });
         });
       
@@ -903,19 +906,19 @@ export default function ExamResultsPage() {
       
       // Preparar los datos del encabezado
       const headerData = [
-        [`RESULTADOS: ${examDetails.titulo}`],
+        [`${t('excel.resultsHeader')}: ${examDetails.titulo}`],
         [''],
-        ['DETALLES DEL EXAMEN'],
-        [`Materia: ${examDetails.materias?.nombre || 'Sin materia'}`],
-        [`Puntaje Total: ${examDetails.puntaje_total}`],
-        [`Grupo: ${examDetails.grupos?.nombre || 'Sin grupo'}`],
-        [`Fecha de Creación: ${examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : 'No disponible'}`],
+        [t('excel.examDetailsHeader')],
+        [`${t('excel.subjectLabel')}: ${examDetails.materias?.nombre || t('excel.noSubjectAvailable')}`],
+        [`${t('excel.totalScoreLabel')}: ${examDetails.puntaje_total}`],
+        [`${t('excel.groupLabel')}: ${examDetails.grupos?.nombre || t('excel.noGroupAvailable')}`],
+        [`${t('excel.creationDateLabel')}: ${examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : t('excel.noDateAvailable')}`],
         [''],
-        ['ESTADÍSTICAS'],
-        [`Estudiantes con examen: ${resultados.length} de ${todosEstudiantes.length}`],
-        [`Promedio: ${resultados.length > 0 ? (resultados.reduce((sum, r: ResultadoExamen) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2) : 'N/A'}`],
-        [`Nota más alta: ${resultados.length > 0 ? Math.max(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2) : 'N/A'}`],
-        [`Nota más baja: ${resultados.length > 0 ? Math.min(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2) : 'N/A'}`],
+        [t('excel.statisticsHeader')],
+        [`${t('excel.studentsWithExamLabel')}: ${resultados.length} ${t('excel.of')} ${todosEstudiantes.length}`],
+        [`${t('excel.averageLabel')}: ${resultados.length > 0 ? (resultados.reduce((sum, r: ResultadoExamen) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2) : t('na')}`],
+        [`${t('excel.highestScoreLabel')}: ${resultados.length > 0 ? Math.max(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2) : t('na')}`],
+        [`${t('excel.lowestScoreLabel')}: ${resultados.length > 0 ? Math.min(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2) : t('na')}`],
         [''],
         [''] // Línea en blanco antes de los datos de estudiantes
       ];
@@ -942,21 +945,21 @@ export default function ExamResultsPage() {
       ];
       
       // Añadir la hoja al libro
-      XLSX.utils.book_append_sheet(wb, ws, "Resultados");
+      XLSX.utils.book_append_sheet(wb, ws, t('excel.sheetName'));
       
       // Generar el archivo y descargarlo
       XLSX.writeFile(wb, `resultados_${examDetails.titulo.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
 
-      toast({
-        title: "Éxito",
-        description: "Resultados exportados correctamente",
-      });
+          toast({
+      title: t('common.success'),
+      description: t('toast.exportSuccess'),
+    });
     } catch (_error) {
-      toast({
-        title: "Error",
-        description: "No se pudieron exportar los resultados",
-        variant: "destructive",
-      });
+          toast({
+      title: t('common.error'),
+      description: t('toast.exportError'),
+      variant: "destructive",
+    });
       if (DEBUG) {
         // Registramos el error en un logger en lugar de la consola
       }
@@ -967,8 +970,8 @@ export default function ExamResultsPage() {
   const handleExportToPDF = async (updateProgress: (_progress: number) => void) => {
     if (!examDetails || resultados.length === 0) {
       toast({
-        title: "Error",
-        description: "No hay resultados para exportar",
+        title: t('common.error'),
+        description: t('toast.noResultsError'),
         variant: "destructive",
       });
       return;
@@ -976,7 +979,7 @@ export default function ExamResultsPage() {
 
     try {
       toast({
-        title: "Preparando PDF",
+        title: t('toast.preparingPDF'),
         description: "Cargando imágenes y preparando el reporte...",
       });
       
@@ -987,15 +990,15 @@ export default function ExamResultsPage() {
       setResultados(updatedResultados);
       
       toast({
-        title: "PDF Generado",
+        title: t('toast.pdfGenerated'),
         description: "El reporte PDF se ha generado correctamente.",
       });
     } catch (_error) {
-      toast({
-        title: "Error",
-        description: "No se pudo generar el PDF",
-        variant: "destructive",
-      });
+          toast({
+      title: t('common.error'),
+      description: t('toast.pdfError'),
+      variant: "destructive",
+    });
       if (DEBUG) {
         // Registramos el error en un logger en lugar de la consola
       }
@@ -1069,7 +1072,7 @@ export default function ExamResultsPage() {
           className="h-9"
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
-          Volver a Exámenes
+          {t('backToExams')}
         </Button>
 
         {availableGroups.length > 1 && (
@@ -1090,21 +1093,21 @@ export default function ExamResultsPage() {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Resultados: {examDetails?.titulo || 'Cargando...'}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}: {examDetails?.titulo || t('loading')}</h2>
           <p className="text-muted-foreground">
-            Detalles de calificaciones y respuestas de los estudiantes
+            {t('description')}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button 
-            onClick={handleExportToExcel}
-            variant="default"
-            className="flex items-center"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Descargar notas en Excel</span>
-            <span className="inline sm:hidden">Reporte Excel</span>
-          </Button>
+                      <Button 
+              onClick={handleExportToExcel}
+              variant="default"
+              className="flex items-center"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">{t('downloadExcel')}</span>
+              <span className="inline sm:hidden">{t('excelReport')}</span>
+            </Button>
           
           {resultados.length > 0 && (
             <div>
@@ -1113,7 +1116,7 @@ export default function ExamResultsPage() {
                   resultados={resultados} 
                   examDetails={examDetails}
                   fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
-                  buttonText="Generar reporte en PDF"
+                  buttonText={t('generatePDFReport')}
                   onPrepare={(updateProgress) => handleExportToPDF(updateProgress)}
                   totalPreguntas={totalPreguntas}
                 />
@@ -1123,7 +1126,7 @@ export default function ExamResultsPage() {
                   resultados={resultados} 
                   examDetails={examDetails}
                   fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
-                  buttonText="Reporte PDF"
+                  buttonText={t('pdfReport')}
                   onPrepare={(updateProgress) => handleExportToPDF(updateProgress)}
                   totalPreguntas={totalPreguntas}
                 />
@@ -1135,66 +1138,66 @@ export default function ExamResultsPage() {
 
       {examDetails && (
         <div className="flex flex-col sm:flex-row gap-4">
-          <Card className="flex-1">
-            <CardHeader>
-              <CardTitle>Detalles del Examen</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Materia:</div>
-                  <div>{examDetails.materias?.nombre || 'Sin materia'}</div>
+                      <Card className="flex-1">
+              <CardHeader>
+                <CardTitle>{t('examDetails')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">{t('subject')}:</div>
+                    <div>{examDetails.materias?.nombre || t('noSubject')}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">{t('totalScore')}:</div>
+                    <div>{examDetails.puntaje_total}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">{t('group')}:</div>
+                    <div>{examDetails.grupos?.nombre || t('noGroup')}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">{t('creationDate')}:</div>
+                    <div>{examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : t('notAvailable')}</div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Puntaje Total:</div>
-                  <div>{examDetails.puntaje_total}</div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Grupo:</div>
-                  <div>{examDetails.grupos?.nombre || 'Sin grupo'}</div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Fecha de Creación:</div>
-                  <div>{examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : 'No disponible'}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
           <Card className="flex-1">
             <CardHeader>
-              <CardTitle>Estadísticas</CardTitle>
+              <CardTitle>{t('statisticsTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Estudiantes con examen:</div>
-                  <div>{resultados.length} de {todosEstudiantes.length}</div>
+                  <div className="font-medium">{t('studentsWithExam')}:</div>
+                  <div>{resultados.length} {t('of')} {todosEstudiantes.length}</div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Promedio:</div>
+                  <div className="font-medium">{t('average')}:</div>
                   <div>
                     {resultados.length > 0
                       ? (resultados.reduce((sum, r: ResultadoExamen) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2)
-                      : 'N/A'
+                      : t('na')
                     }
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Nota más alta:</div>
+                  <div className="font-medium">{t('highestScore')}:</div>
                   <div>
                     {resultados.length > 0
                       ? Math.max(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
-                      : 'N/A'
+                      : t('na')
                     }
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Nota más baja:</div>
+                  <div className="font-medium">{t('lowestScore')}:</div>
                   <div>
                     {resultados.length > 0
                       ? Math.min(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
-                      : 'N/A'
+                      : t('na')
                     }
                   </div>
                 </div>
@@ -1213,35 +1216,35 @@ export default function ExamResultsPage() {
             onChange={(e) => setVerSoloConExamen(e.target.checked)}
             className="rounded border-gray-300 text-primary focus:ring-primary"
           />
-          <label htmlFor="ver-solo-con-examen" className="text-sm">
-            Ver solo estudiantes con examen calificado
-          </label>
+                  <label htmlFor="ver-solo-con-examen" className="text-sm">
+          {t('checkbox.showOnlyGraded')}
+        </label>
         </div>
         
         <Card>
           <CardHeader>
-            <CardTitle>Estudiantes</CardTitle>
+            <CardTitle>{t('studentsSection')}</CardTitle>
             <CardDescription>
-              Resultados de los estudiantes en este examen
+              {t('studentsSectionDescription')}
             </CardDescription>
           </CardHeader>
           
           <CardContent>
             {todosEstudiantes.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No hay estudiantes en este grupo
+                {t('emptyState.noResultsMessage')}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-muted/50">
-                      <th className="py-2 px-4 text-left">Nombre</th>
-                      <th className="py-2 px-4 text-left">Identificación</th>
-                      <th className="py-2 px-4 text-center">Nota</th>
-                      <th className="py-2 px-4 text-center">Porcentaje</th>
-                      <th className="py-2 px-4 text-center">Estado</th>
-                      <th className="py-2 px-4 text-center">Acciones</th>
+                                      <th className="py-2 px-4 text-left">{t('table.name')}</th>
+                <th className="py-2 px-4 text-left">{t('table.identification')}</th>
+                <th className="py-2 px-4 text-center">{t('table.score')}</th>
+                <th className="py-2 px-4 text-center">{t('table.percentage')}</th>
+                <th className="py-2 px-4 text-center">{t('table.status')}</th>
+                <th className="py-2 px-4 text-center">{t('table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1264,13 +1267,13 @@ export default function ExamResultsPage() {
                             </td>
                             <td className="py-2 px-4 text-center">
                               {resultado ? (
-                                <span className="px-2 py-1 rounded-full text-xs bg-primary text-primary-foreground font-medium shadow-sm">
-                                  Calificado
-                                </span>
+                                                  <span className="px-2 py-1 rounded-full text-xs bg-primary text-primary-foreground font-medium shadow-sm">
+                    {t('status.graded')}
+                  </span>
                               ) : (
-                                <span className="px-2 py-1 rounded-full text-xs bg-accent text-accent-foreground font-medium shadow-sm">
-                                  Pendiente
-                                </span>
+                                                <span className="px-2 py-1 rounded-full text-xs bg-accent text-accent-foreground font-medium shadow-sm">
+                  {t('status.notPresented')}
+                </span>
                               )}
                             </td>
                             <td className="py-2 px-4 text-center">
@@ -1280,7 +1283,7 @@ export default function ExamResultsPage() {
                                   size="sm"
                                   onClick={() => handleShowDetails(resultado)}
                                 >
-                                  Ver detalles
+                                  {t('viewDetailsButton')}
                                 </Button>
                               ) : (
                                 <Button
@@ -1348,31 +1351,31 @@ export default function ExamResultsPage() {
       >
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Detalles del Examen</DialogTitle>
+            <DialogTitle>{t('modal.title')}</DialogTitle>
             <DialogDescription>
-              Resultados detallados para {selectedResultado?.estudiante.nombres} {selectedResultado?.estudiante.apellidos}
+              {t('modal.description')} {selectedResultado?.estudiante.nombres} {selectedResultado?.estudiante.apellidos}
             </DialogDescription>
           </DialogHeader>
           
           {selectedResultado && (
             <Tabs defaultValue="answers" className="mt-2">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="answers">Respuestas</TabsTrigger>
-                <TabsTrigger value="original">Imagen Original</TabsTrigger>
-                <TabsTrigger value="processed">Imagen Procesada</TabsTrigger>
+                            <TabsTrigger value="answers">{t('modal.responses')}</TabsTrigger>
+            <TabsTrigger value="original">{t('modal.originalImage')}</TabsTrigger>
+            <TabsTrigger value="processed">{t('modal.processedImage')}</TabsTrigger>
               </TabsList>
               
               <TabsContent value="answers">
                 <div className="pt-4">
                   <div className="flex justify-between items-center mb-4">
                     <div>
-                      <p className="font-medium">Nota: {selectedResultado?.puntaje_obtenido.toFixed(2)}</p>
+                      <p className="font-medium">{t('modal.scoreLabel')}: {selectedResultado?.puntaje_obtenido.toFixed(2)}</p>
                       <p className="text-sm text-muted-foreground">
-                        Porcentaje: {selectedResultado?.porcentaje.toFixed(1)}%
+                        {t('table.percentage')}: {selectedResultado?.porcentaje.toFixed(1)}%
                       </p>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Total preguntas: {totalPreguntas} | Válidas: {selectedResultado?.respuestas_estudiante.length}
+                      {t('modal.totalQuestions')}: {totalPreguntas} | {t('modal.validQuestions')}: {selectedResultado?.respuestas_estudiante.length}
                     </div>
                   </div>
 

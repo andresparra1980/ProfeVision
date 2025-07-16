@@ -45,9 +45,10 @@
   },
   "exams": {
     "title": "Exams",
-    "description": "Manage and create exams for your students.",
-    "create": "Create Exam",
-    "createWithAI": "Create Exam with AI",
+          "description": "Manage and create exams for your students.",
+      "create": "Create Exam",
+      "createWithAI": "Create Exam with AI",
+      "createNewDesc": "Design a new exam for your students",
     "import": "Import Exam",
     "edit": "Edit Exam",
     "actions": {
@@ -58,7 +59,14 @@
       "delete": "Delete",
       "view": "View",
       "assign": "Assign",
-      "export": "Export"
+      "export": "Export",
+      "print": "Print",
+      "generateSheets": "Generate Answer Sheets",
+      "assignGroups": "Assign Groups",
+      "viewResults": "View Results",
+      "linkComponent": "Link Component",
+      "linkComponentFull": "Link to Grade Component",
+      "backToExams": "Back to Exams"
     },
     "form": {
       "title": "Exam title",
@@ -68,7 +76,26 @@
       "duration": "Duration (minutes)",
       "totalScore": "Total score",
       "titlePlaceholder": "Enter exam title",
-      "descriptionPlaceholder": "Briefly describe the exam"
+      "descriptionPlaceholder": "Briefly describe the exam",
+      "generalInfo": "General Information",
+      "numberOfQuestions": "Number of Questions",
+      "selectSubject": "Select a subject",
+      "selectGroup": "Select a group",
+      "selectSubjectFirst": "Select a subject first",
+      "noGroupsForSubject": "No groups available for this subject",
+      "noGroupsAvailable": "No groups available for this subject",
+      "createGroup": "Create group",
+      "instructions": "Instructions (optional)",
+      "instructionsPlaceholder": "Specific instructions for students",
+      "questionNumber": "Question {current} of {total}",
+      "questionText": "Question text",
+      "options": "Options",
+      "questionPlaceholder": "Write your question here",
+      "optionPlaceholder": "Option {number}",
+      "addOption": "Add option",
+      "addQuestion": "Add question",
+      "creating": "Creating...",
+      "optionsNote": "Only options with text will be saved"
     },
     "table": {
       "name": "Name",
@@ -79,7 +106,12 @@
       "actions": "Actions",
       "duration": "Duration",
       "status": "Status",
-      "search": "Search exams..."
+      "search": "Search exams...",
+      "title": "Title",
+      "allExams": "All Exams",
+      "allExamsDesc": "List of all created exams.",
+      "assignedGroups": "Assigned Groups",
+      "noGroups": "No groups assigned"
     },
     "status": {
       "draft": "Draft",
@@ -110,7 +142,14 @@
       "noExams": "No exams available",
       "noResults": "No exams found matching your search",
       "tryDifferentSearch": "Try a different search or adjust filters.",
-      "noExamsDescription": "You haven't created or imported any exams yet."
+      "noExamsDescription": "You haven't created or imported any exams yet.",
+      "adjustSearch": "Try adjusting your search.",
+      "createFirst": "Start by importing or creating your first exam from the options above.",
+      "unauthorized": "Unauthorized",
+      "createError": "Error creating exam",
+      "success": "Success",
+      "examCreated": "Exam created successfully",
+      "error": "Error"
     },
     "details": {
       "title": "Exam Details",
@@ -131,7 +170,32 @@
     },
     "createWithAI": {
       "title": "Create Exam with AI",
-      "description": "Use artificial intelligence to generate personalized exams",
+      "description": "Design a new exam for your students. You can create an exam from scratch by adding your own questions, or use the",
+      "generateWithAI": "Generate with AI",
+      "descriptionContinued": "button to get questions suggested automatically by an advanced language model (LLM). This option allows you to save time and customize content according to your needs.",
+      "createWithAI": "Create with Artificial Intelligence",
+      "questionNumber": "Question {current} of {total}",
+      "questionText": "Question text",
+      "questionPlaceholder": "Write your question here",
+      "options": "Options",
+      "optionPlaceholder": "Option {number}",
+      "addOption": "Add option",
+      "onlyTextOptionsWillBeSaved": "Only options with text will be saved",
+      "addQuestion": "Add question",
+      "creating": "Creating...",
+      "createExam": "Create Exam",
+      "entityRequired": "Educational Entity Required",
+      "entityRequiredDescription": "You must create or join at least one educational entity before creating exams. Exams must be associated with a subject, and subjects with an educational entity.",
+      "entityRequiredDesc": "You must create or join at least one educational entity before creating exams. Exams must be associated with a subject, and subjects with an educational entity.",
+      "createEntity": "Create Educational Entity",
+      "subjectRequired": "Subject Required",
+      "subjectRequiredDescription": "You must create at least one subject before creating exams. Exams must be associated with a subject.",
+      "subjectRequiredDesc": "You must create at least one subject before creating exams. Exams must be associated with a subject.",
+      "createSubject": "Create Subject",
+      "importedTitle": "Imported Exam",
+      "importedDesc": "Successfully imported",
+      "questionsImported": "questions correctly",
+      "importError": "Could not process imported data",
       "form": {
         "topic": "Exam topic",
         "topicPlaceholder": "E.g: Basic Mathematics, History of Colombia...",
@@ -150,12 +214,6 @@
         },
         "generate": "Generate Exam",
         "generating": "Generating exam...",
-        "entityRequired": "Educational Entity Required",
-        "entityRequiredDescription": "You must create or join at least one educational entity before creating exams. Exams must be associated with a subject, and subjects with an educational entity.",
-        "createEntity": "Create Educational Entity",
-        "subjectRequired": "Subject Required",
-        "subjectRequiredDescription": "You must create at least one subject before creating exams. Exams must be associated with a subject.",
-        "createSubject": "Create Subject",
         "backToExams": "Back to Exams",
         "createExam": "Create Exam",
         "basicInfo": "Define basic exam information",
@@ -181,7 +239,9 @@
       "assign": "Save Assignments",
       "assigning": "Assigning...",
       "success": "Groups assigned successfully",
-      "error": "Error saving assignments"
+      "error": "Error saving assignments",
+      "loadingError": "Error loading exam details",
+      "loadingGroupsError": "Error loading groups"
     },
     "edit": {
       "title": "Edit Exam",
@@ -196,7 +256,61 @@
       "save": "Save Changes",
       "saving": "Saving...",
       "success": "Exam updated successfully",
-      "error": "Error updating exam"
+      "error": "Error updating exam",
+      "backToExams": "Back to Exams",
+      "publishExam": "Publish Exam",
+      "questions": "Questions",
+      "questionsCount": "Questions ({count})",
+      "noQuestions": "This exam doesn't have questions yet.",
+      "addNewQuestion": "Add New Question",
+      "addNewQuestionDesc": "Define the content and answer options for the question",
+      "questionText": "Question Text",
+      "questionTextRequired": "Question Text*",
+      "questionTextPlaceholder": "Write your question here",
+      "responseOptions": "Answer Options",
+      "optionPlaceholder": "Option {number}",
+      "optionsInfo": "Only options with text will be saved",
+      "feedback": "Feedback",
+      "difficulty": "Difficulty",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "correct": "(Correct)",
+      "unknownType": "Unknown type",
+      "confirmToggle": "{action} question?",
+      "confirmToggleDesc": "By {action} this question, it will {effect} in student grading.",
+      "confirmToggleEnable": "enabling",
+      "confirmToggleDisable": "disabling",
+      "confirmToggleEnableEffect": "be considered again",
+      "confirmToggleDisableEffect": "recalculate grades for all students who have already taken this exam, excluding this question from the calculation",
+      "confirmUpdateAnswer": "Update correct answer?",
+      "confirmUpdateAnswerDesc": "By clicking Confirm, grades will be recalculated for all students who have already taken this exam.",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "status": {
+        "draft": "Draft",
+        "published": "Published"
+      },
+      "validation": {
+        "questionRequired": "Question text is required",
+        "optionsRequired": "You must add at least one option with text",
+        "cantPublishNoQuestions": "You cannot publish an exam without questions"
+      },
+      "messages": {
+        "questionAdded": "Question added successfully",
+        "questionDeleted": "Question deleted successfully",
+        "questionEnabled": "Question enabled successfully",
+        "questionDisabled": "Question disabled successfully",
+        "answerUpdated": "Correct answer updated and grades recalculated",
+        "examPublished": "Exam published successfully",
+        "loadError": "Could not load exam information",
+        "addError": "Could not add question",
+        "deleteError": "Could not delete question",
+        "toggleError": "Could not {action} question",
+        "updateAnswerError": "Could not update correct answer",
+        "publishError": "Could not publish exam",
+        "examNotFound": "Requested exam not found.",
+        "unauthorized": "Unauthorized"
+      }
     },
     "export": {
       "title": "Export Exam",
@@ -214,8 +328,31 @@
       "error": "Error exporting exam"
     },
     "results": {
-      "title": "Exam Results",
-      "description": "Review exam results and statistics",
+      "title": "Results",
+      "description": "Details of student grades and responses",
+      "loading": "Loading...",
+      "error": "Error",
+      "loadingError": "Error loading exam results",
+      "backToExams": "Back to Exams",
+      "downloadExcel": "Download grades in Excel",
+      "excelReport": "Excel Report",
+      "generatePDFReport": "Generate PDF report",
+      "pdfReport": "PDF Report",
+      "examDetails": "Exam Details",
+      "subject": "Subject",
+      "totalScore": "Total Score",
+      "group": "Group",
+      "creationDate": "Creation Date",
+      "noSubject": "No subject",
+      "noGroup": "No group",
+      "notAvailable": "Not available",
+      "statisticsTitle": "Statistics",
+      "studentsWithExam": "Students with exam",
+      "of": "of",
+      "average": "Average",
+      "highestScore": "Highest score",
+      "lowestScore": "Lowest score",
+      "na": "N/A",
       "statistics": {
         "totalStudents": "Total students",
         "completed": "Completed",
@@ -225,17 +362,93 @@
         "lowestScore": "Lowest score"
       },
       "studentResults": "Student Results",
+      "studentsSection": "Students",
+      "studentsSectionDescription": "Results of students in this exam",
       "student": "Student",
       "score": "Score",
       "percentage": "Percentage",
       "completedAt": "Completed",
       "viewDetails": "View Details",
+      "viewDetailsButton": "View details",
       "downloadResults": "Download Results",
-      "noResults": "No results available"
+      "noResults": "No results available",
+      "toast": {
+        "answerUpdated": "Answer updated",
+        "updateError": "Update error",
+        "updateErrorDesc": "Could not update answer",
+        "gradeSaved": "Grade saved",
+        "saveError": "Save error",
+        "saveErrorDesc": "Could not save grade",
+        "noResultsError": "No results to export",
+        "exportSuccess": "Results exported successfully",
+        "exportError": "Could not export results",
+        "preparingPDF": "Preparing PDF",
+        "pdfGenerated": "PDF Generated",
+        "pdfError": "Could not generate PDF"
+      },
+      "table": {
+        "name": "Name",
+        "identification": "Identification",
+        "score": "Score",
+        "percentage": "Percentage",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "graded": "Graded",
+        "notPresented": "Not presented"
+      },
+      "excel": {
+        "lastName": "Last Name",
+        "firstName": "First Name",
+        "identification": "Identification",
+        "score": "Score",
+        "percentage": "Percentage",
+        "gradedDate": "Graded Date",
+        "notPresented": "Not presented",
+        "sheetName": "Results",
+        "examDetailsHeader": "EXAM DETAILS",
+        "resultsHeader": "RESULTS",
+        "subjectLabel": "Subject",
+        "totalScoreLabel": "Total Score",
+        "groupLabel": "Group",
+        "creationDateLabel": "Creation Date",
+        "noSubjectAvailable": "No subject",
+        "noGroupAvailable": "No group",
+        "noDateAvailable": "Not available",
+        "statisticsHeader": "STATISTICS",
+        "studentsWithExamLabel": "Students with exam",
+        "of": "of",
+        "averageLabel": "Average",
+        "highestScoreLabel": "Highest score",
+        "lowestScoreLabel": "Lowest score"
+      },
+      "modal": {
+        "responses": "Responses",
+        "originalImage": "Original Image",
+        "processedImage": "Processed Image",
+        "scoreLabel": "Score",
+        "gradedOn": "Graded on",
+        "title": "Exam Details",
+        "description": "Detailed results for",
+        "totalQuestions": "Total questions",
+        "validQuestions": "Valid"
+      },
+      "checkbox": {
+        "showOnlyGraded": "Show only students with graded exam"
+      },
+      "emptyState": {
+        "noResultsMessage": "No results available for this exam."
+      }
     },
     "responses": {
-      "title": "Exam Responses",
-      "description": "Review individual student responses",
+      "title": "Generate Answer Sheets",
+      "description": "Select the group for which you want to generate answer sheets",
+      "backToExams": "Back to Exams",
+      "group": "Group",
+      "selectGroup": "Select a group",
+      "generatePDF": "Generate PDF",
+      "loadingError": "Error loading exam",
       "selectStudent": "Select Student",
       "question": "Question",
       "studentAnswer": "Student Answer",
@@ -255,6 +468,90 @@
       "linking": "Linking...",
       "success": "Grades linked successfully",
       "error": "Error linking grades"
+    },
+    "export": {
+      "title": "Export Formats",
+      "examNotFound": "The requested exam was not found.",
+      "backToExams": "Back to Exams",
+      "toast": {
+        "success": "Success",
+        "error": "Error",
+        "errorFetchingExam": "Could not load exam information",
+        "questionsGenerated": "Questions format has been generated",
+        "errorGeneratingFormat": "Could not generate format"
+      },
+      "actions": {
+        "back": "Back",
+        "downloadPDF": "Download PDF",
+        "preview": "Preview",
+        "generateAnswerSheets": "Generate Answer Sheets"
+      },
+      "formats": {
+        "title": "Available Formats",
+        "description": "Select the type of format you want to generate",
+        "questions": {
+          "title": "Question Sheet",
+          "description": "Format with exam questions to distribute to students"
+        },
+        "answers": {
+          "title": "Answer Sheets",
+          "description": "Custom formats for each student with QR code and alignment marks"
+        }
+      },
+      "configuration": {
+        "title": "Export Configuration",
+        "description": "Select the group and paper size for export",
+        "group": "Group",
+        "paperSize": "Paper Size",
+        "letter": "Letter",
+        "a4": "A4",
+        "legal": "Legal",
+        "noGroupsAssigned": "No groups assigned to this exam.",
+        "assignGroups": "Assign groups"
+      }
+    },
+    "import": {
+      "title": "Import Exam",
+      "description": "Upload a PDF, DOC or DOCX file with exam questions to process it automatically",
+      "stages": {
+        "analyzing": "Analyzing document...",
+        "extracting": "Extracting questions with AI...",
+        "identifying": "Identifying answer options...",
+        "processing": "Processing final format..."
+      },
+      "tips": {
+        "validateAnswers": "Make sure to validate before saving the exam that the correct answers marked by the AI are correct.",
+        "highlightAnswers": "Preferably use a PDF with correct answers highlighted in a bright color (e.g., fluorescent green) or put an asterisk (*) at the end of the correct answer.",
+        "clearFormat": "For best results, make sure your document has a clear format with numbered questions.",
+        "labeledOptions": "Questions with clearly labeled options (A, B, C, D) are easier to process.",
+        "goodContrast": "Better results are obtained with documents that have good contrast and clear text.",
+        "uniformPattern": "The system can recognize various formats, but it's ideal if all questions follow a uniform pattern."
+      },
+      "upload": {
+        "dragActive": "Drop the file here...",
+        "processing": "Processing file...",
+        "dragDrop": "Drag a file here or click to select",
+        "supportedFiles": "Supported files: PDF, DOC, DOCX (max. 10MB)",
+        "estimatedTime": "Estimated time: approximately {seconds} seconds remaining"
+      },
+      "errors": {
+        "processingFile": "Error processing file",
+        "unknown": "Unknown error"
+      },
+      "success": {
+        "examProcessed": "Exam processed successfully: {count} questions found",
+        "examProcessedTitle": "Exam Processed",
+        "questionsCount": "{count} questions",
+        "questionsDetected": "The following questions have been detected:",
+        "optionsLabel": "Options",
+        "correctAnswerLabel": "Correct answer",
+        "notDetected": "Not detected",
+        "moreQuestions": "... and {count} more questions"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "import": "Import Exam"
+      }
     }
   },
   "main": {

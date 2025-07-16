@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -666,7 +667,7 @@ export default function CreateExamPage() {
               {t('exams.subjectRequiredDesc', { defaultValue: 'Debes crear al menos una materia antes de poder crear exámenes. Los exámenes deben estar asociados a una materia.' })}
             </p>
             <Button 
-              onClick={() => router.push('/dashboard/subjects/create')}
+              onClick={() => router.push('/dashboard/subjects')}
               className="mt-2"
             >
               <Plus className="mr-2 h-4 w-4" /> {t('exams.createSubject', { defaultValue: 'Crear Materia' })}

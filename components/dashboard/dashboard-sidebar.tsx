@@ -186,6 +186,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
               ) : (
                 <Link
                   key={item.href}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   href={item.href as any}
                   onClick={() => setIsOpen(false)}
                   className={cn(

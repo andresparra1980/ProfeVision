@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { ChevronLeft, Save } from "lucide-react";
 import { useTranslations } from 'next-intl';
 import { Button } from "@/components/ui/button";
@@ -85,7 +85,7 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
       setAsignaciones(asignacionesIniciales);
     } catch (error) {
       logger.error("Error fetching exam details:", error);
-      toast.error("Error al cargar los detalles del examen");
+      toast.error(t('loadingError'));
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
       setGrupos(gruposFormateados);
     } catch (error) {
       logger.error("Error fetching groups:", error);
-      toast.error("Error al cargar los grupos");
+      toast.error(t('loadingGroupsError'));
     }
   }
 
