@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from 'next-intl';
+import { useLocalizedRoute } from '@/lib/utils/i18n-routes';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +29,7 @@ export default function LoginPage() {
   const tCommon = useTranslations('common');
   const router = useRouter();
   const locale = useLocale();
+  const routes = useLocalizedRoute(locale);
   const [isLoading, setIsLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
@@ -72,9 +74,8 @@ export default function LoginPage() {
         throw error;
       }
 
-      // 🔄 Redirección localizada
-      const dashboardPath = locale === 'es' ? '/dashboard' : '/en/dashboard';
-      router.push(dashboardPath);
+              // 🔄 Redirección localizada
+        router.push(routes.dashboard.home());
       router.refresh();
     } catch (error: unknown) {
       toast({
@@ -93,9 +94,9 @@ export default function LoginPage() {
     }
   }
 
-  // 🔄 Rutas localizadas
-  const resetPasswordPath = locale === 'es' ? '/auth/reset-password' : '/en/auth/reset-password';
-        const registerPath = locale === 'es' ? '/auth/register' : '/en/auth/register';
+      // 🔄 Rutas localizadas con utilidad
+    const resetPasswordPath = routes.auth.resetPassword();
+    const registerPath = routes.auth.register();
 
   return (
     <Card className="w-full max-w-md">
