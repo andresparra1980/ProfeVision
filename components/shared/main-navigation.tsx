@@ -1,5 +1,8 @@
+"use client"
+
 import * as React from "react"
 import Link from "next/link"
+import { useTranslations, useLocale } from 'next-intl'
 import { cn } from "@/lib/utils"
 import {
   NavigationMenu,
@@ -36,18 +39,18 @@ const ListItem = React.forwardRef<
         <Link
           ref={ref}
           className={cn(
-            "block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group",
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group",
             className
           )}
           href={href || "#"}
           {...props}
         >
           <div className="flex items-center gap-2">
-            {Icon && <Icon className="h-3 w-3" />}
-            <div className="text-xs font-medium leading-none">{title}</div>
+            {Icon && <Icon className="h-4 w-4" />}
+            <div className="text-sm font-medium leading-none">{title}</div>
           </div>
           {children && (
-            <p className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors">
+            <p className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors mt-1">
               {children}
             </p>
           )}
@@ -61,10 +64,10 @@ ListItem.displayName = "ListItem"
 // Componente especializado para los sub-items de Exámenes
 const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => {
   return (
-    <li className="ml-4"> {/* Indentación reducida */}
+    <li className="ml-2"> {/* Indentación más sutil */}
       <NavigationMenuLink asChild>
         <Link
-          className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group border-l-2 border-muted pl-3"
+          className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group border-l-2 border-muted/50 pl-3"
           href={href || "#"}
         >
           <div className="flex items-center gap-2">
@@ -72,7 +75,7 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
             <div className="text-xs font-medium leading-none">{title}</div>
           </div>
           {children && (
-            <p className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors">
+            <p className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors mt-1">
               {children}
             </p>
           )}
@@ -83,6 +86,28 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
 }
 
 export function MainNavigation() {
+  const t = useTranslations('common')
+  const locale = useLocale()
+
+  // Helper function to get localized routes
+  const getLocalizedRoute = (route: string) => {
+    if (locale === 'es') {
+      const routeMap: { [key: string]: string } = {
+        'how-it-works': '/como-funciona',
+        'pricing': '/precios',
+        'contact': '/contacto',
+        'blog': '/blog',
+        'exams': '/examenes',
+        'exams/manual-generator': '/examenes/generador-manual',
+        'exams/ai-generator': '/examenes/generador-ia',
+        'paper-exams': '/examenes-papel',
+        'mobile-app': '/aplicacion-movil'
+      }
+      return routeMap[route] || `/${route}`
+    }
+    return `/${route}`
+  }
+
   return (
     <NavigationMenu>
       <NavigationMenuList>
@@ -90,7 +115,7 @@ export function MainNavigation() {
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link href="/" className={navigationMenuTriggerStyle()}>
-              Inicio
+              {t('navigation.home')}
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
@@ -98,109 +123,65 @@ export function MainNavigation() {
         {/* Funciones */}
         <NavigationMenuItem>
           <NavigationMenuTrigger className="hover:text-[#0b890f]">
-            Funciones
+            {t('navigation.functions')}
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="p-3 md:w-[600px] lg:w-[700px]">
-              <div className="grid grid-cols-3 gap-4">
+            <div className="p-4 w-[600px]">
+              <div className="grid grid-cols-3 gap-6">
                 {/* Columna 1 */}
-                <ul className="space-y-1">
+                <ul className="space-y-2">
                   {/* Cómo funciona - Primer item clickeable */}
                   <ListItem 
-                    href="/how-it-works" 
-                    title="¿Cómo Funciona ProfeVision?"
+                    href={getLocalizedRoute('how-it-works')} 
+                    title={t('navigation.howItWorks')}
                     icon={BookOpen}
                   >
-                    Descubre cómo transformar tu forma de crear, administrar y calificar exámenes
+                    {t('navigation.howItWorksDescription')}
                   </ListItem>
-                  
-                  {/* <ListItem 
-                    href="/institutions-management" 
-                    title="Gestión de Instituciones"
-                    icon={Building}
-                  >
-                    Administra múltiples instituciones educativas
-                  </ListItem>
-                  <ListItem 
-                    href="/subjects-management" 
-                    title="Gestión de Materias"
-                    icon={BookOpen}
-                  >
-                    Organiza y gestiona todas tus materias
-                  </ListItem>
-                  <ListItem 
-                    href="/groups-management" 
-                    title="Gestión de Grupos"
-                    icon={Users}
-                  >
-                    Administra grupos y estudiantes eficientemente
-                  </ListItem> */}
                 </ul>
 
                 {/* Columna 2 - Exámenes (Central) */}
-                <ul className="space-y-1">
+                <ul className="space-y-2">
                   {/* Exámenes - Categoría principal */}
-                  <li className="mb-1">
-                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                      
+                  <li className="mb-2">
+                    <div className="flex items-center gap-2 p-3 rounded-md bg-muted/30">
                       <div>
-                        <div className="text-xs font-medium flex items-center gap-2">
-                          <FileText className="h-3 w-3" />
-                          Exámenes
+                        <div className="text-sm font-semibold flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          {t('navigation.exams')}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Crea y administra exámenes de múltiples formas
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {t('navigation.examsDescription')}
                         </p>
                       </div>
                     </div>
                   </li>
                   
                   {/* Sub-items de Exámenes */}
-                  {/* <ExamenSubItem 
-                    href="/exams" 
-                    title="Generador Manual"
-                    icon={FileText}
-                  >
-                    Crea exámenes paso a paso de forma manual
-                  </ExamenSubItem> */}
                   <ExamenSubItem 
-                    href="/exams" 
-                    title="Generar Exámenes con IA"
+                    href={getLocalizedRoute('exams/ai-generator')} 
+                    title={t('navigation.aiGenerator')}
                     icon={Brain}
                   >
-                    Genera exámenes automáticamente con inteligencia artificial
+                    {t('navigation.aiGeneratorDescription')}
                   </ExamenSubItem>
                   <ExamenSubItem 
-                    href="/paper-exams" 
-                    title="Exámenes en Papel"
+                    href={getLocalizedRoute('paper-exams')} 
+                    title={t('navigation.paperExams')}
                     icon={ScanLine}
                   >
-                    Escanea y califica exámenes físicos automáticamente
+                    {t('navigation.paperExamsDescription')}
                   </ExamenSubItem>
                 </ul>
 
                 {/* Columna 3 */}
-                <ul className="space-y-1">
-                  {/* <ListItem 
-                    href="/students-management" 
-                    title="Gestión de Estudiantes"
-                    icon={GraduationCap}
-                  >
-                    Control completo de información estudiantil
-                  </ListItem>
+                <ul className="space-y-2">
                   <ListItem 
-                    href="/reports" 
-                    title="Gestión de Reportes"
-                    icon={BarChart3}
-                  >
-                    Análisis detallado del desempeño estudiantil
-                  </ListItem> */}
-                  <ListItem 
-                    href="/mobile-app" 
-                    title="Aplicación Móvil"
+                    href={getLocalizedRoute('mobile-app')} 
+                    title={t('navigation.mobileApp')}
                     icon={Smartphone}
                   >
-                    En desarrollo - Próximamente disponible
+                    {t('navigation.mobileAppDescription')}
                   </ListItem>
                 </ul>
               </div>
@@ -211,8 +192,8 @@ export function MainNavigation() {
         {/* Precios */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href="/pricing" className={navigationMenuTriggerStyle()}>
-              Precios
+            <Link href={getLocalizedRoute('pricing')} className={navigationMenuTriggerStyle()}>
+              {t('navigation.pricing')}
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
@@ -220,8 +201,8 @@ export function MainNavigation() {
         {/* Blog */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href="/blog" className={navigationMenuTriggerStyle()}>
-              Blog
+            <Link href={getLocalizedRoute('blog')} className={navigationMenuTriggerStyle()}>
+              {t('navigation.blog')}
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
@@ -229,8 +210,8 @@ export function MainNavigation() {
         {/* Contacto */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href="/contact" className={navigationMenuTriggerStyle()}>
-              Contacto
+            <Link href={getLocalizedRoute('contact')} className={navigationMenuTriggerStyle()}>
+              {t('navigation.contact')}
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>

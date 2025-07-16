@@ -11,7 +11,13 @@
     "submit": "Submit",
     "close": "Close",
     "continue": "Continue",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "startFree": "Start Free!",
+    "learnMore": "Learn More",
+    "startTrial": "Start Free Trial",
+    "exportGrades": "Export Grades",
+    "login": "Sign In",
+    "register": "Sign Up"
   },
   "labels": {
     "name": "Name",
@@ -40,6 +46,237 @@
   "language": {
     "switch": "Switch language",
     "spanish": "Español",
-    "english": "English"
+    "english": "English",
+    "label": "Language"
+  },
+  "navigation": {
+    "home": "Home",
+    "howItWorks": "How It Works",
+    "howItWorksDescription": "Discover how to transform your way of creating, managing and grading exams",
+    "exams": "Exams",
+    "examsDescription": "Create and manage exams in multiple ways",
+    "manualGenerator": "Manual Generator",
+    "aiGenerator": "AI Generator",
+    "aiGeneratorDescription": "Generate exams automatically with artificial intelligence",
+    "paperExams": "Paper Exams",
+    "paperExamsDescription": "Scan and grade physical exams automatically",
+    "functions": "Functions",
+    "institutionsManagement": "Institution Management",
+    "subjectsManagement": "Subject Management",
+    "groupsManagement": "Group Management",
+    "studentsManagement": "Student Management",
+    "reportsManagement": "Reports Management",
+    "reports": "Reports",
+    "mobileApp": "Mobile App",
+    "mobileAppDescription": "In development - Coming soon",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "contact": "Contact",
+    "about": "About",
+    "dashboard": "Dashboard",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "cookies": "Cookies"
+  },
+  "footer": {
+    "description": "ProfeVision is the comprehensive platform for educators. Automates exam creation and grading with AI and OMR technology, allowing you to scan and correct paper tests instantly with your mobile. Additionally, it centralizes complete management of institutions, subjects, groups, and students. Save time, optimize educational evaluation, and get precise insights for more effective teaching. It's your definitive tool to transform academic management.",
+    "sections": {
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal"
+    },
+    "links": {
+      "howItWorks": "How It Works",
+      "pricing": "Pricing",
+      "aiGenerator": "AI Generator",
+      "mobileApp": "Mobile App",
+      "about": "About",
+      "blog": "Blog",
+      "contact": "Contact",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "cookies": "Cookies",
+      "termsOfService": "Terms of Service",
+      "privacyPolicy": "Privacy Policy",
+      "cookiesPolicy": "Cookie Policy"
+    },
+    "copyright": "All rights reserved."
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "description": "Discover how ProfeVision simplifies exam creation, grading, and management in just a few steps",
+    "stepsTitle": "4 Simple Steps to Transform Your Teaching",
+    "stepsDescription": "Follow our intuitive process to create, apply, and grade exams efficiently",
+    "steps": {
+      "step1": {
+        "title": "Create Your Exams",
+        "description": "Use our AI-powered tools to generate questions or create them manually. Choose from multiple formats and customize according to your needs."
+      },
+      "step2": {
+        "title": "Apply to Students",
+        "description": "Print personalized formats for each student with unique QR codes. Assign digital exams or distribute physical answer sheets."
+      },
+      "step3": {
+        "title": "Scan and Grade",
+        "description": "Use your smartphone to scan answer sheets. Our OMR technology automatically processes responses and calculates grades instantly."
+      },
+      "step4": {
+        "title": "Analyze Results",
+        "description": "Access detailed reports on student performance, identify improvement areas, and make data-driven educational decisions."
+      }
+    },
+    "ctaTitle": "Ready to revolutionize your teaching?",
+    "ctaDescription": "Join thousands of educators who are already saving time and improving their students' results.",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More"
+  },
+  "homepage": {
+    "newBadge": "New! AI-Powered Grading (OMR)",
+    "heroTitle": "The Best App for Scanning and Grading Paper Exams",
+    "heroDescription": "At ProfeVision, we understand the challenges of modern education. We've developed an all-in-one solution that automates exam creation, grading, and management with AI, freeing up your valuable time to focus on what really matters: teaching and empowering your students' learning.",
+    "trustedBy": "Over 1,000+ teachers trust us",
+    "featuresTitle": "Everything you need in one platform",
+    "featuresDescription": "ProfeVision simplifies your work as an educator with powerful and intuitive tools",
+    "featuresTag": "Key Features",
+    "modulesTitle": "Complete educational management",
+    "modulesDescription": "Organize all aspects of your educational environment in one place",
+    "modulesTag": "Main Modules",
+    "benefitsTitle": "Save time and improve educational quality",
+    "benefitsDescription": "ProfeVision allows you to focus on what really matters: teaching and your students' learning, driving digital transformation in education. We are the platform for teachers you were looking for.",
+    "benefitsTag": "Key Benefits",
+    "ctaTitle": "Transform your educational experience with ProfeVision",
+    "ctaDescription": "Join thousands of educators who are already optimizing their work and improving their students' results.",
+    "moreInfo": "More information",
+    "features": {
+      "examCreation": {
+        "title": "Intelligent Exam Creation",
+        "description": "Generate personalized educational tests with AI assistance. Enjoy multiple formats (multiple choice, true/false, etc.), quality questions and reusable templates. Save time and ensure accurate and relevant assessments."
+      },
+      "aiGrading": {
+        "title": "AI and Computer Vision Grading (OMR)",
+        "description": "Transform your grading process. Our evaluation platform allows you to grade exams with your phone in minutes with our advanced OMR technology. Simply scan and process answer sheets automatically with your smartphone or tablet. AI handles instant correction of online tests and accurate paper reading."
+      },
+      "analytics": {
+        "title": "Detailed Results Analysis",
+        "description": "Get valuable insights into your students' performance. Identify areas for improvement, strengths and trends with our graphic and detailed reports. Make informed pedagogical decisions to enhance adaptive learning."
+      }
+    },
+    "modules": {
+      "institutions": {
+        "title": "Institution Management",
+        "items": [
+          "Create and manage multiple institutions",
+          "Configure institution-specific settings",
+          "Analytics by institution"
+        ]
+      },
+      "subjects": {
+        "title": "Subject Management",
+        "items": [
+          "Create and organize subjects by institution",
+          "Add descriptions and details",
+          "Structure your curriculum"
+        ]
+      },
+      "groups": {
+        "title": "Group Management",
+        "items": [
+          "Create and manage student groups",
+          "Define academic periods",
+          "Mass import of students"
+        ]
+      },
+      "grading": {
+        "title": "Grading Scheme",
+        "items": [
+          "Define detailed schemes by group",
+          "Configure periods and components",
+          "Assign percentage weights"
+        ]
+      },
+      "exams": {
+        "title": "Exam Management",
+        "items": [
+          "Create exams with AI assistance",
+          "Generate QR answer sheets",
+          "Automatic grading with Computer Vision (OMR)"
+        ]
+      },
+      "reports": {
+        "title": "Analysis and Results",
+        "items": [
+          "Detailed exam statistics",
+          "Excel and PDF reports",
+          "Detailed view by student"
+        ]
+      }
+    },
+    "benefits": {
+      "automation": {
+        "title": "Intelligent Automation",
+        "description": "Drastically reduce time spent on administrative and grading tasks thanks to AI and our exam scanning application."
+      },
+      "organization": {
+        "title": "Centralized Organization",
+        "description": "Have all educational information in one place, accessible when you need it, improving academic assessment management."
+      },
+      "insights": {
+        "title": "Valuable Insights",
+        "description": "Make pedagogical decisions based on reliable data to improve student performance and adapt your strategies."
+      },
+      "flexibility": {
+        "title": "Total Flexibility",
+        "description": "Adapt this exam platform to your specific needs and workflow, from elementary to university."
+      },
+      "speed": {
+        "title": "Grading in Minutes, Not Hours",
+        "description": "OMR (Optical Mark Recognition) technology converts hours of manual grading into minutes, allowing you to focus on teaching and automated feedback. ProfeVision is one of the best digital tools for teachers."
+      }
+    },
+    "stats": {
+      "teachers": "Active Teachers",
+      "institutions": "Institutions",
+      "exams": "Graded Exams",
+      "satisfaction": "Satisfaction"
+    },
+    "gradeTable": {
+      "title": "Grade Report",
+      "subject": "Mathematics - Group A",
+      "period": "Period 2",
+      "students": "students",
+      "average": "Average",
+      "student": "Student",
+      "exam1": "Exam 1",
+      "exam2": "Exam 2",
+      "final": "Final"
+    },
+    "howItWorks": {
+      "badge": "How It Works",
+      "title": "Create and grade exams in seconds with ProfeVision",
+      "subtitle": "The fastest and most modern way to evaluate your students",
+      "description": "Would you like to create exams in minutes and grade them in seconds? With ProfeVision you can do it. Our platform is designed for teachers and schools looking to save time and get accurate results. Create exams with artificial intelligence, upload your tests in PDF and automatically grade by scanning printed answer sheets with your phone. Plus, organize everything by institutions, subjects and classes, and access a dashboard with detailed results metrics.",
+      "tryFree": "Try Free",
+      "seeDemo": "See Demo",
+      "stepsTitle": "Step-by-step process",
+      "stepsDescription": "Follow these simple steps to start using ProfeVision",
+      "steps": {
+        "step1": {
+          "title": "Create your exam",
+          "description": "Use our AI to generate questions automatically or upload your own PDF content"
+        },
+        "step2": {
+          "title": "Print the sheets",
+          "description": "Generate and print answer sheets with unique QR codes for each student"
+        },
+        "step3": {
+          "title": "Scan with your mobile",
+          "description": "Use the mobile app to scan completed sheets and get instant results"
+        },
+        "step4": {
+          "title": "Review results",
+          "description": "Access detailed analytics, export grades and manage student performance"
+        }
+      }
+    }
   }
 }

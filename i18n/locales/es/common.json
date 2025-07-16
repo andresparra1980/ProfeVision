@@ -11,7 +11,13 @@
     "submit": "Enviar",
     "close": "Cerrar",
     "continue": "Continuar",
-    "confirm": "Confirmar"
+    "confirm": "Confirmar",
+    "startFree": "Comenzar Gratis!",
+    "learnMore": "Conocer Más",
+    "startTrial": "Inicia Prueba Gratis",
+    "exportGrades": "Exportar Calificaciones",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse"
   },
   "labels": {
     "name": "Nombre",
@@ -40,6 +46,209 @@
   "language": {
     "switch": "Cambiar idioma",
     "spanish": "Español",
-    "english": "English"
+    "english": "English",
+    "label": "Idioma"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "howItWorks": "¿Cómo funciona?",
+    "howItWorksDescription": "Descubre cómo transformar tu forma de crear, administrar y calificar exámenes",
+    "exams": "Exámenes",
+    "examsDescription": "Crea y administra exámenes de múltiples formas",
+    "manualGenerator": "Generador Manual",
+    "aiGenerator": "Generador con IA",
+    "aiGeneratorDescription": "Genera exámenes automáticamente con inteligencia artificial",
+    "paperExams": "Exámenes en Papel",
+    "paperExamsDescription": "Escanea y califica exámenes físicos automáticamente",
+    "functions": "Funciones",
+    "institutionsManagement": "Gestión de Instituciones",
+    "subjectsManagement": "Gestión de Materias",
+    "groupsManagement": "Gestión de Grupos",
+    "studentsManagement": "Gestión de Estudiantes",
+    "reportsManagement": "Gestión de Reportes",
+    "reports": "Reportes",
+    "mobileApp": "Aplicación Móvil",
+    "mobileAppDescription": "En desarrollo - Próximamente disponible",
+    "pricing": "Precios",
+    "blog": "Blog",
+    "contact": "Contacto",
+    "about": "Acerca de",
+    "dashboard": "Panel",
+    "terms": "Términos",
+    "privacy": "Privacidad",
+    "cookies": "Cookies"
+  },
+  "footer": {
+    "description": "ProfeVisión es la plataforma integral para educadores. Automatiza la creación y calificación de exámenes con IA y tecnología OMR, permitiéndote escanear y corregir pruebas en papel al instante con tu móvil. Además, centraliza la gestión completa de instituciones, materias, grupos y estudiantes. Ahorra tiempo, optimiza la evaluación educativa y obtén insights precisos para una enseñanza más efectiva. Es tu herramienta definitiva para transformar la gestión académica.",
+    "sections": {
+      "product": "Producto",
+      "company": "Empresa",
+      "legal": "Legal"
+    },
+    "links": {
+      "howItWorks": "¿Cómo funciona?",
+      "pricing": "Precios",
+      "aiGenerator": "Generador IA",
+      "mobileApp": "App Móvil",
+      "about": "Acerca de",
+      "blog": "Blog",
+      "contact": "Contacto",
+      "terms": "Términos",
+      "privacy": "Privacidad",
+      "cookies": "Cookies",
+      "termsOfService": "Términos de Servicio",
+      "privacyPolicy": "Política de Privacidad",
+      "cookiesPolicy": "Política de cookies"
+    },
+    "copyright": "Todos los derechos reservados."
+  },
+  "homepage": {
+    "newBadge": "¡Nuevo! Calificación con Visión Artificial (OMR)",
+    "heroTitle": "La Mejor Aplicación para Escanear y Calificar Exámenes en Papel",
+    "heroDescription": "En ProfeVisión, entendemos los desafíos de la educación moderna. Hemos desarrollado la solución todo en uno que automatiza la creación, calificación y gestión de exámenes con IA, liberando tu valioso tiempo para que te concentres en lo que realmente importa: enseñar y potenciar el aprendizaje de tus estudiantes.",
+    "trustedBy": "Más de 1,000+ profesores confían en nosotros",
+    "featuresTitle": "Todo lo que necesitas en una sola plataforma",
+    "featuresDescription": "ProfeVision simplifica tu trabajo como educador con herramientas potentes e intuitivas",
+    "featuresTag": "Características Principales",
+    "modulesTitle": "Gestión educativa completa",
+    "modulesDescription": "Organiza todos los aspectos de tu entorno educativo en un solo lugar",
+    "modulesTag": "Módulos Principales",
+    "benefitsTitle": "Ahorra tiempo y mejora la calidad educativa",
+    "benefitsDescription": "ProfeVision te permite enfocarte en lo que realmente importa: la enseñanza y el aprendizaje de tus estudiantes, impulsando la transformación digital en educación. Somos la plataforma para profesores que estabas buscando.",
+    "benefitsTag": "Beneficios Clave",
+    "ctaTitle": "Transforma tu experiencia educativa con ProfeVision",
+    "ctaDescription": "Únete a miles de educadores que ya están optimizando su trabajo y mejorando los resultados de sus estudiantes.",
+    "moreInfo": "Más información",
+    "features": {
+      "examCreation": {
+        "title": "Creación de Exámenes Inteligente",
+        "description": "Genera pruebas educativas personalizadas con asistencia de IA. Disfruta de múltiples formatos (selección múltiple, verdadero/falso, etc.), preguntas de calidad y plantillas reutilizables. Ahorra tiempo y asegura evaluaciones precisas y relevantes."
+      },
+      "aiGrading": {
+        "title": "Calificación con IA y Visión Artificial (OMR)",
+        "description": "Transforma tu proceso de corrección. Nuestra plataforma de evaluación te permite calificar exámenes con celular en minutos con nuestra tecnología OMR avanzada. Simplemente escanea y procesa hojas de respuestas automáticamente con tu smartphone o tablet. La IA se encarga de la corrección instantánea de pruebas online y la lectura precisa del papel."
+      },
+      "analytics": {
+        "title": "Análisis de Resultados Detallado",
+        "description": "Obtén insights valiosos sobre el desempeño de tus estudiantes. Identifica áreas de mejora, fortalezas y tendencias con nuestros reportes gráficos y detallados. Toma decisiones pedagógicas informadas para potenciar el aprendizaje adaptativo."
+      }
+    },
+    "modules": {
+      "institutions": {
+        "title": "Gestión de Instituciones",
+        "items": [
+          "Crea y administra múltiples instituciones",
+          "Configura ajustes específicos por institución",
+          "Analíticas por institución"
+        ]
+      },
+      "subjects": {
+        "title": "Gestión de Materias",
+        "items": [
+          "Crea y organiza materias por institución",
+          "Añade descripciones y detalles",
+          "Estructura tu plan de estudios"
+        ]
+      },
+      "groups": {
+        "title": "Gestión de Grupos",
+        "items": [
+          "Crea y administra grupos de estudiantes",
+          "Define períodos académicos",
+          "Importación masiva de estudiantes"
+        ]
+      },
+      "grading": {
+        "title": "Esquema de Calificaciones",
+        "items": [
+          "Define esquemas detallados por grupo",
+          "Configura períodos y componentes",
+          "Asigna pesos porcentuales"
+        ]
+      },
+      "exams": {
+        "title": "Gestión de Exámenes",
+        "items": [
+          "Crea exámenes con asistencia de IA",
+          "Genera hojas de respuesta con QR",
+          "Calificación automática con Visión Artificial (OMR)"
+        ]
+      },
+      "reports": {
+        "title": "Análisis y Resultados",
+        "items": [
+          "Estadísticas detalladas de exámenes",
+          "Reportes en Excel y PDF",
+          "Vista detallada por estudiante"
+        ]
+      }
+    },
+    "benefits": {
+      "automation": {
+        "title": "Automatización Inteligente",
+        "description": "Reduce drásticamente el tiempo dedicado a tareas administrativas y de calificación gracias a la IA y nuestra aplicación para escanear exámenes."
+      },
+      "organization": {
+        "title": "Organización Centralizada",
+        "description": "Ten toda la información educativa en un solo lugar, accesible cuando la necesites, mejorando la gestión de evaluaciones académicas."
+      },
+      "insights": {
+        "title": "Insights Valiosos",
+        "description": "Toma decisiones pedagógicas basadas en datos confiables para mejorar el rendimiento estudiantil y adaptar tus estrategias."
+      },
+      "flexibility": {
+        "title": "Flexibilidad Total",
+        "description": "Adapta esta plataforma de exámenes a tus necesidades específicas y flujo de trabajo, desde primaria hasta la universidad."
+      },
+      "speed": {
+        "title": "Calificación en Minutos, No en Horas",
+        "description": "La tecnología OMR (Optical Mark Recognition) convierte horas de calificación manual en minutos, permitiéndote enfocarte en la enseñanza y el feedback automático. ProfeVisión es una de las mejores herramientas digitales para docentes."
+      }
+    },
+    "stats": {
+      "teachers": "Profesores Activos",
+      "institutions": "Instituciones",
+      "exams": "Exámenes Calificados",
+      "satisfaction": "Satisfacción"
+    },
+    "gradeTable": {
+      "title": "Tabulado de Notas",
+      "subject": "Matemáticas - Grupo A",
+      "period": "Período 2",
+      "students": "estudiantes",
+      "average": "Promedio",
+      "student": "Estudiante",
+      "exam1": "Examen 1",
+      "exam2": "Examen 2",
+      "final": "Final"
+    },
+    "howItWorks": {
+      "badge": "¿Cómo Funciona?",
+      "title": "Crea y califica exámenes en segundos con ProfeVision",
+      "subtitle": "La forma más rápida y moderna de evaluar a tus estudiantes",
+      "description": "¿Te gustaría crear exámenes en minutos y calificarlos en segundos? Con ProfeVision puedes hacerlo. Nuestra plataforma está diseñada para profesores y escuelas que buscan ahorrar tiempo y obtener resultados precisos. Crea exámenes con inteligencia artificial, sube tus pruebas en PDF y califica automáticamente escaneando las hojas de respuesta impresas con tu celular. Además, organiza todo por instituciones, materias y clases, y accede a un dashboard con métricas detalladas de los resultados.",
+      "tryFree": "Prueba Gratis",
+      "seeDemo": "Ver Demo",
+      "stepsTitle": "Proceso paso a paso",
+      "stepsDescription": "Sigue estos sencillos pasos para comenzar a usar ProfeVision",
+      "steps": {
+        "step1": {
+          "title": "Crea tu examen",
+          "description": "Usa nuestra IA para generar preguntas automáticamente o sube tu propio contenido en PDF"
+        },
+        "step2": {
+          "title": "Imprime las hojas",
+          "description": "Genera e imprime las hojas de respuesta con códigos QR únicos para cada estudiante"
+        },
+        "step3": {
+          "title": "Escanea con tu móvil",
+          "description": "Usa la aplicación móvil para escanear las hojas completadas y obtener resultados instantáneos"
+        },
+        "step4": {
+          "title": "Revisa los resultados",
+          "description": "Accede a análisis detallados, exporta calificaciones y gestiona el rendimiento estudiantil"
+        }
+      }
+    }
   }
 }

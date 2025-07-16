@@ -1,12 +1,35 @@
 import Link from "next/link"
+import { useTranslations, useLocale } from 'next-intl'
 
 export function SiteFooter() {
+  const t = useTranslations('common')
+  const locale = useLocale()
+
+  // Helper function to get localized routes
+  const getLocalizedRoute = (route: string) => {
+    if (locale === 'es') {
+      const routeMap: { [key: string]: string } = {
+        'how-it-works': '/como-funciona',
+        'pricing': '/precios',
+        'contact': '/contacto',
+        'blog': '/blog',
+        'exams': '/examenes',
+        'mobile-app': '/aplicacion-movil',
+        'terms': '/terminos',
+        'privacy': '/privacidad',
+        'cookies': '/cookies'
+      }
+      return routeMap[route] || `/${route}`
+    }
+    return `/${route}`
+  }
+
   return (
     <footer className="border-t bg-card mt-auto">
       <div className="container px-4 md:px-6 py-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
           <div className="col-span-1 md:col-span-2 lg:col-span-2 text-center md:text-left">
-            <Link href="/" className="flex items-center gap-2 mb-3 hover:opacity-80 transition-opacity justify-center md:justify-start w-fit mx-auto md:mx-0" title="ProfeVisión - Página principal">
+            <Link href="/" className="flex items-center gap-2 mb-3 hover:opacity-80 transition-opacity justify-center md:justify-start w-fit mx-auto md:mx-0" title={`ProfeVisión - ${t('navigation.home')}`}>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
                 <span className="font-bold text-white">PV</span>
               </div>
@@ -18,15 +41,7 @@ export function SiteFooter() {
               </div>
             </Link>
             <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto md:mx-0">
-            ProfeVisión es la plataforma integral para educadores.
-            Automatiza la creación y calificación de exámenes con IA y
-            tecnología OMR, permitiéndote escanear y corregir pruebas
-            en papel al instante con tu móvil. Además, centraliza la
-            gestión completa de instituciones, materias, grupos y
-            estudiantes. Ahorra tiempo, optimiza la evaluación
-            educativa y obtén insights precisos para una enseñanza
-            más efectiva. Es tu herramienta definitiva para transformar
-            la gestión académica.
+              {t('footer.description')}
             </p>
             <div className="flex gap-4 justify-center md:justify-start">
               <Link href="#" className="text-muted-foreground hover:text-foreground">
@@ -80,95 +95,85 @@ export function SiteFooter() {
           </div>
           <div className="grid grid-cols-3 gap-4 md:gap-6 col-span-1 md:col-span-2 lg:col-span-3">
             <div>
-              <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">Producto</h3>
+              <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">{t('footer.sections.product')}</h3>
               <ul className="space-y-1 md:space-y-2">
                 <li>
-                  <Link href="/how-it-works" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="¿Cómo funciona ProfeVisión?">
-                    ¿Cómo funciona?
+                  <Link href={getLocalizedRoute('how-it-works')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.howItWorks')}>
+                    {t('footer.links.howItWorks')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/pricing" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Precios de ProfeVisión">
-                    Precios
+                  <Link href={getLocalizedRoute('pricing')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.pricing')}>
+                    {t('footer.links.pricing')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/exams" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Generador de exámenes con IA">
-                    Generador IA
+                  <Link href={getLocalizedRoute('exams')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.aiGenerator')}>
+                    {t('footer.links.aiGenerator')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/mobile-app" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Aplicación móvil">
-                    App Móvil
+                  <Link href={getLocalizedRoute('mobile-app')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.mobileApp')}>
+                    {t('footer.links.mobileApp')}
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">Empresa</h3>
+              <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">{t('footer.sections.company')}</h3>
               <ul className="space-y-1 md:space-y-2">
                 <li>
-                  <Link href="/how-it-works" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Acerca de ProfeVisión">
-                    Acerca de
+                  <Link href={getLocalizedRoute('how-it-works')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.about')}>
+                    {t('footer.links.about')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Blog de ProfeVisión">
-                    Blog
+                  <Link href={getLocalizedRoute('blog')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.blog')}>
+                    {t('footer.links.blog')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Contacto ProfeVisión">
-                    Contacto
+                  <Link href={getLocalizedRoute('contact')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.contact')}>
+                    {t('footer.links.contact')}
                   </Link>
                 </li>
-                {/* <li>
-                  <Link href="#" className="text-xs md:text-sm text-muted-foreground hover:text-foreground">
-                    Carreras
-                  </Link>
-                </li> */}
               </ul>
             </div>
             <div>
-              <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">Legal</h3>
+              <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">{t('footer.sections.legal')}</h3>
               <ul className="space-y-1 md:space-y-2">
                 <li>
-                  <Link href="/terms" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Términos y condiciones de ProfeVisión">
-                    Términos
+                  <Link href={getLocalizedRoute('terms')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.terms')}>
+                    {t('footer.links.terms')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/privacy" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Política de privacidad de ProfeVisión">
-                    Privacidad
+                  <Link href={getLocalizedRoute('privacy')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.privacy')}>
+                    {t('footer.links.privacy')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/cookies" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title="Política de cookies de ProfeVisión">
-                    Cookies
+                  <Link href={getLocalizedRoute('cookies')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.cookies')}>
+                    {t('footer.links.cookies')}
                   </Link>
                 </li>
-                {/* <li>
-                  <Link href="#" className="text-xs md:text-sm text-muted-foreground hover:text-foreground">
-                    Licencias
-                  </Link>
-                </li> */}
               </ul>
             </div>
           </div>
         </div>
         <div className="border-t mt-8 md:mt-12 pt-4 md:pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} ProfeVision. Todos los derechos reservados.
+            &copy; {new Date().getFullYear()} ProfeVision. {t('footer.copyright')}
           </p>
           <div className="flex gap-4 mt-2 md:mt-0">
-            <Link href="/cookies" className="text-xs text-muted-foreground hover:text-foreground" title="Política de cookies">
-              Cookies
+            <Link href={getLocalizedRoute('cookies')} className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.cookiesPolicy')}>
+              {t('footer.links.cookies')}
             </Link>
-            <Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground" title="Términos de servicio">
-              Términos de Servicio
+            <Link href={getLocalizedRoute('terms')} className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.termsOfService')}>
+              {t('footer.links.termsOfService')}
             </Link>
-            <Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground" title="Política de privacidad">
-              Política de Privacidad
+            <Link href={getLocalizedRoute('privacy')} className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.privacyPolicy')}>
+              {t('footer.links.privacyPolicy')}
             </Link>
           </div>
         </div>

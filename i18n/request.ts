@@ -9,9 +9,15 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ? requested
     : routing.defaultLocale;
 
+  // 🌍 Importar todos los archivos de traducción
+  const messages = {
+    common: (await import(`./locales/${locale}/common.json`)).default,
+    auth: (await import(`./locales/${locale}/auth.json`)).default,
+  };
+
   return {
     locale,
-    messages: (await import(`./locales/${locale}/common.json`)).default,
+    messages,
     timeZone: 'America/Bogota',
     now: new Date(),
   };

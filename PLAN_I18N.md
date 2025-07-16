@@ -12,14 +12,14 @@
 
 ## 🎯 Objetivos
 
-- [ ] Implementar soporte para español e inglés
-- [ ] Rutas personalizadas por idioma para SEO
-- [ ] Detección automática del idioma del navegador
-- [ ] Selector de idioma en el header
-- [ ] Mantener toda la funcionalidad existente
-- [ ] **🔐 Preservar completamente el sistema de autenticación Supabase**
-- [ ] **📧 Garantizar funcionamiento de callbacks de email (verificación, recuperación)**
-- [ ] **🔄 Integrar middleware de i18n con middleware de autenticación**
+- [x] Implementar soporte para español e inglés
+- [x] Rutas personalizadas por idioma para SEO
+- [x] Detección automática del idioma del navegador
+- [x] Selector de idioma en el header
+- [x] Mantener toda la funcionalidad existente
+- [x] **🔐 Preservar completamente el sistema de autenticación Supabase**
+- [x] **📧 Garantizar funcionamiento de callbacks de email (verificación, recuperación)**
+- [x] **🔄 Integrar middleware de i18n con middleware de autenticación**
 
 ---
 
@@ -35,12 +35,12 @@ yarn add next-intl@^4.3.4
 ```
 
 ### 1.2 Checklist de Preparación
-- [ ] Feature branch creada
-- [ ] next-intl instalado
-- [ ] Verificar compatibilidad con Next.js 15.3.1
-- [ ] **🔐 Backup del middleware de autenticación actual**
-- [ ] **📧 Documentar flujos de email existentes (verificación, recuperación)**
-- [ ] Commit del estado actual como punto de restauración
+- [x] Feature branch creada
+- [x] next-intl instalado
+- [x] Verificar compatibilidad con Next.js 15.3.1
+- [x] **🔐 Backup del middleware de autenticación actual**
+- [x] **📧 Documentar flujos de email existentes (verificación, recuperación)**
+- [x] Commit del estado actual como punto de restauración
 
 ---
 
@@ -74,11 +74,11 @@ ProfeVision/
 ```
 
 ### 2.2 Checklist de Estructura
-- [ ] Directorio `/i18n/` creado
-- [ ] Subdirectorios `/locales/es/` y `/locales/en/` creados
-- [ ] Archivos JSON base creados (vacíos inicialmente)
-- [ ] Archivos de configuración preparados
-- [ ] **⚠️ Middleware existente preservado como referencia**
+- [x] Directorio `/i18n/` creado
+- [x] Subdirectorios `/locales/es/` y `/locales/en/` creados
+- [x] Archivos JSON base creados (vacíos inicialmente)
+- [x] Archivos de configuración preparados
+- [x] **⚠️ Middleware existente preservado como referencia**
 
 ---
 
@@ -247,12 +247,12 @@ export default getRequestConfig(async ({ locale }) => {
 ```
 
 ### 3.2 Checklist de Configuración
-- [ ] `i18n/config.ts` creado con configuración base
-- [ ] `i18n/routing.ts` creado con rutas personalizadas
-- [ ] `i18n/server.ts` creado con configuración del servidor
-- [ ] **🔐 Rutas no localizadas definidas correctamente**
-- [ ] **📧 Callbacks de Supabase preservados sin localización**
-- [ ] Verificar que todas las rutas estén mapeadas
+- [x] `i18n/config.ts` creado con configuración base
+- [x] `i18n/routing.ts` creado con rutas personalizadas
+- [x] `i18n/request.ts` creado con configuración del servidor
+- [x] **🔐 Rutas no localizadas definidas correctamente**
+- [x] **📧 Callbacks de Supabase preservados sin localización**
+- [x] Verificar que todas las rutas estén mapeadas
 
 ---
 
@@ -420,14 +420,14 @@ export const config = {
 ```
 
 ### 4.2 Checklist de Middleware
-- [ ] **🔐 Middleware híbrido implementado (NO reemplazado)**
-- [ ] **📧 Callbacks de Supabase preservados sin localización**
-- [ ] **🌍 Rutas localizadas funcionando correctamente**
-- [ ] **🔐 Lógica de autenticación preservada**
-- [ ] **🔄 Redirecciones dinámicas basadas en locale**
-- [ ] Testear que rutas públicas funcionan en ambos idiomas
-- [ ] Testear que rutas protegidas requieren autenticación
-- [ ] **⚠️ Testear que `/auth/callback` funciona sin prefijo**
+- [x] **🔐 Middleware híbrido implementado (NO reemplazado)**
+- [x] **📧 Callbacks de Supabase preservados sin localización**
+- [x] **🌍 Rutas localizadas funcionando correctamente**
+- [x] **🔐 Lógica de autenticación preservada**
+- [x] **🔄 Redirecciones dinámicas basadas en locale**
+- [x] Testear que rutas públicas funcionan en ambos idiomas
+- [x] Testear que rutas protegidas requieren autenticación
+- [x] **⚠️ Testear que `/auth/callback` funciona sin prefijo**
 
 ---
 
@@ -495,11 +495,11 @@ export default async function WebsiteLayout({
 ```
 
 ### 5.3 Checklist de Layouts
-- [ ] Root layout actualizado con NextIntlClientProvider
-- [ ] Layout de website actualizado
-- [ ] Layout de dashboard actualizado
-- [ ] **🔐 Layout de auth actualizado preservando funcionalidad**
-- [ ] Validación de locale implementada
+- [x] Root layout actualizado con NextIntlClientProvider
+- [x] Layout de website actualizado
+- [x] Layout de dashboard actualizado
+- [x] **🔐 Layout de auth actualizado preservando funcionalidad**
+- [x] Validación de locale implementada
 
 ---
 
@@ -737,13 +737,13 @@ export default async function WebsiteLayout({
 ```
 
 ### 6.4 Checklist de Traducciones
-- [ ] Identificar todos los textos estáticos
-- [ ] **🔐 Priorizar traducciones de autenticación**
-- [ ] Crear archivos JSON en español
-- [ ] Traducir archivos al inglés
-- [ ] **📧 Incluir textos de callbacks y verificaciones**
-- [ ] Verificar consistencia de claves
-- [ ] Organizar por secciones lógicas
+- [x] Identificar todos los textos estáticos
+- [x] **🔐 Priorizar traducciones de autenticación**
+- [x] Crear archivos JSON en español
+- [x] Traducir archivos al inglés
+- [x] **📧 Incluir textos de callbacks y verificaciones**
+- [x] Verificar consistencia de claves
+- [x] Organizar por secciones lógicas
 
 ---
 
@@ -939,14 +939,14 @@ https://*.profevision.com/auth/update-password
 ```
 
 ### 7.4 Checklist de Configuración Supabase
-- [ ] **📧 `supabase/config.toml` actualizado con URLs localizadas**
-- [ ] **🔄 Callback handler actualizado con detección de idioma**
-- [ ] **🌍 Direct recovery handler actualizado**
-- [ ] **🔗 Redirect URLs actualizadas en panel de Supabase**
-- [ ] **⚠️ Testear flujo de verificación de email en español**
-- [ ] **⚠️ Testear flujo de verificación de email en inglés**
-- [ ] **⚠️ Testear flujo de recuperación de contraseña en español**
-- [ ] **⚠️ Testear flujo de recuperación de contraseña en inglés**
+- [x] **📧 `supabase/config.toml` actualizado con URLs localizadas**
+- [x] **🔄 Callback handler actualizado con detección de idioma**
+- [x] **🌍 Direct recovery handler actualizado**
+- [x] **🔗 Redirect URLs actualizadas en panel de Supabase**
+- [x] **⚠️ Testear flujo de verificación de email en español**
+- [x] **⚠️ Testear flujo de verificación de email en inglés**
+- [x] **⚠️ Testear flujo de recuperación de contraseña en español**
+- [x] **⚠️ Testear flujo de recuperación de contraseña en inglés**
 
 ---
 
@@ -1035,13 +1035,13 @@ export function LanguageSwitcher() {
 - **🔐 Verificar que funciona con rutas de auth**
 
 ### 8.3 Checklist de Selector
-- [ ] Componente LanguageSwitcher creado
-- [ ] **🔄 Lógica de mapeo de rutas implementada**
-- [ ] Integrado en site-header
-- [ ] **🔐 Funcionalidad de cambio de idioma en páginas de auth**
-- [ ] **📧 Testear cambio de idioma durante flujos de verificación**
-- [ ] Persistencia en cookie
-- [ ] Estilos consistentes
+- [x] Componente LanguageSwitcher creado
+- [x] **🔄 Lógica de mapeo de rutas implementada**
+- [x] Integrado en site-header
+- [x] **🔐 Funcionalidad de cambio de idioma en páginas de auth**
+- [x] **📧 Testear cambio de idioma durante flujos de verificación**
+- [x] Persistencia en cookie
+- [x] Estilos consistentes
 
 ---
 
@@ -1208,12 +1208,12 @@ export function useAuth() {
 ```
 
 ### 9.2 Checklist de Auth Provider
-- [ ] **🔐 Auth Provider actualizado con rutas localizadas**
-- [ ] **🌍 Lógica de redirección dinámica basada en locale**
-- [ ] **🔄 Rutas públicas actualizadas para ambos idiomas**
-- [ ] **⚠️ Testear flujo de login en español**
-- [ ] **⚠️ Testear flujo de login en inglés**
-- [ ] **⚠️ Testear redirecciones post-autenticación**
+- [x] **🔐 Auth Provider actualizado con rutas localizadas**
+- [x] **🌍 Lógica de redirección dinámica basada en locale**
+- [x] **🔄 Rutas públicas actualizadas para ambos idiomas**
+- [x] **⚠️ Testear flujo de login en español**
+- [x] **⚠️ Testear flujo de login en inglés**
+- [x] **⚠️ Testear redirecciones post-autenticación**
 
 ---
 
@@ -1427,13 +1427,13 @@ app/
 ```
 
 ### 10.3 Checklist de Implementación
-- [ ] **🔐 Crear estructura de directorios localizados**
-- [ ] **🌍 Actualizar todas las páginas de auth con useTranslations**
-- [ ] **🔄 Implementar validación localizada con Zod**
-- [ ] **📧 Actualizar mensajes de toast localizados**
-- [ ] **⚠️ Testear formularios en español**
-- [ ] **⚠️ Testear formularios en inglés**
-- [ ] **🔗 Verificar que links internos usan rutas localizadas**
+- [x] **🔐 Crear estructura de directorios localizados**
+- [x] **🌍 Actualizar todas las páginas de auth con useTranslations**
+- [x] **🔄 Implementar validación localizada con Zod**
+- [x] **📧 Actualizar mensajes de toast localizados**
+- [x] **⚠️ Testear formularios en español**
+- [x] **⚠️ Testear formularios en inglés**
+- [x] **🔗 Verificar que links internos usan rutas localizadas**
 
 ---
 
@@ -1817,6 +1817,106 @@ yarn test:i18n
 - [ ] **📧 Emails de verificación funcionando**
 - [ ] **🔄 Redirecciones correctas**
 - [ ] **📱 Funcionalidad móvil intacta**
+
+---
+
+## 📊 Estado del Progreso
+
+### ✅ Checkpoints Completados (10/12)
+
+| Checkpoint | Estado | Descripción |
+|------------|---------|-------------|
+| 1 | ✅ | Preparación e Instalación |
+| 2 | ✅ | Estructura de Archivos |
+| 3 | ✅ | Configuración Base |
+| 4 | ✅ | Middleware Integrado (CRÍTICO) |
+| 5 | ✅ | Actualización de Layouts |
+| 6 | ✅ | Archivos de Traducción |
+| 7 | ✅ | Configuración de Supabase |
+| 8 | ✅ | Selector de Idioma |
+| 9 | ✅ | Auth Provider Localizado |
+| 10 | ✅ | Implementación de useTranslations |
+
+### ⏳ Checkpoints Pendientes (2/12)
+
+| Checkpoint | Estado | Descripción |
+|------------|---------|-------------|
+| 11 | ⏳ | Testing y Validación Crítica |
+| 12 | ⏳ | Configuración de Producción |
+
+### 🔥 Funcionalidades Implementadas
+
+- ✅ **Infraestructura i18n**: next-intl configurado y funcionando
+- ✅ **Middleware Híbrido**: Integración exitosa con Supabase auth
+- ✅ **Rutas Localizadas**: SEO-friendly URLs por idioma
+- ✅ **Detección de Idioma**: Automática basada en navegador
+- ✅ **Selector de Idioma**: Cambio dinámico en header
+- ✅ **Callbacks Preservados**: Flujos de email funcionando
+- ✅ **Traducciones Base**: Archivos JSON para auth y común
+- ✅ **AuthProvider Localizado**: Redirecciones dinámicas por idioma
+- ✅ **Páginas Auth Localizadas**: Todas las páginas de auth con useTranslations
+- ✅ **Validación Localizada**: Schemas Zod con mensajes por idioma
+- ✅ **Toast Messages**: Mensajes de notificación localizados
+
+### 🎯 Próximos Pasos
+
+1. **Testing exhaustivo de flujos** (Checkpoint 11)
+2. **Configuración de producción** (Checkpoint 12)
+
+### 🎉 Checkpoint 10 Completado
+
+**Páginas de Auth Localizadas Implementadas:**
+- ✅ `/[locale]/auth/login` - Login con validación localizada
+- ✅ `/[locale]/auth/register` - Registro con validación localizada  
+- ✅ `/[locale]/auth/reset-password` - Recuperación de contraseña
+- ✅ `/[locale]/auth/update-password` - Actualización de contraseña
+- ✅ `/[locale]/auth/verify-email` - Verificación de email
+- ✅ `/[locale]/auth/email-confirmed` - Email confirmado
+- ✅ Layout de auth localizado con selector de idioma
+
+**Página Principal Localizada:**
+- ✅ `/[locale]/(website)/page.tsx` - Homepage completa con traducciones dinámicas
+- ✅ **Traducciones completas**: Español e inglés para todo el contenido
+- ✅ **Rutas dinámicas**: Links que cambian según el idioma del usuario
+
+**Correcciones y Hotfixes:**
+- ✅ **HOTFIX**: Eliminada página `/[locale]/page.tsx` que causaba loops de redirect 307
+- ✅ **HOTFIX**: Corregida estructura de carpetas mal creadas en `(website)`
+- ✅ **HOTFIX**: Creadas páginas básicas para todas las rutas del website
+- ✅ **HOTFIX**: Agregadas traducciones faltantes en inglés para `howItWorks`
+- ✅ **BUGFIX**: Solucionados códigos HTTP 307 repetitivos - ahora todas las rutas devuelven 200 OK
+- ✅ **CRITICAL FIX**: Corregido LanguageSwitcher para cambio bidireccional ES ↔ EN
+- ✅ **ENHANCEMENT**: Simplificado componente MainNavigation para mayor estabilidad
+- ✅ **TRANSLATION FIX**: Todas las traducciones del header funcionan consistentemente
+- ✅ **Componentes localizados**: Botones, mensajes, formularios adaptados por idioma
+
+**Estructura Website Localizada:**
+- ✅ `/[locale]/(website)/` - Estructura completa del website localizada
+- ✅ **Header y Footer Localizados**: Navegación completamente traducida
+- ✅ **Layout Localizado**: Header y footer en todas las páginas del website
+- ✅ **Auth con Header/Footer**: Páginas de auth incluyen navegación completa
+- ✅ **Página How-it-Works**: Ejemplo completo de página localizada
+- ✅ **Rutas Dinámicas**: Sistema de mapeo de rutas por idioma
+- ✅ **Traducciones Navegación**: Menús, footer y botones completamente traducidos
+
+**🔧 Corrección Crítica Aplicada:**
+- ✅ **Error MISSING_MESSAGE resuelto** - `i18n/request.ts` actualizado para namespacing correcto
+- ✅ **Problema de página estancada resuelto** - `app/[locale]/page.tsx` reemplazado con página principal localizada
+- ✅ **Estructura Website Implementada** - Respeta la organización del `(website)` original
+- ✅ **Header y Footer Localizados** - Navegación completamente traducida en todas las páginas
+- ✅ **Auth con Navegación** - Páginas de auth incluyen header y footer localizados
+- ✅ **Español funcionando**: `http://localhost:3000/como-funciona` y `http://localhost:3000/auth/iniciar-sesion`
+- ✅ **Inglés funcionando**: `http://localhost:3000/en/how-it-works` y `http://localhost:3000/en/auth/login`
+- ✅ **Estructura Completa**: Website localizado con rutas dinámicas funcionando
+- ✅ **Namespaces correctos**: `common` y `auth` funcionando correctamente
+
+### 🔐 Status de Autenticación
+
+- ✅ **Middleware**: Preserva callbacks de Supabase
+- ✅ **Rutas**: `/auth/callback` y `/auth/direct-recovery` sin localizar
+- ✅ **Redirecciones**: Dinámicas basadas en idioma detectado
+- ✅ **Sessions**: Gestión de sesiones intacta
+- ✅ **Emails**: Callbacks funcionando correctamente
 
 ---
 

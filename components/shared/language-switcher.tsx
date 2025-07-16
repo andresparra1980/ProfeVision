@@ -3,7 +3,6 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { locales } from '@/i18n/config';
-import { routing } from '@/i18n/routing';
 import {
   Select,
   SelectContent,
@@ -17,38 +16,82 @@ export function LanguageSwitcher() {
   const pathname = usePathname();
   const locale = useLocale();
 
+  // Mapa bidireccional de rutas
+  const routeMap: Record<string, string> = {
+    '/': '/',
+    '/how-it-works': '/como-funciona',
+    '/pricing': '/precios',
+    '/contact': '/contacto',
+    '/blog': '/blog',
+    '/exams': '/examenes',
+    '/paper-exams': '/examenes-papel',
+    '/mobile-app': '/aplicacion-movil',
+    '/privacy': '/privacidad',
+    '/terms': '/terminos',
+    '/cookies': '/cookies',
+    '/reports': '/reportes',
+    '/institutions-management': '/gestion-instituciones',
+    '/subjects-management': '/gestion-materias',
+    '/groups-management': '/gestion-grupos',
+    '/students-management': '/gestion-estudiantes',
+    '/auth/login': '/auth/iniciar-sesion',
+    '/auth/register': '/auth/registro',
+    '/auth/reset-password': '/auth/restablecer-contrasena',
+    '/auth/update-password': '/auth/actualizar-contrasena',
+    '/auth/verify-email': '/auth/verificar-email',
+    '/auth/email-confirmed': '/auth/email-confirmado',
+    '/dashboard': '/panel'
+  };
+
+  // Crear mapa inverso
+  const reverseRouteMap = Object.entries(routeMap).reduce((acc, [en, es]) => {
+    acc[es] = en;
+    return acc;
+  }, {} as Record<string, string>);
+
   const handleLocaleChange = (newLocale: string) => {
-    // 🌍 Construir nueva ruta manteniendo la estructura
-    let newPath = pathname;
+    console.log('🔄 Language Switch START:', { pathname, locale, newLocale });
     
-    // Si la ruta actual tiene prefijo de idioma, removerlo
-    if (pathname.startsWith(`/${locale}/`)) {
-      newPath = pathname.replace(`/${locale}/`, '/');
-    } else if (pathname === `/${locale}`) {
-      newPath = '/';
+    let currentPath = pathname;
+    
+    // 1. Obtener la ruta sin prefijo de idioma
+    if (locale === 'en' && pathname.startsWith('/en')) {
+      currentPath = pathname === '/en' ? '/' : pathname.replace('/en', '');
     }
     
-    // 🔄 Mapear rutas usando routing.pathnames si existe
-    const currentPathnameKey = Object.keys(routing.pathnames).find(key => {
-      const paths = routing.pathnames[key as keyof typeof routing.pathnames];
-      if (typeof paths === 'object' && paths !== null) {
-        return paths[locale as keyof typeof paths] === pathname.replace(`/${locale}`, '') || 
-               paths[locale as keyof typeof paths] === pathname;
-      }
-      return false;
-    });
+    console.log('🔄 Current path (no prefix):', currentPath);
     
-    if (currentPathnameKey) {
-      const targetPaths = routing.pathnames[currentPathnameKey as keyof typeof routing.pathnames];
-      if (typeof targetPaths === 'object' && targetPaths !== null) {
-        newPath = targetPaths[newLocale as keyof typeof targetPaths] || newPath;
+    // 2. Mapear la ruta al idioma de destino
+    let targetPath = currentPath;
+    
+    if (newLocale === 'es') {
+      // Cambiar de inglés a español
+      if (locale === 'en') {
+        targetPath = routeMap[currentPath] || currentPath;
       }
+      // Si ya estamos en español, no cambiar la ruta
+    } else if (newLocale === 'en') {
+      // Cambiar de español a inglés
+      if (locale === 'es') {
+        targetPath = reverseRouteMap[currentPath] || currentPath;
+      }
+      // Si ya estamos en inglés, no cambiar la ruta
     }
     
-    // Construir URL final
-    const finalPath = newLocale === 'es' && newPath === '/' ? '/' : `/${newLocale}${newPath}`;
+    console.log('🔄 Target path:', targetPath);
     
-    // 🔄 Navegar a la nueva ruta
+    // 3. Construir URL final
+    let finalPath = targetPath;
+    if (newLocale === 'en') {
+      finalPath = targetPath === '/' ? '/en' : `/en${targetPath}`;
+    } else if (newLocale === 'es') {
+      // Forzar prefijo /es para asegurar cambio de idioma
+      finalPath = targetPath === '/' ? '/es' : `/es${targetPath}`;
+    }
+    
+    console.log('🔄 Final path:', finalPath);
+    
+    // 4. Navegar a la nueva ruta
     router.push(finalPath);
   };
 
