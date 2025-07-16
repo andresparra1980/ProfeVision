@@ -89,7 +89,7 @@ export default function RegisterPage() {
       });
       
       // 🔄 Redirección localizada
-      const verifyEmailPath = locale === 'es' ? '/es/auth/verificar-email' : '/en/auth/verify-email';
+      const verifyEmailPath = locale === 'es' ? '/auth/verify-email' : '/en/auth/verify-email';
       router.push(verifyEmailPath);
     } catch (error: unknown) {
       toast({
@@ -108,7 +108,7 @@ export default function RegisterPage() {
   }
 
   // 🔄 Rutas localizadas
-  const loginPath = locale === 'es' ? '/es/auth/iniciar-sesion' : '/en/auth/login';
+  const loginPath = locale === 'es' ? '/auth/login' : '/en/auth/login';
 
   return (
     <Card className="w-full max-w-md">

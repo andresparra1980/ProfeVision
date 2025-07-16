@@ -167,7 +167,7 @@ function UpdatePasswordContent() {
       });
       
       // 🔄 Redirección localizada
-      const loginPath = locale === 'es' ? '/es/auth/iniciar-sesion' : '/en/auth/login';
+      const loginPath = locale === 'es' ? '/auth/login' : '/en/auth/login';
       router.push(loginPath);
     } catch (error: unknown) {
       let errorMsg = tErrors('generalError');
@@ -191,7 +191,7 @@ function UpdatePasswordContent() {
   }
 
   // 🔄 Rutas localizadas
-  const resetPasswordPath = locale === 'es' ? '/es/auth/restablecer-contrasena' : '/en/auth/reset-password';
+  const resetPasswordPath = locale === 'es' ? '/auth/reset-password' : '/en/auth/reset-password';
 
   if (error) {
     return (

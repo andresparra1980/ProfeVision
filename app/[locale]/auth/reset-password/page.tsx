@@ -97,7 +97,7 @@ export default function ResetPasswordPage() {
   }
 
   // 🔄 Rutas localizadas
-  const loginPath = locale === 'es' ? '/es/auth/iniciar-sesion' : '/en/auth/login';
+  const loginPath = locale === 'es' ? '/auth/login' : '/en/auth/login';
 
   if (isSubmitted) {
     return (

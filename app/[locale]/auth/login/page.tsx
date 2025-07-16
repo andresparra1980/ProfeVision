@@ -73,7 +73,7 @@ export default function LoginPage() {
       }
 
       // 🔄 Redirección localizada
-      const dashboardPath = locale === 'es' ? '/es/panel' : '/en/dashboard';
+      const dashboardPath = locale === 'es' ? '/dashboard' : '/en/dashboard';
       router.push(dashboardPath);
       router.refresh();
     } catch (error: unknown) {
@@ -94,8 +94,8 @@ export default function LoginPage() {
   }
 
   // 🔄 Rutas localizadas
-  const resetPasswordPath = locale === 'es' ? '/es/auth/restablecer-contrasena' : '/en/auth/reset-password';
-  const registerPath = locale === 'es' ? '/es/auth/registro' : '/en/auth/register';
+  const resetPasswordPath = locale === 'es' ? '/auth/reset-password' : '/en/auth/reset-password';
+        const registerPath = locale === 'es' ? '/auth/register' : '/en/auth/register';
 
   return (
     <Card className="w-full max-w-md">
