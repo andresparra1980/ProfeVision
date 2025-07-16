@@ -18,48 +18,30 @@ import {
 import Image from 'next/image'
 import { useMemo } from 'react'
 
-export default function LocaleHomePage() {
-  const t = useTranslations('common.homepage')
-  const tButtons = useTranslations('common.buttons')
+export default function Home() {
+  const t = useTranslations('common')
   const locale = useLocale()
-
-  // Helper function to get localized auth routes
-  const getAuthRoute = (route: string) => {
-    if (locale === 'es') {
-      return `/auth/${route === 'register' ? 'registro' : 'iniciar-sesion'}`
-    }
-    return `/auth/${route}`
-  }
-
-  // Helper function to get localized routes
-  const getRoute = (route: string) => {
-    if (locale === 'es') {
-      const routeMap: { [key: string]: string } = {
-        'how-it-works': '/como-funciona',
-        'pricing': '/precios',
-        'contact': '/contacto',
-        'blog': '/blog',
-        'exams': '/examenes',
-        'institutions-management': '/gestion-instituciones',
-        'subjects-management': '/gestion-materias',
-        'groups-management': '/gestion-grupos',
-        'students-management': '/gestion-estudiantes',
-        'reports': '/reportes',
-        'mobile-app': '/aplicacion-movil',
-        'paper-exams': '/examenes-papel'
-      }
-      return routeMap[route] || route
-    }
-    return `/${route}`
-  }
-
+  
   const avatarSeeds = useMemo(
     () => Array.from({ length: 4 }, () => Math.random().toString(36).substring(2, 10)),
     []
   )
 
+  // Helper function to get localized routes
+  const getLocalizedRoute = (route: string) => {
+    if (locale === 'es') {
+      const routeMap: Record<string, string> = {
+        '/auth/register': '/auth/registro',
+        '/how-it-works': '/como-funciona',
+      }
+      return routeMap[route] || route
+    }
+    return route
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Content wrapper - applying blur when menu is open */}
       <div className="flex-1 transition-all duration-200">
         {/* Hero Section */}
         <section className="py-12 md:py-20 relative overflow-hidden">
@@ -71,21 +53,13 @@ export default function LocaleHomePage() {
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-[#0b890f] text-white hover:bg-[#0b890f]/80 w-fit">
-                  {t('newBadge')}
+                  {t('homepage.hero.badge')}
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                  {locale === 'es' ? (
-                    <>
-                      La Mejor Aplicación <span className="text-[#0b890f]">para Escanear y Calificar Exámenes en Papel</span>
-                    </>
-                  ) : (
-                    <>
-                      The Best App <span className="text-[#0b890f]">for Scanning and Grading Paper Exams</span>
-                    </>
-                  )}
+                  {t('homepage.hero.title')} <span className="text-[#0b890f]">{t('homepage.hero.titleHighlight')}</span>
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  {t('heroDescription')}
+                  {t('homepage.hero.description')}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button
@@ -93,13 +67,13 @@ export default function LocaleHomePage() {
                     size="lg"
                     className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
-                    <Link href={getAuthRoute('register')} title={`${tButtons('startFree')} - ${t('heroTitle')}`}>
-                      {tButtons('startFree')}
+                    <Link href={getLocalizedRoute('/auth/register')} title={t('homepage.hero.registerTitle')}>
+                      {t('homepage.hero.startFree')}
                     </Link>
                   </Button>
                   <Button asChild variant="outline" size="lg">
-                    <Link href="#caracteristicas" title={t('featuresDescription')}>
-                      {tButtons('learnMore')}
+                    <Link href="#caracteristicas" title={t('homepage.hero.learnMoreTitle')}>
+                      {t('homepage.hero.learnMore')}
                     </Link>
                   </Button>
                 </div>
@@ -109,8 +83,8 @@ export default function LocaleHomePage() {
                       <Image
                         key={seed}
                         src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`}
-                        alt={`Teacher avatar ${index + 1}`}
-                        title={`Teacher using ProfeVision`}
+                        alt={t('homepage.hero.avatarAlt', { number: index + 1 })}
+                        title={t('homepage.hero.avatarTitle')}
                         width={32}
                         height={32}
                         className="w-8 h-8 rounded-full border-2 border-background"
@@ -119,7 +93,7 @@ export default function LocaleHomePage() {
                     ))}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {t('trustedBy')}
+                    {t('homepage.hero.trustText')} <span className="font-bold text-foreground">{t('homepage.hero.trustNumber')}</span> {t('homepage.hero.trustSuffix')}
                   </p>
                 </div>
               </div>
@@ -133,13 +107,13 @@ export default function LocaleHomePage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
-                {t('featuresTag')}
+                {t('homepage.features.badge')}
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                {t('featuresTitle')}
+                {t('homepage.features.title')}
               </h2>
               <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                {t('featuresDescription')}
+                {t('homepage.features.description')}
               </p>
             </div>
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
@@ -147,27 +121,27 @@ export default function LocaleHomePage() {
                 <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
                   <BookOpen className="h-6 w-6 text-[#0b890f]" />
                 </div>
-                <h3 className="text-xl text-center font-bold">{t('features.examCreation.title')}</h3>
+                <h3 className="text-xl text-center font-bold">{t('homepage.features.examCreation.title')}</h3>
                 <p className="text-center text-muted-foreground">
-                  {t('features.examCreation.description')}
+                  {t('homepage.features.examCreation.description')}
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md">
                 <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
                   <Smartphone className="h-6 w-6 text-[#0b890f]" />
                 </div>
-                <h3 className="text-xl text-center font-bold">{t('features.aiGrading.title')}</h3>
+                <h3 className="text-xl text-center font-bold">{t('homepage.features.aiGrading.title')}</h3>
                 <p className="text-center text-muted-foreground">
-                  {t('features.aiGrading.description')}
+                  {t('homepage.features.aiGrading.description')}
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md">
                 <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
                   <BarChart3 className="h-6 w-6 text-[#0b890f]" />
                 </div>
-                <h3 className="text-xl text-center font-bold">{t('features.analytics.title')}</h3>
+                <h3 className="text-xl text-center font-bold">{t('homepage.features.resultAnalysis.title')}</h3>
                 <p className="text-center text-muted-foreground">
-                  {t('features.analytics.description')}
+                  {t('homepage.features.resultAnalysis.description')}
                 </p>
               </div>
             </div>
@@ -180,15 +154,14 @@ export default function LocaleHomePage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
-                {t('modulesTag')}
+                {t('homepage.modules.badge')}
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">{t('modulesTitle')}</h2>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">{t('homepage.modules.title')}</h2>
               <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                {t('modulesDescription')}
+                {t('homepage.modules.description')}
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-12">
-              {/* Institutions Module */}
               <div className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
@@ -196,26 +169,36 @@ export default function LocaleHomePage() {
                     <div className="rounded-full bg-[#0b890f]/10 p-3">
                       <School className="h-5 w-5 text-[#0b890f]" />
                     </div>
-                    <h3 className="text-lg font-bold">{t('modules.institutions.title')}</h3>
+                    <h3 className="text-lg font-bold">{t('homepage.modules.institutions.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
-                    {t.raw('modules.institutions.items').map((item: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
-                        <span className="text-sm">{item}</span>
-                      </li>
-                    ))}
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.institutions.feature1')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.institutions.feature2')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.institutions.feature3')}</span>
+                    </li>
                   </ul>
                   <div className="mt-6 flex justify-end">
-                    <span className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted">
-                      <span>{t('moreInfo')}</span>
+                    <a
+                      href="https://docs.profevision.com/dashboard-entities"
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title={t('homepage.modules.institutions.linkTitle')}
+                    >
+                      <span>{t('homepage.modules.moreInfo')}</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </span>
+                    </a>
                   </div>
                 </div>
               </div>
-
-              {/* Subjects Module */}
               <div className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
@@ -223,26 +206,36 @@ export default function LocaleHomePage() {
                     <div className="rounded-full bg-[#0b890f]/10 p-3">
                       <BookOpen className="h-5 w-5 text-[#0b890f]" />
                     </div>
-                    <h3 className="text-lg font-bold">{t('modules.subjects.title')}</h3>
+                    <h3 className="text-lg font-bold">{t('homepage.modules.subjects.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
-                    {t.raw('modules.subjects.items').map((item: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
-                        <span className="text-sm">{item}</span>
-                      </li>
-                    ))}
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.subjects.feature1')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.subjects.feature2')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.subjects.feature3')}</span>
+                    </li>
                   </ul>
                   <div className="mt-6 flex justify-end">
-                    <span className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted">
-                      <span>{t('moreInfo')}</span>
+                    <a
+                      href="https://docs.profevision.com/dashboard-subjects"
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title={t('homepage.modules.subjects.linkTitle')}
+                    >
+                      <span>{t('homepage.modules.moreInfo')}</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </span>
+                    </a>
                   </div>
                 </div>
               </div>
-
-              {/* Groups Module */}
               <div className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
@@ -250,26 +243,36 @@ export default function LocaleHomePage() {
                     <div className="rounded-full bg-[#0b890f]/10 p-3">
                       <Users className="h-5 w-5 text-[#0b890f]" />
                     </div>
-                    <h3 className="text-lg font-bold">{t('modules.groups.title')}</h3>
+                    <h3 className="text-lg font-bold">{t('homepage.modules.groups.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
-                    {t.raw('modules.groups.items').map((item: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
-                        <span className="text-sm">{item}</span>
-                      </li>
-                    ))}
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.groups.feature1')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.groups.feature2')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.groups.feature3')}</span>
+                    </li>
                   </ul>
                   <div className="mt-6 flex justify-end">
-                    <span className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted">
-                      <span>{t('moreInfo')}</span>
+                    <a
+                      href="https://docs.profevision.com/dashboard-groups"
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title={t('homepage.modules.groups.linkTitle')}
+                    >
+                      <span>{t('homepage.modules.moreInfo')}</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </span>
+                    </a>
                   </div>
                 </div>
               </div>
-
-              {/* Grading Module */}
               <div className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
@@ -277,26 +280,36 @@ export default function LocaleHomePage() {
                     <div className="rounded-full bg-[#0b890f]/10 p-3">
                       <FileSpreadsheet className="h-5 w-5 text-[#0b890f]" />
                     </div>
-                    <h3 className="text-lg font-bold">{t('modules.grading.title')}</h3>
+                    <h3 className="text-lg font-bold">{t('homepage.modules.grading.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
-                    {t.raw('modules.grading.items').map((item: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
-                        <span className="text-sm">{item}</span>
-                      </li>
-                    ))}
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.grading.feature1')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.grading.feature2')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.grading.feature3')}</span>
+                    </li>
                   </ul>
                   <div className="mt-6 flex justify-end">
-                    <span className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted">
-                      <span>{t('moreInfo')}</span>
+                    <a
+                      href="https://docs.profevision.com/dashboard-groups#sistema-de-calificaciones"
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title={t('homepage.modules.grading.linkTitle')}
+                    >
+                      <span>{t('homepage.modules.moreInfo')}</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </span>
+                    </a>
                   </div>
                 </div>
               </div>
-
-              {/* Exams Module */}
               <div className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
@@ -304,26 +317,36 @@ export default function LocaleHomePage() {
                     <div className="rounded-full bg-[#0b890f]/10 p-3">
                       <ScanText className="h-5 w-5 text-[#0b890f]" />
                     </div>
-                    <h3 className="text-lg font-bold">{t('modules.exams.title')}</h3>
+                    <h3 className="text-lg font-bold">{t('homepage.modules.exams.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
-                    {t.raw('modules.exams.items').map((item: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
-                        <span className="text-sm">{item}</span>
-                      </li>
-                    ))}
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.exams.feature1')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.exams.feature2')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.exams.feature3')}</span>
+                    </li>
                   </ul>
                   <div className="mt-6 flex justify-end">
-                    <span className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted">
-                      <span>{t('moreInfo')}</span>
+                    <a
+                      href="https://docs.profevision.com/dashboard-exams"
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title={t('homepage.modules.exams.linkTitle')}
+                    >
+                      <span>{t('homepage.modules.moreInfo')}</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </span>
+                    </a>
                   </div>
                 </div>
               </div>
-
-              {/* Reports Module */}
               <div className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
@@ -331,21 +354,33 @@ export default function LocaleHomePage() {
                     <div className="rounded-full bg-[#0b890f]/10 p-3">
                       <BarChart3 className="h-5 w-5 text-[#0b890f]" />
                     </div>
-                    <h3 className="text-lg font-bold">{t('modules.reports.title')}</h3>
+                    <h3 className="text-lg font-bold">{t('homepage.modules.analysis.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
-                    {t.raw('modules.reports.items').map((item: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
-                        <span className="text-sm">{item}</span>
-                      </li>
-                    ))}
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.analysis.feature1')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.analysis.feature2')}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <span className="text-sm">{t('homepage.modules.analysis.feature3')}</span>
+                    </li>
                   </ul>
                   <div className="mt-6 flex justify-end">
-                    <span className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted">
-                      <span>{t('moreInfo')}</span>
+                    <a
+                      href="https://docs.profevision.com/dashboard-exams#ver-resultados-del-examen"
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      title={t('homepage.modules.analysis.linkTitle')}
+                    >
+                      <span>{t('homepage.modules.moreInfo')}</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </span>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -359,13 +394,13 @@ export default function LocaleHomePage() {
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_500px]">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground w-fit">
-                  {t('benefitsTag')}
+                  {t('homepage.benefits.badge')}
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  {t('benefitsTitle')}
+                  {t('homepage.benefits.title')}
                 </h2>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  {t('benefitsDescription')}
+                  {t('homepage.benefits.description')}
                 </p>
                 <ul className="space-y-2">
                   <li className="flex items-start gap-3">
@@ -373,9 +408,9 @@ export default function LocaleHomePage() {
                       <CheckCircle className="h-4 w-4 text-[#0b890f]" />
                     </div>
                     <div>
-                      <h3 className="font-medium">{t('benefits.automation.title')}</h3>
+                      <h3 className="font-medium">{t('homepage.benefits.automation.title')}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {t('benefits.automation.description')}
+                        {t('homepage.benefits.automation.description')}
                       </p>
                     </div>
                   </li>
@@ -384,9 +419,9 @@ export default function LocaleHomePage() {
                       <CheckCircle className="h-4 w-4 text-[#0b890f]" />
                     </div>
                     <div>
-                      <h3 className="font-medium">{t('benefits.organization.title')}</h3>
+                      <h3 className="font-medium">{t('homepage.benefits.organization.title')}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {t('benefits.organization.description')}
+                        {t('homepage.benefits.organization.description')}
                       </p>
                     </div>
                   </li>
@@ -395,9 +430,9 @@ export default function LocaleHomePage() {
                       <CheckCircle className="h-4 w-4 text-[#0b890f]" />
                     </div>
                     <div>
-                      <h3 className="font-medium">{t('benefits.insights.title')}</h3>
+                      <h3 className="font-medium">{t('homepage.benefits.insights.title')}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {t('benefits.insights.description')}
+                        {t('homepage.benefits.insights.description')}
                       </p>
                     </div>
                   </li>
@@ -406,9 +441,9 @@ export default function LocaleHomePage() {
                       <CheckCircle className="h-4 w-4 text-[#0b890f]" />
                     </div>
                     <div>
-                      <h3 className="font-medium">{t('benefits.flexibility.title')}</h3>
+                      <h3 className="font-medium">{t('homepage.benefits.flexibility.title')}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {t('benefits.flexibility.description')}
+                        {t('homepage.benefits.flexibility.description')}
                       </p>
                     </div>
                   </li>
@@ -417,9 +452,9 @@ export default function LocaleHomePage() {
                       <CheckCircle className="h-4 w-4 text-[#0b890f]" />
                     </div>
                     <div>
-                      <h3 className="font-medium">{t('benefits.speed.title')}</h3>
+                      <h3 className="font-medium">{t('homepage.benefits.gradingSpeed.title')}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {t('benefits.speed.description')}
+                        {t('homepage.benefits.gradingSpeed.description')}
                       </p>
                     </div>
                   </li>
@@ -430,8 +465,8 @@ export default function LocaleHomePage() {
                     size="lg"
                     className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
-                    <Link href={getAuthRoute('register')} title={`${tButtons('startFree')} - ProfeVision`}>
-                      {tButtons('startFree')}
+                    <Link href={getLocalizedRoute('/auth/register')} title={t('homepage.benefits.startFreeTitle')}>
+                      {t('homepage.benefits.startFree')}
                     </Link>
                   </Button>
                 </div>
@@ -439,24 +474,24 @@ export default function LocaleHomePage() {
               <div className="relative flex items-center justify-center lg:order-first">
                 <div className="relative bg-card backdrop-blur-sm border rounded-2xl shadow-xl overflow-hidden w-full max-w-md mx-auto">
                   <div className="p-4 border-b">
-                    <h3 className="font-medium">{t('gradeTable.title')}</h3>
+                    <h3 className="font-medium">{t('homepage.benefits.gradingTable.title')}</h3>
                   </div>
                   <div className="p-6 space-y-4">
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <h4 className="font-medium">{t('gradeTable.subject')}</h4>
-                        <span className="text-xs bg-[#0b890f]/10 text-[#0b890f] px-2 py-1 rounded-full">{t('gradeTable.period')}</span>
+                        <h4 className="font-medium">{t('homepage.benefits.gradingTable.subject')}</h4>
+                        <span className="text-xs bg-[#0b890f]/10 text-[#0b890f] px-2 py-1 rounded-full">{t('homepage.benefits.gradingTable.period')}</span>
                       </div>
-                      <div className="text-sm text-muted-foreground">25 {t('gradeTable.students')} · {t('gradeTable.average')}: 4.2</div>
+                      <div className="text-sm text-muted-foreground">{t('homepage.benefits.gradingTable.stats')}</div>
                     </div>
                     <div className="border rounded-lg overflow-hidden">
                       <table className="w-full text-sm">
                         <thead className="bg-muted/50">
                           <tr>
-                            <th className="px-4 py-2 text-left font-medium">{t('gradeTable.student')}</th>
-                            <th className="px-4 py-2 text-center font-medium">{t('gradeTable.exam1')}</th>
-                            <th className="px-4 py-2 text-center font-medium">{t('gradeTable.exam2')}</th>
-                            <th className="px-4 py-2 text-center font-medium">{t('gradeTable.final')}</th>
+                            <th className="px-4 py-2 text-left font-medium">{t('homepage.benefits.gradingTable.student')}</th>
+                            <th className="px-4 py-2 text-center font-medium">{t('homepage.benefits.gradingTable.exam1')}</th>
+                            <th className="px-4 py-2 text-center font-medium">{t('homepage.benefits.gradingTable.exam2')}</th>
+                            <th className="px-4 py-2 text-center font-medium">{t('homepage.benefits.gradingTable.final')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y">
@@ -482,7 +517,7 @@ export default function LocaleHomePage() {
                       </table>
                     </div>
                     <Button variant="outline" className="w-full">
-                      {tButtons('exportGrades')}
+                      {t('homepage.benefits.gradingTable.export')}
                     </Button>
                   </div>
                 </div>
@@ -496,10 +531,10 @@ export default function LocaleHomePage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-white">
-                {t('ctaTitle')}
+                {t('homepage.cta.title')}
               </h2>
               <p className="max-w-[600px] text-white/90 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                {t('ctaDescription')}
+                {t('homepage.cta.description')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button
@@ -508,8 +543,8 @@ export default function LocaleHomePage() {
                   variant="secondary"
                   className="bg-white text-[#0b890f] hover:bg-white/90"
                 >
-                  <Link href={getAuthRoute('register')} title={`${tButtons('startTrial')} - ProfeVision`}>
-                    {tButtons('startTrial')}
+                  <Link href={getLocalizedRoute('/auth/register')} title={t('homepage.cta.startTrialTitle')}>
+                    {t('homepage.cta.startTrial')}
                   </Link>
                 </Button>
                 <Button
@@ -517,25 +552,25 @@ export default function LocaleHomePage() {
                   size="lg"
                   className="bg-white/10 text-white hover:bg-white/20 border border-white/20 backdrop-blur-sm"
                 >
-                  <Link href={getRoute('how-it-works')}>{tButtons('learnMore')}</Link>
+                  <Link href={getLocalizedRoute('/how-it-works')}>{t('homepage.cta.learnMore')}</Link>
                 </Button>
               </div>
               <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
                 <div className="flex flex-col items-center">
-                  <div className="text-3xl font-bold text-white">1000+</div>
-                  <p className="text-sm text-white/80">{t('stats.teachers')}</p>
+                  <div className="text-3xl font-bold text-white">{t('homepage.cta.stats.teachers')}</div>
+                  <p className="text-sm text-white/80">{t('homepage.cta.stats.teachersLabel')}</p>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="text-3xl font-bold text-white">50+</div>
-                  <p className="text-sm text-white/80">{t('stats.institutions')}</p>
+                  <div className="text-3xl font-bold text-white">{t('homepage.cta.stats.institutions')}</div>
+                  <p className="text-sm text-white/80">{t('homepage.cta.stats.institutionsLabel')}</p>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="text-3xl font-bold text-white">100K+</div>
-                  <p className="text-sm text-white/80">{t('stats.exams')}</p>
+                  <div className="text-3xl font-bold text-white">{t('homepage.cta.stats.exams')}</div>
+                  <p className="text-sm text-white/80">{t('homepage.cta.stats.examsLabel')}</p>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="text-3xl font-bold text-white">98%</div>
-                  <p className="text-sm text-white/80">{t('stats.satisfaction')}</p>
+                  <div className="text-3xl font-bold text-white">{t('homepage.cta.stats.satisfaction')}</div>
+                  <p className="text-sm text-white/80">{t('homepage.cta.stats.satisfactionLabel')}</p>
                 </div>
               </div>
             </div>

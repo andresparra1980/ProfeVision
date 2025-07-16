@@ -4,19 +4,27 @@ import { useTranslations } from 'next-intl';
 
 export default function ReportsPage() {
   const t = useTranslations('common');
-
+  
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">{t('navigation.reports')}</h1>
-        <p className="text-lg text-muted-foreground">
-          Reportes y análisis académicos
+      <h1 className="text-4xl font-bold text-center mb-8">{t('reports.title')}</h1>
+      <div className="max-w-4xl mx-auto">
+        <p className="text-lg text-muted-foreground text-center mb-8">
+          {t('reports.subtitle')}
         </p>
-      </div>
-      
-      <div className="prose max-w-none">
-        <p>Contenido de la página de reportes...</p>
+        
+        <div className="space-y-6">
+          <div className="bg-card p-6 rounded-lg border">
+            <h2 className="text-2xl font-semibold mb-4">{t('reports.mainFeatures.title')}</h2>
+            <ul className="space-y-2 text-muted-foreground">
+              <li>• {t('reports.mainFeatures.item1')}</li>
+              <li>• {t('reports.mainFeatures.item2')}</li>
+              <li>• {t('reports.mainFeatures.item3')}</li>
+              <li>• {t('reports.mainFeatures.item4')}</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
-  );
+  )
 } 

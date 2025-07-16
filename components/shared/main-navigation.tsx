@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { useTranslations, useLocale } from 'next-intl'
+import { Link as IntlLink } from '@/i18n/navigation'
 import { cn } from "@/lib/utils"
 import {
   NavigationMenu,
@@ -36,13 +36,13 @@ const ListItem = React.forwardRef<
   return (
     <li>
       <NavigationMenuLink asChild>
-        <Link
+        <IntlLink
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group",
             className
           )}
-          href={href || "#"}
+          href={href as any || "#"}
           {...props}
         >
           <div className="flex items-center gap-2">
@@ -54,7 +54,7 @@ const ListItem = React.forwardRef<
               {children}
             </p>
           )}
-        </Link>
+        </IntlLink>
       </NavigationMenuLink>
     </li>
   )
@@ -66,9 +66,9 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
   return (
     <li className="ml-2"> {/* Indentación más sutil */}
       <NavigationMenuLink asChild>
-        <Link
+        <IntlLink
           className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group border-l-2 border-muted/50 pl-3"
-          href={href || "#"}
+          href={href as any || "#"}
         >
           <div className="flex items-center gap-2">
             {Icon && <Icon className="h-3 w-3" />} {/* Íconos más pequeños para sub-items */}
@@ -79,7 +79,7 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
               {children}
             </p>
           )}
-        </Link>
+        </IntlLink>
       </NavigationMenuLink>
     </li>
   )
@@ -89,24 +89,7 @@ export function MainNavigation() {
   const t = useTranslations('common')
   const locale = useLocale()
 
-  // Helper function to get localized routes
-  const getLocalizedRoute = (route: string) => {
-    if (locale === 'es') {
-      const routeMap: { [key: string]: string } = {
-        'how-it-works': '/como-funciona',
-        'pricing': '/precios',
-        'contact': '/contacto',
-        'blog': '/blog',
-        'exams': '/examenes',
-        'exams/manual-generator': '/examenes/generador-manual',
-        'exams/ai-generator': '/examenes/generador-ia',
-        'paper-exams': '/examenes-papel',
-        'mobile-app': '/aplicacion-movil'
-      }
-      return routeMap[route] || `/${route}`
-    }
-    return `/${route}`
-  }
+
 
   return (
     <NavigationMenu>
@@ -114,9 +97,9 @@ export function MainNavigation() {
         {/* Inicio */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href="/" className={navigationMenuTriggerStyle()}>
+            <IntlLink href="/" className={navigationMenuTriggerStyle()}>
               {t('navigation.home')}
-            </Link>
+            </IntlLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
 
@@ -132,7 +115,7 @@ export function MainNavigation() {
                 <ul className="space-y-2">
                   {/* Cómo funciona - Primer item clickeable */}
                   <ListItem 
-                    href={getLocalizedRoute('how-it-works')} 
+                    href="/how-it-works" 
                     title={t('navigation.howItWorks')}
                     icon={BookOpen}
                   >
@@ -159,14 +142,14 @@ export function MainNavigation() {
                   
                   {/* Sub-items de Exámenes */}
                   <ExamenSubItem 
-                    href={getLocalizedRoute('exams/ai-generator')} 
+                    href="/exams-with-ai" 
                     title={t('navigation.aiGenerator')}
                     icon={Brain}
                   >
                     {t('navigation.aiGeneratorDescription')}
                   </ExamenSubItem>
                   <ExamenSubItem 
-                    href={getLocalizedRoute('paper-exams')} 
+                    href="/paper-exams" 
                     title={t('navigation.paperExams')}
                     icon={ScanLine}
                   >
@@ -177,7 +160,7 @@ export function MainNavigation() {
                 {/* Columna 3 */}
                 <ul className="space-y-2">
                   <ListItem 
-                    href={getLocalizedRoute('mobile-app')} 
+                    href="/mobile-app" 
                     title={t('navigation.mobileApp')}
                     icon={Smartphone}
                   >
@@ -192,27 +175,27 @@ export function MainNavigation() {
         {/* Precios */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href={getLocalizedRoute('pricing')} className={navigationMenuTriggerStyle()}>
+            <IntlLink href="/pricing" className={navigationMenuTriggerStyle()}>
               {t('navigation.pricing')}
-            </Link>
+            </IntlLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
 
         {/* Blog */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href={getLocalizedRoute('blog')} className={navigationMenuTriggerStyle()}>
+            <IntlLink href="/blog" className={navigationMenuTriggerStyle()}>
               {t('navigation.blog')}
-            </Link>
+            </IntlLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
 
         {/* Contacto */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href={getLocalizedRoute('contact')} className={navigationMenuTriggerStyle()}>
+            <IntlLink href="/contact" className={navigationMenuTriggerStyle()}>
               {t('navigation.contact')}
-            </Link>
+            </IntlLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
       </NavigationMenuList>

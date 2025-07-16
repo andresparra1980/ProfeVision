@@ -47,9 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     `/${locale}/${locale === 'es' ? 'blog' : 'blog'}`,
     
     // Páginas de exámenes
-    `/${locale}/${locale === 'es' ? 'examenes' : 'exams'}`,
-    `/${locale}/${locale === 'es' ? 'examenes/generador-manual' : 'exams/manual-generator'}`,
-    `/${locale}/${locale === 'es' ? 'examenes/generador-ia' : 'exams/ai-generator'}`,
+    `/${locale}/${locale === 'es' ? 'examenes-con-ia' : 'exams-with-ai'}`,
     `/${locale}/${locale === 'es' ? 'examenes-papel' : 'paper-exams'}`,
     
     // Páginas de gestión (información pública)
@@ -128,10 +126,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!currentSession && !isPublicPath) {
           logger.log('No initial session and not on public path, redirecting to login.');
           router.push(routes.login);
-        } else if (currentSession && isPublicPath && pathname !== `/${locale}` && pathname !== `/${locale}/auth/${locale === 'es' ? 'email-confirmado' : 'email-confirmed'}`) {
-          logger.log('Initial session found on public path (not home), redirecting to dashboard.');
-          setTimeout(() => router.push(routes.dashboard), 0);
         }
+        // Permitir que usuarios autenticados naveguen libremente por páginas públicas
       }
     });
 

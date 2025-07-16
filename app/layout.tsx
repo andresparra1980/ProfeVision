@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { headers } from 'next/headers';
 import '@/styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -22,13 +23,17 @@ export const metadata: Metadata = {
 };
 
 // 🔐 Layout raíz simplificado para callbacks de Supabase y rutas no localizadas
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // 🌍 Detectar locale desde middleware para SEO correcto
+  const headersList = await headers();
+  const locale = headersList.get('x-locale') || 'es';
+  
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`min-h-screen bg-background font-sans antialiased ${inter.className}`}
         suppressHydrationWarning

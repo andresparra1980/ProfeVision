@@ -31,7 +31,13 @@ export async function middleware(request: NextRequest) {
   }
   
   // 🔐 Aplicar lógica de autenticación a rutas localizadas
-  return await handleAuthMiddleware(request, intlResponse);
+  const authResponse = await handleAuthMiddleware(request, intlResponse);
+  
+  // 🌍 Detectar locale y agregarlo como header para SEO
+  const locale = pathname.startsWith('/en') ? 'en' : 'es';
+  authResponse.headers.set('x-locale', locale);
+  
+  return authResponse;
 }
 
 async function handleAuthMiddleware(request: NextRequest, response?: NextResponse) {
@@ -115,9 +121,7 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
     `/${locale}/${locale === 'es' ? 'blog' : 'blog'}`,
     
     // Páginas de exámenes
-    `/${locale}/${locale === 'es' ? 'examenes' : 'exams'}`,
-    `/${locale}/${locale === 'es' ? 'examenes/generador-manual' : 'exams/manual-generator'}`,
-    `/${locale}/${locale === 'es' ? 'examenes/generador-ia' : 'exams/ai-generator'}`,
+    `/${locale}/${locale === 'es' ? 'examenes-con-ia' : 'exams-with-ai'}`,
     `/${locale}/${locale === 'es' ? 'examenes-papel' : 'paper-exams'}`,
     
     // Páginas de gestión (información pública)

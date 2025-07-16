@@ -76,10 +76,15 @@ export const routing = defineRouting({
       es: '/examenes/generador-ia',
       en: '/exams/ai-generator'
     },
+    '/exams-with-ai': {
+      es: '/examenes-con-ia',
+      en: '/exams-with-ai'
+    },
     '/paper-exams': {
       es: '/examenes-papel',
       en: '/paper-exams'
     },
+
     
     // 🔐 Páginas de autenticación (LOCALIZADAS)
     '/auth/login': {

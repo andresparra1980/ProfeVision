@@ -127,7 +127,7 @@ export function SiteHeader() {
     <>
       <header className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b">
         <div className="container flex h-16 items-center justify-between relative">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" title={`ProfeVisión - ${t('navigation.home')} | ${t('homepage.heroTitle')}`}>
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" title={`ProfeVisión - ${t('navigation.home')} | ${t('homepage.hero.title')}`}>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
               <span className="font-bold text-white">PV</span>
             </div>
