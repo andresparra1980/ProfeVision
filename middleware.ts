@@ -70,42 +70,73 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
   const { data: { session } } = await supabase.auth.getSession();
   const { pathname } = request.nextUrl;
   
-  // 🌍 Extraer locale del pathname
-  const locale = pathname.startsWith('/es/') || pathname.startsWith('/es') ? 'es' : 
-                pathname.startsWith('/en/') || pathname.startsWith('/en') ? 'en' : 'es';
+  // 🌍 Extraer locale del pathname con detección más robusta
+  const getLocaleFromPath = (path: string): string => {
+    // Detectar si el path comienza con /en/ o /en (inglés)
+    if (path.startsWith('/en/') || path === '/en') {
+      return 'en';
+    }
+    // Detectar si el path comienza con /es/ o /es (español explícito)
+    if (path.startsWith('/es/') || path === '/es') {
+      return 'es';
+    }
+    // Si no tiene prefijo de idioma, usar español como default
+    return 'es';
+  };
+  
+  const locale = getLocaleFromPath(pathname);
   
   // 🔐 Construir rutas localizadas dinámicamente
-  const localizedRoutes = {
-    login: `/${locale}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
-    dashboard: `/${locale}/${locale === 'es' ? 'panel' : 'dashboard'}`,
+  const getLocalizedRoutes = (currentLocale: string) => {
+    const base = currentLocale === 'es' ? '' : `/${currentLocale}`;
+    return {
+      login: `${base}/auth/${currentLocale === 'es' ? 'login' : 'login'}`,
+      dashboard: `${base}/dashboard`,
+    };
   };
+  
+  const localizedRoutes = getLocalizedRoutes(locale);
 
-  // 🔐 Rutas públicas localizadas (preservar lógica original)
+  // 🔐 Rutas públicas localizadas - Lista completa actualizada
   const publicRoutes = [
+    // Rutas con prefijo de locale
     `/${locale}`,
     `/${locale}/`,
-    `/${locale}/privacy`,
-    `/${locale}/terms`,
-    `/${locale}/cookies`,
+    
+    // Páginas de contenido estático
     `/${locale}/${locale === 'es' ? 'privacidad' : 'privacy'}`,
     `/${locale}/${locale === 'es' ? 'terminos' : 'terms'}`,
     `/${locale}/${locale === 'es' ? 'cookies' : 'cookies'}`,
+    
+    // Páginas de información
     `/${locale}/${locale === 'es' ? 'como-funciona' : 'how-it-works'}`,
+    `/${locale}/${locale === 'es' ? 'precios' : 'pricing'}`,
+    `/${locale}/${locale === 'es' ? 'contacto' : 'contact'}`,
+    `/${locale}/${locale === 'es' ? 'blog' : 'blog'}`,
+    
+    // Páginas de exámenes
+    `/${locale}/${locale === 'es' ? 'examenes' : 'exams'}`,
+    `/${locale}/${locale === 'es' ? 'examenes/generador-manual' : 'exams/manual-generator'}`,
+    `/${locale}/${locale === 'es' ? 'examenes/generador-ia' : 'exams/ai-generator'}`,
+    `/${locale}/${locale === 'es' ? 'examenes-papel' : 'paper-exams'}`,
+    
+    // Páginas de gestión (información pública)
     `/${locale}/${locale === 'es' ? 'gestion-instituciones' : 'institutions-management'}`,
     `/${locale}/${locale === 'es' ? 'gestion-materias' : 'subjects-management'}`,
     `/${locale}/${locale === 'es' ? 'gestion-grupos' : 'groups-management'}`,
     `/${locale}/${locale === 'es' ? 'gestion-estudiantes' : 'students-management'}`,
     `/${locale}/${locale === 'es' ? 'reportes' : 'reports'}`,
     `/${locale}/${locale === 'es' ? 'aplicacion-movil' : 'mobile-app'}`,
-    `/${locale}/${locale === 'es' ? 'precios' : 'pricing'}`,
-    `/${locale}/${locale === 'es' ? 'contacto' : 'contact'}`,
-    `/${locale}/${locale === 'es' ? 'blog' : 'blog'}`,
-    `/${locale}/${locale === 'es' ? 'examenes' : 'exams'}`,
-    `/${locale}/${locale === 'es' ? 'examenes/generador-manual' : 'exams/manual-generator'}`,
-    `/${locale}/${locale === 'es' ? 'examenes/generador-ia' : 'exams/ai-generator'}`,
-    `/${locale}/${locale === 'es' ? 'examenes-papel' : 'paper-exams'}`,
     
-    // Rutas sin prefijo de idioma para el locale por defecto
+    // Páginas de autenticación
+    `/${locale}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
+    `/${locale}/auth/${locale === 'es' ? 'registro' : 'register'}`,
+    `/${locale}/auth/${locale === 'es' ? 'restablecer-contrasena' : 'reset-password'}`,
+    `/${locale}/auth/${locale === 'es' ? 'actualizar-contrasena' : 'update-password'}`,
+    `/${locale}/auth/${locale === 'es' ? 'verificar-email' : 'verify-email'}`,
+    `/${locale}/auth/${locale === 'es' ? 'email-confirmado' : 'email-confirmed'}`,
+    
+    // Rutas sin prefijo de idioma solo para el locale por defecto (español)
     ...(locale === 'es' ? [
       "/",
       "/privacy",
@@ -121,10 +152,16 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
       "/pricing",
       "/contact",
       "/blog",
+      "/exams",
       "/exams/manual-generator",
       "/exams/ai-generator",
       "/paper-exams",
-      "/exams"
+      "/auth/login",
+      "/auth/register",
+      "/auth/reset-password",
+      "/auth/update-password",
+      "/auth/verify-email",
+      "/auth/email-confirmed"
     ] : [])
   ];
 
@@ -135,8 +172,23 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
   }
 
   // 🔐 Rutas protegidas (dashboard)
-  if (pathname.startsWith(`/${locale}/${locale === 'es' ? 'panel' : 'dashboard'}`) || 
-      (locale === 'es' && pathname.startsWith('/dashboard'))) {
+  const isDashboardRoute = (path: string, currentLocale: string): boolean => {
+    // Para español (sin prefijo): /dashboard
+    if (currentLocale === 'es' && path.startsWith('/dashboard')) {
+      return true;
+    }
+    // Para inglés (con prefijo): /en/dashboard
+    if (currentLocale === 'en' && path.startsWith('/en/dashboard')) {
+      return true;
+    }
+    // Para español explícito (con prefijo): /es/dashboard
+    if (currentLocale === 'es' && path.startsWith('/es/dashboard')) {
+      return true;
+    }
+    return false;
+  };
+  
+  if (isDashboardRoute(pathname, locale)) {
     if (!session) {
       const redirectUrl = new URL(localizedRoutes.login, request.url);
       redirectUrl.searchParams.set("redirect", pathname);
@@ -147,11 +199,29 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
     return authResponse;
   }
 
-  // 🔐 Rutas de auth (preservar lógica original)
-  if (pathname.startsWith(`/${locale}/auth/`) || 
-      (locale === 'es' && pathname.startsWith('/auth/') && 
-       !pathname.endsWith('/callback') && 
-       !pathname.endsWith('/direct-recovery'))) {
+  // 🔐 Rutas de auth con lógica mejorada
+  const isAuthRoute = (path: string, currentLocale: string): boolean => {
+    // Excluir callbacks y rutas especiales
+    if (path.endsWith('/callback') || path.endsWith('/direct-recovery')) {
+      return false;
+    }
+    
+    // Para español (sin prefijo): /auth/
+    if (currentLocale === 'es' && path.startsWith('/auth/')) {
+      return true;
+    }
+    // Para inglés (con prefijo): /en/auth/
+    if (currentLocale === 'en' && path.startsWith('/en/auth/')) {
+      return true;
+    }
+    // Para español explícito (con prefijo): /es/auth/
+    if (currentLocale === 'es' && path.startsWith('/es/auth/')) {
+      return true;
+    }
+    return false;
+  };
+  
+  if (isAuthRoute(pathname, locale)) {
     if (session) {
       console.log(`[Middleware] Session found on auth page (${pathname}). Redirecting to dashboard.`);
       return NextResponse.redirect(new URL(localizedRoutes.dashboard, request.url));

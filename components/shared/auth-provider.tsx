@@ -29,35 +29,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     dashboard: `/${locale}/${locale === 'es' ? 'panel' : 'dashboard'}`,
   }), [locale]);
 
-  // 🔐 Rutas públicas localizadas
+  // 🔐 Rutas públicas localizadas - Lista completa actualizada (sincronizada con middleware)
   const getPublicPaths = useMemo(() => [
-    `/${locale}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
-    `/${locale}/auth/${locale === 'es' ? 'registro' : 'register'}`,
-    `/${locale}/auth/${locale === 'es' ? 'restablecer-contrasena' : 'reset-password'}`,
-    `/${locale}/auth/${locale === 'es' ? 'actualizar-contrasena' : 'update-password'}`,
-    `/${locale}/auth/${locale === 'es' ? 'verificar-email' : 'verify-email'}`,
-    `/${locale}/auth/${locale === 'es' ? 'email-confirmado' : 'email-confirmed'}`,
+    // Rutas con prefijo de locale
     `/${locale}`,
     `/${locale}/`,
+    
+    // Páginas de contenido estático
     `/${locale}/${locale === 'es' ? 'privacidad' : 'privacy'}`,
     `/${locale}/${locale === 'es' ? 'terminos' : 'terms'}`,
     `/${locale}/${locale === 'es' ? 'cookies' : 'cookies'}`,
+    
+    // Páginas de información
     `/${locale}/${locale === 'es' ? 'como-funciona' : 'how-it-works'}`,
+    `/${locale}/${locale === 'es' ? 'precios' : 'pricing'}`,
+    `/${locale}/${locale === 'es' ? 'contacto' : 'contact'}`,
+    `/${locale}/${locale === 'es' ? 'blog' : 'blog'}`,
+    
+    // Páginas de exámenes
+    `/${locale}/${locale === 'es' ? 'examenes' : 'exams'}`,
+    `/${locale}/${locale === 'es' ? 'examenes/generador-manual' : 'exams/manual-generator'}`,
+    `/${locale}/${locale === 'es' ? 'examenes/generador-ia' : 'exams/ai-generator'}`,
+    `/${locale}/${locale === 'es' ? 'examenes-papel' : 'paper-exams'}`,
+    
+    // Páginas de gestión (información pública)
     `/${locale}/${locale === 'es' ? 'gestion-instituciones' : 'institutions-management'}`,
     `/${locale}/${locale === 'es' ? 'gestion-materias' : 'subjects-management'}`,
     `/${locale}/${locale === 'es' ? 'gestion-grupos' : 'groups-management'}`,
     `/${locale}/${locale === 'es' ? 'gestion-estudiantes' : 'students-management'}`,
     `/${locale}/${locale === 'es' ? 'reportes' : 'reports'}`,
     `/${locale}/${locale === 'es' ? 'aplicacion-movil' : 'mobile-app'}`,
-    `/${locale}/${locale === 'es' ? 'precios' : 'pricing'}`,
-    `/${locale}/${locale === 'es' ? 'contacto' : 'contact'}`,
-    `/${locale}/${locale === 'es' ? 'blog' : 'blog'}`,
-    `/${locale}/${locale === 'es' ? 'examenes' : 'exams'}`,
-    `/${locale}/${locale === 'es' ? 'examenes/generador-manual' : 'exams/manual-generator'}`,
-    `/${locale}/${locale === 'es' ? 'examenes/generador-ia' : 'exams/ai-generator'}`,
-    `/${locale}/${locale === 'es' ? 'examenes-papel' : 'paper-exams'}`,
     
-    // Rutas sin prefijo de idioma para el locale por defecto (español)
+    // Páginas de autenticación
+    `/${locale}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
+    `/${locale}/auth/${locale === 'es' ? 'registro' : 'register'}`,
+    `/${locale}/auth/${locale === 'es' ? 'restablecer-contrasena' : 'reset-password'}`,
+    `/${locale}/auth/${locale === 'es' ? 'actualizar-contrasena' : 'update-password'}`,
+    `/${locale}/auth/${locale === 'es' ? 'verificar-email' : 'verify-email'}`,
+    `/${locale}/auth/${locale === 'es' ? 'email-confirmado' : 'email-confirmed'}`,
+    
+    // Rutas sin prefijo de idioma solo para el locale por defecto (español)
     ...(locale === 'es' ? [
       '/',
       '/privacy',
@@ -73,10 +84,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       '/pricing',
       '/contact',
       '/blog',
+      '/exams',
       '/exams/manual-generator',
       '/exams/ai-generator',
       '/paper-exams',
-      '/exams',
       '/auth/login',
       '/auth/register',
       '/auth/reset-password',

@@ -74,7 +74,15 @@ export default function LocaleHomePage() {
                   {t('newBadge')}
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                  {t('heroTitle')}
+                  {locale === 'es' ? (
+                    <>
+                      La Mejor Aplicación <span className="text-[#0b890f]">para Escanear y Calificar Exámenes en Papel</span>
+                    </>
+                  ) : (
+                    <>
+                      The Best App <span className="text-[#0b890f]">for Scanning and Grading Paper Exams</span>
+                    </>
+                  )}
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
                   {t('heroDescription')}
