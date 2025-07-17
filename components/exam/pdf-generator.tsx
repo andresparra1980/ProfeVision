@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Document, Page, Text, View, StyleSheet, Circle, Svg, Path, Image, BlobProvider } from '@react-pdf/renderer';
+import { useTranslations } from 'next-intl';
 import { generateLMarkerPath, calculateMarkerDimensions, generateMarkerContainerStyle } from '@/lib/utils/corner-markers';
 import { generateOptimizedQRCode, generateOptimizedQRData } from '@/lib/utils/qr-code';
 
@@ -401,6 +402,7 @@ const PDFDocument = ({ exam, group }: { exam: Exam; group: Group }) => {
 
 export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName }: PDFGeneratorProps) {
   const [isClient, setIsClient] = useState(false);
+  const t = useTranslations('dashboard.exams.results.pdfExport');
 
   useEffect(() => {
     setIsClient(true);
@@ -413,7 +415,7 @@ export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName }: P
         disabled
         className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
       >
-        No hay preguntas
+        {t('noQuestions')}
       </button>
     );
   }
@@ -439,7 +441,7 @@ export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName }: P
               disabled
               className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
-              Generando PDF...
+              {t('generatingPDF')}
             </button>
           );
         }
@@ -451,7 +453,7 @@ export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName }: P
               disabled
               className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
-              Error generando PDF
+              {t('generationError')}
             </button>
           );
         }

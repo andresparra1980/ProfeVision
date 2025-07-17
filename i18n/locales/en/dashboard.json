@@ -374,17 +374,42 @@
       "noResults": "No results available",
       "toast": {
         "answerUpdated": "Answer updated",
+        "answerUpdatedDesc": "The grade has been recalculated correctly.",
         "updateError": "Update error",
         "updateErrorDesc": "Could not update answer",
         "gradeSaved": "Grade saved",
+        "gradeSavedDesc": "The grade has been recorded correctly.",
         "saveError": "Save error",
         "saveErrorDesc": "Could not save grade",
         "noResultsError": "No results to export",
         "exportSuccess": "Results exported successfully",
         "exportError": "Could not export results",
         "preparingPDF": "Preparing PDF",
+        "preparingPDFDesc": "Loading images and preparing the report...",
         "pdfGenerated": "PDF Generated",
-        "pdfError": "Could not generate PDF"
+        "pdfGeneratedDesc": "The PDF report has been generated correctly.",
+        "pdfError": "Could not generate PDF",
+        "gradeValidationError": "Grade must be a number between 0 and 5"
+      },
+      "dialogs": {
+        "confirmChangeTitle": "Confirm answer change",
+        "confirmChangeDescription": "Are you sure you want to change the answer for question {question} to option {option}?\n\nThis action will automatically recalculate the exam grade.",
+        "confirmChangeButton": "Confirm change",
+        "updating": "Updating...",
+        "manualGradeTitle": "Enter manual grade",
+        "manualGradeDescription": "This functionality is designed for special cases where the student did not take the general exam, such as makeup or supplementary exams.",
+        "manualGradeWarning": "If an exam is subsequently scanned for this student, this manual grade will be replaced by the scan result.",
+        "studentLabel": "Student",
+        "gradeLabel": "Grade (0-5)",
+        "saving": "Saving...",
+        "saveGrade": "Save grade",
+        "groupSelectionTitle": "Select Group",
+        "groupSelectionDescription": "This exam is assigned to multiple groups. Select the group to view its results.",
+        "close": "Close",
+        "enterGrade": "Enter Grade",
+        "imageLoadError": "Error loading image",
+        "noOriginalImage": "No original image available",
+        "noProcessedImage": "No processed image available"
       },
       "table": {
         "name": "Name",
@@ -439,6 +464,26 @@
       },
       "emptyState": {
         "noResultsMessage": "No results available for this exam."
+      },
+      "common": {
+        "cancel": "Cancel"
+      },
+      "pdfExport": {
+        "generatingPDF": "Generating PDF",
+        "pdfReady": "PDF ready for download",
+        "generationError": "Error generating PDF",
+        "preparingInfo": "Preparing information and loading images...",
+        "pdfGeneratedSuccess": "The PDF has been generated correctly and is ready for download.",
+        "errorOccurred": "An error occurred while preparing the PDF. Please try again.",
+        "preparingDocument": "Preparing PDF document...",
+        "loadingImages": "Loading images...",
+        "pdfGeneratedCorrectly": "PDF generated correctly",
+        "preparingPDF": "Preparing PDF...",
+        "downloadPDF": "Download PDF",
+        "couldNotGenerate": "Could not generate PDF",
+        "close": "Close",
+        "retry": "Retry",
+        "noQuestions": "No questions"
       }
     },
     "responses": {

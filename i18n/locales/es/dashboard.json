@@ -374,17 +374,42 @@
       "noResults": "No hay resultados disponibles",
       "toast": {
         "answerUpdated": "Respuesta actualizada",
+        "answerUpdatedDesc": "La calificación ha sido recalculada correctamente.",
         "updateError": "Error al actualizar",
         "updateErrorDesc": "No se pudo actualizar la respuesta",
         "gradeSaved": "Calificación guardada",
+        "gradeSavedDesc": "La calificación ha sido registrada correctamente.",
         "saveError": "Error al guardar",
         "saveErrorDesc": "No se pudo guardar la calificación",
         "noResultsError": "No hay resultados para exportar",
         "exportSuccess": "Resultados exportados correctamente",
         "exportError": "No se pudieron exportar los resultados",
         "preparingPDF": "Preparando PDF",
+        "preparingPDFDesc": "Cargando imágenes y preparando el reporte...",
         "pdfGenerated": "PDF Generado",
-        "pdfError": "No se pudo generar el PDF"
+        "pdfGeneratedDesc": "El reporte PDF se ha generado correctamente.",
+        "pdfError": "No se pudo generar el PDF",
+        "gradeValidationError": "La calificación debe ser un número entre 0 y 5"
+      },
+      "dialogs": {
+        "confirmChangeTitle": "Confirmar cambio de respuesta",
+        "confirmChangeDescription": "¿Estás seguro de que deseas cambiar la respuesta de la pregunta {question} a la opción {option}?\n\nEsta acción recalculará automáticamente la calificación del examen.",
+        "confirmChangeButton": "Confirmar cambio",
+        "updating": "Actualizando...",
+        "manualGradeTitle": "Ingresar calificación manual",
+        "manualGradeDescription": "Esta funcionalidad está diseñada para casos especiales donde el estudiante no realizó el examen general, como recuperaciones o supletorios.",
+        "manualGradeWarning": "Si posteriormente se escanea un examen para este estudiante, esta calificación manual será reemplazada por el resultado del escaneo.",
+        "studentLabel": "Estudiante",
+        "gradeLabel": "Calificación (0-5)",
+        "saving": "Guardando...",
+        "saveGrade": "Guardar calificación",
+        "groupSelectionTitle": "Seleccionar Grupo",
+        "groupSelectionDescription": "Este examen está asignado a múltiples grupos. Seleccione el grupo para ver sus resultados.",
+        "close": "Cerrar",
+        "enterGrade": "Ingresar Nota",
+        "imageLoadError": "Error al cargar la imagen",
+        "noOriginalImage": "No hay imagen original disponible",
+        "noProcessedImage": "No hay imagen procesada disponible"
       },
       "table": {
         "name": "Nombre",
@@ -439,6 +464,26 @@
       },
       "emptyState": {
         "noResultsMessage": "No hay resultados disponibles para este examen."
+      },
+      "common": {
+        "cancel": "Cancelar"
+      },
+      "pdfExport": {
+        "generatingPDF": "Generando PDF",
+        "pdfReady": "PDF listo para descargar",
+        "generationError": "Error al generar el PDF",
+        "preparingInfo": "Preparando la información y cargando imágenes...",
+        "pdfGeneratedSuccess": "El PDF ha sido generado correctamente y está listo para descargar.",
+        "errorOccurred": "Ocurrió un error al preparar el PDF. Por favor, intente nuevamente.",
+        "preparingDocument": "Preparando documento PDF...",
+        "loadingImages": "Cargando imágenes...",
+        "pdfGeneratedCorrectly": "PDF generado correctamente",
+        "preparingPDF": "Preparando PDF...",
+        "downloadPDF": "Descargar PDF",
+        "couldNotGenerate": "No se pudo generar el PDF",
+        "close": "Cerrar",
+        "retry": "Reintentar",
+        "noQuestions": "No hay preguntas"
       }
     },
     "responses": {

@@ -609,7 +609,7 @@ export default function ExamResultsPage() {
 
       toast({
         title: t('toast.answerUpdated'),
-        description: "La calificación ha sido recalculada correctamente.",
+        description: t('toast.answerUpdatedDesc'),
       });
 
     } catch (error) {
@@ -810,8 +810,8 @@ export default function ExamResultsPage() {
       
       if (isNaN(gradeValue) || gradeValue < 0 || gradeValue > 5) {
         toast({
-          title: "Error",
-          description: "La calificación debe ser un número entre 0 y 5",
+          title: t('common.error'),
+          description: t('toast.gradeValidationError'),
           variant: "destructive",
         });
         return;
@@ -838,7 +838,7 @@ export default function ExamResultsPage() {
       
       toast({
         title: t('toast.gradeSaved'),
-        description: "La calificación ha sido registrada correctamente.",
+        description: t('toast.gradeSavedDesc'),
       });
       
       setShowManualGradeDialog(false);
@@ -852,8 +852,8 @@ export default function ExamResultsPage() {
         });
       } else {
         toast({
-          title: "Error al guardar",
-          description: "No se pudo guardar la calificación",
+          title: t('toast.saveError'),
+          description: t('toast.saveErrorDesc'),
           variant: "destructive",
         });
       }
@@ -980,7 +980,7 @@ export default function ExamResultsPage() {
     try {
       toast({
         title: t('toast.preparingPDF'),
-        description: "Cargando imágenes y preparando el reporte...",
+        description: t('toast.preparingPDFDesc'),
       });
       
       // Cargar imágenes para los resultados con seguimiento de progreso real
@@ -991,7 +991,7 @@ export default function ExamResultsPage() {
       
       toast({
         title: t('toast.pdfGenerated'),
-        description: "El reporte PDF se ha generado correctamente.",
+        description: t('toast.pdfGeneratedDesc'),
       });
     } catch (_error) {
           toast({
@@ -1291,7 +1291,7 @@ export default function ExamResultsPage() {
                                   size="sm"
                                   onClick={() => handleShowManualGradeDialog(estudiante)}
                                 >
-                                  Ingresar Nota
+                                  {t('dialogs.enterGrade')}
                                 </Button>
                               )}
                             </td>
@@ -1309,11 +1309,12 @@ export default function ExamResultsPage() {
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar cambio de respuesta</DialogTitle>
+            <DialogTitle>{t('dialogs.confirmChangeTitle')}</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de que deseas cambiar la respuesta de la pregunta {pendingUpdate?.preguntaOrden} a la opción {pendingUpdate?.nuevaLetra}?
-              <br /><br />
-              Esta acción recalculará automáticamente la calificación del examen.
+              {t('dialogs.confirmChangeDescription', {
+                question: pendingUpdate?.preguntaOrden || 0,
+                option: pendingUpdate?.nuevaLetra || ''
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1325,7 +1326,7 @@ export default function ExamResultsPage() {
               }}
               disabled={updatingAnswer}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleConfirmUpdate}
@@ -1334,10 +1335,10 @@ export default function ExamResultsPage() {
               {updatingAnswer ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Actualizando...
+                  {t('dialogs.updating')}
                 </>
               ) : (
-                'Confirmar cambio'
+                t('dialogs.confirmChangeButton')
               )}
             </Button>
           </DialogFooter>
@@ -1556,7 +1557,7 @@ export default function ExamResultsPage() {
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    No hay imagen original disponible
+                    {t('dialogs.noOriginalImage')}
                   </div>
                 )}
               </TabsContent>
@@ -1571,7 +1572,7 @@ export default function ExamResultsPage() {
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    No hay imagen procesada disponible
+                    {t('dialogs.noProcessedImage')}
                   </div>
                 )}
               </TabsContent>
@@ -1579,7 +1580,7 @@ export default function ExamResultsPage() {
           )}
           
           <DialogFooter>
-            <Button onClick={() => setShowDetailsDialog(false)}>Cerrar</Button>
+            <Button onClick={() => setShowDetailsDialog(false)}>{t('dialogs.close')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1588,22 +1589,22 @@ export default function ExamResultsPage() {
       <Dialog open={showManualGradeDialog} onOpenChange={setShowManualGradeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ingresar calificación manual</DialogTitle>
+            <DialogTitle>{t('dialogs.manualGradeTitle')}</DialogTitle>
             <DialogDescription>
-              Esta funcionalidad está diseñada para casos especiales donde el estudiante no realizó el examen general, como recuperaciones o supletorios.
+              {t('dialogs.manualGradeDescription')}
             </DialogDescription>
           </DialogHeader>
           
           <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md mt-3 mb-4 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
             <AlertCircle className="h-5 w-5 flex-shrink-0" />
             <span className="text-sm">
-              Si posteriormente se escanea un examen para este estudiante, esta calificación manual será reemplazada por el resultado del escaneo.
+              {t('dialogs.manualGradeWarning')}
             </span>
           </div>
           
           <div className="space-y-4 py-2">
             <div>
-              <Label htmlFor="estudiante">Estudiante</Label>
+              <Label htmlFor="estudiante">{t('dialogs.studentLabel')}</Label>
               <Input 
                 id="estudiante" 
                 value={selectedEstudiante ? `${selectedEstudiante.apellidos}, ${selectedEstudiante.nombres}` : ''} 
@@ -1612,7 +1613,7 @@ export default function ExamResultsPage() {
             </div>
             
             <div>
-              <Label htmlFor="grade">Calificación (0-5)</Label>
+              <Label htmlFor="grade">{t('dialogs.gradeLabel')}</Label>
               <Input 
                 id="grade" 
                 type="number" 
@@ -1632,7 +1633,7 @@ export default function ExamResultsPage() {
               onClick={() => setShowManualGradeDialog(false)}
               disabled={isSubmittingGrade}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleSaveManualGrade}
@@ -1641,12 +1642,12 @@ export default function ExamResultsPage() {
               {isSubmittingGrade ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Guardando...
+                  {t('dialogs.saving')}
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  Guardar calificación
+                  {t('dialogs.saveGrade')}
                 </>
               )}
             </Button>
@@ -1658,9 +1659,9 @@ export default function ExamResultsPage() {
       <Dialog open={showGroupSelectionModal} onOpenChange={handleModalOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Seleccionar Grupo</DialogTitle>
+            <DialogTitle>{t('dialogs.groupSelectionTitle')}</DialogTitle>
             <DialogDescription>
-              Este examen está asignado a múltiples grupos. Seleccione el grupo para ver sus resultados.
+              {t('dialogs.groupSelectionDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
