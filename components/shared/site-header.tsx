@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { useTranslations, useLocale } from 'next-intl'
+import { Link } from "@/i18n/navigation"
+import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/shared/mode-toggle"
 import { LanguageSwitcher } from "@/components/shared/language-switcher"
@@ -15,10 +15,10 @@ import {
   ScanLine,
   Smartphone
 } from "lucide-react"
+import { AppPathnames } from "@/i18n/routing"
 
 export function SiteHeader() {
   const t = useTranslations('common')
-  const locale = useLocale()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isFuncionesOpen, setIsFuncionesOpen] = useState(false)
   const [isExamenesOpen, setIsExamenesOpen] = useState(false)
@@ -33,38 +33,6 @@ export function SiteHeader() {
   const toggleFunciones = () => setIsFuncionesOpen(!isFuncionesOpen)
   const toggleExamenes = () => setIsExamenesOpen(!isExamenesOpen)
 
-  // Helper function to get localized routes
-  const getLocalizedRoute = (route: string) => {
-    if (locale === 'es') {
-      const routeMap: { [key: string]: string } = {
-        'how-it-works': '/como-funciona',
-        'pricing': '/precios',
-        'contact': '/contacto',
-        'blog': '/blog',
-        'exams': '/examenes',
-        'exams/manual-generator': '/examenes/generador-manual',
-        'exams/ai-generator': '/examenes/generador-ia',
-        'paper-exams': '/examenes-papel',
-        'institutions-management': '/gestion-instituciones',
-        'subjects-management': '/gestion-materias',
-        'groups-management': '/gestion-grupos',
-        'students-management': '/gestion-estudiantes',
-        'reports': '/reportes',
-        'mobile-app': '/aplicacion-movil'
-      }
-      return routeMap[route] || `/${route}`
-    }
-    return `/${route}`
-  }
-
-  // Helper function to get localized auth routes
-  const getAuthRoute = (route: string) => {
-    if (locale === 'es') {
-      return `/auth/${route === 'register' ? 'registro' : 'iniciar-sesion'}`
-    }
-    return `/auth/${route}`
-  }
-
   // Componente para items del menú móvil
   const MobileMenuItem = ({ 
     href, 
@@ -74,7 +42,7 @@ export function SiteHeader() {
     isSubItem = false,
     isSubSubItem = false 
   }: {
-    href?: string
+    href?: AppPathnames
     title: string
     icon?: React.ComponentType<{ className?: string }>
     onClick?: () => void
@@ -104,7 +72,8 @@ export function SiteHeader() {
     if (href) {
       return (
         <Link 
-          href={href} 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          href={href as any} 
           className={`${baseClasses} ${subItemClasses} ${subSubItemClasses}`}
           onClick={closeMenu}
         >
@@ -144,12 +113,12 @@ export function SiteHeader() {
             </nav>
             <div className="hidden md:flex items-center gap-2">
               <Button asChild size="sm" className="bg-accent text-black dark:text-black">
-                <Link href={getAuthRoute('login')} title={`${t('buttons.login')} - ProfeVision`}>
+                <Link href="/auth/login" title={`${t('buttons.login')} - ProfeVision`}>
                   {t('buttons.login')}
                 </Link>
               </Button>
               <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90">
-                <Link href={getAuthRoute('register')} title={`${t('buttons.register')} - ProfeVision`}>
+                <Link href="/auth/register" title={`${t('buttons.register')} - ProfeVision`}>
                   {t('buttons.register')}
                 </Link>
               </Button>
@@ -175,7 +144,7 @@ export function SiteHeader() {
           <div className="absolute top-16 inset-x-0 bg-background/95 backdrop-blur-md border-b md:hidden z-40">
             <div className="container py-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
               {/* Cómo funciona */}
-              <MobileMenuItem href={getLocalizedRoute('how-it-works')} title={t('navigation.howItWorks')} />
+              <MobileMenuItem href='/how-it-works' title={t('navigation.howItWorks')} />
               
               {/* Exámenes */}
               <div>
@@ -187,25 +156,25 @@ export function SiteHeader() {
                 {isExamenesOpen && (
                   <div className="border-l-2 border-muted ml-4">
                     <MobileMenuItem 
-                      href={getLocalizedRoute('exams')} 
+                      href='/exams' 
                       title={t('navigation.exams')}
                       icon={FileText}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href={getLocalizedRoute('exams/manual-generator')} 
+                      href='/exams/manual-generator' 
                       title={t('navigation.manualGenerator')}
                       icon={FileText}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href={getLocalizedRoute('exams/ai-generator')} 
+                      href='/exams/ai-generator' 
                       title={t('navigation.aiGenerator')}
                       icon={Brain}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href={getLocalizedRoute('paper-exams')} 
+                      href='/paper-exams' 
                       title={t('navigation.paperExams')}
                       icon={ScanLine}
                       isSubItem
@@ -224,37 +193,37 @@ export function SiteHeader() {
                 {isFuncionesOpen && (
                   <div className="border-l-2 border-muted ml-4">
                     <MobileMenuItem 
-                      href={getLocalizedRoute('institutions-management')} 
+                      href='/institutions-management' 
                       title={t('navigation.institutionsManagement')} 
                       icon={BookOpen}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href={getLocalizedRoute('subjects-management')} 
+                      href='/subjects-management' 
                       title={t('navigation.subjectsManagement')} 
                       icon={BookOpen}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href={getLocalizedRoute('groups-management')} 
+                      href='/groups-management' 
                       title={t('navigation.groupsManagement')} 
                       icon={BookOpen}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href={getLocalizedRoute('students-management')} 
+                      href='/students-management' 
                       title={t('navigation.studentsManagement')} 
                       icon={BookOpen}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href={getLocalizedRoute('reports')} 
-                      title={t('navigation.reportsManagement')} 
+                      href='/reports' 
+                      title={t('navigation.reports')} 
                       icon={BookOpen}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href={getLocalizedRoute('mobile-app')} 
+                      href='/mobile-app' 
                       title={t('navigation.mobileApp')} 
                       icon={Smartphone}
                       isSubItem
@@ -262,49 +231,34 @@ export function SiteHeader() {
                   </div>
                 )}
               </div>
-              
+
               {/* Precios */}
-              <MobileMenuItem href={getLocalizedRoute('pricing')} title={t('navigation.pricing')} />
-              
-              {/* Blog */}
-              <MobileMenuItem href={getLocalizedRoute('blog')} title={t('navigation.blog')} />
+              <MobileMenuItem href='/pricing' title={t('navigation.pricing')} />
               
               {/* Contacto */}
-              <MobileMenuItem href={getLocalizedRoute('contact')} title={t('navigation.contact')} />
+              <MobileMenuItem href='/contact' title={t('navigation.contact')} />
+
+              {/* Blog */}
+              <MobileMenuItem href='/blog' title={t('navigation.blog')} />
               
-              {/* Selector de idioma en mobile */}
-              <div className="py-3 px-4 border-t mt-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t('language.label')}</span>
-                  <LanguageSwitcher />
+              <div className="border-t mt-4">
+                <div className="pt-4 flex flex-col gap-3">
+                  <Button asChild variant="outline" size="sm" className="bg-accent text-black dark:text-black justify-center text-base">
+                    <Link href="/auth/login" onClick={closeMenu} title={`${t('buttons.login')} - ProfeVision`}>
+                      {t('buttons.login')}
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90 text-base">
+                    <Link href="/auth/register" onClick={closeMenu} title={`${t('buttons.register')} - ProfeVision`}>
+                      {t('buttons.register')}
+                    </Link>
+                  </Button>
                 </div>
-              </div>
-              
-              {/* Botones de autenticación */}
-              <div className="pt-4 flex flex-col gap-3">
-                <Button asChild variant="outline" size="sm" className="bg-accent text-black dark:text-black justify-center text-base">
-                  <Link href={getAuthRoute('login')} onClick={closeMenu} title={`${t('buttons.login')} - ProfeVision`}>
-                    {t('buttons.login')}
-                  </Link>
-                </Button>
-                <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90 text-base">
-                  <Link href={getAuthRoute('register')} onClick={closeMenu} title={`${t('buttons.register')} - ProfeVision`}>
-                    {t('buttons.register')}
-                  </Link>
-                </Button>
               </div>
             </div>
           </div>
         )}
       </header>
-
-      {/* Overlay for mobile menu */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-40 md:hidden"
-          onClick={closeMenu}
-        />
-      )}
     </>
   )
 }

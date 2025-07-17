@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { supabase } from "@/lib/supabase/client";
 import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
@@ -72,7 +72,7 @@ export default function DashboardLayout({
       
       // Always redirect to clear client state
       logger.log('[DashboardLayout] Redirecting to login after logout attempt.');
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
       
       // It might take a moment for redirect, ensure isLoggingOut is reset eventually
       // Setting it false here might be too soon if redirect hangs, but often okay.
