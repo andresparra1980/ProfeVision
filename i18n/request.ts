@@ -14,6 +14,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
     common: (await import(`./locales/${locale}/common.json`)).default,
     auth: (await import(`./locales/${locale}/auth.json`)).default,
     dashboard: (await import(`./locales/${locale}/dashboard.json`)).default,
+    errors: (await import(`./locales/${locale}/errors.json`)).default,
+    exam: (await import(`./locales/${locale}/exam.json`)).default,
+    forms: (await import(`./locales/${locale}/forms.json`)).default,
+    navigation: (await import(`./locales/${locale}/navigation.json`)).default,
   };
 
   return {

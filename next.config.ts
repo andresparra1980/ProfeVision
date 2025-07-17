@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "api.dicebear.com",
+        port: "",
+        pathname: "/9.x/avataaars/svg",
+      },
     ],
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,

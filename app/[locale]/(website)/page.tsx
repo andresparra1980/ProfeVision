@@ -23,7 +23,7 @@ export default function Home() {
   const locale = useLocale()
   
   const avatarSeeds = useMemo(
-    () => Array.from({ length: 4 }, () => Math.random().toString(36).substring(2, 10)),
+    () => ['seed1', 'seed2', 'seed3', 'seed4'],
     []
   )
 
@@ -83,8 +83,8 @@ export default function Home() {
                       <Image
                         key={index}
                         src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`}
-                        alt={`${t('avatarAlt', { number: index + 1 })}`}
-                        title={t('avatarTitle')}
+                        alt={t('homepage.hero.avatarAlt', { number: index + 1 })}
+                        title={t('homepage.hero.avatarTitle')}
                         width={32}
                         height={32}
                         className="w-8 h-8 rounded-full border-2 border-background"
