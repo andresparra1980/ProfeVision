@@ -78,17 +78,16 @@ export default function Home() {
                   </Button>
                 </div>
                 <div className="flex items-center gap-4 pt-4">
-                  <div className="flex -space-x-2">
+                  <div className="flex -space-x-2 overflow-hidden" suppressHydrationWarning>
                     {avatarSeeds.map((seed, index) => (
                       <Image
-                        key={seed}
+                        key={index}
                         src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`}
-                        alt={t('homepage.hero.avatarAlt', { number: index + 1 })}
-                        title={t('homepage.hero.avatarTitle')}
+                        alt={`${t('avatarAlt', { number: index + 1 })}`}
+                        title={t('avatarTitle')}
                         width={32}
                         height={32}
                         className="w-8 h-8 rounded-full border-2 border-background"
-                        unoptimized
                       />
                     ))}
                   </div>

@@ -60,7 +60,7 @@ export default function Home() {
                   </Button>
                 </div>
                 <div className="flex items-center gap-4 pt-4">
-                  <div className="flex -space-x-2">
+                  <div className="flex -space-x-2 overflow-hidden" suppressHydrationWarning>
                     {avatarSeeds.map((seed, index) => (
                       <Image
                         key={seed}
