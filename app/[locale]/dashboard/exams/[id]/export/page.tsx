@@ -69,8 +69,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const examId = resolvedParams.id;
   
   const router = useRouter();
-  const t = useTranslations('dashboard.exams');
-  const tExport = useTranslations('dashboard.exams.export');
+  const t = useTranslations('dashboard');
   const [loading, setLoading] = useState(true);
   const [exam, setExam] = useState<ExamDetails | null>(null);
   const [paperSize, setPaperSize] = useState("letter"); // letter, a4, legal
@@ -180,15 +179,15 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
         URL.revokeObjectURL(url);
 
         toast({
-          title: t('messages.success'),
-          description: tExport('success'),
+          title: t('exams.messages.success'),
+          description: t('exams.export.success'),
         });
       }
     } catch (error) {
       console.error("Error exporting exam:", error);
       toast({
-        title: t('messages.error'),
-        description: tExport('error'),
+        title: t('exams.messages.error'),
+        description: t('exams.export.error'),
         variant: "destructive",
       });
     }
@@ -205,12 +204,12 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   if (!exam) {
     return (
       <div className="text-center py-8">
-        <p>{tExport('notFound')}</p>
+        <p>{t('exams.export.notFound')}</p>
         <Button 
           className="mt-4"
           onClick={() => router.push("/dashboard/exams")}
         >
-          {tExport('backToExams')}
+          {t('exams.export.backToExams')}
         </Button>
       </div>
     );
@@ -225,12 +224,12 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               variant="ghost"
               onClick={() => setPreviewing(false)}
             >
-              <ChevronLeft className="mr-2 h-4 w-4" /> {tExport('back')}
+              <ChevronLeft className="mr-2 h-4 w-4" /> {t('exams.export.back')}
             </Button>
             <Button
               onClick={() => handleExport('questions')}
             >
-              <Printer className="mr-2 h-4 w-4" /> {tExport('downloadPDF')}
+              <Printer className="mr-2 h-4 w-4" /> {t('exams.export.downloadPDF')}
             </Button>
           </div>
           <div className="flex-1 w-full h-full bg-gray-100">
@@ -253,11 +252,11 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             onClick={() => router.push("/dashboard/exams")}
             className="mb-2"
           >
-            <ChevronLeft className="mr-2 h-4 w-4" /> {tExport('backToExams')}
+            <ChevronLeft className="mr-2 h-4 w-4" /> {t('exams.export.backToExams')}
           </Button>
           <h2 className="text-3xl font-bold tracking-tight">{exam.titulo}</h2>
           <p className="text-muted-foreground">
-            {exam.materias?.nombre} | {tExport('title')}
+            {exam.materias?.nombre} | {t('exams.export.title')}
           </p>
         </div>
       </div>
@@ -265,23 +264,23 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>{tExport('availableFormats')}</CardTitle>
+            <CardTitle>{t('exams.export.availableFormats')}</CardTitle>
             <CardDescription>
-              {tExport('description')}
+              {t('exams.export.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="flex flex-col items-start gap-2">
-              <h3 className="text-lg font-semibold">{tExport('questionSheet')}</h3>
+              <h3 className="text-lg font-semibold">{t('exams.export.questionSheet')}</h3>
               <p className="text-sm text-muted-foreground">
-                {tExport('questionSheetDesc')}
+                {t('exams.export.questionSheetDesc')}
               </p>
               <div className="flex gap-2">
                 <Button onClick={() => setPreviewing(true)}>
-                  <Eye className="mr-2 h-4 w-4" /> {tExport('preview')}
+                  <Eye className="mr-2 h-4 w-4" /> {t('exams.export.preview')}
                 </Button>
                 <Button onClick={() => handleExport('questions')}>
-                  <Download className="mr-2 h-4 w-4" /> Descargar PDF
+                  <Download className="mr-2 h-4 w-4" /> {t('exams.export.downloadPDF')}
                 </Button>
               </div>
             </div>
@@ -289,12 +288,12 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             <Separator />
 
             <div className="flex flex-col items-start gap-2">
-              <h3 className="text-lg font-semibold">{tExport('answerSheets')}</h3>
+              <h3 className="text-lg font-semibold">{t('exams.export.answerSheets')}</h3>
               <p className="text-sm text-muted-foreground">
-                {tExport('answerSheetsDesc')}
+                {t('exams.export.answerSheetsDesc')}
               </p>
               <Button onClick={() => router.push(`/dashboard/exams/${examId}/responses` as any)}>
-                <FileOutput className="mr-2 h-4 w-4" /> {tExport('generateAnswerSheets')}
+                <FileOutput className="mr-2 h-4 w-4" /> {t('exams.export.generateAnswerSheets')}
               </Button>
             </div>
           </CardContent>
@@ -302,16 +301,16 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
 
         <Card>
           <CardHeader>
-            <CardTitle>Configuración de Exportación</CardTitle>
+            <CardTitle>{t('exams.export.exportConfiguration')}</CardTitle>
             <CardDescription>
-              Selecciona el grupo y el tamaño de papel para exportar
+              {t('exams.export.exportConfigurationDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Selección de grupo */}
             {exam.examen_grupo && exam.examen_grupo.length > 0 ? (
               <div className="space-y-2">
-                <Label>{tExport('group')}</Label>
+                <Label>{t('exams.export.group')}</Label>
                 <RadioGroup
                   value={selectedGroupId}
                   onValueChange={setSelectedGroupId}
@@ -336,32 +335,32 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               </div>
             ) : (
               <div className="text-center py-4 text-muted-foreground">
-                {tExport('noGroupsAssigned')}
+                {t('exams.export.noGroupsAssigned')}
                 <Button 
                   variant="link" 
                   onClick={() => router.push(`/dashboard/exams/${examId}/assign` as any)}
                   className="ml-2"
                 >
-                  {tExport('assignGroups')}
+                  {t('exams.export.assignGroups')}
                 </Button>
               </div>
             )}
 
             {/* Tamaño de papel */}
             <div className="space-y-2">
-              <Label>{tExport('paperSize')}</Label>
+              <Label>{t('exams.export.paperSize')}</Label>
               <RadioGroup value={paperSize} onValueChange={setPaperSize}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="letter" id="letter" />
-                  <Label htmlFor="letter">{tExport('letter')}</Label>
+                  <Label htmlFor="letter">{t('exams.export.letter')}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="a4" id="a4" />
-                  <Label htmlFor="a4">{tExport('a4')}</Label>
+                  <Label htmlFor="a4">{t('exams.export.a4')}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="legal" id="legal" />
-                  <Label htmlFor="legal">{tExport('legal')}</Label>
+                  <Label htmlFor="legal">{t('exams.export.legal')}</Label>
                 </div>
               </RadioGroup>
             </div>
