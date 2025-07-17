@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, use, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, Printer, Eye, Download, FileOutput } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +69,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const examId = resolvedParams.id;
   
   const router = useRouter();
+  const t = useTranslations('dashboard.exams');
+  const tExport = useTranslations('dashboard.exams.export');
   const [loading, setLoading] = useState(true);
   const [exam, setExam] = useState<ExamDetails | null>(null);
   const [paperSize, setPaperSize] = useState("letter"); // letter, a4, legal
@@ -177,15 +180,15 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
         URL.revokeObjectURL(url);
 
         toast({
-          title: "Éxito",
-          description: "El formato de preguntas ha sido generado",
+          title: t('messages.success'),
+          description: tExport('success'),
         });
       }
     } catch (error) {
       console.error("Error exporting exam:", error);
       toast({
-        title: "Error",
-        description: "No se pudo generar el formato",
+        title: t('messages.error'),
+        description: tExport('error'),
         variant: "destructive",
       });
     }
@@ -202,12 +205,12 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   if (!exam) {
     return (
       <div className="text-center py-8">
-        <p>No se encontró el examen solicitado.</p>
+        <p>{tExport('notFound')}</p>
         <Button 
           className="mt-4"
           onClick={() => router.push("/dashboard/exams")}
         >
-          Volver a Exámenes
+          {tExport('backToExams')}
         </Button>
       </div>
     );
@@ -222,12 +225,12 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               variant="ghost"
               onClick={() => setPreviewing(false)}
             >
-              <ChevronLeft className="mr-2 h-4 w-4" /> Volver
+              <ChevronLeft className="mr-2 h-4 w-4" /> {tExport('back')}
             </Button>
             <Button
               onClick={() => handleExport('questions')}
             >
-              <Printer className="mr-2 h-4 w-4" /> Descargar PDF
+              <Printer className="mr-2 h-4 w-4" /> {tExport('downloadPDF')}
             </Button>
           </div>
           <div className="flex-1 w-full h-full bg-gray-100">
@@ -250,11 +253,11 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             onClick={() => router.push("/dashboard/exams")}
             className="mb-2"
           >
-            <ChevronLeft className="mr-2 h-4 w-4" /> Volver a Exámenes
+            <ChevronLeft className="mr-2 h-4 w-4" /> {tExport('backToExams')}
           </Button>
           <h2 className="text-3xl font-bold tracking-tight">{exam.titulo}</h2>
           <p className="text-muted-foreground">
-            {exam.materias?.nombre} | Exportar Formatos
+            {exam.materias?.nombre} | {tExport('title')}
           </p>
         </div>
       </div>
@@ -262,20 +265,20 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Formatos Disponibles</CardTitle>
+            <CardTitle>{tExport('availableFormats')}</CardTitle>
             <CardDescription>
-              Selecciona el tipo de formato que deseas generar
+              {tExport('description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="flex flex-col items-start gap-2">
-              <h3 className="text-lg font-semibold">Hoja de Preguntas</h3>
+              <h3 className="text-lg font-semibold">{tExport('questionSheet')}</h3>
               <p className="text-sm text-muted-foreground">
-                Formato con las preguntas del examen para entregar a los estudiantes
+                {tExport('questionSheetDesc')}
               </p>
               <div className="flex gap-2">
                 <Button onClick={() => setPreviewing(true)}>
-                  <Eye className="mr-2 h-4 w-4" /> Vista Previa
+                  <Eye className="mr-2 h-4 w-4" /> {tExport('preview')}
                 </Button>
                 <Button onClick={() => handleExport('questions')}>
                   <Download className="mr-2 h-4 w-4" /> Descargar PDF
@@ -286,12 +289,12 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             <Separator />
 
             <div className="flex flex-col items-start gap-2">
-              <h3 className="text-lg font-semibold">Hojas de Respuesta</h3>
+              <h3 className="text-lg font-semibold">{tExport('answerSheets')}</h3>
               <p className="text-sm text-muted-foreground">
-                Formatos personalizados para cada estudiante con código QR y marcas de alineación
+                {tExport('answerSheetsDesc')}
               </p>
-              <Button onClick={() => router.push(`/dashboard/exams/${examId}/responses`)}>
-                <FileOutput className="mr-2 h-4 w-4" /> Generar Hojas de Respuesta
+              <Button onClick={() => router.push(`/dashboard/exams/${examId}/responses` as any)}>
+                <FileOutput className="mr-2 h-4 w-4" /> {tExport('generateAnswerSheets')}
               </Button>
             </div>
           </CardContent>
@@ -308,7 +311,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             {/* Selección de grupo */}
             {exam.examen_grupo && exam.examen_grupo.length > 0 ? (
               <div className="space-y-2">
-                <Label>Grupo</Label>
+                <Label>{tExport('group')}</Label>
                 <RadioGroup
                   value={selectedGroupId}
                   onValueChange={setSelectedGroupId}
@@ -333,32 +336,32 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               </div>
             ) : (
               <div className="text-center py-4 text-muted-foreground">
-                No hay grupos asignados a este examen.
+                {tExport('noGroupsAssigned')}
                 <Button 
                   variant="link" 
-                  onClick={() => router.push(`/dashboard/exams/${examId}/assign`)}
+                  onClick={() => router.push(`/dashboard/exams/${examId}/assign` as any)}
                   className="ml-2"
                 >
-                  Asignar grupos
+                  {tExport('assignGroups')}
                 </Button>
               </div>
             )}
 
             {/* Tamaño de papel */}
             <div className="space-y-2">
-              <Label>Tamaño de Papel</Label>
+              <Label>{tExport('paperSize')}</Label>
               <RadioGroup value={paperSize} onValueChange={setPaperSize}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="letter" id="letter" />
-                  <Label htmlFor="letter">Carta (Letter)</Label>
+                  <Label htmlFor="letter">{tExport('letter')}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="a4" id="a4" />
-                  <Label htmlFor="a4">A4</Label>
+                  <Label htmlFor="a4">{tExport('a4')}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="legal" id="legal" />
-                  <Label htmlFor="legal">Legal</Label>
+                  <Label htmlFor="legal">{tExport('legal')}</Label>
                 </div>
               </RadioGroup>
             </div>

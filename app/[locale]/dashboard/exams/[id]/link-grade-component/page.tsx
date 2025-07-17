@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ const DEBUG = process.env.NODE_ENV === 'development';
 // Define el esquema de validación para el formulario
 const formSchema = z.object({
   componentesSeleccionados: z.array(z.string()).min(1, {
-    message: "Debes seleccionar al menos un componente de calificación",
+    message: "Debes seleccionar al menos un componente de calificación", // Note: This validation message should be handled differently
   }),
 });
 
@@ -88,6 +89,8 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
   const examId = unwrappedParams.id;
   
   const router = useRouter();
+  const t = useTranslations('dashboard.exams');
+  const tLink = useTranslations('dashboard.exams.linkGradeComponent');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [gruposDelExamen, setGruposDelExamen] = useState<Grupo[]>([]);
@@ -246,7 +249,7 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
         if (DEBUG) {
           console.error("Error al cargar datos:", error);
         }
-        toast.error("Error al cargar componentes de calificación");
+        toast.error(tLink('loadError'));
         setLoading(false);
       }
     }
@@ -298,13 +301,13 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
         if (errorAgregar) throw errorAgregar;
       }
       
-      toast.success("Vinculaciones actualizadas correctamente");
+      toast.success(tLink('success'));
       router.push("/dashboard/exams");
     } catch (error: unknown) {
       if (DEBUG) {
         console.error("Error al guardar vinculaciones:", error);
       }
-      toast.error("Error al guardar las vinculaciones");
+      toast.error(tLink('error'));
     } finally {
       setSaving(false);
     }
@@ -315,7 +318,7 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
     return (
       <div className="flex flex-col items-center justify-center min-h-[500px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Cargando componentes de calificación...</p>
+        <p className="mt-4 text-muted-foreground">{tLink('loading')}</p>
       </div>
     );
   }
@@ -327,21 +330,21 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
+            {tLink('back')}
           </Button>
-          <h1 className="text-2xl font-bold">Vincular Examen a Componentes de Calificación</h1>
+          <h1 className="text-2xl font-bold">{tLink('title')}</h1>
         </div>
         
         <Card>
           <CardHeader>
-            <CardTitle>No hay grupos asignados</CardTitle>
+            <CardTitle>{tLink('noGroupsAssigned')}</CardTitle>
             <CardDescription>
-              Este examen no tiene grupos asignados. Primero debes asignar el examen a uno o más grupos.
+              {tLink('noGroupsAssignedDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => router.push(`/dashboard/exams/${examId}/assign`)}>
-              Asignar Grupos
+            <Button onClick={() => router.push(`/dashboard/exams/${examId}/assign` as any)}>
+              {tLink('assignGroups')}
             </Button>
           </CardContent>
         </Card>
@@ -357,23 +360,22 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
         <div>
           <Button variant="outline" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver a Exámenes
+            {tLink('backToExams')}
           </Button>
-        <h1 className="text-2xl font-bold mt-6">Vincular Examen a Componentes de Calificación</h1>
+        <h1 className="text-2xl font-bold mt-6">{tLink('title')}</h1>
         </div>
       </div>
         
         <Card>
           <CardHeader>
-            <CardTitle>No hay componentes de calificación</CardTitle>
+            <CardTitle>{tLink('noGradingComponents')}</CardTitle>
             <CardDescription>
-              No se encontraron componentes de calificación para los grupos asignados a este examen.
-              Primero debes crear un esquema de calificación con periodos y componentes.
+              {tLink('noGradingComponentsDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => router.push("/dashboard/grades/schemes")}>
-              Ir a Esquemas de Calificación
+            <Button onClick={() => router.push("/dashboard/grades/schemes" as any)}>
+              {tLink('goToGradingSchemes')}
             </Button>
           </CardContent>
         </Card>
@@ -387,9 +389,9 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
         <div>
           <Button variant="outline" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver a Exámenes
+            {tLink('backToExams')}
           </Button>
-        <h1 className="text-2xl font-bold mt-6">Vincular Examen a Componentes de Calificación</h1>
+        <h1 className="text-2xl font-bold mt-6">{tLink('title')}</h1>
         </div>
       </div>
       
@@ -418,13 +420,13 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
                     
                     {componentes.map((grupo) => (
                       <div key={grupo.grupoId} className="mb-6">
-                        <h3 className="text-lg font-medium mb-2">Grupo: {grupo.grupoNombre}</h3>
+                        <h3 className="text-lg font-medium mb-2">{tLink('group')} {grupo.grupoNombre}</h3>
                         <div className="ml-4">
-                          <h4 className="text-md font-medium text-muted-foreground mb-2">Esquema: {grupo.esquemaNombre}</h4>
+                          <h4 className="text-md font-medium text-muted-foreground mb-2">{tLink('scheme')} {grupo.esquemaNombre}</h4>
                           
                           {grupo.periodos.map((periodo) => (
                             <div key={periodo.periodoId} className="ml-4 mb-4">
-                              <h5 className="text-sm font-medium mb-2">Periodo: {periodo.periodoNombre}</h5>
+                              <h5 className="text-sm font-medium mb-2">{tLink('period')} {periodo.periodoNombre}</h5>
                               
                               <div className="space-y-2 ml-4">
                                 {periodo.componentes.map((componente) => (
@@ -471,11 +473,11 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
                   onClick={() => router.push("/dashboard/exams")}
                   disabled={saving}
                 >
-                  Cancelar
+                  {tLink('cancel')}
                 </Button>
                 <Button type="submit" disabled={saving}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {saving ? "Guardando..." : "Guardar Vinculaciones"}
+                  {saving ? tLink('saving') : tLink('save')}
                 </Button>
               </div>
             </form>

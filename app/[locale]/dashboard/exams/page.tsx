@@ -8,7 +8,6 @@ import { AuthError } from "@supabase/supabase-js";
 import { logger } from "@/lib/utils/logger";
 import { Upload, Plus } from "lucide-react"; // Added for page header buttons
 import ImportExamDialog from "./components/ImportExamDialog";
-import ExamsTableDesktop from "./components/ExamsTableDesktop";
 import ExamsTableMobile from "./components/ExamsTableMobile";
 import {
   AlertDialog,
@@ -31,24 +30,6 @@ import {
 import { Button } from "@/components/ui/button"; // Added for dialogs
 import { useTranslations } from "next-intl";
 
-const useMediaQuery = (query: string) => {
-  const [matches, setMatches] = useState(false);
-
-  useEffect(() => {
-    // Asegurarse de que window está definido (para SSR/SSG)
-    if (typeof window === "undefined") return;
-
-    const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
-    const listener = () => setMatches(media.matches);
-    window.addEventListener("resize", listener);
-    return () => window.removeEventListener("resize", listener);
-  }, [matches, query]);
-
-  return matches;
-};
 
 interface Exam {
   id: string;
@@ -95,8 +76,6 @@ export default function ExamsPage() {
   const [examToDelete, setExamToDelete] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-
-  const isDesktop = useMediaQuery("(min-width: 768px)"); // md breakpoint (Tailwind)
 
   const fetchExams = useCallback(async () => {
     try {
@@ -154,12 +133,6 @@ export default function ExamsPage() {
         exam.materias.nombre.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
-  const handleExamClick = (examId: string) => {
-    router.push({
-      pathname: '/dashboard/exams/[id]/edit',
-      params: { id: examId },
-    });
-  };
 
   const handleOpenDeleteDialog = (examId: string) => {
     setExamToDelete(examId);
@@ -303,16 +276,7 @@ export default function ExamsPage() {
         </div>
       </div>
 
-      {isDesktop ? (
-        <ExamsTableDesktop
-          filteredExams={filteredExams}
-          loading={loading}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          handleExamClick={handleExamClick}
-          onOpenDeleteDialog={handleOpenDeleteDialog}
-        />
-      ) : (
+
         <ExamsTableMobile
           filteredExams={filteredExams}
           loading={loading}
@@ -322,7 +286,6 @@ export default function ExamsPage() {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
         />
-      )}
 
       <ImportExamDialog
         _open={showImportDialog}
