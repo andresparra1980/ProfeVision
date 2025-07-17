@@ -113,8 +113,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body suppressHydrationWarning>
+    <>
       <Script
         id="gtm-script"
         strategy="afterInteractive"
@@ -171,13 +170,12 @@ export default async function LocaleLayout({
           style={{ display: 'none', visibility: 'hidden' }}
         />
       </noscript>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <AuthProvider>
-            <ClientLayout>{children}</ClientLayout>
-            <CookieBanner />
-          </AuthProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        <AuthProvider>
+          <ClientLayout>{children}</ClientLayout>
+          <CookieBanner />
+        </AuthProvider>
+      </NextIntlClientProvider>
+    </>
   );
 } 

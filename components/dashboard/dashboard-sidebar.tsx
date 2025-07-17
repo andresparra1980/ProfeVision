@@ -126,7 +126,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
         <div>
           <div className="flex h-16 items-center justify-between px-4">
             {(!isCollapsed || isMobile) && (
-              <Link href="/dashboard" className="hidden md:flex items-center space-x-2">
+              <Link href="/" className="hidden md:flex items-center space-x-2">
                 <div className="relative">
                   <span className="font-bold text-xl text-secondary dark:text-secondary">ProfeVision</span>
                   <div className="absolute  -right-1 text-[8px] dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
