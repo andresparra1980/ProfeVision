@@ -17,7 +17,8 @@
     "startTrial": "Inicia Prueba Gratis",
     "exportGrades": "Exportar Calificaciones",
     "login": "Iniciar Sesión",
-    "register": "Registrarse"
+    "register": "Registrarse",
+    "goToDashboard": "Ir al Panel"
   },
   "labels": {
     "name": "Nombre",
@@ -421,7 +422,7 @@
         },
         "q4": {
           "question": "¿Necesito equipo especial para escanear las hojas de respuesta?",
-          "answer": "No, solo necesitas tu celular con la app de ProfeVision."
+          "answer": "No, solo necesitas tu celular con la app de ProfeVisión."
         },
         "q5": {
           "question": "¿La plataforma es segura?",
@@ -696,10 +697,10 @@
   "privacy": {
     "title": "Política de Privacidad de ProfeVision",
     "effective": "Vigente desde el 27 de junio de 2025",
-    "intro": "En ProfeVision (www.profevision.com), nos tomamos muy en serio tu privacidad y la de tus estudiantes. Queremos que sepas cómo usamos y protegemos tu información cuando usas nuestra aplicación o nuestro sitio web. Aquí te explicamos, de manera sencilla y clara, todo lo que necesitas saber.",
+    "intro": "En ProfeVisión (www.profevision.com), nos tomamos muy en serio tu privacidad y la de tus estudiantes. Queremos que sepas cómo usamos y protegemos tu información cuando usas nuestra aplicación o nuestro sitio web. Aquí te explicamos, de manera sencilla y clara, todo lo que necesitas saber.",
     "section1": {
       "title": "1. ¿Quiénes somos?",
-      "content": "Somos ProfeVision, una plataforma que ayuda a los profesores a calificar exámenes de opción múltiple y analizar los resultados de sus estudiantes de forma rápida y sencilla. Puedes usar nuestra app o nuestro sitio web para gestionar tus clases y exámenes."
+      "content": "Somos ProfeVisión, una plataforma que ayuda a los profesores a calificar exámenes de opción múltiple y analizar los resultados de sus estudiantes de forma rápida y sencilla. Puedes usar nuestra app o nuestro sitio web para gestionar tus clases y exámenes."
     },
     "section2": {
       "title": "2. ¿Qué información recopilamos?",

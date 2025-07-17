@@ -16,9 +16,12 @@ import {
   Smartphone
 } from "lucide-react"
 import { AppPathnames } from "@/i18n/routing"
+import { useAuth } from "./auth-provider"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function SiteHeader() {
   const t = useTranslations('common')
+  const { session, isLoading } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isFuncionesOpen, setIsFuncionesOpen] = useState(false)
   const [isExamenesOpen, setIsExamenesOpen] = useState(false)
@@ -112,16 +115,31 @@ export function SiteHeader() {
               <MainNavigation />
             </nav>
             <div className="hidden md:flex items-center gap-2">
-              <Button asChild size="sm" className="bg-accent text-black dark:text-black">
-                <Link href="/auth/login" title={`${t('buttons.login')} - ProfeVision`}>
-                  {t('buttons.login')}
-                </Link>
-              </Button>
-              <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90">
-                <Link href="/auth/register" title={`${t('buttons.register')} - ProfeVision`}>
-                  {t('buttons.register')}
-                </Link>
-              </Button>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-9 w-20" />
+                  <Skeleton className="h-9 w-20" />
+                </div>
+              ) : session ? (
+                <Button asChild size="sm" variant="secondary" className="text-background dark:text-foreground">
+                  <Link href="/dashboard" title={`${t('buttons.goToDashboard')} - ProfeVision`}>
+                    {t('buttons.goToDashboard')}
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild size="sm" className="bg-accent text-black dark:text-black">
+                    <Link href="/auth/login" title={`${t('buttons.login')} - ProfeVision`}>
+                      {t('buttons.login')}
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90">
+                    <Link href="/auth/register" title={`${t('buttons.register')} - ProfeVision`}>
+                      {t('buttons.register')}
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
             <LanguageSwitcher />
             <ModeToggle />
@@ -243,16 +261,31 @@ export function SiteHeader() {
               
               <div className="border-t mt-4">
                 <div className="pt-4 flex flex-col gap-3">
-                  <Button asChild variant="outline" size="sm" className="bg-accent text-black dark:text-black justify-center text-base">
-                    <Link href="/auth/login" onClick={closeMenu} title={`${t('buttons.login')} - ProfeVision`}>
-                      {t('buttons.login')}
-                    </Link>
-                  </Button>
-                  <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90 text-base">
-                    <Link href="/auth/register" onClick={closeMenu} title={`${t('buttons.register')} - ProfeVision`}>
-                      {t('buttons.register')}
-                    </Link>
-                  </Button>
+                  {isLoading ? (
+                    <div className="flex flex-col gap-3">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  ) : session ? (
+                    <Button asChild size="lg" className="w-full" variant="secondary">
+                      <Link href="/dashboard" onClick={closeMenu} title={`${t('buttons.goToDashboard')} - ProfeVision`}>
+                        {t('buttons.goToDashboard')}
+                      </Link>
+                    </Button>
+                  ) : (
+                    <>
+                      <Button asChild variant="outline" size="sm" className="bg-accent text-black dark:text-black justify-center text-base">
+                        <Link href="/auth/login" onClick={closeMenu} title={`${t('buttons.login')} - ProfeVision`}>
+                          {t('buttons.login')}
+                        </Link>
+                      </Button>
+                      <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90 text-base">
+                        <Link href="/auth/register" onClick={closeMenu} title={`${t('buttons.register')} - ProfeVision`}>
+                          {t('buttons.register')}
+                        </Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

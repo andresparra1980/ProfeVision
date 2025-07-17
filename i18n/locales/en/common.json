@@ -17,7 +17,8 @@
     "startTrial": "Start Free Trial",
     "exportGrades": "Export Grades",
     "login": "Sign In",
-    "register": "Sign Up"
+    "register": "Sign Up",
+    "goToDashboard": "Go to Dashboard"
   },
   "labels": {
     "name": "Name",

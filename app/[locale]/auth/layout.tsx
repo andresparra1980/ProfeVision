@@ -9,14 +9,14 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <SiteHeader />
-      <div className="pt-16 min-h-screen bg-gradient-to-br from-background to-muted/20">
-        <div className="container mx-auto px-4 py-8 flex items-center justify-center">
+      <main className="flex-grow pt-16 bg-gradient-to-br from-background to-muted/20">
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center h-full">
           {children}
         </div>
-      </div>
+      </main>
       <SiteFooter />
-    </>
+    </div>
   )
 } 

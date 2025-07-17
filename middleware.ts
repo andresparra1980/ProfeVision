@@ -7,7 +7,7 @@ import { nonLocalizedRoutes } from './i18n/routing';
 // Crear el middleware de i18n
 const intlMiddleware = createIntlMiddleware({
   ...routing,
-  localeDetection: false, // Deshabilitar detección automática para evitar flash
+  localeDetection: true, // Habilitar detección automática para respetar cookie
   localePrefix: 'as-needed',
   alternateLinks: false,
 });
@@ -25,8 +25,8 @@ export async function middleware(request: NextRequest) {
   const intlResponse = intlMiddleware(request);
   
   // Si i18n redirige, seguir esa redirección
-  if (intlResponse.status === 307 || intlResponse.status === 302) {
-    console.log(`[Middleware] i18n redirect for: ${pathname}`);
+  if (intlResponse.status === 307 || intlResponse.status === 302 || intlResponse.status === 308) {
+    console.log(`[Middleware] i18n redirect for: ${pathname} with status ${intlResponse.status}`);
     return intlResponse;
   }
   
@@ -76,22 +76,9 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
   const { data: { session } } = await supabase.auth.getSession();
   const { pathname } = request.nextUrl;
   
-  // 🌍 Extraer locale del pathname con detección más robusta
-  const getLocaleFromPath = (path: string): string => {
-    // Detectar si el path comienza con /en/ o /en (inglés)
-    if (path.startsWith('/en/') || path === '/en') {
-      return 'en';
-    }
-    // Detectar si el path comienza con /es/ o /es (español explícito)
-    if (path.startsWith('/es/') || path === '/es') {
-      return 'es';
-    }
-    // Si no tiene prefijo de idioma, usar español como default
-    return 'es';
-  };
-  
-  const locale = getLocaleFromPath(pathname);
-  
+  // 🌍 El locale ahora se obtiene del header que pone `next-intl`
+  const locale = request.headers.get('x-next-intl-locale') || 'es';
+
   // 🔐 Construir rutas localizadas dinámicamente
   const getLocalizedRoutes = (currentLocale: string) => {
     const base = currentLocale === 'es' ? '' : `/${currentLocale}`;
