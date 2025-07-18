@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface FormData {
@@ -59,6 +60,7 @@ const initialFormData: FormData = {
 
 export default function StudentsPage() {
   const router = useRouter();
+  const t = useTranslations('dashboard.students');
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -89,8 +91,8 @@ export default function StudentsPage() {
 
       if (groupError) {
         toast({
-          title: "Error",
-          description: "No se pudieron verificar los grupos",
+          title: t('error.title'),
+          description: t('error.verifyGroups'),
           variant: "destructive",
         });
         return;
@@ -99,12 +101,12 @@ export default function StudentsPage() {
       setHasGroups(count !== null && count > 0);
     } catch (_error) {
       toast({
-        title: "Error",
-        description: "Error al verificar grupos",
+        title: t('error.title'),
+        description: t('error.verifyGroups'),
         variant: "destructive",
       });
     }
-  }, [router]);
+  }, [router, t]);
 
   const fetchStudents = useCallback(async () => {
     try {
@@ -154,16 +156,16 @@ export default function StudentsPage() {
       setStudents(uniqueStudents);
     } catch (_error) {
       toast({
-        title: "Error",
-        description: "No se pudieron cargar los estudiantes",
+        title: t('error.title'),
+        description: t('error.loadingStudents'),
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, t]);
 
-  const loadGrupos = async () => {
+  const loadGrupos = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -185,18 +187,18 @@ export default function StudentsPage() {
       setGrupos(data || []);
     } catch (_error) {
       toast({
-        title: "Error",
-        description: "Error al cargar grupos",
+        title: t('error.title'),
+        description: t('error.loadingGroups'),
         variant: "destructive",
       });
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     checkForGroups();
     fetchStudents();
     loadGrupos();
-  }, [checkForGroups, fetchStudents]);
+  }, [checkForGroups, fetchStudents, loadGrupos]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -385,16 +387,15 @@ export default function StudentsPage() {
       return (
         <div className="py-8 text-center">
           <BookOpen className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Necesitas crear grupos primero</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('empty.noGroups.title')}</h3>
           <p className="text-muted-foreground max-w-md mx-auto mb-6">
-            Para gestionar estudiantes, primero debes crear al menos un grupo asociado a una de tus materias.
-            Los estudiantes en ProfeVision están siempre asociados a grupos específicos.
+            {t('empty.noGroups.description')}
           </p>
           <Button 
             onClick={() => router.push("/dashboard/groups")}
             className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90"
           >
-            <Folders className="mr-2 h-4 w-4" /> Crear Grupo
+            <Folders className="mr-2 h-4 w-4" /> {t('empty.noGroups.createGroup')}
           </Button>
         </div>
       );
@@ -404,10 +405,9 @@ export default function StudentsPage() {
       return (
         <div className="py-8 text-center">
           <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Aún no tienes estudiantes</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('empty.noStudents.title')}</h3>
           <p className="text-muted-foreground max-w-md mx-auto mb-6">
-            No hay estudiantes asignados a tus grupos. Puedes crear estudiantes y luego asignarlos a grupos,
-            o ir directamente a un grupo específico para añadir estudiantes.
+            {t('empty.noStudents.description')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
             <Button 
@@ -416,13 +416,13 @@ export default function StudentsPage() {
               }} 
               variant="outline"
             >
-              <UserPlus className="mr-2 h-4 w-4" /> Crear Estudiante
+              <UserPlus className="mr-2 h-4 w-4" /> {t('empty.noStudents.createStudent')}
             </Button>
             <Button 
               onClick={() => router.push("/dashboard/groups")}
               className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90"
             >
-              <Folders className="mr-2 h-4 w-4" /> Gestionar Grupos
+              <Folders className="mr-2 h-4 w-4" /> {t('empty.noStudents.manageGroups')}
             </Button>
           </div>
         </div>
@@ -434,17 +434,17 @@ export default function StudentsPage() {
         <div className="mb-4 flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             <Users className="inline-block mr-1 h-4 w-4" />
-            {filteredStudents.length} estudiantes encontrados
+            {filteredStudents.length} {t('table.studentsFound')}
           </div>
         </div>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Apellidos</TableHead>
-              <TableHead>Nombres</TableHead>
-              <TableHead>Identificación</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Acciones</TableHead>
+              <TableHead>{t('table.headers.surnames')}</TableHead>
+              <TableHead>{t('table.headers.names')}</TableHead>
+              <TableHead>{t('table.headers.identification')}</TableHead>
+              <TableHead>{t('table.headers.email')}</TableHead>
+              <TableHead>{t('table.headers.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -464,7 +464,7 @@ export default function StudentsPage() {
                     {loadingDetails && selectedStudent?.id === student.id ? (
                       <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    Ver Detalles
+                    {t('table.actions.viewDetails')}
                   </Button>
                 </TableCell>
               </TableRow>
@@ -475,9 +475,9 @@ export default function StudentsPage() {
         <Dialog open={showDetails} onOpenChange={setShowDetails} modal={true}>
           <DialogContent className="bg-[#FAFAF4] dark:bg-[#171717]">
             <DialogHeader>
-              <DialogTitle>Detalles del Estudiante</DialogTitle>
+              <DialogTitle>{t('details.title')}</DialogTitle>
               <DialogDescription>
-                Grupos y materias a los que está asignado el estudiante
+                {t('details.description')}
               </DialogDescription>
             </DialogHeader>
             
@@ -488,7 +488,7 @@ export default function StudentsPage() {
                   <div>
                     <h4 className="font-medium">{grupo.nombre}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Materia: {grupo.materia.nombre}
+                      {t('details.subject')}: {grupo.materia.nombre}
                     </p>
                   </div>
                 </div>
@@ -497,7 +497,7 @@ export default function StudentsPage() {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDetails(false)}>
-                Cerrar
+                {t('details.close')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -510,9 +510,9 @@ export default function StudentsPage() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Estudiantes</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Administra estudiantes asignados a tus grupos
+            {t('description')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -521,79 +521,79 @@ export default function StudentsPage() {
             onClick={() => router.push("/dashboard/groups")}
             className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90"
           >
-            <Folders className="mr-2 h-4 w-4" /> Gestionar Grupos
+            <Folders className="mr-2 h-4 w-4" /> {t('actions.manageGroups')}
           </Button>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="mr-2 h-4 w-4" /> Crear Estudiante
+                <Plus className="mr-2 h-4 w-4" /> {t('actions.createStudent')}
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-[#FAFAF4] dark:bg-[#171717]">
               <DialogHeader>
-                <DialogTitle>Agregar Estudiante</DialogTitle>
+                <DialogTitle>{t('form.title')}</DialogTitle>
                 <DialogDescription>
-                  Ingresa los datos del estudiante y selecciona el grupo al que será asignado.
+                  {t('form.description')}
                 </DialogDescription>
               </DialogHeader>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nombres">Nombres*</Label>
+                  <Label htmlFor="nombres">{t('form.names')}*</Label>
                   <Input
                     id="nombres"
                     name="nombres"
                     value={formData.nombres}
                     onChange={handleChange}
-                    placeholder="Nombres del estudiante"
+                    placeholder={t('form.placeholders.names')}
                     className="bg-white dark:bg-[#1E1E1F]"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="apellidos">Apellidos*</Label>
+                  <Label htmlFor="apellidos">{t('form.surnames')}*</Label>
                   <Input
                     id="apellidos"
                     name="apellidos"
                     value={formData.apellidos}
                     onChange={handleChange}
-                    placeholder="Apellidos del estudiante"
+                    placeholder={t('form.placeholders.surnames')}
                     className="bg-white dark:bg-[#1E1E1F]"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="identificacion">Identificación*</Label>
+                  <Label htmlFor="identificacion">{t('form.identification')}*</Label>
                   <Input
                     id="identificacion"
                     name="identificacion"
                     value={formData.identificacion}
                     onChange={handleChange}
-                    placeholder="Número de identificación"
+                    placeholder={t('form.placeholders.identification')}
                     className="bg-white dark:bg-[#1E1E1F]"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Correo electrónico</Label>
+                  <Label htmlFor="email">{t('form.email')}</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="Correo electrónico del estudiante"
+                    placeholder={t('form.placeholders.email')}
                     className="bg-white dark:bg-[#1E1E1F]"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="grupo">Grupo*</Label>
+                  <Label htmlFor="grupo">{t('form.group')}*</Label>
                   <Select
                     value={formData.grupo_id}
                     onValueChange={handleSelectChange}
                   >
                     <SelectTrigger className="bg-white dark:bg-[#1E1E1F]">
-                      <SelectValue placeholder="Selecciona un grupo" />
+                      <SelectValue placeholder={t('form.placeholders.selectGroup')} />
                     </SelectTrigger>
                     <SelectContent>
                       {grupos.map((grupo) => (
@@ -616,18 +616,18 @@ export default function StudentsPage() {
                     onClick={() => setIsOpen(false)}
                     disabled={isSubmitting}
                   >
-                    Cancelar
+                    {t('form.actions.cancel')}
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? (
                       <>
                         <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                        Creando...
+                        {t('form.actions.creating')}
                       </>
                     ) : (
                       <>
                         <UserPlus className="mr-2 h-4 w-4" />
-                        Crear Estudiante
+                        {t('form.actions.create')}
                       </>
                     )}
                   </Button>
@@ -640,13 +640,13 @@ export default function StudentsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Estudiantes en mis Grupos</CardTitle>
+          <CardTitle>{t('table.title')}</CardTitle>
           <CardDescription>
-            Estudiantes asignados a grupos que administras
+            {t('table.description')}
           </CardDescription>
           <div className="mt-4 flex items-center justify-between">
             <Input
-              placeholder="Buscar estudiante..."
+              placeholder={t('table.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="max-w-sm"
@@ -657,7 +657,7 @@ export default function StudentsPage() {
               onClick={() => fetchStudents()}
               className="ml-2"
             >
-              <RefreshCw className="h-4 w-4 mr-2" /> Actualizar Lista
+              <RefreshCw className="h-4 w-4 mr-2" /> {t('table.refreshList')}
             </Button>
           </div>
         </CardHeader>

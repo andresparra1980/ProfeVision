@@ -1033,5 +1033,141 @@
         "componentName": "Enter the component name"
       }
     }
+  },
+  "students": {
+    "title": "Students",
+    "description": "Manage students assigned to your groups",
+    "actions": {
+      "manageGroups": "Manage Groups",
+      "createStudent": "Create Student"
+    },
+    "form": {
+      "title": "Add Student",
+      "description": "Enter the student's information and select the group they will be assigned to.",
+      "names": "Names",
+      "surnames": "Surnames",
+      "identification": "Identification",
+      "email": "Email",
+      "group": "Group",
+      "placeholders": {
+        "names": "Student's names",
+        "surnames": "Student's surnames",
+        "identification": "Identification number",
+        "email": "Student's email address",
+        "selectGroup": "Select a group"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "create": "Create Student",
+        "creating": "Creating..."
+      }
+    },
+    "table": {
+      "title": "Students in My Groups",
+      "description": "Students assigned to groups you manage",
+      "search": "Search student...",
+      "refreshList": "Refresh List",
+      "studentsFound": "students found",
+      "headers": {
+        "surnames": "Surnames",
+        "names": "Names",
+        "identification": "Identification",
+        "email": "Email",
+        "actions": "Actions"
+      },
+      "actions": {
+        "viewDetails": "View Details"
+      }
+    },
+    "details": {
+      "title": "Student Details",
+      "description": "Groups and subjects to which the student is assigned",
+      "subject": "Subject",
+      "close": "Close"
+    },
+    "empty": {
+      "noGroups": {
+        "title": "You need to create groups first",
+        "description": "To manage students, you must first create at least one group associated with one of your subjects. Students in ProfeVision are always associated with specific groups.",
+        "createGroup": "Create Group"
+      },
+      "noStudents": {
+        "title": "You don't have students yet",
+        "description": "There are no students assigned to your groups. You can create students and then assign them to groups, or go directly to a specific group to add students.",
+        "createStudent": "Create Student",
+        "manageGroups": "Manage Groups"
+      }
+    },
+    "error": {
+      "title": "Error",
+      "verifyGroups": "Could not verify groups",
+      "loadingStudents": "Could not load students",
+      "loadingGroups": "Error loading groups"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "View statistics and analysis of your students' performance",
+    "stats": {
+      "totalExams": "Total Exams",
+      "examsCreated": "Exams created",
+      "totalStudents": "Total Students",
+      "studentsRegistered": "Students registered",
+      "totalSubjects": "Total Subjects",
+      "subjectsCreated": "Subjects created",
+      "applications": "Applications",
+      "examsApplied": "Exams applied"
+    },
+    "charts": {
+      "examPerformance": {
+        "title": "Exam Performance",
+        "description": "Average scores on recent exams"
+      },
+      "gradeDistribution": {
+        "title": "Grade Distribution",
+        "description": "Distribution of grades by range"
+      },
+      "studentPerformance": {
+        "title": "Student Performance",
+        "description": "Analysis of individual student performance"
+      },
+      "noDataAvailable": "No data available"
+    }
+  },
+  "components": {
+    "excelImport": {
+      "downloadTemplate": "Download Template",
+      "downloadDescription": "Download the sample format to import students",
+      "selectFile": "Select Excel File",
+      "errorsFound": "The following errors were found:",
+      "preview": {
+        "title": "Preview ({count} students)",
+        "table": {
+          "names": "Names",
+          "surnames": "Surnames",
+          "identification": "Identification",
+          "email": "Email",
+          "andMore": "And {count} more..."
+        },
+        "validStudents": "{count} valid students",
+        "errors": "{count} errors"
+      },
+      "importing": "Importing...",
+      "importStudents": "Import Students",
+      "validation": {
+        "emptyFile": "The file contains no data",
+        "missingColumns": "Missing required columns",
+        "row": "Row",
+        "missingNames": "Missing names",
+        "missingSurnames": "Missing surnames",
+        "missingIdentification": "Missing identification",
+        "invalidEmail": "Invalid email address"
+      },
+      "error": {
+        "title": "Error",
+        "readingFile": "Could not read the file. Make sure it's a valid Excel file.",
+        "noDataToImport": "No valid data to import"
+      }
+    }
   }
 }

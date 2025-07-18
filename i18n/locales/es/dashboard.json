@@ -1033,5 +1033,141 @@
         "componentName": "Ingrese el nombre del componente"
       }
     }
+  },
+  "students": {
+    "title": "Estudiantes",
+    "description": "Administra estudiantes asignados a tus grupos",
+    "actions": {
+      "manageGroups": "Gestionar Grupos",
+      "createStudent": "Crear Estudiante"
+    },
+    "form": {
+      "title": "Agregar Estudiante",
+      "description": "Ingresa los datos del estudiante y selecciona el grupo al que será asignado.",
+      "names": "Nombres",
+      "surnames": "Apellidos",
+      "identification": "Identificación",
+      "email": "Correo electrónico",
+      "group": "Grupo",
+      "placeholders": {
+        "names": "Nombres del estudiante",
+        "surnames": "Apellidos del estudiante",
+        "identification": "Número de identificación",
+        "email": "Correo electrónico del estudiante",
+        "selectGroup": "Selecciona un grupo"
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "create": "Crear Estudiante",
+        "creating": "Creando..."
+      }
+    },
+    "table": {
+      "title": "Estudiantes en mis Grupos",
+      "description": "Estudiantes asignados a grupos que administras",
+      "search": "Buscar estudiante...",
+      "refreshList": "Actualizar Lista",
+      "studentsFound": "estudiantes encontrados",
+      "headers": {
+        "surnames": "Apellidos",
+        "names": "Nombres",
+        "identification": "Identificación",
+        "email": "Email",
+        "actions": "Acciones"
+      },
+      "actions": {
+        "viewDetails": "Ver Detalles"
+      }
+    },
+    "details": {
+      "title": "Detalles del Estudiante",
+      "description": "Grupos y materias a los que está asignado el estudiante",
+      "subject": "Materia",
+      "close": "Cerrar"
+    },
+    "empty": {
+      "noGroups": {
+        "title": "Necesitas crear grupos primero",
+        "description": "Para gestionar estudiantes, primero debes crear al menos un grupo asociado a una de tus materias. Los estudiantes en ProfeVision están siempre asociados a grupos específicos.",
+        "createGroup": "Crear Grupo"
+      },
+      "noStudents": {
+        "title": "Aún no tienes estudiantes",
+        "description": "No hay estudiantes asignados a tus grupos. Puedes crear estudiantes y luego asignarlos a grupos, o ir directamente a un grupo específico para añadir estudiantes.",
+        "createStudent": "Crear Estudiante",
+        "manageGroups": "Gestionar Grupos"
+      }
+    },
+    "error": {
+      "title": "Error",
+      "verifyGroups": "No se pudieron verificar los grupos",
+      "loadingStudents": "No se pudieron cargar los estudiantes",
+      "loadingGroups": "Error al cargar grupos"
+    }
+  },
+  "reports": {
+    "title": "Reportes",
+    "description": "Visualiza estadísticas y análisis del desempeño de tus estudiantes",
+    "stats": {
+      "totalExams": "Total Exámenes",
+      "examsCreated": "Exámenes creados",
+      "totalStudents": "Total Estudiantes",
+      "studentsRegistered": "Estudiantes registrados",
+      "totalSubjects": "Total Materias",
+      "subjectsCreated": "Materias creadas",
+      "applications": "Aplicaciones",
+      "examsApplied": "Exámenes aplicados"
+    },
+    "charts": {
+      "examPerformance": {
+        "title": "Rendimiento por Examen",
+        "description": "Puntuaciones promedio en exámenes recientes"
+      },
+      "gradeDistribution": {
+        "title": "Distribución de Calificaciones",
+        "description": "Distribución de calificaciones por rango"
+      },
+      "studentPerformance": {
+        "title": "Rendimiento por Estudiante",
+        "description": "Análisis del rendimiento individual de los estudiantes"
+      },
+      "noDataAvailable": "No hay datos disponibles"
+    }
+  },
+  "components": {
+    "excelImport": {
+      "downloadTemplate": "Descargar formato",
+      "downloadDescription": "Descarga el formato de ejemplo para importar estudiantes",
+      "selectFile": "Seleccionar archivo Excel",
+      "errorsFound": "Se encontraron los siguientes errores:",
+      "preview": {
+        "title": "Vista previa ({count} estudiantes)",
+        "table": {
+          "names": "Nombres",
+          "surnames": "Apellidos",
+          "identification": "Identificación",
+          "email": "Email",
+          "andMore": "Y {count} más..."
+        },
+        "validStudents": "{count} estudiantes válidos",
+        "errors": "{count} errores"
+      },
+      "importing": "Importando...",
+      "importStudents": "Importar estudiantes",
+      "validation": {
+        "emptyFile": "El archivo no contiene datos",
+        "missingColumns": "Faltan columnas requeridas",
+        "row": "Fila",
+        "missingNames": "Faltan los nombres",
+        "missingSurnames": "Faltan los apellidos",
+        "missingIdentification": "Falta la identificación",
+        "invalidEmail": "El correo electrónico no es válido"
+      },
+      "error": {
+        "title": "Error",
+        "readingFile": "No se pudo leer el archivo. Asegúrate de que sea un archivo Excel válido.",
+        "noDataToImport": "No hay datos válidos para importar"
+      }
+    }
   }
 }
