@@ -1060,5 +1060,41 @@
         "line2": "Jeaniebury, Wisconsin 49368-5863"
       }
     }
+  },
+  "components": {
+    "excelImport": {
+      "downloadTemplate": "Download Template",
+      "downloadDescription": "Download the sample format to import students",
+      "selectFile": "Select Excel File",
+      "errorsFound": "The following errors were found:",
+      "preview": {
+        "title": "Preview ({count} students)",
+        "table": {
+          "names": "Names",
+          "surnames": "Surnames",
+          "identification": "Identification",
+          "email": "Email",
+          "andMore": "And {count} more..."
+        },
+        "validStudents": "{count} valid students",
+        "errors": "{count} errors"
+      },
+      "importing": "Importing...",
+      "importStudents": "Import Students",
+      "validation": {
+        "emptyFile": "The file contains no data",
+        "missingColumns": "Missing required columns",
+        "row": "Row",
+        "missingNames": "Missing names",
+        "missingSurnames": "Missing surnames",
+        "missingIdentification": "Missing identification",
+        "invalidEmail": "Invalid email address"
+      },
+      "error": {
+        "title": "Error",
+        "readingFile": "Could not read the file. Make sure it's a valid Excel file.",
+        "noDataToImport": "No valid data to import"
+      }
+    }
   }
 }

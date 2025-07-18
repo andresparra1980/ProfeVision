@@ -1133,41 +1133,5 @@
       },
       "noDataAvailable": "No hay datos disponibles"
     }
-  },
-  "components": {
-    "excelImport": {
-      "downloadTemplate": "Descargar formato",
-      "downloadDescription": "Descarga el formato de ejemplo para importar estudiantes",
-      "selectFile": "Seleccionar archivo Excel",
-      "errorsFound": "Se encontraron los siguientes errores:",
-      "preview": {
-        "title": "Vista previa ({count} estudiantes)",
-        "table": {
-          "names": "Nombres",
-          "surnames": "Apellidos",
-          "identification": "Identificación",
-          "email": "Email",
-          "andMore": "Y {count} más..."
-        },
-        "validStudents": "{count} estudiantes válidos",
-        "errors": "{count} errores"
-      },
-      "importing": "Importando...",
-      "importStudents": "Importar estudiantes",
-      "validation": {
-        "emptyFile": "El archivo no contiene datos",
-        "missingColumns": "Faltan columnas requeridas",
-        "row": "Fila",
-        "missingNames": "Faltan los nombres",
-        "missingSurnames": "Faltan los apellidos",
-        "missingIdentification": "Falta la identificación",
-        "invalidEmail": "El correo electrónico no es válido"
-      },
-      "error": {
-        "title": "Error",
-        "readingFile": "No se pudo leer el archivo. Asegúrate de que sea un archivo Excel válido.",
-        "noDataToImport": "No hay datos válidos para importar"
-      }
-    }
   }
 }
