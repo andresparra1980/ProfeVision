@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Table,
   TableBody,
@@ -58,6 +59,7 @@ export function GradesTable({
   onExportFinal,
   componentesVinculados = {},
 }: GradesTableProps) {
+  const t = useTranslations('dashboard.components.gradesTable');
   // Función para calcular la nota final de un periodo para un estudiante
   const calcularNotaPeriodo = (estudiante: Estudiante, periodo: Periodo) => {
     const componentesPeriodo = componentes.filter(c => c.periodo_id === periodo.id);
@@ -106,7 +108,7 @@ export function GradesTable({
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session || !session.access_token) {
-        toast.error('No se encontró token de autenticación');
+        toast.error(t('error.noAuthToken'));
         return;
       }
       
@@ -121,19 +123,19 @@ export function GradesTable({
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Error al sincronizar calificaciones');
+        throw new Error(error.error || t('error.syncGrades'));
       }
       
       const result = await response.json();
       logger.log('Resultado de sincronización:', result);
       
-      toast.success('Calificaciones sincronizadas correctamente');
+      toast.success(t('success.syncComplete'));
       
       // Recargar la página para mostrar las calificaciones actualizadas
       window.location.reload();
     } catch (error) {
       logger.error('Error:', error);
-      toast.error('Error al sincronizar calificaciones');
+      toast.error(t('error.syncGrades'));
     }
   };
 
@@ -163,7 +165,7 @@ export function GradesTable({
                   style={{ width: `${studentDataWidth}px`, minWidth: `${studentDataWidth}px` }}
                 >
                   <div className="flex items-center justify-center py-2">
-                    <span className="font-semibold text-foreground dark:text-foreground">Datos del Estudiante</span>
+                    <span className="font-semibold text-foreground dark:text-foreground">{t('studentData')}</span>
                   </div>
                 </TableHead>
                 {periodos.map((periodo, _index) => {
@@ -185,7 +187,7 @@ export function GradesTable({
                           variant="ghost"
                           size="icon"
                           onClick={() => onExportPeriod?.(periodo.id)}
-                          title="Exportar periodo"
+                          title={t('exportPeriod')}
                         >
                           <Download className="h-4 w-4" />
                         </Button>
@@ -195,12 +197,12 @@ export function GradesTable({
                 })}
                 <TableHead className="text-center w-[60px] min-w-[60px] border-x-2 border-border">
                   <div className="flex flex-col items-center gap-1 py-2">
-                    <span className="font-semibold text-foreground dark:text-foreground">Nota Final</span>
+                    <span className="font-semibold text-foreground dark:text-foreground">{t('finalGrade')}</span>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={onExportFinal}
-                      title="Exportar notas finales"
+                      title={t('exportFinalGrades')}
                       className="h-6 w-6"
                     >
                       <Download className="h-3 w-3" />
@@ -209,9 +211,9 @@ export function GradesTable({
                 </TableHead>
               </TableRow>
               <TableRow className="border-b-2 border-border">
-                <TableHead className="w-[120px] min-w-[120px] md:sticky left-0 z-20 bg-card dark:bg-card">Apellidos</TableHead>
-                <TableHead className="w-[120px] min-w-[120px] md:sticky left-[120px] z-20 bg-card dark:bg-card">Nombres</TableHead>
-                <TableHead className="w-[100px] min-w-[100px] md:sticky left-[240px] z-20 bg-card dark:bg-card">Identificación</TableHead>
+                <TableHead className="w-[120px] min-w-[120px] md:sticky left-0 z-20 bg-card dark:bg-card">{t('surnames')}</TableHead>
+                <TableHead className="w-[120px] min-w-[120px] md:sticky left-[120px] z-20 bg-card dark:bg-card">{t('names')}</TableHead>
+                <TableHead className="w-[100px] min-w-[100px] md:sticky left-[240px] z-20 bg-card dark:bg-card">{t('identification')}</TableHead>
                 {periodos.map(periodo => (
                   <React.Fragment key={periodo.id}>
                     {componentes
@@ -230,11 +232,11 @@ export function GradesTable({
                                     <TooltipTrigger asChild>
                                       <Badge variant="outline" className="mt-1 gap-1 px-1 py-0 h-5 bg-secondary text-primary-foreground border-secondary hover:bg-secondary/90">
                                         <LinkIcon className="h-3 w-3" />
-                                        <span className="text-xs">Examen</span>
+                                        <span className="text-xs">{t('exam')}</span>
                                       </Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                      <p>Vinculado al examen: {componentesVinculados[componente.id].titulo}</p>
+                                      <p>{t('linkedToExam')}: {componentesVinculados[componente.id].titulo}</p>
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
@@ -247,7 +249,7 @@ export function GradesTable({
                                   size="icon"
                                   className="h-6 w-6"
                                   onClick={() => onToggleLock(componente.id)}
-                                  title="Bloquear calificaciones"
+                                  title={t('lockGrades')}
                                 >
                                   <Unlock className="h-3 w-3" />
                                 </Button>
@@ -257,7 +259,7 @@ export function GradesTable({
                                   size="icon"
                                   className="h-6 w-6"
                                   onClick={() => onToggleLock(componente.id)}
-                                  title="Desbloquear calificaciones"
+                                  title={t('unlockGrades')}
                                   disabled={!!componentesVinculados[componente.id]}
                                 >
                                   <Lock className="h-3 w-3" />
@@ -270,7 +272,7 @@ export function GradesTable({
                                   size="icon"
                                   className="h-6 w-6"
                                   onClick={() => handleSyncExamGrades(componente.id)}
-                                  title="Sincronizar calificaciones desde el examen"
+                                  title={t('syncFromExam')}
                                 >
                                   <RefreshCw className="h-3 w-3 text-secondary" />
                                 </Button>
@@ -280,7 +282,7 @@ export function GradesTable({
                                   size="icon"
                                   className="h-6 w-6"
                                   onClick={() => onImportGrades?.(componente.id)}
-                                  title="Importar calificaciones"
+                                  title={t('importGrades')}
                                   disabled={!!componentesVinculados[componente.id]}
                                 >
                                   <Upload className="h-3 w-3" />
@@ -291,7 +293,7 @@ export function GradesTable({
                                 size="icon"
                                 className="h-6 w-6"
                                 onClick={() => onExportGrades?.(componente.id)}
-                                title="Exportar calificaciones"
+                                title={t('exportGrades')}
                               >
                                 <Download className="h-3 w-3" />
                               </Button>
@@ -301,22 +303,22 @@ export function GradesTable({
                       ))}
                     <TableHead className="text-center border-x w-[80px] min-w-[80px]">
                       <div className="flex flex-col items-center">
-                        <span className="font-medium">Nota</span>
-                        <span className="font-medium">Periodo</span>
-                        <span className="text-xs text-foreground/70 dark:text-foreground/70">(Pond.)</span>
+                        <span className="font-medium">{t('grade')}</span>
+                        <span className="font-medium">{t('period')}</span>
+                        <span className="text-xs text-foreground/70 dark:text-foreground/70">({t('weighted')})</span>
                       </div>
                     </TableHead>
                     <TableHead className="text-center border-x w-[80px] min-w-[80px]">
                       <div className="flex flex-col items-center">
-                        <span className="font-medium">Nota</span>
-                        <span className="font-medium">Periodo</span>
-                        <span className="text-xs text-foreground/70 dark:text-foreground/70">(Abs.)</span>
+                        <span className="font-medium">{t('grade')}</span>
+                        <span className="font-medium">{t('period')}</span>
+                        <span className="text-xs text-foreground/70 dark:text-foreground/70">({t('absolute')})</span>
                       </div>
                     </TableHead>
                   </React.Fragment>
                 ))}
                 <TableHead className="text-center w-[60px] min-w-[60px] border-x">
-                  <span className="font-medium">Nota Final</span>
+                  <span className="font-medium">{t('finalGrade')}</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -360,7 +362,7 @@ export function GradesTable({
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Nota absoluta: {calcularNotaPeriodo(estudiante, periodo).absoluta.toFixed(1)}</p>
+                                <p>{t('absoluteGrade')}: {calcularNotaPeriodo(estudiante, periodo).absoluta.toFixed(1)}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>

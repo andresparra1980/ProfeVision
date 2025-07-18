@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { GradingSchemeEditor } from '@/components/grading/grading-scheme-editor';
 import { supabase } from '@/lib/supabase/client';
 import type { GradingScheme } from '@/lib/types/grading';
@@ -43,6 +44,7 @@ export default function GradingSchemePage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('dashboard.groups.gradingScheme');
   const groupId = params.id as string;
   const [initialScheme, setInitialScheme] = useState<GradingScheme | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,7 +76,7 @@ export default function GradingSchemePage() {
           setGroupName(grupo.nombre);
           if (grupo.materia) {
             setMateria(grupo.materia.nombre || '');
-            setInstitucion(grupo.materia.entidad?.nombre || 'INSTITUCIÓN EDUCATIVA');
+            setInstitucion(grupo.materia.entidad?.nombre || t('defaultInstitution'));
           }
         }
 
@@ -129,14 +131,14 @@ export default function GradingSchemePage() {
 
         setInitialScheme(schemeWithSortedPeriods);
       } catch (error) {
-        console.error('Error al cargar datos:', error);
+        console.error(t('error.loadingData'), error);
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [groupId]);
+  }, [groupId, t]);
 
   const handleSave = async (scheme: GradingScheme) => {
     try {
@@ -149,15 +151,15 @@ export default function GradingSchemePage() {
       });
 
       if (!response.ok) {
-        throw new Error('Error al guardar el esquema');
+        throw new Error(t('error.savingScheme'));
       }
 
       const updatedScheme = await response.json();
       setInitialScheme(updatedScheme as GradingScheme);
 
       toast({
-        title: 'Éxito',
-        description: 'Esquema de calificaciones guardado correctamente',
+        title: t('success.title'),
+        description: t('success.schemeSaved'),
       });
 
       router.push(`/dashboard/groups/${groupId}/grades`);
@@ -184,11 +186,11 @@ export default function GradingSchemePage() {
           onClick={() => router.push("/dashboard/groups")}
           className="mb-0 w-fit"
         >
-          <ChevronLeft className="mr-2 h-4 w-4" /> Volver a Grupos
+          <ChevronLeft className="mr-2 h-4 w-4" /> {t('backToGroups')}
         </Button>
         
         <div className="mt-2">
-          <h1 className="text-2xl font-bold tracking-tight">Esquema de Calificación</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-sm text-muted-foreground">
             {institucion} / {materia} / {groupName}
           </p>

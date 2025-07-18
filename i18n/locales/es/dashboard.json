@@ -745,6 +745,195 @@
       "confirmDelete": "Sí, eliminar esta materia y sus datos"
     }
   },
+  "groups": {
+    "title": "Grupos",
+    "description": "Administra tus grupos de estudiantes",
+    "noGroupsMessage": "No hay grupos registrados.",
+    "noSubjectsMessage": "Debes crear al menos una materia antes de crear un grupo.",
+    "goToSubjects": "Ir a crear materia",
+    "buttons": {
+      "showActive": "Ver Grupos Activos",
+      "showArchived": "Ver Grupos Archivados"
+    },
+    "error": {
+      "title": "Error en",
+      "description": "Error",
+      "unknown": "Desconocido",
+      "professorLoad": "Error al cargar los datos del profesor",
+      "professorAuth": "No se pudieron cargar los datos. Por favor, intenta iniciar sesión de nuevo",
+      "loadingGroups": "Error al cargar grupos",
+      "loadingSubjects": "Error al cargar materias",
+      "loadingEntities": "Error al cargar entidades educativas",
+      "savingGroup": "Error al guardar grupo",
+      "deletingGroup": "al eliminar grupo",
+      "changingGroupState": "Error al cambiar estado del grupo"
+    },
+    "toast": {
+      "createTitle": "Grupo creado",
+      "createDescription": "El grupo ha sido creado correctamente.",
+      "updateTitle": "Grupo actualizado",
+      "updateDescription": "El grupo ha sido actualizado correctamente.",
+      "deleteTitle": "Grupo eliminado",
+      "deleteDescription": "El grupo ha sido eliminado correctamente.",
+      "archivedTitle": "Grupo archivado",
+      "archivedDescription": "El grupo ha sido archivado correctamente.",
+      "activatedTitle": "Grupo activado",
+      "activatedDescription": "El grupo ha sido activado correctamente."
+    },
+    "deleteDialog": {
+      "title": "¡ADVERTENCIA! Eliminación Permanente",
+      "mainMessage": "Está a punto de eliminar el grupo",
+      "selectedGroup": "seleccionado",
+      "irreversible": "Esta acción es",
+      "irreversibleText": "IRREVERSIBLE",
+      "resultingIn": "y resultará en",
+      "consequence1": "Eliminación de todas las inscripciones de estudiantes a este grupo.",
+      "consequence2": "Eliminación de todos los esquemas de calificación asociados.",
+      "consequence3": "Eliminación de todas las asignaciones de exámenes a este grupo.",
+      "consequence4": "Las referencias a este grupo en los escaneos de exámenes existentes se perderán (se marcarán como NULAS).",
+      "confirmMessage": "Para confirmar esta acción y proceder con la eliminación, por favor escriba el nombre exacto del grupo en el campo de abajo.",
+      "archiveAlternative": "Recuerde que puede",
+      "archiveText": "Archivar",
+      "archiveReason": "el grupo para evitar la eliminación permanente.",
+      "typePrompt": "Escriba",
+      "typeConfirm": "para confirmar",
+      "placeholder": "Nombre exacto del grupo",
+      "cancel": "Cancelar",
+      "confirm": "Sí, eliminar este grupo y sus datos"
+    },
+    "card": {
+      "subject": "Materia",
+      "entity": "Entidad",
+      "period": "Periodo",
+      "notAssigned": "No asignada",
+      "openMenu": "Abrir menú",
+      "editGroup": "Editar grupo",
+      "manageStudents": "Gestión de Estudiantes",
+      "gradeTable": "Tabulado de Notas",
+      "gradingScheme": "Esquema de Calificaciones",
+      "archive": "Archivar",
+      "activate": "Activar",
+      "delete": "Eliminar",
+      "students": "estudiantes"
+    },
+    "form": {
+      "newGroup": "Nuevo grupo",
+      "editTitle": "Editar grupo",
+      "newTitle": "Nuevo grupo",
+      "editDescription": "Actualiza la información del grupo.",
+      "newDescription": "Ingresa los datos del nuevo grupo.",
+      "nameLabel": "Nombre del grupo (Ej: 10-A, Grupo Mañana, etc.)*",
+      "namePlaceholder": "Ej: 10-A, Grupo Mañana, etc.",
+      "nameError": "El nombre debe tener al menos 2 caracteres",
+      "entityLabel": "Entidad Educativa*",
+      "entityPlaceholder": "Selecciona una entidad educativa",
+      "entityError": "Selecciona una entidad educativa",
+      "noEntities": "No hay entidades educativas registradas",
+      "noEntitiesMessage": "Debes crear al menos una entidad educativa antes de crear un grupo.",
+      "createEntity": "Crear entidad educativa",
+      "subjectLabel": "Materia*",
+      "subjectPlaceholder": "Selecciona una materia",
+      "subjectError": "Selecciona una materia",
+      "selectEntityFirst": "Primero selecciona una entidad educativa",
+      "noSubjectsForEntity": "No hay materias para esta entidad educativa",
+      "noSubjectsMessage": "No hay materias registradas para esta entidad educativa.",
+      "createSubject": "Crear materia",
+      "schoolPeriod": "Periodo Escolar",
+      "startDate": "Fecha Inicio",
+      "endDate": "Fecha Fin",
+      "month": "Mes",
+      "year": "Año",
+      "interpretedPeriod": "Periodo interpretado",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Información adicional sobre el grupo",
+      "cancel": "Cancelar",
+      "create": "Crear",
+      "update": "Actualizar"
+    },
+    "grades": {
+      "title": "Calificaciones",
+      "backToGroups": "Volver a Grupos",
+      "subjectLabel": "Materia",
+      "groupLabel": "Grupo",
+      "defaultInstitution": "INSTITUCIÓN EDUCATIVA",
+      "noTitleExam": "Examen sin título",
+      "noSubject": "Sin materia",
+      "error": {
+        "title": "Error",
+        "loadingScheme": "No se pudo cargar el esquema de calificación.",
+        "noScheme": "No hay esquema de calificación",
+        "mustCreateScheme": "Primero debes crear un esquema de calificación para este grupo.",
+        "loadingData": "No se pudieron cargar los datos. Por favor, intenta nuevamente.",
+        "gradeLocked": "Esta calificación está bloqueada para edición.",
+        "gradeLinked": "Esta calificación está vinculada al examen",
+        "cannotModify": "y no puede ser modificada manualmente",
+        "cannotUnlock": "y no puede ser desbloqueado",
+        "componentLinked": "Este componente está vinculado al examen",
+        "cannotImport": "y no se pueden importar calificaciones manualmente",
+        "savingGrade": "No se pudo guardar la calificación. Por favor, intenta nuevamente."
+      },
+      "modal": {
+        "importTitle": "Importar Calificaciones",
+        "exportTitle": "Exportar Calificaciones",
+        "importDescription": "Importa calificaciones desde un archivo Excel",
+        "exportDescription": "Exporta calificaciones a un archivo Excel",
+        "exportPeriod": "Exportar calificaciones del",
+        "exportFinal": "Exportar todas las calificaciones y nota final"
+      }
+    },
+    "students": {
+      "backToGroups": "Volver a Grupos",
+      "noSchoolPeriod": "Sin período escolar",
+      "groupStudents": "Estudiantes del Grupo",
+      "studentsRegistered": "estudiantes registrados en este grupo",
+      "importFromExcel": "Importar desde Excel",
+      "importExcelTitle": "Importar Estudiantes desde Excel",
+      "importExcelDescription": "Importa estudiantes desde un archivo Excel y serán agregados automáticamente a este grupo",
+      "addStudent": "Agregar Estudiante",
+      "searchStudent": "Buscar Estudiante",
+      "searchStudentDescription": "Busca un estudiante por nombre o identificación para agregarlo al grupo",
+      "searchPlaceholder": "Buscar por nombre o identificación...",
+      "add": "Agregar",
+      "noStudentsFound": "No se encontraron estudiantes",
+      "error": {
+        "title": "Error",
+        "loadingGroup": "No se pudo cargar la información del grupo",
+        "loadingStudents": "No se pudieron cargar los estudiantes de este grupo",
+        "searchingStudents": "No se pudieron buscar estudiantes",
+        "addingStudent": "No se pudo agregar el estudiante al grupo",
+        "removingStudent": "No se pudo remover el estudiante del grupo",
+        "groupNotFound": "No se encontró el grupo solicitado."
+      },
+      "success": {
+        "title": "¡Éxito!",
+        "importComplete": "Los estudiantes han sido importados exitosamente",
+        "studentAdded": "Estudiante agregado",
+        "studentAddedDescription": "El estudiante ha sido agregado al grupo exitosamente",
+        "studentRemoved": "Estudiante removido",
+        "studentRemovedDescription": "El estudiante ha sido removido del grupo exitosamente"
+      },
+      "table": {
+        "identification": "Identificación",
+        "names": "Nombres",
+        "surnames": "Apellidos",
+        "email": "Email",
+        "actions": "Acciones"
+      }
+    },
+    "gradingScheme": {
+      "title": "Esquema de Calificación",
+      "backToGroups": "Volver a Grupos",
+      "defaultInstitution": "INSTITUCIÓN EDUCATIVA",
+      "error": {
+        "loadingData": "Error al cargar datos",
+        "savingScheme": "Error al guardar el esquema"
+      },
+      "success": {
+        "title": "Éxito",
+        "schemeSaved": "Esquema de calificaciones guardado correctamente"
+      }
+    }
+  },
   "main": {
     "title": "Dashboard",
     "welcome": "Bienvenido a ProfeVision, tu plataforma de gestión de exámenes.",
@@ -778,6 +967,66 @@
       "historyDate": "24 de Mayo, 2024",
       "physics": "Física - 9° Grado",
       "physicsDate": "27 de Mayo, 2024"
+    }
+  },
+  "components": {
+    "gradesTable": {
+      "studentData": "Datos del Estudiante",
+      "exportPeriod": "Exportar periodo",
+      "finalGrade": "Nota Final",
+      "exportFinalGrades": "Exportar notas finales",
+      "surnames": "Apellidos",
+      "names": "Nombres",
+      "identification": "Identificación",
+      "exam": "Examen",
+      "linkedToExam": "Vinculado al examen",
+      "lockGrades": "Bloquear calificaciones",
+      "unlockGrades": "Desbloquear calificaciones",
+      "syncFromExam": "Sincronizar calificaciones desde el examen",
+      "importGrades": "Importar calificaciones",
+      "exportGrades": "Exportar calificaciones",
+      "grade": "Nota",
+      "period": "Periodo",
+      "weighted": "Pond.",
+      "absolute": "Abs.",
+      "absoluteGrade": "Nota absoluta",
+      "error": {
+        "noAuthToken": "No se encontró token de autenticación",
+        "syncGrades": "Error al sincronizar calificaciones"
+      },
+      "success": {
+        "syncComplete": "Calificaciones sincronizadas correctamente"
+      }
+    },
+    "gradingSchemeEditor": {
+      "defaultSchemeName": "Esquema de Calificación",
+      "defaultPeriodName": "Primer Periodo",
+      "defaultComponentName": "Tareas",
+      "newComponent": "Nuevo Componente",
+      "period": "Periodo",
+      "schemeName": "Nombre del Esquema",
+      "startDate": "Fecha inicio",
+      "endDate": "Fecha fin",
+      "type": "Tipo",
+      "addComponent": "Agregar Componente",
+      "addPeriod": "Agregar Periodo",
+      "saving": "Guardando...",
+      "saveChanges": "Guardar Cambios",
+      "componentTypes": {
+        "exam": "Examen",
+        "project": "Proyecto",
+        "quiz": "Quiz",
+        "work": "Trabajo"
+      },
+      "error": {
+        "title": "Error",
+        "missingDates": "Debes establecer las fechas de inicio y fin del esquema",
+        "invalidDates": "La fecha de fin debe ser posterior a la fecha de inicio",
+        "periodsSum": "Los porcentajes de los periodos deben sumar 100%",
+        "componentsSum": "Los porcentajes de los componentes en el periodo",
+        "componentsSumValue": "deben sumar",
+        "saving": "No se pudo guardar el esquema de calificaciones"
+      }
     }
   }
 }

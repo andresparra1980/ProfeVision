@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, Plus, Search, X, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,7 @@ export default function GroupStudentsPage({ params }: { params: Promise<{ id: st
 // Componente interno que contiene toda la lógica
 function GroupStudentsContent({ groupId }: { groupId: string }) {
   const router = useRouter();
+  const t = useTranslations('dashboard.groups.students');
   
   // State variables
   const [loading, setLoading] = useState(true);
@@ -79,9 +81,9 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
       setGroup(data);
     } catch (error: unknown) {
       console.error("Error fetching group details:", error);
-      const errorMessage = error instanceof Error ? error.message : "No se pudo cargar la información del grupo";
+      const errorMessage = error instanceof Error ? error.message : t('error.loadingGroup');
       toast({
-        title: "Error",
+        title: t('error.title'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -89,7 +91,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
     } finally {
       setLoading(false);
     }
-  }, [groupId, router]);
+  }, [groupId, router, t]);
 
   const fetchGroupStudents = useCallback(async () => {
     try {
@@ -114,14 +116,14 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
       setGroupStudents(formattedData);
     } catch (error: unknown) {
       console.error("Error fetching group students:", error);
-      const errorMessage = error instanceof Error ? error.message : "No se pudieron cargar los estudiantes de este grupo";
+      const errorMessage = error instanceof Error ? error.message : t('error.loadingStudents');
       toast({
-        title: "Error",
+        title: t('error.title'),
         description: errorMessage,
         variant: "destructive",
       });
     }
-  }, [groupId]);
+  }, [groupId, t]);
 
   const searchStudents = useCallback(async () => {
     if (!searchQuery.trim()) {
@@ -148,26 +150,26 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
       setSearchResults(filteredResults);
     } catch (error: unknown) {
       console.error("Error searching students:", error);
-      const errorMessage = error instanceof Error ? error.message : "No se pudieron buscar estudiantes";
+      const errorMessage = error instanceof Error ? error.message : t('error.searchingStudents');
       toast({
-        title: "Error",
+        title: t('error.title'),
         description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setIsSearching(false);
     }
-  }, [searchQuery, groupStudents]);
+  }, [searchQuery, groupStudents, t]);
 
   const handleImportComplete = useCallback(() => {
     toast({
-      title: "¡Éxito!",
-      description: "Los estudiantes han sido importados exitosamente",
+      title: t('success.title'),
+      description: t('success.importComplete'),
       variant: "default",
     });
     
     fetchGroupStudents();
-  }, [fetchGroupStudents]);
+  }, [fetchGroupStudents, t]);
 
   const addStudentToGroup = useCallback(async (student: Student) => {
     setIsAdding(true);
@@ -189,21 +191,21 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
       setSearchResults([]);
       
       toast({
-        title: "Estudiante agregado",
-        description: "El estudiante ha sido agregado al grupo exitosamente",
+        title: t('success.studentAdded'),
+        description: t('success.studentAddedDescription'),
       });
     } catch (error: unknown) {
       console.error("Error adding student to group:", error);
-      const errorMessage = error instanceof Error ? error.message : "No se pudo agregar el estudiante al grupo";
+      const errorMessage = error instanceof Error ? error.message : t('error.addingStudent');
       toast({
-        title: "Error",
+        title: t('error.title'),
         description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setIsAdding(false);
     }
-  }, [groupId, fetchGroupStudents]);
+  }, [groupId, fetchGroupStudents, t]);
 
   const removeStudentFromGroup = useCallback(async (studentId: string) => {
     try {
@@ -218,19 +220,19 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
       fetchGroupStudents();
       
       toast({
-        title: "Estudiante removido",
-        description: "El estudiante ha sido removido del grupo exitosamente",
+        title: t('success.studentRemoved'),
+        description: t('success.studentRemovedDescription'),
       });
     } catch (error: unknown) {
       console.error("Error removing student from group:", error);
-      const errorMessage = error instanceof Error ? error.message : "No se pudo remover el estudiante del grupo";
+      const errorMessage = error instanceof Error ? error.message : t('error.removingStudent');
       toast({
-        title: "Error",
+        title: t('error.title'),
         description: errorMessage,
         variant: "destructive",
       });
     }
-  }, [fetchGroupStudents]);
+  }, [fetchGroupStudents, t]);
 
   // Effects
   useEffect(() => {
@@ -250,12 +252,12 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
   if (!group) {
     return (
       <div className="text-center py-8">
-        <p>No se encontró el grupo solicitado.</p>
+        <p>{t('error.groupNotFound')}</p>
         <Button 
           className="mt-4"
           onClick={() => router.push("/dashboard/groups")}
         >
-          Volver a Grupos
+          {t('backToGroups')}
         </Button>
       </div>
     );
@@ -271,34 +273,34 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
           onClick={() => router.push("/dashboard/groups")}
           className="mb-2"
         >
-          <ChevronLeft className="mr-2 h-4 w-4" /> Volver a Grupos
+          <ChevronLeft className="mr-2 h-4 w-4" /> {t('backToGroups')}
         </Button>
         <h2 className="text-3xl font-bold tracking-tight">{group.nombre}</h2>
         <p className="text-muted-foreground">
-          {group.materias?.nombre} | {group.periodo_escolar || group.año_escolar || "Sin período escolar"}
+          {group.materias?.nombre} | {group.periodo_escolar || group.año_escolar || t('noSchoolPeriod')}
         </p>
       </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Estudiantes del Grupo</CardTitle>
+            <CardTitle>{t('groupStudents')}</CardTitle>
             <CardDescription>
-              {groupStudents.length} estudiantes registrados en este grupo
+              {groupStudents.length} {t('studentsRegistered')}
             </CardDescription>
           </div>
           <div className="flex space-x-2">
             <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen} modal={true}>
               <DialogTrigger asChild>
                 <Button variant="outline">
-                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Importar desde Excel
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> {t('importFromExcel')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[700px]">
                 <DialogHeader>
-                  <DialogTitle>Importar Estudiantes desde Excel</DialogTitle>
+                  <DialogTitle>{t('importExcelTitle')}</DialogTitle>
                   <DialogDescription>
-                    Importa estudiantes desde un archivo Excel y serán agregados automáticamente a este grupo
+                    {t('importExcelDescription')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
@@ -310,21 +312,21 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
             <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
               <DialogTrigger asChild>
                 <Button>
-                  <Plus className="mr-2 h-4 w-4" /> Agregar Estudiante
+                  <Plus className="mr-2 h-4 w-4" /> {t('addStudent')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Buscar Estudiante</DialogTitle>
+                  <DialogTitle>{t('searchStudent')}</DialogTitle>
                   <DialogDescription>
-                    Busca un estudiante por nombre o identificación para agregarlo al grupo
+                    {t('searchStudentDescription')}
                   </DialogDescription>
                 </DialogHeader>
                 
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
                     <Input
-                      placeholder="Buscar por nombre o identificación..."
+                      placeholder={t('searchPlaceholder')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -359,14 +361,14 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
                             onClick={() => addStudentToGroup(student)}
                             disabled={isAdding}
                           >
-                            Agregar
+                            {t('add')}
                           </Button>
                         </div>
                       ))}
                     </div>
                   ) : searchQuery ? (
                     <p className="text-center text-muted-foreground py-4">
-                      No se encontraron estudiantes
+                      {t('noStudentsFound')}
                     </p>
                   ) : null}
                 </div>
@@ -380,11 +382,11 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Identificación</TableHead>
-                    <TableHead>Nombres</TableHead>
-                    <TableHead>Apellidos</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead>{t('table.identification')}</TableHead>
+                    <TableHead>{t('table.names')}</TableHead>
+                    <TableHead>{t('table.surnames')}</TableHead>
+                    <TableHead>{t('table.email')}</TableHead>
+                    <TableHead className="text-right">{t('table.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

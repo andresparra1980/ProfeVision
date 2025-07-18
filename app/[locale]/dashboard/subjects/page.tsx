@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +18,6 @@ type Materia = Database["public"]["Tables"]["materias"]["Row"];
 type EntidadEducativa = Database["public"]["Tables"]["entidades_educativas"]["Row"];
 
 export default function SubjectsPage() {
-  const router = useRouter();
   const t = useTranslations('dashboard.subjects');
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [entidades, setEntidades] = useState<EntidadEducativa[]>([]);

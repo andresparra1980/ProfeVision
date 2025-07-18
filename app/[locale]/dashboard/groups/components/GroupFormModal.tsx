@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,15 +35,13 @@ type Materia = Database["public"]["Tables"]["materias"]["Row"] & {
   entidades_educativas: EntidadEducativa | null;
 };
 
-const grupoSchema = z.object({
-  nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
-  descripcion: z.string().optional(),
-  entidad_id: z.string({ required_error: "Selecciona una entidad educativa" }),
-  materia_id: z.string({ required_error: "Selecciona una materia" }),
-  periodo_escolar: z.string().optional(),
-});
-
-type GrupoFormValues = z.infer<typeof grupoSchema>;
+type GrupoFormValues = {
+  nombre: string;
+  descripcion?: string;
+  entidad_id: string;
+  materia_id: string;
+  periodo_escolar?: string;
+};
 
 interface GroupFormModalProps {
   open: boolean;
@@ -67,8 +66,17 @@ export function GroupFormModal({
   onSetMateriasFiltradasAction,
   mostrarArchivados
 }: GroupFormModalProps) {
+  const t = useTranslations('dashboard.groups.form');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+
+  const grupoSchema = z.object({
+    nombre: z.string().min(2, { message: t('nameError') }),
+    descripcion: z.string().optional(),
+    entidad_id: z.string({ required_error: t('entityError') }),
+    materia_id: z.string({ required_error: t('subjectError') }),
+    periodo_escolar: z.string().optional(),
+  });
 
   const form = useForm<GrupoFormValues>({
     resolver: zodResolver(grupoSchema),
@@ -229,24 +237,24 @@ export function GroupFormModal({
           <DialogTrigger asChild>
             <Button onClick={() => onOpenChangeAction(true)}>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Nuevo grupo
+              {t('newGroup')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[525px] bg-[#FAFAF4] dark:bg-[#171717]">
             <DialogHeader>
-              <DialogTitle>{editingGrupo ? "Editar grupo" : "Nuevo grupo"}</DialogTitle>
+              <DialogTitle>{editingGrupo ? t('editTitle') : t('newTitle')}</DialogTitle>
               <DialogDescription>
                 {editingGrupo 
-                  ? "Actualiza la información del grupo." 
-                  : "Ingresa los datos del nuevo grupo."}
+                  ? t('editDescription') 
+                  : t('newDescription')}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="nombre">Nombre del grupo (Ej: 10-A, Grupo Mañana, etc.)*</Label>
+                <Label htmlFor="nombre">{t('nameLabel')}</Label>
                 <Input
                   id="nombre"
-                  placeholder=""
+                  placeholder={t('namePlaceholder')}
                   className="bg-white dark:bg-[#1E1E1F]"
                   {...form.register("nombre")}
                 />
@@ -256,13 +264,13 @@ export function GroupFormModal({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="entidad">Entidad Educativa*</Label>
+                <Label htmlFor="entidad">{t('entityLabel')}</Label>
                 <Select
                   onValueChange={(value: string) => form.setValue("entidad_id", value)}
                   value={form.watch("entidad_id")}
                 >
                   <SelectTrigger id="entidad" className="bg-white dark:bg-[#1E1E1F]">
-                    <SelectValue placeholder="Selecciona una entidad educativa" />
+                    <SelectValue placeholder={t('entityPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {entidades.length > 0 ? (
@@ -275,7 +283,7 @@ export function GroupFormModal({
                       </>
                     ) : (
                       <SelectItem value="no-entidades" disabled>
-                        No hay entidades educativas registradas
+                        {t('noEntities')}
                       </SelectItem>
                     )}
                   </SelectContent>
@@ -285,16 +293,16 @@ export function GroupFormModal({
                 )}
                 {entidades.length === 0 && (
                   <div className="text-xs text-destructive">
-                    Debes crear al menos una entidad educativa antes de crear un grupo.
+                    {t('noEntitiesMessage')}
                     <Link href="/dashboard/entidades-educativas" className="ml-1 text-primary hover:underline">
-                      Crear entidad educativa
+                      {t('createEntity')}
                     </Link>
                   </div>
                 )}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="materia">Materia*</Label>
+                <Label htmlFor="materia">{t('subjectLabel')}</Label>
                 <Select
                   onValueChange={(value: string) => form.setValue("materia_id", value)}
                   value={form.watch("materia_id")}
@@ -303,8 +311,8 @@ export function GroupFormModal({
                   <SelectTrigger id="materia" className="bg-white dark:bg-[#1E1E1F]">
                     <SelectValue placeholder={
                       form.watch("entidad_id") 
-                        ? "Selecciona una materia" 
-                        : "Primero selecciona una entidad educativa"
+                        ? t('subjectPlaceholder') 
+                        : t('selectEntityFirst')
                     } />
                   </SelectTrigger>
                   <SelectContent>
@@ -317,8 +325,8 @@ export function GroupFormModal({
                     ) : (
                       <SelectItem value="no-materias" disabled>
                         {form.watch("entidad_id") 
-                          ? "No hay materias para esta entidad educativa" 
-                          : "Selecciona primero una entidad educativa"
+                          ? t('noSubjectsForEntity') 
+                          : t('selectEntityFirst')
                         }
                       </SelectItem>
                     )}
@@ -329,33 +337,33 @@ export function GroupFormModal({
                 )}
                 {form.watch("entidad_id") && materiasFiltradas.length === 0 && (
                   <div className="text-xs text-destructive">
-                    No hay materias registradas para esta entidad educativa.
+                    {t('noSubjectsMessage')}
                     <Link href="/dashboard/subjects" className="ml-1 text-primary hover:underline">
-                      Crear materia
+                      {t('createSubject')}
                     </Link>
                   </div>
                 )}
               </div>
               
               <div className="space-y-2">
-                <Label>Periodo Escolar</Label>
+                <Label>{t('schoolPeriod')}</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm text-muted-foreground">Fecha Inicio</Label>
+                    <Label className="text-sm text-muted-foreground">{t('startDate')}</Label>
                     <div className="flex gap-2">
-                      <Select
-                        value={startDate ? startDate.getMonth().toString() : ""}
-                        onValueChange={(value) => {
-                          if (startDate) {
-                            handleStartDateChange(parseInt(value), startDate.getFullYear());
-                          } else {
-                            handleStartDateChange(parseInt(value), new Date().getFullYear());
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="w-[140px] bg-white dark:bg-[#1E1E1F]">
-                          <SelectValue placeholder="Mes" />
-                        </SelectTrigger>
+                                              <Select
+                          value={startDate ? startDate.getMonth().toString() : ""}
+                          onValueChange={(value) => {
+                            if (startDate) {
+                              handleStartDateChange(parseInt(value), startDate.getFullYear());
+                            } else {
+                              handleStartDateChange(parseInt(value), new Date().getFullYear());
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[140px] bg-white dark:bg-[#1E1E1F]">
+                            <SelectValue placeholder={t('month')} />
+                          </SelectTrigger>
                         <SelectContent>
                           {months.map((month) => (
                             <SelectItem key={month.value} value={month.value.toString()}>
@@ -364,18 +372,18 @@ export function GroupFormModal({
                           ))}
                         </SelectContent>
                       </Select>
-                      <Select
-                        value={startDate ? startDate.getFullYear().toString() : ""}
-                        onValueChange={(value) => {
-                          handleStartDateChange(
-                            startDate ? startDate.getMonth() : 0,
-                            parseInt(value)
-                          );
-                        }}
-                      >
-                        <SelectTrigger className="w-[100px] bg-white dark:bg-[#1E1E1F]">
-                          <SelectValue placeholder="Año" />
-                        </SelectTrigger>
+                                              <Select
+                          value={startDate ? startDate.getFullYear().toString() : ""}
+                          onValueChange={(value) => {
+                            handleStartDateChange(
+                              startDate ? startDate.getMonth() : 0,
+                              parseInt(value)
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="w-[100px] bg-white dark:bg-[#1E1E1F]">
+                            <SelectValue placeholder={t('year')} />
+                          </SelectTrigger>
                         <SelectContent>
                           {years.map((year) => (
                             <SelectItem key={year} value={year.toString()}>
@@ -387,21 +395,21 @@ export function GroupFormModal({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm text-muted-foreground">Fecha Fin</Label>
+                    <Label className="text-sm text-muted-foreground">{t('endDate')}</Label>
                     <div className="flex gap-2">
-                      <Select
-                        value={endDate ? endDate.getMonth().toString() : ""}
-                        onValueChange={(value) => {
-                          if (endDate) {
-                            handleEndDateChange(parseInt(value), endDate.getFullYear());
-                          } else {
-                            handleEndDateChange(parseInt(value), new Date().getFullYear());
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="w-[140px] bg-white dark:bg-[#1E1E1F]">
-                          <SelectValue placeholder="Mes" />
-                        </SelectTrigger>
+                                              <Select
+                          value={endDate ? endDate.getMonth().toString() : ""}
+                          onValueChange={(value) => {
+                            if (endDate) {
+                              handleEndDateChange(parseInt(value), endDate.getFullYear());
+                            } else {
+                              handleEndDateChange(parseInt(value), new Date().getFullYear());
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[140px] bg-white dark:bg-[#1E1E1F]">
+                            <SelectValue placeholder={t('month')} />
+                          </SelectTrigger>
                         <SelectContent>
                           {months.map((month) => (
                             <SelectItem key={month.value} value={month.value.toString()}>
@@ -410,18 +418,18 @@ export function GroupFormModal({
                           ))}
                         </SelectContent>
                       </Select>
-                      <Select
-                        value={endDate ? endDate.getFullYear().toString() : ""}
-                        onValueChange={(value) => {
-                          handleEndDateChange(
-                            endDate ? endDate.getMonth() : 0,
-                            parseInt(value)
-                          );
-                        }}
-                      >
-                        <SelectTrigger className="w-[100px] bg-white dark:bg-[#1E1E1F]">
-                          <SelectValue placeholder="Año" />
-                        </SelectTrigger>
+                                              <Select
+                          value={endDate ? endDate.getFullYear().toString() : ""}
+                          onValueChange={(value) => {
+                            handleEndDateChange(
+                              endDate ? endDate.getMonth() : 0,
+                              parseInt(value)
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="w-[100px] bg-white dark:bg-[#1E1E1F]">
+                            <SelectValue placeholder={t('year')} />
+                          </SelectTrigger>
                         <SelectContent>
                           {years.map((year) => (
                             <SelectItem key={year} value={year.toString()}>
@@ -435,16 +443,16 @@ export function GroupFormModal({
                 </div>
                 {form.watch("periodo_escolar") && (
                   <div className="text-sm text-muted-foreground">
-                    Periodo interpretado: {form.watch("periodo_escolar")}
+                    {t('interpretedPeriod')}: {form.watch("periodo_escolar")}
                   </div>
                 )}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="descripcion">Descripción</Label>
+                <Label htmlFor="descripcion">{t('descriptionLabel')}</Label>
                 <Textarea
                   id="descripcion"
-                  placeholder="Información adicional sobre el grupo"
+                  placeholder={t('descriptionPlaceholder')}
                   className="bg-white dark:bg-[#1E1E1F]"
                   {...form.register("descripcion")}
                 />
@@ -456,10 +464,10 @@ export function GroupFormModal({
                   variant="outline" 
                   onClick={handleClose}
                 >
-                  Cancelar
+                  {t('cancel')}
                 </Button>
                 <Button type="submit" disabled={materias.length === 0}>
-                  {editingGrupo ? "Actualizar" : "Crear"}
+                  {editingGrupo ? t('update') : t('create')}
                 </Button>
               </DialogFooter>
             </form>

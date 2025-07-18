@@ -745,6 +745,195 @@
       "confirmDelete": "Yes, delete this subject and its data"
     }
   },
+  "groups": {
+    "title": "Groups",
+    "description": "Manage your student groups",
+    "noGroupsMessage": "No groups registered.",
+    "noSubjectsMessage": "You must create at least one subject before creating a group.",
+    "goToSubjects": "Go to create subject",
+    "buttons": {
+      "showActive": "Show Active Groups",
+      "showArchived": "Show Archived Groups"
+    },
+    "error": {
+      "title": "Error in",
+      "description": "Error",
+      "unknown": "Unknown",
+      "professorLoad": "Error loading professor data",
+      "professorAuth": "Could not load data. Please try logging in again",
+      "loadingGroups": "Error loading groups",
+      "loadingSubjects": "Error loading subjects",
+      "loadingEntities": "Error loading educational entities",
+      "savingGroup": "Error saving group",
+      "deletingGroup": "deleting group",
+      "changingGroupState": "Error changing group state"
+    },
+    "toast": {
+      "createTitle": "Group created",
+      "createDescription": "The group has been created successfully.",
+      "updateTitle": "Group updated",
+      "updateDescription": "The group has been updated successfully.",
+      "deleteTitle": "Group deleted",
+      "deleteDescription": "The group has been deleted successfully.",
+      "archivedTitle": "Group archived",
+      "archivedDescription": "The group has been archived successfully.",
+      "activatedTitle": "Group activated",
+      "activatedDescription": "The group has been activated successfully."
+    },
+    "deleteDialog": {
+      "title": "WARNING! Permanent Deletion",
+      "mainMessage": "You are about to delete the group",
+      "selectedGroup": "selected",
+      "irreversible": "This action is",
+      "irreversibleText": "IRREVERSIBLE",
+      "resultingIn": "and will result in",
+      "consequence1": "Deletion of all student enrollments in this group.",
+      "consequence2": "Deletion of all associated grading schemes.",
+      "consequence3": "Deletion of all exam assignments to this group.",
+      "consequence4": "References to this group in existing exam scans will be lost (marked as NULL).",
+      "confirmMessage": "To confirm this action and proceed with deletion, please type the exact name of the group in the field below.",
+      "archiveAlternative": "Remember that you can",
+      "archiveText": "Archive",
+      "archiveReason": "the group to avoid permanent deletion.",
+      "typePrompt": "Type",
+      "typeConfirm": "to confirm",
+      "placeholder": "Exact group name",
+      "cancel": "Cancel",
+      "confirm": "Yes, delete this group and its data"
+    },
+    "card": {
+      "subject": "Subject",
+      "entity": "Entity",
+      "period": "Period",
+      "notAssigned": "Not assigned",
+      "openMenu": "Open menu",
+      "editGroup": "Edit group",
+      "manageStudents": "Manage Students",
+      "gradeTable": "Grade Table",
+      "gradingScheme": "Grading Scheme",
+      "archive": "Archive",
+      "activate": "Activate",
+      "delete": "Delete",
+      "students": "students"
+    },
+    "form": {
+      "newGroup": "New group",
+      "editTitle": "Edit group",
+      "newTitle": "New group",
+      "editDescription": "Update the group information.",
+      "newDescription": "Enter the details of the new group.",
+      "nameLabel": "Group name (e.g., 10-A, Morning Group, etc.)*",
+      "namePlaceholder": "e.g., 10-A, Morning Group, etc.",
+      "nameError": "Name must be at least 2 characters",
+      "entityLabel": "Educational Entity*",
+      "entityPlaceholder": "Select an educational entity",
+      "entityError": "Select an educational entity",
+      "noEntities": "No educational entities registered",
+      "noEntitiesMessage": "You must create at least one educational entity before creating a group.",
+      "createEntity": "Create educational entity",
+      "subjectLabel": "Subject*",
+      "subjectPlaceholder": "Select a subject",
+      "subjectError": "Select a subject",
+      "selectEntityFirst": "First select an educational entity",
+      "noSubjectsForEntity": "No subjects for this educational entity",
+      "noSubjectsMessage": "No subjects registered for this educational entity.",
+      "createSubject": "Create subject",
+      "schoolPeriod": "School Period",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "month": "Month",
+      "year": "Year",
+      "interpretedPeriod": "Interpreted period",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Additional information about the group",
+      "cancel": "Cancel",
+      "create": "Create",
+      "update": "Update"
+    },
+    "grades": {
+      "title": "Grades",
+      "backToGroups": "Back to Groups",
+      "subjectLabel": "Subject",
+      "groupLabel": "Group",
+      "defaultInstitution": "EDUCATIONAL INSTITUTION",
+      "noTitleExam": "Exam without title",
+      "noSubject": "No subject",
+      "error": {
+        "title": "Error",
+        "loadingScheme": "Could not load grading scheme.",
+        "noScheme": "No grading scheme",
+        "mustCreateScheme": "You must first create a grading scheme for this group.",
+        "loadingData": "Could not load data. Please try again.",
+        "gradeLocked": "This grade is locked for editing.",
+        "gradeLinked": "This grade is linked to the exam",
+        "cannotModify": "and cannot be modified manually",
+        "cannotUnlock": "and cannot be unlocked",
+        "componentLinked": "This component is linked to the exam",
+        "cannotImport": "and grades cannot be imported manually",
+        "savingGrade": "Could not save grade. Please try again."
+      },
+      "modal": {
+        "importTitle": "Import Grades",
+        "exportTitle": "Export Grades",
+        "importDescription": "Import grades from an Excel file",
+        "exportDescription": "Export grades to an Excel file",
+        "exportPeriod": "Export grades for",
+        "exportFinal": "Export all grades and final grade"
+      }
+    },
+    "students": {
+      "backToGroups": "Back to Groups",
+      "noSchoolPeriod": "No school period",
+      "groupStudents": "Group Students",
+      "studentsRegistered": "students registered in this group",
+      "importFromExcel": "Import from Excel",
+      "importExcelTitle": "Import Students from Excel",
+      "importExcelDescription": "Import students from an Excel file and they will be automatically added to this group",
+      "addStudent": "Add Student",
+      "searchStudent": "Search Student",
+      "searchStudentDescription": "Search for a student by name or identification to add them to the group",
+      "searchPlaceholder": "Search by name or identification...",
+      "add": "Add",
+      "noStudentsFound": "No students found",
+      "error": {
+        "title": "Error",
+        "loadingGroup": "Could not load group information",
+        "loadingStudents": "Could not load students for this group",
+        "searchingStudents": "Could not search students",
+        "addingStudent": "Could not add student to group",
+        "removingStudent": "Could not remove student from group",
+        "groupNotFound": "The requested group was not found."
+      },
+      "success": {
+        "title": "Success!",
+        "importComplete": "Students have been imported successfully",
+        "studentAdded": "Student added",
+        "studentAddedDescription": "The student has been added to the group successfully",
+        "studentRemoved": "Student removed",
+        "studentRemovedDescription": "The student has been removed from the group successfully"
+      },
+      "table": {
+        "identification": "Identification",
+        "names": "Names",
+        "surnames": "Surnames",
+        "email": "Email",
+        "actions": "Actions"
+      }
+    },
+    "gradingScheme": {
+      "title": "Grading Scheme",
+      "backToGroups": "Back to Groups",
+      "defaultInstitution": "EDUCATIONAL INSTITUTION",
+      "error": {
+        "loadingData": "Error loading data",
+        "savingScheme": "Error saving scheme"
+      },
+      "success": {
+        "title": "Success",
+        "schemeSaved": "Grading scheme saved successfully"
+      }
+    }
+  },
   "main": {
     "title": "Dashboard",
     "welcome": "Welcome to ProfeVision, your exam management platform.",
@@ -778,6 +967,66 @@
       "historyDate": "May 24, 2024",
       "physics": "Physics - 9th Grade",
       "physicsDate": "May 27, 2024"
+    }
+  },
+  "components": {
+    "gradesTable": {
+      "studentData": "Student Data",
+      "exportPeriod": "Export period",
+      "finalGrade": "Final Grade",
+      "exportFinalGrades": "Export final grades",
+      "surnames": "Surnames",
+      "names": "Names",
+      "identification": "Identification",
+      "exam": "Exam",
+      "linkedToExam": "Linked to exam",
+      "lockGrades": "Lock grades",
+      "unlockGrades": "Unlock grades",
+      "syncFromExam": "Sync grades from exam",
+      "importGrades": "Import grades",
+      "exportGrades": "Export grades",
+      "grade": "Grade",
+      "period": "Period",
+      "weighted": "Wtd.",
+      "absolute": "Abs.",
+      "absoluteGrade": "Absolute grade",
+      "error": {
+        "noAuthToken": "No authentication token found",
+        "syncGrades": "Error syncing grades"
+      },
+      "success": {
+        "syncComplete": "Grades synchronized successfully"
+      }
+    },
+    "gradingSchemeEditor": {
+      "defaultSchemeName": "Grading Scheme",
+      "defaultPeriodName": "First Period",
+      "defaultComponentName": "Tasks",
+      "newComponent": "New Component",
+      "period": "Period",
+      "schemeName": "Scheme Name",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "type": "Type",
+      "addComponent": "Add Component",
+      "addPeriod": "Add Period",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "componentTypes": {
+        "exam": "Exam",
+        "project": "Project",
+        "quiz": "Quiz",
+        "work": "Work"
+      },
+      "error": {
+        "title": "Error",
+        "missingDates": "You must set the start and end dates for the scheme",
+        "invalidDates": "The end date must be after the start date",
+        "periodsSum": "The percentages of periods must sum to 100%",
+        "componentsSum": "The percentages of components in period",
+        "componentsSumValue": "must sum to",
+        "saving": "Could not save the grading scheme"
+      }
     }
   }
 }

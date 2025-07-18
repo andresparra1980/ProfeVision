@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -10,7 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 import { ChevronLeft, TriangleAlert, Archive, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { useProfesor } from "@/lib/hooks/useProfesor";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { Database } from "@/lib/types/database";
 
 
@@ -48,6 +49,7 @@ type GrupoFormValues = {
 };
 
 export default function GroupsPage() {
+  const t = useTranslations('dashboard.groups');
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [entidades, setEntidades] = useState<EntidadEducativa[]>([]);
@@ -92,10 +94,10 @@ export default function GroupsPage() {
 
     toast({
       variant: "destructive",
-      title: `Error en ${context}`,
-      description: `Error: ${errorObj?.message || 'Desconocido'}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`
+      title: `${t('error.title')} ${context}`,
+      description: `${t('error.description')}: ${errorObj?.message || t('error.unknown')}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`
     });
-  }, []);
+  }, [t]);
 
   const loadGrupos = useCallback(async () => {
     if (!profesor || profesorLoading || profesorError) {
@@ -157,11 +159,11 @@ export default function GroupsPage() {
       
       setGrupos(gruposConConteo);
     } catch (error: unknown) {
-      handleSupabaseError('Error al cargar grupos', error);
+      handleSupabaseError(t('error.loadingGroups'), error);
     } finally {
       setLoading(false);
     }
-  }, [profesor, profesorLoading, profesorError, mostrarArchivados, handleSupabaseError]);
+  }, [profesor, profesorLoading, profesorError, mostrarArchivados, handleSupabaseError, t]);
 
   const loadMaterias = useCallback(async () => {
     if (!profesor || profesorLoading || profesorError) {
@@ -200,9 +202,9 @@ export default function GroupsPage() {
       
       setMaterias(processedData);
     } catch (error: unknown) {
-      handleSupabaseError('Error al cargar materias', error);
+      handleSupabaseError(t('error.loadingSubjects'), error);
     }
-  }, [profesor, profesorLoading, profesorError, handleSupabaseError]);
+  }, [profesor, profesorLoading, profesorError, handleSupabaseError, t]);
 
   const loadEntidades = useCallback(async () => {
     if (!profesor || profesorLoading || profesorError) {
@@ -224,9 +226,9 @@ export default function GroupsPage() {
       logger.log("Entidades totales disponibles:", entidadesData?.length || 0);
       setEntidades(entidadesData || []);
     } catch (error: unknown) {
-      handleSupabaseError('Error al cargar entidades educativas', error);
+      handleSupabaseError(t('error.loadingEntities'), error);
     }
-  }, [profesor, profesorLoading, profesorError, handleSupabaseError]);
+  }, [profesor, profesorLoading, profesorError, handleSupabaseError, t]);
 
   useEffect(() => {
     if (!profesorLoading && profesor && !profesorError) {
@@ -271,8 +273,8 @@ export default function GroupsPage() {
 
         if (error) throw error;
         toast({
-          title: "Grupo actualizado",
-          description: "El grupo ha sido actualizado correctamente.",
+          title: t('toast.updateTitle'),
+          description: t('toast.updateDescription'),
         });
       } else {
         // Crear nuevo
@@ -291,8 +293,8 @@ export default function GroupsPage() {
 
         if (error) throw error;
         toast({
-          title: "Grupo creado",
-          description: "El grupo ha sido creado correctamente.",
+          title: t('toast.createTitle'),
+          description: t('toast.createDescription'),
         });
       }
       
@@ -300,7 +302,7 @@ export default function GroupsPage() {
       setEditingGrupo(null);
       loadGrupos();
     } catch (error: unknown) {
-      handleSupabaseError('Error al guardar grupo', error);
+      handleSupabaseError(t('error.savingGroup'), error);
     }
   };
 
@@ -321,13 +323,13 @@ export default function GroupsPage() {
       if (error) throw error;
       
       toast({
-        title: "Grupo eliminado",
-        description: "El grupo ha sido eliminado correctamente.",
+        title: t('toast.deleteTitle'),
+        description: t('toast.deleteDescription'),
       });
       
       loadGrupos();
     } catch (error: unknown) {
-      handleSupabaseError('al eliminar grupo', error);
+      handleSupabaseError(t('error.deletingGroup'), error);
     } finally {
       setDeletingId(null);
       setConfirmDelete(false);
@@ -351,15 +353,15 @@ export default function GroupsPage() {
       if (error) throw error;
       
       toast({
-        title: grupo.estado === 'activo' ? "Grupo archivado" : "Grupo activado",
+        title: grupo.estado === 'activo' ? t('toast.archivedTitle') : t('toast.activatedTitle'),
         description: grupo.estado === 'activo' 
-          ? "El grupo ha sido archivado correctamente." 
-          : "El grupo ha sido activado correctamente.",
+          ? t('toast.archivedDescription') 
+          : t('toast.activatedDescription'),
       });
       
       loadGrupos();
     } catch (error: unknown) {
-      handleSupabaseError('Error al cambiar estado del grupo', error);
+      handleSupabaseError(t('error.changingGroupState'), error);
     }
   };
 
@@ -385,7 +387,7 @@ export default function GroupsPage() {
   if (profesorError) {
      return (
       <div className="flex h-screen items-center justify-center text-center text-destructive">
-        Error al cargar los datos del profesor: {profesorError.message}
+        {t('error.professorLoad')}: {profesorError.message}
       </div>
      );
   }
@@ -395,7 +397,7 @@ export default function GroupsPage() {
      // This should be hit after SIGNED_OUT and failed refresh
      return (
        <div className="flex h-screen items-center justify-center text-center text-muted-foreground">
-         No se pudieron cargar los datos. Por favor, intenta iniciar sesión de nuevo.
+         {t('error.professorAuth')}
        </div>
      );
   }
@@ -406,9 +408,9 @@ export default function GroupsPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Grupos</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <div className="text-sm text-muted-foreground">
-            Administra tus grupos de estudiantes
+            {t('description')}
           </div>
         </div>
         <div className="flex gap-2">
@@ -419,11 +421,11 @@ export default function GroupsPage() {
           >
             {mostrarArchivados ? (
               <>
-                <ChevronLeft className="mr-2 h-4 w-4" /> Ver Grupos Activos
+                <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.showActive')}
               </>
             ) : (
               <>
-                <Archive className="mr-2 h-4 w-4" /> Ver Grupos Archivados
+                <Archive className="mr-2 h-4 w-4" /> {t('buttons.showArchived')}
               </>
             )}
           </Button>
@@ -450,13 +452,13 @@ export default function GroupsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-10">
             <div className="mb-4 text-center text-muted-foreground">
-              No hay grupos registrados.
+              {t('noGroupsMessage')}
             </div>
             {materias.length === 0 && (
               <div className="mt-4 text-center text-sm text-muted-foreground">
-                Debes crear al menos una materia antes de crear un grupo.
+                {t('noSubjectsMessage')}
                 <Link href="/dashboard/subjects" className="ml-1 font-medium text-primary hover:underline">
-                  Ir a crear materia
+                  {t('goToSubjects')}
                 </Link>
               </div>
             )}
@@ -492,39 +494,39 @@ export default function GroupsPage() {
           <DialogHeader>
             <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold flex items-center">
               <TriangleAlert className="h-7 w-7 mr-2 text-red-600 dark:text-red-400" />
-              ¡ADVERTENCIA! Eliminación Permanente
+              {t('deleteDialog.title')}
             </DialogTitle>
           </DialogHeader>
           <div className="text-gray-600 dark:text-white">
           <p>
-                Está a punto de eliminar el grupo{" "}
-                <span className="font-semibold">{groupNameToConfirmDelete || "seleccionado"}</span>.
+                {t('deleteDialog.mainMessage')} {" "}
+                <span className="font-semibold">{groupNameToConfirmDelete || t('deleteDialog.selectedGroup')}</span>.
               </p>
               <p>
-                Esta acción es <span className="font-semibold uppercase">IRREVERSIBLE</span> y resultará en:
+                {t('deleteDialog.irreversible')} <span className="font-semibold uppercase">{t('deleteDialog.irreversibleText')}</span> {t('deleteDialog.resultingIn')}:
               </p>
               <ul className="list-disc list-inside ml-4 text-sm mt-2">
-                <li>Eliminación de todas las <span className="font-semibold">inscripciones de estudiantes</span> a este grupo.</li>
-                <li>Eliminación de todos los <span className="font-semibold">esquemas de calificación</span> asociados.</li>
-                <li>Eliminación de todas las <span className="font-semibold">asignaciones de exámenes</span> a este grupo.</li>
-                <li>Las referencias a este grupo en los <span className="font-semibold">escaneos de exámenes</span> existentes se perderán (se marcarán como NULAS).</li>
+                <li>{t('deleteDialog.consequence1')}</li>
+                <li>{t('deleteDialog.consequence2')}</li>
+                <li>{t('deleteDialog.consequence3')}</li>
+                <li>{t('deleteDialog.consequence4')}</li>
               </ul>
               <p className="mt-3">
-                Para confirmar esta acción y proceder con la eliminación, por favor escriba el nombre exacto del grupo en el campo de abajo.
+                {t('deleteDialog.confirmMessage')}
               </p>
               <p className="mt-3">
-                Recuerde que puede <span className="font-semibold">Archivar</span> el grupo para evitar la eliminación permanente.
+                {t('deleteDialog.archiveAlternative')} <span className="font-semibold">{t('deleteDialog.archiveText')}</span> {t('deleteDialog.archiveReason')}
               </p>
           </div>
           <div className="grid gap-3 py-3">
             <Label htmlFor="group-confirm-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Escriba &quot;<span className="font-semibold text-red-600 dark:text-red-400">{groupNameToConfirmDelete}</span>&quot; para confirmar:
+              {t('deleteDialog.typePrompt')} &quot;<span className="font-semibold text-red-600 dark:text-red-400">{groupNameToConfirmDelete}</span>&quot; {t('deleteDialog.typeConfirm')}:
             </Label>
             <Input
               id="group-confirm-name"
               value={typedGroupName}
               onChange={(e) => setTypedGroupName(e.target.value)}
-              placeholder="Nombre exacto del grupo"
+              placeholder={t('deleteDialog.placeholder')}
               className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-red-500 focus:ring-red-500"
               autoFocus
             />
@@ -538,7 +540,7 @@ export default function GroupsPage() {
                 setTypedGroupName("");
               }}
             >
-              Cancelar
+              {t('deleteDialog.cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -546,7 +548,7 @@ export default function GroupsPage() {
               disabled={typedGroupName !== groupNameToConfirmDelete}
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Sí, eliminar este grupo y sus datos
+              {t('deleteDialog.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

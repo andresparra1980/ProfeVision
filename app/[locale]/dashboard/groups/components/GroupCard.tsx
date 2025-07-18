@@ -18,6 +18,7 @@ import {
   Trash2, 
   Calendar 
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { Database } from "@/lib/types/database";
 
@@ -43,6 +44,8 @@ interface GroupCardProps {
 }
 
 export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDeleteAction }: GroupCardProps) {
+  const t = useTranslations('dashboard.groups.card');
+  
   return (
     <Card key={grupo.id} className="flex flex-col">
       <CardHeader className="pb-2">
@@ -53,15 +56,15 @@ export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDelete
             </CardTitle>
             <div className="text-sm text-muted-foreground space-y-1">
               <div className="text-sm">
-                Materia: {grupo.materias?.nombre || "No asignada"}
+                {t('subject')}: {grupo.materias?.nombre || t('notAssigned')}
               </div>
               <div className="text-sm">
-                Entidad: {grupo.materias?.entidades_educativas?.nombre || "No asignada"}
+                {t('entity')}: {grupo.materias?.entidades_educativas?.nombre || t('notAssigned')}
               </div>
               {grupo.periodo_escolar && (
                 <div className="text-sm flex items-center">
                   <Calendar className="h-4 w-4 mr-1" />
-                  Periodo: {grupo.periodo_escolar}
+                  {t('period')}: {grupo.periodo_escolar}
                 </div>
               )}
             </div>
@@ -70,30 +73,30 @@ export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDelete
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">Abrir menú</span>
+                <span className="sr-only">{t('openMenu')}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEditAction(grupo)}>
                 <Pencil className="h-4 w-4 mr-2" />
-                Editar grupo
+                {t('editGroup')}
               </DropdownMenuItem>
               <Link href={`/dashboard/groups/${grupo.id}/students`} className="w-full">
                 <DropdownMenuItem>
                   <Users className="h-4 w-4 mr-2" />
-                  Gestion de Estudiantes
+                  {t('manageStudents')}
                 </DropdownMenuItem>
               </Link>
               <Link href={`/dashboard/groups/${grupo.id}/grades`} className="w-full">
                 <DropdownMenuItem>
                   <Calculator className="h-4 w-4 mr-2" />
-                  Tabulado de Notas
+                  {t('gradeTable')}
                 </DropdownMenuItem>
               </Link>
               <Link href={`/dashboard/groups/${grupo.id}/grading-scheme`} className="w-full">
                 <DropdownMenuItem>
                   <BookOpen className="h-4 w-4 mr-2" />
-                  Esquema de Calificaciones
+                  {t('gradingScheme')}
                 </DropdownMenuItem>
               </Link>
               <DropdownMenuSeparator />
@@ -101,12 +104,12 @@ export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDelete
                 {grupo.estado === 'activo' ? (
                   <>
                     <Archive className="h-4 w-4 mr-2" />
-                    Archivar
+                    {t('archive')}
                   </>
                 ) : (
                   <>
                     <ArchiveRestore className="h-4 w-4 mr-2" />
-                    Activar
+                    {t('activate')}
                   </>
                 )}
               </DropdownMenuItem>
@@ -115,7 +118,7 @@ export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDelete
                 className="text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Eliminar
+                {t('delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -128,7 +131,7 @@ export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDelete
             <span>
               {typeof grupo.estudiantes_count === 'number' 
                 ? grupo.estudiantes_count 
-                : grupo.estudiantes_count?.count || 0} estudiantes
+                : grupo.estudiantes_count?.count || 0} {t('students')}
             </span>
           </div>
           {grupo.descripcion && (

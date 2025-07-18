@@ -107,7 +107,7 @@ export default function EntitiesPage() {
     } finally {
       setLoading(false);
     }
-  }, [router, handleSupabaseError]);
+  }, [router, handleSupabaseError, t]);
 
   useEffect(() => {
     fetchEntities();

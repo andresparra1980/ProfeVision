@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase/client';
 import { GradesTable } from '@/components/grades/grades-table';
 import { useToast } from '@/components/ui/use-toast';
@@ -35,6 +36,7 @@ export default function GradesPage({ params }: GradesPageProps) {
   const groupId = resolvedParams.id;
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('dashboard.groups.grades');
   const [isLoading, setIsLoading] = useState(true);
   const [esquema, setEsquema] = useState<EsquemaCalificacion | null>(null);
   const [periodos, setPeriodos] = useState<Periodo[]>([]);
@@ -167,7 +169,7 @@ export default function GradesPage({ params }: GradesPageProps) {
       if (grupo.materia) {
         setMateria(grupo.materia);
       }
-      setInstitucionName(grupo.materia?.entidad?.nombre || 'INSTITUCIÓN EDUCATIVA');
+      setInstitucionName(grupo.materia?.entidad?.nombre || t('defaultInstitution'));
 
       // Cargar esquema de calificación
       const { data: esquemas, error: esquemasError } = await supabase
@@ -179,8 +181,8 @@ export default function GradesPage({ params }: GradesPageProps) {
         console.error('Error al cargar esquema:', esquemasError);
         toast({
           variant: 'destructive',
-          title: 'Error',
-          description: 'No se pudo cargar el esquema de calificación.',
+          title: t('error.title'),
+          description: t('error.loadingScheme'),
         });
         return;
       }
@@ -188,8 +190,8 @@ export default function GradesPage({ params }: GradesPageProps) {
       // Si no hay esquema o hay más de uno (no debería ocurrir), redirigir a la página de creación
       if (!esquemas || esquemas.length === 0) {
         toast({
-          title: 'No hay esquema de calificación',
-          description: 'Primero debes crear un esquema de calificación para este grupo.',
+          title: t('error.noScheme'),
+          description: t('error.mustCreateScheme'),
         });
         router.push(`/dashboard/groups/${groupId}/grading-scheme`);
         return;
@@ -253,7 +255,7 @@ export default function GradesPage({ params }: GradesPageProps) {
         vinculos?.forEach((vinculo: VinculoItem) => {
           vinculosMap[vinculo.componente_id] = { 
             examen_id: vinculo.examen_id,
-            titulo: vinculo.examen?.titulo || 'Examen sin título'
+            titulo: vinculo.examen?.titulo || t('noTitleExam')
           };
         });
         
@@ -310,8 +312,8 @@ export default function GradesPage({ params }: GradesPageProps) {
       console.error('Error al cargar datos:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'No se pudieron cargar los datos. Por favor, intenta nuevamente.',
+        title: t('error.title'),
+        description: t('error.loadingData'),
       });
     } finally {
       setIsLoading(false);
@@ -325,8 +327,8 @@ export default function GradesPage({ params }: GradesPageProps) {
     if (componentesBloqueados[componenteId]) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Esta calificación está bloqueada para edición.',
+        title: t('error.title'),
+        description: t('error.gradeLocked'),
       });
       return;
     }
@@ -335,8 +337,8 @@ export default function GradesPage({ params }: GradesPageProps) {
     if (componentesVinculados[componenteId]) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: `Esta calificación está vinculada al examen "${componentesVinculados[componenteId].titulo}" y no puede ser modificada manualmente.`,
+        title: t('error.title'),
+        description: `${t('error.gradeLinked')} "${componentesVinculados[componenteId].titulo}" ${t('error.cannotModify')}.`,
       });
       return;
     }
@@ -404,8 +406,8 @@ export default function GradesPage({ params }: GradesPageProps) {
       console.error('Error al guardar calificación:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'No se pudo guardar la calificación. Por favor, intenta nuevamente.',
+        title: t('error.title'),
+        description: t('error.savingGrade'),
       });
     }
   };
@@ -415,8 +417,8 @@ export default function GradesPage({ params }: GradesPageProps) {
     if (componentesVinculados[componenteId]) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: `Este componente está vinculado al examen "${componentesVinculados[componenteId].titulo}" y no puede ser desbloqueado.`,
+        title: t('error.title'),
+        description: `${t('error.componentLinked')} "${componentesVinculados[componenteId].titulo}" ${t('error.cannotUnlock')}.`,
       });
       return;
     }
@@ -433,8 +435,8 @@ export default function GradesPage({ params }: GradesPageProps) {
     if (componentesVinculados[componenteId]) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: `Este componente está vinculado al examen "${componentesVinculados[componenteId].titulo}" y no se pueden importar calificaciones manualmente.`,
+        title: t('error.title'),
+        description: `${t('error.componentLinked')} "${componentesVinculados[componenteId].titulo}" ${t('error.cannotImport')}.`,
       });
       return;
     }
@@ -505,13 +507,13 @@ export default function GradesPage({ params }: GradesPageProps) {
           onClick={() => router.push("/dashboard/groups")}
           className="mb-0 w-fit"
         >
-          <ChevronLeft className="mr-2 h-4 w-4" /> Volver a Grupos
+          <ChevronLeft className="mr-2 h-4 w-4" /> {t('backToGroups')}
         </Button>
         
         <div className="mt-2">
-          <h1 className="text-2xl font-bold tracking-tight">Calificaciones</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-sm text-muted-foreground">
-            {institucionName} / {materia?.nombre || 'Materia'} / Grupo {groupName}
+            {institucionName} / {materia?.nombre || t('subjectLabel')} / {t('groupLabel')} {groupName}
           </p>
         </div>
       </div>
@@ -538,16 +540,16 @@ export default function GradesPage({ params }: GradesPageProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {modalMode === 'import' ? 'Importar' : 'Exportar'} Calificaciones
+              {modalMode === 'import' ? t('modal.importTitle') : t('modal.exportTitle')}
             </DialogTitle>
             <DialogDescription>
               {modalMode === 'import' 
-                ? 'Importa calificaciones desde un archivo Excel' 
+                ? t('modal.importDescription') 
                 : modalMode === 'export-period'
-                ? `Exportar calificaciones del ${selectedPeriodo?.nombre}`
+                ? `${t('modal.exportPeriod')} ${selectedPeriodo?.nombre}`
                 : modalMode === 'export-final'
-                ? 'Exportar todas las calificaciones y nota final'
-                : 'Exporta calificaciones a un archivo Excel'}
+                ? t('modal.exportFinal')
+                : t('modal.exportDescription')}
             </DialogDescription>
           </DialogHeader>
           <GradesExcelModal
@@ -558,7 +560,7 @@ export default function GradesPage({ params }: GradesPageProps) {
               : getComponentGrades(selectedComponent?.id || '')}
             onImportComplete={handleImportComplete}
             mode={modalMode}
-            materia={materia ? materia : { id: '', nombre: 'Sin materia' }}
+            materia={materia ? materia : { id: '', nombre: t('noSubject') }}
             grupo={{
               id: groupId,
               nombre: groupName,

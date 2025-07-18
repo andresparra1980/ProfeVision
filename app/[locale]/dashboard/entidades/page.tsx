@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +30,6 @@ type EntidadFormValues = {
 };
 
 export default function EntidadesPage() {
-  const router = useRouter();
   const t = useTranslations('dashboard.entidades');
   
   const entidadSchema = z.object({
