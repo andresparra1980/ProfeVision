@@ -254,7 +254,7 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
     }
     
     fetchData();
-  }, [examId, form]);
+  }, [examId, form, t]);
   
   // Manejar la envío del formulario
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -342,6 +342,7 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <Button onClick={() => router.push(`/dashboard/exams/${examId}/assign` as any)}>
               {t('exams.linkGradeComponent.assignGroups')}
             </Button>
@@ -373,6 +374,7 @@ export default function LinkGradeComponentPage({ params }: { params: Promise<{ i
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <Button onClick={() => router.push("/dashboard/grades/schemes" as any)}>
               {t('exams.linkGradeComponent.goToGradingSchemes')}
             </Button>

@@ -292,6 +292,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               <p className="text-sm text-muted-foreground">
                 {t('exams.export.answerSheetsDesc')}
               </p>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Button onClick={() => router.push(`/dashboard/exams/${examId}/responses` as any)}>
                 <FileOutput className="mr-2 h-4 w-4" /> {t('exams.export.generateAnswerSheets')}
               </Button>
@@ -338,6 +339,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                 {t('exams.export.noGroupsAssigned')}
                 <Button 
                   variant="link" 
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onClick={() => router.push(`/dashboard/exams/${examId}/assign` as any)}
                   className="ml-2"
                 >

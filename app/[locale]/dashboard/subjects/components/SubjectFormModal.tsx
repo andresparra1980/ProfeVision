@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,15 +30,11 @@ type Materia = Database["public"]["Tables"]["materias"]["Row"];
 type EntidadEducativa =
   Database["public"]["Tables"]["entidades_educativas"]["Row"];
 
-const materiaSchema = z.object({
-  nombre: z
-    .string()
-    .min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
-  descripcion: z.string().optional(),
-  entidad_id: z.string().optional(),
-});
-
-type MateriaFormValues = z.infer<typeof materiaSchema>;
+type MateriaFormValues = {
+  nombre: string;
+  descripcion?: string;
+  entidad_id?: string;
+};
 
 interface SubjectFormModalProps {
   open: boolean;
@@ -56,6 +53,17 @@ export function SubjectFormModal({
   onSubmit,
   onCancel,
 }: SubjectFormModalProps) {
+  const t = useTranslations('dashboard.subjects.form');
+  const tSubjects = useTranslations('dashboard.subjects');
+  
+  const materiaSchema = z.object({
+    nombre: z
+      .string()
+      .min(2, { message: t('nameError') }),
+    descripcion: z.string().optional(),
+    entidad_id: z.string().optional(),
+  });
+
   const form = useForm<MateriaFormValues>({
     resolver: zodResolver(materiaSchema),
     defaultValues: {
@@ -96,23 +104,23 @@ export function SubjectFormModal({
       <DialogTrigger asChild>
         <Button onClick={() => onCancel()}>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Nueva materia
+          {tSubjects('addSubject')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px] bg-[#FAFAF4] dark:bg-[#171717]">
         <DialogHeader>
           <DialogTitle>
-            {editingMateria ? "Editar materia" : "Nueva materia"}
+            {editingMateria ? t('editTitle') : t('newTitle')}
           </DialogTitle>
           <DialogDescription>
             {editingMateria
-              ? "Actualiza la información de la materia."
-              : "Ingresa los datos de la nueva materia."}
+              ? t('editDescription')
+              : t('newDescription')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="nombre">Nombre*</Label>
+            <Label htmlFor="nombre">{t('nameLabel')}</Label>
             <Input
               id="nombre"
               className="bg-white dark:bg-[#1E1E1F]"
@@ -126,17 +134,17 @@ export function SubjectFormModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="descripcion">Descripción</Label>
+            <Label htmlFor="descripcion">{t('descriptionLabel')}</Label>
             <Textarea
               id="descripcion"
-              placeholder="Breve descripción de la materia"
+              placeholder={t('descriptionPlaceholder')}
               className="bg-white dark:bg-[#1E1E1F]"
               {...form.register("descripcion")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="entidad">Institución educativa</Label>
+            <Label htmlFor="entidad">{t('institutionLabel')}</Label>
             <Select
               onValueChange={(value: string) =>
                 form.setValue("entidad_id", value)
@@ -147,10 +155,10 @@ export function SubjectFormModal({
                 id="entidad"
                 className="bg-white dark:bg-[#1E1E1F]"
               >
-                <SelectValue placeholder="Selecciona una institución" />
+                <SelectValue placeholder={t('institutionPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Ninguna</SelectItem>
+                <SelectItem value="none">{t('institutionNone')}</SelectItem>
                 {entidades.map((entidad) => (
                   <SelectItem key={entidad.id} value={entidad.id}>
                     {entidad.nombre}
@@ -159,17 +167,16 @@ export function SubjectFormModal({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Si no asocias la materia con una institución, se considerará como
-              privada.
+              {t('institutionNote')}
             </p>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleCancel}>
-              Cancelar
+              {t('cancel')}
             </Button>
             <Button type="submit">
-              {editingMateria ? "Actualizar" : "Crear"}
+              {editingMateria ? t('update') : t('create')}
             </Button>
           </DialogFooter>
         </form>

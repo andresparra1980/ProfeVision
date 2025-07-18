@@ -45,10 +45,10 @@
   },
   "exams": {
     "title": "Exámenes",
-          "description": "Gestiona y crea exámenes para tus estudiantes.",
-      "create": "Crear Examen",
-      "createWithAI": "Crear Examen con IA",
-      "createNewDesc": "Diseña un nuevo examen para tus estudiantes",
+    "description": "Gestiona y crea exámenes para tus estudiantes.",
+    "create": "Crear Examen",
+    "createWithAI": "Crear Examen con IA",
+    "createNewDesc": "Diseña un nuevo examen para tus estudiantes",
     "import": "Importar Examen",
     "edit": "Editar Examen",
     "actions": {
@@ -228,8 +228,6 @@
     "assign": {
       "title": "Asignar Examen",
       "description": "Asigna este examen a grupos de estudiantes",
-      "title": "Asignar Grupos",
-      "description": "Selecciona los grupos a los que se aplicará este examen",
       "backToExams": "Volver a Exámenes",
       "selectGroup": "Grupos Disponibles",
       "selectGroupDescription": "Marca los grupos a los que deseas asignar este examen",
@@ -311,21 +309,6 @@
         "examNotFound": "No se encontró el examen solicitado.",
         "unauthorized": "No autorizado"
       }
-    },
-    "export": {
-      "title": "Exportar Examen",
-      "description": "Exporta el examen en diferentes formatos",
-      "formats": {
-        "pdf": "PDF",
-        "excel": "Excel",
-        "csv": "CSV"
-      },
-      "includeAnswers": "Incluir respuestas",
-      "includeResults": "Incluir resultados",
-      "export": "Exportar",
-      "exporting": "Exportando...",
-      "success": "Examen exportado exitosamente",
-      "error": "Error al exportar el examen"
     },
     "results": {
       "title": "Resultados",
@@ -516,138 +499,6 @@
     },
     "export": {
       "title": "Exportar Formatos",
-      "examNotFound": "No se encontró el examen solicitado.",
-      "backToExams": "Volver a Exámenes",
-      "toast": {
-        "success": "Éxito",
-        "error": "Error",
-        "errorFetchingExam": "No se pudo cargar la información del examen",
-        "questionsGenerated": "El formato de preguntas ha sido generado",
-        "errorGeneratingFormat": "No se pudo generar el formato"
-      },
-      "actions": {
-        "back": "Volver",
-        "downloadPDF": "Descargar PDF",
-        "preview": "Vista Previa",
-        "generateAnswerSheets": "Generar Hojas de Respuesta"
-      },
-      "formats": {
-        "title": "Formatos Disponibles",
-        "description": "Selecciona el tipo de formato que deseas generar",
-        "questions": {
-          "title": "Hoja de Preguntas",
-          "description": "Formato con las preguntas del examen para entregar a los estudiantes"
-        },
-        "answers": {
-          "title": "Hojas de Respuesta",
-          "description": "Formatos personalizados para cada estudiante con código QR y marcas de alineación"
-        }
-      },
-      "configuration": {
-        "title": "Configuración de Exportación",
-        "description": "Selecciona el grupo y el tamaño de papel para exportar",
-        "group": "Grupo",
-        "paperSize": "Tamaño de Papel",
-        "letter": "Carta (Letter)",
-        "a4": "A4",
-        "legal": "Legal",
-        "noGroupsAssigned": "No hay grupos asignados a este examen.",
-        "assignGroups": "Asignar grupos"
-      }
-    },
-    "export": {
-      "title": "Exportar Formatos",
-      "description": "Selecciona el tipo de formato que deseas generar",
-      "backToExams": "Volver a Exámenes",
-      "notFound": "No se encontró el examen solicitado.",
-      "preview": "Vista Previa",
-      "downloadPDF": "Descargar PDF",
-      "back": "Volver",
-      "availableFormats": "Formatos Disponibles",
-      "questionSheet": "Hoja de Preguntas",
-      "questionSheetDesc": "Formato con las preguntas del examen para entregar a los estudiantes",
-      "answerSheets": "Hojas de Respuesta",
-      "answerSheetsDesc": "Formatos personalizados para cada estudiante con código QR y marcas de alineación",
-      "generateAnswerSheets": "Generar Hojas de Respuesta",
-      "group": "Grupo",
-      "noGroupsAssigned": "No hay grupos asignados a este examen.",
-      "assignGroups": "Asignar grupos",
-      "paperSize": "Tamaño de Papel",
-      "letter": "Carta (Letter)",
-      "a4": "A4",
-      "legal": "Legal",
-      "success": "El formato de preguntas ha sido generado",
-      "error": "No se pudo generar el formato"
-    },
-    "linkGradeComponent": {
-      "title": "Vincular Examen a Componentes de Calificación",
-      "loading": "Cargando componentes de calificación...",
-      "back": "Volver",
-      "backToExams": "Volver a Exámenes",
-      "noGroupsAssigned": "No hay grupos asignados",
-      "noGroupsAssignedDesc": "Este examen no tiene grupos asignados. Primero debes asignar el examen a uno o más grupos.",
-      "assignGroups": "Asignar Grupos",
-      "noGradingComponents": "No hay componentes de calificación",
-      "noGradingComponentsDesc": "No se encontraron componentes de calificación para los grupos asignados a este examen. Primero debes crear un esquema de calificación con periodos y componentes.",
-      "goToGradingSchemes": "Ir a Esquemas de Calificación",
-      "group": "Grupo:",
-      "scheme": "Esquema:",
-      "period": "Periodo:",
-      "cancel": "Cancelar",
-      "save": "Guardar Vinculaciones",
-      "saving": "Guardando...",
-      "success": "Vinculaciones actualizadas correctamente",
-      "error": "Error al guardar las vinculaciones",
-      "loadError": "Error al cargar componentes de calificación",
-      "validation": {
-        "selectAtLeastOne": "Debes seleccionar al menos un componente de calificación"
-      }
-    },
-    "import": {
-      "title": "Importar Examen",
-      "description": "Sube un archivo PDF, DOC o DOCX con preguntas de examen para procesarlo automáticamente",
-      "stages": {
-        "analyzing": "Analizando documento...",
-        "extracting": "Extrayendo preguntas con IA...",
-        "identifying": "Identificando opciones de respuesta...",
-        "processing": "Procesando formato final..."
-      },
-      "tips": {
-        "validateAnswers": "Asegúrate de validar antes de guardar el examen que las respuestas correctas que fueron marcadas por la IA son las correctas.",
-        "highlightAnswers": "Preferiblemente usa un PDF con las respuestas correctas resaltadas de un color brillante (ej. verde fosforescente) o pon un asterisco (*) al final de la respuesta correcta.",
-        "clearFormat": "Para mejores resultados, asegúrate que tu documento tenga un formato claro con preguntas numeradas.",
-        "labeledOptions": "Las preguntas con opciones claramente etiquetadas (A, B, C, D) son más fáciles de procesar.",
-        "goodContrast": "Se obtienen mejores resultados con documentos que tienen un buen contraste y texto nítido.",
-        "uniformPattern": "El sistema puede reconocer varios formatos, pero es ideal si todas las preguntas siguen un patrón uniforme."
-      },
-      "upload": {
-        "dragActive": "Suelta el archivo aquí...",
-        "processing": "Procesando archivo...",
-        "dragDrop": "Arrastra un archivo aquí o haz clic para seleccionar",
-        "supportedFiles": "Archivos soportados: PDF, DOC, DOCX (máx. 10MB)",
-        "estimatedTime": "Tiempo estimado: aproximadamente {seconds} segundos restantes"
-      },
-      "errors": {
-        "processingFile": "Error al procesar el archivo",
-        "unknown": "Error desconocido"
-      },
-      "success": {
-        "examProcessed": "Examen procesado exitosamente: {count} preguntas encontradas",
-        "examProcessedTitle": "Examen Procesado",
-        "questionsCount": "{count} preguntas",
-        "questionsDetected": "Se han detectado las siguientes preguntas:",
-        "optionsLabel": "Opciones",
-        "correctAnswerLabel": "Respuesta correcta",
-        "notDetected": "No detectada",
-        "moreQuestions": "... y {count} preguntas más"
-      },
-      "actions": {
-        "cancel": "Cancelar",
-        "import": "Importar Examen"
-      }
-    },
-    "export": {
-      "title": "Exportar Formatos",
       "availableFormats": "Formatos Disponibles",
       "description": "Descarga diferentes formatos de tu examen para impresión y distribución",
       "questionSheet": "Hoja de Preguntas",
@@ -699,6 +550,199 @@
       "validation": {
         "selectAtLeastOne": "Debes seleccionar al menos un componente de calificación"
       }
+    },
+    "import": {
+      "title": "Importar Examen",
+      "description": "Sube un archivo PDF, DOC o DOCX con preguntas de examen para procesarlo automáticamente",
+      "stages": {
+        "analyzing": "Analizando documento...",
+        "extracting": "Extrayendo preguntas con IA...",
+        "identifying": "Identificando opciones de respuesta...",
+        "processing": "Procesando formato final..."
+      },
+      "tips": {
+        "validateAnswers": "Asegúrate de validar antes de guardar el examen que las respuestas correctas que fueron marcadas por la IA son las correctas.",
+        "highlightAnswers": "Preferiblemente usa un PDF con las respuestas correctas resaltadas de un color brillante (ej. verde fosforescente) o pon un asterisco (*) al final de la respuesta correcta.",
+        "clearFormat": "Para mejores resultados, asegúrate que tu documento tenga un formato claro con preguntas numeradas.",
+        "labeledOptions": "Las preguntas con opciones claramente etiquetadas (A, B, C, D) son más fáciles de procesar.",
+        "goodContrast": "Se obtienen mejores resultados con documentos que tienen un buen contraste y texto nítido.",
+        "uniformPattern": "El sistema puede reconocer varios formatos, pero es ideal si todas las preguntas siguen un patrón uniforme."
+      },
+      "upload": {
+        "dragActive": "Suelta el archivo aquí...",
+        "processing": "Procesando archivo...",
+        "dragDrop": "Arrastra un archivo aquí o haz clic para seleccionar",
+        "supportedFiles": "Archivos soportados: PDF, DOC, DOCX (máx. 10MB)",
+        "estimatedTime": "Tiempo estimado: aproximadamente {seconds} segundos restantes"
+      },
+      "errors": {
+        "processingFile": "Error al procesar el archivo",
+        "unknown": "Error desconocido"
+      },
+      "success": {
+        "examProcessed": "Examen procesado exitosamente: {count} preguntas encontradas",
+        "examProcessedTitle": "Examen Procesado",
+        "questionsCount": "{count} preguntas",
+        "questionsDetected": "Se han detectado las siguientes preguntas:",
+        "optionsLabel": "Opciones",
+        "correctAnswerLabel": "Respuesta correcta",
+        "notDetected": "No detectada",
+        "moreQuestions": "... y {count} preguntas más"
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "import": "Importar Examen"
+      }
+    }
+  },
+  "entities": {
+    "title": "Instituciones Educativas",
+    "description": "Gestiona tus instituciones educativas",
+    "emptyDescription": "Debes crear al menos una institución educativa antes de poder crear materias",
+    "newEntity": "Nueva Institución",
+    "addFirstEntity": "Añadir Primera Institución",
+    "yourEntities": "Tus Instituciones Educativas",
+    "entitiesDescription": "Instituciones donde impartes clases",
+    "searchPlaceholder": "Buscar institución...",
+    "noEntitiesMessage": "Aún no tienes instituciones educativas registradas. Debes añadir al menos una para poder crear materias y exámenes.",
+    "noResultsMessage": "No se encontraron instituciones educativas",
+    "form": {
+      "addTitle": "Añadir Institución Educativa",
+      "addDescription": "Ingresa el nombre y tipo de la institución donde impartes clases",
+      "nameLabel": "Nombre de la Institución *",
+      "namePlaceholder": "Ej. Universidad Nacional, Colegio San José",
+      "typeLabel": "Tipo de Institución",
+      "typePlaceholder": "Selecciona un tipo de institución",
+      "typeUniversity": "Universidad",
+      "typeInstitute": "Instituto",
+      "typeSchool": "Colegio",
+      "cancel": "Cancelar",
+      "creating": "Creando...",
+      "addButton": "Añadir Institución"
+    },
+    "table": {
+      "name": "Nombre",
+      "type": "Tipo",
+      "notSpecified": "No especificado"
+    },
+    "toast": {
+      "successTitle": "¡Éxito!",
+      "successDescription": "Entidad educativa creada correctamente",
+      "errorCreating": "al crear la entidad educativa",
+      "errorLoading": "al cargar instituciones educativas",
+      "loginRequired": "Debes iniciar sesión para crear una entidad educativa",
+      "creationError": "Error al crear la entidad educativa"
+    }
+  },
+  "entidades": {
+    "title": "Entidades Educativas",
+    "description": "Administra las instituciones educativas con las que trabajas",
+    "newEntity": "Nueva entidad",
+    "addEntity": "Agregar entidad",
+    "noEntitiesMessage": "No hay entidades educativas registradas.",
+    "form": {
+      "newTitle": "Nueva entidad educativa",
+      "editTitle": "Editar entidad",
+      "newDescription": "Ingresa los datos de la nueva entidad educativa.",
+      "editDescription": "Actualiza la información de la entidad educativa.",
+      "nameLabel": "Nombre*",
+      "typeLabel": "Tipo de institución",
+      "cityLabel": "Ciudad",
+      "cityPlaceholder": "Ciudad",
+      "countryLabel": "País",
+      "countryPlaceholder": "País",
+      "addressLabel": "Dirección",
+      "addressPlaceholder": "Dirección física de la entidad",
+      "phoneLabel": "Teléfono",
+      "phonePlaceholder": "Número de contacto",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "correo@ejemplo.com",
+      "websiteLabel": "Sitio web",
+      "websitePlaceholder": "https://ejemplo.com",
+      "cancel": "Cancelar",
+      "create": "Crear",
+      "update": "Actualizar",
+      "nameError": "El nombre debe tener al menos 2 caracteres",
+      "emailError": "Ingrese un correo electrónico válido",
+      "websiteError": "Ingrese una URL válida"
+    },
+    "card": {
+      "location": "Ubicación:",
+      "address": "Dirección:",
+      "phone": "Teléfono:",
+      "email": "Correo:",
+      "website": "Web:"
+    },
+    "deleteDialog": {
+      "title": "Confirmar eliminación",
+      "description": "¿Estás seguro de que deseas eliminar esta entidad educativa? Esta acción no se puede deshacer.",
+      "cancel": "Cancelar",
+      "delete": "Eliminar"
+    },
+    "toast": {
+      "createSuccess": "Entidad educativa creada con éxito",
+      "updateSuccess": "Entidad educativa actualizada con éxito",
+      "deleteSuccess": "Entidad educativa eliminada con éxito",
+      "createError": "Error al crear la entidad educativa",
+      "updateError": "Error al actualizar la entidad educativa",
+      "deleteError": "Error al eliminar la entidad educativa"
+    }
+  },
+  "subjects": {
+    "title": "Materias",
+    "description": "Administra las materias que impartes",
+    "addSubject": "Agregar materia",
+    "noSubjectsMessage": "No hay materias registradas.",
+    "toast": {
+      "createTitle": "Materia creada",
+      "createDescription": "La materia ha sido creada correctamente.",
+      "updateTitle": "Materia actualizada",
+      "updateDescription": "La materia ha sido actualizada correctamente.",
+      "deleteTitle": "Materia eliminada",
+      "deleteDescription": "La materia ha sido eliminada correctamente.",
+      "saveError": "al guardar materia",
+      "deleteError": "al eliminar materia"
+    },
+    "form": {
+      "newSubject": "Nueva materia",
+      "editTitle": "Editar materia",
+      "newTitle": "Nueva materia",
+      "newDescription": "Ingresa los datos de la nueva materia.",
+      "editDescription": "Actualiza la información de la materia.",
+      "nameLabel": "Nombre*",
+      "nameError": "El nombre debe tener al menos 2 caracteres",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Breve descripción de la materia",
+      "institutionLabel": "Institución educativa",
+      "institutionPlaceholder": "Selecciona una institución",
+      "institutionNone": "Ninguna",
+      "institutionNote": "Si no asocias la materia con una institución, se considerará como privada.",
+      "cancel": "Cancelar",
+      "create": "Crear",
+      "update": "Actualizar"
+    },
+    "deleteModal": {
+      "title": "¡ADVERTENCIA! Eliminación Permanente",
+      "warningMessage": "Está a punto de eliminar la materia",
+      "selected": "seleccionada",
+      "irreversibleAction": "Esta acción es",
+      "irreversible": "IRREVERSIBLE",
+      "consequences": "y resultará en:",
+      "deleteGroups": "Eliminación de todos los",
+      "groups": "grupos",
+      "associated": "asociados.",
+      "deleteExams": "Eliminación de todos los",
+      "exams": "exámenes",
+      "createdFor": "creados para esta materia.",
+      "deleteResults": "Eliminación de todos los",
+      "resultsAndGrades": "resultados de exámenes y calificaciones",
+      "linked": "vinculadas.",
+      "confirmationInstruction": "Para confirmar esta acción y proceder con la eliminación, por favor escriba el nombre exacto de la materia en el campo de abajo.",
+      "typeLabel": "Escriba",
+      "toConfirm": "para confirmar:",
+      "placeholder": "Nombre exacto de la materia",
+      "cancel": "Cancelar",
+      "confirmDelete": "Sí, eliminar esta materia y sus datos"
     }
   },
   "main": {

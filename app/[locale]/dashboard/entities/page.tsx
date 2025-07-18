@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +34,7 @@ interface ApiError extends Error {
 
 export default function EntitiesPage() {
   const router = useRouter();
+  const t = useTranslations('dashboard.entities');
   const [entities, setEntities] = useState<EducationalEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -101,7 +103,7 @@ export default function EntitiesPage() {
       const entitiesList = data.map((item: ProfesorEntidadRelation) => item.entidades_educativas);
       setEntities(entitiesList || []);
     } catch (error) {
-      handleSupabaseError("al cargar instituciones educativas", error);
+      handleSupabaseError(t('toast.errorLoading'), error);
     } finally {
       setLoading(false);
     }
@@ -126,7 +128,7 @@ export default function EntitiesPage() {
       } = await supabase.auth.getSession();
 
       if (!session?.user) {
-        throw new Error('Debes iniciar sesión para crear una entidad educativa');
+        throw new Error(t('toast.loginRequired'));
       }
 
       const response = await fetch('/api/entities', {
@@ -141,15 +143,15 @@ export default function EntitiesPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        const apiError = new Error(result.error || 'Error al crear la entidad educativa');
+        const apiError = new Error(result.error || t('toast.creationError'));
         (apiError as ApiError).status = response.status;
         (apiError as ApiError).details = result.details;
         throw apiError;
       }
 
       toast({
-        title: '¡Éxito!',
-        description: 'Entidad educativa creada correctamente',
+        title: t('toast.successTitle'),
+        description: t('toast.successDescription'),
         variant: 'default',
       });
 
@@ -162,7 +164,7 @@ export default function EntitiesPage() {
 
       fetchEntities();
     } catch (error) {
-      handleSupabaseError("al crear la entidad educativa", error);
+      handleSupabaseError(t('toast.errorCreating'), error);
     } finally {
       setIsSubmitting(false);
     }
@@ -177,63 +179,63 @@ export default function EntitiesPage() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Instituciones Educativas</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
             {entities.length === 0 
-              ? "Debes crear al menos una institución educativa antes de poder crear materias" 
-              : "Gestiona tus instituciones educativas"}
+              ? t('emptyDescription')
+              : t('description')}
           </p>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="mr-2 h-4 w-4" /> Nueva Institución
+              <Plus className="mr-2 h-4 w-4" /> {t('newEntity')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px] bg-[#FAFAF4] dark:bg-[#171717]">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle>Añadir Institución Educativa</DialogTitle>
+                <DialogTitle>{t('form.addTitle')}</DialogTitle>
                 <DialogDescription>
-                  Ingresa el nombre y tipo de la institución donde impartes clases
+                  {t('form.addDescription')}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nombre">Nombre de la Institución *</Label>
+                  <Label htmlFor="nombre">{t('form.nameLabel')}</Label>
                   <Input
                     id="nombre"
                     name="nombre"
                     value={formData.nombre}
                     onChange={handleChange}
-                    placeholder="Ej. Universidad Nacional, Colegio San José"
+                    placeholder={t('form.namePlaceholder')}
                     className="bg-white dark:bg-[#1E1E1F]"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="tipo">Tipo de Institución</Label>
+                  <Label htmlFor="tipo">{t('form.typeLabel')}</Label>
                   <Select
                     value={formData.tipo}
                     onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo: value }))}
                   >
                     <SelectTrigger id="tipo" className="bg-white dark:bg-[#1E1E1F]">
-                      <SelectValue placeholder="Selecciona un tipo de institución" />
+                      <SelectValue placeholder={t('form.typePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Universidad">Universidad</SelectItem>
-                      <SelectItem value="Instituto">Instituto</SelectItem>
-                      <SelectItem value="Colegio">Colegio</SelectItem>
+                      <SelectItem value="Universidad">{t('form.typeUniversity')}</SelectItem>
+                      <SelectItem value="Instituto">{t('form.typeInstitute')}</SelectItem>
+                      <SelectItem value="Colegio">{t('form.typeSchool')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                  Cancelar
+                  {t('form.cancel')}
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Creando..." : "Añadir Institución"}
+                  {isSubmitting ? t('form.creating') : t('form.addButton')}
                 </Button>
               </DialogFooter>
             </form>
@@ -245,23 +247,23 @@ export default function EntitiesPage() {
         <Card className="mt-4">
           <CardContent className="pt-6 text-center">
             <p className="text-muted-foreground mb-4">
-              Aún no tienes instituciones educativas registradas. Debes añadir al menos una para poder crear materias y exámenes.
+              {t('noEntitiesMessage')}
             </p>
             <Button onClick={() => setIsOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Añadir Primera Institución
+              <Plus className="mr-2 h-4 w-4" /> {t('addFirstEntity')}
             </Button>
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Tus Instituciones Educativas</CardTitle>
+            <CardTitle>{t('yourEntities')}</CardTitle>
             <CardDescription>
-              Instituciones donde impartes clases
+              {t('entitiesDescription')}
             </CardDescription>
             <div className="mt-4">
               <Input
-                placeholder="Buscar institución..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="max-w-sm"
@@ -275,22 +277,22 @@ export default function EntitiesPage() {
               </div>
             ) : filteredEntities.length === 0 ? (
               <div className="py-8 text-center">
-                <p className="text-muted-foreground">No se encontraron instituciones educativas</p>
+                <p className="text-muted-foreground">{t('noResultsMessage')}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nombre</TableHead>
-                      <TableHead>Tipo</TableHead>
+                      <TableHead>{t('table.name')}</TableHead>
+                      <TableHead>{t('table.type')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredEntities.map((entity) => (
                       <TableRow key={entity.id}>
                         <TableCell className="font-medium">{entity.nombre}</TableCell>
-                        <TableCell>{entity.tipo || "No especificado"}</TableCell>
+                        <TableCell>{entity.tipo || t('table.notSpecified')}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

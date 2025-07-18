@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,6 +27,7 @@ export function DeleteConfirmationModal({
   onConfirm,
   onCancel,
 }: DeleteConfirmationModalProps) {
+  const t = useTranslations('dashboard.subjects.deleteModal');
   const [typedSubjectName, setTypedSubjectName] = useState<string>("");
 
   const handleCancel = () => {
@@ -51,43 +53,40 @@ export function DeleteConfirmationModal({
         <DialogHeader>
           <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold flex items-center">
             <TriangleAlert className="h-7 w-7 mr-2 text-red-600 dark:text-red-400" />
-            ¡ADVERTENCIA! Eliminación Permanente
+            {t('title')}
           </DialogTitle>
         </DialogHeader>
         <div className="text-gray-600 dark:text-white">
           <p>
-            Está a punto de eliminar la materia{" "}
+            {t('warningMessage')}{" "}
             <span className="font-semibold">
-              {subjectName || "seleccionada"}
+              {subjectName || t('selected')}
             </span>
             .
           </p>
           <p>
-            Esta acción es{" "}
-            <span className="font-semibold uppercase">IRREVERSIBLE</span> y
-            resultará en:
+            {t('irreversibleAction')}{" "}
+            <span className="font-semibold uppercase">{t('irreversible')}</span> {t('consequences')}
           </p>
           <ul className="list-disc list-inside ml-4 text-sm">
             <li>
-              Eliminación de todos los{" "}
-              <span className="font-semibold">grupos</span> asociados.
+              {t('deleteGroups')}{" "}
+              <span className="font-semibold">{t('groups')}</span> {t('associated')}
             </li>
             <li>
-              Eliminación de todos los{" "}
-              <span className="font-semibold">exámenes</span> creados para esta
-              materia.
+              {t('deleteExams')}{" "}
+              <span className="font-semibold">{t('exams')}</span> {t('createdFor')}
             </li>
             <li>
-              Eliminación de todos los{" "}
+              {t('deleteResults')}{" "}
               <span className="font-semibold">
-                resultados de exámenes y calificaciones
+                {t('resultsAndGrades')}
               </span>{" "}
-              vinculadas.
+              {t('linked')}
             </li>
           </ul>
           <p className="mt-3">
-            Para confirmar esta acción y proceder con la eliminación, por favor
-            escriba el nombre exacto de la materia en el campo de abajo.
+            {t('confirmationInstruction')}
           </p>
         </div>
         <div className="grid gap-3 py-3">
@@ -95,24 +94,24 @@ export function DeleteConfirmationModal({
             htmlFor="subject-confirm-name"
             className="text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            Escriba &quot;
+            {t('typeLabel')} &quot;
             <span className="font-semibold text-red-600 dark:text-red-400">
               {subjectName}
             </span>
-            &quot; para confirmar:
+            &quot; {t('toConfirm')}
           </Label>
           <Input
             id="subject-confirm-name"
             value={typedSubjectName}
             onChange={(e) => setTypedSubjectName(e.target.value)}
-            placeholder="Nombre exacto de la materia"
+            placeholder={t('placeholder')}
             className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-red-500 focus:ring-red-500"
             autoFocus
           />
         </div>
         <DialogFooter className="mt-4">
           <Button variant="outline" onClick={handleCancel}>
-            Cancelar
+            {t('cancel')}
           </Button>
           <Button
             variant="destructive"
@@ -120,7 +119,7 @@ export function DeleteConfirmationModal({
             disabled={typedSubjectName !== subjectName}
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Sí, eliminar esta materia y sus datos
+            {t('confirmDelete')}
           </Button>
         </DialogFooter>
       </DialogContent>

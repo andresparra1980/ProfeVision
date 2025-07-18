@@ -45,10 +45,10 @@
   },
   "exams": {
     "title": "Exams",
-          "description": "Manage and create exams for your students.",
-      "create": "Create Exam",
-      "createWithAI": "Create Exam with AI",
-      "createNewDesc": "Design a new exam for your students",
+    "description": "Manage and create exams for your students.",
+    "create": "Create Exam",
+    "createWithAI": "Create Exam with AI",
+    "createNewDesc": "Design a new exam for your students",
     "import": "Import Exam",
     "edit": "Edit Exam",
     "actions": {
@@ -228,8 +228,6 @@
     "assign": {
       "title": "Assign Exam",
       "description": "Assign this exam to student groups",
-      "title": "Assign Groups",
-      "description": "Select the groups to which this exam will be applied",
       "backToExams": "Back to Exams",
       "selectGroup": "Available Groups",
       "selectGroupDescription": "Mark the groups to which you want to assign this exam",
@@ -311,21 +309,6 @@
         "examNotFound": "Requested exam not found.",
         "unauthorized": "Unauthorized"
       }
-    },
-    "export": {
-      "title": "Export Exam",
-      "description": "Export exam in different formats",
-      "formats": {
-        "pdf": "PDF",
-        "excel": "Excel",
-        "csv": "CSV"
-      },
-      "includeAnswers": "Include answers",
-      "includeResults": "Include results",
-      "export": "Export",
-      "exporting": "Exporting...",
-      "success": "Exam exported successfully",
-      "error": "Error exporting exam"
     },
     "results": {
       "title": "Results",
@@ -516,138 +499,6 @@
     },
     "export": {
       "title": "Export Formats",
-      "examNotFound": "The requested exam was not found.",
-      "backToExams": "Back to Exams",
-      "toast": {
-        "success": "Success",
-        "error": "Error",
-        "errorFetchingExam": "Could not load exam information",
-        "questionsGenerated": "Questions format has been generated",
-        "errorGeneratingFormat": "Could not generate format"
-      },
-      "actions": {
-        "back": "Back",
-        "downloadPDF": "Download PDF",
-        "preview": "Preview",
-        "generateAnswerSheets": "Generate Answer Sheets"
-      },
-      "formats": {
-        "title": "Available Formats",
-        "description": "Select the type of format you want to generate",
-        "questions": {
-          "title": "Question Sheet",
-          "description": "Format with exam questions to distribute to students"
-        },
-        "answers": {
-          "title": "Answer Sheets",
-          "description": "Custom formats for each student with QR code and alignment marks"
-        }
-      },
-      "configuration": {
-        "title": "Export Configuration",
-        "description": "Select the group and paper size for export",
-        "group": "Group",
-        "paperSize": "Paper Size",
-        "letter": "Letter",
-        "a4": "A4",
-        "legal": "Legal",
-        "noGroupsAssigned": "No groups assigned to this exam.",
-        "assignGroups": "Assign groups"
-      }
-    },
-    "export": {
-      "title": "Export Formats",
-      "description": "Select the type of format you want to generate",
-      "backToExams": "Back to Exams",
-      "notFound": "The requested exam was not found.",
-      "preview": "Preview",
-      "downloadPDF": "Download PDF",
-      "back": "Back",
-      "availableFormats": "Available Formats",
-      "questionSheet": "Question Sheet",
-      "questionSheetDesc": "Format with exam questions to deliver to students",
-      "answerSheets": "Answer Sheets",
-      "answerSheetsDesc": "Custom formats for each student with QR code and alignment marks",
-      "generateAnswerSheets": "Generate Answer Sheets",
-      "group": "Group",
-      "noGroupsAssigned": "No groups assigned to this exam.",
-      "assignGroups": "Assign groups",
-      "paperSize": "Paper Size",
-      "letter": "Letter",
-      "a4": "A4",
-      "legal": "Legal",
-      "success": "Question format has been generated",
-      "error": "Could not generate format"
-    },
-    "linkGradeComponent": {
-      "title": "Link Exam to Grade Components",
-      "loading": "Loading grade components...",
-      "back": "Back",
-      "backToExams": "Back to Exams",
-      "noGroupsAssigned": "No groups assigned",
-      "noGroupsAssignedDesc": "This exam has no assigned groups. You must first assign the exam to one or more groups.",
-      "assignGroups": "Assign Groups",
-      "noGradingComponents": "No grade components",
-      "noGradingComponentsDesc": "No grade components were found for the groups assigned to this exam. You must first create a grading scheme with periods and components.",
-      "goToGradingSchemes": "Go to Grading Schemes",
-      "group": "Group:",
-      "scheme": "Scheme:",
-      "period": "Period:",
-      "cancel": "Cancel",
-      "save": "Save Links",
-      "saving": "Saving...",
-      "success": "Links updated successfully",
-      "error": "Error saving links",
-      "loadError": "Error loading grade components",
-      "validation": {
-        "selectAtLeastOne": "You must select at least one grade component"
-      }
-    },
-    "import": {
-      "title": "Import Exam",
-      "description": "Upload a PDF, DOC or DOCX file with exam questions to process it automatically",
-      "stages": {
-        "analyzing": "Analyzing document...",
-        "extracting": "Extracting questions with AI...",
-        "identifying": "Identifying answer options...",
-        "processing": "Processing final format..."
-      },
-      "tips": {
-        "validateAnswers": "Make sure to validate before saving the exam that the correct answers marked by the AI are correct.",
-        "highlightAnswers": "Preferably use a PDF with correct answers highlighted in a bright color (e.g., fluorescent green) or put an asterisk (*) at the end of the correct answer.",
-        "clearFormat": "For best results, make sure your document has a clear format with numbered questions.",
-        "labeledOptions": "Questions with clearly labeled options (A, B, C, D) are easier to process.",
-        "goodContrast": "Better results are obtained with documents that have good contrast and clear text.",
-        "uniformPattern": "The system can recognize various formats, but it's ideal if all questions follow a uniform pattern."
-      },
-      "upload": {
-        "dragActive": "Drop the file here...",
-        "processing": "Processing file...",
-        "dragDrop": "Drag a file here or click to select",
-        "supportedFiles": "Supported files: PDF, DOC, DOCX (max. 10MB)",
-        "estimatedTime": "Estimated time: approximately {seconds} seconds remaining"
-      },
-      "errors": {
-        "processingFile": "Error processing file",
-        "unknown": "Unknown error"
-      },
-      "success": {
-        "examProcessed": "Exam processed successfully: {count} questions found",
-        "examProcessedTitle": "Exam Processed",
-        "questionsCount": "{count} questions",
-        "questionsDetected": "The following questions have been detected:",
-        "optionsLabel": "Options",
-        "correctAnswerLabel": "Correct answer",
-        "notDetected": "Not detected",
-        "moreQuestions": "... and {count} more questions"
-      },
-      "actions": {
-        "cancel": "Cancel",
-        "import": "Import Exam"
-      }
-    },
-    "export": {
-      "title": "Export Formats",
       "availableFormats": "Available Formats",
       "description": "Download different formats of your exam for printing and distribution",
       "questionSheet": "Question Sheet",
@@ -699,6 +550,199 @@
       "validation": {
         "selectAtLeastOne": "You must select at least one grade component"
       }
+    },
+    "import": {
+      "title": "Import Exam",
+      "description": "Upload a PDF, DOC or DOCX file with exam questions to process it automatically",
+      "stages": {
+        "analyzing": "Analyzing document...",
+        "extracting": "Extracting questions with AI...",
+        "identifying": "Identifying answer options...",
+        "processing": "Processing final format..."
+      },
+      "tips": {
+        "validateAnswers": "Make sure to validate before saving the exam that the correct answers marked by the AI are correct.",
+        "highlightAnswers": "Preferably use a PDF with correct answers highlighted in a bright color (e.g., fluorescent green) or put an asterisk (*) at the end of the correct answer.",
+        "clearFormat": "For best results, make sure your document has a clear format with numbered questions.",
+        "labeledOptions": "Questions with clearly labeled options (A, B, C, D) are easier to process.",
+        "goodContrast": "Better results are obtained with documents that have good contrast and clear text.",
+        "uniformPattern": "The system can recognize various formats, but it's ideal if all questions follow a uniform pattern."
+      },
+      "upload": {
+        "dragActive": "Drop the file here...",
+        "processing": "Processing file...",
+        "dragDrop": "Drag a file here or click to select",
+        "supportedFiles": "Supported files: PDF, DOC, DOCX (max. 10MB)",
+        "estimatedTime": "Estimated time: approximately {seconds} seconds remaining"
+      },
+      "errors": {
+        "processingFile": "Error processing file",
+        "unknown": "Unknown error"
+      },
+      "success": {
+        "examProcessed": "Exam processed successfully: {count} questions found",
+        "examProcessedTitle": "Exam Processed",
+        "questionsCount": "{count} questions",
+        "questionsDetected": "The following questions have been detected:",
+        "optionsLabel": "Options",
+        "correctAnswerLabel": "Correct answer",
+        "notDetected": "Not detected",
+        "moreQuestions": "... and {count} more questions"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "import": "Import Exam"
+      }
+    }
+  },
+  "entities": {
+    "title": "Educational Institutions",
+    "description": "Manage your educational institutions",
+    "emptyDescription": "You must create at least one educational institution before creating subjects",
+    "newEntity": "New Institution",
+    "addFirstEntity": "Add First Institution",
+    "yourEntities": "Your Educational Institutions",
+    "entitiesDescription": "Institutions where you teach classes",
+    "searchPlaceholder": "Search institution...",
+    "noEntitiesMessage": "You don't have any educational institutions registered yet. You must add at least one to be able to create subjects and exams.",
+    "noResultsMessage": "No educational institutions found",
+    "form": {
+      "addTitle": "Add Educational Institution",
+      "addDescription": "Enter the name and type of the institution where you teach classes",
+      "nameLabel": "Institution Name *",
+      "namePlaceholder": "e.g. National University, Saint Joseph College",
+      "typeLabel": "Institution Type",
+      "typePlaceholder": "Select an institution type",
+      "typeUniversity": "University",
+      "typeInstitute": "Institute",
+      "typeSchool": "School",
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "addButton": "Add Institution"
+    },
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "notSpecified": "Not specified"
+    },
+    "toast": {
+      "successTitle": "Success!",
+      "successDescription": "Educational institution created successfully",
+      "errorCreating": "creating educational institution",
+      "errorLoading": "loading educational institutions",
+      "loginRequired": "You must log in to create an educational institution",
+      "creationError": "Error creating educational institution"
+    }
+  },
+  "entidades": {
+    "title": "Educational Entities",
+    "description": "Manage the educational institutions you work with",
+    "newEntity": "New entity",
+    "addEntity": "Add entity",
+    "noEntitiesMessage": "No educational entities registered.",
+    "form": {
+      "newTitle": "New educational entity",
+      "editTitle": "Edit entity",
+      "newDescription": "Enter the details of the new educational entity.",
+      "editDescription": "Update the educational entity information.",
+      "nameLabel": "Name*",
+      "typeLabel": "Institution type",
+      "cityLabel": "City",
+      "cityPlaceholder": "City",
+      "countryLabel": "Country",
+      "countryPlaceholder": "Country",
+      "addressLabel": "Address",
+      "addressPlaceholder": "Physical address of the entity",
+      "phoneLabel": "Phone",
+      "phonePlaceholder": "Contact number",
+      "emailLabel": "Email",
+      "emailPlaceholder": "email@example.com",
+      "websiteLabel": "Website",
+      "websitePlaceholder": "https://example.com",
+      "cancel": "Cancel",
+      "create": "Create",
+      "update": "Update",
+      "nameError": "Name must be at least 2 characters",
+      "emailError": "Please enter a valid email address",
+      "websiteError": "Please enter a valid URL"
+    },
+    "card": {
+      "location": "Location:",
+      "address": "Address:",
+      "phone": "Phone:",
+      "email": "Email:",
+      "website": "Website:"
+    },
+    "deleteDialog": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete this educational entity? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "toast": {
+      "createSuccess": "Educational entity created successfully",
+      "updateSuccess": "Educational entity updated successfully",
+      "deleteSuccess": "Educational entity deleted successfully",
+      "createError": "Error creating educational entity",
+      "updateError": "Error updating educational entity",
+      "deleteError": "Error deleting educational entity"
+    }
+  },
+  "subjects": {
+    "title": "Subjects",
+    "description": "Manage the subjects you teach",
+    "addSubject": "Add subject",
+    "noSubjectsMessage": "No subjects registered.",
+    "toast": {
+      "createTitle": "Subject created",
+      "createDescription": "The subject has been created successfully.",
+      "updateTitle": "Subject updated",
+      "updateDescription": "The subject has been updated successfully.",
+      "deleteTitle": "Subject deleted",
+      "deleteDescription": "The subject has been deleted successfully.",
+      "saveError": "saving subject",
+      "deleteError": "deleting subject"
+    },
+    "form": {
+      "newSubject": "New subject",
+      "editTitle": "Edit subject",
+      "newTitle": "New subject",
+      "newDescription": "Enter the details of the new subject.",
+      "editDescription": "Update the subject information.",
+      "nameLabel": "Name*",
+      "nameError": "Name must be at least 2 characters",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Brief description of the subject",
+      "institutionLabel": "Educational institution",
+      "institutionPlaceholder": "Select an institution",
+      "institutionNone": "None",
+      "institutionNote": "If you don't associate the subject with an institution, it will be considered private.",
+      "cancel": "Cancel",
+      "create": "Create",
+      "update": "Update"
+    },
+    "deleteModal": {
+      "title": "WARNING! Permanent Deletion",
+      "warningMessage": "You are about to delete the subject",
+      "selected": "selected",
+      "irreversibleAction": "This action is",
+      "irreversible": "IRREVERSIBLE",
+      "consequences": "and will result in:",
+      "deleteGroups": "Deletion of all",
+      "groups": "groups",
+      "associated": "associated.",
+      "deleteExams": "Deletion of all",
+      "exams": "exams",
+      "createdFor": "created for this subject.",
+      "deleteResults": "Deletion of all",
+      "resultsAndGrades": "exam results and grades",
+      "linked": "linked.",
+      "confirmationInstruction": "To confirm this action and proceed with deletion, please type the exact name of the subject in the field below.",
+      "typeLabel": "Type",
+      "toConfirm": "to confirm:",
+      "placeholder": "Exact subject name",
+      "cancel": "Cancel",
+      "confirmDelete": "Yes, delete this subject and its data"
     }
   },
   "main": {

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
@@ -17,6 +19,8 @@ type Materia = Database["public"]["Tables"]["materias"]["Row"];
 type EntidadEducativa = Database["public"]["Tables"]["entidades_educativas"]["Row"];
 
 export default function SubjectsPage() {
+  const router = useRouter();
+  const t = useTranslations('dashboard.subjects');
   const [materias, setMaterias] = useState<Materia[]>([]);
   const [entidades, setEntidades] = useState<EntidadEducativa[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,8 +150,8 @@ export default function SubjectsPage() {
 
         if (error) throw error;
         toast({
-          title: "Materia creada",
-          description: "La materia ha sido creada correctamente.",
+          title: t('toast.createTitle'),
+          description: t('toast.createDescription'),
         });
       }
       
@@ -155,7 +159,7 @@ export default function SubjectsPage() {
       setEditingMateria(null);
       loadMaterias();
     } catch (error: unknown) {
-      handleSupabaseError('al guardar materia', error);
+      handleSupabaseError(t('toast.saveError'), error);
     }
   };
 
@@ -181,8 +185,8 @@ export default function SubjectsPage() {
       if (error) throw error;
       
       toast({
-        title: "Materia eliminada",
-        description: "La materia ha sido eliminada correctamente.",
+        title: t('toast.deleteTitle'),
+        description: t('toast.deleteDescription'),
       });
       
       loadMaterias();
@@ -208,9 +212,9 @@ export default function SubjectsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Materias</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Administra las materias que impartes
+            {t('description')}
           </p>
         </div>
         <SubjectFormModal
@@ -231,11 +235,11 @@ export default function SubjectsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-10">
             <p className="mb-4 text-center text-muted-foreground">
-              No hay materias registradas.
+              {t('noSubjectsMessage')}
             </p>
             <Button onClick={() => setOpenDialog(true)}>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Agregar materia
+              {t('addSubject')}
             </Button>
           </CardContent>
         </Card>

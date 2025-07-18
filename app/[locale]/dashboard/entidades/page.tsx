@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -16,21 +18,33 @@ import type { Database } from "@/lib/types/database";
 
 type EntidadEducativa = Database["public"]["Tables"]["entidades_educativas"]["Row"];
 
-const entidadSchema = z.object({
-  nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
-  descripcion: z.string().optional(),
-  direccion: z.string().optional(),
-  telefono: z.string().optional(),
-  email: z.string().email({ message: "Ingrese un correo electrónico válido" }).optional().or(z.literal("")),
-  website: z.string().url({ message: "Ingrese una URL válida" }).optional().or(z.literal("")),
-  tipo: z.string().default("Escolar"),
-  ciudad: z.string().optional(),
-  pais: z.string().optional(),
-});
-
-type EntidadFormValues = z.infer<typeof entidadSchema>;
+type EntidadFormValues = {
+  nombre: string;
+  descripcion?: string;
+  direccion?: string;
+  telefono?: string;
+  email?: string;
+  website?: string;
+  tipo: string;
+  ciudad?: string;
+  pais?: string;
+};
 
 export default function EntidadesPage() {
+  const router = useRouter();
+  const t = useTranslations('dashboard.entidades');
+  
+  const entidadSchema = z.object({
+    nombre: z.string().min(2, { message: t('form.nameError') }),
+    descripcion: z.string().optional(),
+    direccion: z.string().optional(),
+    telefono: z.string().optional(),
+    email: z.string().email({ message: t('form.emailError') }).optional().or(z.literal("")),
+    website: z.string().url({ message: t('form.websiteError') }).optional().or(z.literal("")),
+    tipo: z.string().default("Escolar"),
+    ciudad: z.string().optional(),
+    pais: z.string().optional(),
+  });
   const [entidades, setEntidades] = useState<EntidadEducativa[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
@@ -206,30 +220,30 @@ export default function EntidadesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Entidades Educativas</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Administra las instituciones educativas con las que trabajas
+            {t('description')}
           </p>
         </div>
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditingEntidad(null)}>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Nueva entidad
+              {t('newEntity')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[525px]">
             <DialogHeader>
-              <DialogTitle>{editingEntidad ? "Editar entidad" : "Nueva entidad educativa"}</DialogTitle>
+              <DialogTitle>{editingEntidad ? t('form.editTitle') : t('form.newTitle')}</DialogTitle>
               <DialogDescription>
                 {editingEntidad 
-                  ? "Actualiza la información de la entidad educativa." 
-                  : "Ingresa los datos de la nueva entidad educativa."}
+                  ? t('form.editDescription')
+                  : t('form.newDescription')}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="nombre">Nombre*</Label>
+                <Label htmlFor="nombre">{t('form.nameLabel')}</Label>
                 <Input
                   id="nombre"
                   {...form.register("nombre")}
@@ -240,7 +254,7 @@ export default function EntidadesPage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="tipo">Tipo de institución</Label>
+                <Label htmlFor="tipo">{t('form.typeLabel')}</Label>
                 <Input
                   id="tipo"
                   {...form.register("tipo")}
@@ -249,48 +263,48 @@ export default function EntidadesPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="ciudad">Ciudad</Label>
+                  <Label htmlFor="ciudad">{t('form.cityLabel')}</Label>
                   <Input
                     id="ciudad"
-                    placeholder="Ciudad"
+                    placeholder={t('form.cityPlaceholder')}
                     {...form.register("ciudad")}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="pais">País</Label>
+                  <Label htmlFor="pais">{t('form.countryLabel')}</Label>
                   <Input
                     id="pais"
-                    placeholder="País"
+                    placeholder={t('form.countryPlaceholder')}
                     {...form.register("pais")}
                   />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="direccion">Dirección</Label>
+                <Label htmlFor="direccion">{t('form.addressLabel')}</Label>
                 <Input
                   id="direccion"
-                  placeholder="Dirección física de la entidad"
+                  placeholder={t('form.addressPlaceholder')}
                   {...form.register("direccion")}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="telefono">Teléfono</Label>
+                <Label htmlFor="telefono">{t('form.phoneLabel')}</Label>
                 <Input
                   id="telefono"
-                  placeholder="Número de contacto"
+                  placeholder={t('form.phonePlaceholder')}
                   {...form.register("telefono")}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="email">{t('form.emailLabel')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="correo@ejemplo.com"
+                  placeholder={t('form.emailPlaceholder')}
                   {...form.register("email")}
                 />
                 {form.formState.errors.email && (
@@ -299,10 +313,10 @@ export default function EntidadesPage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="website">Sitio web</Label>
+                <Label htmlFor="website">{t('form.websiteLabel')}</Label>
                 <Input
                   id="website"
-                  placeholder="https://ejemplo.com"
+                  placeholder={t('form.websitePlaceholder')}
                   {...form.register("website")}
                 />
                 {form.formState.errors.website && (
@@ -319,10 +333,10 @@ export default function EntidadesPage() {
                     setEditingEntidad(null);
                   }}
                 >
-                  Cancelar
+                  {t('form.cancel')}
                 </Button>
                 <Button type="submit">
-                  {editingEntidad ? "Actualizar" : "Crear"}
+                  {editingEntidad ? t('form.update') : t('form.create')}
                 </Button>
               </DialogFooter>
             </form>
@@ -338,11 +352,11 @@ export default function EntidadesPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-10">
             <p className="mb-4 text-center text-muted-foreground">
-              No hay entidades educativas registradas.
+              {t('noEntitiesMessage')}
             </p>
             <Button onClick={() => setOpenDialog(true)}>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Agregar entidad
+              {t('addEntity')}
             </Button>
           </CardContent>
         </Card>
@@ -379,31 +393,31 @@ export default function EntidadesPage() {
                 <div className="space-y-1 text-sm">
                   {entidad.ciudad && entidad.pais && (
                     <div className="flex justify-between">
-                      <span className="font-medium">Ubicación:</span>
+                      <span className="font-medium">{t('card.location')}</span>
                       <span>{entidad.ciudad}, {entidad.pais}</span>
                     </div>
                   )}
                   {entidad.direccion && (
                     <div className="flex justify-between">
-                      <span className="font-medium">Dirección:</span>
+                      <span className="font-medium">{t('card.address')}</span>
                       <span>{entidad.direccion}</span>
                     </div>
                   )}
                   {entidad.telefono && (
                     <div className="flex justify-between">
-                      <span className="font-medium">Teléfono:</span>
+                      <span className="font-medium">{t('card.phone')}</span>
                       <span>{entidad.telefono}</span>
                     </div>
                   )}
                   {entidad.email && (
                     <div className="flex justify-between">
-                      <span className="font-medium">Correo:</span>
+                      <span className="font-medium">{t('card.email')}</span>
                       <span>{entidad.email}</span>
                     </div>
                   )}
                   {entidad.website && (
                     <div className="flex justify-between">
-                      <span className="font-medium">Web:</span>
+                      <span className="font-medium">{t('card.website')}</span>
                       <a 
                         href={entidad.website} 
                         target="_blank" 
@@ -425,17 +439,17 @@ export default function EntidadesPage() {
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Confirmar eliminación</DialogTitle>
+            <DialogTitle>{t('deleteDialog.title')}</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de que deseas eliminar esta entidad educativa? Esta acción no se puede deshacer.
+              {t('deleteDialog.description')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmDelete(false)}>
-              Cancelar
+              {t('deleteDialog.cancel')}
             </Button>
             <Button variant="destructive" onClick={confirmDeleteEntidad}>
-              Eliminar
+              {t('deleteDialog.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>
