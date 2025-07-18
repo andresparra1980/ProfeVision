@@ -1068,5 +1068,8 @@
         "noDataToImport": "No hay datos válidos para importar"
       }
     }
+  },
+  "developmentOverlay": {
+    "message": "Estadísticas en desarrollo - Pronto disponible"
   }
 }

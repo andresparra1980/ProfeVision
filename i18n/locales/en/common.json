@@ -1096,5 +1096,8 @@
         "noDataToImport": "No valid data to import"
       }
     }
+  },
+  "developmentOverlay": {
+    "message": "Statistics in development - Available soon"
   }
 }
