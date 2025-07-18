@@ -1133,5 +1133,43 @@
       },
       "noDataAvailable": "No hay datos disponibles"
     }
+  },
+  "settings": {
+    "title": "Configuración",
+    "description": "Administra tu perfil y ajustes de la plataforma",
+    "profile": {
+      "title": "Perfil de Profesor",
+      "description": "Actualiza tu información personal y de contacto",
+      "form": {
+        "firstName": "Nombres",
+        "lastName": "Apellidos",
+        "email": "Correo Electrónico",
+        "phone": "Teléfono",
+        "biography": "Biografía",
+        "emailNotChangeable": "El correo electrónico no se puede cambiar",
+        "saveChanges": "Guardar cambios",
+        "saving": "Guardando..."
+      }
+    },
+    "password": {
+      "title": "Cambiar Contraseña",
+      "description": "Actualiza tu contraseña para mantener tu cuenta segura",
+      "button": "Cambiar Contraseña"
+    },
+    "notifications": {
+      "title": "Preferencias de Notificaciones",
+      "description": "Configura cómo y cuándo recibir notificaciones",
+      "comingSoon": "Las preferencias de notificaciones estarán disponibles próximamente."
+    },
+    "messages": {
+      "profileUpdated": "Perfil actualizado",
+      "changesSaved": "Los cambios han sido guardados correctamente"
+    },
+    "errors": {
+      "title": "Error",
+      "fetchProfile": "No se pudo cargar la información del perfil",
+      "noSession": "No hay sesión activa",
+      "saveChanges": "No se pudieron guardar los cambios"
+    }
   }
 }

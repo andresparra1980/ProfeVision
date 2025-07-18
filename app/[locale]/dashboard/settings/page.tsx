@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 
 export default function SettingsPage() {
+  const t = useTranslations('dashboard.settings');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -51,8 +53,8 @@ export default function SettingsPage() {
     } catch (error) {
       console.error("Error fetching profile:", error);
       toast({
-        title: "Error",
-        description: "No se pudo cargar la información del perfil",
+        title: t('errors.title'),
+        description: t('errors.fetchProfile'),
         variant: "destructive",
       });
     } finally {
@@ -68,7 +70,7 @@ export default function SettingsPage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        throw new Error("No hay sesión activa");
+        throw new Error(t('errors.noSession'));
       }
 
       // Actualizar datos de autenticación
@@ -95,15 +97,15 @@ export default function SettingsPage() {
       if (updateError) throw updateError;
 
       toast({
-        title: "Perfil actualizado",
-        description: "Los cambios han sido guardados correctamente",
+        title: t('messages.profileUpdated'),
+        description: t('messages.changesSaved'),
       });
     } catch (error: unknown) {
       const err = error as { message?: string };
       console.error("Error updating profile:", err);
       toast({
-        title: "Error",
-        description: "No se pudieron guardar los cambios",
+        title: t('errors.title'),
+        description: t('errors.saveChanges'),
         variant: "destructive",
       });
     } finally {
@@ -114,23 +116,23 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Configuración</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
         <p className="text-muted-foreground">
-          Administra tu perfil y ajustes de la plataforma
+          {t('description')}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Perfil de Profesor</CardTitle>
+          <CardTitle>{t('profile.title')}</CardTitle>
           <CardDescription>
-            Actualiza tu información personal y de contacto
+            {t('profile.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="nombres">Nombres</Label>
+              <Label htmlFor="nombres">{t('profile.form.firstName')}</Label>
               <Input
                 id="nombres"
                 value={profileData.nombres}
@@ -142,7 +144,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="apellidos">Apellidos</Label>
+              <Label htmlFor="apellidos">{t('profile.form.lastName')}</Label>
               <Input
                 id="apellidos"
                 value={profileData.apellidos}
@@ -155,7 +157,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Correo Electrónico</Label>
+            <Label htmlFor="email">{t('profile.form.email')}</Label>
             <Input
               id="email"
               type="email"
@@ -163,12 +165,12 @@ export default function SettingsPage() {
               disabled
             />
             <p className="text-xs text-muted-foreground">
-              El correo electrónico no se puede cambiar
+              {t('profile.form.emailNotChangeable')}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Teléfono</Label>
+            <Label htmlFor="phone">{t('profile.form.phone')}</Label>
             <Input
               id="phone"
               type="tel"
@@ -181,7 +183,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="biografia">Biografía</Label>
+            <Label htmlFor="biografia">{t('profile.form.biography')}</Label>
             <Textarea
               id="biografia"
               value={profileData.biografia}
@@ -197,33 +199,33 @@ export default function SettingsPage() {
             onClick={handleSubmit} 
             disabled={loading || saving}
           >
-            {saving ? "Guardando..." : "Guardar cambios"}
+            {saving ? t('profile.form.saving') : t('profile.form.saveChanges')}
           </Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Cambiar Contraseña</CardTitle>
+          <CardTitle>{t('password.title')}</CardTitle>
           <CardDescription>
-            Actualiza tu contraseña para mantener tu cuenta segura
+            {t('password.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="outline">Cambiar Contraseña</Button>
+          <Button variant="outline">{t('password.button')}</Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Preferencias de Notificaciones</CardTitle>
+          <CardTitle>{t('notifications.title')}</CardTitle>
           <CardDescription>
-            Configura cómo y cuándo recibir notificaciones
+            {t('notifications.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            Las preferencias de notificaciones estarán disponibles próximamente.
+            {t('notifications.comingSoon')}
           </p>
         </CardContent>
       </Card>

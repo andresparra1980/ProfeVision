@@ -1133,5 +1133,43 @@
       },
       "noDataAvailable": "No data available"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your profile and platform settings",
+    "profile": {
+      "title": "Teacher Profile",
+      "description": "Update your personal and contact information",
+      "form": {
+        "firstName": "First Names",
+        "lastName": "Last Names",
+        "email": "Email Address",
+        "phone": "Phone",
+        "biography": "Biography",
+        "emailNotChangeable": "Email address cannot be changed",
+        "saveChanges": "Save Changes",
+        "saving": "Saving..."
+      }
+    },
+    "password": {
+      "title": "Change Password",
+      "description": "Update your password to keep your account secure",
+      "button": "Change Password"
+    },
+    "notifications": {
+      "title": "Notification Preferences",
+      "description": "Configure how and when to receive notifications",
+      "comingSoon": "Notification preferences will be available soon."
+    },
+    "messages": {
+      "profileUpdated": "Profile Updated",
+      "changesSaved": "Changes have been saved successfully"
+    },
+    "errors": {
+      "title": "Error",
+      "fetchProfile": "Could not load profile information",
+      "noSession": "No active session",
+      "saveChanges": "Could not save changes"
+    }
   }
 }
