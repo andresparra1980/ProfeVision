@@ -1026,6 +1026,11 @@
         "componentsSum": "Los porcentajes de los componentes en el periodo",
         "componentsSumValue": "deben sumar",
         "saving": "No se pudo guardar el esquema de calificaciones"
+      },
+      "placeholders": {
+        "schemeName": "Ingrese el nombre del esquema",
+        "periodName": "Ingrese el nombre del periodo",
+        "componentName": "Ingrese el nombre del componente"
       }
     }
   }

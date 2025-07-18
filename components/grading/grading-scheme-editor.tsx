@@ -261,6 +261,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                 id="scheme-name"
                 value={scheme.nombre}
                 onChange={(e) => setScheme({ ...scheme, nombre: e.target.value })}
+                placeholder={t('placeholders.schemeName')}
               />
             </div>
           </div>
@@ -300,6 +301,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                                   updatePeriod(periodIndex, 'nombre', e.target.value)
                                 }
                                 className="max-w-xs"
+                                placeholder={t('placeholders.periodName')}
                               />
                             </CardTitle>
                             <div className="flex items-center gap-4">
@@ -311,6 +313,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                                     updatePeriod(periodIndex, 'porcentaje', parseFloat(e.target.value))
                                   }
                                   className="w-20"
+                                  placeholder="0"
                                 />
                                 <span>%</span>
                               </div>
@@ -371,6 +374,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                                     )
                                   }
                                   className="flex-1"
+                                  placeholder={t('placeholders.componentName')}
                                 />
                                 <Select
                                   value={componente.tipo}
@@ -407,6 +411,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                                       )
                                     }
                                     className="w-20"
+                                    placeholder="0"
                                   />
                                   <span>%</span>
                                 </div>

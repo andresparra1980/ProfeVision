@@ -1026,6 +1026,11 @@
         "componentsSum": "The percentages of components in period",
         "componentsSumValue": "must sum to",
         "saving": "Could not save the grading scheme"
+      },
+      "placeholders": {
+        "schemeName": "Enter the scheme name",
+        "periodName": "Enter the period name",
+        "componentName": "Enter the component name"
       }
     }
   }
