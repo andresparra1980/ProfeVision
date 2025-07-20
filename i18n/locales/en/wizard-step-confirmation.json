@@ -1,0 +1,8 @@
+{
+  "title": "Exam saved successfully!",
+  "description": "The exam results have been recorded in the system.",
+  "buttons": {
+    "scanAnother": "Scan another exam",
+    "finish": "Finish"
+  }
+} 

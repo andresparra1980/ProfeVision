@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ConfirmationProps {
   onScanAnother: () => void;
@@ -7,6 +8,7 @@ interface ConfirmationProps {
 }
 
 export function Confirmation({ onScanAnother, onFinish }: ConfirmationProps) {
+  const t = useTranslations('wizard-step-confirmation');
   return (
     <div className="flex flex-col items-center justify-center h-full py-8 px-4">
       <div className="text-center mb-8">
@@ -16,9 +18,9 @@ export function Confirmation({ onScanAnother, onFinish }: ConfirmationProps) {
           </div>
         </div>
         
-        <h2 className="text-2xl font-bold text-green-700">¡Examen guardado correctamente!</h2>
+        <h2 className="text-2xl font-bold text-green-700">{t('title')}</h2>
         <p className="text-gray-600 mt-2">
-          Los resultados del examen han sido registrados en el sistema.
+          {t('description')}
         </p>
       </div>
       
@@ -29,7 +31,7 @@ export function Confirmation({ onScanAnother, onFinish }: ConfirmationProps) {
           onClick={onScanAnother}
           className="text-base px-8"
         >
-          Escanear otro examen
+          {t('buttons.scanAnother')}
         </Button>
         
         <Button 
@@ -38,7 +40,7 @@ export function Confirmation({ onScanAnother, onFinish }: ConfirmationProps) {
           onClick={onFinish}
           className="text-base px-8 bg-primary"
         >
-          Finalizar
+          {t('buttons.finish')}
         </Button>
       </div>
     </div>
