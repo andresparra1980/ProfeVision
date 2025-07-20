@@ -18,6 +18,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
     exam: (await import(`./locales/${locale}/exam.json`)).default,
     forms: (await import(`./locales/${locale}/forms.json`)).default,
     navigation: (await import(`./locales/${locale}/navigation.json`)).default,
+    // 🧙‍♀️ Wizard steps components
+    'wizard-step-confirmation': (await import(`./locales/${locale}/wizard-step-confirmation.json`)).default,
+    'wizard-step-instructions': (await import(`./locales/${locale}/wizard-step-instructions.json`)).default,
+    'wizard-step-image-capture': (await import(`./locales/${locale}/wizard-step-image-capture.json`)).default,
   };
 
   return {
