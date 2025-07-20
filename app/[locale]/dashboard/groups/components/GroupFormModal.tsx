@@ -294,7 +294,7 @@ export function GroupFormModal({
                 {entidades.length === 0 && (
                   <div className="text-xs text-destructive">
                     {t('noEntitiesMessage')}
-                    <Link href="/dashboard/entidades-educativas" className="ml-1 text-primary hover:underline">
+                    <Link href="/dashboard/entities" className="ml-1 text-primary hover:underline">
                       {t('createEntity')}
                     </Link>
                   </div>

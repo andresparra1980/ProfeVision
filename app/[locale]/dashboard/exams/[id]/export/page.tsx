@@ -134,8 +134,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     } catch (error) {
       console.error("Error fetching exam details:", error);
       toast({
-        title: "Error",
-        description: "No se pudo cargar la información del examen",
+        title: t('common.error'),
+        description: t('exams.messages.loadError'),
         variant: "destructive",
       });
       router.push("/dashboard/exams");
