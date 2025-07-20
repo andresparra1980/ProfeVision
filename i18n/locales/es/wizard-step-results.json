@@ -1,0 +1,48 @@
+{
+  "description": "Revisa los resultados del escaneo. Puedes volver atrás para escanear nuevamente si es necesario.",
+  "examInfo": {
+    "title": "Información del Examen",
+    "loading": "Cargando información...",
+    "fields": {
+      "subject": "Materia:",
+      "exam": "Examen:",
+      "student": "Estudiante:",
+      "group": "Grupo:"
+    },
+    "notAvailable": "No disponible"
+  },
+  "answers": {
+    "title": "Respuestas"
+  },
+  "grading": {
+    "calculating": "Calculando calificación...",
+    "error": "Error al calcular calificación:",
+    "label": "Calificación:",
+    "correctAnswers": "correctas",
+    "scoreFormat": "{obtained}/{total} ({correct}/{totalQuestions} correctas)"
+  },
+  "buttons": {
+    "back": "Atrás",
+    "saving": "Guardando...",
+    "saveResults": "Guardar Resultados",
+    "savedSuccessfully": "Guardado exitosamente",
+    "scanAnother": "Escanear Otro",
+    "finish": "Finalizar"
+  },
+  "toasts": {
+    "resultsUpdated": "Resultados actualizados",
+    "resultsSaved": "Resultados guardados",
+    "saveError": "Error al guardar",
+    "saveErrorDescription": "Ha ocurrido un error al guardar los resultados"
+  },
+  "errors": {
+    "calculatingGrade": "Error al calcular la calificación",
+    "noQRData": "No se detectaron datos del código QR.",
+    "saveResults": "Error al guardar los resultados",
+    "loadingEntities": "Error desconocido al cargar datos de las entidades",
+    "serverEmptyResponse": "El servidor respondió con un cuerpo vacío",
+    "timeoutError": "La solicitud excedió el tiempo máximo de espera (60 segundos)",
+    "formatError": "Error de formato",
+    "unknownError": "Error desconocido"
+  }
+} 

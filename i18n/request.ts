@@ -23,6 +23,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     'wizard-step-instructions': (await import(`./locales/${locale}/wizard-step-instructions.json`)).default,
     'wizard-step-image-capture': (await import(`./locales/${locale}/wizard-step-image-capture.json`)).default,
     'wizard-step-processing': (await import(`./locales/${locale}/wizard-step-processing.json`)).default,
+    'wizard-step-results': (await import(`./locales/${locale}/wizard-step-results.json`)).default,
   };
 
   return {
