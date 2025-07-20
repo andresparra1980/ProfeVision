@@ -1,0 +1,26 @@
+{
+  "states": {
+    "processing": "Processing image...",
+    "checkingDuplicates": "Checking duplicates...",
+    "complete": "Processing successful",
+    "duplicate": "Exam already graded",
+    "examNotDetected": "Exam not detected",
+    "error": "Processing error"
+  },
+  "messages": {
+    "processingSuccess": "Successfully processed!",
+    "duplicateWithDate": "Exam already graded on {date}",
+    "duplicateGeneric": "Exam already graded.",
+    "noExamDetected": "Exam not detected. Please try again.",
+    "invalidExamDetected": "Could not detect a valid exam in the image. Please make sure the QR code and answer marks are clearly visible and try again.",
+    "genericProcessingError": "Processing error. Please try again.",
+    "processedImageAlt": "Processed image"
+  },
+  "buttons": {
+    "retakePhoto": "Take another photo",
+    "retry": "Retry",
+    "continueAnyway": "Continue anyway",
+    "continue": "Continue"
+  },
+  "locale": "en-US"
+} 
