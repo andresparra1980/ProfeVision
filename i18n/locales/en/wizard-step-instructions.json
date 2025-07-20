@@ -1,0 +1,14 @@
+{
+  "title": "Grading Assistant",
+  "subtitle": "Instructions",
+  "description": "In this exam grading assistant you will be able to:",
+  "steps": [
+    "Scan exams one by one quickly with your phone's camera",
+    "Validate that the detection was correct",
+    "Rescan if necessary",
+    "Visually verify if the system doesn't detect a question and mark it manually if desired"
+  ],
+  "button": {
+    "continue": "Continue"
+  }
+} 
