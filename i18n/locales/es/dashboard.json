@@ -1134,6 +1134,39 @@
       "noDataAvailable": "No hay datos disponibles"
     }
   },
+  "profile": {
+    "title": "Mi Perfil",
+    "description": "Gestiona tu información personal y preferencias",
+    "personalInfo": {
+      "title": "Información personal",
+      "description": "Actualiza tus datos de perfil"
+    },
+    "form": {
+      "email": "Correo electrónico",
+      "emailNotChangeable": "El correo electrónico no se puede cambiar",
+      "firstName": "Nombres",
+      "lastName": "Apellidos",
+      "phone": "Teléfono",
+      "position": "Cargo",
+      "positionPlaceholder": "Ej: Profesor de Matemáticas",
+      "biography": "Biografía",
+      "biographyPlaceholder": "Breve descripción sobre ti",
+      "saveChanges": "Guardar cambios",
+      "saving": "Guardando..."
+    },
+    "validation": {
+      "firstNameRequired": "Los nombres deben tener al menos 2 caracteres",
+      "lastNameRequired": "Los apellidos deben tener al menos 2 caracteres"
+    },
+    "messages": {
+      "loading": "Cargando...",
+      "updated": "Perfil actualizado",
+      "updateSuccess": "Tus datos han sido actualizados correctamente.",
+      "loadError": "Error al cargar el perfil",
+      "updateError": "Error al actualizar perfil",
+      "unknownError": "Desconocido"
+    }
+  },
   "settings": {
     "title": "Configuración",
     "description": "Administra tu perfil y ajustes de la plataforma",

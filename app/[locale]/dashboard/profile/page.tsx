@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,25 +13,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 import type { User } from "@supabase/supabase-js";
 
-const profileSchema = z.object({
-  nombres: z.string().min(2, { message: "Los nombres deben tener al menos 2 caracteres" }),
-  apellidos: z.string().min(2, { message: "Los apellidos deben tener al menos 2 caracteres" }),
-  telefono: z.string().optional(),
-  cargo: z.string().optional(),
-  biografia: z.string().optional(),
-});
-
-type ProfileFormValues = z.infer<typeof profileSchema>;
-
 export default function ProfilePage() {
+  const t = useTranslations('dashboard');
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const { profesor, loading: profesorLoading, error: profesorError, updateProfesor } = useProfesor();
+
+  const profileSchema = z.object({
+    nombres: z.string().min(2, { message: t('profile.validation.firstNameRequired') }),
+    apellidos: z.string().min(2, { message: t('profile.validation.lastNameRequired') }),
+    telefono: z.string().optional(),
+    cargo: z.string().optional(),
+    biografia: z.string().optional(),
+  });
+
+  type ProfileFormValues = z.infer<typeof profileSchema>;
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -95,10 +97,10 @@ export default function ProfilePage() {
     
     toast({ 
       variant: "destructive", 
-      title: `Error en ${context}`, 
-      description: `Error: ${errorObj?.message || 'Desconocido'}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`
+      title: t('common.error'), 
+      description: `${t('profile.messages.updateError')}: ${errorObj?.message || t('profile.messages.unknownError')}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`
     });
-  }, []);
+  }, [t]);
 
   async function onSubmit(data: ProfileFormValues) {
     setIsLoading(true);
@@ -136,8 +138,8 @@ export default function ProfilePage() {
       logger.log('[ProfilePage] Profesor data updated.');
 
       toast({
-        title: "Perfil actualizado",
-        description: "Tus datos han sido actualizados correctamente.",
+        title: t('profile.messages.updated'),
+        description: t('profile.messages.updateSuccess'),
       });
       
       router.refresh();
@@ -160,35 +162,35 @@ export default function ProfilePage() {
   if (profesorError) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-destructive">Error al cargar el perfil: {profesorError.message}</p>
+        <p className="text-destructive">{t('profile.messages.loadError')}: {profesorError.message}</p>
       </div>
     );
   }
 
   if (!profesor && !user) {
-    return <div className="flex h-full items-center justify-center">Cargando...</div>;
+    return <div className="flex h-full items-center justify-center">{t('profile.messages.loading')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Mi Perfil</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('profile.title')}</h1>
         <p className="text-muted-foreground">
-          Gestiona tu información personal y preferencias
+          {t('profile.description')}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Información personal</CardTitle>
+          <CardTitle>{t('profile.personalInfo.title')}</CardTitle>
           <CardDescription>
-            Actualiza tus datos de perfil
+            {t('profile.personalInfo.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email">{t('profile.form.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -196,13 +198,13 @@ export default function ProfilePage() {
                 disabled
               />
               <p className="text-sm text-muted-foreground">
-                El correo electrónico no se puede cambiar
+                {t('profile.form.emailNotChangeable')}
               </p>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="nombres">Nombres</Label>
+                <Label htmlFor="nombres">{t('profile.form.firstName')}</Label>
                 <Input
                   id="nombres"
                   {...form.register("nombres")}
@@ -214,7 +216,7 @@ export default function ProfilePage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="apellidos">Apellidos</Label>
+                <Label htmlFor="apellidos">{t('profile.form.lastName')}</Label>
                 <Input
                   id="apellidos"
                   {...form.register("apellidos")}
@@ -227,7 +229,7 @@ export default function ProfilePage() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="telefono">Teléfono</Label>
+              <Label htmlFor="telefono">{t('profile.form.phone')}</Label>
               <Input
                 id="telefono"
                 {...form.register("telefono")}
@@ -236,20 +238,20 @@ export default function ProfilePage() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="cargo">Cargo</Label>
+              <Label htmlFor="cargo">{t('profile.form.position')}</Label>
               <Input
                 id="cargo"
-                placeholder="Ej: Profesor de Matemáticas"
+                placeholder={t('profile.form.positionPlaceholder')}
                 {...form.register("cargo")}
                 disabled={isLoading}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="biografia">Biografía</Label>
+              <Label htmlFor="biografia">{t('profile.form.biography')}</Label>
               <Textarea
                 id="biografia"
-                placeholder="Breve descripción sobre ti"
+                placeholder={t('profile.form.biographyPlaceholder')}
                 className="min-h-32"
                 {...form.register("biografia")}
                 disabled={isLoading}
@@ -257,7 +259,7 @@ export default function ProfilePage() {
             </div>
             
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Guardando..." : "Guardar cambios"}
+              {isLoading ? t('profile.form.saving') : t('profile.form.saveChanges')}
             </Button>
           </form>
         </CardContent>

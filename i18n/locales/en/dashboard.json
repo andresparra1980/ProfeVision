@@ -1134,6 +1134,39 @@
       "noDataAvailable": "No data available"
     }
   },
+  "profile": {
+    "title": "My Profile",
+    "description": "Manage your personal information and preferences",
+    "personalInfo": {
+      "title": "Personal Information",
+      "description": "Update your profile data"
+    },
+    "form": {
+      "email": "Email Address",
+      "emailNotChangeable": "Email address cannot be changed",
+      "firstName": "First Names",
+      "lastName": "Last Names",
+      "phone": "Phone",
+      "position": "Position",
+      "positionPlaceholder": "e.g: Mathematics Teacher",
+      "biography": "Biography",
+      "biographyPlaceholder": "Brief description about yourself",
+      "saveChanges": "Save Changes",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "firstNameRequired": "First names must be at least 2 characters",
+      "lastNameRequired": "Last names must be at least 2 characters"
+    },
+    "messages": {
+      "loading": "Loading...",
+      "updated": "Profile Updated",
+      "updateSuccess": "Your data has been updated successfully.",
+      "loadError": "Error loading profile",
+      "updateError": "Error updating profile",
+      "unknownError": "Unknown"
+    }
+  },
   "settings": {
     "title": "Settings",
     "description": "Manage your profile and platform settings",
