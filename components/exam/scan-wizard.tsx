@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 import { Instructions, ImageCapture, Processing, Results, Confirmation } from './wizard-steps';
 import { ScanData, ProcessingResult } from './types';
 import { ImageProvider, useImageContext } from './contexts';
@@ -16,6 +17,7 @@ interface ScanWizardProps {
 
 // Inner content component that uses the ImageContext
 function ScanWizardContent({ onClose }: { onClose: () => void }) {
+  const t = useTranslations('scan-wizard');
   const { 
     setProcessedImageData, 
     setOnProcessingComplete,
@@ -224,12 +226,12 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
   // Título dinámico según el paso actual
   const getTitleByStep = () => {
     switch (step) {
-      case 1: return "Instrucciones";
-      case 2: return "Captura del Examen";
-      case 3: return "Procesando Imagen";
-      case 4: return "Resultados del Escaneo";
-      case 5: return "Examen Guardado";
-      default: return "Asistente de Calificación";
+      case 1: return t('titles.instructions');
+      case 2: return t('titles.imageCapture');
+      case 3: return t('titles.processing');
+      case 4: return t('titles.results');
+      case 5: return t('titles.saved');
+      default: return t('titles.default');
     }
   };
 
@@ -237,7 +239,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     <>
       <DialogTitle>{getTitleByStep()}</DialogTitle>
       <DialogDescription className="sr-only">
-        Asistente para calificar exámenes escaneados
+        {t('description')}
       </DialogDescription>
       <div className="flex-1 overflow-y-auto">
         {step === 1 && <Instructions onNext={handleNext} />}
@@ -292,7 +294,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
             variant="outline"
             onClick={step === 1 ? onClose : handleBack}
           >
-            {step === 1 ? 'Cerrar' : 'Atrás'}
+            {step === 1 ? t('buttons.close') : t('buttons.back')}
           </Button>
         </div>
       )}

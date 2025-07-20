@@ -24,6 +24,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     'wizard-step-image-capture': (await import(`./locales/${locale}/wizard-step-image-capture.json`)).default,
     'wizard-step-processing': (await import(`./locales/${locale}/wizard-step-processing.json`)).default,
     'wizard-step-results': (await import(`./locales/${locale}/wizard-step-results.json`)).default,
+    // 🧙‍♀️ Main wizard component
+    'scan-wizard': (await import(`./locales/${locale}/scan-wizard.json`)).default,
   };
 
   return {
