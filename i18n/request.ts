@@ -28,6 +28,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     'scan-wizard': (await import(`./locales/${locale}/scan-wizard.json`)).default,
     // 📰 Website pages
     'blog': (await import(`./locales/${locale}/blog.json`)).default,
+    'mobile-app': (await import(`./locales/${locale}/mobile-app.json`)).default,
   };
 
   return {
