@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { Link as IntlLink } from '@/i18n/navigation'
 import { cn } from "@/lib/utils"
 import {
@@ -89,8 +89,42 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
 
 export function MainNavigation() {
   const t = useTranslations('common')
+  const locale = useLocale()
 
-
+  // 🌍 Helper function to get localized routes
+  const getLocalizedRoute = (routeKey: string): any => {
+    const routeMap: Record<string, Record<string, string>> = {
+      'how-it-works': {
+        es: '/como-funciona',
+        en: '/how-it-works'
+      },
+      'exams-with-ai': {
+        es: '/examenes-con-ia',
+        en: '/exams-with-ai'
+      },
+      'paper-exams': {
+        es: '/examenes-papel',
+        en: '/paper-exams'
+      },
+      'mobile-app': {
+        es: '/aplicacion-movil',
+        en: '/mobile-app'
+      },
+      'pricing': {
+        es: '/precios',
+        en: '/pricing'
+      },
+      'blog': {
+        es: '/blog',
+        en: '/blog'
+      },
+      'contact': {
+        es: '/contacto',
+        en: '/contact'
+      }
+    }
+    return routeMap[routeKey]?.[locale] || routeKey
+  }
 
   return (
     <NavigationMenu>
@@ -116,7 +150,7 @@ export function MainNavigation() {
                 <ul className="space-y-2">
                   {/* Cómo funciona - Primer item clickeable */}
                   <ListItem 
-                    href="/how-it-works" 
+                    href={getLocalizedRoute('how-it-works')}
                     title={t('navigation.howItWorks')}
                     icon={BookOpen}
                   >
@@ -143,14 +177,14 @@ export function MainNavigation() {
                   
                   {/* Sub-items de Exámenes */}
                   <ExamenSubItem 
-                    href="/exams-with-ai" 
+                    href={getLocalizedRoute('exams-with-ai')}
                     title={t('navigation.aiGenerator')}
                     icon={Brain}
                   >
                     {t('navigation.aiGeneratorDescription')}
                   </ExamenSubItem>
                   <ExamenSubItem 
-                    href="/paper-exams" 
+                    href={getLocalizedRoute('paper-exams')}
                     title={t('navigation.paperExams')}
                     icon={ScanLine}
                   >
@@ -161,7 +195,7 @@ export function MainNavigation() {
                 {/* Columna 3 */}
                 <ul className="space-y-2">
                   <ListItem 
-                    href="/mobile-app" 
+                    href={getLocalizedRoute('mobile-app')}
                     title={t('navigation.mobileApp')}
                     icon={Smartphone}
                   >
@@ -176,7 +210,7 @@ export function MainNavigation() {
         {/* Precios */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <IntlLink href="/pricing" className={navigationMenuTriggerStyle()}>
+            <IntlLink href={getLocalizedRoute('pricing')} className={navigationMenuTriggerStyle()}>
               {t('navigation.pricing')}
             </IntlLink>
           </NavigationMenuLink>
@@ -185,7 +219,7 @@ export function MainNavigation() {
         {/* Blog */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <IntlLink href="/blog" className={navigationMenuTriggerStyle()}>
+            <IntlLink href={getLocalizedRoute('blog')} className={navigationMenuTriggerStyle()}>
               {t('navigation.blog')}
             </IntlLink>
           </NavigationMenuLink>
@@ -194,7 +228,7 @@ export function MainNavigation() {
         {/* Contacto */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <IntlLink href="/contact" className={navigationMenuTriggerStyle()}>
+            <IntlLink href={getLocalizedRoute('contact')} className={navigationMenuTriggerStyle()}>
               {t('navigation.contact')}
             </IntlLink>
           </NavigationMenuLink>
