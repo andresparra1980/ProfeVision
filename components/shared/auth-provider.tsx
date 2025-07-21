@@ -35,76 +35,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     `/${locale}`,
     `/${locale}/`,
     
-    // Páginas de contenido estático (ambas variantes para evitar redirecciones a auth)
+    // Páginas de contenido estático
     `/${locale}/${locale === 'es' ? 'privacidad' : 'privacy'}`,
-    `/${locale}/privacy`, // Variante en inglés para cualquier locale
-    `/${locale}/privacidad`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'terminos' : 'terms'}`,
-    `/${locale}/terms`, // Variante en inglés para cualquier locale
-    `/${locale}/terminos`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'cookies' : 'cookies'}`,
-    `/${locale}/cookies`, // Misma en ambos idiomas
     
-    // Páginas de información (ambas variantes)
+    // Páginas de información
     `/${locale}/${locale === 'es' ? 'como-funciona' : 'how-it-works'}`,
-    `/${locale}/how-it-works`, // Variante en inglés para cualquier locale
-    `/${locale}/como-funciona`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'precios' : 'pricing'}`,
-    `/${locale}/pricing`, // Variante en inglés para cualquier locale
-    `/${locale}/precios`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'contacto' : 'contact'}`,
-    `/${locale}/contact`, // Variante en inglés para cualquier locale
-    `/${locale}/contacto`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'blog' : 'blog'}`,
-    `/${locale}/blog`, // Misma en ambos idiomas
     
-    // Páginas de exámenes (ambas variantes)
+    // Páginas de exámenes
     `/${locale}/${locale === 'es' ? 'examenes-con-ia' : 'exams-with-ai'}`,
-    `/${locale}/exams-with-ai`, // Variante en inglés para cualquier locale
-    `/${locale}/examenes-con-ia`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'examenes-papel' : 'paper-exams'}`,
-    `/${locale}/paper-exams`, // Variante en inglés para cualquier locale
-    `/${locale}/examenes-papel`, // Variante en español para cualquier locale
     
-    // Páginas de gestión (información pública, ambas variantes)
+    // Páginas de gestión (información pública)
     `/${locale}/${locale === 'es' ? 'gestion-instituciones' : 'institutions-management'}`,
-    `/${locale}/institutions-management`, // Variante en inglés para cualquier locale
-    `/${locale}/gestion-instituciones`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'gestion-materias' : 'subjects-management'}`,
-    `/${locale}/subjects-management`, // Variante en inglés para cualquier locale
-    `/${locale}/gestion-materias`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'gestion-grupos' : 'groups-management'}`,
-    `/${locale}/groups-management`, // Variante en inglés para cualquier locale
-    `/${locale}/gestion-grupos`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'gestion-estudiantes' : 'students-management'}`,
-    `/${locale}/students-management`, // Variante en inglés para cualquier locale
-    `/${locale}/gestion-estudiantes`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'reportes' : 'reports'}`,
-    `/${locale}/reports`, // Variante en inglés para cualquier locale
-    `/${locale}/reportes`, // Variante en español para cualquier locale
     `/${locale}/${locale === 'es' ? 'aplicacion-movil' : 'mobile-app'}`,
-    `/${locale}/mobile-app`, // Variante en inglés para cualquier locale
-    `/${locale}/aplicacion-movil`, // Variante en español para cualquier locale
     
-    // Páginas de autenticación (ambas variantes)
+    // Páginas de autenticación
     `/${locale}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
-    `/${locale}/auth/login`, // Variante en inglés para cualquier locale
-    `/${locale}/auth/iniciar-sesion`, // Variante en español para cualquier locale
     `/${locale}/auth/${locale === 'es' ? 'registro' : 'register'}`,
-    `/${locale}/auth/register`, // Variante en inglés para cualquier locale
-    `/${locale}/auth/registro`, // Variante en español para cualquier locale
     `/${locale}/auth/${locale === 'es' ? 'restablecer-contrasena' : 'reset-password'}`,
-    `/${locale}/auth/reset-password`, // Variante en inglés para cualquier locale
-    `/${locale}/auth/restablecer-contrasena`, // Variante en español para cualquier locale
     `/${locale}/auth/${locale === 'es' ? 'actualizar-contrasena' : 'update-password'}`,
-    `/${locale}/auth/update-password`, // Variante en inglés para cualquier locale
-    `/${locale}/auth/actualizar-contrasena`, // Variante en español para cualquier locale
     `/${locale}/auth/${locale === 'es' ? 'verificar-email' : 'verify-email'}`,
-    `/${locale}/auth/verify-email`, // Variante en inglés para cualquier locale
-    `/${locale}/auth/verificar-email`, // Variante en español para cualquier locale
     `/${locale}/auth/${locale === 'es' ? 'email-confirmado' : 'email-confirmed'}`,
-    `/${locale}/auth/email-confirmed`, // Variante en inglés para cualquier locale
-    `/${locale}/auth/email-confirmado`, // Variante en español para cualquier locale
     
     // Rutas sin prefijo de idioma solo para el locale por defecto (español)
     ...(locale === 'es' ? [
@@ -125,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       '/examenes',
       '/examenes/generador-manual',
       '/examenes/generador-ia',
+      '/examenes-con-ia',
       '/examenes-papel',
       '/auth/iniciar-sesion',
       '/auth/registro',
