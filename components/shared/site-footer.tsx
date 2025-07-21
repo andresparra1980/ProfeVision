@@ -5,23 +5,47 @@ export function SiteFooter() {
   const t = useTranslations('common')
   const locale = useLocale()
 
-  // Helper function to get localized routes
-  const getLocalizedRoute = (route: string) => {
-    if (locale === 'es') {
-      const routeMap: { [key: string]: string } = {
-        'how-it-works': '/como-funciona',
-        'pricing': '/precios',
-        'contact': '/contacto',
-        'blog': '/blog',
-        'exams': '/examenes',
-        'mobile-app': '/aplicacion-movil',
-        'terms': '/terminos',
-        'privacy': '/privacidad',
-        'cookies': '/cookies'
+  // 🌍 Helper function to get localized routes (same structure as main-navigation)
+  const getLocalizedRoute = (routeKey: string): any => {
+    const routeMap: Record<string, Record<string, string>> = {
+      'how-it-works': {
+        es: '/como-funciona',
+        en: '/how-it-works'
+      },
+      'pricing': {
+        es: '/precios',
+        en: '/pricing'
+      },
+      'contact': {
+        es: '/contacto',
+        en: '/contact'
+      },
+      'blog': {
+        es: '/blog',
+        en: '/blog'
+      },
+      'exams-with-ai': {
+        es: '/examenes-con-ia',
+        en: '/exams-with-ai'
+      },
+      'mobile-app': {
+        es: '/aplicacion-movil',
+        en: '/mobile-app'
+      },
+      'terms': {
+        es: '/terminos',
+        en: '/terms'
+      },
+      'privacy': {
+        es: '/privacidad',
+        en: '/privacy'
+      },
+      'cookies': {
+        es: '/cookies',
+        en: '/cookies'
       }
-      return routeMap[route] || `/${route}`
     }
-    return `/${route}`
+    return routeMap[routeKey]?.[locale] || routeKey
   }
 
   return (
@@ -108,7 +132,7 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLocalizedRoute('exams')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.aiGenerator')}>
+                  <Link href={getLocalizedRoute('exams-with-ai')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.aiGenerator')}>
                     {t('footer.links.aiGenerator')}
                   </Link>
                 </li>
