@@ -1,0 +1,30 @@
+{
+  "main": {
+    "title": "🍪 We respect your privacy",
+    "description": "We use cookies to improve your experience on ProfeVision, analyze traffic and personalize content. You can manage your preferences at any time.",
+    "moreInfo": "More information",
+    "configure": "Configure",
+    "rejectAll": "Reject all",
+    "acceptAll": "Accept all"
+  },
+  "preferences": {
+    "title": "Cookie preferences",
+    "necessary": {
+      "title": "Necessary cookies",
+      "description": "Essential for functionality"
+    },
+    "analytics": {
+      "title": "Analytics cookies",
+      "description": "Help us improve the site"
+    },
+    "functional": {
+      "title": "Functional cookies",
+      "description": "Improve functionality"
+    },
+    "marketing": {
+      "title": "Marketing cookies",
+      "description": "Ad personalization"
+    },
+    "savePreferences": "Save preferences"
+  }
+} 

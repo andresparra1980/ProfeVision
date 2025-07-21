@@ -28,6 +28,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     'scan-wizard': (await import(`./locales/${locale}/scan-wizard.json`)).default,
     // 🎠 Feature slideshow component
     'feature-slideshow': (await import(`./locales/${locale}/feature-slideshow.json`)).default,
+    // 🍪 Cookie banner component
+    'cookie-banner': (await import(`./locales/${locale}/cookie-banner.json`)).default,
     // 📰 Website pages
     'blog': (await import(`./locales/${locale}/blog.json`)).default,
     'mobile-app': (await import(`./locales/${locale}/mobile-app.json`)).default,
