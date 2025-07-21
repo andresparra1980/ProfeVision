@@ -142,7 +142,7 @@ export default function ResetPasswordPage() {
             <Input
               id="email"
               type="email"
-              placeholder="tu@ejemplo.com"
+              placeholder={t("emailPlaceholder")}
               {...form.register("email")}
               disabled={isLoading}
             />

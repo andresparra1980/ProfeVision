@@ -125,7 +125,7 @@ export default function RegisterPage() {
             <Label htmlFor="nombres">{t('firstName')}</Label>
             <Input
               id="nombres"
-              placeholder="Juan"
+              placeholder={t("firstNamePlaceholder")}
               {...form.register("nombres")}
               disabled={isLoading}
             />
@@ -138,7 +138,7 @@ export default function RegisterPage() {
             <Label htmlFor="apellidos">{t('lastName')}</Label>
             <Input
               id="apellidos"
-              placeholder="Pérez González"
+              placeholder={t("lastNamePlaceholder")}
               {...form.register("apellidos")}
               disabled={isLoading}
             />
@@ -152,7 +152,7 @@ export default function RegisterPage() {
             <Input
               id="email"
               type="email"
-              placeholder="tu@ejemplo.com"
+              placeholder={t("emailPlaceholder")}
               {...form.register("email")}
               disabled={isLoading}
             />
