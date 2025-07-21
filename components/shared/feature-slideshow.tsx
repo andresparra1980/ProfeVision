@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { LucideIcon, Clock, Brain, School, Target, Zap } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface Slide {
   icon: LucideIcon
@@ -24,46 +25,47 @@ export function FeatureSlideshow({
   showNeonEffect = false
 }: FeatureSlideshowProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const t = useTranslations('feature-slideshow')
 
-  // Slideshow data
+  // Slideshow data with translations
   const slides: Slide[] = [
     {
       icon: Clock,
-      title: "Calificación en Minutos",
-      subtitle: "Tecnología OMR + IA",
-      description: "Nuestra aplicación para escanear exámenes con tecnología OMR (Visión Artificial) para papel y la IA para online te dan resultados instantáneos.",
+      title: t('slides.0.title'),
+      subtitle: t('slides.0.subtitle'),
+      description: t('slides.0.description'),
       color: "text-purple-600",
       bgColor: "bg-purple-600/10"
     },
     {
       icon: School,
-      title: "Gestión Educativa Completa",
-      subtitle: "Todo Centralizado",
-      description: "Centraliza instituciones, materias, grupos y estudiantes sin esfuerzo.",
+      title: t('slides.1.title'),
+      subtitle: t('slides.1.subtitle'),
+      description: t('slides.1.description'),
       color: "text-[#ffd60a]",
       bgColor: "bg-[#ffd60a]/10"
     },
     {
       icon: Brain,
-      title: "Creación de Exámenes con IA",
-      subtitle: "Generación Inteligente",
-      description: "Genera pruebas de calidad rápidamente, adaptadas a tus necesidades.",
+      title: t('slides.2.title'),
+      subtitle: t('slides.2.subtitle'),
+      description: t('slides.2.description'),
       color: "text-purple-600",
       bgColor: "bg-purple-600/10"
     },
     {
       icon: Target,
-      title: "Análisis Detallado de Rendimiento",
-      subtitle: "Insights Clave",
-      description: "Obtén insights clave para mejorar la enseñanza y el aprendizaje de tus estudiantes.",
+      title: t('slides.3.title'),
+      subtitle: t('slides.3.subtitle'),
+      description: t('slides.3.description'),
       color: "text-[#0b890f]",
       bgColor: "bg-[#0b890f]/10"
     },
     {
       icon: Zap,
-      title: "Plataforma Intuitiva",
-      subtitle: "Fácil de Usar",
-      description: "Diseñada para educadores, fácil de usar desde el primer momento.",
+      title: t('slides.4.title'),
+      subtitle: t('slides.4.subtitle'),
+      description: t('slides.4.description'),
       color: "text-[#bc152b]",
       bgColor: "bg-[#bc152b]/10"
     }
@@ -126,11 +128,11 @@ export function FeatureSlideshow({
                 </div>
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <div className="rounded-lg bg-muted p-4">
-                    <p className="text-sm text-muted-foreground">Tiempo Ahorrado</p>
+                    <p className="text-sm text-muted-foreground">{t('metrics.timeSaved')}</p>
                     <p className="font-bold text-xl">95%</p>
                   </div>
                   <div className="rounded-lg bg-muted p-4">
-                    <p className="text-sm text-muted-foreground">Precisión</p>
+                    <p className="text-sm text-muted-foreground">{t('metrics.accuracy')}</p>
                     <p className="font-bold text-xl">99.9%</p>
                   </div>
                 </div>
@@ -173,11 +175,11 @@ export function FeatureSlideshow({
             </div>
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="rounded-lg bg-muted p-4">
-                <p className="text-sm text-muted-foreground">Tiempo Ahorrado</p>
+                <p className="text-sm text-muted-foreground">{t('metrics.timeSaved')}</p>
                 <p className="font-bold text-xl">95%</p>
               </div>
               <div className="rounded-lg bg-muted p-4">
-                <p className="text-sm text-muted-foreground">Precisión</p>
+                <p className="text-sm text-muted-foreground">{t('metrics.accuracy')}</p>
                 <p className="font-bold text-xl">99.9%</p>
               </div>
             </div>

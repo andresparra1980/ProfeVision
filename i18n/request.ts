@@ -26,6 +26,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     'wizard-step-results': (await import(`./locales/${locale}/wizard-step-results.json`)).default,
     // 🧙‍♀️ Main wizard component
     'scan-wizard': (await import(`./locales/${locale}/scan-wizard.json`)).default,
+    // 🎠 Feature slideshow component
+    'feature-slideshow': (await import(`./locales/${locale}/feature-slideshow.json`)).default,
     // 📰 Website pages
     'blog': (await import(`./locales/${locale}/blog.json`)).default,
     'mobile-app': (await import(`./locales/${locale}/mobile-app.json`)).default,
