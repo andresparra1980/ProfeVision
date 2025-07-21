@@ -6,46 +6,22 @@ export function SiteFooter() {
   const locale = useLocale()
 
   // 🌍 Helper function to get localized routes (same structure as main-navigation)
-  const getLocalizedRoute = (routeKey: string): any => {
-    const routeMap: Record<string, Record<string, string>> = {
-      'how-it-works': {
-        es: '/como-funciona',
-        en: '/how-it-works'
-      },
-      'pricing': {
-        es: '/precios',
-        en: '/pricing'
-      },
-      'contact': {
-        es: '/contacto',
-        en: '/contact'
-      },
-      'blog': {
-        es: '/blog',
-        en: '/blog'
-      },
-      'exams-with-ai': {
-        es: '/examenes-con-ia',
-        en: '/exams-with-ai'
-      },
-      'mobile-app': {
-        es: '/aplicacion-movil',
-        en: '/mobile-app'
-      },
-      'terms': {
-        es: '/terminos',
-        en: '/terms'
-      },
-      'privacy': {
-        es: '/privacidad',
-        en: '/privacy'
-      },
-      'cookies': {
-        es: '/cookies',
-        en: '/cookies'
-      }
+  const routeMap = {
+    'how-it-works': { es: '/como-funciona', en: '/how-it-works' },
+    'pricing': { es: '/precios', en: '/pricing' },
+    'contact': { es: '/contacto', en: '/contact' },
+    'blog': { es: '/blog', en: '/blog' },
+    'exams-with-ai': { es: '/examenes-con-ia', en: '/exams-with-ai' },
+    'mobile-app': { es: '/aplicacion-movil', en: '/mobile-app' },
+    'terms': { es: '/terminos', en: '/terms' },
+    'privacy': { es: '/privacidad', en: '/privacy' },
+    'cookies': { es: '/cookies', en: '/cookies' }
+  } as const;
+  const getLocalizedRoute = (routeKey: keyof typeof routeMap | string): string => {
+    if (routeKey in routeMap) {
+      return routeMap[routeKey as keyof typeof routeMap][locale as 'es' | 'en'];
     }
-    return routeMap[routeKey]?.[locale] || routeKey
+    return routeKey;
   }
 
   return (

@@ -32,14 +32,17 @@ export function CookieBanner({ className }: CookieBannerProps) {
   const locale = useLocale()
 
   // 🌍 Helper function to get localized routes
-  const getLocalizedRoute = (routeKey: string): any => {
-    const routeMap: Record<string, Record<string, string>> = {
-      'cookies': {
-        es: '/cookies',
-        en: '/cookies'
-      }
+  const routeMap = {
+    'cookies': {
+      es: '/cookies',
+      en: '/cookies'
     }
-    return routeMap[routeKey]?.[locale] || routeKey
+  } as const;
+  const getLocalizedRoute = (routeKey: keyof typeof routeMap | string): string => {
+    if (routeKey in routeMap) {
+      return routeMap[routeKey as keyof typeof routeMap][locale as 'es' | 'en'];
+    }
+    return routeKey;
   }
 
   useEffect(() => {

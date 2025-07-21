@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useTranslations, useLocale } from 'next-intl'
-import { Link as IntlLink } from '@/i18n/navigation'
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 import {
   NavigationMenu,
@@ -36,14 +36,13 @@ const ListItem = React.forwardRef<
   return (
     <li>
       <NavigationMenuLink asChild>
-        <IntlLink
+        <Link
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group",
             className
           )}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          href={href as any || "#"}
+          href={href || "#"}
           {...props}
         >
           <div className="flex items-center gap-2">
@@ -55,7 +54,7 @@ const ListItem = React.forwardRef<
               {children}
             </p>
           )}
-        </IntlLink>
+        </Link>
       </NavigationMenuLink>
     </li>
   )
@@ -67,10 +66,9 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
   return (
     <li className="ml-2"> {/* Indentación más sutil */}
       <NavigationMenuLink asChild>
-        <IntlLink
+        <Link
           className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group border-l-2 border-muted/50 pl-3"
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          href={href as any || "#"}
+          href={href || "#"}
         >
           <div className="flex items-center gap-2">
             {Icon && <Icon className="h-3 w-3" />} {/* Íconos más pequeños para sub-items */}
@@ -81,7 +79,7 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
               {children}
             </p>
           )}
-        </IntlLink>
+        </Link>
       </NavigationMenuLink>
     </li>
   )
@@ -92,38 +90,20 @@ export function MainNavigation() {
   const locale = useLocale()
 
   // 🌍 Helper function to get localized routes
-  const getLocalizedRoute = (routeKey: string): any => {
-    const routeMap: Record<string, Record<string, string>> = {
-      'how-it-works': {
-        es: '/como-funciona',
-        en: '/how-it-works'
-      },
-      'exams-with-ai': {
-        es: '/examenes-con-ia',
-        en: '/exams-with-ai'
-      },
-      'paper-exams': {
-        es: '/examenes-papel',
-        en: '/paper-exams'
-      },
-      'mobile-app': {
-        es: '/aplicacion-movil',
-        en: '/mobile-app'
-      },
-      'pricing': {
-        es: '/precios',
-        en: '/pricing'
-      },
-      'blog': {
-        es: '/blog',
-        en: '/blog'
-      },
-      'contact': {
-        es: '/contacto',
-        en: '/contact'
-      }
+  const routeMap = {
+    'how-it-works': { es: '/como-funciona', en: '/how-it-works' },
+    'exams-with-ai': { es: '/examenes-con-ia', en: '/exams-with-ai' },
+    'paper-exams': { es: '/examenes-papel', en: '/paper-exams' },
+    'mobile-app': { es: '/aplicacion-movil', en: '/mobile-app' },
+    'pricing': { es: '/precios', en: '/pricing' },
+    'blog': { es: '/blog', en: '/blog' },
+    'contact': { es: '/contacto', en: '/contact' }
+  } as const;
+  const getLocalizedRoute = (routeKey: keyof typeof routeMap | string): string => {
+    if (routeKey in routeMap) {
+      return routeMap[routeKey as keyof typeof routeMap][locale as 'es' | 'en'];
     }
-    return routeMap[routeKey]?.[locale] || routeKey
+    return routeKey;
   }
 
   return (
@@ -132,9 +112,9 @@ export function MainNavigation() {
         {/* Inicio */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <IntlLink href="/" className={navigationMenuTriggerStyle()}>
+            <Link href="/" className={navigationMenuTriggerStyle()}>
               {t('navigation.home')}
-            </IntlLink>
+            </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
 
@@ -210,27 +190,27 @@ export function MainNavigation() {
         {/* Precios */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <IntlLink href={getLocalizedRoute('pricing')} className={navigationMenuTriggerStyle()}>
+            <Link href={getLocalizedRoute('pricing')} className={navigationMenuTriggerStyle()}>
               {t('navigation.pricing')}
-            </IntlLink>
+            </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
 
         {/* Blog */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <IntlLink href={getLocalizedRoute('blog')} className={navigationMenuTriggerStyle()}>
+            <Link href={getLocalizedRoute('blog')} className={navigationMenuTriggerStyle()}>
               {t('navigation.blog')}
-            </IntlLink>
+            </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
 
         {/* Contacto */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <IntlLink href={getLocalizedRoute('contact')} className={navigationMenuTriggerStyle()}>
+            <Link href={getLocalizedRoute('contact')} className={navigationMenuTriggerStyle()}>
               {t('navigation.contact')}
-            </IntlLink>
+            </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
       </NavigationMenuList>

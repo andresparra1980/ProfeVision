@@ -142,7 +142,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     } finally {
       setLoading(false);
     }
-  }, [examId, router]);
+  }, [examId, router, t]);
 
   useEffect(() => {
     fetchExamDetails();

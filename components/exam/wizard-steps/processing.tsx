@@ -43,6 +43,9 @@ export function Processing() {
   const processingCompleted = useRef(false);
   const processingInProgress = useRef(false);
 
+  // Mensaje específico para cuando no se detecta examen válido
+  const NO_EXAM_DETECTED_MSG = t('messages.noExamDetected');
+
   // Helper function to check for duplicates
   const checkForDuplicates = async (qrData: QRData | null): Promise<DuplicateCheckResponse | null> => {
     if (!qrData) return null;
@@ -267,7 +270,7 @@ export function Processing() {
       processingInProgress.current = false;
       processingCompleted.current = false; // Ensure it's not marked as completed
     }
-  }, [processedImageData, setQrValidation, setFinalOutput, onProcessingComplete]);
+  }, [processedImageData, setQrValidation, setFinalOutput, onProcessingComplete, NO_EXAM_DETECTED_MSG, t]);
 
   // Set processedImageData when component mounts
   useEffect(() => {
@@ -307,9 +310,6 @@ export function Processing() {
       minute: '2-digit'
     });
   };
-
-  // Mensaje específico para cuando no se detecta examen válido
-  const NO_EXAM_DETECTED_MSG = t('messages.noExamDetected');
 
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-6 w-full">

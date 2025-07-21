@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -22,11 +22,7 @@ export default function SettingsPage() {
     biografia: "",
   });
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  async function fetchProfile() {
+  const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
@@ -60,7 +56,11 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [t]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

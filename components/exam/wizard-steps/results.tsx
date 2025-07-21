@@ -312,7 +312,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         error: (error as Error).message || t('errors.calculatingGrade')
       }));
     }
-  }, []); // Ya no depende de normalizedAnswers
+  }, [t]); // Ya no depende de normalizedAnswers
 
   // Cargar entidades y calcular puntuación
   useEffect(() => {
@@ -421,7 +421,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
     if (qrData) {
       fetchEntityNames();
     }
-  }, [qrData, calculateExamScore]); // Añadimos calculateExamScore a las dependencias
+  }, [qrData, calculateExamScore, t]); // Añadimos calculateExamScore a las dependencias
 
   // Actualizar el estado de answers cuando cambien las props
   useEffect(() => {
