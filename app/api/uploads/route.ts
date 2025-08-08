@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { getApiTranslator } from '@/i18n/api';
 
 // Directorio para guardar las imágenes subidas
 const UPLOADS_DIR = path.join(process.cwd(), 'public/uploads');
@@ -17,12 +18,12 @@ export async function POST(req: Request) {
     const image = formData.get('image') as File;
     
     if (!image) {
-      return NextResponse.json({ error: 'No se proporcionó ninguna imagen' }, { status: 400 });
+      return NextResponse.json({ error: (await getApiTranslator(req as any, 'uploads')).t('errors.missingImage') }, { status: 400 });
     }
     
     // Validar que sea una imagen
     if (!image.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'El archivo no es una imagen válida' }, { status: 400 });
+      return NextResponse.json({ error: (await getApiTranslator(req as any, 'uploads')).t('errors.invalidImage') }, { status: 400 });
     }
     
     // Generar un nombre único para la imagen
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Error al subir la imagen:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Error al procesar la imagen' },
+      { error: (await getApiTranslator(req as any, 'uploads')).t('errors.process') },
       { status: 500 }
     );
   }

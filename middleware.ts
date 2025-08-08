@@ -7,7 +7,7 @@ import { nonLocalizedRoutes } from './i18n/routing';
 // Crear el middleware de i18n
 const intlMiddleware = createIntlMiddleware({
   ...routing,
-  localeDetection: true, // Habilitar detección automática para respetar cookie
+  localeDetection: false, // Deshabilitar detección automática para evitar redirecciones inesperadas
   localePrefix: 'as-needed',
   alternateLinks: false,
 });

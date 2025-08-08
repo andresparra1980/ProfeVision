@@ -1,28 +1,8 @@
-import Link from "next/link"
-import { useTranslations, useLocale } from 'next-intl'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 
 export function SiteFooter() {
   const t = useTranslations('common')
-  const locale = useLocale()
-
-  // 🌍 Helper function to get localized routes (same structure as main-navigation)
-  const routeMap = {
-    'how-it-works': { es: '/como-funciona', en: '/how-it-works' },
-    'pricing': { es: '/precios', en: '/pricing' },
-    'contact': { es: '/contacto', en: '/contact' },
-    'blog': { es: '/blog', en: '/blog' },
-    'exams-with-ai': { es: '/examenes-con-ia', en: '/exams-with-ai' },
-    'mobile-app': { es: '/aplicacion-movil', en: '/mobile-app' },
-    'terms': { es: '/terminos', en: '/terms' },
-    'privacy': { es: '/privacidad', en: '/privacy' },
-    'cookies': { es: '/cookies', en: '/cookies' }
-  } as const;
-  const getLocalizedRoute = (routeKey: keyof typeof routeMap | string): string => {
-    if (routeKey in routeMap) {
-      return routeMap[routeKey as keyof typeof routeMap][locale as 'es' | 'en'];
-    }
-    return routeKey;
-  }
 
   return (
     <footer className="border-t bg-card mt-auto">
@@ -44,7 +24,7 @@ export function SiteFooter() {
               {t('footer.description')}
             </p>
             <div className="flex gap-4 justify-center md:justify-start">
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
+            <a href="#" className="text-muted-foreground hover:text-foreground">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -58,8 +38,8 @@ export function SiteFooter() {
                 >
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                 </svg>
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
+              </a>
+            <a href="#" className="text-muted-foreground hover:text-foreground">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -73,8 +53,8 @@ export function SiteFooter() {
                 >
                   <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
                 </svg>
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
+              </a>
+            <a href="#" className="text-muted-foreground hover:text-foreground">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -90,7 +70,7 @@ export function SiteFooter() {
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                 </svg>
-              </Link>
+              </a>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 md:gap-6 col-span-1 md:col-span-2 lg:col-span-3">
@@ -98,22 +78,22 @@ export function SiteFooter() {
               <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">{t('footer.sections.product')}</h3>
               <ul className="space-y-1 md:space-y-2">
                 <li>
-                  <Link href={getLocalizedRoute('how-it-works')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.howItWorks')}>
+                  <Link href="/how-it-works" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.howItWorks')}>
                     {t('footer.links.howItWorks')}
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLocalizedRoute('pricing')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.pricing')}>
+                  <Link href="/pricing" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.pricing')}>
                     {t('footer.links.pricing')}
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLocalizedRoute('exams-with-ai')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.aiGenerator')}>
+                  <Link href="/exams-with-ai" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.aiGenerator')}>
                     {t('footer.links.aiGenerator')}
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLocalizedRoute('mobile-app')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.mobileApp')}>
+                  <Link href="/mobile-app" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.mobileApp')}>
                     {t('footer.links.mobileApp')}
                   </Link>
                 </li>
@@ -123,17 +103,17 @@ export function SiteFooter() {
               <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">{t('footer.sections.company')}</h3>
               <ul className="space-y-1 md:space-y-2">
                 <li>
-                  <Link href={getLocalizedRoute('how-it-works')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.about')}>
+                  <Link href="/how-it-works" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.about')}>
                     {t('footer.links.about')}
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLocalizedRoute('blog')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.blog')}>
+                  <Link href="/blog" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.blog')}>
                     {t('footer.links.blog')}
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLocalizedRoute('contact')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.contact')}>
+                  <Link href="/contact" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.contact')}>
                     {t('footer.links.contact')}
                   </Link>
                 </li>
@@ -143,17 +123,17 @@ export function SiteFooter() {
               <h3 className="font-medium mb-2 md:mb-4 text-sm md:text-base">{t('footer.sections.legal')}</h3>
               <ul className="space-y-1 md:space-y-2">
                 <li>
-                  <Link href={getLocalizedRoute('terms')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.terms')}>
+                  <Link href="/terms" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.terms')}>
                     {t('footer.links.terms')}
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLocalizedRoute('privacy')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.privacy')}>
+                  <Link href="/privacy" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.privacy')}>
                     {t('footer.links.privacy')}
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLocalizedRoute('cookies')} className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.cookies')}>
+                  <Link href="/cookies" className="text-xs md:text-sm text-muted-foreground hover:text-foreground" title={t('footer.links.cookies')}>
                     {t('footer.links.cookies')}
                   </Link>
                 </li>
@@ -166,13 +146,13 @@ export function SiteFooter() {
             &copy; {new Date().getFullYear()} ProfeVision. {t('footer.copyright')}
           </p>
           <div className="flex gap-4 mt-2 md:mt-0">
-            <Link href={getLocalizedRoute('cookies')} className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.cookiesPolicy')}>
+            <Link href="/cookies" className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.cookiesPolicy')}>
               {t('footer.links.cookies')}
             </Link>
-            <Link href={getLocalizedRoute('terms')} className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.termsOfService')}>
+            <Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.termsOfService')}>
               {t('footer.links.termsOfService')}
             </Link>
-            <Link href={getLocalizedRoute('privacy')} className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.privacyPolicy')}>
+            <Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.privacyPolicy')}>
               {t('footer.links.privacyPolicy')}
             </Link>
           </div>

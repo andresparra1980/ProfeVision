@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import _logger from '@/lib/utils/logger';
 import { Estudiante } from '@/lib/types/database';
+import { getApiTranslator } from '@/i18n/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export async function GET(
     // Obtener el token de autorización del header
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({ error: (await getApiTranslator(req, 'groups.by-materia.id')).t('errors.unauthorized') }, { status: 401 });
     }
 
     // Resolver los params del Promise
@@ -75,7 +76,7 @@ export async function GET(
       console.error('API /groups/by-materia/[id]: Error:', error);
     }
     return NextResponse.json({
-      error: 'Error al obtener el grupo',
+      error: (await getApiTranslator(req, 'groups.by-materia.id')).t('errors.internal'),
       message: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 });
   }

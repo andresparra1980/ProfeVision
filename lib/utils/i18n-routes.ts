@@ -34,27 +34,27 @@ export function getLocalizedRoute(locale: string, route: LocalizedRoute): string
  */
 export const AUTH_ROUTES = {
   login: {
-    es: '/auth/login',
+    es: '/auth/iniciar-sesion',
     en: '/en/auth/login'
   },
   register: {
-    es: '/auth/register',
+    es: '/auth/registro',
     en: '/en/auth/register'
   },
   resetPassword: {
-    es: '/auth/reset-password',
+    es: '/auth/restablecer-contrasena',
     en: '/en/auth/reset-password'
   },
   updatePassword: {
-    es: '/auth/update-password',
+    es: '/auth/actualizar-contrasena',
     en: '/en/auth/update-password'
   },
   verifyEmail: {
-    es: '/auth/verify-email',
+    es: '/auth/verificar-email',
     en: '/en/auth/verify-email'
   },
   emailConfirmed: {
-    es: '/auth/email-confirmed',
+    es: '/auth/email-confirmado',
     en: '/en/auth/email-confirmed'
   }
 } as const;
@@ -68,11 +68,11 @@ export const DASHBOARD_ROUTES = {
     en: '/en/dashboard'
   },
   exams: {
-    es: '/dashboard/exams',
+    es: '/dashboard/examenes',
     en: '/en/dashboard/exams'
   },
   profile: {
-    es: '/dashboard/profile',
+    es: '/dashboard/perfil',
     en: '/en/dashboard/profile'
   }
 } as const;
@@ -86,15 +86,15 @@ export const PUBLIC_ROUTES = {
     en: '/en'
   },
   howItWorks: {
-    es: '/how-it-works',
+    es: '/como-funciona',
     en: '/en/how-it-works'
   },
   pricing: {
-    es: '/pricing',
+    es: '/precios',
     en: '/en/pricing'
   },
   contact: {
-    es: '/contact',
+    es: '/contacto',
     en: '/en/contact'
   },
   blog: {
@@ -102,11 +102,11 @@ export const PUBLIC_ROUTES = {
     en: '/en/blog'
   },
   privacy: {
-    es: '/privacy',
+    es: '/privacidad',
     en: '/en/privacy'
   },
   terms: {
-    es: '/terms',
+    es: '/terminos',
     en: '/en/terms'
   },
   cookies: {

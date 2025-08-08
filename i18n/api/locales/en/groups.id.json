@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "missingId": "Group ID not provided",
+    "serverConfig": "Server configuration error",
+    "fetch": "Failed to fetch group details",
+    "notFound": "Group not found",
+    "internal": "Internal server error"
+  }
+}
+
+

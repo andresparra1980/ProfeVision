@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import _logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -26,13 +27,14 @@ export async function PUT(
   { params }: { params: Params }
 ) {
   try {
+    const { t } = await getApiTranslator(request, 'exams.id.update-answer');
     // Resolver los params del Promise
     const resolvedParams = await params;
     const examId = resolvedParams.id;
     
     if (!examId) {
       return NextResponse.json(
-        { error: 'ID de examen no proporcionado' },
+        { error: t('errors.missingId') },
         { status: 400 }
       );
     }
@@ -42,7 +44,7 @@ export async function PUT(
     
     if (!respuestaId || !opcionId) {
       return NextResponse.json(
-        { error: 'Se requiere respuestaId y opcionId' },
+        { error: t('errors.missingFields') },
         { status: 400 }
       );
     }
@@ -57,7 +59,7 @@ export async function PUT(
     if (opcionError) {
       if (DEBUG) console.error('Error al obtener opción:', opcionError);
       return NextResponse.json(
-        { error: 'Error al verificar la opción' },
+        { error: t('errors.fetchOption') },
         { status: 500 }
       );
     }
@@ -76,7 +78,7 @@ export async function PUT(
     if (respuestaError) {
       if (DEBUG) console.error('Error al actualizar respuesta:', respuestaError);
       return NextResponse.json(
-        { error: 'Error al actualizar la respuesta' },
+        { error: t('errors.updateAnswer') },
         { status: 500 }
       );
     }
@@ -90,7 +92,7 @@ export async function PUT(
     if (respuestasError) {
       if (DEBUG) console.error('Error al obtener todas las respuestas:', respuestasError);
       return NextResponse.json(
-        { error: 'Error al recalcular puntaje' },
+        { error: t('errors.fetchAllAnswers') },
         { status: 500 }
       );
     }
@@ -114,7 +116,7 @@ export async function PUT(
     if (resultadoError) {
       if (DEBUG) console.error('Error al actualizar resultado:', resultadoError);
       return NextResponse.json(
-        { error: 'Error al actualizar puntaje final' },
+        { error: t('errors.updateResult') },
         { status: 500 }
       );
     }
@@ -132,7 +134,7 @@ export async function PUT(
       console.error('Error al procesar la solicitud:', error);
     }
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: (await getApiTranslator(request, 'exams.id.update-answer')).t('errors.internal') },
       { status: 500 }
     );
   }

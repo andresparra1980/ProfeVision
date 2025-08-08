@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "missingImage": "No image provided",
+    "invalidImage": "The file is not a valid image",
+    "process": "Error processing image"
+  }
+}
+
+

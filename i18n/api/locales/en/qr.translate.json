@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "serverConfig": "Supabase credentials missing",
+    "missingIds": "At least one ID is required (exam, student or group)",
+    "internal": "QR data translation error"
+  }
+}
+
+

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "@/lib/types/database";
 import logger from "@/lib/utils/logger";
+import { getApiTranslator } from '@/i18n/api';
 
 // Endpoint de diagnóstico para verificar que las rutas base de API están accesibles
 export async function GET() {
@@ -11,7 +12,7 @@ export async function GET() {
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: "Error de configuración del servidor" },
+        { error: (await getApiTranslator({} as any, 'exams.base')).t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -26,7 +27,7 @@ export async function GET() {
     if (error) {
       logger.error("API /exams GET: Error al obtener exámenes:", error);
       return NextResponse.json(
-        { error: "Error al obtener los exámenes" },
+        { error: (await getApiTranslator({} as any, 'exams.base')).t('errors.fetchExams') },
         { status: 500 }
       );
     }
@@ -36,7 +37,7 @@ export async function GET() {
     logger.error("API /exams GET: Error:", error);
     return NextResponse.json(
       {
-        error: "Error al obtener los exámenes",
+        error: (await getApiTranslator({} as any, 'exams.base')).t('errors.fetchExams'),
         message: error instanceof Error ? error.message : "Error desconocido",
       },
       { status: 500 }
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
 
     if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: "Error de configuración del servidor" },
+        { error: (await getApiTranslator({} as any, 'exams.base')).t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
       const { data: sessionData } = await supabaseAuth.auth.getSession();
       if (!sessionData.session) {
         return NextResponse.json(
-          { error: "No autorizado. Inicie sesión para continuar." },
+          { error: (await getApiTranslator({} as any, 'exams.base')).t('errors.unauthorized') },
           { status: 401 }
         );
       }
@@ -93,7 +94,7 @@ export async function POST(request: Request) {
         userId = sessionData.session.user.id;
       } else {
         return NextResponse.json(
-          { error: "No se pudo identificar al usuario" },
+          { error: (await getApiTranslator({} as any, 'exams.base')).t('errors.noUser') },
           { status: 401 }
         );
       }
@@ -118,7 +119,7 @@ export async function POST(request: Request) {
 
     if (!titulo || !materia_id) {
       return NextResponse.json(
-        { error: "Faltan campos requeridos (título o materia_id)" },
+        { error: (await getApiTranslator({} as any, 'exams.base')).t('errors.missingFields') },
         { status: 400 }
       );
     }
@@ -126,7 +127,7 @@ export async function POST(request: Request) {
     // Validar que hay un grupo seleccionado
     if (!grupo_id) {
       return NextResponse.json(
-        { error: "Debe seleccionar un grupo" },
+        { error: (await getApiTranslator({} as any, 'exams.base')).t('errors.missingGroup') },
         { status: 400 }
       );
     }
@@ -154,7 +155,7 @@ export async function POST(request: Request) {
       logger.error("API /exams POST: Error al crear examen:", error);
       logger.error("Detalles del error:", error.details);
       return NextResponse.json(
-        { error: "Error al crear examen" },
+        { error: (await getApiTranslator({} as any, 'exams.base')).t('errors.createExam') },
         { status: 500 }
       );
     }
@@ -252,7 +253,7 @@ export async function POST(request: Request) {
     logger.error("API /exams POST: Error:", error);
     return NextResponse.json(
       {
-        error: "Error al crear el examen",
+        error: (await getApiTranslator({} as any, 'exams.base')).t('errors.createExam'),
         message: error instanceof Error ? error.message : "Error desconocido",
       },
       { status: 500 }

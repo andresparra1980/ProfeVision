@@ -1,0 +1,16 @@
+{
+  "errors": {
+    "missingId": "Exam ID not provided",
+    "missingFields": "respuestaId and opcionId are required",
+    "fetchOption": "Failed to verify option",
+    "updateAnswer": "Failed to update answer",
+    "fetchAllAnswers": "Failed to fetch all answers",
+    "updateResult": "Failed to update final score",
+    "internal": "Internal server error"
+  },
+  "success": {
+    "ok": "Answer updated"
+  }
+}
+
+

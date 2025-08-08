@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "serverConfig": "Incomplete server configuration",
+    "missingScan": "No scan file provided",
+    "processedNotFound": "Error processing scan - processed image not found",
+    "processError": "Error processing scan",
+    "internal": "Internal server error"
+  }
+}
+
+

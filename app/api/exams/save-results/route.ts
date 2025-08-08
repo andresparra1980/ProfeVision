@@ -5,6 +5,7 @@ import { promises as _fsPromises } from "fs";
 import * as _path from "path";
 import sharp from "sharp";
 import logger from "@/lib/utils/logger";
+import { getApiTranslator } from '@/i18n/api';
 
 const DEBUG = process.env.NODE_ENV === "development";
 
@@ -217,7 +218,7 @@ export async function POST(req: NextRequest) {
       logger.error(`[${requestId}] Error parseando JSON:`, parseError);
       return NextResponse.json(
         {
-          error: "Error al procesar datos de entrada",
+          error: (await getApiTranslator(req, 'exams.save-results')).t('errors.parse'),
           details: String(parseError),
         },
         { status: 400 }
@@ -241,7 +242,7 @@ export async function POST(req: NextRequest) {
         logger.error("Invalid QR data:", qrData);
       }
       return NextResponse.json(
-        { error: "Datos de QR incompletos" },
+        { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.missingQr') },
         { status: 400 }
       );
     }
@@ -501,7 +502,7 @@ export async function POST(req: NextRequest) {
         logger.error("Error al obtener preguntas:", preguntasError);
       }
       return NextResponse.json(
-        { error: "Error al obtener preguntas del examen" },
+        { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.fetchQuestions') },
         { status: 500 }
       );
     }
@@ -767,7 +768,7 @@ export async function POST(req: NextRequest) {
         logger.error("Error al subir imagen original:", originalError);
       }
       return NextResponse.json(
-        { error: "Error al guardar imagen original" },
+        { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.uploadOriginal') },
         { status: 500 }
       );
     }
@@ -785,7 +786,7 @@ export async function POST(req: NextRequest) {
         logger.error("Error al subir imagen procesada:", processedError);
       }
       return NextResponse.json(
-        { error: "Error al guardar imagen procesada" },
+        { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.uploadProcessed') },
         { status: 500 }
       );
     }
@@ -823,7 +824,7 @@ export async function POST(req: NextRequest) {
         );
       }
       return NextResponse.json(
-        { error: "Error al guardar resultados" },
+        { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.saveResults') },
         { status: 500 }
       );
     }
@@ -899,7 +900,7 @@ export async function POST(req: NextRequest) {
         logger.error("Error al guardar resultados de escaneo:", resultadoError);
       }
       return NextResponse.json(
-        { error: "Error al guardar imágenes escaneadas" },
+        { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.saveScans') },
         { status: 500 }
       );
     }
@@ -980,7 +981,7 @@ export async function POST(req: NextRequest) {
       logger.error("Error en POST /api/exams/save-results:", error);
     }
     return NextResponse.json(
-      { error: "Error interno del servidor" },
+      { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.internal') },
       { status: 500 }
     );
   }

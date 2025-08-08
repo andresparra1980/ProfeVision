@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "serverConfig": "Server configuration error",
+    "unauthorizedMissing": "Unauthorized - Token not found",
+    "unauthorized": "Unauthorized",
+    "createEntity": "Failed to create educational entity",
+    "relateEntity": "Failed to associate entity with teacher",
+    "internal": "Internal server error"
+  }
+}
+
+

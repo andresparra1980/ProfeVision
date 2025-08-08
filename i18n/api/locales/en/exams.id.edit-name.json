@@ -1,0 +1,15 @@
+{
+  "errors": {
+    "missingId": "Exam ID not provided in URL",
+    "invalidBody": "Invalid request body",
+    "missingTitle": "New title not provided or invalid in request body",
+    "updateTitle": "Failed to update exam title",
+    "notFound": "Exam not found",
+    "unexpected": "Unexpected server error"
+  },
+  "success": {
+    "titleUpdated": "Exam title updated successfully"
+  }
+}
+
+

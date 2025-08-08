@@ -1,0 +1,13 @@
+{
+  "errors": {
+    "unauthorized": "Unauthorized",
+    "fetchLinks": "Failed to fetch links",
+    "internal": "Internal server error"
+  },
+  "success": {
+    "completed": "Sync completed",
+    "noLinks": "No links to sync"
+  }
+}
+
+

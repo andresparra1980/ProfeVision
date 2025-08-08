@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import _logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -17,6 +18,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request, { params }: { params: Params }) {
   try {
+    const { t } = await getApiTranslator(request as unknown as NextRequest, 'exams.id.manual-grade');
     // Resolver los params del Promise
     const resolvedParams = await params;
     const examId = resolvedParams.id;
@@ -25,7 +27,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
     
     if (!estudianteId || puntaje === undefined) {
       return NextResponse.json(
-        { error: 'Se requiere estudianteId y puntaje' },
+        { error: t('errors.missingFields') },
         { status: 400 }
       );
     }
@@ -60,7 +62,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
           console.error("Error al actualizar la calificación:", updateError);
         }
         return NextResponse.json(
-          { error: 'Error al actualizar la calificación' },
+          { error: t('errors.updateGrade') },
           { status: 500 }
         );
       }
@@ -86,7 +88,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
           console.error("Error al insertar la calificación:", insertError);
         }
         return NextResponse.json(
-          { error: 'Error al insertar la calificación' },
+          { error: t('errors.insertGrade') },
           { status: 500 }
         );
       }
@@ -113,9 +115,9 @@ export async function POST(request: Request, { params }: { params: Params }) {
               'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ examId: examId })
-          }).catch((error: Error) => {
+           }).catch((error: Error) => {
             if (DEBUG) {
-              console.error('Error al sincronizar calificaciones:', error);
+               console.error('Error al sincronizar calificaciones:', error);
             }
           });
         }

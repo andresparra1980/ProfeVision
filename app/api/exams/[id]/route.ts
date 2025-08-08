@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import _logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -20,6 +21,7 @@ export async function GET(
   { params }: { params: Params }
 ) {
   try {
+    const { t } = await getApiTranslator(request, 'exams.id');
     // Resolver los params del Promise
     const resolvedParams = await params;
     const examId = resolvedParams.id;
@@ -27,7 +29,7 @@ export async function GET(
     // Obtener el token de autorización del header
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({ error: t('errors.unauthorized') }, { status: 401 });
     }
 
     const { data: exam, error } = await supabase
@@ -37,7 +39,7 @@ export async function GET(
       .single();
 
     if (error?.code === 'PGRST116') {
-      return NextResponse.json({ error: 'Examen no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: t('errors.notFound') }, { status: 404 });
     }
     if (error) throw error;
 
@@ -46,8 +48,9 @@ export async function GET(
     if (DEBUG) {
       console.error('API /exams/[id]: Error:', error);
     }
+    const { t } = await getApiTranslator(request, 'exams.id');
     return NextResponse.json({
-      error: 'Error al procesar la solicitud',
+      error: t('errors.internal'),
       message: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 });
   }
@@ -58,6 +61,7 @@ export async function DELETE(
   { params }: { params: Params }
 ) {
   try {
+    const { t } = await getApiTranslator(request, 'exams.id');
     // Resolver los params del Promise
     const resolvedParams = await params;
     const examId = resolvedParams.id;
@@ -65,7 +69,7 @@ export async function DELETE(
     // Obtener el token de autorización del header
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({ error: t('errors.unauthorized') }, { status: 401 });
     }
 
     // 1. Verificar que el examen existe y está en borrador
@@ -76,13 +80,13 @@ export async function DELETE(
       .single();
 
     if (examError?.code === 'PGRST116') {
-      return NextResponse.json({ error: 'Examen no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: t('errors.notFound') }, { status: 404 });
     }
     if (examError) throw examError;
 
     if (exam.estado !== 'borrador') {
       return NextResponse.json({ 
-        error: 'Solo se pueden eliminar exámenes en estado borrador' 
+        error: t('errors.onlyDraftDelete') 
       }, { status: 400 });
     }
 
@@ -130,15 +134,16 @@ export async function DELETE(
     if (deleteExamError) throw deleteExamError;
 
     return NextResponse.json({ 
-      message: 'Examen y elementos relacionados eliminados correctamente' 
+      message: t('success.deleted') 
     });
 
   } catch (error: unknown) {
     if (DEBUG) {
       console.error('API /exams/[id] DELETE: Error:', error);
     }
+    const { t } = await getApiTranslator(request, 'exams.id');
     return NextResponse.json({
-      error: 'Error al eliminar el examen',
+      error: t('errors.internal'),
       message: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 });
   }
@@ -149,13 +154,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { t } = await getApiTranslator(req, 'exams.id');
     const { id: examId } = await params;
     const { estado } = await req.json();
 
     // Obtener el token de autorización del header
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({ error: t('errors.unauthorized') }, { status: 401 });
     }
 
     // 1. Verificar que el examen existe
@@ -166,7 +172,7 @@ export async function PATCH(
       .single();
 
     if (examError?.code === 'PGRST116') {
-      return NextResponse.json({ error: 'Examen no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: t('errors.notFound') }, { status: 404 });
     }
     if (examError) throw examError;
 
@@ -192,7 +198,7 @@ export async function PATCH(
     if (updateGruposError) throw updateGruposError;
 
     return NextResponse.json({ 
-      message: 'Estado del examen actualizado correctamente',
+      message: t('success.stateUpdated'),
       estado: estado
     });
 
@@ -200,8 +206,9 @@ export async function PATCH(
     if (DEBUG) {
       console.error('API /exams/[id] PATCH: Error:', error);
     }
+    const { t } = await getApiTranslator(req, 'exams.id');
     return NextResponse.json({
-      error: 'Error al actualizar el estado del examen',
+      error: t('errors.updateState'),
       message: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 });
   }
@@ -212,6 +219,7 @@ export async function PUT(
   { params }: { params: Params }
 ) {
   try {
+    const { t } = await getApiTranslator(request, 'exams.id');
     // Resolver los params del Promise
     const resolvedParams = await params;
     const examId = resolvedParams.id;
@@ -221,7 +229,7 @@ export async function PUT(
     
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: 'Error de configuración del servidor' },
+        { error: t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -238,7 +246,7 @@ export async function PUT(
     
     if (!title || !questions) {
       return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
+        { error: t('errors.missingFields') },
         { status: 400 }
       );
     }
@@ -259,22 +267,23 @@ export async function PUT(
         console.error('Error al actualizar examen:', updateError);
       }
       return NextResponse.json(
-        { error: 'Error al actualizar examen' },
+        { error: t('errors.updateExam') },
         { status: 500 }
       );
     }
     
     return NextResponse.json({ 
       success: true,
-      message: 'Examen actualizado correctamente'
+      message: t('success.updated')
     });
     
   } catch (error) {
     if (DEBUG) {
       console.error('Error en PUT /api/exams/[id]:', error);
     }
+    const { t } = await getApiTranslator(request, 'exams.id');
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: t('errors.internal') },
       { status: 500 }
     );
   }

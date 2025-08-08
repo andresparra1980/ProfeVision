@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import _logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,9 +17,10 @@ export async function GET(
     const resolvedParams = await params;
     const groupId = resolvedParams.id;
     
+    const { t } = await getApiTranslator(req, 'groups.id');
     if (!groupId) {
       return NextResponse.json(
-        { error: 'ID de grupo no proporcionado' },
+        { error: t('errors.missingId') },
         { status: 400 }
       );
     }
@@ -29,7 +31,7 @@ export async function GET(
     
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: 'Error de configuración del servidor' },
+        { error: t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -51,14 +53,14 @@ export async function GET(
     if (error) {
       console.error('Error al obtener detalles del grupo:', error);
       return NextResponse.json(
-        { error: 'Error al obtener detalles del grupo' },
+        { error: t('errors.fetch') },
         { status: 500 }
       );
     }
     
     if (!group) {
       return NextResponse.json(
-        { error: 'Grupo no encontrado' },
+        { error: t('errors.notFound') },
         { status: 404 }
       );
     }
@@ -90,7 +92,7 @@ export async function GET(
   } catch (error) {
     console.error('Error al procesar la solicitud:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: (await getApiTranslator(req, 'groups.id')).t('errors.internal') },
       { status: 500 }
     );
   }

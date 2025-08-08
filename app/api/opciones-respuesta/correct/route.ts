@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getApiTranslator } from '@/i18n/api';
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,7 +8,7 @@ export async function POST(req: NextRequest) {
     
     if (!questionIds || !Array.isArray(questionIds) || questionIds.length === 0) {
       return NextResponse.json(
-        { error: 'Se requiere un array de IDs de preguntas' },
+        { error: (await getApiTranslator(req, 'opciones-respuesta.correct')).t('errors.missingArray') },
         { status: 400 }
       );
     }
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
     
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: 'Error de configuración del servidor' },
+        { error: (await getApiTranslator(req, 'opciones-respuesta.correct')).t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error('Error al obtener opciones de respuesta:', error);
       return NextResponse.json(
-        { error: 'Error al obtener opciones de respuesta' },
+        { error: (await getApiTranslator(req, 'opciones-respuesta.correct')).t('errors.fetch') },
         { status: 500 }
       );
     }
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Error inesperado:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: (await getApiTranslator(req, 'opciones-respuesta.correct')).t('errors.internal') },
       { status: 500 }
     );
   }

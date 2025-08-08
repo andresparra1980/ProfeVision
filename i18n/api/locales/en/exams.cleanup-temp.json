@@ -1,0 +1,11 @@
+{
+  "success": {
+    "deleted": "Temporary files deleted successfully"
+  },
+  "errors": {
+    "cleanup": "Error deleting temporary files",
+    "internal": "Internal server error"
+  }
+}
+
+

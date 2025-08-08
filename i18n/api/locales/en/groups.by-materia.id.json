@@ -1,0 +1,8 @@
+{
+  "errors": {
+    "unauthorized": "Unauthorized",
+    "internal": "Error fetching group"
+  }
+}
+
+

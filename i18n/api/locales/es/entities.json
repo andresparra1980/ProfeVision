@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "serverConfig": "Error de configuración del servidor",
+    "unauthorizedMissing": "No autorizado - Token no encontrado",
+    "unauthorized": "No autorizado",
+    "createEntity": "Error al crear la entidad educativa",
+    "relateEntity": "Error al asociar la entidad con el profesor",
+    "internal": "Error interno del servidor"
+  }
+}
+
+
