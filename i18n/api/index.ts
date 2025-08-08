@@ -1,5 +1,3 @@
-import { NextRequest } from 'next/server';
-
 export type ApiLocale = 'es' | 'en';
 
 const SUPPORTED_LOCALES: ApiLocale[] = ['es', 'en'];
@@ -14,7 +12,7 @@ function parseAcceptLanguage(headerValue: string | null): ApiLocale | null {
   return null;
 }
 
-export function resolveApiLocale(request: NextRequest): ApiLocale {
+export function resolveApiLocale(request: Request): ApiLocale {
   // 1) Query param has priority
   const url = new URL(request.url);
   const queryLocale = url.searchParams.get('locale');
@@ -53,7 +51,7 @@ export async function getApiMessages(namespace: string, locale: ApiLocale): Prom
   }
 }
 
-export async function getApiTranslator(request: NextRequest, namespace: string) {
+export async function getApiTranslator(request: Request, namespace: string) {
   const locale = resolveApiLocale(request);
   const messages = await getApiMessages(namespace, locale);
 

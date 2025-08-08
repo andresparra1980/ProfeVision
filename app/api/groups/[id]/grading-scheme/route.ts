@@ -27,7 +27,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
         console.error('Error: Faltan variables de entorno para Supabase');
       }
       return NextResponse.json({ 
-        error: (await getApiTranslator(request as any, 'groups.id.grading-scheme')).t('errors.serverConfig') 
+        error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.serverConfig') 
       }, { status: 500 });
     }
 
@@ -50,14 +50,14 @@ export async function POST(request: Request, { params }: { params: Params }) {
         console.error('Error al verificar grupo:', grupoError);
       }
       return NextResponse.json(
-        { error: (await getApiTranslator(request as any, 'groups.id.grading-scheme')).t('errors.forbidden') },
+        { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.forbidden') },
         { status: 403 }
       );
     }
 
     if (!grupo) {
       return NextResponse.json(
-        { error: (await getApiTranslator(request as any, 'groups.id.grading-scheme')).t('errors.groupNotFound') },
+        { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.groupNotFound') },
         { status: 404 }
       );
     }
@@ -67,7 +67,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
       // Validar que las fechas estén establecidas
       if (!periodo.fecha_inicio || !periodo.fecha_fin) {
         return NextResponse.json(
-          { error: (await getApiTranslator(request as any, 'groups.id.grading-scheme')).t('errors.missingPeriodDates') },
+          { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.missingPeriodDates') },
           { status: 400 }
         );
       }
@@ -94,7 +94,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
       // Validar que la fecha de fin sea posterior a la de inicio
       if (new Date(scheme.fecha_fin) <= new Date(scheme.fecha_inicio)) {
         return NextResponse.json(
-          { error: (await getApiTranslator(request as any, 'groups.id.grading-scheme')).t('errors.invalidPeriodRange') },
+          { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.invalidPeriodRange') },
           { status: 400 }
         );
       }
@@ -309,7 +309,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
       console.error('Error al guardar esquema:', error);
     }
     return NextResponse.json(
-      { error: (await getApiTranslator(request as any, 'groups.id.grading-scheme')).t('errors.internal'), 
+      { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.internal'), 
         message: error instanceof Error ? error.message : 'Error desconocido' 
       },
       { status: 500 }

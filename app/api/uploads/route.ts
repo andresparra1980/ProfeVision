@@ -18,12 +18,12 @@ export async function POST(req: Request) {
     const image = formData.get('image') as File;
     
     if (!image) {
-      return NextResponse.json({ error: (await getApiTranslator(req as any, 'uploads')).t('errors.missingImage') }, { status: 400 });
+      return NextResponse.json({ error: (await getApiTranslator(req, 'uploads')).t('errors.missingImage') }, { status: 400 });
     }
     
     // Validar que sea una imagen
     if (!image.type.startsWith('image/')) {
-      return NextResponse.json({ error: (await getApiTranslator(req as any, 'uploads')).t('errors.invalidImage') }, { status: 400 });
+      return NextResponse.json({ error: (await getApiTranslator(req, 'uploads')).t('errors.invalidImage') }, { status: 400 });
     }
     
     // Generar un nombre único para la imagen
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Error al subir la imagen:', error);
     return NextResponse.json(
-      { error: (await getApiTranslator(req as any, 'uploads')).t('errors.process') },
+      { error: (await getApiTranslator(req, 'uploads')).t('errors.process') },
       { status: 500 }
     );
   }

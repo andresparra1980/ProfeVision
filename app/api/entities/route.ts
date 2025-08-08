@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: (await getApiTranslator(request as any, 'entities')).t('errors.serverConfig') },
+        { error: (await getApiTranslator(request, 'entities')).t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const authHeader = request.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
-        { error: (await getApiTranslator(request as any, 'entities')).t('errors.unauthorizedMissing') },
+        { error: (await getApiTranslator(request, 'entities')).t('errors.unauthorizedMissing') },
         { status: 401 }
       );
     }
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       if (DEBUG && authError) {
         console.error("Error de autenticación:", authError);
       }
-      return NextResponse.json({ error: (await getApiTranslator(request as any, 'entities')).t('errors.unauthorized') }, { status: 401 });
+      return NextResponse.json({ error: (await getApiTranslator(request, 'entities')).t('errors.unauthorized') }, { status: 401 });
     }
 
     // Obtener los datos del request
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
         console.error("Error al crear entidad:", entidadError);
       }
       return NextResponse.json(
-        { error: (await getApiTranslator(request as any, 'entities')).t('errors.createEntity') },
+        { error: (await getApiTranslator(request, 'entities')).t('errors.createEntity') },
         { status: 500 }
       );
     }
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
       await supabase.from("entidades_educativas").delete().eq("id", entidad.id);
 
       return NextResponse.json(
-        { error: (await getApiTranslator(request as any, 'entities')).t('errors.relateEntity') },
+        { error: (await getApiTranslator(request, 'entities')).t('errors.relateEntity') },
         { status: 500 }
       );
     }
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
       console.error("Error al procesar la solicitud:", error);
     }
     return NextResponse.json(
-      { error: (await getApiTranslator(request as any, 'entities')).t('errors.internal') },
+      { error: (await getApiTranslator(request, 'entities')).t('errors.internal') },
       { status: 500 }
     );
   }
