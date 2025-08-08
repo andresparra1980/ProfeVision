@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { ChevronLeft, Loader2, Save, AlertCircle, Download, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -152,6 +152,8 @@ export default function ExamResultsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const t = useTranslations('dashboard.exams.results');
+  const tc = useTranslations('common');
+  const locale = useLocale();
   const [loading, setLoading] = useState(true);
   const [examDetails, setExamDetails] = useState<ExamDetails | null>(null);
   const [resultados, setResultados] = useState<ResultadoExamen[]>([]);
@@ -810,7 +812,7 @@ export default function ExamResultsPage() {
       
       if (isNaN(gradeValue) || gradeValue < 0 || gradeValue > 5) {
         toast({
-          title: t('common.error'),
+          title: tc('messages.error'),
           description: t('toast.gradeValidationError'),
           variant: "destructive",
         });
@@ -866,7 +868,7 @@ export default function ExamResultsPage() {
   const handleExportToExcel = () => {
     if (!examDetails || resultados.length === 0) {
       toast({
-        title: t('common.error'),
+        title: tc('messages.error'),
         description: t('toast.noResultsError'),
         variant: "destructive",
       });
@@ -898,8 +900,13 @@ export default function ExamResultsPage() {
           });
         });
       
-      // Ordenar datos por apellidos en orden ascendente
-      dataToExport.sort((a, b) => a["Apellidos"].localeCompare(b["Apellidos"], 'es'));
+      // Ordenar datos por apellidos en orden ascendente usando etiqueta localizada
+      const lastNameLabel = t('excel.lastName');
+      dataToExport.sort((a, b) => {
+        const aLast = String(a[lastNameLabel] ?? '');
+        const bLast = String(b[lastNameLabel] ?? '');
+        return aLast.localeCompare(bLast, locale);
+      });
       
       // Crear un libro de trabajo
       const wb = XLSX.utils.book_new();
@@ -923,8 +930,15 @@ export default function ExamResultsPage() {
         [''] // Línea en blanco antes de los datos de estudiantes
       ];
       
-      // Crear cabeceras de columnas
-      const columnsRow = ['Apellidos', 'Nombres', 'Identificación', 'Nota', 'Porcentaje', 'Fecha de Calificación'];
+      // Crear cabeceras de columnas (localizadas)
+      const columnsRow = [
+        t('excel.lastName'),
+        t('excel.firstName'),
+        t('excel.identification'),
+        t('excel.score'),
+        t('excel.percentage'),
+        t('excel.gradedDate')
+      ];
       
       // Combinar todo en una matriz
       const allData = [...headerData, columnsRow];
@@ -950,13 +964,13 @@ export default function ExamResultsPage() {
       // Generar el archivo y descargarlo
       XLSX.writeFile(wb, `resultados_${examDetails.titulo.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
 
-          toast({
-      title: t('common.success'),
+      toast({
+        title: tc('messages.success'),
       description: t('toast.exportSuccess'),
     });
     } catch (_error) {
-          toast({
-      title: t('common.error'),
+      toast({
+        title: tc('messages.error'),
       description: t('toast.exportError'),
       variant: "destructive",
     });
@@ -970,7 +984,7 @@ export default function ExamResultsPage() {
   const handleExportToPDF = async (updateProgress: (_progress: number) => void) => {
     if (!examDetails || resultados.length === 0) {
       toast({
-        title: t('common.error'),
+        title: tc('messages.error'),
         description: t('toast.noResultsError'),
         variant: "destructive",
       });
@@ -994,8 +1008,8 @@ export default function ExamResultsPage() {
         description: t('toast.pdfGeneratedDesc'),
       });
     } catch (_error) {
-          toast({
-      title: t('common.error'),
+      toast({
+        title: tc('messages.error'),
       description: t('toast.pdfError'),
       variant: "destructive",
     });
@@ -1326,7 +1340,7 @@ export default function ExamResultsPage() {
               }}
               disabled={updatingAnswer}
             >
-              {t('common.cancel')}
+              {tc('buttons.cancel')}
             </Button>
             <Button
               onClick={handleConfirmUpdate}
@@ -1633,7 +1647,7 @@ export default function ExamResultsPage() {
               onClick={() => setShowManualGradeDialog(false)}
               disabled={isSubmittingGrade}
             >
-              {t('common.cancel')}
+              {tc('buttons.cancel')}
             </Button>
             <Button
               onClick={handleSaveManualGrade}
