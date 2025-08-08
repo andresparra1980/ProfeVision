@@ -14,7 +14,7 @@ set -e
 PROJECT_DIR="/home/andresparra/ProfeVision-i18n"
 NEXT_DIR="$PROJECT_DIR/.next"
 NEXT_STATIC_DIR="$NEXT_DIR/static"
-NGINX_STATIC_DIR="/www/html/testing-profevision/_next/static"
+NGINX_STATIC_DIR="/var/www/testing-profevision/_next/static"
 PM2_NAME="profevision-testing"
 APP_PORT=3002
 
@@ -38,9 +38,9 @@ NODE_ENV=production yarn build
 echo "🗂️  Updating static assets for nginx..."
 sudo mkdir -p "$NGINX_STATIC_DIR"
 sudo rsync -a --delete "$NEXT_STATIC_DIR/" "$NGINX_STATIC_DIR/"
-sudo chown -R www-data:www-data "/www/html/testing-profevision"
-sudo find "/www/html/testing-profevision" -type d -exec chmod 755 {} \;
-sudo find "/www/html/testing-profevision" -type f -exec chmod 644 {} \;
+sudo chown -R www-data:www-data "/var/www/testing-profevision"
+sudo find "/var/www/testing-profevision" -type d -exec chmod 755 {} \;
+sudo find "/var/www/testing-profevision" -type f -exec chmod 644 {} \;
 
 echo "🔎 Verifying CSS files..."
 if [ -d "$NEXT_STATIC_DIR/css" ] && [ "$(ls -A "$NEXT_STATIC_DIR/css" 2>/dev/null)" ]; then
