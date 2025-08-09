@@ -38,7 +38,6 @@ export default function DashboardLayout({
   const router = useRouter();
   const t = useTranslations('dashboard');
   const locale = useLocale();
-  const routes = useLocalizedRoute(locale);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
