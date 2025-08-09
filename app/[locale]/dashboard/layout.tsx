@@ -11,7 +11,6 @@ import type { User, Session } from '@supabase/supabase-js';
 import { SidebarProvider } from "@/lib/contexts/sidebar-context";
 import logger from "@/lib/utils/logger";
 import { useTranslations, useLocale } from 'next-intl';
-import { useLocalizedRoute } from '@/lib/utils/i18n-routes';
 
 // Helper function to delete cookies by name prefix
 function deleteSupabaseCookies() {
