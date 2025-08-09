@@ -10,7 +10,6 @@ import { MainNavigation } from "@/components/shared/main-navigation"
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react"
 import { 
   BookOpen, 
-  FileText, 
   Brain, 
   ScanLine,
   Smartphone
@@ -24,17 +23,17 @@ export function SiteHeader() {
   const { session, isLoading } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isFuncionesOpen, setIsFuncionesOpen] = useState(false)
-  const [isExamenesOpen, setIsExamenesOpen] = useState(false)
+  // Removed exams sub-menu state (not used currently)
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
   const closeMenu = () => {
     setIsMenuOpen(false)
     setIsFuncionesOpen(false)
-    setIsExamenesOpen(false)
+    // ensure all toggles closed
   }
   
   const toggleFunciones = () => setIsFuncionesOpen(!isFuncionesOpen)
-  const toggleExamenes = () => setIsExamenesOpen(!isExamenesOpen)
+  // const toggleExamenes = () => setIsExamenesOpen(!isExamenesOpen)
 
   // Componente para items del menú móvil
   const MobileMenuItem = ({ 
@@ -62,7 +61,7 @@ export function SiteHeader() {
         <span>{title}</span>
         {onClick && (
           <span className="ml-auto">
-            {(title === t('navigation.functions') && isFuncionesOpen) || (title === t('navigation.exams') && isExamenesOpen) ? (
+            {(title === t('navigation.functions') && isFuncionesOpen) ? (
               <ChevronDown className="h-4 w-4" />
             ) : (
               <ChevronRight className="h-4 w-4" />
@@ -97,7 +96,7 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b">
+      <header className={`fixed w-full z-[2000] border-b ${isMenuOpen ? 'bg-white dark:bg-background' : 'bg-background/80 backdrop-blur-md'}`}>
         <div className="container flex h-16 items-center justify-between relative">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" title={`ProfeVisión - ${t('navigation.home')} | ${t('homepage.hero.title')}`}>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
@@ -159,49 +158,12 @@ export function SiteHeader() {
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="absolute top-16 inset-x-0 bg-background/95 backdrop-blur-md border-b md:hidden z-40">
+          <div className="fixed top-16 inset-x-0 bottom-0 bg-white dark:bg-background md:hidden z-[60] border-t shadow-lg">
             <div className="container py-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
-              {/* Cómo funciona */}
-              <MobileMenuItem href='/how-it-works' title={t('navigation.howItWorks')} />
-              
-              {/* Exámenes */}
-              <div>
-                <MobileMenuItem 
-                  title={t('navigation.exams')} 
-                  icon={FileText}
-                  onClick={toggleExamenes}
-                />
-                {isExamenesOpen && (
-                  <div className="border-l-2 border-muted ml-4">
-                    <MobileMenuItem 
-                      href='/exams' 
-                      title={t('navigation.exams')}
-                      icon={FileText}
-                      isSubItem
-                    />
-                    <MobileMenuItem 
-                      href='/exams/manual-generator' 
-                      title={t('navigation.manualGenerator')}
-                      icon={FileText}
-                      isSubItem
-                    />
-                    <MobileMenuItem 
-                      href='/exams/ai-generator' 
-                      title={t('navigation.aiGenerator')}
-                      icon={Brain}
-                      isSubItem
-                    />
-                    <MobileMenuItem 
-                      href='/paper-exams' 
-                      title={t('navigation.paperExams')}
-                      icon={ScanLine}
-                      isSubItem
-                    />
-                  </div>
-                )}
-              </div>
-              
-              {/* Funciones */}
+              {/* Inicio */}
+              <MobileMenuItem href='/' title={t('navigation.home')} />
+
+              {/* Funciones (replica del menú de escritorio) */}
               <div>
                 <MobileMenuItem 
                   title={t('navigation.functions')} 
@@ -211,33 +173,21 @@ export function SiteHeader() {
                 {isFuncionesOpen && (
                   <div className="border-l-2 border-muted ml-4">
                     <MobileMenuItem 
-                      href='/institutions-management' 
-                      title={t('navigation.institutionsManagement')} 
+                      href='/how-it-works' 
+                      title={t('navigation.howItWorks')} 
                       icon={BookOpen}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href='/subjects-management' 
-                      title={t('navigation.subjectsManagement')} 
-                      icon={BookOpen}
+                      href='/exams-with-ai' 
+                      title={t('navigation.aiGenerator')}
+                      icon={Brain}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href='/groups-management' 
-                      title={t('navigation.groupsManagement')} 
-                      icon={BookOpen}
-                      isSubItem
-                    />
-                    <MobileMenuItem 
-                      href='/students-management' 
-                      title={t('navigation.studentsManagement')} 
-                      icon={BookOpen}
-                      isSubItem
-                    />
-                    <MobileMenuItem 
-                      href='/reports' 
-                      title={t('navigation.reports')} 
-                      icon={BookOpen}
+                      href='/paper-exams' 
+                      title={t('navigation.paperExams')}
+                      icon={ScanLine}
                       isSubItem
                     />
                     <MobileMenuItem 

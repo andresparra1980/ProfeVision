@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useTranslations, useLocale } from 'next-intl'
-import Link from "next/link"
+import { useTranslations } from 'next-intl'
+import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/utils"
 import {
   NavigationMenu,
@@ -21,10 +21,14 @@ import {
   Smartphone
 } from "lucide-react"
 
+type PublicStaticPath =
+  '/' | '/how-it-works' | '/exams-with-ai' | '/paper-exams' | '/mobile-app' |
+  '/pricing' | '/blog' | '/contact';
+
 interface ListItemProps {
   title: string
   icon?: React.ComponentType<{ className?: string }>
-  href?: string
+  href: PublicStaticPath
   className?: string
   children?: React.ReactNode
 }
@@ -42,7 +46,7 @@ const ListItem = React.forwardRef<
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group",
             className
           )}
-          href={href || "#"}
+          href={href}
           {...props}
         >
           <div className="flex items-center gap-2">
@@ -68,7 +72,7 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
       <NavigationMenuLink asChild>
         <Link
           className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group border-l-2 border-muted/50 pl-3"
-          href={href || "#"}
+          href={href}
         >
           <div className="flex items-center gap-2">
             {Icon && <Icon className="h-3 w-3" />} {/* Íconos más pequeños para sub-items */}
@@ -87,24 +91,7 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
 
 export function MainNavigation() {
   const t = useTranslations('common')
-  const locale = useLocale()
-
-  // 🌍 Helper function to get localized routes
-  const routeMap = {
-    'how-it-works': { es: '/como-funciona', en: '/how-it-works' },
-    'exams-with-ai': { es: '/examenes-con-ia', en: '/exams-with-ai' },
-    'paper-exams': { es: '/examenes-papel', en: '/paper-exams' },
-    'mobile-app': { es: '/aplicacion-movil', en: '/mobile-app' },
-    'pricing': { es: '/precios', en: '/pricing' },
-    'blog': { es: '/blog', en: '/blog' },
-    'contact': { es: '/contacto', en: '/contact' }
-  } as const;
-  const getLocalizedRoute = (routeKey: keyof typeof routeMap | string): string => {
-    if (routeKey in routeMap) {
-      return routeMap[routeKey as keyof typeof routeMap][locale as 'es' | 'en'];
-    }
-    return routeKey;
-  }
+  // Enlaces usan las claves de `routing.pathnames` para preservar el locale automáticamente
 
   return (
     <NavigationMenu>
@@ -130,7 +117,7 @@ export function MainNavigation() {
                 <ul className="space-y-2">
                   {/* Cómo funciona - Primer item clickeable */}
                   <ListItem 
-                    href={getLocalizedRoute('how-it-works')}
+                    href={'/how-it-works'}
                     title={t('navigation.howItWorks')}
                     icon={BookOpen}
                   >
@@ -157,14 +144,14 @@ export function MainNavigation() {
                   
                   {/* Sub-items de Exámenes */}
                   <ExamenSubItem 
-                    href={getLocalizedRoute('exams-with-ai')}
+                    href={'/exams-with-ai'}
                     title={t('navigation.aiGenerator')}
                     icon={Brain}
                   >
                     {t('navigation.aiGeneratorDescription')}
                   </ExamenSubItem>
                   <ExamenSubItem 
-                    href={getLocalizedRoute('paper-exams')}
+                    href={'/paper-exams'}
                     title={t('navigation.paperExams')}
                     icon={ScanLine}
                   >
@@ -175,7 +162,7 @@ export function MainNavigation() {
                 {/* Columna 3 */}
                 <ul className="space-y-2">
                   <ListItem 
-                    href={getLocalizedRoute('mobile-app')}
+                    href={'/mobile-app'}
                     title={t('navigation.mobileApp')}
                     icon={Smartphone}
                   >
@@ -190,7 +177,7 @@ export function MainNavigation() {
         {/* Precios */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href={getLocalizedRoute('pricing')} className={navigationMenuTriggerStyle()}>
+            <Link href={'/pricing'} className={navigationMenuTriggerStyle()}>
               {t('navigation.pricing')}
             </Link>
           </NavigationMenuLink>
@@ -199,7 +186,7 @@ export function MainNavigation() {
         {/* Blog */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href={getLocalizedRoute('blog')} className={navigationMenuTriggerStyle()}>
+            <Link href={'/blog'} className={navigationMenuTriggerStyle()}>
               {t('navigation.blog')}
             </Link>
           </NavigationMenuLink>
@@ -208,7 +195,7 @@ export function MainNavigation() {
         {/* Contacto */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href={getLocalizedRoute('contact')} className={navigationMenuTriggerStyle()}>
+            <Link href={'/contact'} className={navigationMenuTriggerStyle()}>
               {t('navigation.contact')}
             </Link>
           </NavigationMenuLink>
