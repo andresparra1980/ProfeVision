@@ -100,7 +100,7 @@ export function LanguageSwitcher() {
       <SelectTrigger className="w-20">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="z-[3000]">
         {locales.map((loc) => (
           <SelectItem key={loc} value={loc}>
             {loc.toUpperCase()}
