@@ -31,7 +31,9 @@
     "defaultName": "User",
     "myProfile": "My profile",
     "logout": "Logout",
-    "loggingOut": "Logging out..."
+    "loggingOut": "Logging out...",
+    "logoutSuccessTitle": "Signed out",
+    "logoutSuccessDescription": "You have been signed out successfully."
   },
   "header": {
     "documentation": "Documentation",

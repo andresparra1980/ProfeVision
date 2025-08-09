@@ -175,7 +175,7 @@ function UpdatePasswordContent() {
         typedError.error_code === "same_password" ||
         typedError.msg === "New password should be different from the old password."
       ) {
-        errorMsg = "La nueva contraseña debe ser diferente a la anterior.";
+        errorMsg = tErrors('samePasswordDifferent');
       } else if (error instanceof Error) {
         errorMsg = error.message;
       }
@@ -201,14 +201,14 @@ function UpdatePasswordContent() {
         <div className="mx-auto w-full max-w-md">
           <Card>
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-center">Error</CardTitle>
+              <CardTitle className="text-2xl text-center">{t('error')}</CardTitle>
               <CardDescription className="text-center text-destructive">
                 {error}
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-center">
               <Button asChild variant="outline" className="w-full">
-                <a href={resetPasswordPath}>Solicitar nuevo enlace</a>
+                <a href={resetPasswordPath}>{t('requestNewLink')}</a>
               </Button>
             </CardFooter>
           </Card>

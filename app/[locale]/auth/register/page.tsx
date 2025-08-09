@@ -60,7 +60,7 @@ export default function RegisterPage() {
     if (!captchaToken) {
       toast({
         variant: "destructive",
-        title: t('validationError') || 'Error de validación',
+        title: tErrors('validationError'),
         description: tErrors('captchaRequired'),
       });
       return;

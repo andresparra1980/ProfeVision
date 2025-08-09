@@ -10,6 +10,8 @@ import { toast } from "@/components/ui/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
 import { SidebarProvider } from "@/lib/contexts/sidebar-context";
 import logger from "@/lib/utils/logger";
+import { useTranslations, useLocale } from 'next-intl';
+import { useLocalizedRoute } from '@/lib/utils/i18n-routes';
 
 // Helper function to delete cookies by name prefix
 function deleteSupabaseCookies() {
@@ -34,6 +36,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const t = useTranslations('dashboard');
+  const locale = useLocale();
+  const routes = useLocalizedRoute(locale);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -64,7 +69,10 @@ export default function DashboardLayout({
         // toast({ variant: "destructive", title: "Error al cerrar sesión", ... }); 
       } else {
         // Only toast success if signOut didn't error
-        toast({ title: "Sesión cerrada", description: "Has cerrado sesión correctamente." });
+        toast({ 
+          title: t('user.logoutSuccessTitle', { defaultValue: locale === 'en' ? 'Signed out' : 'Sesión cerrada' }), 
+          description: t('user.logoutSuccessDescription', { defaultValue: locale === 'en' ? 'You have been signed out successfully.' : 'Has cerrado sesión correctamente.' }) 
+        });
       }
       
       // Manually clear Supabase cookies before redirecting
@@ -72,7 +80,7 @@ export default function DashboardLayout({
       
       // Always redirect to clear client state
       logger.log('[DashboardLayout] Redirecting to login after logout attempt.');
-      router.push("/auth/login");
+      router.push({ pathname: '/auth/login' });
       
       // It might take a moment for redirect, ensure isLoggingOut is reset eventually
       // Setting it false here might be too soon if redirect hangs, but often okay.

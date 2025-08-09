@@ -53,8 +53,8 @@ export default function LoginPage() {
     if (!captchaToken) {
       toast({
         variant: "destructive",
-        title: t('validationError'),
-        description: t('captchaError'),
+        title: tErrors('validationError'),
+        description: tErrors('captchaRequired'),
       });
       return;
     }

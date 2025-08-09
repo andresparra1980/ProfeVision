@@ -31,7 +31,9 @@
     "defaultName": "Usuario",
     "myProfile": "Mi perfil",
     "logout": "Cerrar sesión",
-    "loggingOut": "Cerrando sesión..."
+    "loggingOut": "Cerrando sesión...",
+    "logoutSuccessTitle": "Sesión cerrada",
+    "logoutSuccessDescription": "Has cerrado sesión correctamente."
   },
   "header": {
     "documentation": "Documentación",
