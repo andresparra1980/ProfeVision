@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
-import { useTranslations, useLocale } from 'next-intl'
+import { Link } from "@/i18n/navigation"
+import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { FeatureSlideshow } from "@/components/shared/feature-slideshow"
 import {
@@ -20,24 +20,13 @@ import { useMemo } from 'react'
 
 export default function Home() {
   const t = useTranslations('common')
-  const locale = useLocale()
   
   const avatarSeeds = useMemo(
     () => ['seed1', 'seed2', 'seed3', 'seed4'],
     []
   )
 
-  // Helper function to get localized routes
-  const getLocalizedRoute = (route: string) => {
-    if (locale === 'es') {
-      const routeMap: Record<string, string> = {
-        '/auth/register': '/auth/registro',
-        '/how-it-works': '/como-funciona',
-      }
-      return routeMap[route] || route
-    }
-    return route
-  }
+  // Internal links use i18n-aware Link which preserves current locale
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -67,14 +56,14 @@ export default function Home() {
                     size="lg"
                     className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
-                    <Link href={getLocalizedRoute('/auth/register')} title={t('homepage.hero.registerTitle')}>
+                    <Link href={'/auth/register'} title={t('homepage.hero.registerTitle')}>
                       {t('homepage.hero.startFree')}
                     </Link>
                   </Button>
                   <Button asChild variant="outline" size="lg">
-                    <Link href="#caracteristicas" title={t('homepage.hero.learnMoreTitle')}>
+                    <a href="#caracteristicas" title={t('homepage.hero.learnMoreTitle')}>
                       {t('homepage.hero.learnMore')}
-                    </Link>
+                    </a>
                   </Button>
                 </div>
                 <div className="flex items-center gap-4 pt-4">
@@ -464,7 +453,7 @@ export default function Home() {
                     size="lg"
                     className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
-                    <Link href={getLocalizedRoute('/auth/register')} title={t('homepage.benefits.startFreeTitle')}>
+                    <Link href={'/auth/register'} title={t('homepage.benefits.startFreeTitle')}>
                       {t('homepage.benefits.startFree')}
                     </Link>
                   </Button>
@@ -542,7 +531,7 @@ export default function Home() {
                   variant="secondary"
                   className="bg-white text-[#0b890f] hover:bg-white/90"
                 >
-                  <Link href={getLocalizedRoute('/auth/register')} title={t('homepage.cta.startTrialTitle')}>
+                  <Link href={'/auth/register'} title={t('homepage.cta.startTrialTitle')}>
                     {t('homepage.cta.startTrial')}
                   </Link>
                 </Button>
@@ -551,7 +540,7 @@ export default function Home() {
                   size="lg"
                   className="bg-white/10 text-white hover:bg-white/20 border border-white/20 backdrop-blur-sm"
                 >
-                  <Link href={getLocalizedRoute('/how-it-works')}>{t('homepage.cta.learnMore')}</Link>
+                  <Link href={'/how-it-works'}>{t('homepage.cta.learnMore')}</Link>
                 </Button>
               </div>
               <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">

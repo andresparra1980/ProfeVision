@@ -1,7 +1,7 @@
 'use client'
 
-import Link from "next/link"
-import { useTranslations, useLocale } from 'next-intl'
+import { Link } from "@/i18n/navigation"
+import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
@@ -25,19 +25,8 @@ import { Badge } from "@/components/ui/badge"
 
 export default function HowItWorksPage() {
   const t = useTranslations('common')
-  const locale = useLocale()
 
-  // Helper function to get localized routes
-  const getLocalizedRoute = (route: string) => {
-    if (locale === 'es') {
-      const routeMap: Record<string, string> = {
-        '/auth/register': '/auth/registro',
-        '/pricing': '/precios',
-      }
-      return routeMap[route] || route
-    }
-    return route
-  }
+  // Internal links use i18n-aware Link which preserves current locale
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -67,7 +56,7 @@ export default function HowItWorksPage() {
                 size="lg"
                 className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
               >
-                <Link href={getLocalizedRoute('/auth/register')}>{t('howItWorks.hero.cta')}</Link>
+                <Link href={'/auth/register'}>{t('howItWorks.hero.cta')}</Link>
               </Button>
             </div>
           </div>
@@ -518,14 +507,14 @@ export default function HowItWorksPage() {
                 variant="secondary"
                 className="bg-white text-[#0b890f] hover:bg-white/90"
               >
-                <Link href={getLocalizedRoute('/auth/register')}>{t('howItWorks.cta.startFree')}</Link>
+                <Link href={'/auth/register'}>{t('howItWorks.cta.startFree')}</Link>
               </Button>
               <Button
                 asChild
                 size="lg"
                 className="bg-white/10 text-white hover:bg-white/20 border border-white/20 backdrop-blur-sm"
               >
-                <Link href={getLocalizedRoute('/pricing')}>{t('howItWorks.cta.viewPricing')}</Link>
+                <Link href={'/pricing'}>{t('howItWorks.cta.viewPricing')}</Link>
               </Button>
             </div>
           </div>
