@@ -11,7 +11,7 @@ export default function EmailConfirmedPage() {
   const locale = useLocale();
   
   // 🔄 Rutas localizadas
-  const loginPath = locale === 'es' ? '/auth/login' : '/en/auth/login';
+  const loginPath = locale === 'es' ? '/auth/iniciar-sesion' : '/en/auth/login';
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">

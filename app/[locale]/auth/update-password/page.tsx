@@ -166,7 +166,7 @@ function UpdatePasswordContent() {
       });
       
       // 🔄 Redirección localizada
-      const loginPath = locale === 'es' ? '/auth/login' : '/en/auth/login';
+      const loginPath = locale === 'es' ? '/auth/iniciar-sesion' : '/en/auth/login';
       router.push(loginPath);
     } catch (error: unknown) {
       let errorMsg = tErrors('generalError');
@@ -190,7 +190,7 @@ function UpdatePasswordContent() {
   }
 
   // 🔄 Rutas localizadas
-  const resetPasswordPath = locale === 'es' ? '/auth/reset-password' : '/en/auth/reset-password';
+  const resetPasswordPath = locale === 'es' ? '/auth/restablecer-contrasena' : '/en/auth/reset-password';
 
   if (error) {
     return (
@@ -278,7 +278,7 @@ export default function UpdatePasswordPage() {
     <Suspense fallback={
       <div className="flex min-h-screen flex-col items-center justify-center">
         <div className="text-center">
-          <p>{tCommon('loading')}</p>
+          <p>{tCommon('messages.loading')}</p>
         </div>
       </div>
     }>

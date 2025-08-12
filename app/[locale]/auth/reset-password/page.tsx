@@ -61,7 +61,7 @@ export default function ResetPasswordPage() {
         email: data.email,
       });
       
-      const { error } = await resetPassword(data.email, captchaToken);
+      const { error } = await resetPassword(data.email, captchaToken, locale as 'es' | 'en');
 
       if (error) {
         logger.auth("Error resetting password", { error, email: data.email });

@@ -75,8 +75,10 @@ export default function RegisterPage() {
           nombre: data.nombres,
           apellido: data.apellidos,
           full_name: `${data.nombres} ${data.apellidos}`,
+          preferred_locale: locale,
         },
-        captchaToken
+        captchaToken,
+        locale as 'es' | 'en'
       );
 
       if (error) {
