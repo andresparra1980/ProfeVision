@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
+import type { Session, AuthError } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { logger } from "@/lib/utils/logger";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -63,9 +63,8 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    let sessionResult: { data: { session: any | null }, error: any | null } = { data: { session: null }, error: null };
+    let sessionResult: { data: { session: Session | null }, error: AuthError | null } = { data: { session: null }, error: null };
     if (code) {
-      // Exchange the code for a session when provided (OAuth/PKCE flows)
       logger.auth("Attempting to exchange code for session", { type });
       sessionResult = await supabase.auth.exchangeCodeForSession(code);
       logger.auth("Exchange result", {
