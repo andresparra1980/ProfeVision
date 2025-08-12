@@ -5,7 +5,11 @@ import { createServerClient } from "@supabase/ssr";
 export async function GET(request: NextRequest) {
   // Extract tokens from URL
   const requestUrl = new URL(request.url);
-  const requestOrigin = requestUrl.origin;
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto');
+  const requestOrigin = forwardedHost && forwardedProto
+    ? `${forwardedProto}://${forwardedHost}`
+    : requestUrl.origin;
 
   // Look for all possible token variations
   const token = requestUrl.searchParams.get("token");

@@ -6,7 +6,11 @@ import { logger } from "@/lib/utils/logger";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
-  const requestOrigin = requestUrl.origin;
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto');
+  const requestOrigin = forwardedHost && forwardedProto
+    ? `${forwardedProto}://${forwardedHost}`
+    : requestUrl.origin;
   const code = requestUrl.searchParams.get("code");
   const token = requestUrl.searchParams.get("token");
   const type = requestUrl.searchParams.get("type");
