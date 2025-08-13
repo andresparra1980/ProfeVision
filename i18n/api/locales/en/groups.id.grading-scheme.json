@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "serverConfig": "Server configuration error",
+    "forbidden": "Could not verify access to the group",
+    "groupNotFound": "Group not found",
+    "missingPeriodDates": "Start and end dates are required",
+    "invalidPeriodRange": "End date must be after start date",
+    "createScheme": "Failed to create scheme",
+    "createPeriod": "Failed to create period",
+    "createComponent": "Failed to create component",
+    "updatePeriod": "Error updating period",
+    "deleteComponents": "Error deleting components",
+    "deletePeriods": "Error deleting periods",
+    "loadScheme": "Error loading updated scheme",
+    "internal": "Error saving grading scheme"
+  }
+}
+
+

@@ -1,0 +1,24 @@
+{
+  "title": "Captura del Examen",
+  "capture": {
+    "instruction": "Toma una foto clara del examen completo",
+    "subInstruction": "Asegúrate de que todas las esquinas sean visibles",
+    "button": "Tomar Foto",
+    "description": "Al hacer clic en \"Tomar Foto\", se abrirá la cámara de tu dispositivo"
+  },
+  "suggestions": {
+    "title": "Sugerencias para una mejor captura",
+    "tips": [
+      "Buena iluminación, preferiblemente luz natural",
+      "Superficie plana sin sombras",
+      "Toda la hoja visible en el encuadre",
+      "Cámara paralela al documento",
+      "Evita movimientos bruscos"
+    ]
+  },
+  "preview": {
+    "altText": "Examen capturado",
+    "retakeButton": "Volver a capturar",
+    "continueButton": "Continuar"
+  }
+} 

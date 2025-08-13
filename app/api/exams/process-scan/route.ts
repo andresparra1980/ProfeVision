@@ -6,6 +6,7 @@ import * as _crypto from 'crypto';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 // Configure debug flag
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -293,9 +294,10 @@ export async function POST(request: NextRequest) {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
     if (!supabaseUrl || !supabaseServiceKey) {
+      const { t } = await getApiTranslator(request, 'exams.process-scan');
       return NextResponse.json({ 
         success: false, 
-        error: "Configuración de servidor incompleta" 
+        error: t('errors.serverConfig') 
       }, { status: 500 });
     }
     
@@ -308,9 +310,10 @@ export async function POST(request: NextRequest) {
     
     // Validate required fields
     if (!scan) {
+      const { t } = await getApiTranslator(request, 'exams.process-scan');
       return NextResponse.json({ 
         success: false, 
-        error: "No se proporcionó archivo de escaneo" 
+        error: t('errors.missingScan') 
       }, { status: 400 });
     }
     
@@ -451,9 +454,10 @@ export async function POST(request: NextRequest) {
         if (DEBUG) {
           logger.error(`[${requestId}] Processed image not found at expected path:`, processedImagePath);
         }
+        const { t } = await getApiTranslator(request, 'exams.process-scan');
         return NextResponse.json({ 
           success: false, 
-          error: "Error al procesar el escaneo - imagen procesada no encontrada",
+          error: t('errors.processedNotFound'),
           error_details: { message: "No se pudo encontrar la imagen procesada" }
         }, { status: 500 });
       }
@@ -490,9 +494,10 @@ export async function POST(request: NextRequest) {
       if (DEBUG) {
         logger.error('Error processing scan:', error);
       }
+      const { t } = await getApiTranslator(request, 'exams.process-scan');
       return NextResponse.json({ 
         success: false, 
-        error: "Error al procesar el escaneo",
+        error: t('errors.processError'),
         error_details: { message: error instanceof Error ? error.message : 'Unknown error' }
       }, { status: 500 });
     }
@@ -501,9 +506,10 @@ export async function POST(request: NextRequest) {
     if (DEBUG) {
       logger.error('Error in process-scan endpoint:', error);
     }
+    const { t } = await getApiTranslator(request, 'exams.process-scan');
     return NextResponse.json({ 
       success: false, 
-      error: "Error interno del servidor",
+      error: t('errors.internal'),
       error_details: { message: error instanceof Error ? error.message : 'Unknown error' }
     }, { status: 500 });
   }

@@ -1,0 +1,14 @@
+{
+  "errors": {
+    "parse": "Error al procesar datos de entrada",
+    "missingQr": "Datos de QR incompletos",
+    "fetchQuestions": "Error al obtener preguntas del examen",
+    "uploadOriginal": "Error al guardar imagen original",
+    "uploadProcessed": "Error al guardar imagen procesada",
+    "saveResults": "Error al guardar resultados",
+    "saveScans": "Error al guardar imágenes escaneadas",
+    "internal": "Error interno del servidor"
+  }
+}
+
+

@@ -1,0 +1,15 @@
+{
+  "titles": {
+    "instructions": "Instructions",
+    "imageCapture": "Exam Capture",
+    "processing": "Processing Image",
+    "results": "Scan Results",
+    "saved": "Exam Saved",
+    "default": "Grading Assistant"
+  },
+  "description": "Assistant for grading scanned exams",
+  "buttons": {
+    "close": "Close",
+    "back": "Back"
+  }
+} 

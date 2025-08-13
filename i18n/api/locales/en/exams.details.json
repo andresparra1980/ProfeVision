@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "missingId": "Exam ID not provided",
+    "serverConfig": "Server configuration error",
+    "fetchExam": "Failed to fetch exam details",
+    "notFound": "Exam not found",
+    "internal": "Internal server error"
+  }
+}
+
+

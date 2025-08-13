@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -69,9 +70,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const { t } = await getApiTranslator(req, 'exams.cleanup-temp');
     return NextResponse.json({
       success: true,
-      message: 'Archivos temporales eliminados correctamente',
+      message: t('success.deleted'),
       filesDeleted: filesToDelete.map(f => path.basename(f))
     });
 
@@ -79,9 +81,10 @@ export async function POST(req: NextRequest) {
     if (DEBUG) {
       logger.error('Error al limpiar archivos temporales:', error);
     }
+    const { t } = await getApiTranslator(req, 'exams.cleanup-temp');
     return NextResponse.json(
       { 
-        error: 'Error al limpiar archivos temporales',
+        error: t('errors.cleanup'),
         details: error instanceof Error ? error.message : 'Error desconocido'
       },
       { status: 500 }

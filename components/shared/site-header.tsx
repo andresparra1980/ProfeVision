@@ -1,33 +1,39 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
+import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/shared/mode-toggle"
+import { LanguageSwitcher } from "@/components/shared/language-switcher"
 import { MainNavigation } from "@/components/shared/main-navigation"
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react"
 import { 
   BookOpen, 
-  FileText, 
   Brain, 
   ScanLine,
   Smartphone
 } from "lucide-react"
+import { AppPathnames } from "@/i18n/routing"
+import { useAuth } from "./auth-provider"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function SiteHeader() {
+  const t = useTranslations('common')
+  const { session, isLoading } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isFuncionesOpen, setIsFuncionesOpen] = useState(false)
-  const [isExamenesOpen, setIsExamenesOpen] = useState(false)
+  // Removed exams sub-menu state (not used currently)
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
   const closeMenu = () => {
     setIsMenuOpen(false)
     setIsFuncionesOpen(false)
-    setIsExamenesOpen(false)
+    // ensure all toggles closed
   }
   
   const toggleFunciones = () => setIsFuncionesOpen(!isFuncionesOpen)
-  const toggleExamenes = () => setIsExamenesOpen(!isExamenesOpen)
+  // const toggleExamenes = () => setIsExamenesOpen(!isExamenesOpen)
 
   // Componente para items del menú móvil
   const MobileMenuItem = ({ 
@@ -38,7 +44,7 @@ export function SiteHeader() {
     isSubItem = false,
     isSubSubItem = false 
   }: {
-    href?: string
+    href?: AppPathnames
     title: string
     icon?: React.ComponentType<{ className?: string }>
     onClick?: () => void
@@ -48,18 +54,28 @@ export function SiteHeader() {
     const baseClasses = "flex items-center gap-3 py-3 px-4 text-base font-medium hover:text-[#0b890f] transition-colors"
     const subItemClasses = isSubItem ? "ml-4 text-sm py-2" : ""
     const subSubItemClasses = isSubSubItem ? "ml-8 text-xs py-2 border-l-2 border-muted pl-3" : ""
-    
+
     const content = (
       <>
-        {Icon && <Icon className={`${isSubSubItem ? 'h-3 w-3' : isSubItem ? 'h-4 w-4' : 'h-5 w-5'}`} />}
-        <span className="flex-1">{title}</span>
+        {Icon && <Icon className="h-4 w-4 text-[#0b890f]" />}
+        <span>{title}</span>
+        {onClick && (
+          <span className="ml-auto">
+            {(title === t('navigation.functions') && isFuncionesOpen) ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </span>
+        )}
       </>
     )
 
     if (href) {
       return (
         <Link 
-          href={href} 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          href={href as any} 
           className={`${baseClasses} ${subItemClasses} ${subSubItemClasses}`}
           onClick={closeMenu}
         >
@@ -80,15 +96,15 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="fixed w-full z-50 bg-background/80 backdrop-blur-md border-b">
+      <header className={`fixed w-full z-[2000] border-b ${isMenuOpen ? 'bg-white dark:bg-background' : 'bg-background/80 backdrop-blur-md'}`}>
         <div className="container flex h-16 items-center justify-between relative">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" title="ProfeVisión - Inicio | Aplicación para escanear y calificar exámenes">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" title={`ProfeVisión - ${t('navigation.home')} | ${t('homepage.hero.title')}`}>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
               <span className="font-bold text-white">PV</span>
             </div>
             <div className="relative">
               <span className="font-bold text-xl text-secondary dark:text-white">ProfeVision</span>
-              <div className="absolute  -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full leading-none">
+              <div className="absolute -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full leading-none">
                 Beta
               </div>
             </div>
@@ -98,13 +114,33 @@ export function SiteHeader() {
               <MainNavigation />
             </nav>
             <div className="hidden md:flex items-center gap-2">
-              <Button asChild size="sm" className="bg-accent text-black dark:text-black">
-                <Link href="/auth/login" title="Iniciar sesión en ProfeVisión - Acceder a tu cuenta">Iniciar Sesión</Link>
-              </Button>
-              <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90">
-                <Link href="/auth/register" title="Registrarse en ProfeVisión - Crear cuenta gratuita">Registrarse</Link>
-              </Button>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-9 w-20" />
+                  <Skeleton className="h-9 w-20" />
+                </div>
+              ) : session ? (
+                <Button asChild size="sm" variant="secondary" className="text-background dark:text-foreground">
+                  <Link href="/dashboard" title={`${t('buttons.goToDashboard')} - ProfeVision`}>
+                    {t('buttons.goToDashboard')}
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild size="sm" className="bg-accent text-black dark:text-black">
+                    <Link href="/auth/login" title={`${t('buttons.login')} - ProfeVision`}>
+                      {t('buttons.login')}
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90">
+                    <Link href="/auth/register" title={`${t('buttons.register')} - ProfeVision`}>
+                      {t('buttons.register')}
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
+            <LanguageSwitcher />
             <ModeToggle />
             <button 
               onClick={toggleMenu}
@@ -120,135 +156,92 @@ export function SiteHeader() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-card border-b shadow-lg animate-in slide-in-from-top-5 duration-300 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto">
-            <div className="container py-4">
+          <div className="fixed top-16 inset-x-0 bottom-0 bg-white dark:bg-background md:hidden z-[60] border-t shadow-lg">
+            <div className="container py-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
               {/* Inicio */}
-              <MobileMenuItem href="/" title="Inicio" />
-              
-              {/* Funciones - Dropdown */}
+              <MobileMenuItem href='/' title={t('navigation.home')} />
+
+              {/* Funciones (replica del menú de escritorio) */}
               <div>
-                <div className="flex items-center gap-3 py-3 px-4 text-base font-medium hover:text-[#0b890f] transition-colors">
-                  <button 
-                    className="flex items-center gap-3 w-full text-left"
-                    onClick={toggleFunciones}
-                  >
-                    <span className="flex-1">Funciones</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${isFuncionesOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                
+                <MobileMenuItem 
+                  title={t('navigation.functions')} 
+                  icon={BookOpen}
+                  onClick={toggleFunciones}
+                />
                 {isFuncionesOpen && (
-                  <div className="bg-muted/30 py-2">
+                  <div className="border-l-2 border-muted ml-4">
                     <MobileMenuItem 
-                      href="/how-it-works" 
-                      title="¿Cómo Funciona ProfeVision?" 
-                      icon={BookOpen}
-                      isSubItem
-                    />
-                    {/* <MobileMenuItem 
-                      href="/institutions-management" 
-                      title="Gestión de Instituciones" 
-                      icon={Building}
-                      isSubItem
-                    />
-                    <MobileMenuItem 
-                      href="/subjects-management" 
-                      title="Gestión de Materias" 
+                      href='/how-it-works' 
+                      title={t('navigation.howItWorks')} 
                       icon={BookOpen}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href="/groups-management" 
-                      title="Gestión de Grupos" 
-                      icon={Users}
-                      isSubItem
-                    /> */}
-                    
-                    {/* Exámenes - Sub-dropdown */}
-                    <div className="ml-4">
-                      <div className="flex items-center gap-3 py-2 px-4 text-sm font-medium hover:text-[#0b890f] transition-colors">
-                        <button 
-                          className="flex items-center gap-3 w-full text-left"
-                          onClick={toggleExamenes}
-                        >
-                          <FileText className="h-4 w-4" />
-                          <span className="flex-1">Exámenes</span>
-                          <ChevronRight className={`h-3 w-3 transition-transform ${isExamenesOpen ? 'rotate-90' : ''}`} />
-                        </button>
-                      </div>
-                      
-                      {isExamenesOpen && (
-                        <div className="bg-muted/50 py-1">
-                          <MobileMenuItem 
-                            href="/exams" 
-                            title="Generador de Exámenes con IA" 
-                            icon={Brain}
-                            isSubSubItem
-                          />
-                          <MobileMenuItem 
-                            href="/paper-exams" 
-                            title="Exámenes en Papel" 
-                            icon={ScanLine}
-                            isSubSubItem
-                          />
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* <MobileMenuItem 
-                      href="/students-management" 
-                      title="Gestión de Estudiantes" 
-                      icon={GraduationCap}
+                      href='/exams-with-ai' 
+                      title={t('navigation.aiGenerator')}
+                      icon={Brain}
                       isSubItem
                     />
                     <MobileMenuItem 
-                      href="/reports" 
-                      title="Gestión de Reportes" 
-                      icon={BarChart3}
+                      href='/paper-exams' 
+                      title={t('navigation.paperExams')}
+                      icon={ScanLine}
                       isSubItem
-                    /> */}
+                    />
                     <MobileMenuItem 
-                      href="/mobile-app" 
-                      title="Aplicación Móvil" 
+                      href='/mobile-app' 
+                      title={t('navigation.mobileApp')} 
                       icon={Smartphone}
                       isSubItem
                     />
                   </div>
                 )}
               </div>
-              
+
               {/* Precios */}
-              <MobileMenuItem href="/pricing" title="Precios" />
-              
-              {/* Blog */}
-              <MobileMenuItem href="/blog" title="Blog" />
+              <MobileMenuItem href='/pricing' title={t('navigation.pricing')} />
               
               {/* Contacto */}
-              <MobileMenuItem href="/contact" title="Contacto" />
+              <MobileMenuItem href='/contact' title={t('navigation.contact')} />
+
+              {/* Blog */}
+              <MobileMenuItem href='/blog' title={t('navigation.blog')} />
               
-              {/* Botones de autenticación */}
-              <div className="pt-4 mt-4 flex flex-col gap-3 border-t">
-                <Button asChild variant="outline" size="sm" className="bg-accent text-black dark:text-black justify-center text-base">
-                  <Link href="/auth/login" onClick={closeMenu} title="Iniciar sesión en ProfeVisión">Iniciar Sesión</Link>
-                </Button>
-                <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90 text-base">
-                  <Link href="/auth/register" onClick={closeMenu} title="Registrarse gratis en ProfeVisión">Registrarse</Link>
-                </Button>
+              <div className="border-t mt-4">
+                <div className="pt-4 flex flex-col gap-3">
+                  {isLoading ? (
+                    <div className="flex flex-col gap-3">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  ) : session ? (
+                    <Button asChild size="lg" className="w-full" variant="secondary">
+                      <Link href="/dashboard" onClick={closeMenu} title={`${t('buttons.goToDashboard')} - ProfeVision`}>
+                        {t('buttons.goToDashboard')}
+                      </Link>
+                    </Button>
+                  ) : (
+                    <>
+                      <Button asChild variant="outline" size="sm" className="bg-accent text-black dark:text-black justify-center text-base">
+                        <Link href="/auth/login" onClick={closeMenu} title={`${t('buttons.login')} - ProfeVision`}>
+                          {t('buttons.login')}
+                        </Link>
+                      </Button>
+                      <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90 text-base">
+                        <Link href="/auth/register" onClick={closeMenu} title={`${t('buttons.register')} - ProfeVision`}>
+                          {t('buttons.register')}
+                        </Link>
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
       </header>
-
-      {/* Overlay for mobile menu */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-40 md:hidden"
-          onClick={closeMenu}
-        />
-      )}
     </>
   )
-} 
+}

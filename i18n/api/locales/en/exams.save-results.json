@@ -1,0 +1,14 @@
+{
+  "errors": {
+    "parse": "Error processing input data",
+    "missingQr": "Incomplete QR data",
+    "fetchQuestions": "Failed to fetch exam questions",
+    "uploadOriginal": "Failed to save original image",
+    "uploadProcessed": "Failed to save processed image",
+    "saveResults": "Failed to save results",
+    "saveScans": "Failed to save scanned images",
+    "internal": "Internal server error"
+  }
+}
+
+

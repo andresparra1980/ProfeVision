@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "@/lib/types/database";
 import logger from "@/lib/utils/logger";
+import { getApiTranslator } from '@/i18n/api';
 
 // Endpoint de diagnóstico para verificar que las rutas base de API están accesibles
 export async function GET() {
@@ -10,8 +11,10 @@ export async function GET() {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseServiceKey) {
+      // Create a minimal Request for translation resolution
+      const dummyReq = new Request('http://localhost/api/exams');
       return NextResponse.json(
-        { error: "Error de configuración del servidor" },
+        { error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -25,8 +28,9 @@ export async function GET() {
 
     if (error) {
       logger.error("API /exams GET: Error al obtener exámenes:", error);
+      const dummyReq = new Request('http://localhost/api/exams');
       return NextResponse.json(
-        { error: "Error al obtener los exámenes" },
+        { error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.fetchExams') },
         { status: 500 }
       );
     }
@@ -34,9 +38,10 @@ export async function GET() {
     return NextResponse.json(data);
   } catch (error: unknown) {
     logger.error("API /exams GET: Error:", error);
+    const dummyReq = new Request('http://localhost/api/exams');
     return NextResponse.json(
       {
-        error: "Error al obtener los exámenes",
+        error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.fetchExams'),
         message: error instanceof Error ? error.message : "Error desconocido",
       },
       { status: 500 }
@@ -51,8 +56,9 @@ export async function POST(request: Request) {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
+      const dummyReq = new Request('http://localhost/api/exams');
       return NextResponse.json(
-        { error: "Error de configuración del servidor" },
+        { error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -82,8 +88,9 @@ export async function POST(request: Request) {
       // Intentar recuperar la sesión como alternativa
       const { data: sessionData } = await supabaseAuth.auth.getSession();
       if (!sessionData.session) {
+        const dummyReq = new Request('http://localhost/api/exams');
         return NextResponse.json(
-          { error: "No autorizado. Inicie sesión para continuar." },
+          { error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.unauthorized') },
           { status: 401 }
         );
       }
@@ -92,8 +99,9 @@ export async function POST(request: Request) {
       if (sessionData.session.user) {
         userId = sessionData.session.user.id;
       } else {
+        const dummyReq = new Request('http://localhost/api/exams');
         return NextResponse.json(
-          { error: "No se pudo identificar al usuario" },
+          { error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.noUser') },
           { status: 401 }
         );
       }
@@ -117,16 +125,18 @@ export async function POST(request: Request) {
     } = body;
 
     if (!titulo || !materia_id) {
+      const dummyReq = new Request('http://localhost/api/exams');
       return NextResponse.json(
-        { error: "Faltan campos requeridos (título o materia_id)" },
+        { error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.missingFields') },
         { status: 400 }
       );
     }
 
     // Validar que hay un grupo seleccionado
     if (!grupo_id) {
+      const dummyReq = new Request('http://localhost/api/exams');
       return NextResponse.json(
-        { error: "Debe seleccionar un grupo" },
+        { error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.missingGroup') },
         { status: 400 }
       );
     }
@@ -153,8 +163,9 @@ export async function POST(request: Request) {
     if (error) {
       logger.error("API /exams POST: Error al crear examen:", error);
       logger.error("Detalles del error:", error.details);
+      const dummyReq = new Request('http://localhost/api/exams');
       return NextResponse.json(
-        { error: "Error al crear examen" },
+        { error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.createExam') },
         { status: 500 }
       );
     }
@@ -250,9 +261,10 @@ export async function POST(request: Request) {
     return NextResponse.json(data);
   } catch (error: unknown) {
     logger.error("API /exams POST: Error:", error);
+    const dummyReq = new Request('http://localhost/api/exams');
     return NextResponse.json(
       {
-        error: "Error al crear el examen",
+        error: (await getApiTranslator(dummyReq, 'exams.base')).t('errors.createExam'),
         message: error instanceof Error ? error.message : "Error desconocido",
       },
       { status: 500 }

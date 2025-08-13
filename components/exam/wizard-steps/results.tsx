@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
+import { useTranslations } from 'next-intl';
 import { OMRForm } from '@/components/exam/omr-form';
 import { 
   QRData, 
@@ -76,6 +77,7 @@ const normalizeAnswers = (rawAnswers: RawAnswer[]): Answer[] => {
 };
 
 export function Results({ qrData, answers: initialAnswers, processedImage, originalImage, onPrevious, onComplete, onContinue, onSaved }: ResultsProps) {
+  const t = useTranslations('wizard-step-results');
   // Usar una ref para registrar si ya se ha mostrado el log
   const loggedRef = useRef(false);
   
@@ -307,10 +309,10 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         totalQuestions: 0,
         percentage: 0,
         loading: false,
-        error: (error as Error).message || "Error al calcular la calificación"
+        error: (error as Error).message || t('errors.calculatingGrade')
       }));
     }
-  }, []); // Ya no depende de normalizedAnswers
+  }, [t]); // Ya no depende de normalizedAnswers
 
   // Cargar entidades y calcular puntuación
   useEffect(() => {
@@ -320,7 +322,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         
         // Validar que tenemos datos QR
         if (!qrData) {
-          throw new Error("No se detectaron datos del código QR.");
+          throw new Error(t('errors.noQRData'));
         }
         
         // Extraer IDs usando optional chaining para mejor type safety
@@ -388,18 +390,18 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         
         // Actualizar los nombres de las entidades con manejo de casos nulos
         setEntityNames({
-          materia: examData.materia?.nombre || 'No disponible',
-          examen: examData.nombre || examData.titulo || examData.title || 'No disponible',
-          estudiante: studentData.nombres && studentData.apellidos 
-            ? `${studentData.nombres} ${studentData.apellidos}`
-            : studentData.nombres || studentData.apellidos || 'No disponible',
+                  materia: examData.materia?.nombre || t('examInfo.notAvailable'),
+        examen: examData.nombre || examData.titulo || examData.title || t('examInfo.notAvailable'),
+                      estudiante: studentData.nombres && studentData.apellidos 
+              ? `${studentData.nombres} ${studentData.apellidos}`
+              : studentData.nombres || studentData.apellidos || t('examInfo.notAvailable'),
           grupo: groupData 
             ? (groupData.nombre || groupData.name || `Grupo ${groupData.id}`)
             : (examData.grupo_id 
                 ? `Grupo ID: ${examData.grupo_id}`
                 : (qrData.grupo_id || qrData.groupId 
                     ? `Grupo ID: ${qrData.grupo_id || qrData.groupId}` 
-                    : 'No disponible')),
+                    : t('examInfo.notAvailable'))),
           loading: false,
           error: null
         });
@@ -411,7 +413,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         setEntityNames(prev => ({
           ...prev,
           loading: false,
-          error: error instanceof Error ? error.message : "Error desconocido al cargar datos de las entidades"
+          error: error instanceof Error ? error.message : t('errors.loadingEntities')
         }));
       }
     };
@@ -419,7 +421,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
     if (qrData) {
       fetchEntityNames();
     }
-  }, [qrData, calculateExamScore]); // Añadimos calculateExamScore a las dependencias
+  }, [qrData, calculateExamScore, t]); // Añadimos calculateExamScore a las dependencias
 
   // Actualizar el estado de answers cuando cambien las props
   useEffect(() => {
@@ -619,7 +621,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       
       // Verificar que tenemos todos los datos necesarios
       if (!qrData || !answers.length || !processedImage || !originalImage || !examScore) {
-        throw new Error("Faltan datos para guardar los resultados");
+        throw new Error(t('errors.saveResults'));
       }
       
       // Verificar si tenemos URLs diferentes para las imágenes
@@ -731,7 +733,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         
         // Verificar si la respuesta es exitosa
         if (!response.ok) {
-          let errorMessage = "Error al guardar los resultados";
+          let errorMessage = t('errors.saveResults');
           try {
             const errorData = await response.json();
             errorMessage = errorData.error || errorMessage;
@@ -747,7 +749,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         // Leer la respuesta como texto primero para validar
         const responseText = await response.text();
         if (!responseText) {
-          throw new Error("El servidor respondió con un cuerpo vacío");
+          throw new Error(t('errors.serverEmptyResponse'));
         }
         
         // Parsear la respuesta JSON después de verificar que no está vacía
@@ -755,7 +757,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         try {
           result = JSON.parse(responseText);
         } catch (parseError) {
-          throw new Error(`Error al procesar respuesta: ${parseError instanceof Error ? parseError.message : 'Error de formato'}`);
+          throw new Error(`Error al procesar respuesta: ${parseError instanceof Error ? parseError.message : t('errors.formatError')}`);
         }
         
         if (DEBUG) {
@@ -763,8 +765,8 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         }
         
         // Mostrar notificación de éxito
-        toast({
-          title: isDuplicate ? "Resultados actualizados" : "Resultados guardados",
+              toast({
+        title: isDuplicate ? t('toasts.resultsUpdated') : t('toasts.resultsSaved'),
           description: isDuplicate 
             ? `La calificación anterior ha sido reemplazada correctamente.`
             : `La calificación del examen ha sido registrada correctamente.`,
@@ -782,7 +784,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       } catch (fetchError) {
         // Manejar errores específicos de la petición
         if (fetchError instanceof DOMException && fetchError.name === 'AbortError') {
-          throw new Error("La solicitud excedió el tiempo máximo de espera (60 segundos)");
+          throw new Error(t('errors.timeoutError'));
         }
         throw fetchError;
       }
@@ -794,8 +796,8 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       
       // Mostrar notificación de error
       toast({
-        title: "Error al guardar",
-        description: (error as Error).message || "Ha ocurrido un error al guardar los resultados",
+        title: t('toasts.saveError'),
+        description: (error as Error).message || t('toasts.saveErrorDescription'),
         variant: "destructive",
       });
       
@@ -807,7 +809,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
     <div className="space-y-6">
       <div>
         <p className="text-sm text-muted-foreground">
-          Revisa los resultados del escaneo. Puedes volver atrás para escanear nuevamente si es necesario.
+          {t('description')}
         </p>
       </div>
       
@@ -820,37 +822,37 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       )}
       
       <div className="rounded-lg border p-4">
-        <h4 className="font-medium mb-2">Información del Examen</h4>
+        <h4 className="font-medium mb-2">{t('examInfo.title')}</h4>
         
         {entityNames.loading ? (
           <div className="flex items-center justify-center py-4">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            <span className="ml-2 text-sm text-muted-foreground">Cargando información...</span>
+            <span className="ml-2 text-sm text-muted-foreground">{t('examInfo.loading')}</span>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <p className="text-muted-foreground">Materia:</p>
-              <p className="font-medium">{entityNames.materia}</p>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-muted-foreground">{t('examInfo.fields.subject')}</p>
+                <p className="font-medium">{entityNames.materia}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">{t('examInfo.fields.exam')}</p>
+                <p className="font-medium">{entityNames.examen}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">{t('examInfo.fields.student')}</p>
+                <p className="font-medium">{entityNames.estudiante}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">{t('examInfo.fields.group')}</p>
+                <p className="font-medium">{entityNames.grupo}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-muted-foreground">Examen:</p>
-              <p className="font-medium">{entityNames.examen}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Estudiante:</p>
-              <p className="font-medium">{entityNames.estudiante}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Grupo:</p>
-              <p className="font-medium">{entityNames.grupo}</p>
-            </div>
-          </div>
         )}
       </div>
       
       <div className="rounded-lg border p-4">
-        <h4 className="font-medium mb-2">Respuestas</h4>
+        <h4 className="font-medium mb-2">{t('answers.title')}</h4>
         <div className="flex justify-center mb-2 text-sm">
           <div className="flex items-center mr-3">
             <div className="w-4 h-4 rounded-full bg-blue-500 mr-1"></div>
@@ -884,18 +886,18 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         {examScore.loading ? (
           <div className="flex items-center justify-center py-4 mt-4">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            <span className="ml-2 text-sm text-muted-foreground">Calculando calificación...</span>
+            <span className="ml-2 text-sm text-muted-foreground">{t('grading.calculating')}</span>
           </div>
         ) : examScore.error ? (
           <div className="mt-4 text-center text-red-500 text-sm">
-            <span>Error al calcular calificación: {examScore.error}</span>
+            <span>{t('grading.error')} {examScore.error}</span>
           </div>
         ) : (
           <div className="mt-4 text-center">
             <div className="bg-green-100 rounded-lg inline-flex items-center px-4 py-2">
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
               <span className="text-green-700 font-semibold">
-                Calificación: {examScore.puntajeObtenido?.toFixed(2)}/{examScore.puntajeTotal?.toFixed(2)} ({examScore.correctAnswers}/{examScore.totalQuestions} correctas)
+                {t('grading.label')} {examScore.puntajeObtenido?.toFixed(2)}/{examScore.puntajeTotal?.toFixed(2)} ({examScore.correctAnswers}/{examScore.totalQuestions} {t('grading.correctAnswers')})
               </span>
             </div>
           </div>
@@ -906,7 +908,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       
       <div className="flex justify-between mt-6 pt-4 border-t">
         <Button variant="outline" onClick={onPrevious} disabled={saving}>
-          Atrás
+          {t('buttons.back')}
         </Button>
         
         {!saved ? (
@@ -919,28 +921,28 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Guardando...
+                {t('buttons.saving')}
               </>
             ) : (
-              'Guardar Resultados'
+              t('buttons.saveResults')
             )}
           </Button>
         ) : (
           <div className="space-x-2 flex">
             <div className="flex items-center mr-2 bg-green-100 px-3 py-1 rounded-md">
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-              <span className="text-green-700 text-sm font-medium">Guardado exitosamente</span>
+              <span className="text-green-700 text-sm font-medium">{t('buttons.savedSuccessfully')}</span>
             </div>
-            <Button 
-              variant="secondary" 
-              onClick={onContinue}>
-              Escanear Otro
-            </Button>
-            <Button 
-              variant="default" 
-              onClick={onComplete}>
-              Finalizar
-            </Button>
+                          <Button 
+                variant="secondary" 
+                onClick={onContinue}>
+                {t('buttons.scanAnother')}
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={onComplete}>
+                {t('buttons.finish')}
+              </Button>
           </div>
         )}
       </div>

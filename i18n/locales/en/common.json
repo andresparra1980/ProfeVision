@@ -1,0 +1,1104 @@
+{
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close",
+    "continue": "Continue",
+    "confirm": "Confirm",
+    "startFree": "Start Free!",
+    "learnMore": "Learn More",
+    "startTrial": "Start Free Trial",
+    "exportGrades": "Export Grades",
+    "login": "Sign In",
+    "register": "Sign Up",
+    "goToDashboard": "Go to Dashboard"
+  },
+  "labels": {
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "description": "Description",
+    "date": "Date",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "completed": "Completed",
+    "draft": "Draft"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "success": "Operation successful",
+    "error": "An error occurred",
+    "noData": "No data available",
+    "confirmDelete": "Are you sure you want to delete this item?",
+    "sessionExpired": "Your session has expired. Please sign in again."
+  },
+  "language": {
+    "switch": "Switch language",
+    "spanish": "Español",
+    "english": "English",
+    "label": "Language"
+  },
+  "navigation": {
+    "home": "Home",
+    "howItWorks": "How It Works",
+    "howItWorksDescription": "Discover how to transform your way of creating, managing and grading exams",
+    "exams": "Exams",
+    "examsDescription": "Create and manage exams in multiple ways",
+    "manualGenerator": "Manual Generator",
+    "aiGenerator": "AI Generator",
+    "aiGeneratorDescription": "Generate exams automatically with artificial intelligence",
+    "paperExams": "Paper Exams",
+    "paperExamsDescription": "Scan and grade physical exams automatically",
+    "functions": "Functions",
+    "institutionsManagement": "Institution Management",
+    "subjectsManagement": "Subject Management",
+    "groupsManagement": "Group Management",
+    "studentsManagement": "Student Management",
+    "reportsManagement": "Reports Management",
+    "reports": "Reports",
+    "mobileApp": "Mobile App",
+    "mobileAppDescription": "In development - Coming soon",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "contact": "Contact",
+    "about": "About",
+    "dashboard": "Dashboard",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "cookies": "Cookies"
+  },
+  "footer": {
+    "description": "ProfeVision is the comprehensive platform for educators. Automates exam creation and grading with AI and OMR technology, allowing you to scan and correct paper tests instantly with your mobile. Additionally, it centralizes complete management of institutions, subjects, groups, and students. Save time, optimize educational evaluation, and get precise insights for more effective teaching. It's your definitive tool to transform academic management.",
+    "sections": {
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal"
+    },
+    "links": {
+      "howItWorks": "How It Works",
+      "pricing": "Pricing",
+      "aiGenerator": "AI Generator",
+      "mobileApp": "Mobile App",
+      "about": "About",
+      "blog": "Blog",
+      "contact": "Contact",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "cookies": "Cookies",
+      "termsOfService": "Terms of Service",
+      "privacyPolicy": "Privacy Policy",
+      "cookiesPolicy": "Cookie Policy"
+    },
+    "copyright": "All rights reserved."
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "description": "Discover how ProfeVision simplifies exam creation, grading, and management in just a few steps",
+    "stepsTitle": "4 Simple Steps to Transform Your Teaching",
+    "stepsDescription": "Follow our intuitive process to create, apply, and grade exams efficiently",
+    "steps": {
+      "step1": {
+        "title": "Create Your Exams",
+        "description": "Use our AI-powered tools to generate questions or create them manually. Choose from multiple formats and customize according to your needs."
+      },
+      "step2": {
+        "title": "Apply to Students",
+        "description": "Print personalized formats for each student with unique QR codes. Assign digital exams or distribute physical answer sheets."
+      },
+      "step3": {
+        "title": "Scan and Grade",
+        "description": "Use your smartphone to scan answer sheets. Our OMR technology automatically processes responses and calculates grades instantly."
+      },
+      "step4": {
+        "title": "Analyze Results",
+        "description": "Access detailed reports on student performance, identify improvement areas, and make data-driven educational decisions."
+      }
+    },
+    "ctaTitle": "Ready to revolutionize your teaching?",
+    "ctaDescription": "Join thousands of educators who are already saving time and improving their students' results.",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More"
+  },
+  "homepage": {
+    "hero": {
+      "badge": "New! AI-Powered Grading (OMR)",
+      "title": "The Best App",
+      "titleHighlight": "for Scanning and Grading Paper Exams",
+      "description": "At ProfeVision, we understand the challenges of modern education. We've developed an all-in-one solution that automates exam creation, grading, and management with AI, freeing up your valuable time to focus on what really matters: teaching and empowering your students' learning.",
+      "startFree": "Start Free!",
+      "learnMore": "Learn More",
+      "registerTitle": "Sign up for free with ProfeVision - Create account at no cost",
+      "learnMoreTitle": "Learn more about ProfeVision features",
+      "avatarAlt": "Teacher avatar {number} using ProfeVision",
+      "avatarTitle": "Teacher who trusts ProfeVision to automate exam grading",
+      "trustText": "Over",
+      "trustNumber": "1,000+",
+      "trustSuffix": "teachers trust us"
+    },
+    "features": {
+      "badge": "Key Features",
+      "title": "Everything you need in one platform",
+      "description": "ProfeVision simplifies your work as an educator with powerful and intuitive tools",
+      "examCreation": {
+        "title": "Intelligent Exam Creation",
+        "description": "Generate personalized educational tests with AI assistance. Enjoy multiple formats (multiple choice, true/false, etc.), quality questions and reusable templates. Save time and ensure accurate and relevant assessments."
+      },
+      "aiGrading": {
+        "title": "AI and Computer Vision Grading (OMR)",
+        "description": "Transform your grading process. Our evaluation platform allows you to grade exams with your phone in minutes with our advanced OMR technology. Simply scan and process answer sheets automatically with your smartphone or tablet. AI handles instant correction of online tests and accurate paper reading."
+      },
+      "resultAnalysis": {
+        "title": "Detailed Results Analysis",
+        "description": "Get valuable insights into your students' performance. Identify areas for improvement, strengths and trends with our graphic and detailed reports. Make informed pedagogical decisions to enhance adaptive learning."
+      }
+    },
+    "modules": {
+      "badge": "Main Modules",
+      "title": "Complete educational management",
+      "description": "Organize all aspects of your educational environment in one place",
+      "moreInfo": "More information",
+      "institutions": {
+        "title": "Institution Management",
+        "feature1": "Create and manage multiple institutions",
+        "feature2": "Configure institution-specific settings",
+        "feature3": "Analytics by institution",
+        "linkTitle": "View documentation on entity management in ProfeVision"
+      },
+      "subjects": {
+        "title": "Subject Management",
+        "feature1": "Create and organize subjects by institution",
+        "feature2": "Add descriptions and details",
+        "feature3": "Structure your curriculum",
+        "linkTitle": "View documentation on subject management in ProfeVision"
+      },
+      "groups": {
+        "title": "Group Management",
+        "feature1": "Create and manage student groups",
+        "feature2": "Define academic periods",
+        "feature3": "Mass import of students",
+        "linkTitle": "View documentation on student group management in ProfeVision"
+      },
+      "grading": {
+        "title": "Grading Scheme",
+        "feature1": "Define detailed schemes by group",
+        "feature2": "Configure periods and components",
+        "feature3": "Assign percentage weights",
+        "linkTitle": "View documentation on grading system in ProfeVision"
+      },
+      "exams": {
+        "title": "Exam Management",
+        "feature1": "Create exams with AI assistance",
+        "feature2": "Generate QR answer sheets",
+        "feature3": "Automatic grading with Computer Vision (OMR)",
+        "linkTitle": "View documentation on exam management in ProfeVision"
+      },
+      "analysis": {
+        "title": "Analysis and Results",
+        "feature1": "Detailed exam statistics",
+        "feature2": "Excel and PDF reports",
+        "feature3": "Detailed view by student",
+        "linkTitle": "View documentation on exam analysis and results in ProfeVision"
+      }
+    },
+    "benefits": {
+      "badge": "Key Benefits",
+      "title": "Save time and improve educational quality",
+      "description": "ProfeVision allows you to focus on what really matters: teaching and your students' learning, driving digital transformation in education. We are the platform for teachers you were looking for.",
+      "startFree": "Start Free",
+      "startFreeTitle": "Start free with ProfeVision - No cost registration",
+      "automation": {
+        "title": "Intelligent Automation",
+        "description": "Drastically reduce time spent on administrative and grading tasks thanks to AI and our exam scanning application."
+      },
+      "organization": {
+        "title": "Centralized Organization",
+        "description": "Have all educational information in one place, accessible when you need it, improving academic assessment management."
+      },
+      "insights": {
+        "title": "Valuable Insights",
+        "description": "Make pedagogical decisions based on reliable data to improve student performance and adapt your strategies."
+      },
+      "flexibility": {
+        "title": "Total Flexibility",
+        "description": "Adapt this exam platform to your specific needs and workflow, from elementary to university."
+      },
+      "gradingSpeed": {
+        "title": "Grading in Minutes, Not Hours",
+        "description": "OMR (Optical Mark Recognition) technology converts hours of manual grading into minutes, allowing you to focus on teaching and automated feedback. ProfeVision is one of the best digital tools for teachers."
+      },
+      "gradingTable": {
+        "title": "Grade Report",
+        "subject": "Mathematics - Group A",
+        "period": "Period 2",
+        "stats": "25 students · Average: 4.2",
+        "student": "Student",
+        "exam1": "Exam 1",
+        "exam2": "Exam 2",
+        "final": "Final",
+        "export": "Export Grades"
+      }
+    },
+    "cta": {
+      "title": "Transform your educational experience with ProfeVision",
+      "description": "Join thousands of educators who are already optimizing their work and improving their students' results.",
+      "startTrial": "Start Free Trial",
+      "startTrialTitle": "Start free trial of ProfeVision - No commitments",
+      "learnMore": "Learn More",
+      "stats": {
+        "teachers": "1000+",
+        "teachersLabel": "Active Teachers",
+        "institutions": "50+",
+        "institutionsLabel": "Institutions",
+        "exams": "100K+",
+        "examsLabel": "Graded Exams",
+        "satisfaction": "98%",
+        "satisfactionLabel": "Satisfaction"
+      }
+    }
+  },
+  "pricing": {
+    "hero": {
+      "badge": "Special Launch",
+      "title": "Free During the",
+      "titleHighlight": "Launch",
+      "description": "Take advantage of free access to ProfeVision while we're in the launch phase. All features available at no cost."
+    },
+    "launch": {
+      "title": "Launch Plan",
+      "price": "FREE",
+      "subtitle": "Complete access during the launch phase",
+      "features": {
+        "unlimitedStudents": "Unlimited students",
+        "unlimitedExams": "Unlimited exams",
+        "aiGeneration": "AI generation",
+        "omrGrading": "Automatic OMR grading",
+        "advancedReports": "Advanced reports",
+        "institutionManagement": "Institution management",
+        "mobileApp": "Mobile app",
+        "prioritySupport": "Priority support"
+      },
+      "cta": "Register Free Now!"
+    },
+    "future": {
+      "title": "Future Plans",
+      "description": "When the launch period ends, we'll offer flexible plans for teachers and institutions of all sizes.",
+      "basic": {
+        "title": "Basic Plan",
+        "price": "Coming Soon",
+        "features": {
+          "students": "Up to 500 students",
+          "exams": "Unlimited exams",
+          "reports": "Basic reports",
+          "support": "Email support"
+        }
+      },
+      "institutional": {
+        "title": "Institutional Plan",
+        "price": "Coming Soon",
+        "features": {
+          "students": "Unlimited students",
+          "institutions": "Multiple institutions",
+          "reports": "Advanced reports",
+          "support": "Dedicated support"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Revolutionize Your Assessments?",
+      "description": "Join now and get free access to all ProfeVision features during our launch period.",
+      "startFree": "Start Free",
+      "learnMore": "Learn More"
+    }
+  },
+  "howItWorks": {
+    "hero": {
+      "badge": "How It Works",
+      "title": "Create and grade exams in",
+      "titleHighlight": "seconds",
+      "titleEnd": "with ProfeVision",
+      "subtitle": "The fastest and most modern way to evaluate your students",
+      "description": "Would you like to create exams in minutes and grade them in seconds? With ProfeVision you can do it. Our platform is designed for teachers and schools looking to save time and get accurate results. Create exams with artificial intelligence, upload your tests in PDF and automatically grade by scanning printed answer sheets with your phone. Plus, organize everything by institutions, subjects and classes, and access a dashboard with detailed results metrics.",
+      "cta": "Start now for free"
+    },
+    "features": {
+      "badge": "Key Features",
+      "title": "What can you do with ProfeVision?",
+      "feature1": {
+        "title": "1. Create exams with AI or upload your tests in PDF",
+        "item1": {
+          "title": "Generate exams automatically:",
+          "description": "Use our artificial intelligence to create personalized exams in seconds. Choose from multiple choice, open-ended, or mixed questions."
+        },
+        "item2": {
+          "title": "Upload your exams in PDF:",
+          "description": "If you already have your tests ready, simply upload them to the platform. No need to transcribe anything."
+        }
+      },
+      "feature2": {
+        "title": "2. Grade faster with your phone",
+        "item1": {
+          "title": "Scan printed answer sheets:",
+          "description": "Print answer sheets, apply them in class and then scan them with your phone using our Computer Vision (OMR) technology. Get grades instantly, error-free and without manual effort."
+        },
+        "item2": {
+          "title": "Automatic and accurate results:",
+          "description": "Forget about reviewing sheet by sheet. ProfeVision delivers results in seconds and organizes them automatically."
+        }
+      },
+      "feature3": {
+        "title": "3. Organize everything by institutions, subjects and classes",
+        "item1": {
+          "title": "Create your institution:",
+          "description": "Register your school, academy or educational center in just a few steps."
+        },
+        "item2": {
+          "title": "Add subjects and classes:",
+          "description": "Organize your exams and results by subject and group. This way you'll have everything organized and easy to find."
+        },
+        "item3": {
+          "title": "Dashboard with metrics:",
+          "description": "Visualize your students' performance with clear charts and reports. Analyze results by class, subject or period and make better decisions."
+        }
+      }
+    },
+    "benefits": {
+      "badge": "Benefits",
+      "title": "Benefits of using ProfeVision",
+      "timeSaving": {
+        "title": "Save time",
+        "description": "Create and grade exams in minutes."
+      },
+      "accuracy": {
+        "title": "Accurate results",
+        "description": "Eliminate human errors with automatic grading."
+      },
+      "organization": {
+        "title": "Total organization",
+        "description": "Keep your exams and results organized by institution, subject and class."
+      },
+      "accessibility": {
+        "title": "Access from any device",
+        "description": "Work from your computer or phone."
+      },
+      "analytics": {
+        "title": "Advanced analytics",
+        "description": "Visualize your students' progress with clear and useful metrics."
+      }
+    },
+    "comparison": {
+      "badge": "Comparison",
+      "title": "ProfeVision vs. Traditional methods",
+      "table": {
+        "feature": "Feature",
+        "profevision": "ProfeVision",
+        "traditional": "Traditional methods",
+        "yes": "Yes",
+        "no": "No",
+        "rows": {
+          "aiCreation": "AI exam creation",
+          "pdfUpload": "PDF exam upload",
+          "omrGrading": "Automatic grading (OMR)",
+          "omrGradingYes": "Yes, with phone scanning",
+          "omrGradingNo": "No, manual",
+          "organization": "Organization by institution/subject",
+          "organizationYes": "Yes, all centralized",
+          "organizationNo": "Limited, dispersed",
+          "dashboard": "Metrics and reports dashboard",
+          "dashboardYes": "Yes, real-time",
+          "dashboardNo": "No, requires manual work",
+          "errorReduction": "Human error reduction",
+          "deviceAccess": "Access from any device",
+          "deviceAccessNo": "Not always",
+          "timeSaving": "Time saving",
+          "timeSavingMax": "Maximum",
+          "timeSavingMin": "Minimum"
+        }
+      }
+    },
+    "whyChoose": {
+      "badge": "The Best Choice",
+      "title": "Why choose ProfeVision?",
+      "description": "ProfeVision is the ideal tool for teachers and schools that want to modernize digital school evaluation. Our platform is easy to use, fast and reliable. Forget manual processes and take your exams to the next level with artificial intelligence and scanning technology."
+    },
+    "faq": {
+      "badge": "Frequently Asked Questions",
+      "title": "Frequently Asked Questions (FAQ)",
+      "questions": {
+        "q1": {
+          "question": "Can I use ProfeVision in any type of school?",
+          "answer": "Yes, the platform adapts to schools, academies and training centers of any size."
+        },
+        "q2": {
+          "question": "Is automatic grading reliable?",
+          "answer": "Yes, our Computer Vision (OMR) technology guarantees fast and accurate results."
+        },
+        "q3": {
+          "question": "Can I upload exams in PDF?",
+          "answer": "Of course. Just upload them to the platform and start grading."
+        },
+        "q4": {
+          "question": "Do I need special equipment to scan answer sheets?",
+          "answer": "No, you only need your phone with the ProfeVision app."
+        },
+        "q5": {
+          "question": "Is the platform secure?",
+          "answer": "Yes, we protect all your information with the highest security standards."
+        }
+      }
+    },
+    "cta": {
+      "title": "ProfeVision is the ideal tool to modernize digital school evaluation",
+      "description": "Join thousands of teachers and schools that are already transforming their assessment processes with advanced technology.",
+      "startFree": "Try ProfeVision for free",
+      "viewPricing": "View Pricing"
+    }
+  },
+  "paperExams": {
+    "hero": {
+      "badge": "Instant Grading",
+      "title": "Grade Exams Fast with",
+      "titleHighlight": "Answer Sheets",
+      "titleEnd": "from ProfeVision",
+      "description": "Transform your students' assessment with cutting-edge technology.",
+      "descriptionHighlight": "Grade exams in seconds",
+      "descriptionEnd": "using only your smartphone or tablet.",
+      "cta": "Start Now"
+    },
+    "features": {
+      "badge": "Answer Sheets",
+      "title": "Features and Usage",
+      "imageAlt": "ProfeVision answer sheet with QR code and response fields",
+      "customFormat": {
+        "title": "Custom Format",
+        "uniqueId": {
+          "title": "Unique identification",
+          "description": "Each sheet includes the student's name and identification"
+        },
+        "qrCode": {
+          "title": "Smart QR code",
+          "description": "Located in the upper left corner, contains all exam information"
+        },
+        "adaptableFormat": {
+          "title": "Adaptable format",
+          "description": "Between 1 and 40 response fields according to exam configuration"
+        }
+      }
+    },
+    "instructions": {
+      "title": "Filling Instructions",
+      "penUse": {
+        "title": "Use black or blue pen",
+        "description": "to completely fill the bubbles"
+      },
+      "avoidPencil": {
+        "title": "Avoid pencil",
+        "description": "can generate glares and cause grading errors"
+      },
+      "correction": {
+        "title": "To correct",
+        "description": "Completely erase the inside of the incorrect bubble"
+      }
+    },
+    "restrictedAreas": {
+      "title": "Restricted Areas - Do Not Write",
+      "qrCode": "Over the QR code",
+      "borders": "On the format borders",
+      "answersSection": "Inside the answers section",
+      "tip": {
+        "title": "Tip",
+        "description": "For additional notes, use a separate sheet"
+      }
+    },
+    "autoGrading": {
+      "badge": "Advanced Technology",
+      "title": "Automatic Grading",
+      "imageAlt": "Automatic grading process with smartphone",
+      "processTitle": "Simple 3-Step Process",
+      "step1": {
+        "title": "Scan the Sheets",
+        "item1": "Enter the platform from your smartphone",
+        "item2": "Click the \"Grade Now!\" button",
+        "item3": "Scan each answer sheet with the camera"
+      },
+      "step2": {
+        "title": "Automatic Detection",
+        "description": "The system instantly identifies:",
+        "item1": "Exam version",
+        "item2": "Answers marked by the student",
+        "item3": "Student identification"
+      },
+      "step3": {
+        "title": "Confirm and Save",
+        "item1": "Review the detected grades",
+        "item2": "Available options:",
+        "item3": "Back: To re-scan if necessary",
+        "item4": "Save Results: To confirm and store"
+      }
+    },
+    "benefits": {
+      "badge": "Final Result",
+      "title": "Save time and effort",
+      "description": "Repeat this process with each exam and you'll have",
+      "descriptionHighlight": "all results graded and entered automatically",
+      "descriptionEnd": "in the system quickly and efficiently.",
+      "advantage": {
+        "title": "Advantage",
+        "description": "No need for manual grading - the entire process is automatic and precise."
+      }
+    },
+    "cta": {
+      "title": "Grade exams in seconds with ProfeVision answer sheets",
+      "description": "Digitize your assessment process with automatic scanning technology and get accurate results instantly.",
+      "startNow": "Start Now",
+      "moreDetails": "View More Details"
+    }
+  },
+  "exams": {
+    "hero": {
+      "badge": "Exam Generator",
+      "title": "Create Exams with",
+      "titleHighlight": "Artificial Intelligence",
+      "titleEnd": "in seconds",
+      "description": "Transform any educational content into complete and personalized assessments. ProfeVision uses advanced AI to generate multiple choice, true/false and open-ended questions from your class materials.",
+      "cta": "Start Now"
+    },
+    "features": {
+      "badge": "Creation Methods",
+      "title": "Key Features",
+      "aiCreation": {
+        "title": "AI Creation",
+        "description": "Use advanced artificial intelligence to generate personalized questions automatically.",
+        "item1": "Generate multiple choice, true/false and open-ended questions",
+        "item2": "Customize theme, difficulty and style",
+        "item3": "Select number of answer options",
+        "item4": "Adjust according to curriculum section",
+        "item5": "Save time and improve quality"
+      },
+      "manualCreation": {
+        "title": "Manual Creation",
+        "description": "Friendly and intuitive platform to create completely personalized exams.",
+        "item1": "Easy-to-use and navigable interface",
+        "item2": "Full control over each question",
+        "item3": "Configure title, subject and group",
+        "item4": "Set duration and total score",
+        "item5": "Add custom instructions"
+      },
+      "fileImport": {
+        "title": "File Import",
+        "description": "Upload and convert your existing exams from multiple file formats.",
+        "item1": "Compatible with PDF, DOC and DOCX",
+        "item2": "Process lecture notes",
+        "item3": "Convert textbooks",
+        "item4": "Import existing presentations",
+        "item5": "Reuse previous academic content"
+      }
+    },
+    "process": {
+      "badge": "Step-by-Step Process",
+      "title": "How Does It Work?",
+      "step1": {
+        "title": "Choose Your Method",
+        "description": "Select between AI creation, manual or import existing files according to your specific needs."
+      },
+      "step2": {
+        "title": "Configure Your Exam",
+        "description": "Define parameters such as theme, difficulty, number of questions and desired evaluation type."
+      },
+      "step3": {
+        "title": "Generate and Download",
+        "description": "Get your ready-to-use exam with personalized PDF answer sheets for each student."
+      }
+    },
+    "benefits": {
+      "badge": "Key Advantages",
+      "title": "Benefits for Educators",
+      "timeSaving": {
+        "title": "Save Time",
+        "description": "Reduce exam creation time from hours to minutes"
+      },
+      "precision": {
+        "title": "High Precision",
+        "description": "AI trained to generate relevant and well-structured questions"
+      },
+      "formats": {
+        "title": "Multiple Formats",
+        "description": "Support for different question types and evaluation styles"
+      },
+      "reusable": {
+        "title": "Reusable",
+        "description": "Import and adapt existing content easily"
+      }
+    },
+    "cta": {
+      "title": "Transform your content into engaging tests in seconds",
+      "description": "Generate multiple types of questions from text or uploaded files intelligently and efficiently.",
+      "startNow": "Start Now",
+      "learnMore": "Learn More"
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Have questions? We're here to help.",
+    "info": {
+      "title": "Contact Information",
+      "email": "Email:",
+      "phone": "Phone:",
+      "schedule": "Schedule:",
+      "scheduleHours": "Monday to Friday, 9:00 AM - 6:00 PM"
+    },
+    "support": {
+      "title": "Technical Support",
+      "email": "Email:",
+      "liveChat": "Live chat:",
+      "liveChatAvailable": "Available on the platform",
+      "knowledge": "Knowledge base:",
+      "knowledgeBase": "FAQ and guides"
+    }
+  },
+  "studentsManagement": {
+    "title": "Student Management",
+    "subtitle": "Complete control of student information.",
+    "mainFeatures": {
+      "title": "Main Functions",
+      "item1": "Student data registration and maintenance",
+      "item2": "Complete academic history",
+      "item3": "Mass import from Excel",
+      "item4": "Custom report generation"
+    }
+  },
+  "subjectsManagement": {
+    "title": "Subject Management",
+    "subtitle": "Organize and manage all academic subjects.",
+    "mainFeatures": {
+      "title": "Main Functions",
+      "item1": "Subject creation and organization",
+      "item2": "Teacher assignment",
+      "item3": "Schedule configuration",
+      "item4": "Curriculum content management"
+    }
+  },
+  "reports": {
+    "title": "Reports and Analysis",
+    "subtitle": "Detailed analysis of academic performance.",
+    "mainFeatures": {
+      "title": "Key Features",
+      "item1": "Student performance reports",
+      "item2": "Statistical analysis by subject",
+      "item3": "Group comparisons",
+      "item4": "Export to Excel and PDF"
+    }
+  },
+  "institutionsManagement": {
+    "title": "Institution Management",
+    "subtitle": "Manage multiple educational institutions.",
+    "mainFeatures": {
+      "title": "Main Functions",
+      "item1": "Multiple institution registration",
+      "item2": "Campus and branch management",
+      "item3": "Permission configuration",
+      "item4": "Consolidated reports"
+    }
+  },
+  "mobileApp": {
+    "title": "Mobile Application",
+    "subtitle": "Take ProfeVision with you anywhere.",
+    "mainFeatures": {
+      "title": "Key Features",
+      "item1": "Answer sheet scanning",
+      "item2": "Real-time grading",
+      "item3": "Access to reports",
+      "item4": "Automatic synchronization"
+    }
+  },
+  "privacy": {
+    "title": "ProfeVision Privacy Policy",
+    "effective": "Effective since June 27, 2025",
+    "intro": "At ProfeVision (www.profevision.com), we take your privacy and that of your students very seriously. We want you to know how we use and protect your information when you use our application or website. Here we explain, in a simple and clear way, everything you need to know.",
+    "section1": {
+      "title": "1. Who are we?",
+      "content": "We are ProfeVision, a platform that helps teachers grade multiple choice exams and analyze their students' results quickly and easily. You can use our app or website to manage your classes and exams."
+    },
+    "section2": {
+      "title": "2. What information do we collect?",
+      "intro": "We collect two types of information:",
+      "accountInfo": {
+        "title": "a) Your account and usage information",
+        "items": [
+          "Email and password: To create your account and identify you.",
+          "Subscription data: If you have a paid subscription, we store the necessary information to manage it.",
+          "Usage data: We collect information about how you use ProfeVision, such as how often you log in, from which devices, your IP address, browser type, etc.",
+          "Cookies and similar technologies: We use cookies to make the platform work correctly and to improve your experience. We don't use them for advertising."
+        ]
+      },
+      "userInfo": {
+        "title": "b) Information you choose to enter",
+        "items": [
+          "Your students' data: If you want, you can enter names, surnames, identification numbers and classes of your students.",
+          "Exams and results: When you grade exams, you can save images and results to analyze them later.",
+          "Your class information: You can create records of your classes and link them with your students."
+        ]
+      }
+    },
+    "section3": {
+      "title": "3. What do we use your information for?",
+      "intro": "We use your information to:",
+      "items": [
+        "Provide you with ProfeVision's service and constantly improve it.",
+        "Respond to your questions or queries.",
+        "Customize the platform for you.",
+        "Send you important notices about your account, subscription or ProfeVision news."
+      ],
+      "note": "We never sell your information or use it to show you advertising."
+    },
+    "section4": {
+      "title": "4. Who do we share your information with?",
+      "intro": "We only share your information in these cases:",
+      "items": [
+        "When you decide: For example, if you export results to another system.",
+        "With service providers: We work with companies that help us send emails, host our servers or provide technical support. These companies only use your information to help us and are obligated to protect it.",
+        "By legal obligation: If an authority requires it, we may share information to comply with the law or protect the rights of ProfeVision and its users.",
+        "In case of company changes: If ProfeVision is acquired or merges with another company, we will notify you and your information will continue to be protected under this policy.",
+        "With your consent: We will never share your information with third parties for other purposes without your permission."
+      ]
+    },
+    "section5": {
+      "title": "5. How do we protect your information?",
+      "items": [
+        "Your account is protected with your email and a password that only you know.",
+        "All information is transmitted and stored in encrypted form.",
+        "We constantly review and improve our security measures.",
+        "If a security breach ever occurs, we will notify you as soon as possible."
+      ]
+    },
+    "section6": {
+      "title": "6. Can I decide what information to share?",
+      "answer": "Of course!",
+      "items": [
+        "You can use ProfeVision without syncing your data with our servers.",
+        "You can delete or edit your students', classes' and exams' information at any time.",
+        "If you want to delete your account and all your data, you can do so from the \"My Account\" section."
+      ]
+    },
+    "section7": {
+      "title": "7. How long do we keep your information?",
+      "content": "If you delete data or your account, we will delete it from all our systems within a maximum of 60 days. If your account is inactive for a long time, we will also delete your data to protect your privacy."
+    },
+    "section8": {
+      "title": "8. What communications will I receive?",
+      "content": "We will send you emails only for important matters: security notices, information about your account, news or support. If you don't want to receive certain emails, you can let us know at any time."
+    },
+    "section9": {
+      "title": "9. Changes to this policy",
+      "content": "If we change something important in this policy, we will let you know by email and when you enter the app or website. You will always be able to consult the most updated version on our site."
+    },
+    "section10": {
+      "title": "10. Do you have questions or need help?",
+      "content": "If you have questions about your privacy or how we handle your data, write to us at info@profevision.com. We are here to help you.",
+      "address": {
+        "name": "ProfeVision",
+        "line1": "647 Santino Meadows Apt. 525",
+        "line2": "Jeaniebury, Wisconsin 49368-5863"
+      }
+    }
+  },
+  "cookies": {
+    "title": "Cookie Policy",
+    "effective": "Effective since June 27, 2025",
+    "intro": "This policy explains how we use cookies on www.profevision.com to improve your browsing experience and the functioning of our website.",
+    "section1": {
+      "title": "Previous Considerations",
+      "content": {
+        "paragraph1": "User shall be understood as any person who navigates the website www.profevision.com. Editor shall be understood as the owner of the website, who is ProfeVision and is identified in the terms and conditions.",
+        "paragraph2": "The cookies used in the user's browser have been installed with their authorization. If at any time you wish to revoke this authorization, you may do so without any obstacle by consulting the \"Deactivation or deletion of cookies\" section.",
+        "paragraph3": "The Editor is free to make changes to the website, so the user is advised to check this policy every time they access the website."
+      }
+    },
+    "section2": {
+      "title": "Definition and Function of Cookies",
+      "intro": "Cookies are information that is stored in the user's browser to consult previous activity and remember certain data for future visits. They may also be called web beacons, pixels, bugs or trackers.",
+      "functions": {
+        "title": "Main functions:",
+        "items": [
+          "Technical data and statistics",
+          "Profile personalization",
+          "Social media links",
+          "Personal preferences"
+        ]
+      },
+      "notWhat": {
+        "title": "What they are NOT:",
+        "items": [
+          "Viruses or malware",
+          "Spam or trojans",
+          "Spyware",
+          "Pop-up advertising"
+        ]
+      }
+    },
+    "section3": {
+      "title": "Types of Cookies",
+      "byEntity": {
+        "title": "According to the Entity that Manages Them",
+        "own": "Own",
+        "ownDescription": "Managed by ProfeVision from our own domain",
+        "thirdParty": "Third party",
+        "thirdPartyDescription": "Managed by entities other than ProfeVision",
+        "note": "This website uses its own and third-party cookies."
+      },
+      "byPurpose": {
+        "title": "According to their Purpose",
+        "technical": "Technical",
+        "technicalDescription": "Allow operational management of the website",
+        "personalization": "Personalization",
+        "personalizationDescription": "Remember personalized browsing characteristics",
+        "analysis": "Analysis",
+        "analysisDescription": "Tracking and analysis of user behavior",
+        "advertising": "Advertising",
+        "advertisingDescription": "Efficient management of advertising spaces",
+        "behavioral": "Behavioral advertising",
+        "behavioralDescription": "Information based on browsing habits"
+      },
+      "byDuration": {
+        "title": "According to their Duration",
+        "session": "Session",
+        "sessionDescription": "Disappear when the browsing session ends",
+        "persistent": "Persistent",
+        "persistentDescription": "Remain for a defined period"
+      }
+    },
+    "section4": {
+      "title": "Cookies Used on This Website",
+      "table": {
+        "name": "Name",
+        "provider": "Provider",
+        "description": "Description",
+        "duration": "Duration",
+        "type": "Type"
+      },
+      "cookies": [
+        {
+          "name": "_Georgia_*",
+          "provider": ".profevision.com",
+          "description": "Google Analytics to store and count visits",
+          "duration": "1 year 1 month 4 days",
+          "type": "Analytics"
+        },
+        {
+          "name": "_Georgia",
+          "provider": ".profevision.com",
+          "description": "Calculates visitor, session and campaign data",
+          "duration": "1 year 1 month 4 days",
+          "type": "Analytics"
+        },
+        {
+          "name": "theme",
+          "provider": ".profevision.com",
+          "description": "User theme preferences",
+          "duration": "never",
+          "type": "Other"
+        }
+      ]
+    },
+    "section5": {
+      "title": "Consequences of Deactivating Cookies",
+      "warning": "By deactivating cookies, you could experience the following limitations:",
+      "consequences": [
+        "Products will not load in the store, preventing purchases from being completed",
+        "You will not be able to access the customer area or areas that require confirmation",
+        "Data cannot be collected to analyze and improve the website",
+        "You will not be able to share content on social networks",
+        "You will not be able to comment on the blog",
+        "Limitations in the use of social networks",
+        "Third-party advertising will not be displayed",
+        "Your browsing could be considered spam"
+      ]
+    },
+    "section6": {
+      "title": "Deactivation or Deletion of Cookies",
+      "intro": "You can deactivate or delete cookies at any time, except those necessary for the website to function. This configuration must be done in each browser.",
+      "browsers": {
+        "chrome": "Chrome Help",
+        "firefox": "Firefox Help",
+        "safari": "Safari Help",
+        "edge": "IE Help"
+      }
+    },
+    "section7": {
+      "title": "Notices Related to Cookies",
+      "important": "Important:",
+      "warning": "The Editor is not responsible for technical failures that you may encounter on the website or browser by incorrectly manipulating the deactivation or deletion of cookies.",
+      "responsibility": "You must verify the information about deactivation in the help section of your browser. You assume responsibility for deleting or deactivating cookies and the consequences that arise."
+    },
+    "section8": {
+      "title": "Contact",
+      "content": "You can contact the Editor at any time through email: info@profevision.com",
+      "address": {
+        "name": "ProfeVision",
+        "line1": "647 Santino Meadows Apt. 525",
+        "line2": "Jeaniebury, Wisconsin 49368-5863"
+      }
+    }
+  },
+  "terms": {
+    "title": "ProfeVision Terms and Conditions",
+    "effective": "Effective since June 27, 2025",
+    "intro": "Thank you for your interest in ProfeVision (\"ProfeVision\", \"we\", \"our\"), which offers services available at www.profevision.com and on our mobile applications. By using ProfeVision, you agree to these Terms and our Privacy Policy. Please read them carefully.",
+    "section1": {
+      "title": "1. Acceptance of Terms",
+      "content": "By creating an account, accessing or using ProfeVision, you agree to comply with these Terms and our Privacy Policy. If you use ProfeVision on behalf of an educational institution or company, make sure you have the authority to accept these Terms on their behalf."
+    },
+    "section2": {
+      "title": "2. Who can use ProfeVision",
+      "items": [
+        "You must be over 18 years old or have authorization from your parents/guardians and your educational institution.",
+        "If you represent an institution, you guarantee that you have permission to accept these Terms on its behalf."
+      ]
+    },
+    "section3": {
+      "title": "3. Proper use of the service",
+      "intro": "By using ProfeVision, you commit to:",
+      "items": [
+        "Provide real and updated information about yourself and your institution.",
+        "Not use ProfeVision for illegal, harmful, fraudulent, abusive activities or that violate the rights of others.",
+        "Not attempt to access other users' accounts or share your password.",
+        "Not use robots, scrapers or other automated means to collect information without permission.",
+        "Not overload, damage or interfere with the operation of ProfeVision.",
+        "Not impersonate other people or falsify your identity.",
+        "Not facilitate or encourage the violation of these Terms."
+      ],
+      "warning": "If you violate any of these rules, we may suspend or cancel your account."
+    },
+    "section4": {
+      "title": "4. Your information and privacy",
+      "items": [
+        "When using ProfeVision, you can enter personal and student information.",
+        "You are the owner of that information.",
+        "You give us permission to use, store and process that information only to provide you with the service.",
+        "You can delete your information and your account at any time."
+      ],
+      "privacyLink": "Check our Privacy Policy to learn more about how we protect your data."
+    },
+    "section5": {
+      "title": "5. Using ProfeVision in educational institutions",
+      "intro": "If you are a teacher or staff member of an educational institution:",
+      "items": [
+        "You guarantee that you have authorization to use ProfeVision with your students.",
+        "You comply with applicable privacy and data protection laws (such as FERPA in the US or LOPI in other countries)."
+      ],
+      "note": "If your institution does not want student data to be stored on our servers, you can disable synchronization from your account."
+    },
+    "section6": {
+      "title": "6. Intellectual property",
+      "items": [
+        "ProfeVision and its technology are protected by copyright and other laws.",
+        "You may not copy, modify, distribute, sell, decompile or use our technology or brand for other purposes without our permission.",
+        "Using ProfeVision does not give you rights over our intellectual property."
+      ]
+    },
+    "section7": {
+      "title": "7. Changes to Terms",
+      "content": "We may update these Terms to reflect changes in law or our services. We will notify you of important changes. If you continue to use ProfeVision after the changes, it will be considered that you accept them. If you disagree, you can stop using the service and delete your account."
+    },
+    "section8": {
+      "title": "8. Experimental features",
+      "content": "Sometimes we test new features that may change or disappear without prior notice. We do not guarantee that they will always work."
+    },
+    "section9": {
+      "title": "9. Limitation of liability",
+      "items": [
+        "ProfeVision is offered \"as is\", without guarantees that it will always be available or error-free.",
+        "We are not responsible for indirect damages, data loss or any damage arising from the use or inability to use ProfeVision.",
+        "Our maximum responsibility to you will not exceed the amount you have paid for the service in the last 12 months or $100 USD, whichever is greater."
+      ]
+    },
+    "section10": {
+      "title": "10. Security and registration",
+      "items": [
+        "You must keep your password safe and not share your account.",
+        "If you detect unauthorized use of your account, notify us immediately at info@profevision.com."
+      ]
+    },
+    "section11": {
+      "title": "11. Indemnification",
+      "content": "If someone makes a claim against ProfeVision related to your use of the service, you agree to defend us and cover any expense or damage this causes."
+    },
+    "section12": {
+      "title": "12. Account cancellation",
+      "content": "You can cancel your account at any time from the \"My Account\" section or by writing to us at info@profevision.com. We may also suspend or cancel your account if you violate these Terms."
+    },
+    "section13": {
+      "title": "13. Dispute resolution",
+      "content": "If a conflict arises between you and ProfeVision, we will try to resolve it in good faith. If this is not possible, any dispute will be resolved through arbitration in Chicago, Illinois, under the rules of the American Arbitration Association (AAA).",
+      "waiver": "By accepting these Terms, you waive the right to a jury trial or to participate in class action lawsuits.",
+      "note": "By accepting these Terms, you waive the right to a jury trial or to participate in class action lawsuits."
+    },
+    "section14": {
+      "title": "14. Miscellaneous",
+      "items": [
+        "If any part of these Terms is invalid, the rest remains in effect.",
+        "You may not transfer your account without our permission.",
+        "These Terms constitute the complete agreement between you and ProfeVision."
+      ]
+    },
+    "section15": {
+      "title": "15. Contact",
+      "content": "If you have questions or need help, write to us at info@profevision.com or to:",
+      "address": {
+        "name": "ProfeVision",
+        "line1": "647 Santino Meadows Apt. 525",
+        "line2": "Jeaniebury, Wisconsin 49368-5863"
+      }
+    }
+  },
+  "components": {
+    "excelImport": {
+      "downloadTemplate": "Download Template",
+      "downloadDescription": "Download the sample format to import students",
+      "selectFile": "Select Excel File",
+      "errorsFound": "The following errors were found:",
+      "preview": {
+        "title": "Preview ({count} students)",
+        "table": {
+          "names": "Names",
+          "surnames": "Surnames",
+          "identification": "Identification",
+          "email": "Email",
+          "andMore": "And {count} more..."
+        },
+        "validStudents": "{count} valid students",
+        "errors": "{count} errors"
+      },
+      "importing": "Importing...",
+      "importStudents": "Import Students",
+      "validation": {
+        "emptyFile": "The file contains no data",
+        "missingColumns": "Missing required columns",
+        "row": "Row",
+        "missingNames": "Missing names",
+        "missingSurnames": "Missing surnames",
+        "missingIdentification": "Missing identification",
+        "invalidEmail": "Invalid email address"
+      },
+      "error": {
+        "title": "Error",
+        "readingFile": "Could not read the file. Make sure it's a valid Excel file.",
+        "noDataToImport": "No valid data to import"
+      }
+    }
+  },
+  "developmentOverlay": {
+    "message": "Statistics in development - Available soon"
+  }
+}

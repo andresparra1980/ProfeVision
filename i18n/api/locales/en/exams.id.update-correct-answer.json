@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "missingId": "Exam ID not provided",
+    "missingFields": "questionId and optionId are required",
+    "verifyQuestion": "Failed to verify question or question does not belong to this exam",
+    "fetchOptions": "Failed to fetch question options",
+    "updateOptions": "Failed to update answer options",
+    "updateCorrect": "Failed to update correct option",
+    "fetchResults": "Failed to fetch results for recalculation",
+    "updateResult": "Failed to update result",
+    "updateStudentAnswer": "Failed to update student answer",
+    "internal": "Internal server error"
+  },
+  "success": {
+    "ok": "Correct answer updated and grades recalculated"
+  }
+}
+
+

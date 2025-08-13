@@ -1,0 +1,14 @@
+{
+  "errors": {
+    "missingFields": "studentId and score are required",
+    "updateGrade": "Failed to update grade",
+    "insertGrade": "Failed to insert grade",
+    "sync": "Failed to sync grades",
+    "internal": "Internal server error"
+  },
+  "success": {
+    "ok": "Grade processed"
+  }
+}
+
+

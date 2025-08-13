@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { GradingScheme } from '@/lib/types/grading';
 import _logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
@@ -26,7 +27,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
         console.error('Error: Faltan variables de entorno para Supabase');
       }
       return NextResponse.json({ 
-        error: 'Error de configuración del servidor' 
+        error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.serverConfig') 
       }, { status: 500 });
     }
 
@@ -49,14 +50,14 @@ export async function POST(request: Request, { params }: { params: Params }) {
         console.error('Error al verificar grupo:', grupoError);
       }
       return NextResponse.json(
-        { error: 'No se pudo verificar el acceso al grupo' },
+        { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.forbidden') },
         { status: 403 }
       );
     }
 
     if (!grupo) {
       return NextResponse.json(
-        { error: 'Grupo no encontrado' },
+        { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.groupNotFound') },
         { status: 404 }
       );
     }
@@ -66,7 +67,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
       // Validar que las fechas estén establecidas
       if (!periodo.fecha_inicio || !periodo.fecha_fin) {
         return NextResponse.json(
-          { error: `Las fechas son requeridas para el periodo "${periodo.nombre}"` },
+          { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.missingPeriodDates') },
           { status: 400 }
         );
       }
@@ -93,7 +94,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
       // Validar que la fecha de fin sea posterior a la de inicio
       if (new Date(scheme.fecha_fin) <= new Date(scheme.fecha_inicio)) {
         return NextResponse.json(
-          { error: 'La fecha de fin debe ser posterior a la fecha de inicio' },
+          { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.invalidPeriodRange') },
           { status: 400 }
         );
       }
@@ -308,7 +309,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
       console.error('Error al guardar esquema:', error);
     }
     return NextResponse.json(
-      { error: 'Error al guardar el esquema de calificaciones', 
+      { error: (await getApiTranslator(request, 'groups.id.grading-scheme')).t('errors.internal'), 
         message: error instanceof Error ? error.message : 'Error desconocido' 
       },
       { status: 500 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useTranslations, useLocale } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { X, Cookie, Settings, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -26,6 +27,23 @@ export function CookieBanner({ className }: CookieBannerProps) {
     marketing: true,
     functional: true,
   })
+
+  const t = useTranslations('cookie-banner')
+  const locale = useLocale()
+
+  // 🌍 Helper function to get localized routes
+  const routeMap = {
+    'cookies': {
+      es: '/cookies',
+      en: '/cookies'
+    }
+  } as const;
+  const getLocalizedRoute = (routeKey: keyof typeof routeMap | string): string => {
+    if (routeKey in routeMap) {
+      return routeMap[routeKey as keyof typeof routeMap][locale as 'es' | 'en'];
+    }
+    return routeKey;
+  }
 
   useEffect(() => {
     // Check if user has already made a choice
@@ -106,12 +124,11 @@ export function CookieBanner({ className }: CookieBannerProps) {
                  <Cookie className="h-3 w-3 text-white" />
                </div>
                <div className="flex-1">
-                 <h3 className="font-medium text-base mb-1">🍪 Respetamos tu privacidad</h3>
+                 <h3 className="font-medium text-base mb-1">{t('main.title')}</h3>
                  <p className="text-xs text-muted-foreground leading-snug">
-                   Utilizamos cookies para mejorar tu experiencia en ProfeVision, analizar el tráfico y personalizar el contenido. 
-                   Puedes gestionar tus preferencias en cualquier momento.{" "}
-                   <Link href="/cookies" className="text-[#0b890f] hover:underline font-medium">
-                     Más información
+                   {t('main.description')}{" "}
+                   <Link href={getLocalizedRoute('cookies')} className="text-[#0b890f] hover:underline font-medium">
+                     {t('main.moreInfo')}
                    </Link>
                  </p>
                </div>
@@ -125,7 +142,7 @@ export function CookieBanner({ className }: CookieBannerProps) {
                  className="flex items-center gap-1 h-8 px-3 text-xs"
                >
                  <Settings className="h-3 w-3" />
-                 Configurar
+                 {t('main.configure')}
                </Button>
                <Button
                  variant="outline"
@@ -133,7 +150,7 @@ export function CookieBanner({ className }: CookieBannerProps) {
                  onClick={rejectAll}
                  className="hover:bg-muted h-8 px-3 text-xs"
                >
-                 Rechazar todo
+                 {t('main.rejectAll')}
                </Button>
                <Button
                  size="sm"
@@ -141,7 +158,7 @@ export function CookieBanner({ className }: CookieBannerProps) {
                  className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f] text-white h-8 px-3 text-xs"
                >
                  <Check className="h-3 w-3 mr-1" />
-                 Aceptar todo
+                 {t('main.acceptAll')}
                </Button>
              </div>
           </div>
@@ -149,7 +166,7 @@ export function CookieBanner({ className }: CookieBannerProps) {
           // Preferences panel
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-lg">Preferencias de cookies</h3>
+              <h3 className="font-semibold text-lg">{t('preferences.title')}</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -164,8 +181,8 @@ export function CookieBanner({ className }: CookieBannerProps) {
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                   <div>
-                    <h4 className="font-medium text-sm">Cookies necesarias</h4>
-                    <p className="text-xs text-muted-foreground">Esenciales para el funcionamiento</p>
+                    <h4 className="font-medium text-sm">{t('preferences.necessary.title')}</h4>
+                    <p className="text-xs text-muted-foreground">{t('preferences.necessary.description')}</p>
                   </div>
                   <div className="w-8 h-4 bg-[#0b890f] rounded-full flex items-center justify-end px-1">
                     <div className="w-3 h-3 bg-white rounded-full"></div>
@@ -174,8 +191,8 @@ export function CookieBanner({ className }: CookieBannerProps) {
                 
                 <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
                   <div>
-                    <h4 className="font-medium text-sm">Cookies analíticas</h4>
-                    <p className="text-xs text-muted-foreground">Nos ayudan a mejorar el sitio</p>
+                    <h4 className="font-medium text-sm">{t('preferences.analytics.title')}</h4>
+                    <p className="text-xs text-muted-foreground">{t('preferences.analytics.description')}</p>
                   </div>
                   <button
                     onClick={() => setPreferences(prev => ({ ...prev, analytics: !prev.analytics }))}
@@ -192,8 +209,8 @@ export function CookieBanner({ className }: CookieBannerProps) {
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
                   <div>
-                    <h4 className="font-medium text-sm">Cookies funcionales</h4>
-                    <p className="text-xs text-muted-foreground">Mejoran la funcionalidad</p>
+                    <h4 className="font-medium text-sm">{t('preferences.functional.title')}</h4>
+                    <p className="text-xs text-muted-foreground">{t('preferences.functional.description')}</p>
                   </div>
                   <button
                     onClick={() => setPreferences(prev => ({ ...prev, functional: !prev.functional }))}
@@ -208,8 +225,8 @@ export function CookieBanner({ className }: CookieBannerProps) {
                 
                 <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
                   <div>
-                    <h4 className="font-medium text-sm">Cookies de marketing</h4>
-                    <p className="text-xs text-muted-foreground">Personalización de anuncios</p>
+                    <h4 className="font-medium text-sm">{t('preferences.marketing.title')}</h4>
+                    <p className="text-xs text-muted-foreground">{t('preferences.marketing.description')}</p>
                   </div>
                   <button
                     onClick={() => setPreferences(prev => ({ ...prev, marketing: !prev.marketing }))}
@@ -231,14 +248,14 @@ export function CookieBanner({ className }: CookieBannerProps) {
                 onClick={rejectAll}
                 className="flex-1 sm:flex-none"
               >
-                Rechazar todo
+                {t('main.rejectAll')}
               </Button>
               <Button
                 size="sm"
                 onClick={acceptSelected}
                 className="flex-1 sm:flex-none bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f] text-white"
               >
-                Guardar preferencias
+                {t('preferences.savePreferences')}
               </Button>
             </div>
           </div>

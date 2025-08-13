@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "missingId": "Exam ID is required",
+    "serverConfig": "Server configuration error",
+    "fetchQuestions": "Failed to fetch exam questions",
+    "internal": "Internal server error"
+  }
+}
+
+

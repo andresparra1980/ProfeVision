@@ -1,23 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { logger } from "@/lib/utils/logger";
 import { createServerClient } from "@supabase/ssr";
-import { getSiteUrl } from "@/lib/supabase";
-
-// Use the more reliable URL getter
-const SITE_URL = getSiteUrl();
-
-// Enhanced cookie options for better persistence across domains
-const COOKIE_OPTIONS = {
-  path: "/",
-  sameSite: "none" as const, // Allow cross-site cookies
-  secure: true, // Required for sameSite=none
-  maxAge: 60 * 60 * 24 * 7, // 7 days
-  httpOnly: true,
-};
 
 export async function GET(request: NextRequest) {
   // Extract tokens from URL
   const requestUrl = new URL(request.url);
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto');
+  const requestOrigin = forwardedHost && forwardedProto
+    ? `${forwardedProto}://${forwardedHost}`
+    : requestUrl.origin;
 
   // Look for all possible token variations
   const token = requestUrl.searchParams.get("token");
@@ -26,6 +18,16 @@ export async function GET(request: NextRequest) {
   const refreshToken = requestUrl.searchParams.get("refresh_token");
   const code = requestUrl.searchParams.get("code");
 
+  // 🌍 Determinar locale prioritariamente por query param, luego header
+  const urlLocale = requestUrl.searchParams.get('locale');
+  const acceptLanguage = request.headers.get('accept-language');
+  const preferredLocale = (urlLocale === 'en' || urlLocale === 'es')
+    ? urlLocale
+    : (acceptLanguage?.startsWith('en') ? 'en' : 'es');
+  
+  // 🌍 Construir URL localizada para update-password
+  const localizedUpdatePassword = `/${preferredLocale}/auth/${preferredLocale === 'es' ? 'actualizar-contrasena' : 'update-password'}`;
+
   // Log all parameters to help debug
   logger.auth("Direct recovery request received", {
     token: token ? "exists" : "missing",
@@ -33,14 +35,27 @@ export async function GET(request: NextRequest) {
     hasAccessToken: !!accessToken,
     hasRefreshToken: !!refreshToken,
     hasCode: !!code,
+    preferredLocale,
     url: request.url,
-    siteUrl: SITE_URL,
+    origin: requestOrigin,
   });
 
-  // Initialize response
+  // Initialize response with localized URL
   let response = NextResponse.redirect(
-    new URL("/auth/update-password?source=direct-recovery-flow", SITE_URL)
+    new URL(`${localizedUpdatePassword}?source=direct-recovery-flow`, requestOrigin)
   );
+
+  // Enhanced cookie options for better persistence across domains
+  // Adjust for localhost (http) where SameSite=None + secure is invalid
+  const isSecureOrigin = requestOrigin.startsWith("https://");
+  const sameSitePolicy: 'lax' | 'none' = isSecureOrigin ? 'none' : 'lax';
+  const COOKIE_OPTIONS = {
+    path: "/",
+    sameSite: sameSitePolicy,
+    secure: isSecureOrigin,
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    httpOnly: true,
+  };
 
   // If we have a code, try to exchange it for a session
   if (code) {
@@ -51,7 +66,7 @@ export async function GET(request: NextRequest) {
       );
 
       // Create server client
-      const supabase = createServerClient(
+        const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
@@ -109,8 +124,8 @@ export async function GET(request: NextRequest) {
           "Successfully obtained session, redirecting to update-password"
         );
 
-        // Create URL for update-password with some debug info but without tokens
-        const finalRedirectUrl = new URL("/auth/update-password", SITE_URL);
+        // 🌍 Create URL for localized update-password with some debug info but without tokens
+        const finalRedirectUrl = new URL(localizedUpdatePassword, requestOrigin);
         finalRedirectUrl.searchParams.set(
           "source",
           "direct-recovery-with-session"
@@ -168,8 +183,8 @@ export async function GET(request: NextRequest) {
   }
 
   // If we get here, we need to try passing tokens directly
-  // Build the redirect URL with all available tokens
-  const redirectUrl = new URL("/auth/update-password", SITE_URL);
+  // 🌍 Build the redirect URL with all available tokens using localized URL
+  const redirectUrl = new URL(localizedUpdatePassword, requestOrigin);
 
   // Add any tokens we have to the redirect
   if (token) redirectUrl.searchParams.set("token", token);
@@ -188,6 +203,7 @@ export async function GET(request: NextRequest) {
       .toString()
       .replace(/token=[^&]+/, "token=REDACTED"),
     type,
+    locale: preferredLocale,
   });
 
   // Return the redirect response

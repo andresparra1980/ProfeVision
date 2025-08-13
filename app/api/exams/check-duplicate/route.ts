@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
 export async function GET(request: NextRequest) {
   try {
+    const { t } = await getApiTranslator(request, 'exams.check-duplicate');
     // Crear cliente Supabase con Service Role Key para operaciones del lado del servidor
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     if (!examId || !studentId) {
       return NextResponse.json(
-        { error: 'Se requieren examId y studentId' },
+        { error: t('errors.missingParams') },
         { status: 400 }
       );
     }
@@ -39,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     if (examError || !examData) {
       return NextResponse.json(
-        { error: 'Examen no encontrado' },
+        { error: t('errors.notFoundExam') },
         { status: 404 }
       );
     }
@@ -60,7 +62,7 @@ export async function GET(request: NextRequest) {
         logger.error('Error al buscar versiones:', versionesError);
       }
       return NextResponse.json(
-        { error: 'Error al verificar versiones de examen' },
+        { error: t('errors.fetchVersions') },
         { status: 500 }
       );
     }
@@ -122,7 +124,7 @@ export async function GET(request: NextRequest) {
         logger.error('Error al buscar resultado previo:', resultadoError);
       }
       return NextResponse.json(
-        { error: 'Error al verificar resultados previos' },
+        { error: t('errors.fetchPrevious') },
         { status: 500 }
       );
     }
@@ -213,7 +215,7 @@ export async function GET(request: NextRequest) {
       logger.error('Error en check-duplicate:', error);
     }
     return NextResponse.json(
-      { error: 'Error al verificar duplicados' },
+      { error: (await getApiTranslator(request, 'exams.check-duplicate')).t('errors.internal') },
       { status: 500 }
     );
   }
@@ -221,6 +223,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const { t } = await getApiTranslator(req, 'exams.check-duplicate');
     const { qrData } = await req.json();
     
     if (!qrData) {
@@ -276,7 +279,7 @@ export async function POST(req: NextRequest) {
         logger.error('Error al verificar duplicado:', error);
       }
       return NextResponse.json(
-        { error: 'Error al verificar duplicados' },
+        { error: t('errors.fetchPrevious') },
         { status: 500 }
       );
     }
@@ -299,7 +302,7 @@ export async function POST(req: NextRequest) {
       logger.error('Error al verificar duplicados:', error);
     }
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: (await getApiTranslator(req, 'exams.check-duplicate')).t('errors.internal') },
       { status: 500 }
     );
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 // Definir interfaces para tipado
 interface ResultadoExamen {
@@ -24,7 +25,8 @@ export async function POST(req: NextRequest) {
     // Obtener el token de autorización del header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      const { t } = await getApiTranslator(req, 'exams.sync-grades');
+      return NextResponse.json({ error: t('errors.unauthorized') }, { status: 401 });
     }
     
     const token = authHeader.split(' ')[1];
@@ -78,11 +80,13 @@ export async function POST(req: NextRequest) {
       if (DEBUG) {
         logger.error('Error al obtener vínculos:', vinculosError);
       }
-      return NextResponse.json({ error: 'Error al obtener vínculos' }, { status: 500 });
+      const { t } = await getApiTranslator(req, 'exams.sync-grades');
+      return NextResponse.json({ error: t('errors.fetchLinks') }, { status: 500 });
     }
     
     if (!vinculos || vinculos.length === 0) {
-      return NextResponse.json({ message: 'No hay vínculos para sincronizar' });
+      const { t } = await getApiTranslator(req, 'exams.sync-grades');
+      return NextResponse.json({ message: t('success.noLinks') });
     }
     
     // For debugging
@@ -195,8 +199,9 @@ export async function POST(req: NextRequest) {
       resultados.push({ examen_id: examenId, sincronizado: true });
     }
     
+    const { t } = await getApiTranslator(req, 'exams.sync-grades');
     return NextResponse.json({ 
-      message: 'Sincronización completada', 
+      message: t('success.completed'), 
       resultados 
     });
     
@@ -204,8 +209,9 @@ export async function POST(req: NextRequest) {
     if (DEBUG) {
       logger.error('Error en sincronización de notas:', error);
     }
+    const { t } = await getApiTranslator(req, 'exams.sync-grades');
     return NextResponse.json({
-      error: 'Error interno del servidor',
+      error: t('errors.internal'),
       message: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 });
   }

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { Link } from '@/i18n/navigation';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
   FileText,
@@ -19,10 +19,11 @@ import {
   HelpCircle,
   PanelLeftClose,
   PanelLeftOpen,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/lib/contexts/sidebar-context";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useSidebar } from '@/lib/contexts/sidebar-context';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTranslations } from 'next-intl';
 
 // Definir un tipo más específico para el usuario
 interface User {
@@ -39,60 +40,61 @@ interface DashboardSidebarProps {
   isLoggingOut: boolean;
 }
 
-const navItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Entidades Educativas",
-    href: "/dashboard/entities",
-    icon: Building2,
-  },
-  {
-    title: "Materias",
-    href: "/dashboard/subjects",
-    icon: BookOpen,
-  },
-  {
-    title: "Grupos",
-    href: "/dashboard/groups",
-    icon: Folders,
-  },
-  {
-    title: "Exámenes",
-    href: "/dashboard/exams",
-    icon: FileText,
-  },
-  {
-    title: "Estudiantes",
-    href: "/dashboard/students",
-    icon: Users,
-  },
-  {
-    title: "Reportes",
-    href: "/dashboard/reports",
-    icon: BarChart3,
-  },
-  {
-    title: "Configuración",
-    href: "/dashboard/settings",
-    icon: Settings,
-  },
-  {
-    title: "Manual de Usuario",
-    href: "https://docs.profevision.com",
-    icon: HelpCircle,
-    external: true,
-  },
-];
-
 export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: DashboardSidebarProps) {
   const pathname = usePathname();
   const { isCollapsed, toggleCollapse, isMobile, isOpen, setIsOpen } = useSidebar();
+  const t = useTranslations('dashboard');
 
-  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'Usuario';
+  const navItems = [
+    {
+      title: t('navigation.dashboard'),
+      href: '/dashboard',
+      icon: LayoutDashboard,
+    },
+    {
+      title: t('navigation.entities', { defaultValue: 'Entidades Educativas' }),
+      href: '/dashboard/entities',
+      icon: Building2,
+    },
+    {
+      title: t('navigation.subjects'),
+      href: '/dashboard/subjects',
+      icon: BookOpen,
+    },
+    {
+      title: t('navigation.groups'),
+      href: '/dashboard/groups',
+      icon: Folders,
+    },
+    {
+      title: t('navigation.exams'),
+      href: '/dashboard/exams',
+      icon: FileText,
+    },
+    {
+      title: t('navigation.students'),
+      href: '/dashboard/students',
+      icon: Users,
+    },
+    {
+      title: t('navigation.reports'),
+      href: '/dashboard/reports',
+      icon: BarChart3,
+    },
+    {
+      title: t('navigation.settings'),
+      href: '/dashboard/settings',
+      icon: Settings,
+    },
+    {
+      title: t('navigation.userManual', { defaultValue: 'Manual de Usuario' }),
+      href: 'https://docs.profevision.com',
+      icon: HelpCircle,
+      external: true,
+    },
+  ];
+
+  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || t('user.defaultName', { defaultValue: 'Usuario' });
 
   return (
     <>
@@ -103,7 +105,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        <span className="sr-only">Toggle Menu</span>
+        <span className="sr-only">{t('ui.toggleMenu', { defaultValue: 'Toggle Menu' })}</span>
       </Button>
 
       <div
@@ -124,7 +126,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
         <div>
           <div className="flex h-16 items-center justify-between px-4">
             {(!isCollapsed || isMobile) && (
-              <Link href="/dashboard" className="hidden md:flex items-center space-x-2">
+              <Link href="/" className="hidden md:flex items-center space-x-2">
                 <div className="relative">
                   <span className="font-bold text-xl text-secondary dark:text-secondary">ProfeVision</span>
                   <div className="absolute  -right-1 text-[8px] dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
@@ -149,12 +151,12 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                           <PanelLeftClose className="h-5 w-5" />
                         }
                         <span className="sr-only">
-                          {isCollapsed ? "Expandir menú" : "Contraer menú"}
+                          {isCollapsed ? t('ui.expandMenu', { defaultValue: 'Expandir menú' }) : t('ui.collapseMenu', { defaultValue: 'Contraer menú' })}
                         </span>
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent side="right">
-                      {isCollapsed ? "Expandir menú" : "Contraer menú"}
+                      {isCollapsed ? t('ui.expandMenu', { defaultValue: 'Expandir menú' }) : t('ui.collapseMenu', { defaultValue: 'Contraer menú' })}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -184,7 +186,8 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
               ) : (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  href={item.href as any}
                   onClick={() => setIsOpen(false)}
                   className={cn(
                     "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
@@ -221,7 +224,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                   )}
                 >
                   <UserCircle className="mr-2 h-4 w-4" />
-                  Mi perfil
+                  {t('user.myProfile', { defaultValue: 'Mi perfil' })}
                 </Link>
                 <Button 
                   variant="ghost"
@@ -231,7 +234,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                   className="w-full justify-start px-2 hover:bg-destructive/10 text-red-600 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+                  {isLoggingOut ? t('user.loggingOut', { defaultValue: 'Cerrando sesión...' }) : t('user.logout', { defaultValue: 'Cerrar sesión' })}
                 </Button>
               </div>
 
@@ -251,7 +254,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                     ? "bg-primary/10 text-primary"
                     : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
-                title="Mi perfil"
+                title={t('user.myProfile', { defaultValue: 'Mi perfil' })}
               >
                 <UserCircle className="h-5 w-5" />
               </Link>
@@ -261,7 +264,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                 disabled={isLoggingOut} 
                 onClick={handleLogout}
                 className="text-destructive hover:bg-destructive/10 text-red-600 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
-                title="Cerrar sesión"
+                title={t('user.logout', { defaultValue: 'Cerrar sesión' })}
               >
                 <LogOut className="h-5 w-5" />
               </Button>

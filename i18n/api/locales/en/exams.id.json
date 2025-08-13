@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "unauthorized": "Unauthorized",
+    "internal": "Error processing request",
+    "notFound": "Exam not found",
+    "onlyDraftDelete": "Only exams in draft status can be deleted",
+    "serverConfig": "Server configuration error",
+    "missingFields": "Missing required fields",
+    "updateExam": "Failed to update exam",
+    "updateState": "Failed to update exam status"
+  },
+  "success": {
+    "deleted": "Exam and related items deleted successfully",
+    "stateUpdated": "Exam status updated successfully",
+    "updated": "Exam updated successfully"
+  }
+}
+
+

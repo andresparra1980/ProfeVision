@@ -1,0 +1,33 @@
+{
+  "slides": [
+    {
+      "title": "Grading in Minutes",
+      "subtitle": "OMR + AI Technology",
+      "description": "Our exam scanning app with OMR (Computer Vision) technology for paper and AI for online gives you instant results."
+    },
+    {
+      "title": "Complete Educational Management",
+      "subtitle": "Everything Centralized",
+      "description": "Centralize institutions, subjects, groups and students effortlessly."
+    },
+    {
+      "title": "AI-Powered Exam Creation",
+      "subtitle": "Smart Generation",
+      "description": "Generate quality tests quickly, adapted to your needs."
+    },
+    {
+      "title": "Detailed Performance Analysis",
+      "subtitle": "Key Insights",
+      "description": "Get key insights to improve teaching and learning for your students."
+    },
+    {
+      "title": "Intuitive Platform",
+      "subtitle": "Easy to Use",
+      "description": "Designed for educators, easy to use from the first moment."
+    }
+  ],
+  "metrics": {
+    "timeSaved": "Time Saved",
+    "accuracy": "Accuracy"
+  }
+} 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { FileText, Loader2, Check, X } from 'lucide-react';
 import { Document, Page, Text, View, StyleSheet, Image, PDFDownloadLink } from '@react-pdf/renderer';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -254,6 +255,7 @@ export function PDFExportButton({
   const [hasError, setHasError] = useState(false);
   const [progress, setProgress] = useState(0);
   const [institucionNombre, setInstitucionNombre] = useState('INSTITUCIÓN ACADÉMICA');
+  const t = useTranslations('dashboard.exams.results.pdfExport');
 
   // Make sure we're on the client side
   useEffect(() => {
@@ -352,15 +354,15 @@ export function PDFExportButton({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {isLoading ? 'Generando PDF' : 
-               isPrepared ? 'PDF listo para descargar' : 
-               hasError ? 'Error al generar el PDF' : 'Generando PDF'}
+              {isLoading ? t('generatingPDF') : 
+               isPrepared ? t('pdfReady') : 
+               hasError ? t('generationError') : t('generatingPDF')}
             </DialogTitle>
             <DialogDescription>
-              {isLoading ? 'Preparando la información y cargando imágenes...' : 
-               isPrepared ? 'El PDF ha sido generado correctamente y está listo para descargar.' : 
-               hasError ? 'Ocurrió un error al preparar el PDF. Por favor, intente nuevamente.' : 
-               'Preparando documento PDF...'}
+              {isLoading ? t('preparingInfo') : 
+               isPrepared ? t('pdfGeneratedSuccess') : 
+               hasError ? t('errorOccurred') : 
+               t('preparingDocument')}
             </DialogDescription>
           </DialogHeader>
 
@@ -374,7 +376,7 @@ export function PDFExportButton({
                   ></div>
                 </div>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Cargando imágenes...</span>
+                  <span>{t('loadingImages')}</span>
                   <span>{Math.round(progress)}%</span>
                 </div>
               </div>
@@ -386,7 +388,7 @@ export function PDFExportButton({
                   <div className="rounded-full bg-green-100 p-2 dark:bg-green-900/30">
                     <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
-                  <span className="text-sm font-medium">PDF generado correctamente</span>
+                  <span className="text-sm font-medium">{t('pdfGeneratedCorrectly')}</span>
                 </div>
                 
                 <div className="flex justify-center mt-4">
@@ -404,12 +406,12 @@ export function PDFExportButton({
                       loading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Preparando PDF...
+                          {t('preparingPDF')}
                         </>
                       ) : (
                         <>
                           <FileText className="mr-2 h-4 w-4" />
-                          Descargar PDF
+                          {t('downloadPDF')}
                         </>
                       )
                     }
@@ -423,7 +425,7 @@ export function PDFExportButton({
                 <div className="rounded-full bg-red-100 p-2 dark:bg-red-900/30">
                   <X className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
-                <span className="text-sm font-medium">No se pudo generar el PDF</span>
+                <span className="text-sm font-medium">{t('couldNotGenerate')}</span>
               </div>
             )}
           </div>
@@ -433,7 +435,7 @@ export function PDFExportButton({
               variant="outline" 
               onClick={handleClose}
             >
-              Cerrar
+              {t('close')}
             </Button>
             
             {hasError && (
@@ -441,7 +443,7 @@ export function PDFExportButton({
                 variant="default" 
                 onClick={handlePrepare}
               >
-                Reintentar
+                {t('retry')}
               </Button>
             )}
           </DialogFooter>

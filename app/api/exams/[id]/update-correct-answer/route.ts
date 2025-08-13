@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import _logger from "@/lib/utils/logger";
+import { getApiTranslator } from '@/i18n/api';
 
 const DEBUG = process.env.NODE_ENV === "development";
 
@@ -26,13 +27,14 @@ export async function PUT(
   { params }: { params: Params }
 ) {
   try {
+    const { t } = await getApiTranslator(request, 'exams.id.update-correct-answer');
     // Resolver los params del Promise
     const resolvedParams = await params;
     const examId = resolvedParams.id;
 
     if (!examId) {
       return NextResponse.json(
-        { error: "ID de examen no proporcionado" },
+        { error: t('errors.missingId') },
         { status: 400 }
       );
     }
@@ -42,7 +44,7 @@ export async function PUT(
 
     if (!questionId || !optionId) {
       return NextResponse.json(
-        { error: "Se requiere questionId y optionId" },
+        { error: t('errors.missingFields') },
         { status: 400 }
       );
     }
@@ -58,10 +60,7 @@ export async function PUT(
     if (questionError) {
       if (DEBUG) console.error("Error al verificar pregunta:", questionError);
       return NextResponse.json(
-        {
-          error:
-            "Error al verificar la pregunta o la pregunta no pertenece a este examen",
-        },
+        { error: t('errors.verifyQuestion') },
         { status: 400 }
       );
     }
@@ -75,7 +74,7 @@ export async function PUT(
     if (optionsError) {
       if (DEBUG) console.error("Error al obtener opciones:", optionsError);
       return NextResponse.json(
-        { error: "Error al obtener opciones de la pregunta" },
+        { error: t('errors.fetchOptions') },
         { status: 500 }
       );
     }
@@ -100,7 +99,7 @@ export async function PUT(
     if (updateAllError) {
       if (DEBUG) console.error("Error al actualizar opciones:", updateAllError);
       return NextResponse.json(
-        { error: "Error al actualizar opciones de respuesta" },
+        { error: t('errors.updateOptions') },
         { status: 500 }
       );
     }
@@ -118,7 +117,7 @@ export async function PUT(
           updateCorrectError
         );
       return NextResponse.json(
-        { error: "Error al actualizar opción correcta" },
+        { error: t('errors.updateCorrect') },
         { status: 500 }
       );
     }
@@ -132,7 +131,7 @@ export async function PUT(
     if (resultadosError) {
       if (DEBUG) console.error("Error al obtener resultados:", resultadosError);
       return NextResponse.json(
-        { error: "Error al obtener resultados para recalcular" },
+        { error: t('errors.fetchResults') },
         { status: 500 }
       );
     }
@@ -237,14 +236,14 @@ export async function PUT(
     // Return success
     return NextResponse.json({
       success: true,
-      message: "Respuesta correcta actualizada y calificaciones recalculadas",
+      message: t('success.ok'),
     });
   } catch (error: unknown) {
     if (DEBUG) {
       console.error("Error al procesar la solicitud:", error);
     }
     return NextResponse.json(
-      { error: "Error interno del servidor" },
+      { error: (await getApiTranslator(request, 'exams.id.update-correct-answer')).t('errors.internal') },
       { status: 500 }
     );
   }

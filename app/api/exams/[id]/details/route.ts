@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import logger from '@/lib/utils/logger';
+import { getApiTranslator } from '@/i18n/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,13 +13,14 @@ export async function GET(
   { params }: { params: Params }
 ) {
   try {
+    const { t } = await getApiTranslator(request, 'exams.details');
     // Resolver los params del Promise
     const resolvedParams = await params;
     const examId = resolvedParams.id;
     
     if (!examId) {
       return NextResponse.json(
-        { error: 'ID de examen no proporcionado' },
+        { error: t('errors.missingId') },
         { status: 400 }
       );
     }
@@ -29,7 +31,7 @@ export async function GET(
     
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: 'Error de configuración del servidor' },
+        { error: t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -52,14 +54,14 @@ export async function GET(
     if (examError) {
       logger.error('Error al obtener examen:', examError);
       return NextResponse.json(
-        { error: 'Error al obtener detalles del examen' },
+        { error: t('errors.fetchExam') },
         { status: 500 }
       );
     }
     
     if (!exam) {
       return NextResponse.json(
-        { error: 'Examen no encontrado' },
+        { error: t('errors.notFound') },
         { status: 404 }
       );
     }
@@ -91,7 +93,7 @@ export async function GET(
   } catch (error) {
     logger.error('Error al procesar la solicitud:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: (await getApiTranslator(request, 'exams.details')).t('errors.internal') },
       { status: 500 }
     );
   }

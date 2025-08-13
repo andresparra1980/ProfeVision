@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Download, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ interface ExcelImportProps {
 }
 
 export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
+  const t = useTranslations('common');
   const [_file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +35,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     const errors: string[] = [];
     
     if (data.length === 0) {
-      errors.push("El archivo no contiene datos");
+      errors.push(t('components.excelImport.validation.emptyFile'));
       return { valid: [], errors };
     }
     
@@ -43,7 +45,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     const missingColumns = requiredColumns.filter(col => !(col in firstRow));
     
     if (missingColumns.length > 0) {
-      errors.push(`Faltan columnas requeridas: ${missingColumns.join(", ")}`);
+      errors.push(`${t('components.excelImport.validation.missingColumns')}: ${missingColumns.join(", ")}`);
       return { valid: [], errors };
     }
     
@@ -55,23 +57,23 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       const email = (row.Email ? String(row.Email) : '').trim().toLowerCase();
       
       if (!nombres) {
-        errors.push(`Fila ${index + 1}: Faltan los nombres`);
+        errors.push(`${t('components.excelImport.validation.row')} ${index + 1}: ${t('components.excelImport.validation.missingNames')}`);
         return;
       }
 
       if (!apellidos) {
-        errors.push(`Fila ${index + 1}: Faltan los apellidos`);
+        errors.push(`${t('components.excelImport.validation.row')} ${index + 1}: ${t('components.excelImport.validation.missingSurnames')}`);
         return;
       }
       
       if (!identificacion) {
-        errors.push(`Fila ${index + 1}: Falta la identificación`);
+        errors.push(`${t('components.excelImport.validation.row')} ${index + 1}: ${t('components.excelImport.validation.missingIdentification')}`);
         return;
       }
       
       // Email es opcional pero debe ser válido si existe
       if (email && !validateEmail(email)) {
-        errors.push(`Fila ${index + 1}: El correo electrónico no es válido`);
+        errors.push(`${t('components.excelImport.validation.row')} ${index + 1}: ${t('components.excelImport.validation.invalidEmail')}`);
         return;
       }
       
@@ -115,8 +117,8 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     } catch (error) {
       logger.error('Error reading file:', error);
       toast({
-        title: "Error",
-        description: "No se pudo leer el archivo. Asegúrate de que sea un archivo Excel válido.",
+        title: t('components.excelImport.error.title'),
+        description: t('components.excelImport.error.readingFile'),
         variant: "destructive",
       });
     } finally {
@@ -131,7 +133,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       reader.onload = (e) => {
         try {
           const data = e.target?.result;
-          if (!data) throw new Error("No se pudo leer el archivo");
+          if (!data) throw new Error(t('components.excelImport.error.readingFile'));
           
           // Leer el archivo y convertir los datos
           const workbook = XLSX.read(data, { type: "binary", cellDates: true, cellText: false });
@@ -163,8 +165,8 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
   logger.log(`[IMPORT] GroupId: ${groupId}`);
     if (preview.length === 0) {
       toast({
-        title: "Error",
-        description: "No hay datos válidos para importar",
+        title: t('components.excelImport.error.title'),
+        description: t('components.excelImport.error.noDataToImport'),
         variant: "destructive",
       });
       return;
@@ -338,16 +340,16 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-4 items-center mb-6">
-        <Button 
-          variant="outline" 
+                <Button
+          variant="outline"
           onClick={downloadTemplate}
           className="flex items-center"
         >
           <Download className="mr-2 h-4 w-4" />
-          Descargar formato
+          {t('components.excelImport.downloadTemplate')}
         </Button>
         <div className="text-sm text-muted-foreground">
-          Descarga el formato de ejemplo para importar estudiantes
+          {t('components.excelImport.downloadDescription')}
         </div>
       </div>
       
@@ -357,7 +359,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
             htmlFor="file-input" 
             className="block mb-2 text-sm font-medium"
           >
-            Seleccionar archivo Excel
+            {t('components.excelImport.selectFile')}
           </label>
           <input
             id="file-input"
@@ -373,7 +375,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
             <div className="flex">
               <AlertCircle className="h-5 w-5 text-destructive mr-2" />
               <div className="text-sm text-destructive">
-                <p className="font-medium">Se encontraron los siguientes errores:</p>
+                <p className="font-medium">{t('components.excelImport.errorsFound')}</p>
                 <ul className="ml-4 list-disc">
                   {errors.map((error, i) => (
                     <li key={i}>{error}</li>
@@ -386,15 +388,15 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
         
         {preview.length > 0 && (
           <div className="mt-4">
-            <h3 className="text-sm font-medium mb-2">Vista previa ({preview.length} estudiantes)</h3>
+            <h3 className="text-sm font-medium mb-2">{t('components.excelImport.preview.title', { count: preview.length })}</h3>
             <div className="overflow-auto max-h-36 rounded-md border">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombres</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Apellidos</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Identificación</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('components.excelImport.preview.table.names')}</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('components.excelImport.preview.table.surnames')}</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('components.excelImport.preview.table.identification')}</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('components.excelImport.preview.table.email')}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -409,7 +411,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
                   {preview.length > 5 && (
                     <tr>
                       <td colSpan={4} className="px-4 py-2 text-xs text-center">
-                        Y {preview.length - 5} más...
+                        {t('components.excelImport.preview.table.andMore', { count: preview.length - 5 })}
                       </td>
                     </tr>
                   )}
@@ -420,11 +422,11 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
             <div className="mt-4 flex justify-between items-center">
               <div className="flex space-x-2 items-center">
                 <Badge variant="secondary">
-                  {preview.length} estudiantes válidos
+                  {t('components.excelImport.preview.validStudents', { count: preview.length })}
                 </Badge>
                 {errors.length > 0 && (
                   <Badge variant="destructive">
-                    {errors.length} errores
+                    {t('components.excelImport.preview.errors', { count: errors.length })}
                   </Badge>
                 )}
               </div>
@@ -432,7 +434,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
                 onClick={handleImport} 
                 disabled={isLoading || preview.length === 0}
               >
-                {isLoading ? "Importando..." : "Importar estudiantes"}
+                {isLoading ? t('components.excelImport.importing') : t('components.excelImport.importStudents')}
               </Button>
             </div>
           </div>

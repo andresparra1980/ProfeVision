@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { getApiTranslator } from '@/i18n/api';
 
 // Obtener variables de entorno para Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     // Validar credenciales de Supabase
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: 'Faltan credenciales de Supabase' },
+        { error: (await getApiTranslator(request, 'qr.translate')).t('errors.serverConfig') },
         { status: 500 }
       );
     }
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     if (!examId && !studentId && !groupId) {
       return NextResponse.json(
-        { error: 'Se requiere al menos un ID (examen, estudiante o grupo)' },
+        { error: (await getApiTranslator(request, 'qr.translate')).t('errors.missingIds') },
         { status: 400 }
       );
     }
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error en traducción de QR:', error);
     return NextResponse.json(
-      { success: false, error: 'Error en traducción de datos de QR' },
+      { success: false, error: (await getApiTranslator(request, 'qr.translate')).t('errors.internal') },
       { status: 500 }
     );
   }

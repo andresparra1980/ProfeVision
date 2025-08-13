@@ -1,0 +1,24 @@
+{
+  "title": "Exam Capture",
+  "capture": {
+    "instruction": "Take a clear photo of the complete exam",
+    "subInstruction": "Make sure all corners are visible",
+    "button": "Take Photo",
+    "description": "By clicking \"Take Photo\", your device's camera will open"
+  },
+  "suggestions": {
+    "title": "Suggestions for better capture",
+    "tips": [
+      "Good lighting, preferably natural light",
+      "Flat surface without shadows",
+      "Entire sheet visible in frame",
+      "Camera parallel to document",
+      "Avoid sudden movements"
+    ]
+  },
+  "preview": {
+    "altText": "Captured exam",
+    "retakeButton": "Retake photo",
+    "continueButton": "Continue"
+  }
+} 

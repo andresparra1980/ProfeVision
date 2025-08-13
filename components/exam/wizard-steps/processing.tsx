@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, RefreshCw } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { QRData, ProcessingResult, DuplicateInfo } from '../types';
 import { useImageContext } from '../contexts';
 import logger from '@/lib/utils/logger';
@@ -24,6 +25,7 @@ interface DuplicateCheckResponse {
 }
 
 export function Processing() {
+  const t = useTranslations('wizard-step-processing');
   const { 
     processedImageData, 
     qrValidation: _qrValidation, 
@@ -40,6 +42,9 @@ export function Processing() {
   
   const processingCompleted = useRef(false);
   const processingInProgress = useRef(false);
+
+  // Mensaje específico para cuando no se detecta examen válido
+  const NO_EXAM_DETECTED_MSG = t('messages.noExamDetected');
 
   // Helper function to check for duplicates
   const checkForDuplicates = async (qrData: QRData | null): Promise<DuplicateCheckResponse | null> => {
@@ -155,7 +160,7 @@ export function Processing() {
         const noAnswersFound = !data.result?.answers || Object.keys(data.result.answers).length === 0;
         if (!normalizedQrData.examId && !normalizedQrData.studentId && noAnswersFound) {
           setStatus('error');
-          setErrorMessage('No se pudo detectar un examen válido en la imagen. Por favor, asegúrese de que el código QR y las marcas de respuesta sean claramente visibles e intente de nuevo.');
+          setErrorMessage(t('messages.invalidExamDetected'));
           processingInProgress.current = false;
           processingCompleted.current = false; // Not successfully completed
           return; // Stop processing
@@ -247,7 +252,7 @@ export function Processing() {
         setErrorMessage(data.error_details?.message || data.error || 'Error processing image');
       }
     } catch (error) {
-      const genericErrorMessage = 'Error al procesar. Intente de nuevo.';
+      const genericErrorMessage = t('messages.genericProcessingError');
       let specificErrorMessage = genericErrorMessage;
 
       if (DEBUG) {
@@ -265,7 +270,7 @@ export function Processing() {
       processingInProgress.current = false;
       processingCompleted.current = false; // Ensure it's not marked as completed
     }
-  }, [processedImageData, setQrValidation, setFinalOutput, onProcessingComplete]);
+  }, [processedImageData, setQrValidation, setFinalOutput, onProcessingComplete, NO_EXAM_DETECTED_MSG, t]);
 
   // Set processedImageData when component mounts
   useEffect(() => {
@@ -297,7 +302,7 @@ export function Processing() {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
+    return date.toLocaleDateString(t('locale'), {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -306,20 +311,17 @@ export function Processing() {
     });
   };
 
-  // Mensaje específico para cuando no se detecta examen válido
-  const NO_EXAM_DETECTED_MSG = "Examen no detectado. Intente de nuevo.";
-
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-6 w-full">
       <h2 className="text-xl font-bold text-center">
-        {status === 'idle' ? 'Procesando imagen...' :
-         status === 'processing' ? 'Procesando imagen...' :
-         status === 'checking_duplicates' ? 'Verificando duplicados...' :
-         status === 'complete' ? 'Procesamiento exitoso' :
-         status === 'duplicate' ? 'Examen ya calificado' :
-         status === 'error' && errorMessage === NO_EXAM_DETECTED_MSG ? 'Examen no detectado' :
-         status === 'error' ? 'Error de procesamiento' :
-         'Procesando imagen...'}
+        {status === 'idle' ? t('states.processing') :
+         status === 'processing' ? t('states.processing') :
+         status === 'checking_duplicates' ? t('states.checkingDuplicates') :
+         status === 'complete' ? t('states.complete') :
+         status === 'duplicate' ? t('states.duplicate') :
+         status === 'error' && errorMessage === NO_EXAM_DETECTED_MSG ? t('states.examNotDetected') :
+         status === 'error' ? t('states.error') :
+         t('states.processing')}
       </h2>
       
       <div className="w-full max-w-md relative">
@@ -336,7 +338,7 @@ export function Processing() {
             <div className="relative w-full h-full">
               <Image 
                 src={processedImageData} 
-                alt="Imagen procesada" 
+                alt={t('messages.processedImageAlt')} 
                 fill
                 sizes="(max-width: 768px) 100vw, 400px"
                 className="object-contain"
@@ -360,8 +362,8 @@ export function Processing() {
               }}
             >
               <p className="text-white text-sm font-medium">
-                {status === 'complete' && '¡Procesado correctamente!'}
-                {status === 'duplicate' && (duplicateData ? `Examen ya calificado el ${formatDate(duplicateData.fecha_calificacion)}` : 'Examen ya calificado.')}
+                {status === 'complete' && t('messages.processingSuccess')}
+                {status === 'duplicate' && (duplicateData ? t('messages.duplicateWithDate', { date: formatDate(duplicateData.fecha_calificacion) }) : t('messages.duplicateGeneric'))}
                 {status === 'error' && errorMessage}
               </p>
             </div>
@@ -376,7 +378,7 @@ export function Processing() {
               onClick={handleRetake}
               className="px-4"
             >
-              Tomar otra foto
+              {t('buttons.retakePhoto')}
             </Button>
           )}
           
@@ -389,7 +391,7 @@ export function Processing() {
               }}
               className="px-6 bg-primary"
             >
-              Reintentar
+              {t('buttons.retry')}
               <RefreshCw className="ml-2 h-4 w-4" />
             </Button>
           )}
@@ -400,7 +402,7 @@ export function Processing() {
               onClick={processImage}
               className="px-6"
             >
-              {status === 'duplicate' ? 'Continuar de todas formas' : 'Continuar'}
+              {status === 'duplicate' ? t('buttons.continueAnyway') : t('buttons.continue')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           )}

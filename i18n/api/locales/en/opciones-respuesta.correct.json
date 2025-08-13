@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "missingArray": "An array of question IDs is required",
+    "serverConfig": "Server configuration error",
+    "fetch": "Failed to fetch answer options",
+    "internal": "Internal server error"
+  }
+}
+
+

@@ -1,0 +1,13 @@
+{
+  "errors": {
+    "serverConfig": "Server configuration error",
+    "fetchExams": "Failed to fetch exams",
+    "unauthorized": "Unauthorized. Please sign in to continue.",
+    "noUser": "Could not identify user",
+    "missingFields": "Missing required fields (title or materia_id)",
+    "missingGroup": "You must select a group",
+    "createExam": "Failed to create exam"
+  }
+}
+
+

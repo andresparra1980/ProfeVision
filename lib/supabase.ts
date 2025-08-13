@@ -55,25 +55,34 @@ export const signUpWithRedirect = (
   email: string,
   password: string,
   userData: UserSignupData,
-  captchaToken?: string
+  captchaToken?: string,
+  locale?: 'es' | 'en'
 ) => {
+  const currentSiteUrl = getSiteUrl();
+  const query = new URLSearchParams();
+  if (locale) query.set('locale', locale);
+  // Use a conservative param name that providers won't strip
+  query.set('pv', 'signup');
+  const callbackUrl = `${currentSiteUrl}/auth/callback?${query.toString()}`;
   return supabase.auth.signUp({
     email,
     password,
     options: {
       data: userData,
-      emailRedirectTo: `${siteUrl}/auth/email-confirmed`,
+      // Always redirect back to the centralized auth callback so it can
+      // decide the proper localized destination (en/es) consistently.
+      emailRedirectTo: callbackUrl,
       captchaToken: captchaToken,
     },
   });
 };
 
 // Helper function specifically for password reset
-export const resetPassword = (email: string, captchaToken?: string) => {
+export const resetPassword = (email: string, captchaToken?: string, locale?: 'es' | 'en') => {
   // Always recalculate the URL to ensure we have the correct origin
   const currentSiteUrl = getSiteUrl();
   // Use the direct-recovery endpoint specifically
-  const resetRedirectUrl = `${currentSiteUrl}/auth/direct-recovery`;
+  const resetRedirectUrl = `${currentSiteUrl}/auth/direct-recovery${locale ? `?locale=${locale}` : ''}`;
 
   // Make sure we're using the correct URL format
   return supabase.auth.resetPasswordForEmail(email, {

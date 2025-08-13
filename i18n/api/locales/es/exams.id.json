@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "unauthorized": "No autorizado",
+    "internal": "Error al procesar la solicitud",
+    "notFound": "Examen no encontrado",
+    "onlyDraftDelete": "Solo se pueden eliminar exámenes en estado borrador",
+    "serverConfig": "Error de configuración del servidor",
+    "missingFields": "Faltan campos requeridos",
+    "updateExam": "Error al actualizar examen",
+    "updateState": "Error al actualizar el estado del examen"
+  },
+  "success": {
+    "deleted": "Examen y elementos relacionados eliminados correctamente",
+    "stateUpdated": "Estado del examen actualizado correctamente",
+    "updated": "Examen actualizado correctamente"
+  }
+}
+
+

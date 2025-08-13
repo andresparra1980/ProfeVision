@@ -1,0 +1,14 @@
+{
+  "title": "Blog",
+  "description": "Latest news, tips and updates about ProfeVision.",
+  "comingSoon": {
+    "title": "Coming Soon",
+    "description": "We are preparing valuable content for educators. Here you will find:",
+    "items": [
+      "Best practices in digital assessment",
+      "Tips to optimize grading time",
+      "Success stories from educational institutions",
+      "Platform news and updates"
+    ]
+  }
+} 

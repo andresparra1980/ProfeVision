@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,12 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const COMPONENT_TYPES: { value: ComponentType; label: string }[] = [
-  { value: 'examen', label: 'Examen' },
-  { value: 'proyecto', label: 'Proyecto' },
-  { value: 'quiz', label: 'Quiz' },
-  { value: 'trabajo', label: 'Trabajo' },
-];
+// Moved inside component to access translations
 
 interface Props {
   initialScheme?: GradingScheme;
@@ -32,30 +28,39 @@ interface Props {
 }
 
 export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
+  const t = useTranslations('dashboard.components.gradingSchemeEditor');
+  
+  const COMPONENT_TYPES: { value: ComponentType; label: string }[] = [
+    { value: 'examen', label: t('componentTypes.exam') },
+    { value: 'proyecto', label: t('componentTypes.project') },
+    { value: 'quiz', label: t('componentTypes.quiz') },
+    { value: 'trabajo', label: t('componentTypes.work') },
+  ];
+  
   const [scheme, setScheme] = useState<GradingScheme>(
     initialScheme || {
-      grupo_id: groupId,
-      nombre: 'Esquema de Calificación',
-      fecha_inicio: '',
-      fecha_fin: '',
-      periodos: [
-        {
-          nombre: 'Primer Periodo',
-          porcentaje: 0,
-          orden: 0,
-          esquema_id: '',
-          fecha_inicio: '',
-          fecha_fin: '',
-          componentes: [
-            {
-              nombre: 'Tareas',
-              porcentaje: 0,
-              periodo_id: '',
-              tipo: 'trabajo',
-            },
-          ],
-        },
-      ],
+              grupo_id: groupId,
+        nombre: t('defaultSchemeName'),
+        fecha_inicio: '',
+        fecha_fin: '',
+        periodos: [
+          {
+            nombre: t('defaultPeriodName'),
+            porcentaje: 0,
+            orden: 0,
+            esquema_id: '',
+            fecha_inicio: '',
+            fecha_fin: '',
+            componentes: [
+              {
+                nombre: t('defaultComponentName'),
+                porcentaje: 0,
+                periodo_id: '',
+                tipo: 'trabajo',
+              },
+            ],
+          },
+        ],
     }
   );
 
@@ -82,8 +87,8 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       // Validar que las fechas estén establecidas
       if (!updatedScheme.fecha_inicio || !updatedScheme.fecha_fin) {
         toast({
-          title: 'Error',
-          description: 'Debes establecer las fechas de inicio y fin del esquema',
+          title: t('error.title'),
+          description: t('error.missingDates'),
           variant: 'destructive',
         });
         return;
@@ -92,8 +97,8 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       // Validar que la fecha de fin sea posterior a la de inicio
       if (new Date(updatedScheme.fecha_fin) <= new Date(updatedScheme.fecha_inicio)) {
         toast({
-          title: 'Error',
-          description: 'La fecha de fin debe ser posterior a la fecha de inicio',
+          title: t('error.title'),
+          description: t('error.invalidDates'),
           variant: 'destructive',
         });
         return;
@@ -103,8 +108,8 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       const periodosTotal = updatedScheme.periodos.reduce((sum, p) => sum + p.porcentaje, 0);
       if (Math.abs(periodosTotal - 100) > 0.01) {
         toast({
-          title: 'Error',
-          description: 'Los porcentajes de los periodos deben sumar 100%',
+          title: t('error.title'),
+          description: t('error.periodsSum'),
           variant: 'destructive',
         });
         return;
@@ -115,8 +120,8 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
         const componentesTotal = periodo.componentes.reduce((sum, c) => sum + c.porcentaje, 0);
         if (Math.abs(componentesTotal - periodo.porcentaje) > 0.01) {
           toast({
-            title: 'Error',
-            description: `Los porcentajes de los componentes en el periodo "${periodo.nombre}" deben sumar ${periodo.porcentaje}%`,
+            title: t('error.title'),
+            description: `${t('error.componentsSum')} "${periodo.nombre}" ${t('error.componentsSumValue')} ${periodo.porcentaje}%`,
             variant: 'destructive',
           });
           return;
@@ -127,8 +132,8 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
     } catch (error) {
       console.error('Error al guardar:', error);
       toast({
-        title: 'Error',
-        description: 'No se pudo guardar el esquema de calificaciones',
+        title: t('error.title'),
+        description: t('error.saving'),
         variant: 'destructive',
       });
     } finally {
@@ -157,7 +162,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
 
   const addPeriod = () => {
     const newPeriod: GradingPeriod = {
-      nombre: `Periodo ${scheme.periodos.length + 1}`,
+      nombre: `${t('period')} ${scheme.periodos.length + 1}`,
       porcentaje: 0,
       orden: scheme.periodos.length,
       esquema_id: scheme.id || '',
@@ -165,7 +170,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       fecha_fin: scheme.fecha_fin,
       componentes: [
         {
-          nombre: 'Nuevo Componente',
+          nombre: t('newComponent'),
           porcentaje: 0,
           periodo_id: '',
           tipo: 'examen',
@@ -204,7 +209,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
     const period = updatedPeriods[periodIndex];
     
     period.componentes.push({
-      nombre: `Nuevo Componente`,
+      nombre: t('newComponent'),
       porcentaje: 0,
       periodo_id: period.id || '',
       tipo: 'examen',
@@ -251,11 +256,12 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1 w-full">
-              <Label htmlFor="scheme-name">Nombre del Esquema</Label>
+              <Label htmlFor="scheme-name">{t('schemeName')}</Label>
               <Input
                 id="scheme-name"
                 value={scheme.nombre}
                 onChange={(e) => setScheme({ ...scheme, nombre: e.target.value })}
+                placeholder={t('placeholders.schemeName')}
               />
             </div>
           </div>
@@ -295,6 +301,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                                   updatePeriod(periodIndex, 'nombre', e.target.value)
                                 }
                                 className="max-w-xs"
+                                placeholder={t('placeholders.periodName')}
                               />
                             </CardTitle>
                             <div className="flex items-center gap-4">
@@ -306,6 +313,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                                     updatePeriod(periodIndex, 'porcentaje', parseFloat(e.target.value))
                                   }
                                   className="w-20"
+                                  placeholder="0"
                                 />
                                 <span>%</span>
                               </div>
@@ -320,7 +328,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                           </div>
                           <div className="flex gap-4 mt-2">
                             <div className="flex-1">
-                              <Label htmlFor={`periodo-fecha-inicio-${periodIndex}`} className="text-sm">Fecha inicio</Label>
+                              <Label htmlFor={`periodo-fecha-inicio-${periodIndex}`} className="text-sm">{t('startDate')}</Label>
                               <Input
                                 id={`periodo-fecha-inicio-${periodIndex}`}
                                 type="date"
@@ -332,7 +340,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                               />
                             </div>
                             <div className="flex-1">
-                              <Label htmlFor={`periodo-fecha-fin-${periodIndex}`} className="text-sm">Fecha fin</Label>
+                              <Label htmlFor={`periodo-fecha-fin-${periodIndex}`} className="text-sm">{t('endDate')}</Label>
                               <Input
                                 id={`periodo-fecha-fin-${periodIndex}`}
                                 type="date"
@@ -366,6 +374,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                                     )
                                   }
                                   className="flex-1"
+                                  placeholder={t('placeholders.componentName')}
                                 />
                                 <Select
                                   value={componente.tipo}
@@ -379,7 +388,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                                   }
                                 >
                                   <SelectTrigger className="w-[140px]">
-                                    <SelectValue placeholder="Tipo" />
+                                    <SelectValue placeholder={t('type')} />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {COMPONENT_TYPES.map((type) => (
@@ -402,6 +411,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                                       )
                                     }
                                     className="w-20"
+                                    placeholder="0"
                                   />
                                   <span>%</span>
                                 </div>
@@ -423,7 +433,7 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
                             onClick={() => addComponent(periodIndex)}
                           >
                             <Plus className="h-4 w-4 mr-2" />
-                            Agregar Componente
+                            {t('addComponent')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -442,13 +452,13 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
           onClick={() => addPeriod()}
         >
           <Plus className="w-4 h-4 mr-2" />
-          Agregar Periodo
+          {t('addPeriod')}
         </Button>
       </div>
 
       <div className="flex justify-end mt-6">
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? 'Guardando...' : 'Guardar Cambios'}
+          {saving ? t('saving') : t('saveChanges')}
         </Button>
       </div>
     </div>

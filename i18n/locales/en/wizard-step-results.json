@@ -1,0 +1,48 @@
+{
+  "description": "Review the scan results. You can go back to scan again if necessary.",
+  "examInfo": {
+    "title": "Exam Information",
+    "loading": "Loading information...",
+    "fields": {
+      "subject": "Subject:",
+      "exam": "Exam:",
+      "student": "Student:",
+      "group": "Group:"
+    },
+    "notAvailable": "Not available"
+  },
+  "answers": {
+    "title": "Answers"
+  },
+  "grading": {
+    "calculating": "Calculating grade...",
+    "error": "Error calculating grade:",
+    "label": "Grade:",
+    "correctAnswers": "correct",
+    "scoreFormat": "{obtained}/{total} ({correct}/{totalQuestions} correct)"
+  },
+  "buttons": {
+    "back": "Back",
+    "saving": "Saving...",
+    "saveResults": "Save Results",
+    "savedSuccessfully": "Saved successfully",
+    "scanAnother": "Scan Another",
+    "finish": "Finish"
+  },
+  "toasts": {
+    "resultsUpdated": "Results updated",
+    "resultsSaved": "Results saved",
+    "saveError": "Save error",
+    "saveErrorDescription": "An error occurred while saving the results"
+  },
+  "errors": {
+    "calculatingGrade": "Error calculating grade",
+    "noQRData": "No QR data detected.",
+    "saveResults": "Error saving results",
+    "loadingEntities": "Unknown error loading entity data",
+    "serverEmptyResponse": "Server responded with empty body",
+    "timeoutError": "Request exceeded maximum timeout (60 seconds)",
+    "formatError": "Format error",
+    "unknownError": "Unknown error"
+  }
+} 

@@ -1,0 +1,14 @@
+{
+  "title": "Mobile App",
+  "description": "Coming soon - Access ProfeVision from your mobile device.",
+  "plannedFeatures": {
+    "title": "Planned Features",
+    "items": {
+      "0": "Exam scanning with phone camera",
+      "1": "Real-time access to grades",
+      "2": "Result notifications",
+      "3": "Mobile-optimized interface"
+    }
+  },
+  "inDevelopment": "🚧 In development - Stay tuned for updates"
+} 
