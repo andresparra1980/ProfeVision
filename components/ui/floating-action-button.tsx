@@ -1,6 +1,7 @@
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/sidebar-context';
+import { useTranslations } from 'next-intl';
 
 interface FloatingActionButtonProps {
   onClick: () => void;
@@ -8,6 +9,7 @@ interface FloatingActionButtonProps {
 
 export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
   const { isOpen } = useSidebar();
+  const t = useTranslations('floating-action-button');
 
   // No mostrar la bottom bar si el sidebar está abierto en mobile
   if (isOpen) {
@@ -23,7 +25,7 @@ export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
           className="h-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-md flex items-center gap-2 px-6 font-medium"
         >
           <Camera className="h-5 w-5" />
-          ¡Califica Ya!
+          {t('label')}
         </Button>
       </div>
     </div>
