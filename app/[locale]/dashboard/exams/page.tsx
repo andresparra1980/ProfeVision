@@ -244,7 +244,7 @@ export default function ExamsPage() {
   };
 
   const handleCreateExam = () => {
-    router.push("/dashboard/exams/create-with-ai");
+    router.push("/dashboard/exams/ai-exams-creation-chat");
   };
 
   return (

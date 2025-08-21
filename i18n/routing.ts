@@ -123,6 +123,10 @@ export const pathnames = {
     es: '/dashboard/examenes/crear-con-ia', 
     en: '/dashboard/exams/create-with-ai' 
   },
+  '/dashboard/exams/ai-exams-creation-chat': {
+    es: '/dashboard/examenes/chat-creacion-ia',
+    en: '/dashboard/exams/ai-exams-creation-chat'
+  },
   '/dashboard/exams/[id]': {
     es: '/dashboard/examenes/[id]',
     en: '/dashboard/exams/[id]'

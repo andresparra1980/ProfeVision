@@ -12,6 +12,7 @@
     "dev:fresh": "rm -rf .next && rm -rf node_modules/.cache && next dev --turbopack"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.17",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.3.4",
     "@marsidev/react-turnstile": "^1.1.0",
@@ -52,6 +53,7 @@
     "@tiptap/starter-kit": "^2.11.7",
     "@types/js-cookie": "^3.0.6",
     "@types/uuid": "^10.0.0",
+    "ai": "^5.0.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
