@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { loadSettings, loadLastDocumentContext } from "@/lib/persistence/browser";
+import { loadSettings, loadLastDocumentContext, loadOutput } from "@/lib/persistence/browser";
 import { useAIChat } from "./AIChatContext";
 import { supabase } from "@/lib/supabase";
 
@@ -36,6 +36,17 @@ export default function ChatPanel() {
       }
 
       const lastDoc = loadLastDocumentContext();
+      // Try to load a previously saved topic summary for this document
+      let topicSummary: any | undefined = undefined;
+      if (lastDoc?.documentId) {
+        try {
+          const out = await loadOutput<any>("summary", lastDoc.documentId);
+          // out payload shape: { summary, meta }
+          topicSummary = out?.summary;
+        } catch (_e) {
+          // ignore if not found or IndexedDB error
+        }
+      }
       const payload = {
         messages: next.map((m) => ({ role: m.role, content: m.content })),
         context: {
@@ -44,6 +55,7 @@ export default function ChatPanel() {
           questionTypes: ["multiple_choice"],
           difficulty: "mixed",
           taxonomy: [],
+          topicSummary,
         },
       };
 

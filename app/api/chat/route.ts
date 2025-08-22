@@ -18,6 +18,31 @@ const ChatMessageSchema = z.object({
   content: z.string().min(1),
 });
 
+// Optional topic summary context to guide question generation
+const TopicSummarySchema = z.object({
+  generalOverview: z.string(),
+  academicLevel: z.string(),
+  macroTopics: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        importance: z.enum(["high", "medium", "low"]),
+        microTopics: z
+          .array(
+            z.object({
+              name: z.string(),
+              description: z.string(),
+              keyTerms: z.array(z.string()),
+              concepts: z.array(z.string()),
+            })
+          )
+          .default([]),
+      })
+    )
+    .default([]),
+});
+
 const ChatContextSchema = z.object({
   documentId: z.string().nullable().optional(),
   language: z.string().min(2).default("es"),
@@ -39,6 +64,8 @@ const ChatContextSchema = z.object({
     )
     .optional()
     .default([]),
+  // Newly added optional summary payload from the document summarization step
+  topicSummary: TopicSummarySchema.nullable().optional(),
 });
 
 const ChatRequestSchema = z.object({
@@ -252,6 +279,18 @@ export async function POST(req: NextRequest) {
         models,
         messages: [
           { role: "system", content: systemPrompt },
+          // Contexto opcional del documento: Resumen temático
+          ...(context.topicSummary
+            ? [
+                {
+                  role: "system" as const,
+                  content:
+                    `Resumen temático del documento${context.documentId ? ` (documentId: ${context.documentId})` : ""}. ` +
+                    `Úsalo SOLO como contexto para alinear los temas; no lo cites literalmente.\n` +
+                    `${JSON.stringify(context.topicSummary)}`,
+                },
+              ]
+            : []),
           // Conversación previa del usuario
           ...messages,
           // Instrucción final con parámetros estructurados
