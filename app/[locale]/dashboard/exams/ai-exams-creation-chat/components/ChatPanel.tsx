@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { loadSettings, loadLastDocumentContext, loadOutput } from "@/lib/persistence/browser";
+import { loadSettings, loadLastDocumentsContext, loadOutput } from "@/lib/persistence/browser";
 import { useAIChat } from "./AIChatContext";
 import { supabase } from "@/lib/supabase";
 
@@ -14,7 +14,7 @@ export default function ChatPanel() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const { setResult } = useAIChat();
+  const { result, setResult } = useAIChat();
 
   async function onSend() {
     if (!input.trim()) return;
@@ -35,14 +35,14 @@ export default function ChatPanel() {
         return;
       }
 
-      const lastDoc = loadLastDocumentContext();
-      // Try to load a previously saved topic summary for this document
-      let topicSummary: any | undefined = undefined;
-      if (lastDoc?.documentId) {
+      const docsCtx = loadLastDocumentsContext();
+      const documentIds = (docsCtx?.documentIds || []).slice(0, 5);
+      // Load summaries for each doc (if available)
+      const topicSummaries: Array<{ documentId: string; summary: any }> = [];
+      for (const docId of documentIds) {
         try {
-          const out = await loadOutput<any>("summary", lastDoc.documentId);
-          // out payload shape: { summary, meta }
-          topicSummary = out?.summary;
+          const out = await loadOutput<any>("summary", docId);
+          if (out?.summary) topicSummaries.push({ documentId: docId, summary: out.summary });
         } catch (_e) {
           // ignore if not found or IndexedDB error
         }
@@ -50,12 +50,14 @@ export default function ChatPanel() {
       const payload = {
         messages: next.map((m) => ({ role: m.role, content: m.content })),
         context: {
-          documentId: lastDoc?.documentId ?? null,
+          documentIds,
           language: settings.language ?? "es",
           questionTypes: ["multiple_choice"],
           difficulty: "mixed",
           taxonomy: [],
-          topicSummary,
+          topicSummaries,
+          // Include existing exam result (possibly edited or randomized on client) as baseline
+          existingExam: result ?? undefined,
         },
       };
 

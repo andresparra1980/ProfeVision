@@ -74,7 +74,7 @@ export function useBackgroundSummarization(): UseBackgroundSummarization {
           const resp = await fetch("/api/documents/summarize", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: doc.text, options: { maxOutputTokens: 2200 } }),
+            body: JSON.stringify({ text: doc.text, options: { maxOutputTokens: 10000 } }),
           });
           if (!resp.ok) {
             const details = await resp.text();

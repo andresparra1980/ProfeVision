@@ -84,11 +84,64 @@ export default function ResultsView() {
     URL.revokeObjectURL(url);
   }
 
+  // Aleatorizar opciones de preguntas multiple_choice y actualizar índice de respuesta
+  function randomizeOptions() {
+    if (!result) return;
+    try {
+      const cloned: any = JSON.parse(JSON.stringify(result));
+      const questions: any[] = cloned?.exam?.questions;
+      if (!Array.isArray(questions)) return;
+
+      const shuffle = <T,>(arr: T[]): T[] => {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      };
+
+      for (let qi = 0; qi < questions.length; qi++) {
+        const q = questions[qi];
+        if (!q || q.type !== "multiple_choice") continue;
+        const opts: unknown = q.options;
+        if (!Array.isArray(opts) || opts.length < 2) continue;
+
+        // Determinar índice correcto original
+        let correctIndex: number | null = null;
+        if (typeof q.answer === "number" && q.answer >= 0 && q.answer < opts.length) {
+          correctIndex = q.answer;
+        } else if (typeof q.answer === "string") {
+          const idx = opts.findIndex((t: any) => t === q.answer);
+          correctIndex = idx >= 0 ? idx : null;
+        }
+        if (correctIndex == null) continue;
+
+        // Emparejar opciones con su índice original
+        const paired = (opts as string[]).map((text, i) => ({ text, i }));
+        const shuffled = shuffle(paired);
+        const newOptions = shuffled.map((p) => p.text);
+        const newCorrectIndex = shuffled.findIndex((p) => p.i === correctIndex);
+
+        // Aplicar cambios
+        q.options = newOptions;
+        q.answer = newCorrectIndex >= 0 ? newCorrectIndex : q.answer;
+      }
+
+      setResult(cloned);
+    } catch (_e) {
+      // no-op: si falla, no mutamos el estado
+    }
+  }
+
   return (
     <div className="rounded-md border p-3 space-y-3">
       <div className="flex items-center justify-between">
         <div className="font-medium">Resultados</div>
         <div className="flex items-center gap-2">
+          <button className="h-8 rounded border px-2 text-sm" onClick={randomizeOptions} disabled={!result}>
+            Aleatorizar opciones
+          </button>
           <button className="h-8 rounded border px-2 text-sm" onClick={exportJSON} disabled={!result}>
             Exportar JSON
           </button>

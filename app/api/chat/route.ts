@@ -12,67 +12,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export const dynamic = "force-dynamic";
 
-// Zod: request schema per DOC_preguntas_ia.md
-const ChatMessageSchema = z.object({
-  role: z.enum(["user", "system", "assistant"]),
-  content: z.string().min(1),
-});
-
-// Optional topic summary context to guide question generation
-const TopicSummarySchema = z.object({
-  generalOverview: z.string(),
-  academicLevel: z.string(),
-  macroTopics: z
-    .array(
-      z.object({
-        name: z.string(),
-        description: z.string(),
-        importance: z.enum(["high", "medium", "low"]),
-        microTopics: z
-          .array(
-            z.object({
-              name: z.string(),
-              description: z.string(),
-              keyTerms: z.array(z.string()),
-              concepts: z.array(z.string()),
-            })
-          )
-          .default([]),
-      })
-    )
-    .default([]),
-});
-
-const ChatContextSchema = z.object({
-  documentId: z.string().nullable().optional(),
-  language: z.string().min(2).default("es"),
-  numQuestions: z.number().int().min(1).max(50).optional(),
-  questionTypes: z
-    .array(z.enum(["multiple_choice", "true_false", "short_answer", "essay"]))
-    .nonempty(),
-  difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
-  taxonomy: z
-    .array(
-      z.enum([
-        "remember",
-        "understand",
-        "apply",
-        "analyze",
-        "evaluate",
-        "create",
-      ])
-    )
-    .optional()
-    .default([]),
-  // Newly added optional summary payload from the document summarization step
-  topicSummary: TopicSummarySchema.nullable().optional(),
-});
-
-const ChatRequestSchema = z.object({
-  messages: z.array(ChatMessageSchema).min(1),
-  context: ChatContextSchema,
-});
-
 // Zod: response contract schema per DOC_preguntas_ia.md
 const ExamQuestionSchema = z.object({
   id: z.string(),
@@ -125,6 +64,72 @@ const ExamSchema = z.object({
     language: z.string(),
     questions: z.array(ExamQuestionSchema).min(1),
   }),
+});
+
+// Zod: request schema per DOC_preguntas_ia.md
+const ChatMessageSchema = z.object({
+  role: z.enum(["user", "system", "assistant"]),
+  content: z.string().min(1),
+});
+
+// Optional topic summary context to guide question generation
+const TopicSummarySchema = z.object({
+  generalOverview: z.string(),
+  academicLevel: z.string(),
+  macroTopics: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        importance: z.enum(["high", "medium", "low"]),
+        microTopics: z
+          .array(
+            z.object({
+              name: z.string(),
+              description: z.string(),
+              keyTerms: z.array(z.string()),
+              concepts: z.array(z.string()),
+            })
+          )
+          .default([]),
+      })
+    )
+    .default([]),
+});
+
+const ChatContextSchema = z.object({
+  documentIds: z.array(z.string()).max(5).optional().default([]),
+  language: z.string().min(2).default("es"),
+  numQuestions: z.number().int().min(1).max(50).optional(),
+  questionTypes: z
+    .array(z.enum(["multiple_choice", "true_false", "short_answer", "essay"]))
+    .nonempty(),
+  difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
+  taxonomy: z
+    .array(
+      z.enum([
+        "remember",
+        "understand",
+        "apply",
+        "analyze",
+        "evaluate",
+        "create",
+      ])
+    )
+    .optional()
+    .default([]),
+  // Multiple optional summaries from background processing
+  topicSummaries: z
+    .array(z.object({ documentId: z.string(), summary: TopicSummarySchema }))
+    .optional()
+    .default([]),
+  // Optional existing exam (the UI may allow edits locally and send as baseline for the next turn)
+  existingExam: ExamSchema.nullable().optional(),
+});
+
+const ChatRequestSchema = z.object({
+  messages: z.array(ChatMessageSchema).min(1),
+  context: ChatContextSchema,
 });
 
 function buildSystemPrompt(language: string) {
@@ -279,15 +284,22 @@ export async function POST(req: NextRequest) {
         models,
         messages: [
           { role: "system", content: systemPrompt },
-          // Contexto opcional del documento: Resumen temático
-          ...(context.topicSummary
+          // Contexto opcional: Resúmenes temáticos por documento (si hay varios docs)
+          ...((context.topicSummaries || []).map((ts) => ({
+            role: "system" as const,
+            content:
+              `Resumen temático del documento (documentId: ${ts.documentId}). ` +
+              `Úsalo SOLO como contexto para alinear los temas; no lo cites literalmente.\n` +
+              `${JSON.stringify(ts.summary)}`,
+          }))),
+          // Contexto opcional: examen existente a modificar/expandir
+          ...(context.existingExam
             ? [
                 {
                   role: "system" as const,
                   content:
-                    `Resumen temático del documento${context.documentId ? ` (documentId: ${context.documentId})` : ""}. ` +
-                    `Úsalo SOLO como contexto para alinear los temas; no lo cites literalmente.\n` +
-                    `${JSON.stringify(context.topicSummary)}`,
+                    "Examen existente provisto por el usuario. Si el usuario solicita cambios, devuelve el examen COMPLETO actualizado.\n" +
+                    `${JSON.stringify(context.existingExam)}`,
                 },
               ]
             : []),
@@ -303,7 +315,7 @@ export async function POST(req: NextRequest) {
           },
         ],
         temperature: 0.7,
-        max_tokens: 4000,
+        max_tokens: 40000,
       }),
     });
 
