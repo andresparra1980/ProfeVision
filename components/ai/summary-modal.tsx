@@ -23,10 +23,11 @@ interface TopicSummaryResult {
 
 interface SummaryOutputPayload {
   summary: TopicSummaryResult;
-  meta?: any;
+  meta?: Record<string, unknown>;
 }
 
-export function SummaryModal({ open, onOpenChange, documentId }: { open: boolean; onOpenChange: (open: boolean) => void; documentId: string }) {
+export function SummaryModal({ open: _open, onOpenChange, documentId }: { open: boolean; onOpenChange: (_open: boolean) => void; documentId: string }) {
+  const open = _open;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payload, setPayload] = useState<SummaryOutputPayload | null>(null);
@@ -46,9 +47,10 @@ export function SummaryModal({ open, onOpenChange, documentId }: { open: boolean
         } else {
           setPayload(out);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!mounted) return;
-        setError(e?.message || String(e));
+        const msg = (e as { message?: string } | undefined)?.message || String(e);
+        setError(msg);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -69,7 +71,7 @@ export function SummaryModal({ open, onOpenChange, documentId }: { open: boolean
 
   function handleCopy() {
     if (!prettyJson) return;
-    navigator.clipboard.writeText(prettyJson).catch(() => {});
+    navigator.clipboard.writeText(prettyJson).catch(() => { /* ignore */ });
   }
 
   return (

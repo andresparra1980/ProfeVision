@@ -18,9 +18,9 @@ export interface SummaryJob {
 
 export interface UseBackgroundSummarization {
   jobs: SummaryJob[];
-  addJob: (documentId: string) => string;
-  removeJob: (jobId: string) => void;
-  getSummary: (documentId: string) => Promise<any | null>;
+  addJob: (_documentId: string) => string;
+  removeJob: (_jobId: string) => void;
+  getSummary: (_documentId: string) => Promise<any | null>;
 }
 
 function uid() {
@@ -41,11 +41,6 @@ export function useBackgroundSummarization(): UseBackgroundSummarization {
     setJobs((prev) => [...prev, job]);
   }, []);
 
-  const startNextIfIdle = useCallback(() => {
-    if (isProcessingRef.current) return;
-    setTimeout(processLoop, 0);
-  }, []);
-
   const updateJob = useCallback((jobId: string, patch: Partial<SummaryJob>) => {
     setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, ...patch } : j)));
   }, []);
@@ -54,9 +49,8 @@ export function useBackgroundSummarization(): UseBackgroundSummarization {
     if (isProcessingRef.current) return;
     isProcessingRef.current = true;
     try {
-      // process one job at a time
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
+      // Process while there are queued jobs
+      while (jobsRef.current.some((x) => x.status === "queued")) {
         const next: SummaryJob | undefined = jobsRef.current.find((x) => x.status === "queued");
         if (!next) break;
 
@@ -64,17 +58,22 @@ export function useBackgroundSummarization(): UseBackgroundSummarization {
         updateJob(jobId, { status: "summarizing", progress: 5, startedAt: new Date().toISOString() });
 
         try {
-          // Load document text from IndexedDB
+          // Load document text/meta from IndexedDB
           const doc = await loadDocument<{ text: string; meta?: any }>(next.documentId);
-          if (!doc?.text) throw new Error("Documento no encontrado en IndexedDB");
+          const isImageDoc = !!(doc?.meta?.kind === "image" && typeof doc?.meta?.dataUrl === "string");
+          if (!isImageDoc && !doc?.text) throw new Error("Documento no encontrado en IndexedDB");
 
           updateJob(jobId, { progress: 25 });
 
-          // Call summarization API
+          // Call summarization API (vision if image, text otherwise)
+          const isImage = doc?.meta?.kind === "image" && typeof doc?.meta?.dataUrl === "string";
+          const payload = isImage
+            ? { imageData: doc.meta.dataUrl, options: { maxOutputTokens: 2000 } }
+            : { text: doc.text, options: { maxOutputTokens: 10000 } };
           const resp = await fetch("/api/documents/summarize", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: doc.text, options: { maxOutputTokens: 10000 } }),
+            body: JSON.stringify(payload),
           });
           if (!resp.ok) {
             const details = await resp.text();
@@ -96,6 +95,11 @@ export function useBackgroundSummarization(): UseBackgroundSummarization {
       isProcessingRef.current = false;
     }
   }, [updateJob]);
+
+  const startNextIfIdle = useCallback(() => {
+    if (isProcessingRef.current) return;
+    setTimeout(processLoop, 0);
+  }, [processLoop]);
 
   const addJob = useCallback(
     (documentId: string) => {

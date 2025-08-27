@@ -42,6 +42,15 @@ export async function POST(req: Request) {
       // occasionally reported as msword
       lowerMime.includes("msword");
     const isDoc = lowerName.endsWith(".doc") || lowerMime === "application/msword";
+    const isPptx =
+      lowerName.endsWith(".pptx") ||
+      lowerMime === "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    const isImage =
+      lowerName.endsWith(".png") ||
+      lowerName.endsWith(".jpg") ||
+      lowerName.endsWith(".jpeg") ||
+      lowerName.endsWith(".webp") ||
+      lowerMime.startsWith("image/");
 
     if (isPdf) {
       // Use unpdf (serverless-friendly wrapper over pdf.js)
@@ -69,30 +78,57 @@ export async function POST(req: Request) {
           text = (result2?.value || "").trim();
         } catch (e2: any) {
           console.error("/api/documents/extract mammoth error (arrayBuffer)", e2?.message || e2);
-          try {
-            // Final fallback: convert to HTML then strip tags to approximate text
-            const htmlRes = await mammothLib.convertToHtml({ buffer });
-            const html = (htmlRes?.value || "").toString();
-            const stripped = html
-              .replace(/<style[\s\S]*?<\/style>/gi, " ")
-              .replace(/<script[\s\S]*?<\/script>/gi, " ")
-              .replace(/<[^>]+>/g, " ")
-              .replace(/&nbsp;/g, " ")
-              .replace(/\s+/g, " ")
-              .trim();
-            text = stripped;
-          } catch (e3: any) {
-            console.error("/api/documents/extract mammoth error (html fallback)", e3?.message || e3);
-            return NextResponse.json({ error: "Failed to extract DOCX content" }, { status: 422 });
-          }
+          return NextResponse.json({ error: "Failed to extract DOCX content" }, { status: 422 });
         }
       }
+    } else if (isPptx) {
+      // PPTX: unzip and extract text from slides XML; images are ignored
+      try {
+        const JSZip = (await import("jszip")).default;
+        const { XMLParser } = await import("fast-xml-parser");
+        const zip = await JSZip.loadAsync(buffer);
+        const slideFiles = Object.keys(zip.files).filter((p) => p.startsWith("ppt/slides/slide") && p.endsWith(".xml"));
+        const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
+        const chunks: string[] = [];
+        for (const path of slideFiles.sort()) {
+          const xmlStr = await zip.files[path].async("string");
+          const xml = parser.parse(xmlStr);
+          // Collect text nodes commonly under a:p/a:r/a:t in PPTX
+          const visit = (node: any) => {
+            if (!node || typeof node !== "object") return;
+            for (const key of Object.keys(node)) {
+              const val = (node as any)[key];
+              if (key.endsWith(":t") || key === "a:t" || key === "t") {
+                if (typeof val === "string") chunks.push(val);
+              } else if (Array.isArray(val)) {
+                val.forEach(visit);
+              } else if (typeof val === "object") {
+                visit(val);
+              }
+            }
+          };
+          visit(xml);
+        }
+        text = chunks.join("\n").trim();
+      } catch (e: any) {
+        console.error("/api/documents/extract pptx error", e?.message || e);
+        return NextResponse.json({ error: "Failed to extract PPTX text" }, { status: 500 });
+      }
+    } else if (isImage) {
+      // IMAGES: return base64 data URL via meta; summarization route will handle vision model
+      const base64 = Buffer.from(buffer).toString("base64");
+      // Fallback to a concrete supported MIME instead of image/*
+      const safeMime = mime && /^image\/(png|jpe?g|webp|gif)$/i.test(mime) ? mime : "image/jpeg";
+      const dataUrl = `data:${safeMime};base64,${base64}`;
+      return NextResponse.json({ text: "", meta: { mime, fileName: name, length: buffer.byteLength, kind: "image", dataUrl } });
     } else {
       return NextResponse.json({ error: "Unsupported file type" }, { status: 415 });
     }
 
-    // Basic sanitization
-    text = text.replace(/\u0000/g, "");
+    // Basic sanitization: remove NUL characters without regex to satisfy no-control-regex
+    if (text.includes("\u0000")) {
+      text = text.split("\u0000").join("");
+    }
 
     return NextResponse.json({
       text,

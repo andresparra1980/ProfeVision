@@ -12,6 +12,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { useBackgroundSummarization } from "@/lib/hooks/useBackgroundSummarization";
 import SummaryModal from "@/components/ai/summary-modal";
+import type { SummaryJob } from "@/lib/hooks/useBackgroundSummarization";
 
 export default function DocumentContextBar() {
   const [documentIds, setDocumentIds] = useState<string[]>([]);
@@ -55,7 +56,7 @@ export default function DocumentContextBar() {
       const metaMap: Record<string, { fileName?: string; mime?: string }> = {};
       for (const id of documentIds) {
         try {
-          const doc = (await loadDocument<any>(id)) as { text?: string; meta?: { fileName?: string; mime?: string } } | null;
+          const doc = await loadDocument<{ text?: string; meta?: { fileName?: string; mime?: string } }>(id);
           if (doc?.meta) metaMap[id] = { fileName: doc.meta.fileName, mime: doc.meta.mime };
         } catch {
           // ignore
@@ -90,7 +91,7 @@ export default function DocumentContextBar() {
     const inputEl = inputRef.current; // stable ref to DOM element
     const file = inputEl?.files?.[0] || e.target.files?.[0] || null;
     if (!file) {
-      try { if (inputEl) inputEl.value = ""; } catch {}
+      try { if (inputEl) inputEl.value = ""; } catch (_e) { /* ignore */ }
       return;
     }
     setError(null);
@@ -111,17 +112,18 @@ export default function DocumentContextBar() {
       setDocumentIds(next);
       // Auto-start background summarization
       addJob(id);
-    } catch (err: any) {
-      setError(err?.message || "No se pudo extraer el texto del documento.");
+    } catch (err) {
+      const msg = (err as { message?: string } | undefined)?.message || String(err);
+      setError(msg || "No se pudo extraer el texto del documento.");
     } finally {
       setIsUploading(false);
       // reset input so same file can be selected again
-      try { if (inputEl) inputEl.value = ""; } catch {}
+      try { if (inputEl) inputEl.value = ""; } catch (_e) { /* ignore */ }
     }
   }
 
   const jobByDoc = useMemo(() => {
-    const map: Record<string, any> = {};
+    const map: Record<string, SummaryJob | undefined> = {};
     for (const id of documentIds) {
       const docJobs = jobs.filter((j) => j.documentId === id);
       const active = docJobs.find((j) => j.status === "queued" || j.status === "summarizing");
@@ -165,7 +167,7 @@ export default function DocumentContextBar() {
         <input
           ref={inputRef}
           type="file"
-          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          accept=".pdf,.docx,.pptx,.png,.jpg,.jpeg,.webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/png,image/jpeg,image/webp"
           onChange={onFileSelected}
           disabled={isUploading}
           className="hidden"
