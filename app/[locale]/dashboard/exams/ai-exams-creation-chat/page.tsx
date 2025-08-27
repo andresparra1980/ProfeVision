@@ -523,18 +523,17 @@ export default function AIExamsCreationChatPage() {
     React.useEffect(() => {
       const load = async () => {
         if (!examId) return;
-        if (loadedExamIdRef.current === examId) return; // already loaded this id in this instance
-        // page-scope check removed to ensure reload when revisiting the same examId
+        // Always allow reloads even if this examId was loaded before in this instance
         if (loadingRef.current) return; // avoid concurrent loads
-        if (loadedOnce.has(examId)) return; // prevent reloading once done in this tab/module
+        // Do not block by loadedOnce; we want to be able to revisit the same exam
         if (inFlightLoads.has(examId)) return; // another effect cycle already started it
         // If we've already completed a load for this exam in this tab, skip (prevents remount loops)
         try {
           const doneOnce = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loaded-exam-id') : null;
-          if (doneOnce === examId) return;
           const lastTsRaw = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loaded-exam-ts') : null;
           const lastTs = lastTsRaw ? parseInt(lastTsRaw, 10) : 0;
           const within30s = Date.now() - lastTs < 30000;
+          // Only skip if we just loaded this same exam very recently to avoid duplicate in-flight loads
           if (within30s && doneOnce === examId) return;
         } catch {}
         // Persistent guard across remounts (e.g., dev HMR, StrictMode double invoke)
@@ -550,6 +549,22 @@ export default function AIExamsCreationChatPage() {
           }
         } catch (_e) {}
         try {
+          // Before loading a different exam, clear all local caches to avoid stale UI
+          try {
+            // Clear AI exam result cache and in-memory state
+            setResult(null);
+            clearPersistedAIExamDraft();
+          } catch {}
+          try { clearLastDocumentContext(); } catch {}
+          try { await clearIndexedDBStores(); } catch {}
+          // Mark the latest clicked exam with current timestamp to prioritize it
+          try {
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('pv:loaded-exam-id', examId);
+              sessionStorage.setItem('pv:loaded-exam-ts', String(Date.now()));
+            }
+          } catch {}
+
           loadingRef.current = true;
           inFlightLoads.add(examId);
           try {
@@ -718,7 +733,8 @@ export default function AIExamsCreationChatPage() {
               <CardDescription>Revisa y exporta el examen generado.</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResultsView />
+              {/** Force ResultsView to remount whenever a different exam draft is loaded */}
+              <ResultsView key={loadedExamId ?? 'no-exam'} />
             </CardContent>
           </Card>
         </div>
