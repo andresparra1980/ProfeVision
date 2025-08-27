@@ -73,8 +73,61 @@ interface IDBEntry<T = unknown> {
 let idbPromise: Promise<IDBDatabase> | null = null;
 function getDB(): Promise<IDBDatabase> {
   if (typeof window === "undefined") return Promise.reject(new Error("No window"));
-  if (idbPromise) return idbPromise;
+  if (idbPromise) {
+    // Re-validate stores on every call in case the cached DB lacks them (e.g., after code updates)
+    idbPromise = idbPromise.then((db) => new Promise<IDBDatabase>((resolve, reject) => {
+      const needsDocs = !db.objectStoreNames.contains("docs");
+      const needsOutputs = !db.objectStoreNames.contains("outputs");
+      if (!needsDocs && !needsOutputs) {
+        resolve(db);
+        return;
+      }
+      const nextVersion = (db.version || 1) + 1;
+      try { db.close(); } catch { /* ignore */ }
+      const upgradeReq = window.indexedDB.open("pv_v1", nextVersion);
+      upgradeReq.onerror = () => reject(upgradeReq.error);
+      upgradeReq.onupgradeneeded = () => {
+        const udb = upgradeReq.result;
+        if (!udb.objectStoreNames.contains("docs")) {
+          udb.createObjectStore("docs", { keyPath: "id" });
+        }
+        if (!udb.objectStoreNames.contains("outputs")) {
+          const store = udb.createObjectStore("outputs", { keyPath: "id" });
+          try { store.createIndex("by_kind", "kind", { unique: false }); } catch { /* ignore */ }
+        }
+      };
+      upgradeReq.onsuccess = () => resolve(upgradeReq.result);
+    }));
+    return idbPromise;
+  }
   idbPromise = new Promise((resolve, reject) => {
+    const ensureStores = (db: IDBDatabase) => {
+      const needsDocs = !db.objectStoreNames.contains("docs");
+      const needsOutputs = !db.objectStoreNames.contains("outputs");
+      if (!needsDocs && !needsOutputs) {
+        resolve(db);
+        return;
+      }
+      // Bump version to create missing stores
+      const nextVersion = (db.version || 1) + 1;
+      try { db.close(); } catch { /* ignore */ }
+      const upgradeReq = window.indexedDB.open("pv_v1", nextVersion);
+      upgradeReq.onerror = () => reject(upgradeReq.error);
+      upgradeReq.onupgradeneeded = () => {
+        const udb = upgradeReq.result;
+        if (!udb.objectStoreNames.contains("docs")) {
+          udb.createObjectStore("docs", { keyPath: "id" });
+        }
+        if (!udb.objectStoreNames.contains("outputs")) {
+          const store = udb.createObjectStore("outputs", { keyPath: "id" });
+          try {
+            store.createIndex("by_kind", "kind", { unique: false });
+          } catch { /* ignore */ }
+        }
+      };
+      upgradeReq.onsuccess = () => resolve(upgradeReq.result);
+    };
+
     const req = window.indexedDB.open("pv_v1", 1);
     req.onerror = () => reject(req.error);
     req.onupgradeneeded = () => {
@@ -84,16 +137,12 @@ function getDB(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains("outputs")) {
         const store = db.createObjectStore("outputs", { keyPath: "id" });
-        // optional secondary index by kind
         try {
           store.createIndex("by_kind", "kind", { unique: false });
-        } catch (_e) {
-          // index might already exist on certain upgrade paths
-          void _e;
-        }
+        } catch { /* ignore */ }
       }
     };
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => ensureStores(req.result);
   });
   return idbPromise;
 }

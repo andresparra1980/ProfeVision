@@ -119,7 +119,9 @@ export default function ResultsView() {
         q.answer = newCorrectIndex >= 0 ? newCorrectIndex : q.answer;
       }
       setResult(cloned);
-    } catch {}
+    } catch (_e) {
+      // ignore failures while randomizing
+    }
   }
 
   function setCorrectAnswer(qIndex: number, value: number | boolean) {

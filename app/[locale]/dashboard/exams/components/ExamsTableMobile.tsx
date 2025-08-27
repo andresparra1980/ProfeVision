@@ -105,6 +105,21 @@ function ExamCardContent({
         <Button
           variant="ghost"
           size="sm"
+          className="w-full justify-start h-auto py-2 px-2"
+          onClick={() => {
+            router.push({
+              pathname: '/dashboard/exams/ai-exams-creation-chat',
+              query: { examId: exam.id },
+            });
+          }}
+        >
+          <Pencil className="mr-2 h-4 w-4" /> Editar en Chat IA
+        </Button>
+      )}
+      {exam.estado === "borrador" && (
+        <Button
+          variant="ghost"
+          size="sm"
           className="w-full justify-start h-auto py-2 px-2 text-red-500 dark:text-red-400"
           onClick={() => onOpenDeleteDialog(exam.id)}
         >

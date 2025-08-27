@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,10 @@ import { useAIChat } from "./components/AIChatContext";
 import { clearPersistedAIExamDraft } from "./components/AIChatContext";
 import { clearLastDocumentContext } from "@/lib/persistence/browser";
 
+// In-memory guards to prevent duplicate loads even across remounts in the same module instance
+const loadedOnce = new Set<string>();
+const inFlightLoads = new Set<string>();
+
 type Materia = { id: string; nombre: string; entidades_educativas?: { nombre: string } | null };
 type Grupo = { id: string; nombre: string; materia_id: string; estado: 'activo' | 'archivado' };
 
@@ -40,35 +45,71 @@ function SaveDraftDialog({
   onOpenChange,
   materias,
   grupos,
+  existing,
 }: {
   open: boolean;
-  onOpenChange: (val: boolean) => void;
+  onOpenChange: (_value: boolean) => void;
   materias: Materia[];
   grupos: Grupo[];
+  existing?: {
+    id: string;
+    titulo: string;
+    materia_id?: string | null;
+    duracion_minutos?: number | null;
+    puntaje_total?: number | null;
+  } | null;
 }) {
   const { toast } = useToast();
   const { result } = useAIChat();
   const [savingDraft, setSavingDraft] = React.useState(false);
+  const router = useRouter();
+  const isEditing = Boolean(existing?.id);
 
-  const draftSchema = z.object({
-    titulo: z.string().min(3, { message: 'Título requerido (mínimo 3 caracteres)' }),
-    materia_id: z.string().min(1, { message: 'Materia requerida' }),
-    grupo_id: z.string().min(1, { message: 'Grupo requerido' }),
-    duracion: z.number().min(1).max(240),
-    puntaje_total: z.number().min(1).max(100).default(5),
-  });
+  // For creation we require metadata; for edit we allow empty/unchanged values
+  const draftSchema = React.useMemo(() => {
+    if (isEditing) {
+      return z.object({
+        titulo: z.string().optional(),
+        materia_id: z.string().optional(),
+        grupo_id: z.string().optional(),
+        duracion: z.number().optional(),
+        puntaje_total: z.number().optional(),
+      });
+    }
+    return z.object({
+      titulo: z.string().min(3, { message: 'Título requerido (mínimo 3 caracteres)' }),
+      materia_id: z.string().min(1, { message: 'Materia requerida' }),
+      grupo_id: z.string().min(1, { message: 'Grupo requerido' }),
+      duracion: z.number().min(1).max(240),
+      puntaje_total: z.number().min(1).max(100).default(5),
+    });
+  }, [isEditing]);
   type DraftFormValues = z.infer<typeof draftSchema>;
 
   const form = useForm<DraftFormValues>({
     resolver: zodResolver(draftSchema),
     defaultValues: {
-      titulo: (result as any)?.exam?.title || '',
-      materia_id: '',
+      titulo: existing?.titulo || (result as any)?.exam?.title || '',
+      materia_id: existing?.materia_id || '',
       grupo_id: '',
-      duracion: 60,
-      puntaje_total: 5,
+      duracion: existing?.duracion_minutos ?? 60,
+      puntaje_total: existing?.puntaje_total ?? 5,
     },
   });
+
+  // If existing changes after mount, sync into form
+  React.useEffect(() => {
+    if (existing) {
+      form.reset({
+        titulo: existing.titulo || (result as any)?.exam?.title || '',
+        materia_id: existing.materia_id || '',
+        grupo_id: '',
+        duracion: existing.duracion_minutos ?? 60,
+        puntaje_total: existing.puntaje_total ?? 5,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existing?.id]);
 
   const materiaId = form.watch('materia_id');
   const gruposFiltrados = React.useMemo(
@@ -134,21 +175,34 @@ function SaveDraftDialog({
 
       const preguntas = mapAIQuestionsToApi();
 
-      const response = await fetch('/api/exams', {
-        method: 'POST',
+      const url = isEditing ? `/api/exams/${existing?.id}` : '/api/exams';
+      const method = isEditing ? 'PUT' : 'POST';
+      const payload: any = {
+        // For edit, only send fields if meaningful to avoid overwriting with empty/NaN
+        descripcion: '',
+        preguntas,
+      };
+      if (!isEditing || (values.titulo && values.titulo.trim().length > 0)) {
+        payload.titulo = values.titulo;
+      }
+      if (!isEditing) {
+        payload.materia_id = values.materia_id;
+        payload.grupo_id = values.grupo_id;
+      }
+      if (typeof values.duracion === 'number' && !Number.isNaN(values.duracion)) {
+        payload.duracion_minutos = values.duracion;
+      }
+      if (typeof values.puntaje_total === 'number' && !Number.isNaN(values.puntaje_total)) {
+        payload.puntaje_total = values.puntaje_total;
+      }
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${sessionData.session.access_token}`,
         },
-        body: JSON.stringify({
-          titulo: values.titulo,
-          descripcion: '',
-          duracion_minutos: values.duracion,
-          puntaje_total: values.puntaje_total,
-          materia_id: values.materia_id,
-          grupo_id: values.grupo_id,
-          preguntas,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -156,110 +210,185 @@ function SaveDraftDialog({
         throw new Error(err.error || 'Error al guardar el borrador');
       }
 
-      onOpenChange(false);
-      toast({ title: 'Borrador guardado', description: 'El examen se guardó como borrador.' });
+      // On success: clear persisted AI draft, document context, and IndexedDB, then redirect
+      try {
+        clearPersistedAIExamDraft();
+        clearLastDocumentContext();
+      } catch (_e) {
+        // ignore cleanup errors
+      }
+      // Clear IndexedDB stores used by our persistence layer (scoped helper)
+      try {
+        if (typeof window !== 'undefined') {
+          await new Promise<void>((resolve) => {
+            const req = window.indexedDB.open('pv_v1');
+            req.onsuccess = () => {
+              const db = req.result;
+              const clearStore = (name: string, done: () => void) => {
+                try {
+                  if (!db.objectStoreNames.contains(name)) {
+                    done();
+                    return;
+                  }
+                  const tx = db.transaction([name], 'readwrite');
+                  tx.oncomplete = () => done();
+                  tx.onerror = () => done();
+                  try {
+                    tx.objectStore(name).clear();
+                  } catch {
+                    done();
+                  }
+                } catch {
+                  done();
+                }
+              };
+              clearStore('docs', () => clearStore('outputs', () => resolve()));
+            };
+            req.onerror = () => resolve();
+          });
+        }
+      } catch (_e) {
+        // ignore
+      }
+
+      toast({ title: 'Borrador guardado', description: isEditing ? 'El borrador fue actualizado.' : 'El examen se guardó como borrador.' });
+      // Redirect to localized dashboard exams (router from i18n handles locale prefix)
+      router.push('/dashboard/exams');
     } catch (e) {
       toast({ title: 'Error', description: e instanceof Error ? e.message : 'No se pudo guardar el borrador', variant: 'destructive' });
     } finally {
       setSavingDraft(false);
     }
-  }, [mapAIQuestionsToApi, onOpenChange, toast]);
+  }, [existing?.id, mapAIQuestionsToApi, router, toast]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Guardar borrador de examen</DialogTitle>
+          <DialogTitle>{isEditing ? 'Guardar cambios del examen' : 'Guardar borrador de examen'}</DialogTitle>
           <DialogDescription>
-            Completa la información general para guardar este examen como borrador.
+            {isEditing
+              ? 'Se actualizarán las preguntas del examen con los cambios realizados. No se modifican materia ni grupo.'
+              : 'Completa la información general para guardar este examen como borrador.'}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {isEditing ? (
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="titulo">Título*</Label>
+              <Label htmlFor="titulo">Título</Label>
               <Input id="titulo" placeholder="Ej. Examen de lectura" {...form.register('titulo')} />
-              {form.formState.errors.titulo && (
-                <p className="text-sm text-destructive">{form.formState.errors.titulo.message}</p>
-              )}
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="materia">Materia*</Label>
-              <Select
-                onValueChange={(value: string) => form.setValue('materia_id', value)}
-                value={form.watch('materia_id')}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="duracion">Duración (min)</Label>
+                <Input id="duracion" type="number" min={1} max={240} {...form.register('duracion', { valueAsNumber: true })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="puntaje_total">Puntaje total</Label>
+                <Input id="puntaje_total" type="number" min={1} max={100} {...form.register('puntaje_total', { valueAsNumber: true })} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={savingDraft}
+                onClick={() => form.handleSubmit(handleSubmit)()}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona una materia" />
-                </SelectTrigger>
-                <SelectContent>
-                  {materias.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.nombre}{m.entidades_educativas?.nombre ? ` - ${m.entidades_educativas.nombre}` : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.materia_id && (
-                <p className="text-sm text-destructive">{form.formState.errors.materia_id.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="grupo">Grupo*</Label>
-              <Select
-                onValueChange={(value: string) => form.setValue('grupo_id', value)}
-                value={form.watch('grupo_id')}
-                disabled={!form.watch('materia_id')}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={form.watch('materia_id') ? 'Selecciona un grupo' : 'Primero selecciona una materia'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {gruposFiltrados.length > 0 ? (
-                    gruposFiltrados.map((g) => (
-                      <SelectItem key={g.id} value={g.id}>{g.nombre}</SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="no-grupos" disabled>
-                      {form.watch('materia_id') ? 'No hay grupos disponibles' : 'Selecciona primero una materia'}
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.grupo_id && (
-                <p className="text-sm text-destructive">{form.formState.errors.grupo_id.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="duracion">Duración (min)*</Label>
-              <Input id="duracion" type="number" min={1} max={240} {...form.register('duracion', { valueAsNumber: true })} />
-              {form.formState.errors.duracion && (
-                <p className="text-sm text-destructive">{form.formState.errors.duracion.message as string}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="puntaje_total">Puntaje total*</Label>
-              <Input id="puntaje_total" type="number" min={1} max={100} {...form.register('puntaje_total', { valueAsNumber: true })} />
-              {form.formState.errors.puntaje_total && (
-                <p className="text-sm text-destructive">{form.formState.errors.puntaje_total.message as string}</p>
-              )}
-            </div>
+                {savingDraft ? 'Guardando…' : 'Guardar cambios'}
+              </Button>
+            </DialogFooter>
           </div>
+        ) : (
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="titulo">Título*</Label>
+                <Input id="titulo" placeholder="Ej. Examen de lectura" {...form.register('titulo')} />
+                {form.formState.errors.titulo && (
+                  <p className="text-sm text-destructive">{form.formState.errors.titulo.message}</p>
+                )}
+              </div>
 
-          <DialogFooter>
-            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={savingDraft}>
-              {savingDraft ? 'Guardando…' : 'Guardar borrador'}
-            </Button>
-          </DialogFooter>
-        </form>
+              <div className="space-y-2">
+                <Label htmlFor="materia">Materia*</Label>
+                <Select
+                  onValueChange={(value: string) => form.setValue('materia_id', value)}
+                  value={form.watch('materia_id')}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una materia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {materias.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.nombre}{m.entidades_educativas?.nombre ? ` - ${m.entidades_educativas.nombre}` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.materia_id && (
+                  <p className="text-sm text-destructive">{form.formState.errors.materia_id.message as string}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="grupo">Grupo*</Label>
+                <Select
+                  onValueChange={(value: string) => form.setValue('grupo_id', value)}
+                  value={form.watch('grupo_id')}
+                  disabled={!form.watch('materia_id')}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={form.watch('materia_id') ? 'Selecciona un grupo' : 'Primero selecciona una materia'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gruposFiltrados.length > 0 ? (
+                      gruposFiltrados.map((g) => (
+                        <SelectItem key={g.id} value={g.id}>{g.nombre}</SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-grupos" disabled>
+                        {form.watch('materia_id') ? 'No hay grupos disponibles' : 'Selecciona primero una materia'}
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.grupo_id && (
+                  <p className="text-sm text-destructive">{form.formState.errors.grupo_id.message as string}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="duracion">Duración (min)*</Label>
+                <Input id="duracion" type="number" min={1} max={240} {...form.register('duracion', { valueAsNumber: true })} />
+                {form.formState.errors.duracion && (
+                  <p className="text-sm text-destructive">{form.formState.errors.duracion.message as string}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="puntaje_total">Puntaje total*</Label>
+                <Input id="puntaje_total" type="number" min={1} max={100} {...form.register('puntaje_total', { valueAsNumber: true })} />
+                {form.formState.errors.puntaje_total && (
+                  <p className="text-sm text-destructive">{form.formState.errors.puntaje_total.message as string}</p>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={savingDraft}>
+                {savingDraft ? 'Guardando…' : 'Guardar borrador'}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -269,6 +398,7 @@ export default function AIExamsCreationChatPage() {
   const router = useRouter();
   const locale = useLocale();
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   const [showClearDialog, setShowClearDialog] = React.useState(false);
   const [clearing, setClearing] = React.useState(false);
@@ -278,7 +408,14 @@ export default function AIExamsCreationChatPage() {
   const { profesor } = useProfesor();
   const [materias, setMaterias] = React.useState<Materia[]>([]);
   const [grupos, setGrupos] = React.useState<Grupo[]>([]);
-  const [gruposFiltrados, setGruposFiltrados] = React.useState<Grupo[]>([]);
+  const [editingExam, setEditingExam] = React.useState<{
+    id: string;
+    titulo: string;
+    materia_id?: string | null;
+    duracion_minutos?: number | null;
+    puntaje_total?: number | null;
+  } | null>(null);
+  const [loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
 
   // Load materias and grupos for current profesor
   React.useEffect(() => {
@@ -311,7 +448,7 @@ export default function AIExamsCreationChatPage() {
     load();
   }, [profesor, toast]);
 
-  // Filter groups by selected materia (kept for future use if needed elsewhere)
+  // Filter groups by selected materia (handled inside SaveDraftDialog)
 
   // Clear IndexedDB stores used by our persistence layer
   const clearIndexedDBStores = React.useCallback(async () => {
@@ -320,18 +457,26 @@ export default function AIExamsCreationChatPage() {
       const req = window.indexedDB.open("pv_v1");
       req.onsuccess = () => {
         const db = req.result;
-        const tx = db.transaction(["docs", "outputs"], "readwrite");
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => resolve();
-        try {
-          const docs = tx.objectStore("docs");
-          const outputs = tx.objectStore("outputs");
-          docs.clear();
-          outputs.clear();
-        } catch (_e) {
-          // ignore if stores missing
-          resolve();
-        }
+        const clearStore = (name: string, done: () => void) => {
+          try {
+            if (!db.objectStoreNames.contains(name)) {
+              done();
+              return;
+            }
+            const tx = db.transaction([name], "readwrite");
+            tx.oncomplete = () => done();
+            tx.onerror = () => done();
+            try {
+              tx.objectStore(name).clear();
+            } catch {
+              done();
+            }
+          } catch {
+            done();
+          }
+        };
+        // Clear sequentially to keep logic simple
+        clearStore("docs", () => clearStore("outputs", () => resolve()));
       };
       req.onerror = () => resolve();
     });
@@ -367,6 +512,163 @@ export default function AIExamsCreationChatPage() {
       setShowClearDialog(false);
     }
   }, [clearIndexedDBStores, toast]);
+
+  // Loader component to populate AIChatContext from an existing draft exam
+  function DraftLoader() {
+    const { result, setResult } = useAIChat();
+    const examId = searchParams?.get('examId');
+    const loadedExamIdRef = React.useRef<string | null>(null);
+    const loadingRef = React.useRef(false);
+
+    React.useEffect(() => {
+      const load = async () => {
+        if (!examId) return;
+        if (loadedExamIdRef.current === examId) return; // already loaded this id in this instance
+        // page-scope check removed to ensure reload when revisiting the same examId
+        if (loadingRef.current) return; // avoid concurrent loads
+        if (loadedOnce.has(examId)) return; // prevent reloading once done in this tab/module
+        if (inFlightLoads.has(examId)) return; // another effect cycle already started it
+        // If we've already completed a load for this exam in this tab, skip (prevents remount loops)
+        try {
+          const doneOnce = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loaded-exam-id') : null;
+          if (doneOnce === examId) return;
+          const lastTsRaw = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loaded-exam-ts') : null;
+          const lastTs = lastTsRaw ? parseInt(lastTsRaw, 10) : 0;
+          const within30s = Date.now() - lastTs < 30000;
+          if (within30s && doneOnce === examId) return;
+        } catch {}
+        // Persistent guard across remounts (e.g., dev HMR, StrictMode double invoke)
+        try {
+          const loading = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loading-exam-id') : null;
+          const loadingTsRaw = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loading-exam-ts') : null;
+          const loadingTs = loadingTsRaw ? parseInt(loadingTsRaw, 10) : 0;
+          const isRecent = Date.now() - loadingTs < 15000; // 15s window considered in-flight
+          if (loading === examId && isRecent) return;
+          // clear stale loading markers
+          if (loading === examId && !isRecent && typeof window !== 'undefined') {
+            try { sessionStorage.removeItem('pv:loading-exam-id'); sessionStorage.removeItem('pv:loading-exam-ts'); } catch {}
+          }
+        } catch (_e) {}
+        try {
+          loadingRef.current = true;
+          inFlightLoads.add(examId);
+          try {
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('pv:loading-exam-id', examId);
+              sessionStorage.setItem('pv:loading-exam-ts', String(Date.now()));
+            }
+          } catch (_e) {}
+          const { data: sessionData } = await supabase.auth.getSession();
+          const token = sessionData.session?.access_token;
+          if (!token) throw new Error('No autorizado');
+
+          // Fetch exam metadata
+          const examRes = await fetch(`/api/exams/${examId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!examRes.ok) throw new Error('No se pudo cargar el examen');
+          const exam = await examRes.json();
+          setEditingExam({
+            id: exam.id,
+            titulo: exam.titulo,
+            materia_id: exam.materia_id ?? null,
+            duracion_minutos: exam.duracion_minutos ?? null,
+            puntaje_total: exam.puntaje_total ?? null,
+          });
+
+          // Fetch questions with options
+          const qRes = await fetch(`/api/exams/${examId}/questions-with-options`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!qRes.ok) throw new Error('No se pudieron cargar las preguntas');
+          const preguntas: Array<{
+            id: string;
+            texto: string;
+            tipo_id: string;
+            opciones: Array<{ texto: string; es_correcta: boolean; orden: number }>;
+          }> = await qRes.json();
+
+          // Map to AI chat format
+          const questions = preguntas.map((p) => {
+            if (p.tipo_id === 'opcion_multiple') {
+              const opts = (p.opciones || []).sort((a,b) => a.orden - b.orden).map(o => o.texto);
+              const correctIndex = (p.opciones || []).findIndex(o => o.es_correcta);
+              return {
+                type: 'multiple_choice',
+                prompt: p.texto,
+                options: opts,
+                answer: correctIndex >= 0 ? correctIndex : 0,
+              };
+            }
+            if (p.tipo_id === 'verdadero_falso') {
+              const trueOpt = (p.opciones || []).find(o => o.texto.toLowerCase().includes('verdadero'));
+              const falseOpt = (p.opciones || []).find(o => o.texto.toLowerCase().includes('falso'));
+              const answer = trueOpt?.es_correcta ? true : falseOpt?.es_correcta ? false : false;
+              return {
+                type: 'true_false',
+                prompt: p.texto,
+                answer,
+              };
+            }
+            return {
+              type: 'short_answer',
+              prompt: p.texto,
+              answer: '',
+            };
+          });
+
+          // Build a server-valid existingExam object matching API schema
+          const normalizedQuestions = questions.map((q: any, idx: number) => ({
+            id: `q${idx + 1}`,
+            type: q.type || 'multiple_choice',
+            prompt: q.prompt || '',
+            options: Array.isArray(q.options) ? q.options : [],
+            answer: q.answer ?? null,
+            rationale: q.rationale ?? '',
+            difficulty: q.difficulty ?? 'medium',
+            taxonomy: q.taxonomy ?? 'understand',
+            tags: Array.isArray(q.tags) ? q.tags : [],
+            source: q.source ?? { documentId: null, spans: [] },
+          }));
+
+          setResult({
+            exam: {
+              title: exam.titulo || '',
+              subject: exam.materia_id ? String(exam.materia_id) : 'general',
+              level: 'general',
+              language: locale || 'es',
+              questions: normalizedQuestions,
+            },
+          } as any);
+          loadedExamIdRef.current = examId;
+          setLoadedExamId(examId);
+          try {
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('pv:loaded-exam-id', examId);
+              sessionStorage.setItem('pv:loaded-exam-ts', String(Date.now()));
+            }
+          } catch {}
+          loadedOnce.add(examId);
+          toast({ title: 'Borrador cargado', description: 'Puedes editar las preguntas en el chat.' });
+        } catch (e) {
+          toast({ variant: 'destructive', title: 'Error', description: e instanceof Error ? e.message : 'No se pudo cargar el borrador' });
+        } finally {
+          loadingRef.current = false;
+          inFlightLoads.delete(examId);
+          try {
+            if (typeof window !== 'undefined') {
+              sessionStorage.removeItem('pv:loading-exam-id');
+              sessionStorage.removeItem('pv:loading-exam-ts');
+            }
+          } catch (_e) {}
+        }
+      };
+      load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [examId]);
+
+    return null;
+  }
 
   return (
     <div className="space-y-4">
@@ -427,7 +729,10 @@ export default function AIExamsCreationChatPage() {
           onOpenChange={setShowSaveDraftDialog}
           materias={materias}
           grupos={grupos}
+          existing={editingExam}
         />
+        {/* Loader that maps DB draft -> AI chat format */}
+        <DraftLoader />
       </AIChatProvider>
 
       {/* Confirmación Borrar Chat */}

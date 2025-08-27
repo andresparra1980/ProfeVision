@@ -26,9 +26,9 @@ export interface ExamQuestion {
 
 interface Props {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   question: ExamQuestion | null;
-  onSave: (updated: ExamQuestion) => void;
+  onSave: (_updated: ExamQuestion) => void;
 }
 
 export default function QuestionEditorDialog({ open, onOpenChange, question, onSave }: Props) {
