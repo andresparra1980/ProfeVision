@@ -47,19 +47,49 @@ export default function ChatPanel() {
           // ignore if not found or IndexedDB error
         }
       }
+      // Sanitize existing exam to match API contract shape to avoid stringify or schema issues
+      const allowedDifficulty = new Set(["easy", "medium", "hard"]);
+      const sanitizeExistingExam = (obj: any) => {
+        try {
+          if (!obj || typeof obj !== "object") return undefined;
+          const cloned = JSON.parse(JSON.stringify(obj));
+          if (!cloned.exam || !Array.isArray(cloned.exam.questions)) return undefined;
+          for (const q of cloned.exam.questions) {
+            if (!allowedDifficulty.has(q.difficulty)) q.difficulty = "medium";
+          }
+          return cloned;
+        } catch {
+          return undefined;
+        }
+      };
+      const existingExam = sanitizeExistingExam(result);
+
       const payload = {
         messages: next.map((m) => ({ role: m.role, content: m.content })),
         context: {
-          documentIds,
+          documentIds: Array.isArray(documentIds) ? documentIds : [],
           language: settings.language ?? "es",
           questionTypes: ["multiple_choice"],
-          difficulty: "mixed",
+          difficulty: "mixed" as const,
           taxonomy: [],
           topicSummaries,
-          // Include existing exam result (possibly edited or randomized on client) as baseline
-          existingExam: result ?? undefined,
+          existingExam: existingExam ?? undefined,
         },
+      } as const;
+
+      // Safe stringify with fallback dropping existingExam if it fails (never drop context)
+      const tryStringify = (p: any) => {
+        try {
+          return JSON.stringify(p);
+        } catch {
+          const { existingExam: _ex, ...rest } = p.context || {};
+          const minimal = { ...p, context: rest };
+          return JSON.stringify(minimal);
+        }
       };
+
+      // Debug minimal log to help diagnose future issues
+      try { console.debug("[AIChat] Payload context keys:", Object.keys(payload.context)); } catch {}
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -67,7 +97,7 @@ export default function ChatPanel() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: tryStringify(payload),
       });
 
       if (!res.ok) {

@@ -530,11 +530,9 @@ export default function AIExamsCreationChatPage() {
         // If we've already completed a load for this exam in this tab, skip (prevents remount loops)
         try {
           const doneOnce = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loaded-exam-id') : null;
-          const lastTsRaw = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loaded-exam-ts') : null;
-          const lastTs = lastTsRaw ? parseInt(lastTsRaw, 10) : 0;
-          const within30s = Date.now() - lastTs < 30000;
-          // Only skip if we just loaded this same exam very recently to avoid duplicate in-flight loads
-          if (within30s && doneOnce === examId) return;
+          // If we're working on the same exam and already have content, never auto-reload from DB
+          const hasNonEmpty = Boolean((result as any)?.exam?.questions && (result as any).exam.questions.length > 0);
+          if (doneOnce === examId && hasNonEmpty) return;
         } catch {}
         // Persistent guard across remounts (e.g., dev HMR, StrictMode double invoke)
         try {

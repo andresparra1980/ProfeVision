@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAIChat } from "./AIChatContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Pencil } from "lucide-react";
 import QuestionEditorDialog, { type ExamQuestion } from "./QuestionEditorDialog";
+import { supabase } from "@/lib/supabase";
 
 type CSVQuestion = {
   type?: string;
@@ -31,11 +32,120 @@ export default function ResultsView() {
   const { result, setResult } = useAIChat();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [examId, setExamId] = useState<string | null>(null);
+  const [dbCount, setDbCount] = useState<number | null>(null);
+  const [loadingDb, setLoadingDb] = useState(false);
 
   const questions = useMemo(() => {
     const examRes = (result as CSVExamResult | null);
     return examRes?.exam?.questions ?? [];
   }, [result]);
+
+  // Detect if we are editing an exam: read current examId persisted by the loader
+  useEffect(() => {
+    try {
+      if (typeof window === "undefined") return;
+      const id = sessionStorage.getItem("pv:loaded-exam-id");
+      setExamId(id);
+    } catch {}
+  }, []);
+
+  // Fetch DB question count to decide if the button should be disabled
+  useEffect(() => {
+    const fetchCount = async () => {
+      if (!examId) { setDbCount(null); return; }
+      try {
+        setLoadingDb(true);
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        if (!token) { setDbCount(null); return; }
+        const qRes = await fetch(`/api/exams/${examId}/questions-with-options`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!qRes.ok) { setDbCount(null); return; }
+        const preguntas: Array<any> = await qRes.json();
+        setDbCount(Array.isArray(preguntas) ? preguntas.length : null);
+      } catch {
+        setDbCount(null);
+      } finally {
+        setLoadingDb(false);
+      }
+    };
+    fetchCount();
+  }, [examId]);
+
+  const disabledLoadFromDb = !examId || loadingDb || (dbCount != null && dbCount === questions.length);
+
+  async function loadQuestionsFromDb() {
+    if (!examId) return;
+    try {
+      setLoadingDb(true);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) return;
+
+      // Fetch questions from API
+      const qRes = await fetch(`/api/exams/${examId}/questions-with-options`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!qRes.ok) return;
+      const preguntas: Array<{
+        id: string;
+        texto: string;
+        tipo_id: string;
+        opciones: Array<{ texto: string; es_correcta: boolean; orden: number }>;
+      }> = await qRes.json();
+
+      // Map to AI chat format, similar to DraftLoader
+      const mapped = preguntas.map((p) => {
+        if (p.tipo_id === 'opcion_multiple') {
+          const opts = (p.opciones || []).sort((a,b) => a.orden - b.orden).map(o => o.texto);
+          const correctIndex = (p.opciones || []).findIndex(o => o.es_correcta);
+          return {
+            type: 'multiple_choice',
+            prompt: p.texto,
+            options: opts,
+            answer: correctIndex >= 0 ? correctIndex : 0,
+          } as ExamQuestion;
+        }
+        if (p.tipo_id === 'verdadero_falso') {
+          const trueOpt = (p.opciones || []).find(o => o.texto.toLowerCase().includes('verdadero'));
+          const falseOpt = (p.opciones || []).find(o => o.texto.toLowerCase().includes('falso'));
+          const answer = trueOpt?.es_correcta ? true : falseOpt?.es_correcta ? false : false;
+          return {
+            type: 'true_false',
+            prompt: p.texto,
+            answer,
+          } as ExamQuestion;
+        }
+        return {
+          type: 'short_answer',
+          prompt: p.texto,
+          answer: '',
+        } as ExamQuestion;
+      });
+
+      // Replace questions in the current result, preserving metadata/title
+      setResult((prev: any) => {
+        const base = prev ? JSON.parse(JSON.stringify(prev)) : { exam: { title: '', questions: [] } };
+        if (!base.exam) base.exam = { title: '', questions: [] };
+        base.exam.questions = mapped as any;
+        return base;
+      });
+
+      // Refresh count to update disabled state
+      setDbCount(mapped.length);
+      // Update last-loaded markers
+      try {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('pv:loaded-exam-id', examId);
+          sessionStorage.setItem('pv:loaded-exam-ts', String(Date.now()));
+        }
+      } catch {}
+    } finally {
+      setLoadingDb(false);
+    }
+  }
 
   function exportJSON() {
     if (!result) return;
@@ -157,6 +267,16 @@ export default function ResultsView() {
       <div className="flex items-center justify-between">
         <div className="font-medium">Preguntas generadas</div>
         <div className="flex items-center gap-2">
+          {examId && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={loadQuestionsFromDb}
+              disabled={disabledLoadFromDb}
+            >
+              {loadingDb ? 'Cargando…' : 'Cargar preguntas'}
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={randomizeOptions} disabled={!questions.length}>Aleatorizar opciones</Button>
           <Button variant="outline" size="sm" onClick={exportJSON} disabled={!questions.length}>Exportar JSON</Button>
           <Button variant="outline" size="sm" onClick={exportCSV} disabled={!questions.length}>Exportar CSV</Button>
