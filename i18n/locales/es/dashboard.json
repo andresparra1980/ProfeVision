@@ -51,8 +51,14 @@
     "create": "Crear Examen",
     "createWithAI": "Crear Examen con IA",
     "createNewDesc": "Diseña un nuevo examen para tus estudiantes",
+    "createDesc": "Define la información básica del examen",
     "import": "Importar Examen",
     "edit": "Editar Examen",
+    "backToExams": "Volver a Exámenes",
+    "questions": "preguntas",
+    "subjectRequired": "Materia Requerida",
+    "subjectRequiredDesc": "Debes crear al menos una materia antes de poder crear exámenes. Los exámenes deben estar asociados a una materia.",
+    "createSubject": "Crear Materia",
     "actions": {
       "create": "Crear",
       "createWithAI": "Crear con IA",
@@ -134,6 +140,7 @@
     "validation": {
       "titleRequired": "El título es requerido",
       "subjectRequired": "La materia es requerida",
+      "groupRequired": "El grupo es requerido",
       "durationRequired": "La duración es requerida",
       "durationMin": "La duración debe ser mayor a 0 minutos"
     },
