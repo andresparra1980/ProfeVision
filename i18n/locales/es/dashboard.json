@@ -259,6 +259,7 @@
       "error": "Error al actualizar el examen",
       "backToExams": "Volver a Exámenes",
       "publishExam": "Publicar Examen",
+      "editWithAI": "Editar en Chat IA",
       "questions": "Preguntas",
       "questionsCount": "Preguntas ({count})",
       "noQuestions": "Este examen aún no tiene preguntas.",

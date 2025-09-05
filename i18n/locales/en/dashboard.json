@@ -259,6 +259,7 @@
       "error": "Error updating exam",
       "backToExams": "Back to Exams",
       "publishExam": "Publish Exam",
+      "editWithAI": "Edit in AI Chat",
       "questions": "Questions",
       "questionsCount": "Questions ({count})",
       "noQuestions": "This exam doesn't have questions yet.",
