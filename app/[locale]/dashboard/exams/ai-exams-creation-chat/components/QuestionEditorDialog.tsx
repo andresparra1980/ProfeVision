@@ -98,7 +98,7 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar pregunta</DialogTitle>
           <DialogDescription>Ajusta el enunciado, opciones, respuesta correcta y metadatos.</DialogDescription>

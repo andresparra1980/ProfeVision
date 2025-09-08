@@ -715,8 +715,8 @@ export default function AIExamsCreationChatPage() {
 
       {/* Chat, resultados y diálogo de guardar dentro del Provider */}
       <AIChatProvider>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-          <Card>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+          <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle>Chat</CardTitle>
               <CardDescription>Describe el examen que deseas generar y ajusta con instrucciones.</CardDescription>
@@ -725,7 +725,7 @@ export default function AIExamsCreationChatPage() {
               <ChatPanel />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="lg:col-span-3">
             <CardHeader>
               <CardTitle>Resultados</CardTitle>
               <CardDescription>Revisa y exporta el examen generado.</CardDescription>

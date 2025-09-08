@@ -3,7 +3,6 @@ import React, { useMemo, useState } from "react";
 import { useAIChat } from "./AIChatContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Pencil } from "lucide-react";
@@ -105,7 +104,7 @@ export default function ResultsView() {
 
       {/* Accordion with questions */}
       {!!questions.length && (
-        <Accordion type="single" collapsible className="w-full space-y-2">
+        <Accordion type="single" collapsible defaultValue={`q-0`} className="w-full space-y-2">
           {questions.map((q: ExamQuestion, idx: number) => {
             const isMC = q?.type === "multiple_choice";
             const title = q?.prompt || `Pregunta ${idx + 1}`;
@@ -115,29 +114,15 @@ export default function ResultsView() {
             const correctIdx = typeof q?.answer === "number" ? q.answer : (typeof q?.answer === "string" ? options.indexOf(q.answer) : -1);
             const isTF = q?.type === "true_false";
             return (
-              <AccordionItem key={idx} value={`q-${idx}`} className="border rounded-md bg-card">
+              <AccordionItem key={idx} value={`q-${idx}`} className="border-2 border-purple-400/50 rounded-md bg-card">
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <div className="flex flex-col items-start text-left w-full gap-1">
                     <div className="flex items-center gap-2 w-full">
                       <span className="font-medium">{idx + 1}.</span>
-                      <span className="flex-1 line-clamp-2">{title}</span>
-                      {difficulty && <Badge variant="secondary">{difficulty}</Badge>}
-                      <Button variant="ghost" size="sm" asChild>
-                        <span onClick={(e) => { e.stopPropagation(); openEditor(idx); }} className="inline-flex items-center">
-                          <Pencil className="h-4 w-4 mr-1" /> Editar
-                        </span>
-                      </Button>
+                      <span className="flex-1 whitespace-pre-wrap">{title}</span>
+                      {/* difficulty pill removed to give more space to accordion icon */}
                     </div>
-                    {isMC && options.length > 0 && (
-                      <div className="text-xs text-muted-foreground">
-                        {options.map((opt: string, i: number) => (
-                          <span key={i} className={"mr-2 inline-block " + (i === correctIdx ? "text-primary font-medium" : "")}>{String.fromCharCode(65 + i)}. {opt}</span>
-                        ))}
-                      </div>
-                    )}
-                    {isTF && (
-                      <div className="text-xs text-muted-foreground">Respuesta: {String(q?.answer)}</div>
-                    )}
+                    {/* Removed options and answer preview from header; these are visible in content when expanded */}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-4 pb-4 pt-2 border-t bg-muted/20">
@@ -178,6 +163,13 @@ export default function ResultsView() {
                       <div className="text-sm text-muted-foreground whitespace-pre-wrap">{rationale}</div>
                     </div>
                   )}
+
+                  {/* Moved Edit button inside accordion content, aligned to end */}
+                  <div className="mt-4 flex justify-end">
+                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); openEditor(idx); }}>
+                      <Pencil className="h-4 w-4 mr-1" /> Editar
+                    </Button>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             );
