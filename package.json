@@ -12,7 +12,7 @@
     "dev:fresh": "rm -rf .next && rm -rf node_modules/.cache && next dev --turbopack"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.17",
+    "@ai-sdk/openai": "^2.0.18",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.3.4",
     "@marsidev/react-turnstile": "^1.1.0",
@@ -58,8 +58,10 @@
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
+    "fast-xml-parser": "^5.2.5",
     "js-cookie": "^3.0.5",
     "jsqr": "^1.4.0",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.483.0",
     "mammoth": "^1.9.0",
     "next": "^15.2.3",
@@ -76,9 +78,10 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "unpdf": "^1.2.1",
     "uuid": "^11.1.0",
     "xlsx": "^0.18.5",
-    "zod": "^3.22.4"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

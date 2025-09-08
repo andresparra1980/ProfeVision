@@ -51,8 +51,14 @@
     "create": "Create Exam",
     "createWithAI": "Create Exam with AI",
     "createNewDesc": "Design a new exam for your students",
+    "createDesc": "Define basic exam information",
     "import": "Import Exam",
     "edit": "Edit Exam",
+    "backToExams": "Back to Exams",
+    "questions": "questions",
+    "subjectRequired": "Subject Required",
+    "subjectRequiredDesc": "You must create at least one subject before creating exams. Exams must be associated with a subject.",
+    "createSubject": "Create Subject",
     "actions": {
       "create": "Create",
       "createWithAI": "Create with AI",
@@ -134,6 +140,7 @@
     "validation": {
       "titleRequired": "Title is required",
       "subjectRequired": "Subject is required",
+      "groupRequired": "Group is required",
       "durationRequired": "Duration is required",
       "durationMin": "Duration must be greater than 0 minutes"
     },
@@ -259,6 +266,7 @@
       "error": "Error updating exam",
       "backToExams": "Back to Exams",
       "publishExam": "Publish Exam",
+      "editWithAI": "Edit in AI Chat",
       "questions": "Questions",
       "questionsCount": "Questions ({count})",
       "noQuestions": "This exam doesn't have questions yet.",

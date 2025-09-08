@@ -3,7 +3,7 @@
 import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, Plus, Save, Trash2, GripVertical, Info } from "lucide-react";
+import { ChevronLeft, Plus, Save, Trash2, GripVertical, Info, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -724,9 +724,23 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           </p>
         </div>
         {exam.estado === "borrador" && (
-          <Button onClick={publishExam} disabled={saving}>
-            <Save className="mr-2 h-4 w-4" /> {t('publishExam')}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                router.push({
+                  pathname: '/dashboard/exams/ai-exams-creation-chat',
+                  query: { examId: exam.id },
+                });
+              }}
+              disabled={saving}
+            >
+              <Pencil className="mr-2 h-4 w-4" /> {t('editWithAI')}
+            </Button>
+            <Button onClick={publishExam} disabled={saving}>
+              <Save className="mr-2 h-4 w-4" /> {t('publishExam')}
+            </Button>
+          </div>
         )}
       </div>
 

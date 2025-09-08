@@ -563,7 +563,11 @@ export default function CreateExamPage() {
         
         // Actualizar el formulario con datos importados
         form.setValue('numero_preguntas', preguntasImportadas.length);
-        form.setValue('titulo', `${t('exams.importedTitle', { defaultValue: 'Examen Importado' })} - ${parsedData.total_preguntas} ${t('exams.questions', { defaultValue: 'preguntas' })}`);
+        // Usar claves existentes bajo createWithAI y asegurar defaultValue para el sustantivo "preguntas"
+        form.setValue(
+          'titulo',
+          `${t('exams.createWithAI.importedTitle', { defaultValue: 'Examen Importado' })} - ${parsedData.total_preguntas} ${t('exams.questions', { defaultValue: 'preguntas' })}`
+        );
         
         // Establecer las preguntas
         setAllStoredQuestions(preguntasImportadas);
@@ -581,8 +585,8 @@ export default function CreateExamPage() {
         localStorage.removeItem(`examImport_${importId}`);
         
         toast({
-          title: t('exams.importedTitle', { defaultValue: 'Examen importado' }),
-          description: `${t('exams.importedDesc', { defaultValue: 'Se han importado' })} ${preguntasImportadas.length} ${t('exams.questionsImported', { defaultValue: 'preguntas correctamente' })}`,
+          title: t('exams.createWithAI.importedTitle', { defaultValue: 'Examen importado' }),
+          description: `${t('exams.createWithAI.importedDesc', { defaultValue: 'Se han importado' })} ${preguntasImportadas.length} ${t('exams.createWithAI.questionsImported', { defaultValue: 'preguntas correctamente' })}`,
         });
         
       } catch (error) {
@@ -590,7 +594,7 @@ export default function CreateExamPage() {
         toast({
           variant: 'destructive',
           title: t('common.error'),
-          description: t('exams.importError', { defaultValue: 'No se pudieron procesar los datos importados' }),
+          description: t('exams.createWithAI.importError', { defaultValue: 'No se pudieron procesar los datos importados' }),
         });
       }
     }
@@ -854,7 +858,7 @@ export default function CreateExamPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-lg font-medium">
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent text-accent-foreground font-bold text-sm">
-                    {t('exams.form.questionNumber', { defaultValue: 'Pregunta {index} de {total}' }).replace('{index}', String(index + 1)).replace('{total}', String(numeroPreguntas))}
+                    {t('exams.form.questionNumber', { current: index + 1, total: numeroPreguntas, defaultValue: 'Pregunta {current} de {total}' })}
                   </span>
                 </CardTitle>
               </CardHeader>
@@ -924,7 +928,7 @@ export default function CreateExamPage() {
                             setAllStoredQuestions(storedQuestions);
                           }
                         }}
-                        placeholder={t('exams.form.optionPlaceholder', { defaultValue: 'Opción {number}' }).replace('{number}', String(opcionIndex + 1))}
+                        placeholder={t('exams.form.optionPlaceholder', { number: opcionIndex + 1, defaultValue: 'Opción {number}' })}
                         className="placeholder:text-muted-foreground/50"
                         disabled={pregunta.tipo === 'verdadero_falso'}
                       />

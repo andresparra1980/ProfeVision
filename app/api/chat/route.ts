@@ -12,40 +12,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export const dynamic = "force-dynamic";
 
-// Zod: request schema per DOC_preguntas_ia.md
-const ChatMessageSchema = z.object({
-  role: z.enum(["user", "system", "assistant"]),
-  content: z.string().min(1),
-});
-
-const ChatContextSchema = z.object({
-  documentId: z.string().nullable().optional(),
-  language: z.string().min(2).default("es"),
-  numQuestions: z.number().int().min(1).max(50).optional(),
-  questionTypes: z
-    .array(z.enum(["multiple_choice", "true_false", "short_answer", "essay"]))
-    .nonempty(),
-  difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
-  taxonomy: z
-    .array(
-      z.enum([
-        "remember",
-        "understand",
-        "apply",
-        "analyze",
-        "evaluate",
-        "create",
-      ])
-    )
-    .optional()
-    .default([]),
-});
-
-const ChatRequestSchema = z.object({
-  messages: z.array(ChatMessageSchema).min(1),
-  context: ChatContextSchema,
-});
-
 // Zod: response contract schema per DOC_preguntas_ia.md
 const ExamQuestionSchema = z.object({
   id: z.string(),
@@ -100,6 +66,72 @@ const ExamSchema = z.object({
   }),
 });
 
+// Zod: request schema per DOC_preguntas_ia.md
+const ChatMessageSchema = z.object({
+  role: z.enum(["user", "system", "assistant"]),
+  content: z.string().min(1),
+});
+
+// Optional topic summary context to guide question generation
+const TopicSummarySchema = z.object({
+  generalOverview: z.string(),
+  academicLevel: z.string(),
+  macroTopics: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        importance: z.enum(["high", "medium", "low"]),
+        microTopics: z
+          .array(
+            z.object({
+              name: z.string(),
+              description: z.string(),
+              keyTerms: z.array(z.string()),
+              concepts: z.array(z.string()),
+            })
+          )
+          .default([]),
+      })
+    )
+    .default([]),
+});
+
+const ChatContextSchema = z.object({
+  documentIds: z.array(z.string()).max(5).optional().default([]),
+  language: z.string().min(2).default("es"),
+  numQuestions: z.number().int().min(1).max(50).optional(),
+  questionTypes: z
+    .array(z.enum(["multiple_choice", "true_false", "short_answer", "essay"]))
+    .nonempty(),
+  difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
+  taxonomy: z
+    .array(
+      z.enum([
+        "remember",
+        "understand",
+        "apply",
+        "analyze",
+        "evaluate",
+        "create",
+      ])
+    )
+    .optional()
+    .default([]),
+  // Multiple optional summaries from background processing
+  topicSummaries: z
+    .array(z.object({ documentId: z.string(), summary: TopicSummarySchema }))
+    .optional()
+    .default([]),
+  // Optional existing exam (the UI may allow edits locally and send as baseline for the next turn)
+  existingExam: ExamSchema.nullable().optional(),
+});
+
+const ChatRequestSchema = z.object({
+  messages: z.array(ChatMessageSchema).min(1),
+  context: ChatContextSchema,
+});
+
 function buildSystemPrompt(language: string) {
   return [
     // Contexto y rol
@@ -137,6 +169,28 @@ function buildSystemPrompt(language: string) {
     "Responde exclusivamente con JSON válido que cumpla el contrato indicado a continuación.",
   ].join("\n");
 }
+
+// Sanea payloads de IA para compatibilidad con el contrato (p.ej. difficulty: "mixed" -> "medium")
+const sanitizeAIExamPayload = (obj: any) => {
+  try {
+    if (!obj || typeof obj !== 'object') return obj;
+    const cloned = JSON.parse(JSON.stringify(obj));
+    const exam = cloned?.exam;
+    const allowed = new Set(["easy", "medium", "hard"]);
+    if (exam && Array.isArray(exam.questions)) {
+      for (let i = 0; i < exam.questions.length; i++) {
+        const q = exam.questions[i];
+        if (!q) continue;
+        if (!allowed.has(q.difficulty)) {
+          q.difficulty = "medium";
+        }
+      }
+    }
+    return cloned;
+  } catch {
+    return obj;
+  }
+};
 
 function buildUserInstruction(context: z.infer<typeof ChatContextSchema>) {
   const { language, numQuestions, questionTypes, difficulty, taxonomy } =
@@ -252,6 +306,25 @@ export async function POST(req: NextRequest) {
         models,
         messages: [
           { role: "system", content: systemPrompt },
+          // Contexto opcional: Resúmenes temáticos por documento (si hay varios docs)
+          ...((context.topicSummaries || []).map((ts) => ({
+            role: "system" as const,
+            content:
+              `Resumen temático del documento (documentId: ${ts.documentId}). ` +
+              `Úsalo SOLO como contexto para alinear los temas; no lo cites literalmente.\n` +
+              `${JSON.stringify(ts.summary)}`,
+          }))),
+          // Contexto opcional: examen existente a modificar/expandir
+          ...(context.existingExam
+            ? [
+                {
+                  role: "system" as const,
+                  content:
+                    "Examen existente provisto por el usuario. Si el usuario solicita cambios, devuelve el examen COMPLETO actualizado.\n" +
+                    `${JSON.stringify(context.existingExam)}`,
+                },
+              ]
+            : []),
           // Conversación previa del usuario
           ...messages,
           // Instrucción final con parámetros estructurados
@@ -264,7 +337,7 @@ export async function POST(req: NextRequest) {
           },
         ],
         temperature: 0.7,
-        max_tokens: 4000,
+        max_tokens: 40000,
       }),
     });
 
@@ -303,13 +376,44 @@ export async function POST(req: NextRequest) {
       try {
         jsonPayload = JSON.parse(stripped);
       } catch {
-        // Extrae el objeto JSON más externo si hay texto adicional
-        const start = stripped.indexOf("{");
-        const end = stripped.lastIndexOf("}");
-        if (start !== -1 && end !== -1 && end > start) {
-          jsonPayload = JSON.parse(stripped.slice(start, end + 1));
+        // Buscamos el objeto JSON balanceado más grande { ... } respetando strings y escapes
+        const s = stripped;
+        let inStr = false;
+        let esc = false;
+        let depth = 0;
+        let startIdx = -1;
+        let endIdx = -1;
+        for (let i = 0; i < s.length; i++) {
+          const ch = s[i];
+          if (inStr) {
+            if (esc) {
+              esc = false;
+            } else if (ch === "\\") {
+              esc = true;
+            } else if (ch === '"') {
+              inStr = false;
+            }
+            continue;
+          }
+          if (ch === '"') {
+            inStr = true;
+            continue;
+          }
+          if (ch === "{") {
+            if (depth === 0) startIdx = i;
+            depth++;
+          } else if (ch === "}") {
+            depth--;
+            if (depth === 0 && startIdx !== -1) {
+              endIdx = i; // mantén el último cierre balanceado al nivel raíz
+            }
+          }
+        }
+        if (startIdx !== -1 && endIdx !== -1) {
+          const candidate = s.slice(startIdx, endIdx + 1);
+          jsonPayload = JSON.parse(candidate);
         } else {
-          throw new Error("No JSON object found");
+          throw new Error("No balanced JSON object found");
         }
       }
     } catch (_e) {
@@ -319,6 +423,8 @@ export async function POST(req: NextRequest) {
         { status: 422 }
       );
     }
+
+    jsonPayload = sanitizeAIExamPayload(jsonPayload);
 
     const validated = ExamSchema.safeParse(jsonPayload);
     if (!validated.success) {

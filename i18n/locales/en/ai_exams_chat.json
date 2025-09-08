@@ -1,0 +1,115 @@
+{
+  "header": {
+    "back": "Back to Exams",
+    "title": "Create exams with AI",
+    "description": "Chat experience to generate question banks and summaries. Language: {locale}",
+    "clearChat": "Clear Chat",
+    "saveDraft": "Save Draft"
+  },
+  "context": {
+    "title": "Document context",
+    "description": "Upload up to 5 files to be summarized by AI to serve as context for exam generation."
+  },
+  "results": {
+    "title": "Results",
+    "description": "Review the generated exam.",
+    "generatedQuestions": "Generated questions",
+    "empty": "Results will appear here when the chat is connected to the endpoint.",
+    "randomizeOptions": "Randomize options",
+    "edit": "Edit",
+    "selectCorrect": "Select the correct answer:",
+    "true": "True",
+    "false": "False",
+    "rationale": "Rationale"
+  },
+  "editor": {
+    "title": "Edit question",
+    "description": "Adjust prompt, options, correct answer and metadata.",
+    "type": "Type",
+    "selectType": "Select type",
+    "types": {
+      "multiple_choice": "Multiple choice",
+      "true_false": "True/False",
+      "short_answer": "Short answer",
+      "essay": "Essay"
+    },
+    "prompt": "Prompt",
+    "options": "Options",
+    "addOption": "Add option",
+    "delete": "Delete",
+    "correctAnswer": "Correct answer",
+    "rationale": "Rationale (optional)",
+    "difficulty": "Difficulty",
+    "difficulties": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "clearDialog": {
+    "title": "Clear chat data?",
+    "description": "This action will clear documents and outputs in the browser, the document context and the local draft of the AI-generated exam.",
+    "cancel": "Cancel",
+    "confirm": "Clear"
+  },
+  "clearToasts": {
+    "successTitle": "Chat data cleared",
+    "successDesc": "Documents, outputs and the local draft were cleared.",
+    "errorTitle": "Error clearing",
+    "errorDesc": "Could not fully clear local storage."
+  },
+  "loadDraft": {
+    "successTitle": "Draft loaded",
+    "successDesc": "You can edit the questions in the chat.",
+    "errorTitle": "Error",
+    "errorDesc": "Could not load the draft"
+  },
+  "saveDraftDialog": {
+    "create": {
+      "title": "Save exam draft",
+      "description": "Complete general information to save this exam as a draft.",
+      "submit": "Save draft"
+    },
+    "edit": {
+      "title": "Save exam changes",
+      "description": "Questions will be updated with your changes. Subject and group are not modified.",
+      "submit": "Save changes"
+    },
+    "form": {
+      "title": "Title",
+      "titlePlaceholder": "e.g. Reading exam",
+      "subject": "Subject",
+      "group": "Group",
+      "duration": "Duration (min)",
+      "totalScore": "Total score",
+      "selectSubject": "Select a subject",
+      "selectGroup": "Select a group",
+      "selectSubjectFirst": "Select a subject first",
+      "noGroups": "No groups available",
+      "cancel": "Cancel"
+    },
+    "toasts": {
+      "saved": "Draft saved",
+      "savedDesc": "The exam has been saved as a draft.",
+      "updated": "Draft updated",
+      "updatedDesc": "The draft was updated.",
+      "error": "Error",
+      "saveError": "Could not save the draft"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "description": "Describe the exam you want to generate and refine with instructions.",
+    "needLogin": "You must sign in to use AI.",
+    "send": "Send",
+    "inputPlaceholder": "Write your instructions here...",
+    "toasts": {
+      "successTitle": "Results generated",
+      "successDesc": "Review the generated exam on the Results panel.",
+      "errorTitle": "Error",
+      "errorDesc": "An unexpected error occurred. Please try again."
+    }
+  }
+}

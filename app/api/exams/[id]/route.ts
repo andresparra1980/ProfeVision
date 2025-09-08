@@ -223,60 +223,174 @@ export async function PUT(
     // Resolver los params del Promise
     const resolvedParams = await params;
     const examId = resolvedParams.id;
-    
+
+    // Obtener el token de autorización del header (mismo comportamiento que otros handlers)
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: t('errors.unauthorized') }, { status: 401 });
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
+
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
         { error: t('errors.serverConfig') },
         { status: 500 }
       );
     }
-    
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
       }
     });
-    
+
     const body = await request.json();
-    const { title, description, questions, is_archived } = body;
-    
-    if (!title || !questions) {
-      return NextResponse.json(
-        { error: t('errors.missingFields') },
-        { status: 400 }
-      );
-    }
-    
-    const { error: updateError } = await supabase
+    const {
+      titulo,
+      descripcion,
+      preguntas,
+      duracion_minutos,
+      puntaje_total,
+    } = body as {
+      titulo?: string;
+      descripcion?: string;
+      preguntas?: Array<{
+        texto: string;
+        tipo?: string;
+        opciones?: Array<{ texto: string; esCorrecta?: boolean }>;
+      }>;
+      duracion_minutos?: number;
+      puntaje_total?: number;
+    };
+
+    // 1) Verificar que el examen existe
+    const { data: examRow, error: examErr } = await supabase
       .from('examenes')
-      .update({
-        title,
-        description,
-        questions,
-        is_archived,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', examId);
-      
-    if (updateError) {
-      if (DEBUG) {
-        console.error('Error al actualizar examen:', updateError);
-      }
-      return NextResponse.json(
-        { error: t('errors.updateExam') },
-        { status: 500 }
-      );
+      .select('id, titulo, duracion_minutos, puntaje_total')
+      .eq('id', examId)
+      .single();
+
+    if (examErr?.code === 'PGRST116') {
+      return NextResponse.json({ error: t('errors.notFound') }, { status: 404 });
     }
-    
-    return NextResponse.json({ 
-      success: true,
-      message: t('success.updated')
-    });
-    
+    if (examErr) throw examErr;
+
+    // 2) Actualizar metadatos del examen si vienen en el body
+    if (
+      typeof titulo !== 'undefined' ||
+      typeof descripcion !== 'undefined' ||
+      typeof duracion_minutos !== 'undefined' ||
+      typeof puntaje_total !== 'undefined'
+    ) {
+      const { error: updExamErr } = await supabase
+        .from('examenes')
+        .update({
+          ...(typeof titulo !== 'undefined' ? { titulo } : {}),
+          ...(typeof descripcion !== 'undefined' ? { descripcion } : {}),
+          ...(typeof duracion_minutos !== 'undefined' ? { duracion_minutos } : {}),
+          ...(typeof puntaje_total !== 'undefined' ? { puntaje_total } : {}),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', examId);
+      if (updExamErr) {
+        if (DEBUG) console.error('Error al actualizar metadatos del examen:', updExamErr);
+        return NextResponse.json({ error: t('errors.updateExam') }, { status: 500 });
+      }
+    }
+
+    // 3) Si no se proporcionan preguntas, terminamos aquí (solo metadatos)
+    if (!preguntas || !Array.isArray(preguntas)) {
+      return NextResponse.json({ success: true, message: t('success.updated') });
+    }
+
+    // 4) Obtener preguntas existentes para limpiar opciones y preguntas
+    const { data: existingQuestions, error: qErr } = await supabase
+      .from('preguntas')
+      .select('id')
+      .eq('examen_id', examId);
+    if (qErr) {
+      if (DEBUG) console.error('Error al obtener preguntas existentes:', qErr);
+      return NextResponse.json({ error: t('errors.updateExam') }, { status: 500 });
+    }
+
+    const existingIds = (existingQuestions || []).map((q: any) => q.id);
+
+    if (existingIds.length > 0) {
+      const { error: delOptsErr } = await supabase
+        .from('opciones_respuesta')
+        .delete()
+        .in('pregunta_id', existingIds);
+      if (delOptsErr) {
+        if (DEBUG) console.error('Error al eliminar opciones existentes:', delOptsErr);
+        return NextResponse.json({ error: t('errors.updateExam') }, { status: 500 });
+      }
+
+      const { error: delQErr } = await supabase
+        .from('preguntas')
+        .delete()
+        .eq('examen_id', examId);
+      if (delQErr) {
+        if (DEBUG) console.error('Error al eliminar preguntas existentes:', delQErr);
+        return NextResponse.json({ error: t('errors.updateExam') }, { status: 500 });
+      }
+    }
+
+    // 5) Insertar nuevas preguntas y opciones
+    const totalPoints = typeof puntaje_total === 'number' ? puntaje_total : (examRow?.puntaje_total ?? 5);
+    const validPreguntas = preguntas.filter((p) => (p.texto || '').trim() !== '');
+    const pointsPerQuestion = validPreguntas.length > 0
+      ? parseFloat(((totalPoints as number) / validPreguntas.length).toFixed(2))
+      : 0;
+
+    for (let i = 0; i < preguntas.length; i++) {
+      const pregunta = preguntas[i];
+      const texto = (pregunta.texto || '').trim();
+      if (!texto) continue;
+
+      const { data: preguntaData, error: insQErr } = await supabase
+        .from('preguntas')
+        .insert({
+          examen_id: examId,
+          texto,
+          tipo_id: pregunta.tipo || 'opcion_multiple',
+          puntaje: pointsPerQuestion,
+          orden: i + 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      if (insQErr) {
+        if (DEBUG) console.error('Error al insertar pregunta:', insQErr);
+        continue;
+      }
+
+      if (pregunta.opciones && Array.isArray(pregunta.opciones)) {
+        let ordenActual = 1;
+        for (const opcion of pregunta.opciones) {
+          const optText = (opcion.texto || '').trim();
+          if (!optText) continue;
+          const { error: insOptErr } = await supabase
+            .from('opciones_respuesta')
+            .insert({
+              pregunta_id: (preguntaData as any).id,
+              texto: optText,
+              es_correcta: Boolean(opcion.esCorrecta),
+              orden: ordenActual++,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            });
+          if (insOptErr) {
+            if (DEBUG) console.error('Error al insertar opción:', insOptErr);
+          }
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true, message: t('success.updated') });
   } catch (error) {
     if (DEBUG) {
       console.error('Error en PUT /api/exams/[id]:', error);
@@ -287,4 +401,5 @@ export async function PUT(
       { status: 500 }
     );
   }
-} 
+}
+ 
