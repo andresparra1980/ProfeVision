@@ -31,6 +31,8 @@ import DocumentContextBar from "./components/DocumentContextBar";
 import ResultsView from "./components/ResultsView";
 import { AIChatProvider } from "./components/AIChatContext";
 import { useAIChat } from "./components/AIChatContext";
+import type { AIExamResult } from "./components/AIChatContext";
+import type { ExamQuestion } from "./components/QuestionEditorDialog";
 import { clearPersistedAIExamDraft } from "./components/AIChatContext";
 import { clearLastDocumentContext } from "@/lib/persistence/browser";
 
@@ -85,13 +87,13 @@ function SaveDraftDialog({
       duracion: z.number().min(1).max(240),
       puntaje_total: z.number().min(1).max(100).default(5),
     });
-  }, [isEditing]);
+  }, [isEditing, t]);
   type DraftFormValues = z.infer<typeof draftSchema>;
 
   const form = useForm<DraftFormValues>({
     resolver: zodResolver(draftSchema),
     defaultValues: {
-      titulo: existing?.titulo || (result as any)?.exam?.title || '',
+      titulo: existing?.titulo || (result as AIExamResult | null)?.exam?.title || '',
       materia_id: existing?.materia_id || '',
       grupo_id: '',
       duracion: existing?.duracion_minutos ?? 60,
@@ -103,7 +105,7 @@ function SaveDraftDialog({
   React.useEffect(() => {
     if (existing) {
       form.reset({
-        titulo: existing.titulo || (result as any)?.exam?.title || '',
+        titulo: existing.titulo || (result as AIExamResult | null)?.exam?.title || '',
         materia_id: existing.materia_id || '',
         grupo_id: '',
         duracion: existing.duracion_minutos ?? 60,
@@ -121,9 +123,9 @@ function SaveDraftDialog({
 
   const mapAIQuestionsToApi = React.useCallback(() => {
     try {
-      const examRes: any = result as any;
-      const qs: any[] = examRes?.exam?.questions || [];
-      const mapped = qs.map((q: any) => {
+      const examRes = result as AIExamResult | null;
+      const qs: ExamQuestion[] = examRes?.exam?.questions || [];
+      const mapped = qs.map((q) => {
         const type = q?.type || 'multiple_choice';
         const prompt = q?.prompt || '';
         if (type === 'multiple_choice') {
@@ -165,7 +167,7 @@ function SaveDraftDialog({
       });
       return mapped;
     } catch {
-      return [] as any[];
+      return [] as Array<{ texto: string; tipo: string; opciones: Array<{ texto: string; esCorrecta: boolean }> }>;
     }
   }, [result]);
 
@@ -179,7 +181,16 @@ function SaveDraftDialog({
 
       const url = isEditing ? `/api/exams/${existing?.id}` : '/api/exams';
       const method = isEditing ? 'PUT' : 'POST';
-      const payload: any = {
+      type ExamPayload = {
+        titulo?: string;
+        materia_id?: string;
+        grupo_id?: string;
+        duracion_minutos?: number;
+        puntaje_total?: number;
+        descripcion: string;
+        preguntas: Array<{ texto: string; tipo: string; opciones: Array<{ texto: string; esCorrecta: boolean }> }>;
+      };
+      const payload: ExamPayload = {
         // For edit, only send fields if meaningful to avoid overwriting with empty/NaN
         descripcion: '',
         preguntas,
@@ -217,7 +228,7 @@ function SaveDraftDialog({
         clearPersistedAIExamDraft();
         clearLastDocumentContext();
       } catch (_e) {
-        // ignore cleanup errors
+        void _e; // ignore cleanup errors
       }
       // Clear IndexedDB stores used by our persistence layer (scoped helper)
       try {
@@ -237,11 +248,11 @@ function SaveDraftDialog({
                   tx.onerror = () => done();
                   try {
                     tx.objectStore(name).clear();
-                  } catch {
-                    done();
+                  } catch (_e) {
+                    void _e; done();
                   }
-                } catch {
-                  done();
+                } catch (_e) {
+                  void _e; done();
                 }
               };
               clearStore('docs', () => clearStore('outputs', () => resolve()));
@@ -250,7 +261,7 @@ function SaveDraftDialog({
           });
         }
       } catch (_e) {
-        // ignore
+        void _e; // ignore
       }
 
       toast({ title: isEditing ? t('saveDraftDialog.toasts.updated') : t('saveDraftDialog.toasts.saved'), description: isEditing ? t('saveDraftDialog.toasts.updatedDesc') : t('saveDraftDialog.toasts.savedDesc') });
@@ -261,7 +272,7 @@ function SaveDraftDialog({
     } finally {
       setSavingDraft(false);
     }
-  }, [existing?.id, mapAIQuestionsToApi, router, toast]);
+  }, [existing?.id, isEditing, mapAIQuestionsToApi, router, t, toast]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -512,7 +523,7 @@ export default function AIExamsCreationChatPage() {
       setClearing(false);
       setShowClearDialog(false);
     }
-  }, [clearIndexedDBStores, toast]);
+  }, [clearIndexedDBStores, t, toast]);
 
   // Loader component to populate AIChatContext from an existing draft exam
   function DraftLoader() {
@@ -532,9 +543,9 @@ export default function AIExamsCreationChatPage() {
         try {
           const doneOnce = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loaded-exam-id') : null;
           // If we're working on the same exam and already have content, never auto-reload from DB
-          const hasNonEmpty = Boolean((result as any)?.exam?.questions && (result as any).exam.questions.length > 0);
+          const hasNonEmpty = Boolean((result as AIExamResult | null)?.exam?.questions && (result as AIExamResult | null)!.exam!.questions!.length > 0);
           if (doneOnce === examId && hasNonEmpty) return;
-        } catch {}
+        } catch (_e) { void _e; }
         // Persistent guard across remounts (e.g., dev HMR, StrictMode double invoke)
         try {
           const loading = typeof window !== 'undefined' ? sessionStorage.getItem('pv:loading-exam-id') : null;
@@ -544,25 +555,25 @@ export default function AIExamsCreationChatPage() {
           if (loading === examId && isRecent) return;
           // clear stale loading markers
           if (loading === examId && !isRecent && typeof window !== 'undefined') {
-            try { sessionStorage.removeItem('pv:loading-exam-id'); sessionStorage.removeItem('pv:loading-exam-ts'); } catch {}
+            try { sessionStorage.removeItem('pv:loading-exam-id'); sessionStorage.removeItem('pv:loading-exam-ts'); } catch (_e) { void _e; }
           }
-        } catch (_e) {}
+        } catch (_e) { void _e; }
         try {
           // Before loading a different exam, clear all local caches to avoid stale UI
           try {
             // Clear AI exam result cache and in-memory state
             setResult(null);
             clearPersistedAIExamDraft();
-          } catch {}
-          try { clearLastDocumentContext(); } catch {}
-          try { await clearIndexedDBStores(); } catch {}
+          } catch (_e) { void _e; }
+          try { clearLastDocumentContext(); } catch (_e) { void _e; }
+          try { await clearIndexedDBStores(); } catch (_e) { void _e; }
           // Mark the latest clicked exam with current timestamp to prioritize it
           try {
             if (typeof window !== 'undefined') {
               sessionStorage.setItem('pv:loaded-exam-id', examId);
               sessionStorage.setItem('pv:loaded-exam-ts', String(Date.now()));
             }
-          } catch {}
+          } catch (_e) { void _e; }
 
           loadingRef.current = true;
           inFlightLoads.add(examId);
@@ -571,7 +582,7 @@ export default function AIExamsCreationChatPage() {
               sessionStorage.setItem('pv:loading-exam-id', examId);
               sessionStorage.setItem('pv:loading-exam-ts', String(Date.now()));
             }
-          } catch (_e) {}
+          } catch (_e) { void _e; }
           const { data: sessionData } = await supabase.auth.getSession();
           const token = sessionData.session?.access_token;
           if (!token) throw new Error('No autorizado');
@@ -603,7 +614,7 @@ export default function AIExamsCreationChatPage() {
           }> = await qRes.json();
 
           // Map to AI chat format
-          const questions = preguntas.map((p) => {
+          const questions: ExamQuestion[] = preguntas.map((p) => {
             if (p.tipo_id === 'opcion_multiple') {
               const opts = (p.opciones || []).sort((a,b) => a.orden - b.orden).map(o => o.texto);
               const correctIndex = (p.opciones || []).findIndex(o => o.es_correcta);
@@ -632,18 +643,36 @@ export default function AIExamsCreationChatPage() {
           });
 
           // Build a server-valid existingExam object matching API schema
-          const normalizedQuestions = questions.map((q: any, idx: number) => ({
-            id: `q${idx + 1}`,
-            type: q.type || 'multiple_choice',
-            prompt: q.prompt || '',
-            options: Array.isArray(q.options) ? q.options : [],
-            answer: q.answer ?? null,
-            rationale: q.rationale ?? '',
-            difficulty: q.difficulty ?? 'medium',
-            taxonomy: q.taxonomy ?? 'understand',
-            tags: Array.isArray(q.tags) ? q.tags : [],
-            source: q.source ?? { documentId: null, spans: [] },
-          }));
+          const normalizedQuestions: ExamQuestion[] = questions.map((q, idx: number) => {
+            const type = (q.type as ExamQuestion['type']) || 'multiple_choice';
+            const options = Array.isArray(q.options) ? q.options : [];
+            const rawAnswer = (q as Partial<ExamQuestion>).answer;
+            let answer: ExamQuestion['answer'] | undefined = undefined;
+            if (typeof rawAnswer !== 'undefined') {
+              answer = rawAnswer as ExamQuestion['answer'];
+            } else {
+              if (type === 'multiple_choice') answer = options.length > 0 ? 0 : undefined;
+              else if (type === 'true_false') answer = false;
+              else answer = '';
+            }
+            const rationale = (q as Partial<ExamQuestion>).rationale ?? '';
+            const difficulty = (q as Partial<ExamQuestion>).difficulty ?? 'medium';
+            const taxonomy = (q as Partial<ExamQuestion>).taxonomy ?? 'understand';
+            const tags = Array.isArray((q as Partial<ExamQuestion>).tags) ? (q as Partial<ExamQuestion>).tags! : [];
+            const source = (q as Partial<ExamQuestion>).source ?? { documentId: null, spans: [] };
+            return {
+              id: `q${idx + 1}`,
+              type,
+              prompt: q.prompt || '',
+              options,
+              answer,
+              rationale,
+              difficulty,
+              taxonomy,
+              tags,
+              source,
+            } as ExamQuestion;
+          });
 
           setResult({
             exam: {
@@ -653,7 +682,7 @@ export default function AIExamsCreationChatPage() {
               language: locale || 'es',
               questions: normalizedQuestions,
             },
-          } as any);
+          } as AIExamResult);
           loadedExamIdRef.current = examId;
           setLoadedExamId(examId);
           try {
@@ -661,7 +690,7 @@ export default function AIExamsCreationChatPage() {
               sessionStorage.setItem('pv:loaded-exam-id', examId);
               sessionStorage.setItem('pv:loaded-exam-ts', String(Date.now()));
             }
-          } catch {}
+          } catch (_e) { void _e; }
           loadedOnce.add(examId);
           toast({ title: t('loadDraft.successTitle'), description: t('loadDraft.successDesc') });
         } catch (e) {
@@ -674,7 +703,7 @@ export default function AIExamsCreationChatPage() {
               sessionStorage.removeItem('pv:loading-exam-id');
               sessionStorage.removeItem('pv:loading-exam-ts');
             }
-          } catch (_e) {}
+          } catch (_e) { void _e; }
         }
       };
       load();

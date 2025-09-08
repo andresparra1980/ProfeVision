@@ -21,6 +21,7 @@ export interface ExamQuestion {
   difficulty?: "easy" | "medium" | "hard" | string;
   taxonomy?: string | string[];
   tags?: string[];
+  source?: { documentId: string | null; spans: Array<unknown> };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }

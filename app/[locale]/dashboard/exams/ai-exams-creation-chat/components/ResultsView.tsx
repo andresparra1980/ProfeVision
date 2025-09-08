@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAIChat } from "./AIChatContext";
+import type { AIExamResult } from "./AIChatContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -16,8 +17,7 @@ export default function ResultsView() {
   const t = useTranslations('ai_exams_chat');
 
   const questions = useMemo(() => {
-    const examRes = result as any;
-    return (examRes?.exam?.questions ?? []) as ExamQuestion[];
+    return (result?.exam?.questions ?? []) as ExamQuestion[];
   }, [result]);
 
   
@@ -25,8 +25,8 @@ export default function ResultsView() {
   function randomizeOptions() {
     if (!result) return;
     try {
-      const cloned: any = JSON.parse(JSON.stringify(result));
-      const qs: any[] = cloned?.exam?.questions;
+      const cloned: AIExamResult = JSON.parse(JSON.stringify(result));
+      const qs: ExamQuestion[] = cloned.exam?.questions ?? [];
       if (!Array.isArray(qs)) return;
       const shuffle = <T,>(arr: T[]): T[] => {
         const a = arr.slice();
@@ -39,13 +39,13 @@ export default function ResultsView() {
       for (let qi = 0; qi < qs.length; qi++) {
         const q = qs[qi];
         if (!q || q.type !== "multiple_choice") continue;
-        const opts: unknown = q.options;
+        const opts: string[] = Array.isArray(q.options) ? q.options : [];
         if (!Array.isArray(opts) || opts.length < 2) continue;
         let correctIndex: number | null = null;
         if (typeof q.answer === "number" && q.answer >= 0 && q.answer < opts.length) {
           correctIndex = q.answer;
         } else if (typeof q.answer === "string") {
-          const idx = opts.findIndex((t: any) => t === q.answer);
+          const idx = opts.findIndex((t) => t === q.answer);
           correctIndex = idx >= 0 ? idx : null;
         }
         if (correctIndex == null) continue;
@@ -58,15 +58,15 @@ export default function ResultsView() {
       }
       setResult(cloned);
     } catch (_e) {
-      // ignore failures while randomizing
+      void _e; // ignore failures while randomizing
     }
   }
 
   function setCorrectAnswer(qIndex: number, value: number | boolean) {
-    setResult((prev: any) => {
+    setResult((prev) => {
       if (!prev) return prev;
       const cloned = JSON.parse(JSON.stringify(prev));
-      const qs = cloned?.exam?.questions;
+      const qs: ExamQuestion[] = cloned?.exam?.questions ?? [];
       if (!Array.isArray(qs) || !qs[qIndex]) return prev;
       qs[qIndex].answer = value;
       return cloned;
@@ -79,10 +79,10 @@ export default function ResultsView() {
   }
 
   function saveEdited(updated: ExamQuestion) {
-    setResult((prev: any) => {
+    setResult((prev) => {
       if (!prev) return prev;
       const cloned = JSON.parse(JSON.stringify(prev));
-      const qs = cloned?.exam?.questions;
+      const qs: ExamQuestion[] = cloned?.exam?.questions ?? [];
       if (!Array.isArray(qs) || editingIndex == null) return prev;
       qs[editingIndex] = updated;
       return cloned;
@@ -110,8 +110,7 @@ export default function ResultsView() {
           {questions.map((q: ExamQuestion, idx: number) => {
             const isMC = q?.type === "multiple_choice";
             const title = q?.prompt || `Pregunta ${idx + 1}`;
-            const difficulty = (q?.difficulty as string) || undefined;
-            const rationale = (q as any)?.rationale as string | undefined;
+            const rationale = q?.rationale as string | undefined;
             const options = Array.isArray(q?.options) ? q.options : [];
             const correctIdx = typeof q?.answer === "number" ? q.answer : (typeof q?.answer === "string" ? options.indexOf(q.answer) : -1);
             const isTF = q?.type === "true_false";

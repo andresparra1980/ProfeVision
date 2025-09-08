@@ -42,18 +42,19 @@ export default function ChatPanel() {
       const docsCtx = loadLastDocumentsContext();
       const documentIds = (docsCtx?.documentIds || []).slice(0, 5);
       // Load summaries for each doc (if available)
-      const topicSummaries: Array<{ documentId: string; summary: any }> = [];
+      interface TopicSummary { documentId: string; summary: unknown }
+      const topicSummaries: TopicSummary[] = [];
       for (const docId of documentIds) {
         try {
-          const out = await loadOutput<any>("summary", docId);
+          const out = await loadOutput<{ summary?: unknown }>("summary", docId);
           if (out?.summary) topicSummaries.push({ documentId: docId, summary: out.summary });
         } catch (_e) {
-          // ignore if not found or IndexedDB error
+          void _e; // ignore if not found or IndexedDB error
         }
       }
       // Sanitize existing exam to match API contract shape to avoid stringify or schema issues
       const allowedDifficulty = new Set(["easy", "medium", "hard"]);
-      const sanitizeExistingExam = (obj: any) => {
+      const sanitizeExistingExam = (obj: unknown) => {
         try {
           if (!obj || typeof obj !== "object") return undefined;
           const cloned = JSON.parse(JSON.stringify(obj));
@@ -82,18 +83,20 @@ export default function ChatPanel() {
       } as const;
 
       // Safe stringify with fallback dropping existingExam if it fails (never drop context)
-      const tryStringify = (p: any) => {
+      const tryStringify = (p: unknown) => {
         try {
           return JSON.stringify(p);
-        } catch {
-          const { existingExam: _ex, ...rest } = p.context || {};
-          const minimal = { ...p, context: rest };
+        } catch (_e) {
+          void _e;
+          const ctx = (p as { context?: Record<string, unknown> })?.context ?? {};
+          const { existingExam: _ex, ...rest } = ctx;
+          const minimal = { ...(p as object), context: rest } as object;
           return JSON.stringify(minimal);
         }
       };
 
       // Debug minimal log to help diagnose future issues
-      try { console.debug("[AIChat] Payload context keys:", Object.keys(payload.context)); } catch {}
+      try { console.debug("[AIChat] Payload context keys:", Object.keys(payload.context)); } catch (_e) { void _e; }
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -117,13 +120,13 @@ export default function ChatPanel() {
       const json = await res.json();
       setResult(json);
       // Success toast
-      try { toast({ title: t('chat.toasts.successTitle'), description: t('chat.toasts.successDesc') }); } catch {}
+      try { toast({ title: t('chat.toasts.successTitle'), description: t('chat.toasts.successDesc') }); } catch (_e) { void _e; }
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: t('results.title') + ": " + t('results.description') },
       ]);
     } catch (_e) {
-      try { toast({ title: t('chat.toasts.errorTitle'), description: t('chat.toasts.errorDesc'), variant: 'destructive' }); } catch {}
+      try { toast({ title: t('chat.toasts.errorTitle'), description: t('chat.toasts.errorDesc'), variant: 'destructive' }); } catch (_e2) { void _e2; }
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: t('saveDraftDialog.toasts.error') + ": " + t('saveDraftDialog.toasts.saveError') },

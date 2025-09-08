@@ -94,8 +94,6 @@ export async function POST(req: NextRequest) {
       // Per request: use env-configured models directly; allow 'openrouter/auto' as fallback
       const envPrimary = process.env.OPENAI_IMAGE_SUMMARY_MODEL || "";
       const envFallback = process.env.OPENAI_IMAGE_SUMMARY_FALBACK_MODEL || "";
-      const visionModel = envPrimary || "openrouter/auto";
-      const visionFallback = envFallback || "openrouter/auto";
       const temperature = typeof options?.temperature === "number" ? options.temperature : 0.2;
       const maxOutputTokens = typeof options?.maxOutputTokens === "number" ? options.maxOutputTokens : 20000;
 
@@ -143,6 +141,7 @@ Reglas:
 
       const truncate = (s: string, n = 120) => (s.length > n ? s.slice(0, n) + "…[truncated]" : s);
 
+      type VisionUserContent = Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
       const buildMessages = () => [
         { role: "system", content: `Eres un experto analista de contenido académico. Devuelve SOLO JSON válido con el SIGUIENTE ESQUEMA EXACTO y claves en inglés:
 {
@@ -161,13 +160,13 @@ Reglas:
 }
 No añadas nada fuera del JSON.` },
         {
-          role: "user",
+          role: "user" as const,
           content: [
             { type: "text", text: prompt },
             // OpenRouter expects the image in image_url.url (data URL or remote URL)
             { type: "image_url", image_url: { url: imageData } },
-          ],
-        } as any,
+          ] as VisionUserContent,
+        },
       ];
 
       const requestVision = async (modelName: string) => {
@@ -201,7 +200,7 @@ No añadas nada fuera del JSON.` },
                 }
               }
             }
-          } catch {}
+          } catch (_e) { void _e; }
           // Stringify body so it doesn't collapse to [Object]
           logger.api(
             "/api/documents/summarize vision request",
@@ -211,7 +210,7 @@ No añadas nada fuera del JSON.` },
               body: JSON.stringify(loggedBody, null, 2),
             }
           );
-        } catch {}
+        } catch (_e) { void _e; }
 
         const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
@@ -226,7 +225,7 @@ No añadas nada fuera del JSON.` },
           Array.from(resp.headers.entries()).forEach(([k, v]) => {
             headersObj[k] = v;
           });
-        } catch {}
+        } catch (_e) { void _e; }
         const rawBody = await resp.text();
         logger.api("/api/documents/summarize vision raw response", {
           status,
@@ -234,11 +233,11 @@ No añadas nada fuera del JSON.` },
           body: truncate(rawBody, 20000),
         });
 
-        let data: any = null;
+        let data: unknown = null;
         try {
           data = JSON.parse(rawBody);
-        } catch {
-          // leave data as null; will be handled below
+        } catch (_e) {
+          void _e; // leave data as null; will be handled below
         }
         if (!resp.ok || !data) {
           logger.error("summarize vision non-OK", {
@@ -246,14 +245,20 @@ No añadas nada fuera del JSON.` },
             headers: headersObj,
             details: truncate(rawBody, 20000),
           });
-          const err: any = new Error(`OpenRouter vision ${status}: ${truncate(rawBody, 2000)}`);
+          const err = new Error(`OpenRouter vision ${status}: ${truncate(rawBody, 2000)}`) as Error & { code?: string };
           err.code = "TRANSPORT_ERROR";
           throw err;
         }
-        const content: any = data?.choices?.[0]?.message?.content;
+        interface ORMessage { content?: unknown }
+        interface ORChoice { message?: ORMessage }
+        interface ORResponse { choices?: ORChoice[] }
+        const choices = (data as ORResponse).choices;
+        const content = Array.isArray(choices)
+          ? choices[0]?.message?.content
+          : undefined;
         if (!content) {
           const err = new Error("Empty content");
-          (err as any).code = "PARSE_ERROR";
+          (err as Error & { code?: string }).code = "PARSE_ERROR";
           throw err;
         }
         let contentText: string;
@@ -261,33 +266,33 @@ No añadas nada fuera del JSON.` },
         else if (Array.isArray(content)) {
           // Join any text parts if provider returns content as an array of parts
           contentText = content
-            .map((p: any) => (typeof p?.text === "string" ? p.text : ""))
+            .map((p: unknown) => (typeof (p as { text?: string })?.text === "string" ? (p as { text?: string }).text as string : ""))
             .filter(Boolean)
             .join("\n");
         } else {
           const err = new Error("Unsupported content shape");
-          (err as any).code = "PARSE_ERROR";
+          (err as Error & { code?: string }).code = "PARSE_ERROR";
           throw err;
         }
         let jsonObj: unknown;
         try {
           jsonObj = JSON.parse(contentText);
-        } catch {
+        } catch (_e) {
           const match = contentText.match(/\{[\s\S]*\}/);
           if (match) jsonObj = JSON.parse(match[0]);
           else {
-            const err = new Error("Model did not return JSON content");
-            (err as any).code = "PARSE_ERROR";
+            const err = new Error("Model did not return JSON content") as Error & { code?: string };
+            err.code = "PARSE_ERROR";
             throw err;
           }
         }
         const validated = summarySchema.safeParse(jsonObj);
         if (!validated.success) {
-          const err = new Error("Response failed schema validation: " + validated.error.message);
-          (err as any).code = "VALIDATION_ERROR";
+          const err = new Error("Response failed schema validation: " + validated.error.message) as Error & { code?: string; parsed?: string };
+          err.code = "VALIDATION_ERROR";
           // Attach a preview of parsed JSON for diagnostics
-          (err as any).parsed = (() => {
-            try { return JSON.stringify(jsonObj).slice(0, 2000); } catch { return undefined; }
+          err.parsed = (() => {
+            try { return JSON.stringify(jsonObj).slice(0, 2000); } catch (_e: unknown) { console.error(_e); return undefined; }
           })();
           throw err;
         }
@@ -296,42 +301,43 @@ No añadas nada fuera del JSON.` },
           logger.api("/api/documents/summarize vision validated json", {
             result: JSON.stringify(validated.data, null, 2),
           });
-        } catch {}
+        } catch (_logErr) { console.error(_logErr as unknown); }
         return validated.data;
       };
 
       try {
         logger.api("/api/documents/summarize image-mode selected model", { model: envPrimary });
-        const out = await requestVision(envPrimary);
+        const out = await requestVision(envPrimary || "openrouter/auto");
         return NextResponse.json(out);
-      } catch (_e1: any) {
+      } catch (_e1: unknown) {
         // Do not fallback if it's a parse/validation issue; surface to client for diagnosis
-        if (_e1?.code === "VALIDATION_ERROR" || _e1?.code === "PARSE_ERROR") {
+        const code = (_e1 as { code?: string } | undefined)?.code;
+        if (code === "VALIDATION_ERROR" || code === "PARSE_ERROR") {
           logger.warn("summarize image-mode primary returned parse/validation issue; skipping fallback", {
-            code: _e1?.code,
-            message: String(_e1?.message || _e1),
-            parsedPreview: _e1?.parsed,
+            code,
+            message: String((_e1 as Error)?.message || _e1),
+            parsedPreview: (_e1 as { parsed?: string })?.parsed,
           });
           return NextResponse.json(
-            { error: _e1?.message || "Unprocessable LLM response", code: _e1?.code || "UNPROCESSABLE" },
+            { error: (_e1 as Error)?.message || "Unprocessable LLM response", code: code || "UNPROCESSABLE" },
             { status: 422 }
           );
         }
-        if (_e1?.code !== "TRANSPORT_ERROR") {
+        if (code !== "TRANSPORT_ERROR") {
           // Unknown/non-transport error -> surface without fallback
           logger.warn("summarize image-mode primary error; not a transport error, skipping fallback", {
-            code: _e1?.code,
-            message: String(_e1?.message || _e1),
+            code,
+            message: String((_e1 as Error)?.message || _e1),
           });
           return NextResponse.json(
-            { error: _e1?.message || "Unprocessable LLM response", code: _e1?.code || "UNPROCESSABLE" },
+            { error: (_e1 as Error)?.message || "Unprocessable LLM response", code: code || "UNPROCESSABLE" },
             { status: 422 }
           );
         }
         logger.api("/api/documents/summarize image-mode fallback model", {
           model: envFallback,
           reason: "TRANSPORT_ERROR from primary",
-          error: String(_e1?.message || _e1),
+          error: String((_e1 as Error)?.message || _e1),
         });
         const out = await requestVision(envFallback);
         return NextResponse.json(out);
@@ -398,18 +404,23 @@ No añadas nada fuera del JSON.` },
         throw new Error(`OpenRouter chat/completions ${resp.status}: ${details}`);
       }
       const raw = await resp.text();
-      let data: any;
+      let data: unknown;
       try {
         data = JSON.parse(raw);
       } catch {
         console.error("/api/documents/summarize OpenRouter non-JSON body:", raw.slice(0, 500));
         throw new Error("OpenRouter returned non-JSON body");
       }
-      const content: string | undefined = data?.choices?.[0]?.message?.content;
+      interface ORMessage { content?: string }
+      interface ORChoice { message?: ORMessage }
+      interface ORResponse { choices?: ORChoice[] }
+      const content: string | undefined = Array.isArray((data as ORResponse).choices)
+        ? (data as ORResponse).choices![0]?.message?.content
+        : undefined;
       if (!content || typeof content !== "string") {
         throw new Error("Empty completion content from OpenRouter");
       }
-      let jsonObj: any;
+      let jsonObj: unknown;
       try {
         jsonObj = JSON.parse(content);
       } catch {
@@ -425,11 +436,11 @@ No añadas nada fuera del JSON.` },
     };
 
     // Generate schema-validated object preferring chat/completions on OpenRouter
-    let parsedResponse: any;
+    let parsedResponse: unknown;
     try {
       parsedResponse = await requestViaChatCompletions(model);
-    } catch (err: any) {
-      console.warn("/api/documents/summarize chat/completions attempt failed, retrying with generateObject", err?.message || err);
+    } catch (err: unknown) {
+      console.warn("/api/documents/summarize chat/completions attempt failed, retrying with generateObject", (err as Error)?.message || err);
       try {
         const { object } = await generateObject({
           model: openrouter(model),
@@ -440,8 +451,8 @@ No añadas nada fuera del JSON.` },
           schemaName: "TopicSummary",
         });
         parsedResponse = object;
-      } catch (err2: any) {
-        console.warn("/api/documents/summarize generateObject attempt failed, retrying with openrouter/auto", err2?.message || err2);
+      } catch (err2: unknown) {
+        console.warn("/api/documents/summarize generateObject attempt failed, retrying with openrouter/auto", (err2 as Error)?.message || err2);
         const fallbackModel = "openrouter/auto";
         try {
           const { object } = await generateObject({
@@ -453,18 +464,20 @@ No añadas nada fuera del JSON.` },
             schemaName: "TopicSummary",
           });
           parsedResponse = object;
-        } catch (err3: any) {
-          console.warn("/api/documents/summarize final fallback to chat/completions", err3?.message || err3);
+        } catch (err3: unknown) {
+          console.warn("/api/documents/summarize final fallback to chat/completions", (err3 as Error)?.message || err3);
           parsedResponse = await requestViaChatCompletions(fallbackModel);
         }
       }
     }
 
     // Basic shape check (defensive)
+    const pr = parsedResponse as Partial<TopicSummaryResult> | undefined;
     if (
-      !parsedResponse?.generalOverview ||
-      !parsedResponse?.academicLevel ||
-      !Array.isArray(parsedResponse?.macroTopics)
+      !pr ||
+      typeof pr.generalOverview !== "string" ||
+      typeof pr.academicLevel !== "string" ||
+      !Array.isArray((pr as { macroTopics?: unknown }).macroTopics)
     ) {
       return NextResponse.json(
         { error: "Invalid response structure from AI" },
@@ -472,9 +485,10 @@ No añadas nada fuera del JSON.` },
       );
     }
 
-    return NextResponse.json(parsedResponse);
-  } catch (e: any) {
-    console.error("/api/documents/summarize error", e?.message || e, e?.stack || "");
-    return NextResponse.json({ error: "Internal error", details: e?.message || String(e) }, { status: 500 });
+    return NextResponse.json(pr as TopicSummaryResult);
+  } catch (e: unknown) {
+    const err = e as Error & { stack?: string };
+    console.error("/api/documents/summarize error", err?.message || e, err?.stack || "");
+    return NextResponse.json({ error: "Internal error", details: err?.message || String(e) }, { status: 500 });
   }
 }

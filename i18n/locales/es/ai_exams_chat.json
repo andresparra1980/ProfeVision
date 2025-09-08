@@ -104,6 +104,12 @@
     "description": "Describe el examen que deseas generar y ajusta con instrucciones.",
     "needLogin": "Debes iniciar sesión para usar la IA.",
     "send": "Enviar",
-    "inputPlaceholder": "Escribe tus instrucciones aquí..."
+    "inputPlaceholder": "Escribe tus instrucciones aquí...",
+    "toasts": {
+      "successTitle": "Resultados generados",
+      "successDesc": "Revisa el examen generado en el panel de Resultados.",
+      "errorTitle": "Error",
+      "errorDesc": "Ocurrió un error inesperado. Intenta nuevamente."
+    }
   }
 }

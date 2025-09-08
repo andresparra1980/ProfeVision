@@ -171,18 +171,19 @@ function buildSystemPrompt(language: string) {
 }
 
 // Sanea payloads de IA para compatibilidad con el contrato (p.ej. difficulty: "mixed" -> "medium")
-const sanitizeAIExamPayload = (obj: any) => {
+const sanitizeAIExamPayload = (obj: unknown): unknown => {
   try {
     if (!obj || typeof obj !== 'object') return obj;
-    const cloned = JSON.parse(JSON.stringify(obj));
-    const exam = cloned?.exam;
+    const cloned: Record<string, unknown> = JSON.parse(JSON.stringify(obj));
+    const exam = (cloned as { exam?: { questions?: Array<Record<string, unknown>> } }).exam;
     const allowed = new Set(["easy", "medium", "hard"]);
     if (exam && Array.isArray(exam.questions)) {
       for (let i = 0; i < exam.questions.length; i++) {
         const q = exam.questions[i];
-        if (!q) continue;
-        if (!allowed.has(q.difficulty)) {
-          q.difficulty = "medium";
+        if (!q || typeof q !== 'object') continue;
+        const diff = (q as Record<string, unknown>).difficulty;
+        if (typeof diff !== 'string' || !allowed.has(diff)) {
+          (q as Record<string, unknown>).difficulty = "medium";
         }
       }
     }

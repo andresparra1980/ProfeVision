@@ -65,19 +65,24 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Unsupported file type: legacy .doc is not supported" }, { status: 415 });
       }
       const mammothNS = await import("mammoth");
-      const mammothLib: any = (mammothNS as any).default || (mammothNS as any);
+      type ExtractRawTextFn = (_input: { buffer?: Buffer; arrayBuffer?: ArrayBuffer }) => Promise<{ value?: string }>;
+      const mammothMod = mammothNS as unknown as { extractRawText?: ExtractRawTextFn; default?: { extractRawText?: ExtractRawTextFn } };
+      const extractRawTextFn: ExtractRawTextFn | undefined = mammothMod.extractRawText ?? mammothMod.default?.extractRawText;
+      if (!extractRawTextFn) {
+        return NextResponse.json({ error: "Mammoth library not available" }, { status: 500 });
+      }
       try {
         // First attempt: Node Buffer
-        const result = await mammothLib.extractRawText({ buffer });
+        const result = await extractRawTextFn({ buffer });
         text = (result?.value || "").trim();
-      } catch (e: any) {
-        console.error("/api/documents/extract mammoth error (buffer)", e?.message || e);
+      } catch (e: unknown) {
+        console.error("/api/documents/extract mammoth error (buffer)", e);
         try {
           // Fallback: ArrayBuffer (some environments prefer this)
-          const result2 = await mammothLib.extractRawText({ arrayBuffer });
+          const result2 = await extractRawTextFn({ arrayBuffer });
           text = (result2?.value || "").trim();
-        } catch (e2: any) {
-          console.error("/api/documents/extract mammoth error (arrayBuffer)", e2?.message || e2);
+        } catch (e2: unknown) {
+          console.error("/api/documents/extract mammoth error (arrayBuffer)", e2);
           return NextResponse.json({ error: "Failed to extract DOCX content" }, { status: 422 });
         }
       }
@@ -94,14 +99,13 @@ export async function POST(req: Request) {
           const xmlStr = await zip.files[path].async("string");
           const xml = parser.parse(xmlStr);
           // Collect text nodes commonly under a:p/a:r/a:t in PPTX
-          const visit = (node: any) => {
+          const visit = (node: unknown) => {
             if (!node || typeof node !== "object") return;
-            for (const key of Object.keys(node)) {
-              const val = (node as any)[key];
+            for (const [key, val] of Object.entries(node as Record<string, unknown>)) {
               if (key.endsWith(":t") || key === "a:t" || key === "t") {
                 if (typeof val === "string") chunks.push(val);
               } else if (Array.isArray(val)) {
-                val.forEach(visit);
+                (val as unknown[]).forEach(visit);
               } else if (typeof val === "object") {
                 visit(val);
               }
@@ -110,8 +114,8 @@ export async function POST(req: Request) {
           visit(xml);
         }
         text = chunks.join("\n").trim();
-      } catch (e: any) {
-        console.error("/api/documents/extract pptx error", e?.message || e);
+      } catch (e: unknown) {
+        console.error("/api/documents/extract pptx error", e);
         return NextResponse.json({ error: "Failed to extract PPTX text" }, { status: 500 });
       }
     } else if (isImage) {

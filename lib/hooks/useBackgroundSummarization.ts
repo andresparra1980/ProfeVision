@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadDocument, saveOutput, loadOutput } from "@/lib/persistence/browser";
 
+type DocMeta = { kind?: string; dataUrl?: string };
+
 export type SummaryJobStatus = "queued" | "summarizing" | "completed" | "failed";
 
 export interface SummaryJob {
@@ -13,14 +15,14 @@ export interface SummaryJob {
   error?: string;
   startedAt?: string;
   completedAt?: string;
-  result?: any;
+  result?: unknown;
 }
 
 export interface UseBackgroundSummarization {
   jobs: SummaryJob[];
   addJob: (_documentId: string) => string;
   removeJob: (_jobId: string) => void;
-  getSummary: (_documentId: string) => Promise<any | null>;
+  getSummary: (_documentId: string) => Promise<unknown | null>;
 }
 
 function uid() {
@@ -59,7 +61,7 @@ export function useBackgroundSummarization(): UseBackgroundSummarization {
 
         try {
           // Load document text/meta from IndexedDB
-          const doc = await loadDocument<{ text: string; meta?: any }>(next.documentId);
+          const doc = await loadDocument<{ text: string; meta?: DocMeta }>(next.documentId);
           const isImageDoc = !!(doc?.meta?.kind === "image" && typeof doc?.meta?.dataUrl === "string");
           if (!isImageDoc && !doc?.text) throw new Error("Documento no encontrado en IndexedDB");
 
@@ -68,7 +70,7 @@ export function useBackgroundSummarization(): UseBackgroundSummarization {
           // Call summarization API (vision if image, text otherwise)
           const isImage = doc?.meta?.kind === "image" && typeof doc?.meta?.dataUrl === "string";
           const payload = isImage
-            ? { imageData: doc.meta.dataUrl, options: { maxOutputTokens: 2000 } }
+            ? { imageData: (doc.meta?.dataUrl as string), options: { maxOutputTokens: 2000 } }
             : { text: doc.text, options: { maxOutputTokens: 10000 } };
           const resp = await fetch("/api/documents/summarize", {
             method: "POST",
@@ -87,8 +89,9 @@ export function useBackgroundSummarization(): UseBackgroundSummarization {
           await saveOutput("summary", next.documentId, { summary, meta: doc.meta });
 
           updateJob(jobId, { status: "completed", progress: 100, completedAt: new Date().toISOString(), result: summary });
-        } catch (e: any) {
-          updateJob(jobId, { status: "failed", error: e?.message || String(e), progress: 100, completedAt: new Date().toISOString() });
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : String(e);
+          updateJob(jobId, { status: "failed", error: msg, progress: 100, completedAt: new Date().toISOString() });
         }
       }
     } finally {
@@ -116,7 +119,7 @@ export function useBackgroundSummarization(): UseBackgroundSummarization {
   }, []);
 
   const getSummary = useCallback(async (documentId: string) => {
-    return loadOutput<any>("summary", documentId);
+    return loadOutput<unknown>("summary", documentId);
   }, []);
 
   // Auto-start if there are queued jobs and we become idle

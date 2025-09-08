@@ -316,7 +316,7 @@ export async function PUT(
       return NextResponse.json({ error: t('errors.updateExam') }, { status: 500 });
     }
 
-    const existingIds = (existingQuestions || []).map((q: any) => q.id);
+    const existingIds = (existingQuestions || []).map((q: { id: string }) => q.id);
 
     if (existingIds.length > 0) {
       const { error: delOptsErr } = await supabase
@@ -376,7 +376,7 @@ export async function PUT(
           const { error: insOptErr } = await supabase
             .from('opciones_respuesta')
             .insert({
-              pregunta_id: (preguntaData as any).id,
+              pregunta_id: (preguntaData as { id: string }).id,
               texto: optText,
               es_correcta: Boolean(opcion.esCorrecta),
               orden: ordenActual++,

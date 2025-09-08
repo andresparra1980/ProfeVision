@@ -66,14 +66,15 @@ export async function GET(req: NextRequest, { params }: { params: Params }) {
       );
     }
 
+    type OptionRow = { pregunta_id: string | number; texto: string; es_correcta: boolean; orden: number };
     const optionsByQuestion: Record<string, Array<{ texto: string; es_correcta: boolean; orden: number }>> = {};
-    for (const opt of options || []) {
-      const key = String((opt as any).pregunta_id);
+    for (const opt of (options as OptionRow[] | null) || []) {
+      const key = String(opt.pregunta_id);
       if (!optionsByQuestion[key]) optionsByQuestion[key] = [];
       optionsByQuestion[key].push({
-        texto: (opt as any).texto,
-        es_correcta: Boolean((opt as any).es_correcta),
-        orden: Number((opt as any).orden) || 0,
+        texto: opt.texto,
+        es_correcta: Boolean(opt.es_correcta),
+        orden: Number(opt.orden) || 0,
       });
     }
 
