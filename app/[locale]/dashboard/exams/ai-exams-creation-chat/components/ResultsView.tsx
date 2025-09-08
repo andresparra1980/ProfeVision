@@ -1,5 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAIChat } from "./AIChatContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ export default function ResultsView() {
   const { result, setResult } = useAIChat();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const t = useTranslations('ai_exams_chat');
 
   const questions = useMemo(() => {
     const examRes = result as any;
@@ -91,15 +93,15 @@ export default function ResultsView() {
     <div className="rounded-md border p-3 space-y-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between">
-        <div className="font-medium">Preguntas generadas</div>
+        <div className="font-medium">{t('results.generatedQuestions')}</div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={randomizeOptions} disabled={!questions.length}>Aleatorizar opciones</Button>
+          <Button variant="outline" size="sm" onClick={randomizeOptions} disabled={!questions.length}>{t('results.randomizeOptions')}</Button>
         </div>
       </div>
 
       {/* Empty state */}
       {!questions.length && (
-        <div className="text-sm text-muted-foreground">Los resultados aparecerán aquí cuando se conecte el chat al endpoint.</div>
+        <div className="text-sm text-muted-foreground">{t('results.empty')}</div>
       )}
 
       {/* Accordion with questions */}
@@ -129,7 +131,7 @@ export default function ResultsView() {
                   {/* Body: options and controls */}
                   {isMC && (
                     <div className="space-y-3">
-                      <div className="text-sm font-medium">Selecciona la respuesta correcta:</div>
+                      <div className="text-sm font-medium">{t('results.selectCorrect')}</div>
                       <RadioGroup value={String(correctIdx)} onValueChange={(v) => setCorrectAnswer(idx, Number(v))} className="grid gap-2">
                         {options.map((opt, i) => (
                           <div key={i} className={`flex items-center gap-2 rounded border p-2 ${i === correctIdx ? "border-primary bg-primary/5" : ""}`}>
@@ -143,15 +145,15 @@ export default function ResultsView() {
 
                   {isTF && (
                     <div className="space-y-2">
-                      <div className="text-sm font-medium">Selecciona la respuesta correcta:</div>
+                      <div className="text-sm font-medium">{t('results.selectCorrect')}</div>
                       <RadioGroup value={String(q?.answer)} onValueChange={(v) => setCorrectAnswer(idx, v === "true")} className="grid gap-2">
                         <div className={`flex items-center gap-2 rounded border p-2 ${q?.answer === true ? "border-primary bg-primary/5" : ""}`}>
                           <RadioGroupItem id={`q${idx}-tf-true`} value="true" />
-                          <Label htmlFor={`q${idx}-tf-true`} className="font-normal">Verdadero</Label>
+                          <Label htmlFor={`q${idx}-tf-true`} className="font-normal">{t('results.true')}</Label>
                         </div>
                         <div className={`flex items-center gap-2 rounded border p-2 ${q?.answer === false ? "border-primary bg-primary/5" : ""}`}>
                           <RadioGroupItem id={`q${idx}-tf-false`} value="false" />
-                          <Label htmlFor={`q${idx}-tf-false`} className="font-normal">Falso</Label>
+                          <Label htmlFor={`q${idx}-tf-false`} className="font-normal">{t('results.false')}</Label>
                         </div>
                       </RadioGroup>
                     </div>
@@ -159,7 +161,7 @@ export default function ResultsView() {
 
                   {rationale && (
                     <div className="mt-4">
-                      <div className="text-sm font-medium mb-1">Rationale</div>
+                      <div className="text-sm font-medium mb-1">{t('results.rationale')}</div>
                       <div className="text-sm text-muted-foreground whitespace-pre-wrap">{rationale}</div>
                     </div>
                   )}
@@ -167,7 +169,7 @@ export default function ResultsView() {
                   {/* Moved Edit button inside accordion content, aligned to end */}
                   <div className="mt-4 flex justify-end">
                     <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); openEditor(idx); }}>
-                      <Pencil className="h-4 w-4 mr-1" /> Editar
+                      <Pencil className="h-4 w-4 mr-1" /> {t('results.edit')}
                     </Button>
                   </div>
                 </AccordionContent>

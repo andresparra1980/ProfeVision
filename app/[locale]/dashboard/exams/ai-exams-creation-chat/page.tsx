@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -60,6 +61,7 @@ function SaveDraftDialog({
   } | null;
 }) {
   const { toast } = useToast();
+  const t = useTranslations('ai_exams_chat');
   const { result } = useAIChat();
   const [savingDraft, setSavingDraft] = React.useState(false);
   const router = useRouter();
@@ -77,9 +79,9 @@ function SaveDraftDialog({
       });
     }
     return z.object({
-      titulo: z.string().min(3, { message: 'Título requerido (mínimo 3 caracteres)' }),
-      materia_id: z.string().min(1, { message: 'Materia requerida' }),
-      grupo_id: z.string().min(1, { message: 'Grupo requerido' }),
+      titulo: z.string().min(3, { message: t('saveDraftDialog.form.title') + ' (min 3)' }),
+      materia_id: z.string().min(1, { message: t('saveDraftDialog.form.subject') + ' ' + t('saveDraftDialog.form.selectSubject') }),
+      grupo_id: z.string().min(1, { message: t('saveDraftDialog.form.group') + ' ' + t('saveDraftDialog.form.selectGroup') }),
       duracion: z.number().min(1).max(240),
       puntaje_total: z.number().min(1).max(100).default(5),
     });
@@ -251,11 +253,11 @@ function SaveDraftDialog({
         // ignore
       }
 
-      toast({ title: 'Borrador guardado', description: isEditing ? 'El borrador fue actualizado.' : 'El examen se guardó como borrador.' });
+      toast({ title: isEditing ? t('saveDraftDialog.toasts.updated') : t('saveDraftDialog.toasts.saved'), description: isEditing ? t('saveDraftDialog.toasts.updatedDesc') : t('saveDraftDialog.toasts.savedDesc') });
       // Redirect to localized dashboard exams (router from i18n handles locale prefix)
       router.push('/dashboard/exams');
     } catch (e) {
-      toast({ title: 'Error', description: e instanceof Error ? e.message : 'No se pudo guardar el borrador', variant: 'destructive' });
+      toast({ title: t('saveDraftDialog.toasts.error'), description: e instanceof Error ? e.message : t('saveDraftDialog.toasts.saveError'), variant: 'destructive' });
     } finally {
       setSavingDraft(false);
     }
@@ -265,40 +267,38 @@ function SaveDraftDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Guardar cambios del examen' : 'Guardar borrador de examen'}</DialogTitle>
+          <DialogTitle>{isEditing ? t('saveDraftDialog.edit.title') : t('saveDraftDialog.create.title')}</DialogTitle>
           <DialogDescription>
-            {isEditing
-              ? 'Se actualizarán las preguntas del examen con los cambios realizados. No se modifican materia ni grupo.'
-              : 'Completa la información general para guardar este examen como borrador.'}
+            {isEditing ? t('saveDraftDialog.edit.description') : t('saveDraftDialog.create.description')}
           </DialogDescription>
         </DialogHeader>
 
         {isEditing ? (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="titulo">Título</Label>
-              <Input id="titulo" placeholder="Ej. Examen de lectura" {...form.register('titulo')} />
+              <Label htmlFor="titulo">{t('saveDraftDialog.form.title')}</Label>
+              <Input id="titulo" placeholder={t('saveDraftDialog.form.titlePlaceholder')} {...form.register('titulo')} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="duracion">Duración (min)</Label>
+                <Label htmlFor="duracion">{t('saveDraftDialog.form.duration')}</Label>
                 <Input id="duracion" type="number" min={1} max={240} {...form.register('duracion', { valueAsNumber: true })} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="puntaje_total">Puntaje total</Label>
+                <Label htmlFor="puntaje_total">{t('saveDraftDialog.form.totalScore')}</Label>
                 <Input id="puntaje_total" type="number" min={1} max={100} {...form.register('puntaje_total', { valueAsNumber: true })} />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Cancelar
+                {t('saveDraftDialog.form.cancel')}
               </Button>
               <Button
                 type="button"
                 disabled={savingDraft}
                 onClick={() => form.handleSubmit(handleSubmit)()}
               >
-                {savingDraft ? 'Guardando…' : 'Guardar cambios'}
+                {savingDraft ? '…' : t('saveDraftDialog.edit.submit')}
               </Button>
             </DialogFooter>
           </div>
@@ -306,21 +306,21 @@ function SaveDraftDialog({
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="titulo">Título*</Label>
-                <Input id="titulo" placeholder="Ej. Examen de lectura" {...form.register('titulo')} />
+                <Label htmlFor="titulo">{t('saveDraftDialog.form.title')}*</Label>
+                <Input id="titulo" placeholder={t('saveDraftDialog.form.titlePlaceholder')} {...form.register('titulo')} />
                 {form.formState.errors.titulo && (
                   <p className="text-sm text-destructive">{form.formState.errors.titulo.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="materia">Materia*</Label>
+                <Label htmlFor="materia">{t('saveDraftDialog.form.subject')}*</Label>
                 <Select
                   onValueChange={(value: string) => form.setValue('materia_id', value)}
                   value={form.watch('materia_id')}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una materia" />
+                    <SelectValue placeholder={t('saveDraftDialog.form.selectSubject')} />
                   </SelectTrigger>
                   <SelectContent>
                     {materias.map((m) => (
@@ -336,14 +336,14 @@ function SaveDraftDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="grupo">Grupo*</Label>
+                <Label htmlFor="grupo">{t('saveDraftDialog.form.group')}*</Label>
                 <Select
                   onValueChange={(value: string) => form.setValue('grupo_id', value)}
                   value={form.watch('grupo_id')}
                   disabled={!form.watch('materia_id')}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={form.watch('materia_id') ? 'Selecciona un grupo' : 'Primero selecciona una materia'} />
+                    <SelectValue placeholder={form.watch('materia_id') ? t('saveDraftDialog.form.selectGroup') : t('saveDraftDialog.form.selectSubjectFirst')} />
                   </SelectTrigger>
                   <SelectContent>
                     {gruposFiltrados.length > 0 ? (
@@ -352,7 +352,7 @@ function SaveDraftDialog({
                       ))
                     ) : (
                       <SelectItem value="no-grupos" disabled>
-                        {form.watch('materia_id') ? 'No hay grupos disponibles' : 'Selecciona primero una materia'}
+                        {form.watch('materia_id') ? t('saveDraftDialog.form.noGroups') : t('saveDraftDialog.form.selectSubjectFirst')}
                       </SelectItem>
                     )}
                   </SelectContent>
@@ -363,7 +363,7 @@ function SaveDraftDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="duracion">Duración (min)*</Label>
+                <Label htmlFor="duracion">{t('saveDraftDialog.form.duration')}*</Label>
                 <Input id="duracion" type="number" min={1} max={240} {...form.register('duracion', { valueAsNumber: true })} />
                 {form.formState.errors.duracion && (
                   <p className="text-sm text-destructive">{form.formState.errors.duracion.message as string}</p>
@@ -371,7 +371,7 @@ function SaveDraftDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="puntaje_total">Puntaje total*</Label>
+                <Label htmlFor="puntaje_total">{t('saveDraftDialog.form.totalScore')}*</Label>
                 <Input id="puntaje_total" type="number" min={1} max={100} {...form.register('puntaje_total', { valueAsNumber: true })} />
                 {form.formState.errors.puntaje_total && (
                   <p className="text-sm text-destructive">{form.formState.errors.puntaje_total.message as string}</p>
@@ -381,10 +381,10 @@ function SaveDraftDialog({
 
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Cancelar
+                {t('saveDraftDialog.form.cancel')}
               </Button>
               <Button type="submit" disabled={savingDraft}>
-                {savingDraft ? 'Guardando…' : 'Guardar borrador'}
+                {savingDraft ? '…' : t('saveDraftDialog.create.submit')}
               </Button>
             </DialogFooter>
           </form>
@@ -397,6 +397,7 @@ function SaveDraftDialog({
 export default function AIExamsCreationChatPage() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('ai_exams_chat');
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
@@ -493,8 +494,8 @@ export default function AIExamsCreationChatPage() {
       await clearIndexedDBStores();
 
       toast({
-        title: "Datos del chat borrados",
-        description: "Se limpiaron documentos, salidas y el borrador local del examen.",
+        title: t('clearToasts.successTitle'),
+        description: t('clearToasts.successDesc'),
       });
 
       // Reload to ensure all client state/UI resets immediately
@@ -503,8 +504,8 @@ export default function AIExamsCreationChatPage() {
       }
     } catch (_e) {
       toast({
-        title: "Error al borrar",
-        description: "No se pudo limpiar completamente el almacenamiento local.",
+        title: t('clearToasts.errorTitle'),
+        description: t('clearToasts.errorDesc'),
         variant: "destructive",
       });
     } finally {
@@ -662,9 +663,9 @@ export default function AIExamsCreationChatPage() {
             }
           } catch {}
           loadedOnce.add(examId);
-          toast({ title: 'Borrador cargado', description: 'Puedes editar las preguntas en el chat.' });
+          toast({ title: t('loadDraft.successTitle'), description: t('loadDraft.successDesc') });
         } catch (e) {
-          toast({ variant: 'destructive', title: 'Error', description: e instanceof Error ? e.message : 'No se pudo cargar el borrador' });
+          toast({ variant: 'destructive', title: t('loadDraft.errorTitle'), description: e instanceof Error ? e.message : t('loadDraft.errorDesc') });
         } finally {
           loadingRef.current = false;
           inFlightLoads.delete(examId);
@@ -688,25 +689,25 @@ export default function AIExamsCreationChatPage() {
       {/* Header: botón de regreso arriba, título debajo (como en results) */}
       <div>
         <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard/exams")}> 
-          <ChevronLeft className="mr-1 h-4 w-4" /> Volver a Exámenes
+          <ChevronLeft className="mr-1 h-4 w-4" /> {t('header.back')}
         </Button>
       </div>
       <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Crear exámenes con IA</h2>
-          <p className="text-muted-foreground">Experiencia de chat para generar bancos de preguntas y resúmenes. Idioma: {locale}</p>
+          <h2 className="text-3xl font-bold tracking-tight">{t('header.title')}</h2>
+          <p className="text-muted-foreground">{t('header.description', { locale })}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setShowClearDialog(true)}>Borrar Chat</Button>
-          <Button onClick={() => setShowSaveDraftDialog(true)}>Guardar Borrador</Button>
+          <Button variant="outline" onClick={() => setShowClearDialog(true)}>{t('header.clearChat')}</Button>
+          <Button onClick={() => setShowSaveDraftDialog(true)}>{t('header.saveDraft')}</Button>
         </div>
       </div>
 
       {/* Contexto de documento */}
       <Card>
         <CardHeader>
-          <CardTitle>Contexto de documento</CardTitle>
-          <CardDescription>Sube un archivo o define un documentId y genera/consulta el resumen con IA.</CardDescription>
+          <CardTitle>{t('context.title')}</CardTitle>
+          <CardDescription>{t('context.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <DocumentContextBar />
@@ -718,8 +719,8 @@ export default function AIExamsCreationChatPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
           <Card className="lg:col-span-1">
             <CardHeader>
-              <CardTitle>Chat</CardTitle>
-              <CardDescription>Describe el examen que deseas generar y ajusta con instrucciones.</CardDescription>
+              <CardTitle>{t('chat.title')}</CardTitle>
+              <CardDescription>{t('chat.description')}</CardDescription>
             </CardHeader>
             <CardContent>
               <ChatPanel />
@@ -727,8 +728,8 @@ export default function AIExamsCreationChatPage() {
           </Card>
           <Card className="lg:col-span-3">
             <CardHeader>
-              <CardTitle>Resultados</CardTitle>
-              <CardDescription>Revisa y exporta el examen generado.</CardDescription>
+              <CardTitle>{t('results.title')}</CardTitle>
+              <CardDescription>{t('results.description')}</CardDescription>
             </CardHeader>
             <CardContent>
               {/** Force ResultsView to remount whenever a different exam draft is loaded */}
@@ -753,15 +754,15 @@ export default function AIExamsCreationChatPage() {
       <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>¿Borrar datos del chat?</DialogTitle>
+            <DialogTitle>{t('clearDialog.title')}</DialogTitle>
             <DialogDescription>
-              Esta acción limpiará documentos y salidas en el navegador, el contexto de documento y el borrador local del examen generado por IA.
+              {t('clearDialog.description')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowClearDialog(false)} disabled={clearing}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setShowClearDialog(false)} disabled={clearing}>{t('clearDialog.cancel')}</Button>
             <Button variant="destructive" onClick={handleConfirmClear} disabled={clearing}>
-              {clearing ? "Borrando…" : "Borrar"}
+              {clearing ? '…' : t('clearDialog.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

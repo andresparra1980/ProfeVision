@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -32,6 +33,7 @@ interface Props {
 }
 
 export default function QuestionEditorDialog({ open, onOpenChange, question, onSave }: Props) {
+  const t = useTranslations('ai_exams_chat');
   const [local, setLocal] = useState<ExamQuestion | null>(null);
 
   useEffect(() => {
@@ -100,30 +102,30 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Editar pregunta</DialogTitle>
-          <DialogDescription>Ajusta el enunciado, opciones, respuesta correcta y metadatos.</DialogDescription>
+          <DialogTitle>{t('editor.title')}</DialogTitle>
+          <DialogDescription>{t('editor.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Tipo */}
           <div className="grid gap-2">
-            <Label>Tipo</Label>
+            <Label>{t('editor.type')}</Label>
             <Select value={local.type || "multiple_choice"} onValueChange={(v) => update("type", v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecciona el tipo" />
+                <SelectValue placeholder={t('editor.selectType')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="multiple_choice">Selección múltiple</SelectItem>
-                <SelectItem value="true_false">Verdadero/Falso</SelectItem>
-                <SelectItem value="short_answer">Respuesta corta</SelectItem>
-                <SelectItem value="essay">Ensayo</SelectItem>
+                <SelectItem value="multiple_choice">{t('editor.types.multiple_choice')}</SelectItem>
+                <SelectItem value="true_false">{t('editor.types.true_false')}</SelectItem>
+                <SelectItem value="short_answer">{t('editor.types.short_answer')}</SelectItem>
+                <SelectItem value="essay">{t('editor.types.essay')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Enunciado */}
           <div className="grid gap-2">
-            <Label>Enunciado</Label>
+            <Label>{t('editor.prompt')}</Label>
             <Textarea value={local.prompt || ""} onChange={(e) => update("prompt", e.target.value)} rows={4} />
           </div>
 
@@ -131,14 +133,14 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
           {isMC && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Opciones</Label>
-                <Button variant="outline" size="sm" onClick={addOption}>Agregar opción</Button>
+                <Label>{t('editor.options')}</Label>
+                <Button variant="outline" size="sm" onClick={addOption}>{t('editor.addOption')}</Button>
               </div>
               <div className="space-y-2">
                 {(local.options || []).map((opt, idx) => (
                   <div key={idx} className="flex items-center gap-2">
                     <Input value={opt} onChange={(e) => updateOption(idx, e.target.value)} className="flex-1" />
-                    <Button variant="secondary" size="icon" onClick={() => removeOption(idx)} title="Eliminar">
+                    <Button variant="secondary" size="icon" onClick={() => removeOption(idx)} title={t('editor.delete')}>
                       ×
                     </Button>
                   </div>
@@ -147,7 +149,7 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
 
               {/* Selección de respuesta correcta */}
               <div className="grid gap-2">
-                <Label>Respuesta correcta</Label>
+                <Label>{t('editor.correctAnswer')}</Label>
                 <RadioGroup
                   value={typeof local.answer === "number" ? String(local.answer) : typeof local.answer === "string" ? String((local.options || []).indexOf(local.answer)) : "-1"}
                   onValueChange={(v) => update("answer", Number(v))}
@@ -167,7 +169,7 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
           {/* Verdadero/Falso */}
           {local.type === "true_false" && (
             <div className="grid gap-2">
-              <Label>Respuesta</Label>
+              <Label>{t('editor.correctAnswer')}</Label>
               <RadioGroup
                 value={typeof local.answer === "boolean" ? String(local.answer) : "true"}
                 onValueChange={(v) => update("answer", v === "true")}
@@ -175,11 +177,11 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
               >
                 <div className="flex items-center gap-2">
                   <RadioGroupItem id="tf-true" value="true" />
-                  <Label htmlFor="tf-true" className="font-normal">Verdadero</Label>
+                  <Label htmlFor="tf-true" className="font-normal">{t('results.true')}</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <RadioGroupItem id="tf-false" value="false" />
-                  <Label htmlFor="tf-false" className="font-normal">Falso</Label>
+                  <Label htmlFor="tf-false" className="font-normal">{t('results.false')}</Label>
                 </div>
               </RadioGroup>
             </div>
@@ -187,29 +189,29 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
 
           {/* Rationale */}
           <div className="grid gap-2">
-            <Label>Rationale (opcional)</Label>
+            <Label>{t('editor.rationale')}</Label>
             <Textarea value={local.rationale || ""} onChange={(e) => update("rationale", e.target.value)} rows={3} />
           </div>
 
           {/* Dificultad */}
           <div className="grid gap-2">
-            <Label>Dificultad</Label>
+            <Label>{t('editor.difficulty')}</Label>
             <Select value={(local.difficulty as string) || "medium"} onValueChange={(v) => update("difficulty", v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecciona dificultad" />
+                <SelectValue placeholder={t('editor.difficulty')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="easy">Fácil</SelectItem>
-                <SelectItem value="medium">Media</SelectItem>
-                <SelectItem value="hard">Difícil</SelectItem>
+                <SelectItem value="easy">{t('editor.difficulties.easy')}</SelectItem>
+                <SelectItem value="medium">{t('editor.difficulties.medium')}</SelectItem>
+                <SelectItem value="hard">{t('editor.difficulties.hard')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSave}>Guardar</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('editor.cancel')}</Button>
+          <Button onClick={handleSave}>{t('editor.save')}</Button>
         </div>
       </DialogContent>
     </Dialog>
