@@ -128,20 +128,10 @@ function getDB(): Promise<IDBDatabase> {
       upgradeReq.onsuccess = () => resolve(upgradeReq.result);
     };
 
-    const req = window.indexedDB.open("pv_v1", 1);
+    // Open DB without specifying a fixed version to avoid 'requested version < existing version' errors
+    const req = window.indexedDB.open("pv_v1");
     req.onerror = () => reject(req.error);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains("docs")) {
-        db.createObjectStore("docs", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("outputs")) {
-        const store = db.createObjectStore("outputs", { keyPath: "id" });
-        try {
-          store.createIndex("by_kind", "kind", { unique: false });
-        } catch { /* ignore */ }
-      }
-    };
+    // If DB exists already, success will fire immediately. We then ensure stores and bump version if needed.
     req.onsuccess = () => ensureStores(req.result);
   });
   return idbPromise;
