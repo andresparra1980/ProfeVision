@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useAIChat } from "./AIChatContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -8,191 +8,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Pencil } from "lucide-react";
 import QuestionEditorDialog, { type ExamQuestion } from "./QuestionEditorDialog";
-import { supabase } from "@/lib/supabase";
-
-type CSVQuestion = {
-  type?: string;
-  prompt?: string;
-  options?: string[];
-  answer?: string | number | boolean | Array<string | number | boolean>;
-  rationale?: string;
-  difficulty?: string;
-  taxonomy?: string | string[];
-  tags?: string[];
-};
-
-type CSVExamResult = {
-  exam?: {
-    title?: string;
-    questions?: CSVQuestion[];
-  };
-};
 
 export default function ResultsView() {
   const { result, setResult } = useAIChat();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [examId, setExamId] = useState<string | null>(null);
-  const [dbCount, setDbCount] = useState<number | null>(null);
-  const [loadingDb, setLoadingDb] = useState(false);
 
   const questions = useMemo(() => {
-    const examRes = (result as CSVExamResult | null);
-    return examRes?.exam?.questions ?? [];
+    const examRes = result as any;
+    return (examRes?.exam?.questions ?? []) as ExamQuestion[];
   }, [result]);
 
-  // Detect if we are editing an exam: read current examId persisted by the loader
-  useEffect(() => {
-    try {
-      if (typeof window === "undefined") return;
-      const id = sessionStorage.getItem("pv:loaded-exam-id");
-      setExamId(id);
-    } catch {}
-  }, []);
-
-  // Fetch DB question count to decide if the button should be disabled
-  useEffect(() => {
-    const fetchCount = async () => {
-      if (!examId) { setDbCount(null); return; }
-      try {
-        setLoadingDb(true);
-        const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData.session?.access_token;
-        if (!token) { setDbCount(null); return; }
-        const qRes = await fetch(`/api/exams/${examId}/questions-with-options`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!qRes.ok) { setDbCount(null); return; }
-        const preguntas: Array<any> = await qRes.json();
-        setDbCount(Array.isArray(preguntas) ? preguntas.length : null);
-      } catch {
-        setDbCount(null);
-      } finally {
-        setLoadingDb(false);
-      }
-    };
-    fetchCount();
-  }, [examId]);
-
-  const disabledLoadFromDb = !examId || loadingDb || (dbCount != null && dbCount === questions.length);
-
-  async function loadQuestionsFromDb() {
-    if (!examId) return;
-    try {
-      setLoadingDb(true);
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) return;
-
-      // Fetch questions from API
-      const qRes = await fetch(`/api/exams/${examId}/questions-with-options`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!qRes.ok) return;
-      const preguntas: Array<{
-        id: string;
-        texto: string;
-        tipo_id: string;
-        opciones: Array<{ texto: string; es_correcta: boolean; orden: number }>;
-      }> = await qRes.json();
-
-      // Map to AI chat format, similar to DraftLoader
-      const mapped = preguntas.map((p) => {
-        if (p.tipo_id === 'opcion_multiple') {
-          const opts = (p.opciones || []).sort((a,b) => a.orden - b.orden).map(o => o.texto);
-          const correctIndex = (p.opciones || []).findIndex(o => o.es_correcta);
-          return {
-            type: 'multiple_choice',
-            prompt: p.texto,
-            options: opts,
-            answer: correctIndex >= 0 ? correctIndex : 0,
-          } as ExamQuestion;
-        }
-        if (p.tipo_id === 'verdadero_falso') {
-          const trueOpt = (p.opciones || []).find(o => o.texto.toLowerCase().includes('verdadero'));
-          const falseOpt = (p.opciones || []).find(o => o.texto.toLowerCase().includes('falso'));
-          const answer = trueOpt?.es_correcta ? true : falseOpt?.es_correcta ? false : false;
-          return {
-            type: 'true_false',
-            prompt: p.texto,
-            answer,
-          } as ExamQuestion;
-        }
-        return {
-          type: 'short_answer',
-          prompt: p.texto,
-          answer: '',
-        } as ExamQuestion;
-      });
-
-      // Replace questions in the current result, preserving metadata/title
-      setResult((prev: any) => {
-        const base = prev ? JSON.parse(JSON.stringify(prev)) : { exam: { title: '', questions: [] } };
-        if (!base.exam) base.exam = { title: '', questions: [] };
-        base.exam.questions = mapped as any;
-        return base;
-      });
-
-      // Refresh count to update disabled state
-      setDbCount(mapped.length);
-      // Update last-loaded markers
-      try {
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('pv:loaded-exam-id', examId);
-          sessionStorage.setItem('pv:loaded-exam-ts', String(Date.now()));
-        }
-      } catch {}
-    } finally {
-      setLoadingDb(false);
-    }
-  }
-
-  function exportJSON() {
-    if (!result) return;
-    const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "result.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function toCSV(): string | null {
-    const examRes = (result as CSVExamResult | null);
-    const qs: CSVQuestion[] = examRes?.exam?.questions ?? [];
-    if (!Array.isArray(qs) || qs.length === 0) return null;
-    const headers = ["index", "type", "prompt", "options", "answer", "rationale", "difficulty", "taxonomy", "tags"];
-    const lines = [headers.join(",")];
-    for (let i = 0; i < qs.length; i++) {
-      const q = qs[i];
-      const row = [
-        String(i + 1),
-        JSON.stringify(q.type ?? ""),
-        JSON.stringify(q.prompt ?? ""),
-        JSON.stringify((q.options ?? []).join(" | ")),
-        JSON.stringify(q.answer ?? ""),
-        JSON.stringify(q.rationale ?? ""),
-        JSON.stringify(q.difficulty ?? ""),
-        JSON.stringify(Array.isArray(q.taxonomy) ? q.taxonomy.join("|") : q.taxonomy ?? ""),
-        JSON.stringify((q.tags ?? []).join("|")),
-      ];
-      lines.push(row.join(","));
-    }
-    return lines.join("\n");
-  }
-
-  function exportCSV() {
-    const csv = toCSV();
-    if (!csv) return;
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "exam.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  
 
   function randomizeOptions() {
     if (!result) return;
@@ -267,19 +94,7 @@ export default function ResultsView() {
       <div className="flex items-center justify-between">
         <div className="font-medium">Preguntas generadas</div>
         <div className="flex items-center gap-2">
-          {examId && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={loadQuestionsFromDb}
-              disabled={disabledLoadFromDb}
-            >
-              {loadingDb ? 'Cargando…' : 'Cargar preguntas'}
-            </Button>
-          )}
           <Button variant="outline" size="sm" onClick={randomizeOptions} disabled={!questions.length}>Aleatorizar opciones</Button>
-          <Button variant="outline" size="sm" onClick={exportJSON} disabled={!questions.length}>Exportar JSON</Button>
-          <Button variant="outline" size="sm" onClick={exportCSV} disabled={!questions.length}>Exportar CSV</Button>
         </div>
       </div>
 
@@ -291,7 +106,7 @@ export default function ResultsView() {
       {/* Accordion with questions */}
       {!!questions.length && (
         <Accordion type="single" collapsible className="w-full space-y-2">
-          {questions.map((q, idx) => {
+          {questions.map((q: ExamQuestion, idx: number) => {
             const isMC = q?.type === "multiple_choice";
             const title = q?.prompt || `Pregunta ${idx + 1}`;
             const difficulty = (q?.difficulty as string) || undefined;
@@ -315,7 +130,7 @@ export default function ResultsView() {
                     </div>
                     {isMC && options.length > 0 && (
                       <div className="text-xs text-muted-foreground">
-                        {options.map((opt, i) => (
+                        {options.map((opt: string, i: number) => (
                           <span key={i} className={"mr-2 inline-block " + (i === correctIdx ? "text-primary font-medium" : "")}>{String.fromCharCode(65 + i)}. {opt}</span>
                         ))}
                       </div>
