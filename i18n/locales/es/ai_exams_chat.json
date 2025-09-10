@@ -105,6 +105,9 @@
     "needLogin": "Debes iniciar sesión para usar la IA.",
     "send": "Enviar",
     "inputPlaceholder": "Escribe tus instrucciones aquí...",
+    "you": "Tú",
+    "assistant": "Asistente",
+    "system": "Sistema",
     "toasts": {
       "successTitle": "Resultados generados",
       "successDesc": "Revisa el examen generado en el panel de Resultados.",

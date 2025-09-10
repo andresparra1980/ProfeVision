@@ -105,6 +105,9 @@
     "needLogin": "You must sign in to use AI.",
     "send": "Send",
     "inputPlaceholder": "Write your instructions here...",
+    "you": "You",
+    "assistant": "Assistant",
+    "system": "System",
     "toasts": {
       "successTitle": "Results generated",
       "successDesc": "Review the generated exam on the Results panel.",

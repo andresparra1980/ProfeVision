@@ -101,7 +101,7 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-h-[85vh] overflow-y-auto w-[98vw] max-w-[98vw] sm:w-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t('editor.title')}</DialogTitle>
           <DialogDescription>{t('editor.description')}</DialogDescription>

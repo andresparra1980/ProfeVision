@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { loadSettings, loadLastDocumentsContext, loadOutput } from "@/lib/persistence/browser";
 import { useAIChat } from "./AIChatContext";
@@ -19,6 +19,12 @@ export default function ChatPanel() {
   const [isSending, setIsSending] = useState(false);
   const { result, setResult } = useAIChat();
   const { toast } = useToast();
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Focus input by default when the component mounts
+  useEffect(() => {
+    try { inputRef.current?.focus(); } catch (_e) { void _e; }
+  }, []);
 
   async function onSend() {
     if (!input.trim()) return;
@@ -138,14 +144,14 @@ export default function ChatPanel() {
 
   return (
     <div className="rounded-md border p-3 space-y-3">
-      <div className="font-medium">{t('chat.title')}</div>
-      <div className="h-64 overflow-auto rounded bg-muted/30 p-2 space-y-2 text-sm">
+      <div className="font-medium"></div>
+      <div className="h-48 overflow-auto rounded bg-muted/30 p-2 space-y-2 text-sm">
         {messages.length === 0 ? (
-          <div className="text-muted-foreground">{t('chat.inputPlaceholder')}</div>
+          <div className="text-muted-foreground"></div>
         ) : (
           messages.map((m, i) => (
             <div key={i} className="whitespace-pre-wrap">
-              <span className="font-semibold">{m.role === "user" ? 'Tú' : m.role === "assistant" ? 'Asistente' : 'Sistema'}:</span>{" "}
+              <span className="font-semibold">{m.role === "user" ? t('chat.you') : m.role === "assistant" ? t('chat.assistant') : t('chat.system')}:</span>{" "}
               {m.content}
             </div>
           ))
@@ -158,6 +164,8 @@ export default function ChatPanel() {
           placeholder={t('chat.inputPlaceholder')}
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          ref={inputRef}
+          autoFocus
         />
         <button
           className="h-10 shrink-0 rounded bg-primary px-3 text-primary-foreground disabled:opacity-50"

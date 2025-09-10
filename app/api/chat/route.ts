@@ -148,7 +148,8 @@ function buildSystemPrompt(language: string) {
 
     // Comportamiento crítico
     "COMPORTAMIENTO CRÍTICO:",
-    "- Si recibes un examen existente en el contexto, SIEMPRE devuelve el examen COMPLETO actualizado bajo la clave 'exam'.",
+    "- No reemplaces preguntas existentes por preguntas nuevas a menos que el usuario lo indique explícitamente cual.",
+    "- Si recibes un examen existente en el contexto, SIEMPRE devuelve el examen COMPLETO actualizado bajo la clave 'exam' sin borrar preguntas a menos que el usuario lo indique explícitamente.",
     "- Mantén las preguntas no modificadas exactamente iguales.",
     "- Si agregas preguntas, añádelas al final; si reordenas, devuelve todas en el nuevo orden.",
     "- Numera las preguntas secuencialmente en el campo 'id' (por ejemplo: q1, q2, q3...) y asegúrate que el índice concuerde con el orden de las preguntas.",
@@ -173,16 +174,18 @@ function buildSystemPrompt(language: string) {
 // Sanea payloads de IA para compatibilidad con el contrato (p.ej. difficulty: "mixed" -> "medium")
 const sanitizeAIExamPayload = (obj: unknown): unknown => {
   try {
-    if (!obj || typeof obj !== 'object') return obj;
+    if (!obj || typeof obj !== "object") return obj;
     const cloned: Record<string, unknown> = JSON.parse(JSON.stringify(obj));
-    const exam = (cloned as { exam?: { questions?: Array<Record<string, unknown>> } }).exam;
+    const exam = (
+      cloned as { exam?: { questions?: Array<Record<string, unknown>> } }
+    ).exam;
     const allowed = new Set(["easy", "medium", "hard"]);
     if (exam && Array.isArray(exam.questions)) {
       for (let i = 0; i < exam.questions.length; i++) {
         const q = exam.questions[i];
-        if (!q || typeof q !== 'object') continue;
+        if (!q || typeof q !== "object") continue;
         const diff = (q as Record<string, unknown>).difficulty;
-        if (typeof diff !== 'string' || !allowed.has(diff)) {
+        if (typeof diff !== "string" || !allowed.has(diff)) {
           (q as Record<string, unknown>).difficulty = "medium";
         }
       }
@@ -308,13 +311,13 @@ export async function POST(req: NextRequest) {
         messages: [
           { role: "system", content: systemPrompt },
           // Contexto opcional: Resúmenes temáticos por documento (si hay varios docs)
-          ...((context.topicSummaries || []).map((ts) => ({
+          ...(context.topicSummaries || []).map((ts) => ({
             role: "system" as const,
             content:
               `Resumen temático del documento (documentId: ${ts.documentId}). ` +
               `Úsalo SOLO como contexto para alinear los temas; no lo cites literalmente.\n` +
               `${JSON.stringify(ts.summary)}`,
-          }))),
+          })),
           // Contexto opcional: examen existente a modificar/expandir
           ...(context.existingExam
             ? [
@@ -445,7 +448,10 @@ export async function POST(req: NextRequest) {
     const normalized = {
       exam: {
         ...data.exam,
-        questions: data.exam.questions.map((q, idx) => ({ ...q, id: `q${idx + 1}` })),
+        questions: data.exam.questions.map((q, idx) => ({
+          ...q,
+          id: `q${idx + 1}`,
+        })),
       },
     };
 

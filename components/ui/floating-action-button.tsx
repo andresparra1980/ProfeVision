@@ -1,7 +1,10 @@
+'use client';
+
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/sidebar-context';
 import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 
 interface FloatingActionButtonProps {
   onClick: () => void;
@@ -10,9 +13,25 @@ interface FloatingActionButtonProps {
 export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
   const { isOpen } = useSidebar();
   const t = useTranslations('floating-action-button');
+  const pathname = usePathname();
+
+  // Mostrar solo en rutas top de dashboard:
+  // - /dashboard
+  // - /dashboard/* (exactamente un segmento después de "dashboard", p.ej. /dashboard/exams)
+  // - /[locale]/dashboard y /[locale]/dashboard/* con la misma regla
+  const segments = pathname.split('/').filter(Boolean);
+  const dashIndex = segments.indexOf('dashboard');
+  const isInDashboard = dashIndex !== -1;
+  const depthAfterDashboard = isInDashboard ? segments.length - (dashIndex + 1) : 0;
+  const isTopDashboardSection = isInDashboard && depthAfterDashboard <= 1;
 
   // No mostrar la bottom bar si el sidebar está abierto en mobile
   if (isOpen) {
+    return null;
+  }
+
+  // Ocultar cuando no estemos en dashboard o cuando haya más de un nivel de profundidad
+  if (!isTopDashboardSection) {
     return null;
   }
 

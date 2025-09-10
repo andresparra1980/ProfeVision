@@ -732,21 +732,11 @@ export default function AIExamsCreationChatPage() {
         </div>
       </div>
 
-      {/* Contexto de documento */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('context.title')}</CardTitle>
-          <CardDescription>{t('context.description')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DocumentContextBar />
-        </CardContent>
-      </Card>
-
       {/* Chat, resultados y diálogo de guardar dentro del Provider */}
       <AIChatProvider>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
-          <Card className="lg:col-span-1">
+        <div className="space-y-4">
+          {/* Chat (focused by default) */}
+          <Card>
             <CardHeader>
               <CardTitle>{t('chat.title')}</CardTitle>
               <CardDescription>{t('chat.description')}</CardDescription>
@@ -755,7 +745,8 @@ export default function AIExamsCreationChatPage() {
               <ChatPanel />
             </CardContent>
           </Card>
-          <Card className="lg:col-span-3">
+          {/* Resultados */}
+          <Card>
             <CardHeader>
               <CardTitle>{t('results.title')}</CardTitle>
               <CardDescription>{t('results.description')}</CardDescription>
@@ -778,6 +769,26 @@ export default function AIExamsCreationChatPage() {
         {/* Loader that maps DB draft -> AI chat format */}
         <DraftLoader />
       </AIChatProvider>
+
+      {/* Contexto de documento (movido al final) */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('context.title')}</CardTitle>
+          <CardDescription>{t('context.description')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DocumentContextBar />
+        </CardContent>
+      </Card>
+
+      {/* Botonera inferior: misma posición en eje X que arriba */}
+      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div></div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setShowClearDialog(true)}>{t('header.clearChat')}</Button>
+          <Button onClick={() => setShowSaveDraftDialog(true)}>{t('header.saveDraft')}</Button>
+        </div>
+      </div>
 
       {/* Confirmación Borrar Chat */}
       <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
