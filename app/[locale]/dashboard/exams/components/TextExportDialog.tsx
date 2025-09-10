@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -26,11 +27,14 @@ export default function TextExportDialog({
   onOpenChange,
   content,
   htmlContent,
-  title = "Exportar texto",
-  description = "Haz clic en el campo para copiar todo el contenido al portapapeles. Luego pégalo en Word.",
+  title,
+  description,
 }: TextExportDialogProps) {
+  const t = useTranslations('dashboard.exams.textExport');
   const [copied, setCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const finalTitle = title ?? t('title');
+  const finalDescription = description ?? t('description');
 
   const handleCopy = async () => {
     try {
@@ -79,20 +83,20 @@ export default function TextExportDialog({
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{title}</span>
+            <span>{finalTitle}</span>
             <Button size="sm" variant="outline" onClick={handleCopy}>
               {copied ? (
                 <>
-                  <Check className="h-4 w-4 mr-1" /> Copiado
+                  <Check className="h-4 w-4 mr-1" /> {t('statuses.copied')}
                 </>
               ) : (
                 <>
-                  <Clipboard className="h-4 w-4 mr-1" /> Copiar todo
+                  <Clipboard className="h-4 w-4 mr-1" /> {t('buttons.copyAll')}
                 </>
               )}
             </Button>
           </DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogDescription>{finalDescription}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -104,15 +108,16 @@ export default function TextExportDialog({
             className="w-full h-[380px] rounded-md border p-3 font-mono text-sm whitespace-pre leading-6 focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
           <p className="text-xs text-muted-foreground">
-            Consejo: Pega en Word y aplica el estilo de lista para mantener la numeración y las letras.
+            {t('tips.wordList')}
           </p>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cerrar</Button>
-          <Button onClick={handleCopy}>{copied ? "¡Copiado!" : "Copiar"}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('actions.close')}</Button>
+          <Button onClick={handleCopy}>{copied ? t('toasts.copied') : t('actions.copy')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

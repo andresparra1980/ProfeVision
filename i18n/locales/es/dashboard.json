@@ -517,6 +517,7 @@
       "answerSheetsDesc": "Genera hojas de respuesta personalizadas para cada estudiante",
       "preview": "Vista Previa",
       "downloadPDF": "Descargar PDF",
+      "exportText": "Exportar Texto",
       "generateAnswerSheets": "Generar Hojas de Respuesta",
       "back": "Volver",
       "backToExams": "Volver a Exámenes",
@@ -532,6 +533,26 @@
       "legal": "Legal (8.5\" x 14\")",
       "exportConfiguration": "Configuración de Exportación",
       "exportConfigurationDesc": "Selecciona el grupo y el tamaño de papel para exportar"
+    },
+    "textExport": {
+      "title": "Exportar texto",
+      "description": "Haz clic en el campo para copiar todo el contenido al portapapeles. Luego pégalo en Word.",
+      "buttons": {
+        "copyAll": "Copiar todo"
+      },
+      "actions": {
+        "close": "Cerrar",
+        "copy": "Copiar"
+      },
+      "statuses": {
+        "copied": "Copiado"
+      },
+      "tips": {
+        "wordList": "Consejo: Pega en Word y aplica el estilo de lista para mantener la numeración y las letras."
+      },
+      "toasts": {
+        "copied": "¡Copiado!"
+      }
     },
     "linkGradeComponent": {
       "title": "Vincular Examen a Componentes de Calificación",

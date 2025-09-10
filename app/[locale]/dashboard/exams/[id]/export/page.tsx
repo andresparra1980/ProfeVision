@@ -353,8 +353,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                   <Download className="mr-2 h-4 w-4" /> {t('exams.export.downloadPDF')}
                 </Button>
                 <Button variant="secondary" onClick={openTextExport}>
-                  {/* Using Spanish label as per request, no i18n for now */}
-                  Exportar Texto
+                  {t('exams.export.exportText')}
                 </Button>
               </div>
             </div>
@@ -448,8 +447,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       onOpenChange={setTextDialogOpen}
       content={textExportContent}
       htmlContent={textExportHtmlContent}
-      title="Exportar texto"
-      description="Haz clic en el campo para copiar todo el contenido al portapapeles."
+      title={t('exams.export.exportText')}
+      description={t('exams.export.description')}
     />
   </div>
 );

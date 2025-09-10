@@ -517,6 +517,7 @@
       "answerSheetsDesc": "Generate personalized answer sheets for each student",
       "preview": "Preview",
       "downloadPDF": "Download PDF",
+      "exportText": "Export Text",
       "generateAnswerSheets": "Generate Answer Sheets",
       "back": "Back",
       "backToExams": "Back to Exams",
@@ -532,6 +533,26 @@
       "legal": "Legal (8.5\" x 14\")",
       "exportConfiguration": "Export Configuration",
       "exportConfigurationDesc": "Select the group and paper size for export"
+    },
+    "textExport": {
+      "title": "Export text",
+      "description": "Click in the field to copy all content to the clipboard. Then paste it into Word.",
+      "buttons": {
+        "copyAll": "Copy all"
+      },
+      "actions": {
+        "close": "Close",
+        "copy": "Copy"
+      },
+      "statuses": {
+        "copied": "Copied"
+      },
+      "tips": {
+        "wordList": "Tip: Paste into Word and apply the list style to keep numbering and letters."
+      },
+      "toasts": {
+        "copied": "Copied!"
+      }
     },
     "linkGradeComponent": {
       "title": "Link Exam to Grade Components",
