@@ -15,6 +15,7 @@ import { es } from "date-fns/locale";
 import { PDFViewer, pdf } from "@react-pdf/renderer";
 import { ExamPDF } from "@/components/exam/exam-pdf";
 import { Separator } from "@/components/ui/separator";
+import TextExportDialog from "../../components/TextExportDialog";
 
 // Tipos
 interface ExamDetails {
@@ -75,6 +76,9 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const [paperSize, setPaperSize] = useState("letter"); // letter, a4, legal
   const [previewing, setPreviewing] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
+  const [textDialogOpen, setTextDialogOpen] = useState(false);
+  const [textExportContent, setTextExportContent] = useState("");
+  const [textExportHtmlContent, setTextExportHtmlContent] = useState("");
 
   const fetchExamDetails = useCallback(async () => {
     try {
@@ -147,6 +151,72 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   useEffect(() => {
     fetchExamDetails();
   }, [fetchExamDetails]);
+
+  const generateTextExport = (examData: ExamDetails) => {
+    const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+    const lines: string[] = [];
+    examData.preguntas.forEach((q, idx) => {
+      const qNum = idx + 1;
+      const questionText = (q.texto || "").trim();
+      lines.push(`${qNum}. ${questionText}`);
+      const opciones = q.opciones_respuesta || [];
+      opciones.forEach((opt, oIdx) => {
+        const letter = letters[oIdx] ?? String.fromCharCode(97 + oIdx);
+        const optText = (opt.texto || "").trim();
+        lines.push(`  ${letter}. ${optText}`);
+      });
+      // blank line between questions
+      lines.push("");
+    });
+    return lines.join("\n").trim();
+  };
+
+  const escapeHtml = (s: string) =>
+    s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  const generateHtmlExport = (examData: ExamDetails) => {
+    const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+    const parts: string[] = [];
+    parts.push(
+      '<!DOCTYPE html><html><head><meta charset="utf-8">' +
+        // Ensure single spacing for options when pasting into Word
+        '<style>' +
+          'p{margin:0;}' +
+          '.q{font-weight:700;margin:0 0 6px 0;}' +
+          '.opt{margin:0 0 0 20px;line-height:1;}' +
+        '</style>' +
+      '</head><body>'
+    );
+    examData.preguntas.forEach((q, idx) => {
+      const qNum = idx + 1;
+      const questionText = escapeHtml((q.texto || "").trim());
+      parts.push(`<p class="q"><strong>${qNum}. ${questionText}</strong></p>`);
+      const opciones = q.opciones_respuesta || [];
+      opciones.forEach((opt, oIdx) => {
+        const letter = letters[oIdx] ?? String.fromCharCode(97 + oIdx);
+        const optText = escapeHtml((opt.texto || "").trim());
+        parts.push(`<p class="opt">${letter}. ${optText}</p>`);
+      });
+      // Spacer between questions
+      parts.push('<p style="margin:0 0 10px 0">&nbsp;</p>');
+    });
+    parts.push("</body></html>");
+    return parts.join("");
+  };
+
+  const openTextExport = () => {
+    if (!exam) return;
+    const content = generateTextExport(exam);
+    const html = generateHtmlExport(exam);
+    setTextExportContent(content);
+    setTextExportHtmlContent(html);
+    setTextDialogOpen(true);
+  };
 
   const handleExport = async (type: 'questions' | 'answers') => {
     try {
@@ -282,6 +352,10 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                 <Button onClick={() => handleExport('questions')}>
                   <Download className="mr-2 h-4 w-4" /> {t('exams.export.downloadPDF')}
                 </Button>
+                <Button variant="secondary" onClick={openTextExport}>
+                  {/* Using Spanish label as per request, no i18n for now */}
+                  Exportar Texto
+                </Button>
               </div>
             </div>
 
@@ -366,9 +440,17 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                 </div>
               </RadioGroup>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
     </div>
-  );
-} 
+    <TextExportDialog
+      _open={textDialogOpen}
+      onOpenChange={setTextDialogOpen}
+      content={textExportContent}
+      htmlContent={textExportHtmlContent}
+      title="Exportar texto"
+      description="Haz clic en el campo para copiar todo el contenido al portapapeles."
+    />
+  </div>
+);
+}
