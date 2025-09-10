@@ -231,14 +231,15 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - _next/data (data requests for SSG/RSR)
+     * - _next/ (all Next.js internal assets and HMR endpoints)
      * - favicon.ico (favicon file)
      * - assets/ (project specific assets)
      * - uploads/ (user uploads)
      * - images/ (static images)
+     * - .well-known/ (standardized metadata like security.txt)
+     * - security.txt (legacy location)
+     * - .git/ (ignore probes from browser extensions/scanners)
      */
-    "/((?!_next/static|_next/image|_next/data|favicon.ico|assets/|uploads/|images/).*)",
+    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|.git/).*)",
   ],
 };

@@ -1,0 +1,8 @@
+# Security.txt for ProfeVision
+# Learn more: https://securitytxt.org/
+
+Contact: mailto:security@example.com
+Preferred-Languages: es, en
+Expires: 2030-01-01T00:00:00Z
+Policy: https://example.com/security
+Acknowledgments: https://example.com/security#acknowledgments
