@@ -83,7 +83,7 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
   const getLocalizedRoutes = (currentLocale: string) => {
     const base = currentLocale === 'es' ? '' : `/${currentLocale}`;
     return {
-      login: `${base}/auth/${currentLocale === 'es' ? 'login' : 'login'}`,
+      login: `${base}/auth/${currentLocale === 'es' ? 'iniciar-sesion' : 'login'}`,
       dashboard: `${base}/dashboard`,
     };
   };
@@ -233,11 +233,12 @@ export const config = {
      * Match all request paths except for the ones starting with:
      * - _next/static (static files)
      * - _next/image (image optimization files)
+     * - _next/data (data requests for SSG/RSR)
      * - favicon.ico (favicon file)
      * - assets/ (project specific assets)
      * - uploads/ (user uploads)
      * - images/ (static images)
      */
-    "/((?!_next/static|_next/image|favicon.ico|assets/|uploads/|images/).*)",
+    "/((?!_next/static|_next/image|_next/data|favicon.ico|assets/|uploads/|images/).*)",
   ],
 };
