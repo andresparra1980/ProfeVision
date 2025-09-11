@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Cache static assets aggressively
+        // Cache Next.js static assets (fingerprinted / immutable)
         source: '/_next/static/(.*)',
         headers: [
           {
@@ -50,16 +50,27 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Cache images
+        // Cache images only if hashed, otherwise keep short or no cache
         source: '/(.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg))',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400',
+            value: 'public, max-age=60, must-revalidate',
           },
         ],
       },
-    ];
+      {
+        // Prevent caching of HTML or anything else
+        source:
+          '/((?!_next/static|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)).*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, must-revalidate',
+          },
+        ],
+      },
+    ]
   },
 
   // Explicitly enabling App Router is not necessary in Next.js 14+
