@@ -1,0 +1,7 @@
+{
+  "title": "404 • Page not found",
+  "description": "An error occurred and we couldn't find this resource. If you landed here by mistake or it appears occasionally, try forcing a refresh.",
+  "forceRefresh": "Click here (force refresh)",
+  "goHome": "Go to home",
+  "tip": "Tip: if this 404 appears after some time, it might be due to browser or CDN cache."
+}

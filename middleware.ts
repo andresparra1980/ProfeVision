@@ -18,7 +18,10 @@ export async function middleware(request: NextRequest) {
   // 🔐 Rutas que NO deben ser localizadas (callbacks de Supabase)
   if (nonLocalizedRoutes.some(route => pathname.startsWith(route))) {
     console.log(`[Middleware] Non-localized route: ${pathname}`);
-    return await handleAuthMiddleware(request);
+    const resp = await handleAuthMiddleware(request);
+    // Enforce no-cache for all page responses
+    resp.headers.set('Cache-Control', 'no-store, must-revalidate');
+    return resp;
   }
   
   // 🌍 Para rutas localizadas, aplicar middleware de i18n primero
@@ -36,7 +39,9 @@ export async function middleware(request: NextRequest) {
   // 🌍 Detectar locale y agregarlo como header para SEO
   const locale = pathname.startsWith('/en') ? 'en' : 'es';
   authResponse.headers.set('x-locale', locale);
-  
+  // Enforce no-cache for all page responses
+  authResponse.headers.set('Cache-Control', 'no-store, must-revalidate');
+
   return authResponse;
 }
 

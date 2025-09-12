@@ -18,6 +18,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     exam: (await import(`./locales/${locale}/exam.json`)).default,
     forms: (await import(`./locales/${locale}/forms.json`)).default,
     navigation: (await import(`./locales/${locale}/navigation.json`)).default,
+    // 🚨 Not found page
+    'not-found': (await import(`./locales/${locale}/not-found.json`)).default,
     // 🤖 AI Exams Chat module
     ai_exams_chat: (await import(`./locales/${locale}/ai_exams_chat.json`)).default,
     // 🧙‍♀️ Wizard steps components
