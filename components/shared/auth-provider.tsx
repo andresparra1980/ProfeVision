@@ -23,11 +23,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const locale = useLocale();
 
-  // 🌍 Generar rutas localizadas dinámicamente
-  const getLocalizedRoutes = useMemo(() => ({
-    login: `/${locale}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
-    dashboard: `/${locale}/${locale === 'es' ? 'panel' : 'dashboard'}`,
-  }), [locale]);
+  // 🌍 Generar rutas localizadas dinámicamente (alineado con middleware)
+  // Para 'es' (locale por defecto) NO se antepone prefijo
+  const getLocalizedRoutes = useMemo(() => {
+    const base = locale === 'es' ? '' : `/${locale}`
+    return {
+      login: `${base}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
+      // Dashboard es siempre '/dashboard'; el prefijo de idioma solo aplica cuando no es 'es'
+      dashboard: `${base}/dashboard`,
+    }
+  }, [locale]);
 
   // 🔐 Rutas públicas localizadas - Lista completa actualizada (sincronizada con middleware)
   const getPublicPaths = useMemo(() => [
