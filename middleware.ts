@@ -8,12 +8,14 @@ import { nonLocalizedRoutes } from './i18n/routing';
 const intlMiddleware = createIntlMiddleware({
   ...routing,
   localeDetection: false, // Deshabilitar detección automática para evitar redirecciones inesperadas
-  localePrefix: 'as-needed',
+  localePrefix: 'always', // Prefijar siempre el locale (incluye 'es') para evitar normalizaciones 307
   alternateLinks: false,
 });
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const defaultLocale = 'es';
+  const supportedLocales = ['es', 'en'] as const;
   
   // 🔐 Rutas que NO deben ser localizadas (callbacks de Supabase)
   if (nonLocalizedRoutes.some(route => pathname.startsWith(route))) {
@@ -24,9 +26,23 @@ export async function middleware(request: NextRequest) {
     return resp;
   }
   
-  // 🌍 Para rutas localizadas, aplicar middleware de i18n primero
+  // 🌍 Si es la raíz, redirigir únicamente a /{defaultLocale}
+  if (pathname === '/') {
+    const redirectUrl = new URL(`/${defaultLocale}`, request.url);
+    console.log(`[Middleware] Redirecting root to default locale: ${redirectUrl.pathname}`);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // 🌍 Redirigir cualquier ruta NO localizada al defaultLocale
+  const hasLocalePrefix = supportedLocales.some((l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`));
+  if (!hasLocalePrefix) {
+    const redirectUrl = new URL(`/${defaultLocale}${pathname}`, request.url);
+    console.log(`[Middleware] Redirecting non-localized path '${pathname}' to default locale: ${redirectUrl.pathname}`);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // 🌍 Aplicar middleware de i18n SIEMPRE (gestiona slugs traducidos y reescrituras)
   const intlResponse = intlMiddleware(request);
-  
   // Si i18n redirige, seguir esa redirección
   if (intlResponse.status === 307 || intlResponse.status === 302 || intlResponse.status === 308) {
     console.log(`[Middleware] i18n redirect for: ${pathname} with status ${intlResponse.status}`);
@@ -37,7 +53,7 @@ export async function middleware(request: NextRequest) {
   const authResponse = await handleAuthMiddleware(request, intlResponse);
   
   // 🌍 Detectar locale y agregarlo como header para SEO
-  const locale = pathname.startsWith('/en') ? 'en' : 'es';
+  const locale = intlResponse.headers.get('x-next-intl-locale') || (pathname.startsWith('/en') ? 'en' : 'es');
   authResponse.headers.set('x-locale', locale);
   // Enforce no-cache for all page responses
   authResponse.headers.set('Cache-Control', 'no-store, must-revalidate');
@@ -86,7 +102,8 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
 
   // 🔐 Construir rutas localizadas dinámicamente
   const getLocalizedRoutes = (currentLocale: string) => {
-    const base = currentLocale === 'es' ? '' : `/${currentLocale}`;
+    // Siempre prefijar con el locale activo (localePrefix: 'always')
+    const base = `/${currentLocale}`;
     return {
       login: `${base}/auth/${currentLocale === 'es' ? 'iniciar-sesion' : 'login'}`,
       dashboard: `${base}/dashboard`,
@@ -131,35 +148,7 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
     `/${locale}/auth/${locale === 'es' ? 'actualizar-contrasena' : 'update-password'}`,
     `/${locale}/auth/${locale === 'es' ? 'verificar-email' : 'verify-email'}`,
     `/${locale}/auth/${locale === 'es' ? 'email-confirmado' : 'email-confirmed'}`,
-    
-    // Rutas sin prefijo de idioma solo para el locale por defecto (español)
-    ...(locale === 'es' ? [
-      "/",
-      "/privacidad",
-      "/terminos", 
-      "/cookies",
-      "/como-funciona",
-      "/gestion-instituciones",
-      "/gestion-materias",
-      "/gestion-grupos",
-      "/gestion-estudiantes",
-      "/reportes",
-      "/aplicacion-movil",
-      "/precios",
-      "/contacto",
-      "/blog",
-      "/examenes",
-      "/examenes/generador-manual",
-      "/examenes/generador-ia",
-      "/examenes-con-ia",
-      "/examenes-papel",
-      "/auth/iniciar-sesion",
-      "/auth/registro",
-      "/auth/restablecer-contrasena",
-      "/auth/actualizar-contrasena",
-      "/auth/verificar-email",
-      "/auth/email-confirmado"
-    ] : [])
+    // Nota: ya no se incluyen rutas sin prefijo, porque usamos localePrefix: 'always'
   ];
 
   // 🔐 Lógica de autenticación preservada para rutas públicas
@@ -170,19 +159,8 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
 
   // 🔐 Rutas protegidas (dashboard)
   const isDashboardRoute = (path: string, currentLocale: string): boolean => {
-    // Para español (sin prefijo): /dashboard
-    if (currentLocale === 'es' && path.startsWith('/dashboard')) {
-      return true;
-    }
-    // Para inglés (con prefijo): /en/dashboard
-    if (currentLocale === 'en' && path.startsWith('/en/dashboard')) {
-      return true;
-    }
-    // Para español explícito (con prefijo): /es/dashboard
-    if (currentLocale === 'es' && path.startsWith('/es/dashboard')) {
-      return true;
-    }
-    return false;
+    // Con localePrefix: 'always', las rutas protegidas siempre llevan prefijo
+    return path.startsWith(`/${currentLocale}/dashboard`);
   };
   
   if (isDashboardRoute(pathname, locale)) {
@@ -202,20 +180,8 @@ async function handleAuthMiddleware(request: NextRequest, response?: NextRespons
     if (path.endsWith('/callback') || path.endsWith('/direct-recovery')) {
       return false;
     }
-    
-    // Para español (sin prefijo): /auth/
-    if (currentLocale === 'es' && path.startsWith('/auth/')) {
-      return true;
-    }
-    // Para inglés (con prefijo): /en/auth/
-    if (currentLocale === 'en' && path.startsWith('/en/auth/')) {
-      return true;
-    }
-    // Para español explícito (con prefijo): /es/auth/
-    if (currentLocale === 'es' && path.startsWith('/es/auth/')) {
-      return true;
-    }
-    return false;
+    // Con localePrefix: 'always', las rutas de auth siempre llevan prefijo
+    return path.startsWith(`/${currentLocale}/auth/`);
   };
   
   if (isAuthRoute(pathname, locale)) {

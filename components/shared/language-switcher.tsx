@@ -40,7 +40,7 @@ export function LanguageSwitcher() {
     '/auth/update-password': '/auth/actualizar-contrasena',
     '/auth/verify-email': '/auth/verificar-email',
     '/auth/email-confirmed': '/auth/email-confirmado',
-    '/dashboard': '/panel'
+    '/dashboard': '/dashboard'
   };
 
   // Crear mapa inverso
@@ -54,40 +54,32 @@ export function LanguageSwitcher() {
     
     let currentPath = pathname;
     
-    // 1. Obtener la ruta sin prefijo de idioma
-    if (locale === 'en' && pathname.startsWith('/en')) {
-      currentPath = pathname === '/en' ? '/' : pathname.replace('/en', '');
+    // 1) Normalizar: quitar prefijo de idioma actual (/es o /en)
+    if (pathname === '/en' || pathname === '/es') {
+      currentPath = '/';
+    } else if (pathname.startsWith('/en/')) {
+      currentPath = pathname.replace(/^\/en/, '');
+    } else if (pathname.startsWith('/es/')) {
+      currentPath = pathname.replace(/^\/es/, '');
     }
     
     console.log('🔄 Current path (no prefix):', currentPath);
     
-    // 2. Mapear la ruta al idioma de destino
+    // 2) Mapear la ruta al idioma de destino usando slugs canónicos
     let targetPath = currentPath;
     
     if (newLocale === 'es') {
-      // Cambiar de inglés a español
-      if (locale === 'en') {
-        targetPath = routeMap[currentPath] || currentPath;
-      }
-      // Si ya estamos en español, no cambiar la ruta
+      // EN -> ES
+      targetPath = routeMap[currentPath] || currentPath;
     } else if (newLocale === 'en') {
-      // Cambiar de español a inglés
-      if (locale === 'es') {
-        targetPath = reverseRouteMap[currentPath] || currentPath;
-      }
-      // Si ya estamos en inglés, no cambiar la ruta
+      // ES -> EN
+      targetPath = reverseRouteMap[currentPath] || currentPath;
     }
     
     console.log('🔄 Target path:', targetPath);
     
-    // 3. Construir URL final
-    let finalPath = targetPath;
-    if (newLocale === 'en') {
-      finalPath = targetPath === '/' ? '/en' : `/en${targetPath}`;
-    } else if (newLocale === 'es') {
-      // Forzar prefijo /es para asegurar cambio de idioma
-      finalPath = targetPath === '/' ? '/es' : `/es${targetPath}`;
-    }
+    // 3) Construir URL final con prefijo SIEMPRE (localePrefix: 'always')
+    const finalPath = targetPath === '/' ? `/${newLocale}` : `/${newLocale}${targetPath}`;
     
     console.log('🔄 Final path:', finalPath);
     

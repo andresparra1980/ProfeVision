@@ -24,12 +24,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
 
   // 🌍 Generar rutas localizadas dinámicamente (alineado con middleware)
-  // Para 'es' (locale por defecto) NO se antepone prefijo
+  // Con localePrefix: 'always', SIEMPRE se antepone el prefijo del locale
   const getLocalizedRoutes = useMemo(() => {
-    const base = locale === 'es' ? '' : `/${locale}`
+    const base = `/${locale}`
     return {
       login: `${base}/auth/${locale === 'es' ? 'iniciar-sesion' : 'login'}`,
-      // Dashboard es siempre '/dashboard'; el prefijo de idioma solo aplica cuando no es 'es'
       dashboard: `${base}/dashboard`,
     }
   }, [locale]);
@@ -70,35 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     `/${locale}/auth/${locale === 'es' ? 'actualizar-contrasena' : 'update-password'}`,
     `/${locale}/auth/${locale === 'es' ? 'verificar-email' : 'verify-email'}`,
     `/${locale}/auth/${locale === 'es' ? 'email-confirmado' : 'email-confirmed'}`,
-    
-    // Rutas sin prefijo de idioma solo para el locale por defecto (español)
-    ...(locale === 'es' ? [
-      '/',
-      '/privacidad',
-      '/terminos',
-      '/cookies',
-      '/como-funciona',
-      '/gestion-instituciones',
-      '/gestion-materias',
-      '/gestion-grupos',
-      '/gestion-estudiantes',
-      '/reportes',
-      '/aplicacion-movil',
-      '/precios',
-      '/contacto',
-      '/blog',
-      '/examenes',
-      '/examenes/generador-manual',
-      '/examenes/generador-ia',
-      '/examenes-con-ia',
-      '/examenes-papel',
-      '/auth/iniciar-sesion',
-      '/auth/registro',
-      '/auth/restablecer-contrasena',
-      '/auth/actualizar-contrasena',
-      '/auth/verificar-email',
-      '/auth/email-confirmado'
-    ] : [])
+    // Nota: no incluimos rutas sin prefijo porque usamos localePrefix: 'always'
   ], [locale]);
 
   useEffect(() => {
