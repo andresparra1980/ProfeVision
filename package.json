@@ -15,6 +15,8 @@
     "@ai-sdk/openai": "^2.0.18",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.3.4",
+    "@langchain/core": "^0.3.77",
+    "@langchain/openai": "^0.6.13",
     "@marsidev/react-turnstile": "^1.1.0",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.11",
@@ -81,7 +83,8 @@
     "unpdf": "^1.2.1",
     "uuid": "^11.1.0",
     "xlsx": "^0.18.5",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

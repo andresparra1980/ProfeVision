@@ -22,6 +22,9 @@ import {
   Link,
   Calendar,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import SimilarExamModal from "./SimilarExamModal";
+import SimilarExamMetadataDialog, { SimilarExamMeta } from "./SimilarExamMetadataDialog";
 
 // Reusable components
 interface ExamCardHeaderProps {
@@ -77,12 +80,14 @@ interface ExamCardContentProps {
   exam: Exam;
   router: ReturnType<typeof useRouter>;
   onOpenDeleteDialog: (_examId: string) => void;
+  onStartSimilar: (examId: string) => void;
 }
 
 function ExamCardContent({
   exam,
   router,
   onOpenDeleteDialog,
+  onStartSimilar,
 }: ExamCardContentProps) {
   const t = useTranslations('dashboard.exams');
   
@@ -100,6 +105,14 @@ function ExamCardContent({
         }}
       >
         <Pencil className="mr-2 h-4 w-4" /> {t('actions.edit')}
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400"
+        onClick={() => onStartSimilar(exam.id)}
+      >
+        <Plus className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
       </Button>
       {exam.estado === "borrador" && (
         <Button
@@ -323,6 +336,12 @@ export default function ExamsTableMobile({
 
   // Hook to detect if we're in multi-column layout
   const [isMultiColumn, setIsMultiColumn] = useState(false);
+  const [similarOpen, setSimilarOpen] = useState(false);
+  const [jobId, setJobId] = useState<string | undefined>();
+  const [startingId, setStartingId] = useState<string | null>(null);
+  const [streamUrl, setStreamUrl] = useState<string | undefined>(undefined);
+  const [metaDialogOpen, setMetaDialogOpen] = useState(false);
+  const [pendingExamId, setPendingExamId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -333,6 +352,43 @@ export default function ExamsTableMobile({
     window.addEventListener("resize", checkScreenSize);
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
+
+  const startSimilarJob = async (examId: string, meta?: SimilarExamMeta) => {
+    try {
+      setStartingId(examId);
+      const { data: session } = await supabase.auth.getSession();
+      const token = session?.session?.access_token;
+      const res = await fetch(`/api/exams/similar/start`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ sourceExamId: examId, meta }),
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to start job: ${res.status}`);
+      }
+      const json = (await res.json()) as { jobId: string };
+      setJobId(json.jobId);
+      // Build SSE URL with token for ownership validation on server
+      const url = new URL(`/api/exams/similar/stream`, window.location.origin);
+      url.searchParams.set("jobId", json.jobId);
+      if (token) url.searchParams.set("token", token);
+      setStreamUrl(url.toString());
+      setSimilarOpen(true);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setStartingId(null);
+      setPendingExamId(null);
+    }
+  };
+
+  const handleStartSimilar = (examId: string) => {
+    setPendingExamId(examId);
+    setMetaDialogOpen(true);
+  };
 
   return (
     <div className="px-2 md:px-0 py-4 space-y-4">
@@ -398,6 +454,7 @@ export default function ExamsTableMobile({
                   exam={exam}
                   router={router}
                   onOpenDeleteDialog={onOpenDeleteDialog}
+                  onStartSimilar={startSimilarJob}
                 />
               </div>
             </div>
@@ -421,12 +478,36 @@ export default function ExamsTableMobile({
                   exam={exam}
                   router={router}
                   onOpenDeleteDialog={onOpenDeleteDialog}
+                  onStartSimilar={startSimilarJob}
                 />
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
       )}
+
+      <SimilarExamModal
+        open={similarOpen}
+        onOpenChange={setSimilarOpen}
+        jobId={jobId}
+        streamUrl={streamUrl}
+        onCompleted={() => {
+          // Refresh exams after completion to show the new draft (when backend is fully wired)
+          // no-op here; parent page fetches list periodically or on demand
+        }}
+        onFailed={() => {
+          // Could show a toast here
+        }}
+      />
+
+      <SimilarExamMetadataDialog
+        open={metaDialogOpen}
+        onOpenChange={setMetaDialogOpen}
+        onConfirm={async (meta) => {
+          if (!pendingExamId) return;
+          await startSimilarJob(pendingExamId, meta);
+        }}
+      />
     </div>
   );
 }

@@ -62,6 +62,7 @@
     "actions": {
       "create": "Crear",
       "createWithAI": "Crear con IA",
+      "createSimilarExam": "Crear examen similar",
       "import": "Importar",
       "edit": "Editar",
       "delete": "Eliminar",

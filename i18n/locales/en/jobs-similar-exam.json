@@ -1,0 +1,34 @@
+{
+  "jobs": {
+    "similarExam": {
+      "title": "Create Similar Exam",
+      "steps": {
+        "loadBlueprint": "Analyze source exam and build blueprint",
+        "generate": "Generate similar exam draft",
+        "validate": "Validate draft and produce recommendations",
+        "apply": "Apply recommendations",
+        "randomize": "Randomize order (deterministic)",
+        "finalize": "Final validation and finalize"
+      },
+      "status": {
+        "started": "In progress",
+        "succeeded": "Completed",
+        "failed": "Failed"
+      },
+      "errors": {
+        "schemaInvalid": "The generated exam does not match the required schema.",
+        "parseFailed": "The AI response could not be parsed as valid JSON.",
+        "timeout": "The operation timed out. Please try again.",
+        "sourceNotFound": "The source exam could not be found.",
+        "tooLarge": "The source exam is too large to process.",
+        "loadBlueprint": "Failed while analyzing the source exam and building the blueprint.",
+        "generate": "Failed while generating a similar exam draft.",
+        "validate": "Failed during validation of the draft.",
+        "apply": "Failed while applying recommendations to the draft.",
+        "randomize": "Failed while randomizing the questions/options order.",
+        "finalize": "Failed during final validation and closing steps.",
+        "unknown": "An unknown error occurred."
+      }
+    }
+  }
+}
