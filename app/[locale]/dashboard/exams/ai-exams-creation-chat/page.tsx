@@ -128,6 +128,7 @@ function SaveDraftDialog({
       const mapped = qs.map((q) => {
         const type = q?.type || 'multiple_choice';
         const prompt = q?.prompt || '';
+        const retroalimentacion = (q as Partial<ExamQuestion> & { rationale?: string })?.rationale || '';
         if (type === 'multiple_choice') {
           const options: string[] = Array.isArray(q?.options) ? q.options : [];
           const answer = q?.answer;
@@ -141,6 +142,7 @@ function SaveDraftDialog({
             texto: prompt,
             tipo: 'opcion_multiple',
             opciones: options.map((texto, i) => ({ texto, esCorrecta: i === correctIndex })),
+            retroalimentacion,
           };
         }
         if (type === 'true_false') {
@@ -157,12 +159,14 @@ function SaveDraftDialog({
               { texto: 'Verdadero', esCorrecta: correct === true },
               { texto: 'Falso', esCorrecta: correct === false },
             ],
+            retroalimentacion,
           };
         }
         return {
           texto: prompt,
           tipo: 'respuesta_corta',
           opciones: [],
+          retroalimentacion,
         };
       });
       return mapped;
@@ -188,7 +192,7 @@ function SaveDraftDialog({
         duracion_minutos?: number;
         puntaje_total?: number;
         descripcion: string;
-        preguntas: Array<{ texto: string; tipo: string; opciones: Array<{ texto: string; esCorrecta: boolean }> }>;
+        preguntas: Array<{ texto: string; tipo: string; retroalimentacion?: string; opciones: Array<{ texto: string; esCorrecta: boolean }> }>;
       };
       const payload: ExamPayload = {
         // For edit, only send fields if meaningful to avoid overwriting with empty/NaN
@@ -610,6 +614,7 @@ export default function AIExamsCreationChatPage() {
             id: string;
             texto: string;
             tipo_id: string;
+            retroalimentacion?: string;
             opciones: Array<{ texto: string; es_correcta: boolean; orden: number }>;
           }> = await qRes.json();
 
@@ -623,6 +628,7 @@ export default function AIExamsCreationChatPage() {
                 prompt: p.texto,
                 options: opts,
                 answer: correctIndex >= 0 ? correctIndex : 0,
+                rationale: p.retroalimentacion || '',
               };
             }
             if (p.tipo_id === 'verdadero_falso') {
@@ -633,12 +639,14 @@ export default function AIExamsCreationChatPage() {
                 type: 'true_false',
                 prompt: p.texto,
                 answer,
+                rationale: p.retroalimentacion || '',
               };
             }
             return {
               type: 'short_answer',
               prompt: p.texto,
               answer: '',
+              rationale: p.retroalimentacion || '',
             };
           });
 
