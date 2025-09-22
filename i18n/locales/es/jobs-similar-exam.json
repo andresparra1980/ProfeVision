@@ -11,6 +11,7 @@
         "finalize": "Validación final y cierre"
       },
       "status": {
+        "idle": "No iniciado",
         "started": "En progreso",
         "succeeded": "Completado",
         "failed": "Falló"

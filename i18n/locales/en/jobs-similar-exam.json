@@ -11,6 +11,7 @@
         "finalize": "Final validation and finalize"
       },
       "status": {
+        "idle": "Not started",
         "started": "In progress",
         "succeeded": "Completed",
         "failed": "Failed"

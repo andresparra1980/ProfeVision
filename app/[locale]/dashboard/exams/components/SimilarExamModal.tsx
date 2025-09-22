@@ -11,9 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { JobsSimilarExamKeys } from "@/lib/ai/similar-exam/utils/i18nKeys";
+import { Progress } from "@/components/ui/progress";
+import { Loader2, CheckCircle, XCircle, Minus } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type StepKey = keyof typeof JobsSimilarExamKeys.steps;
 
@@ -42,6 +44,46 @@ const orderedSteps: StepKey[] = [
   "randomize",
   "finalize",
 ];
+
+function StatusIcon({
+  status,
+  label,
+}: {
+  status: "idle" | "started" | "succeeded" | "failed";
+  label?: string;
+}) {
+  const common = "h-5 w-5";
+  if (status === "started") {
+    return (
+      <span className="inline-flex items-center gap-2" aria-live="polite">
+        <Loader2 className={`${common} animate-spin text-primary`} aria-hidden="true" />
+        {label ? <span className="text-xs text-muted-foreground hidden sm:inline">{label}</span> : null}
+      </span>
+    );
+  }
+  if (status === "succeeded") {
+    return (
+      <span className="inline-flex items-center gap-2" aria-live="polite">
+        <CheckCircle className={`${common} text-green-600 dark:text-green-500`} aria-hidden="true" />
+        {label ? <span className="text-xs text-muted-foreground hidden sm:inline">{label}</span> : null}
+      </span>
+    );
+  }
+  if (status === "failed") {
+    return (
+      <span className="inline-flex items-center gap-2" aria-live="polite">
+        <XCircle className={`${common} text-destructive`} aria-hidden="true" />
+        {label ? <span className="text-xs text-muted-foreground hidden sm:inline">{label}</span> : null}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-2">
+      <Minus className={`${common} text-muted-foreground`} aria-hidden="true" />
+      {label ? <span className="text-xs text-muted-foreground hidden sm:inline">{label}</span> : null}
+    </span>
+  );
+}
 
 export default function SimilarExamModal({
   open,
@@ -163,6 +205,13 @@ export default function SimilarExamModal({
     return acc;
   }, [events]);
 
+  const totalSteps = orderedSteps.length;
+  const completedCount = useMemo(
+    () => orderedSteps.filter((k) => stepStatusMap[k] === "succeeded").length,
+    [stepStatusMap]
+  );
+  const progressValue = Math.round((completedCount / totalSteps) * 100);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -179,27 +228,72 @@ export default function SimilarExamModal({
           {orderedSteps.map((k) => {
             const st = stepStatusMap[k];
             return (
-              <div key={k} className="flex items-center justify-between p-2 border rounded-md bg-muted/30">
-                <div className="text-sm font-medium">
+              <div
+                key={k}
+                className={`flex items-center justify-between p-2 border rounded-md bg-muted/30 transition-colors ${
+                  st === "started" ? "border-primary/50 bg-primary/5" : ""
+                }`}
+                aria-current={st === "started" ? "step" : undefined}
+              >
+                <div className="text-sm font-medium flex items-center gap-2">
+                  {st === "started" && (
+                    <span
+                      className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse"
+                      aria-hidden="true"
+                    />
+                  )}
                   {tJobs(`jobs.similarExam.steps.${k}` as any)}
                 </div>
-                <div>
-                  {st === "idle" && <Badge variant="secondary">-</Badge>}
-                  {st === "started" && <Badge>{tJobs("jobs.similarExam.status.started")}</Badge>}
-                  {st === "succeeded" && (
-                    <Badge className="bg-green-600 hover:bg-green-600">
-                      {tJobs("jobs.similarExam.status.succeeded")}
-                    </Badge>
-                  )}
-                  {st === "failed" && (
-                    <Badge className="bg-destructive hover:bg-destructive">
-                      {tJobs("jobs.similarExam.status.failed")}
-                    </Badge>
-                  )}
+                <div className="flex items-center">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <StatusIcon
+                            status={st}
+                            label={
+                              st === "started"
+                                ? tJobs("jobs.similarExam.status.started")
+                                : st === "succeeded"
+                                ? tJobs("jobs.similarExam.status.succeeded")
+                                : st === "failed"
+                                ? tJobs("jobs.similarExam.status.failed")
+                                : undefined
+                            }
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <span className="text-xs">
+                          {st === "started"
+                            ? tJobs("jobs.similarExam.status.started")
+                            : st === "succeeded"
+                            ? tJobs("jobs.similarExam.status.succeeded")
+                            : st === "failed"
+                            ? tJobs("jobs.similarExam.status.failed")
+                            : tJobs("jobs.similarExam.status.idle")}
+                        </span>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
             );
           })}
+        </div>
+
+        <div className="mt-4">
+          <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              {status === "running" && tJobs("jobs.similarExam.status.started")}
+              {status === "completed" && tJobs("jobs.similarExam.status.succeeded")}
+              {status === "failed" && tJobs("jobs.similarExam.status.failed")}
+            </span>
+            <span>
+              {completedCount}/{totalSteps}
+            </span>
+          </div>
+          <Progress value={progressValue} aria-label="progress" />
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
