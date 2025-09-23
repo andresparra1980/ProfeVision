@@ -3,7 +3,7 @@
 import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, Printer, Eye, Download, FileOutput, FileText } from "lucide-react";
+import { ChevronLeft, Printer, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -12,8 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { PDFViewer, pdf } from "@react-pdf/renderer";
-import { ExamPDF } from "@/components/exam/exam-pdf";
+// removed local PDF preview/export
 import { Separator } from "@/components/ui/separator";
 import TextExportDialog from "../../components/TextExportDialog";
 import { buildExamTex, type LatexOptions } from "@/lib/latex/buildExamTex";
@@ -74,8 +73,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const t = useTranslations('dashboard');
   const [loading, setLoading] = useState(true);
   const [exam, setExam] = useState<ExamDetails | null>(null);
-  const [paperSize, setPaperSize] = useState("letter"); // letter, a4, legal
-  const [previewing, setPreviewing] = useState(false);
+  // removed local PDF preview state
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
   const [textDialogOpen, setTextDialogOpen] = useState(false);
   const [textExportContent, setTextExportContent] = useState("");
@@ -348,50 +346,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     }
   };
 
-  const handleExport = async (type: 'questions' | 'answers') => {
-    try {
-      if (!exam) return;
-
-      if (type === 'questions') {
-        // Obtener el grupo seleccionado
-        const selectedGroup = exam.examen_grupo?.find(eg => eg.grupo.id === selectedGroupId);
-
-        // Generar el PDF
-        const blob = await pdf(
-          <ExamPDF 
-            exam={exam} 
-            paperSize={paperSize as "letter" | "a4" | "legal"}
-            selectedGroup={selectedGroup?.grupo}
-          />
-        ).toBlob();
-        
-        // Crear URL y descargar
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        const fileName = selectedGroup 
-          ? `${exam.titulo.toLowerCase().replace(/\s+/g, '-')}-${selectedGroup.grupo.nombre.toLowerCase().replace(/\s+/g, '-')}-preguntas.pdf`
-          : `${exam.titulo.toLowerCase().replace(/\s+/g, '-')}-preguntas.pdf`;
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        toast({
-          title: t('exams.messages.success'),
-          description: t('exams.export.success'),
-        });
-      }
-    } catch (error) {
-      console.error("Error exporting exam:", error);
-      toast({
-        title: t('exams.messages.error'),
-        description: t('exams.export.error'),
-        variant: "destructive",
-      });
-    }
-  };
+  // removed local PDF export (React-PDF)
 
   if (loading) {
     return (
@@ -415,32 +370,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     );
   }
 
-  if (previewing && exam) {
-    return (
-      <div className="fixed inset-0 bg-white z-50">
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b">
-            <Button 
-              variant="ghost"
-              onClick={() => setPreviewing(false)}
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" /> {t('exams.export.back')}
-            </Button>
-            <Button
-              onClick={() => handleExport('questions')}
-            >
-              <Printer className="mr-2 h-4 w-4" /> {t('exams.export.downloadPDF')}
-            </Button>
-          </div>
-          <div className="flex-1 w-full h-full bg-gray-100">
-            <PDFViewer className="w-full h-full">
-              <ExamPDF exam={exam} paperSize={paperSize as "letter" | "a4" | "legal"} />
-            </PDFViewer>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // removed preview overlay
 
   return (
     <div className="space-y-6">
@@ -470,117 +400,65 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
+            {/* Selector de grupo al inicio (solo si hay más de un grupo) */}
+            {exam.examen_grupo && exam.examen_grupo.length > 1 && (
+              <div className="space-y-2">
+                <Label>{t('exams.export.group')}</Label>
+                <select
+                  className="w-full border rounded-md px-3 py-2 bg-background"
+                  value={selectedGroupId}
+                  onChange={(e) => setSelectedGroupId(e.target.value)}
+                >
+                  <option value="">{t('exams.export.selectGroup')}</option>
+                  {exam.examen_grupo.map((eg) => (
+                    <option key={eg.grupo.id} value={eg.grupo.id}>
+                      {eg.grupo.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="flex flex-col items-start gap-2">
               <h3 className="text-lg font-semibold">{t('exams.export.questionSheet')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('exams.export.questionSheetDesc')}
               </p>
-              <div className="flex gap-2 flex-wrap">
-                <Button onClick={() => setPreviewing(true)}>
-                  <Eye className="mr-2 h-4 w-4" /> {t('exams.export.preview')}
-                </Button>
-                <Button onClick={() => handleExport('questions')}>
-                  <Download className="mr-2 h-4 w-4" /> {t('exams.export.downloadPDF')}
-                </Button>
-                <Button variant="secondary" onClick={openTextExport}>
+              <div className="flex gap-2 flex-wrap items-center">
+                <Button
+                  variant="secondary"
+                  onClick={openTextExport}
+                  disabled={Boolean(exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId)}
+                  title={exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId ? t('exams.export.selectGroup') : undefined}
+                >
                   {t('exams.export.exportText')}
                 </Button>
-                <Button variant="outline" onClick={handleDownloadTex}>
-                  <FileText className="mr-2 h-4 w-4" /> Descargar LaTeX
+                <Button
+                  variant="outline"
+                  onClick={handleDownloadTex}
+                  disabled={Boolean(exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId)}
+                  title={exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId ? t('exams.export.selectGroup') : undefined}
+                >
+                  <FileText className="mr-2 h-4 w-4" /> {t('exams.export.downloadTex')}
                 </Button>
-                <Button variant="default" onClick={handleCompileServer} disabled={compiling}>
-                  <Printer className="mr-2 h-4 w-4" /> {compiling ? 'Compilando…' : 'Compilar PDF (servidor)'}
+                <Button
+                  variant="default"
+                  onClick={handleCompileServer}
+                  disabled={compiling || Boolean(exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId)}
+                  title={exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId ? t('exams.export.selectGroup') : undefined}
+                >
+                  <Printer className="mr-2 h-4 w-4" /> {compiling ? t('common.loading') : t('exams.export.downloadPDF')}
                 </Button>
               </div>
+              {exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId && (
+                <p className="text-sm text-muted-foreground">{t('exams.export.selectGroupHint')}</p>
+              )}
             </div>
-
             <Separator />
 
-            <div className="flex flex-col items-start gap-2">
-              <h3 className="text-lg font-semibold">{t('exams.export.answerSheets')}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t('exams.export.answerSheetsDesc')}
-              </p>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Button onClick={() => router.push(`/dashboard/exams/${examId}/responses` as any)}>
-                <FileOutput className="mr-2 h-4 w-4" /> {t('exams.export.generateAnswerSheets')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('exams.export.exportConfiguration')}</CardTitle>
-            <CardDescription>
-              {t('exams.export.exportConfigurationDesc')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Selección de grupo */}
-            {exam.examen_grupo && exam.examen_grupo.length > 0 ? (
+            {/* Opciones de exportación */}
+            <div className="grid md:grid-cols-2 gap-4 w-full">
               <div className="space-y-2">
-                <Label>{t('exams.export.group')}</Label>
-                <RadioGroup
-                  value={selectedGroupId}
-                  onValueChange={setSelectedGroupId}
-                  className="grid grid-cols-2 sm:grid-cols-3 gap-4"
-                >
-                  {exam.examen_grupo.map((eg) => (
-                    <Label
-                      key={eg.grupo.id}
-                      htmlFor={eg.grupo.id}
-                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary"
-                    >
-                      <RadioGroupItem value={eg.grupo.id} id={eg.grupo.id} className="sr-only" />
-                      <span className="text-sm font-medium">{eg.grupo.nombre}</span>
-                      {eg.fecha_aplicacion && (
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(eg.fecha_aplicacion), "d MMM yyyy", { locale: es })}
-                        </span>
-                      )}
-                    </Label>
-                  ))}
-                </RadioGroup>
-              </div>
-            ) : (
-              <div className="text-center py-4 text-muted-foreground">
-                {t('exams.export.noGroupsAssigned')}
-                <Button 
-                  variant="link" 
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onClick={() => router.push(`/dashboard/exams/${examId}/assign` as any)}
-                  className="ml-2"
-                >
-                  {t('exams.export.assignGroups')}
-                </Button>
-              </div>
-            )}
-
-            {/* Tamaño de papel (PDF preview) */}
-            <div className="space-y-2">
-              <Label>{t('exams.export.paperSize')}</Label>
-              <RadioGroup value={paperSize} onValueChange={setPaperSize}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="letter" id="letter" />
-                  <Label htmlFor="letter">{t('exams.export.letter')}</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="a4" id="a4" />
-                  <Label htmlFor="a4">{t('exams.export.a4')}</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="legal" id="legal" />
-                  <Label htmlFor="legal">{t('exams.export.legal')}</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* Opciones LaTeX */}
-            <Separator />
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Tamaño de letra (LaTeX)</Label>
+                <Label>{t('exams.export.fontSize')}</Label>
                 <RadioGroup value={latexFontSize} onValueChange={(v) => setLatexFontSize(v as any)}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="8pt" id="l8" /><Label htmlFor="l8">8pt</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="10pt" id="l10" /><Label htmlFor="l10">10pt</Label></div>
@@ -588,7 +466,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                 </RadioGroup>
               </div>
               <div className="space-y-2">
-                <Label>Columnas (LaTeX)</Label>
+                <Label>{t('exams.export.columns')}</Label>
                 <RadioGroup value={String(latexColumns)} onValueChange={(v) => setLatexColumns(Number(v) as any)}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="1" id="c1" /><Label htmlFor="c1">1</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="2" id="c2" /><Label htmlFor="c2">2</Label></div>
@@ -596,24 +474,27 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                 </RadioGroup>
               </div>
               <div className="space-y-2">
-                <Label>Orientación (LaTeX)</Label>
+                <Label>{t('exams.export.orientation')}</Label>
                 <RadioGroup value={latexOrientation} onValueChange={(v) => setLatexOrientation(v as any)}>
-                  <div className="flex items-center space-x-2"><RadioGroupItem value="portrait" id="op" /><Label htmlFor="op">Portrait</Label></div>
-                  <div className="flex items-center space-x-2"><RadioGroupItem value="landscape" id="ol" /><Label htmlFor="ol">Landscape</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="portrait" id="op" /><Label htmlFor="op">{t('exams.export.portrait')}</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="landscape" id="ol" /><Label htmlFor="ol">{t('exams.export.landscape')}</Label></div>
                 </RadioGroup>
               </div>
               <div className="space-y-2">
-                <Label>Papel (LaTeX)</Label>
+                <Label>{t('exams.export.paper')}</Label>
                 <RadioGroup value={latexPaper} onValueChange={(v) => setLatexPaper(v as any)}>
-                  <div className="flex items-center space-x-2"><RadioGroupItem value="letter" id="pl" /><Label htmlFor="pl">Carta (Letter)</Label></div>
-                  <div className="flex items-center space-x-2"><RadioGroupItem value="a4" id="pa4" /><Label htmlFor="pa4">A4</Label></div>
-                  <div className="flex items-center space-x-2"><RadioGroupItem value="legal" id="plegal" /><Label htmlFor="plegal">Legal</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="letter" id="pl" /><Label htmlFor="pl">{t('exams.export.letter')}</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="a4" id="pa4" /><Label htmlFor="pa4">{t('exams.export.a4')}</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="legal" id="plegal" /><Label htmlFor="plegal">{t('exams.export.legal')}</Label></div>
                 </RadioGroup>
               </div>
             </div>
-        </CardContent>
-      </Card>
-    </div>
+
+            {/* Selector de grupo movido arriba */}
+          </CardContent>
+        </Card>
+        
+      </div>
     <TextExportDialog
       _open={textDialogOpen}
       onOpenChange={setTextDialogOpen}
