@@ -149,9 +149,8 @@ function latexQuestions(exam: ExamLike): string {
   q.push('\\begin{enumerate}');
   exam.preguntas.forEach((p) => {
     const text = escapeLatexOutsideMath(p.texto || '');
-    // Keep label and question text on the same baseline; top-align minipage and use raggedright to reduce overfull boxes
-    // Also prevents column breaks within the block
-    q.push(`  \\item \\begin{minipage}[t]{\\linewidth}\\raggedright \\textbf{${text}} (\\emph{${p.puntaje} pts})`);
+    // Permit content to break across columns/pages: avoid minipage so LaTeX can split naturally
+    q.push(`  \\item \\textbf{${text}} (\\emph{${p.puntaje} pts})`);
     if (p.opciones_respuesta && p.opciones_respuesta.length > 0) {
       q.push('    \\begin{enumerate}');
       p.opciones_respuesta.forEach((o) => {
@@ -160,7 +159,6 @@ function latexQuestions(exam: ExamLike): string {
       });
       q.push('    \\end{enumerate}');
     }
-    q.push('  \\end{minipage}');
   });
   q.push('\\end{enumerate}');
   return q.join('\n');
