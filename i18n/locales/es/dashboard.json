@@ -49,11 +49,10 @@
     "title": "Exámenes",
     "description": "Gestiona y crea exámenes para tus estudiantes.",
     "create": "Crear Examen",
-    "createWithAI": "Crear Examen con IA",
     "createNewDesc": "Diseña un nuevo examen para tus estudiantes",
     "createDesc": "Define la información básica del examen",
-    "import": "Importar Examen",
-    "edit": "Editar Examen",
+    
+    
     "backToExams": "Volver a Exámenes",
     "questions": "preguntas",
     "subjectRequired": "Materia Requerida",
