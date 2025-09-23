@@ -14,7 +14,7 @@
     "title": "Resultados",
     "description": "Revisa el examen generado.",
     "generatedQuestions": "Preguntas generadas",
-    "empty": "Los resultados aparecerán aquí cuando se conecte el chat al endpoint.",
+    "empty": "Los resultados aparecerán aquí después de la generación.",
     "randomizeOptions": "Aleatorizar opciones",
     "edit": "Editar",
     "selectCorrect": "Selecciona la respuesta correcta:",

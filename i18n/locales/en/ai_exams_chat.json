@@ -14,7 +14,7 @@
     "title": "Results",
     "description": "Review the generated exam.",
     "generatedQuestions": "Generated questions",
-    "empty": "Results will appear here when the chat is connected to the endpoint.",
+    "empty": "Results will appear here after generation.",
     "randomizeOptions": "Randomize options",
     "edit": "Edit",
     "selectCorrect": "Select the correct answer:",
