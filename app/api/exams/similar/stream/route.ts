@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
       const { data: { user } } = await supabase.auth.getUser(token);
       userId = user?.id ?? null;
     }
-  } catch (e) {
+  } catch (_e) {
     // ignore, will continue without ownership check
   }
 
@@ -68,9 +68,7 @@ export async function GET(req: NextRequest) {
         succeeded: new Set(),
       };
       let lastStepIndex = -1;
-      let running = true;
-
-      while (running) {
+      while (true) {
         try {
           const { data: row } = await supabase
             .from("procesos_examen_similar")
@@ -83,8 +81,10 @@ export async function GET(req: NextRequest) {
             break;
           }
 
-          const status = row.status as string;
-          const step = row.step as Step | null;
+          type Row = { status: string; step: Step | null; error_key: string | null; draft_exam_id: string | null };
+          const typed = row as Row;
+          const status = typed.status;
+          const step = typed.step;
 
           // Emit started for current step
           if (status === "running" && step) {
@@ -124,14 +124,14 @@ export async function GET(req: NextRequest) {
             }
             controller.enqueue(
               encoder.encode(
-                sseEvent("completed", { jobId, draftExamId: row.draft_exam_id, messageKey: "jobs.similarExam.status.succeeded" }),
+                sseEvent("completed", { jobId, draftExamId: typed.draft_exam_id, messageKey: "jobs.similarExam.status.succeeded" }),
               ),
             );
             break;
           }
 
           if (status === "failed") {
-            const rawKey = (row as any).error_key as string | null;
+            const rawKey = typed.error_key;
             const msgKey = rawKey && rawKey.startsWith("jobs.")
               ? rawKey
               : `jobs.similarExam.errors.${rawKey ?? "unknown"}`;

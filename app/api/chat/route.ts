@@ -167,6 +167,9 @@ function buildSystemPrompt(language: string) {
     `Idioma de salida obligatorio: ${language}.`,
     "Incluye racionales breves en cada pregunta en el campo 'rationale'.",
     "Usa LaTeX para las fórmulas cuando aplique (por ejemplo: \\int, \\frac{...}{...}, potencias con ^, funciones como \\sin, \\cos).",
+    "Formato de fórmulas: inline con $...$ y display con \\[...\\]. No uses Markdown math (ni ``` ni bloques).",
+    "IMPORTANTE: Escribe los comandos LaTeX con UNA sola barra invertida por comando (\\alpha, \\Delta, \\frac, etc.). No insertes barras extra; el escape necesario del JSON se aplica automáticamente.",
+    "Ejemplos correctos en strings JSON: '$\\\\Delta p$', '$E=mc^2$', '\\\\[ \\int_0^1 x^2 \\; dx \\\\]'. Evita escribir 'Deltap' o 'LaTeX en texto plano'.",
 
     // Recordatorio del contrato (se define explícitamente en otro mensaje del sistema)
     "Responde exclusivamente con JSON válido que cumpla el contrato indicado a continuación.",

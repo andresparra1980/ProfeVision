@@ -36,7 +36,7 @@ function runTectonic(cwd: string, jobName: string): Promise<{ code: number; stdo
     const killTimer = setTimeout(() => {
       if (!settled) {
         settled = true;
-        try { child.kill("SIGKILL"); } catch { /* noop */ }
+        try { child.kill("SIGKILL"); } catch (_e) { /* noop: process may already be dead */ }
         resolve({ code: -1, stdout, stderr: stderr + "\nTimeout exceeded" });
       }
     }, COMPILE_TIMEOUT_MS);
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     if (code !== 0) {
       // Try to read the .log to return helpful message
       let logText = "";
-      try { logText = await fs.readFile(path.join(tmpDir, `${jobName}.log`), "utf8"); } catch {}
+      try { logText = await fs.readFile(path.join(tmpDir, `${jobName}.log`), "utf8"); } catch (_e) { /* ignore: .log might not exist */ }
       return NextResponse.json({ error: "Fallo al compilar LaTeX", details: logPayload, log: logText.slice(-8000) }, { status: 422 });
     }
 
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
       const files = await fs.readdir(tmpDir);
       await Promise.all(files.map(f => fs.rm(path.join(tmpDir, f), { force: true })));
       await fs.rmdir(tmpDir);
-    } catch { /* ignore */ }
+    } catch (_e) { /* ignore: best-effort cleanup */ }
 
     return new NextResponse(pdf, {
       status: 200,

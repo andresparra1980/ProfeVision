@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ExamSchema, sanitizeAIExamPayload } from "../schemas/exam";
 import { deriveBlueprint } from "../utils/blueprint";
-import { randomizeExamOrder } from "../utils/randomizeExam";
+import { randomizeExamOrder, type ExamLike } from "../utils/randomizeExam";
 import { readFile } from "fs/promises";
 import path from "path";
 import { buildChatModel, getFallbackProvider, getPrimaryProvider, withFallback } from "../llm/client";
@@ -26,6 +26,8 @@ async function loadPrompt(rel: string): Promise<string> {
   return buf.toString("utf-8");
 }
 
+type ChatMessage = { role: "system" | "user"; content: string };
+
 async function generateSimilarExam(input: PipelineInput): Promise<z.infer<typeof ExamSchema>> {
   const sanitized = sanitizeAIExamPayload(input.sourceExam);
   const sanitizedExam = ExamSchema.parse(sanitized);
@@ -38,41 +40,43 @@ async function generateSimilarExam(input: PipelineInput): Promise<z.infer<typeof
   const genPrompt = await loadPrompt("generate.txt");
   const call = async () => {
     const model = buildChatModel(primary, 0);
-    const structured = model.withStructuredOutput(ExamSchema as any);
+    // Treat output as unknown and validate with Zod
+    const structured = model.withStructuredOutput(ExamSchema) as unknown as { invoke: (_msgs: ChatMessage[]) => Promise<unknown> };
     const referenceQuestions = sanitizedExam.exam.questions.map((q) => ({
       type: q.type,
       prompt: q.prompt,
       options: q.options || [],
       answer: q.answer,
     }));
-    const result = await structured.invoke(([
+    const messages: ChatMessage[] = [
       { role: "system", content: genPrompt },
       {
         role: "user",
         content: JSON.stringify({ language: input.language, blueprint: deriveBlueprint(sanitizedExam), reference_questions: referenceQuestions }),
       },
-    ]) as any);
-    // result should be typed by structured output
-    return ExamSchema.parse(result as any);
+    ];
+    const result = await structured.invoke(messages);
+    return ExamSchema.parse(result as unknown);
   };
   const callFallback = fallback
     ? async () => {
         const model = buildChatModel(fallback, 0);
-        const structured = model.withStructuredOutput(ExamSchema as any);
+        const structured = model.withStructuredOutput(ExamSchema) as unknown as { invoke: (_msgs: ChatMessage[]) => Promise<unknown> };
         const referenceQuestions = sanitizedExam.exam.questions.map((q) => ({
           type: q.type,
           prompt: q.prompt,
           options: q.options || [],
           answer: q.answer,
         }));
-        const result = await structured.invoke(([
+        const messages: ChatMessage[] = [
           { role: "system", content: genPrompt },
           {
             role: "user",
             content: JSON.stringify({ language: input.language, blueprint: deriveBlueprint(sanitizedExam), reference_questions: referenceQuestions }),
           },
-        ]) as any);
-        return ExamSchema.parse(result as any);
+        ];
+        const result = await structured.invoke(messages);
+        return ExamSchema.parse(result as unknown);
       }
     : null;
   return withFallback(call, callFallback);
@@ -89,27 +93,31 @@ async function validateAndRecommend(exam: z.infer<typeof ExamSchema>, language: 
   const recommendationsSchema = z.object({ blockers: z.array(z.string()).default([]), warnings: z.array(z.string()).default([]), suggestions: z.array(z.string()).default([]) });
   const call = async () => {
     const model = buildChatModel(primary, 0);
-    const structured = model.withStructuredOutput(recommendationsSchema as any);
-    const rec = await structured.invoke(([
+    const structured = model.withStructuredOutput(recommendationsSchema) as unknown as { invoke: (_msgs: ChatMessage[]) => Promise<unknown> };
+    const messages: ChatMessage[] = [
       { role: "system", content: valPrompt },
       { role: "user", content: JSON.stringify({ exam: parsed, language }) },
-    ]) as any);
-    if ((rec as any)?.blockers && (rec as any).blockers.length > 0) {
+    ];
+    const recUnknown = await structured.invoke(messages);
+    const rec = recommendationsSchema.parse(recUnknown);
+    if (rec.blockers && rec.blockers.length > 0) {
       // Surface as an error so worker maps to validate or schemaInvalid
-      throw new Error("validation blockers: " + (rec as any).blockers.join("; "));
+      throw new Error("validation blockers: " + rec.blockers.join("; "));
     }
     return parsed;
   };
   const callFallback = fallback
     ? async () => {
         const model = buildChatModel(fallback, 0);
-        const structured = model.withStructuredOutput(recommendationsSchema as any);
-        const rec = await structured.invoke(([
+        const structured = model.withStructuredOutput(recommendationsSchema) as unknown as { invoke: (_msgs: ChatMessage[]) => Promise<unknown> };
+        const messages: ChatMessage[] = [
           { role: "system", content: valPrompt },
           { role: "user", content: JSON.stringify({ exam: parsed, language }) },
-        ]) as any);
-        if ((rec as any)?.blockers && (rec as any).blockers.length > 0) {
-          throw new Error("validation blockers: " + (rec as any).blockers.join("; "));
+        ];
+        const recUnknown = await structured.invoke(messages);
+        const rec = recommendationsSchema.parse(recUnknown);
+        if (rec.blockers && rec.blockers.length > 0) {
+          throw new Error("validation blockers: " + rec.blockers.join("; "));
         }
         return parsed;
       }
@@ -125,7 +133,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineOutput>
 
 export type StepKey = "loadBlueprint" | "generate" | "validate" | "apply" | "randomize" | "finalize";
 export type StepStatus = "started" | "succeeded" | "failed";
-export type OnStep = (step: StepKey, status: StepStatus) => void | Promise<void>;
+export type OnStep = (_step: StepKey, _status: StepStatus) => void | Promise<void>;
 
 export async function runPipelineWithHooks(input: PipelineInput, onStep: OnStep): Promise<PipelineOutput> {
   const parsed = PipelineInputSchema.parse(input);
@@ -167,7 +175,7 @@ export async function runPipelineWithHooks(input: PipelineInput, onStep: OnStep)
   // Step E: Randomize deterministically
   await onStep("randomize", "started");
   const t0E = Date.now();
-  const randomized = randomizeExamOrder(applied as any, parsed.seed) as z.infer<typeof ExamSchema>;
+  const randomized = randomizeExamOrder(applied as unknown as ExamLike, parsed.seed) as z.infer<typeof ExamSchema>;
   await ensureMin(t0E, minQuickMs);
   await onStep("randomize", "succeeded");
 

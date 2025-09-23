@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import logger from '@/lib/utils/logger';
 
 /**
  * Minimal LangSmith tracing helper stubs.
@@ -14,11 +15,9 @@ export function startTrace(meta?: Record<string, unknown>): TraceContext {
 }
 
 export function logStep(ctx: TraceContext, step: string, data?: Record<string, unknown>) {
-  // eslint-disable-next-line no-console
-  console.debug(`[LangSmith] step=${step}`, { runId: ctx.runId, ...data });
+  logger.log(`[LangSmith] step=${step}`, { runId: ctx.runId, ...data });
 }
 
 export function endTrace(ctx: TraceContext, status: 'succeeded' | 'failed', data?: Record<string, unknown>) {
-  // eslint-disable-next-line no-console
-  console.debug(`[LangSmith] end status=${status}`, { runId: ctx.runId, ...data });
+  logger.log(`[LangSmith] end status=${status}`, { runId: ctx.runId, ...data });
 }

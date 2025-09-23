@@ -459,7 +459,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             <div className="grid md:grid-cols-2 gap-4 w-full">
               <div className="space-y-2">
                 <Label>{t('exams.export.fontSize')}</Label>
-                <RadioGroup value={latexFontSize} onValueChange={(v) => setLatexFontSize(v as any)}>
+                <RadioGroup value={latexFontSize} onValueChange={(v: string) => setLatexFontSize(v as "8pt"|"10pt"|"12pt")}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="8pt" id="l8" /><Label htmlFor="l8">8pt</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="10pt" id="l10" /><Label htmlFor="l10">10pt</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="12pt" id="l12" /><Label htmlFor="l12">12pt</Label></div>
@@ -467,7 +467,10 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               </div>
               <div className="space-y-2">
                 <Label>{t('exams.export.columns')}</Label>
-                <RadioGroup value={String(latexColumns)} onValueChange={(v) => setLatexColumns(Number(v) as any)}>
+                <RadioGroup value={String(latexColumns)} onValueChange={(v: string) => {
+                  const n = Number(v) as 1|2|3;
+                  setLatexColumns(n);
+                }}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="1" id="c1" /><Label htmlFor="c1">1</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="2" id="c2" /><Label htmlFor="c2">2</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="3" id="c3" /><Label htmlFor="c3">3</Label></div>
@@ -475,14 +478,14 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               </div>
               <div className="space-y-2">
                 <Label>{t('exams.export.orientation')}</Label>
-                <RadioGroup value={latexOrientation} onValueChange={(v) => setLatexOrientation(v as any)}>
+                <RadioGroup value={latexOrientation} onValueChange={(v: string) => setLatexOrientation(v as "portrait"|"landscape")}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="portrait" id="op" /><Label htmlFor="op">{t('exams.export.portrait')}</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="landscape" id="ol" /><Label htmlFor="ol">{t('exams.export.landscape')}</Label></div>
                 </RadioGroup>
               </div>
               <div className="space-y-2">
                 <Label>{t('exams.export.paper')}</Label>
-                <RadioGroup value={latexPaper} onValueChange={(v) => setLatexPaper(v as any)}>
+                <RadioGroup value={latexPaper} onValueChange={(v: string) => setLatexPaper(v as "letter"|"a4"|"legal")}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="letter" id="pl" /><Label htmlFor="pl">{t('exams.export.letter')}</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="a4" id="pa4" /><Label htmlFor="pa4">{t('exams.export.a4')}</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="legal" id="plegal" /><Label htmlFor="plegal">{t('exams.export.legal')}</Label></div>

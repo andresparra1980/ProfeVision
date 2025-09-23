@@ -29,8 +29,7 @@ import SimilarExamMetadataDialog, { SimilarExamMeta } from "./SimilarExamMetadat
 // Reusable components
 interface ExamCardHeaderProps {
   exam: Exam;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any;
+  t: ReturnType<typeof useTranslations>;
 }
 
 function ExamCardHeader({ exam, t }: ExamCardHeaderProps) {
@@ -80,7 +79,7 @@ interface ExamCardContentProps {
   exam: Exam;
   router: ReturnType<typeof useRouter>;
   onOpenDeleteDialog: (_examId: string) => void;
-  onStartSimilar: (examId: string) => void;
+  onStartSimilar: (_examId: string) => void;
 }
 
 function ExamCardContent({
@@ -338,7 +337,6 @@ export default function ExamsTableMobile({
   const [isMultiColumn, setIsMultiColumn] = useState(false);
   const [similarOpen, setSimilarOpen] = useState(false);
   const [jobId, setJobId] = useState<string | undefined>();
-  const [startingId, setStartingId] = useState<string | null>(null);
   const [streamUrl, setStreamUrl] = useState<string | undefined>(undefined);
   const [metaDialogOpen, setMetaDialogOpen] = useState(false);
   const [pendingExamId, setPendingExamId] = useState<string | null>(null);
@@ -355,7 +353,6 @@ export default function ExamsTableMobile({
 
   const startSimilarJob = async (examId: string, meta?: SimilarExamMeta) => {
     try {
-      setStartingId(examId);
       const { data: session } = await supabase.auth.getSession();
       const token = session?.session?.access_token;
       const res = await fetch(`/api/exams/similar/start`, {
@@ -380,15 +377,10 @@ export default function ExamsTableMobile({
     } catch (e) {
       console.error(e);
     } finally {
-      setStartingId(null);
       setPendingExamId(null);
     }
   };
-
-  const handleStartSimilar = (examId: string) => {
-    setPendingExamId(examId);
-    setMetaDialogOpen(true);
-  };
+  // removed unused handleStartSimilar
 
   return (
     <div className="px-2 md:px-0 py-4 space-y-4">

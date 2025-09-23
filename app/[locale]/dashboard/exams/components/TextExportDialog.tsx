@@ -76,7 +76,7 @@ export default function TextExportDialog({
       s = s.replace(/(?<=^|[^A-Za-zÁÉÍÓÚáéíóúñÑ])([a-d])\.\s/g, `\n$1. `);
     } catch {
       // Fallback without lookbehind: replace only when preceded by space/newline/punctuation we add back
-      s = s.replace(/(^|[\s\n\r\)\]\:])([a-d])\.\s/g, (m, pfx, letter) => `${pfx}\n${letter}. `);
+      s = s.replace(/(^|[\s\n\r)\]:])([a-d])\.\s/g, (_m, pfx, letter) => `${pfx}\n${letter}. `);
     }
 
     // 4) Normalize excessive line breaks
@@ -96,10 +96,18 @@ export default function TextExportDialog({
       // If already rendered by MathText, skip
       if (previewRef.current.querySelector('.katex')) return;
       try {
-        const mod: any = await import('katex/contrib/auto-render');
-        const renderMathInElement = mod?.default || mod?.renderMathInElement;
+        type AutoRenderOptions = {
+          delimiters: Array<{ left: string; right: string; display: boolean }>;
+          throwOnError: boolean;
+        };
+        type AutoRenderModule = {
+          default?: (_el: HTMLElement, _opts: AutoRenderOptions) => void;
+          renderMathInElement?: (_el: HTMLElement, _opts: AutoRenderOptions) => void;
+        };
+        const mod = (await import('katex/contrib/auto-render')) as AutoRenderModule;
+        const renderMathInElement = mod.default ?? mod.renderMathInElement;
         if (cancelled || !previewRef.current) return;
-        renderMathInElement(previewRef.current as unknown as HTMLElement, {
+        if (renderMathInElement) renderMathInElement(previewRef.current as unknown as HTMLElement, {
           delimiters: [
             { left: '$$', right: '$$', display: true },
             { left: '$', right: '$', display: false },
@@ -107,8 +115,8 @@ export default function TextExportDialog({
             { left: '\\[', right: '\\]', display: true },
           ],
           throwOnError: false,
-        } as any);
-      } catch {
+        });
+      } catch (_error) {
         // ignore
       }
     })();
@@ -123,10 +131,10 @@ export default function TextExportDialog({
         typeof window !== "undefined" &&
         typeof navigator !== "undefined" &&
         "ClipboardItem" in window &&
-        typeof (window as any).ClipboardItem === "function";
+        typeof (window as unknown as { ClipboardItem?: unknown }).ClipboardItem === "function";
 
       if (canRichCopy) {
-        const ClipboardItemCtor = (window as any).ClipboardItem as ClipboardItemConstructor;
+        const ClipboardItemCtor = (window as unknown as { ClipboardItem: ClipboardItemConstructor }).ClipboardItem;
         // Copy exactly what is rendered on screen (MathText output) but remove KaTeX MathML/annotation
         let htmlSource = formattedContent;
         if (previewRef.current) {
@@ -137,10 +145,9 @@ export default function TextExportDialog({
         }
         const htmlBlob = new Blob([htmlSource], { type: "text/html" });
         const textBlob = new Blob([formattedContent], { type: "text/plain" });
-        const data: ClipboardItem[] = [
+        await (navigator.clipboard as unknown as { write: (_data: ClipboardItem[]) => Promise<void> }).write([
           new ClipboardItemCtor({ "text/html": htmlBlob, "text/plain": textBlob }),
-        ];
-        await (navigator.clipboard as unknown as { write: (_data: ClipboardItem[]) => Promise<void> }).write(data);
+        ]);
       } else {
         await (navigator.clipboard as unknown as { writeText: (_text: string) => Promise<void> }).writeText(content);
       }

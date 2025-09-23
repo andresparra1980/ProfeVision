@@ -41,6 +41,11 @@ function escapeLatexOutsideMath(input: string): string {
     // unify Windows newlines
     .replace(/\r\n/g, '\n');
 
+  // Normalize common double-backslash escaping that comes from DB or JSON encoding
+  // Example: `$\\Delta p$` -> `$\Delta p$` so LaTeX renders Greek Delta instead of the word "Delta"
+  // Only normalize when the double backslash is followed by a letter, to keep constructs like `\\[` intact
+  s = s.replace(/\\\\(?=[A-Za-z])/g, '\\');
+
   // 1) Protect $$...$$ (display math)
   s = s.replace(/\$\$([\s\S]*?)\$\$/g, (_m, inner) => {
     const idx = segments.push('$$' + inner + '$$') - 1;

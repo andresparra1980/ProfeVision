@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components as MarkdownComponents } from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
@@ -17,14 +17,14 @@ export default function MathText({ text, className, inline }: Props) {
   // Normalize common escaping issue: double backslashes appear in content ($\\Delta x$) -> ($\Delta x$)
   const normalized = useMemo(() => raw.replace(/\\\\/g, "\\"), [raw]);
 
-  const Components = inline
+  const components: MarkdownComponents = inline
     ? {
-        p: ({ children }: { children: React.ReactNode }) => (
+        p: ({ children }) => (
           <span className="m-0 p-0 leading-normal align-middle">{children}</span>
         ),
       }
     : {
-        p: ({ children }: { children: React.ReactNode }) => (
+        p: ({ children }) => (
           <p className="my-1 leading-relaxed">{children}</p>
         ),
       };
@@ -42,7 +42,7 @@ export default function MathText({ text, className, inline }: Props) {
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
-        components={Components as any}
+        components={components}
       >
         {normalized}
       </ReactMarkdown>

@@ -30,7 +30,7 @@ export interface ExamLike {
     subject: string;
     level: string;
     language: string;
-    questions: Array<MultipleChoiceQuestion & Record<string, any>>;
+    questions: Array<MultipleChoiceQuestion & Record<string, unknown>>;
   };
 }
 

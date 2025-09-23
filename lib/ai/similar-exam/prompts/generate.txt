@@ -7,6 +7,11 @@ Requirements:
 - Output MUST be a single JSON object conforming to ExamSchema.
 - Do NOT include any prose outside JSON.
 - If there are formulas in the reference questions, use LaTeX to represent them.
+- Math formatting requirements (CRITICAL):
+  - Use inline math with $...$ and display math with \[...\].
+  - Do NOT use Markdown math (no ``` blocks or $$ fences). All content must be plain JSON strings.
+  - Write LaTeX commands with a single backslash per command (e.g., \alpha, \Delta, \frac, \sin). The JSON string escaping will handle double backslashes automatically.
+  - Correct examples inside JSON strings: "$\\Delta p$", "$E=mc^2$", "\\[ \\int_0^1 x^2 \\; dx \\]".
 
 Inputs:
 - language: the output language code (e.g., "es", "en").

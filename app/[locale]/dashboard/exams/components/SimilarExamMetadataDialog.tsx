@@ -18,8 +18,8 @@ export type SimilarExamMeta = {
 
 interface Props {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: (meta: SimilarExamMeta) => Promise<void> | void;
+  onOpenChange: (_open: boolean) => void;
+  onConfirm: (_meta: SimilarExamMeta) => Promise<void> | void;
 }
 
 export default function SimilarExamMetadataDialog({ open, onOpenChange, onConfirm }: Props) {

@@ -29,10 +29,10 @@ type ProgressEvent = {
 
 interface SimilarExamModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   jobId?: string;
-  onCompleted?: (draftExamId: string) => void;
-  onFailed?: (errKey?: string) => void;
+  onCompleted?: (_draftExamId: string) => void;
+  onFailed?: (_errKey?: string) => void;
   streamUrl?: string;
 }
 
@@ -100,6 +100,9 @@ export default function SimilarExamModal({
   const router = useRouter();
   const [events, setEvents] = useState<ProgressEvent[]>([]);
   const [status, setStatus] = useState<"idle" | "running" | "completed" | "failed">("idle");
+  // Keep a ref in sync with status to avoid re-creating the SSE subscription on each status change
+  const statusRef = useRef<typeof status>(status);
+  useEffect(() => { statusRef.current = status; }, [status]);
   const [errorKey, setErrorKey] = useState<string | undefined>();
   const terminalHandledRef = useRef(false);
 
@@ -122,7 +125,7 @@ export default function SimilarExamModal({
       }
     };
     const cleanupAndClose = () => {
-      try { src.close(); } catch {}
+      try { src.close(); } catch (_e) { /* ignore */ }
       src.removeEventListener("progress", onProgress as EventListener);
       src.removeEventListener("completed", onCompletedHandler as EventListener);
       src.removeEventListener("failed", onFailedHandler as EventListener);
@@ -142,7 +145,7 @@ export default function SimilarExamModal({
           router.push({ pathname: "/dashboard/exams/[id]/edit", params: { id: data.draftExamId } });
         }
         cleanupAndClose();
-      } catch {
+      } catch (_e) {
         // ignore parse error
       }
     };
@@ -157,7 +160,7 @@ export default function SimilarExamModal({
           toast({
             variant: "destructive",
             title: tJobs("jobs.similarExam.status.failed"),
-            description: data.messageKey ? tJobs(data.messageKey as any) : undefined,
+            description: data.messageKey ? tJobs(data.messageKey as Parameters<typeof tJobs>[0]) : undefined,
           });
           if (onFailed) onFailed(data.messageKey);
         }
@@ -168,12 +171,12 @@ export default function SimilarExamModal({
     };
     const onError = () => {
       // Avoid spamming on transient EventSource errors or after terminal state
-      if (terminalHandledRef.current || status === "completed" || status === "failed") return;
+      if (terminalHandledRef.current || statusRef.current === "completed" || statusRef.current === "failed") return;
       setStatus("failed");
       setErrorKey(JobsSimilarExamKeys.errors.unknown);
       toast({ variant: "destructive", title: tJobs("jobs.similarExam.status.failed"), description: tJobs(JobsSimilarExamKeys.errors.unknown) });
       if (onFailed) onFailed(JobsSimilarExamKeys.errors.unknown);
-      try { src.close(); } catch {}
+      try { src.close(); } catch (_e) { /* ignore */ }
     };
 
     src.addEventListener("progress", onProgress as EventListener);
@@ -186,9 +189,9 @@ export default function SimilarExamModal({
       src.removeEventListener("completed", onCompletedHandler as EventListener);
       src.removeEventListener("failed", onFailedHandler as EventListener);
       src.removeEventListener("error", onError as EventListener);
-      src.close();
+      try { src.close(); } catch (_e) { /* ignore */ }
     };
-  }, [open, jobId, onCompleted, onFailed]);
+  }, [open, jobId, onCompleted, onFailed, router, tJobs, toast, streamUrl]);
 
   const stepStatusMap = useMemo(() => {
     const acc: Record<StepKey, "idle" | "started" | "succeeded" | "failed"> = {
@@ -242,7 +245,7 @@ export default function SimilarExamModal({
                       aria-hidden="true"
                     />
                   )}
-                  {tJobs(`jobs.similarExam.steps.${k}` as any)}
+                  {tJobs((`jobs.similarExam.steps.${k}`) as Parameters<typeof tJobs>[0])}
                 </div>
                 <div className="flex items-center">
                   <TooltipProvider>
