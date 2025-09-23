@@ -18,12 +18,12 @@ function hasDangerousDirectives(tex: string): boolean {
   return false;
 }
 
-function runTectonic(cwd: string, jobName: string): Promise<{ code: number; stdout: string; stderr: string }>
-{
+function runTectonic(cwd: string, jobName: string): Promise<{ code: number; stdout: string; stderr: string }>{
   return new Promise((resolve) => {
+    // Let tectonic write into current working directory (.) to avoid absolute path permission quirks
     const args = [
       `${jobName}.tex`,
-      "--outdir", cwd,
+      "--outdir", ".",
       "--keep-logs",
       "--keep-intermediates",
       // no other flags; tectonic is non-interactive by default
@@ -71,27 +71,35 @@ export async function POST(req: NextRequest) {
     }
 
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "pv-tex-"));
-    const texPath = path.join(tmpDir, `${jobName}.tex`);
+    // Use a dedicated work directory where tectonic will write outputs
+    const workDir = path.join(tmpDir, "work");
+    await fs.mkdir(workDir, { recursive: true });
+    const texPath = path.join(workDir, `${jobName}.tex`);
     await fs.writeFile(texPath, tex, { encoding: "utf8" });
 
-    const { code, stdout, stderr } = await runTectonic(tmpDir, jobName);
-    const logPayload = { code, stdout: stdout.slice(-4000), stderr: stderr.slice(-4000) };
+    const { code, stdout, stderr } = await runTectonic(workDir, jobName);
+    const logPayload = { code, cwd: workDir, stdout: stdout.slice(-4000), stderr: stderr.slice(-4000) };
 
     if (code !== 0) {
       // Try to read the .log to return helpful message
       let logText = "";
-      try { logText = await fs.readFile(path.join(tmpDir, `${jobName}.log`), "utf8"); } catch (_e) { /* ignore: .log might not exist */ }
+      try { logText = await fs.readFile(path.join(workDir, `${jobName}.log`), "utf8"); } catch (_e) { /* ignore: .log might not exist */ }
       return NextResponse.json({ error: "Fallo al compilar LaTeX", details: logPayload, log: logText.slice(-8000) }, { status: 422 });
     }
 
-    const pdfPath = path.join(tmpDir, `${jobName}.pdf`);
+    const pdfPath = path.join(workDir, `${jobName}.pdf`);
     const pdf = await fs.readFile(pdfPath);
 
     // Clean tmp dir best-effort
     try {
-      const files = await fs.readdir(tmpDir);
-      await Promise.all(files.map(f => fs.rm(path.join(tmpDir, f), { force: true })));
-      await fs.rmdir(tmpDir);
+      const entries = await fs.readdir(tmpDir);
+      await Promise.all(entries.map(async (f) => {
+        const p = path.join(tmpDir, f);
+        try {
+          await fs.rm(p, { recursive: true, force: true });
+        } catch { /* ignore */ }
+      }));
+      try { await fs.rmdir(tmpDir); } catch { /* ignore */ }
     } catch (_e) { /* ignore: best-effort cleanup */ }
 
     return new NextResponse(pdf, {
