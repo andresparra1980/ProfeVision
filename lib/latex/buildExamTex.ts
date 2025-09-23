@@ -150,7 +150,8 @@ function latexQuestions(exam: ExamLike): string {
   exam.preguntas.forEach((p) => {
     const text = escapeLatexOutsideMath(p.texto || '');
     // Permit content to break across columns/pages: avoid minipage so LaTeX can split naturally
-    q.push(`  \\item \\textbf{${text}} (\\emph{${p.puntaje} pts})`);
+    // Use declaration form {\bfseries ...} instead of \textbf{...} to avoid fragile-argument issues with long text
+    q.push(`  \\item {\\bfseries ${text}} (\\emph{${p.puntaje} pts})`);
     if (p.opciones_respuesta && p.opciones_respuesta.length > 0) {
       q.push('    \\begin{enumerate}');
       p.opciones_respuesta.forEach((o) => {
