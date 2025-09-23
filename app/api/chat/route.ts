@@ -145,6 +145,7 @@ function buildSystemPrompt(language: string) {
     "3) Las opciones incorrectas deben ser plausibles pero claramente incorrectas.",
     "4) El JSON debe cumplir EXACTAMENTE con el contrato indicado (estructura con clave raíz 'exam' y arreglo 'questions').",
     "5) Las preguntas deben ser claras, precisas y educativamente válidas.",
+    "6) Si algún enunciado u opción incluye fórmulas, ecuaciones, expresiones matemáticas, químicas o similares, REPRESENTA esas expresiones en LaTeX (no Markdown) usando delimitadores $...$ para inline y \\[...\\] para display; no agregues prosa fuera del JSON.",
 
     // Comportamiento crítico
     "COMPORTAMIENTO CRÍTICO:",
@@ -165,6 +166,7 @@ function buildSystemPrompt(language: string) {
     // Idioma
     `Idioma de salida obligatorio: ${language}.`,
     "Incluye racionales breves en cada pregunta en el campo 'rationale'.",
+    "Usa LaTeX para las fórmulas cuando aplique (por ejemplo: \\int, \\frac{...}{...}, potencias con ^, funciones como \\sin, \\cos).",
 
     // Recordatorio del contrato (se define explícitamente en otro mensaje del sistema)
     "Responde exclusivamente con JSON válido que cumpla el contrato indicado a continuación.",
@@ -219,6 +221,7 @@ function buildUserInstruction(context: z.infer<typeof ChatContextSchema>) {
     taxonomy && taxonomy.length ? `Taxonomía: ${taxonomy.join(", ")}.` : "",
     constraints.join(" "),
     "Entrega el examen completo bajo la clave 'exam' y cumple estrictamente el contrato indicado.",
+    "Si alguna pregunta u opción incluye fórmulas o expresiones matemáticas/químicas, represéntalas en LaTeX: inline con $...$ y display con \\[...\\]. No uses Markdown; todo debe ir en strings JSON.",
   ]
     .filter(Boolean)
     .join(" \n");
@@ -337,7 +340,7 @@ export async function POST(req: NextRequest) {
           {
             role: "system",
             content:
-              'CONTRATO ESTRUCTURA (responde SOLO con JSON válido): { "exam": { "title": string, "subject": string, "level": string, "language": string, "questions": [ { "id": string, "type": "multiple_choice|true_false|short_answer|essay", "prompt": string, "options": [string], "answer": string|number|boolean|array, "rationale": string, "difficulty": "easy|medium|hard", "taxonomy": "remember|understand|apply|analyze|evaluate|create"|string[], "tags": [string], "source": { "documentId": string|null, "spans": [ { "start": number, "end": number } ] } } ] } }\n\nREGLAS ADICIONALES DEL CONTRATO:\n- Si \'type\' == \'multiple_choice\', \'options\' debe tener entre 2 y 4 elementos y \'answer\' debe corresponder a UNA única opción correcta.\n- Si \'type\' == \'true_false\', \'answer\' debe ser boolean.\n- Usa ids secuenciales: q1, q2, q3... en el campo \'id\'.\n- Devuelve SIEMPRE el examen completo bajo la clave \'exam\'.',
+              'CONTRATO ESTRUCTURA (responde SOLO con JSON válido): { "exam": { "title": string, "subject": string, "level": string, "language": string, "questions": [ { "id": string, "type": "multiple_choice|true_false|short_answer|essay", "prompt": string, "options": [string], "answer": string|number|boolean|array, "rationale": string, "difficulty": "easy|medium|hard", "taxonomy": "remember|understand|apply|analyze|evaluate|create"|string[], "tags": [string], "source": { "documentId": string|null, "spans": [ { "start": number, "end": number } ] } } ] } }\n\nREGLAS ADICIONALES DEL CONTRATO:\n- Si \'type\' == \'multiple_choice\', \'options\' debe tener entre 2 y 4 elementos y \'answer\' debe corresponder a UNA única opción correcta.\n- Si \'type\' == \'true_false\', \'answer\' debe ser boolean.\n- Usa ids secuenciales: q1, q2, q3... en el campo \'id\'.\n- Si una pregunta u opción incluye fórmulas/expresiones, represéntalas en LaTeX (inline con $...$, display con \\[...\\]) dentro del string correspondiente.\n- Devuelve SIEMPRE el examen completo bajo la clave \'exam\'.',
           },
         ],
         temperature: 0.7,

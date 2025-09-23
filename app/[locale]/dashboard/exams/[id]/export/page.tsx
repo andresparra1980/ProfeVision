@@ -3,7 +3,7 @@
 import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, Printer, Eye, Download, FileOutput } from "lucide-react";
+import { ChevronLeft, Printer, Eye, Download, FileOutput, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import { PDFViewer, pdf } from "@react-pdf/renderer";
 import { ExamPDF } from "@/components/exam/exam-pdf";
 import { Separator } from "@/components/ui/separator";
 import TextExportDialog from "../../components/TextExportDialog";
+import { buildExamTex, type LatexOptions } from "@/lib/latex/buildExamTex";
 
 // Tipos
 interface ExamDetails {
@@ -79,6 +80,12 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const [textDialogOpen, setTextDialogOpen] = useState(false);
   const [textExportContent, setTextExportContent] = useState("");
   const [textExportHtmlContent, setTextExportHtmlContent] = useState("");
+  // LaTeX export options
+  const [latexFontSize, setLatexFontSize] = useState<"8pt"|"10pt"|"12pt">("8pt");
+  const [latexColumns, setLatexColumns] = useState<1|2|3>(2);
+  const [latexOrientation, setLatexOrientation] = useState<"portrait"|"landscape">("portrait");
+  const [latexPaper, setLatexPaper] = useState<"letter"|"a4"|"legal">("letter");
+  const [compiling, setCompiling] = useState(false);
 
   const fetchExamDetails = useCallback(async () => {
     try {
@@ -218,6 +225,129 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     setTextDialogOpen(true);
   };
 
+  const handleDownloadTex = () => {
+    if (!exam) return;
+    // metadata
+    const selectedGroup = exam.examen_grupo?.find(eg => eg.grupo.id === selectedGroupId);
+    const opts: LatexOptions = {
+      fontSize: latexFontSize,
+      columns: latexColumns,
+      orientation: latexOrientation,
+      paper: latexPaper,
+      institutionName: exam.materias.entidad?.nombre,
+      subjectName: exam.materias.nombre,
+      title: exam.titulo,
+      groupName: selectedGroup?.grupo?.nombre ?? null,
+      dateText: exam.created_at ? format(new Date(exam.created_at), "d 'de' MMMM 'de' yyyy", { locale: es }) : null,
+      description: exam.descripcion ?? undefined,
+      instructions: exam.instrucciones ?? undefined,
+    };
+    const tex = buildExamTex({
+      titulo: exam.titulo,
+      descripcion: exam.descripcion,
+      instrucciones: exam.instrucciones,
+      duracion_minutos: exam.duracion_minutos,
+      puntaje_total: exam.puntaje_total,
+      materias: {
+        nombre: exam.materias.nombre,
+        entidad: { nombre: exam.materias.entidad.nombre }
+      },
+      preguntas: exam.preguntas.map(p => ({
+        id: p.id,
+        texto: p.texto,
+        puntaje: p.puntaje,
+        opciones_respuesta: (p.opciones_respuesta || []).map(o => ({ id: o.id, texto: o.texto }))
+      }))
+    }, opts);
+
+    const blob = new Blob([tex], { type: 'text/x-tex;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const base = exam.titulo.toLowerCase().replace(/\s+/g, '-');
+    link.href = url;
+    link.download = `${base}.tex`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Compilar en el servidor usando el endpoint local con Tectonic
+  const handleCompileServer = async () => {
+    try {
+      if (!exam) return;
+      setCompiling(true);
+      const selectedGroup = exam.examen_grupo?.find((eg) => eg.grupo.id === selectedGroupId);
+      const opts: LatexOptions = {
+        fontSize: latexFontSize,
+        columns: latexColumns,
+        orientation: latexOrientation,
+        paper: latexPaper,
+        institutionName: exam.materias.entidad?.nombre,
+        subjectName: exam.materias.nombre,
+        title: exam.titulo,
+        groupName: selectedGroup?.grupo?.nombre ?? null,
+        dateText: exam.created_at ? format(new Date(exam.created_at), "d 'de' MMMM 'de' yyyy", { locale: es }) : null,
+        description: exam.descripcion ?? undefined,
+        instructions: exam.instrucciones ?? undefined,
+      };
+      const tex = buildExamTex(
+        {
+          titulo: exam.titulo,
+          descripcion: exam.descripcion,
+          instrucciones: exam.instrucciones,
+          duracion_minutos: exam.duracion_minutos,
+          puntaje_total: exam.puntaje_total,
+          materias: {
+            nombre: exam.materias.nombre,
+            entidad: { nombre: exam.materias.entidad.nombre },
+          },
+          preguntas: exam.preguntas.map((p) => ({
+            id: p.id,
+            texto: p.texto,
+            puntaje: p.puntaje,
+            opciones_respuesta: (p.opciones_respuesta || []).map((o) => ({ id: o.id, texto: o.texto })),
+          })),
+        },
+        opts
+      );
+
+      const jobName = exam.titulo.toLowerCase().replace(/\s+/g, "-");
+      const res = await fetch("/api/latex/compile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tex, options: { jobName } }),
+      });
+      if (!res.ok) {
+        let msg = "Fallo al compilar en el servidor";
+        try {
+          const j = await res.json();
+          msg = j?.error || msg;
+          console.error("Compile error", j);
+        } catch {
+          // ignore
+        }
+        toast({ title: t("common.error"), description: msg, variant: "destructive" });
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${jobName}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: t("exams.messages.success"), description: t("exams.export.success") });
+    } catch (e) {
+      console.error(e);
+      toast({ title: t("common.error"), description: t("exams.export.error"), variant: "destructive" });
+    } finally {
+      setCompiling(false);
+    }
+  };
+
   const handleExport = async (type: 'questions' | 'answers') => {
     try {
       if (!exam) return;
@@ -345,7 +475,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               <p className="text-sm text-muted-foreground">
                 {t('exams.export.questionSheetDesc')}
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button onClick={() => setPreviewing(true)}>
                   <Eye className="mr-2 h-4 w-4" /> {t('exams.export.preview')}
                 </Button>
@@ -354,6 +484,12 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                 </Button>
                 <Button variant="secondary" onClick={openTextExport}>
                   {t('exams.export.exportText')}
+                </Button>
+                <Button variant="outline" onClick={handleDownloadTex}>
+                  <FileText className="mr-2 h-4 w-4" /> Descargar LaTeX
+                </Button>
+                <Button variant="default" onClick={handleCompileServer} disabled={compiling}>
+                  <Printer className="mr-2 h-4 w-4" /> {compiling ? 'Compilando…' : 'Compilar PDF (servidor)'}
                 </Button>
               </div>
             </div>
@@ -421,7 +557,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               </div>
             )}
 
-            {/* Tamaño de papel */}
+            {/* Tamaño de papel (PDF preview) */}
             <div className="space-y-2">
               <Label>{t('exams.export.paperSize')}</Label>
               <RadioGroup value={paperSize} onValueChange={setPaperSize}>
@@ -438,6 +574,42 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                   <Label htmlFor="legal">{t('exams.export.legal')}</Label>
                 </div>
               </RadioGroup>
+            </div>
+
+            {/* Opciones LaTeX */}
+            <Separator />
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Tamaño de letra (LaTeX)</Label>
+                <RadioGroup value={latexFontSize} onValueChange={(v) => setLatexFontSize(v as any)}>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="8pt" id="l8" /><Label htmlFor="l8">8pt</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="10pt" id="l10" /><Label htmlFor="l10">10pt</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="12pt" id="l12" /><Label htmlFor="l12">12pt</Label></div>
+                </RadioGroup>
+              </div>
+              <div className="space-y-2">
+                <Label>Columnas (LaTeX)</Label>
+                <RadioGroup value={String(latexColumns)} onValueChange={(v) => setLatexColumns(Number(v) as any)}>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="1" id="c1" /><Label htmlFor="c1">1</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="2" id="c2" /><Label htmlFor="c2">2</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="3" id="c3" /><Label htmlFor="c3">3</Label></div>
+                </RadioGroup>
+              </div>
+              <div className="space-y-2">
+                <Label>Orientación (LaTeX)</Label>
+                <RadioGroup value={latexOrientation} onValueChange={(v) => setLatexOrientation(v as any)}>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="portrait" id="op" /><Label htmlFor="op">Portrait</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="landscape" id="ol" /><Label htmlFor="ol">Landscape</Label></div>
+                </RadioGroup>
+              </div>
+              <div className="space-y-2">
+                <Label>Papel (LaTeX)</Label>
+                <RadioGroup value={latexPaper} onValueChange={(v) => setLatexPaper(v as any)}>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="letter" id="pl" /><Label htmlFor="pl">Carta (Letter)</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="a4" id="pa4" /><Label htmlFor="pa4">A4</Label></div>
+                  <div className="flex items-center space-x-2"><RadioGroupItem value="legal" id="plegal" /><Label htmlFor="plegal">Legal</Label></div>
+                </RadioGroup>
+              </div>
             </div>
         </CardContent>
       </Card>

@@ -6,6 +6,7 @@ Requirements:
 - Keep the approximate mix of question types and difficulty distribution from the blueprint.
 - Output MUST be a single JSON object conforming to ExamSchema.
 - Do NOT include any prose outside JSON.
+- If there are formulas in the reference questions, use LaTeX to represent them.
 
 Inputs:
 - language: the output language code (e.g., "es", "en").
