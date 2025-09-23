@@ -21,8 +21,9 @@ function hasDangerousDirectives(tex: string): boolean {
 function runTectonic(cwd: string, jobName: string): Promise<{ code: number; stdout: string; stderr: string }>{
   return new Promise((resolve) => {
     // Let tectonic write into current working directory (.) to avoid absolute path permission quirks
+    const inputPath = path.join(cwd, `${jobName}.tex`);
     const args = [
-      `${jobName}.tex`,
+      inputPath,
       "--outdir", ".",
       "--keep-logs",
       "--keep-intermediates",
@@ -70,7 +71,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Directivas LaTeX no permitidas detectadas" }, { status: 400 });
     }
 
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "pv-tex-"));
+    // Allow overriding the base work directory in environments where /tmp has noexec/restrictions
+    const baseTmp = process.env.TEX_WORK_DIR_BASE && process.env.TEX_WORK_DIR_BASE.trim().length > 0
+      ? process.env.TEX_WORK_DIR_BASE
+      : os.tmpdir();
+    const tmpDir = await fs.mkdtemp(path.join(baseTmp, "pv-tex-"));
     // Use a dedicated work directory where tectonic will write outputs
     const workDir = path.join(tmpDir, "work");
     await fs.mkdir(workDir, { recursive: true });
