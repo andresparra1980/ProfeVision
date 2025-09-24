@@ -137,6 +137,8 @@ function buildSystemPrompt(language: string) {
     // Contexto y rol
     "Eres un experto en creación de exámenes educativos. Tu función es generar preguntas de alta calidad.",
     "Devuelves exclusivamente JSON válido, sin comentarios ni explicaciones externas.",
+    "PROHIBIDO usar Markdown o fences de código (no uses ``` ni ```json). Responde SOLO con JSON plano.",
+    "No agregues texto antes o después del JSON (ni notas, ni 'Aquí tienes', ni bloques de ejemplo).",
 
     // Reglas importantes
     "REGLAS IMPORTANTES:",
@@ -146,6 +148,7 @@ function buildSystemPrompt(language: string) {
     "4) El JSON debe cumplir EXACTAMENTE con el contrato indicado (estructura con clave raíz 'exam' y arreglo 'questions').",
     "5) Las preguntas deben ser claras, precisas y educativamente válidas.",
     "6) Si algún enunciado u opción incluye fórmulas, ecuaciones, expresiones matemáticas, químicas o similares, REPRESENTA esas expresiones en LaTeX (no Markdown) usando delimitadores $...$ para inline y \\[...\\] para display; no agregues prosa fuera del JSON.",
+    "7) No envuelvas la salida en bloques de código ni etiquetas de lenguaje (NO uses ```json).",
 
     // Comportamiento crítico
     "COMPORTAMIENTO CRÍTICO:",
@@ -168,6 +171,7 @@ function buildSystemPrompt(language: string) {
     "Incluye racionales breves en cada pregunta en el campo 'rationale'.",
     "Usa LaTeX para las fórmulas cuando aplique (por ejemplo: \\int, \\frac{...}{...}, potencias con ^, funciones como \\sin, \\cos).",
     "Formato de fórmulas: inline con $...$ y display con \\[...\\]. No uses Markdown math (ni ``` ni bloques).",
+    "IMPORTANTE: la respuesta debe ser un único objeto JSON. No devuelvas arrays sueltos ni envolturas adicionales.",
     "IMPORTANTE: Escribe los comandos LaTeX con UNA sola barra invertida por comando (\\alpha, \\Delta, \\frac, etc.). No insertes barras extra; el escape necesario del JSON se aplica automáticamente.",
     "Ejemplos correctos en strings JSON: '$\\\\Delta p$', '$E=mc^2$', '\\\\[ \\int_0^1 x^2 \\; dx \\\\]'. Evita escribir 'Deltap' o 'LaTeX en texto plano'.",
 
@@ -372,15 +376,17 @@ export async function POST(req: NextRequest) {
     }
 
     // 6) Extraer JSON y validar (tolerante a bloques con ```json ... ```)
+    const stripCodeFences = (s: string) => {
+      let out = s.trim();
+      // Remove opening fence like ```json or ``` plus any whitespace/newline
+      out = out.replace(/^```(?:json|jsonc|javascript|js|ts|typescript)?\s*/i, "");
+      // Remove closing fence even if followed by whitespace/newlines
+      out = out.replace(/\s*```\s*$/i, "");
+      return out.trim();
+    };
     let jsonPayload: unknown;
     try {
-      const stripped = content
-        .trim()
-        // quita cabecera de bloque de código: ```json\n o ```\n
-        .replace(/^```[a-zA-Z]*\n?/, "")
-        // quita cierre de bloque de código: ``` al final
-        .replace(/```$/, "")
-        .trim();
+      const stripped = stripCodeFences(content);
 
       // Intento directo
       try {

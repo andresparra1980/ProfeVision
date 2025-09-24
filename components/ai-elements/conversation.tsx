@@ -95,3 +95,26 @@ export const ConversationScrollButton = ({
     )
   );
 };
+
+export type ConversationTypingProps = ComponentProps<"div">;
+
+export const ConversationTyping = ({ className, ...props }: ConversationTypingProps) => (
+  <div
+    className={cn("flex items-center gap-1 py-2", className)}
+    aria-live="polite"
+    {...props}
+  >
+    <span
+      className="h-2 w-2 rounded-full bg-current opacity-80 animate-bounce"
+      style={{ animationDelay: "0ms" }}
+    />
+    <span
+      className="h-2 w-2 rounded-full bg-current opacity-80 animate-bounce"
+      style={{ animationDelay: "150ms" }}
+    />
+    <span
+      className="h-2 w-2 rounded-full bg-current opacity-80 animate-bounce"
+      style={{ animationDelay: "300ms" }}
+    />
+  </div>
+);

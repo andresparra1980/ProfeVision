@@ -11,6 +11,7 @@ import {
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
+  ConversationTyping,
 } from "@/components/ai-elements/conversation";
 import {
   PromptInput,
@@ -129,11 +130,30 @@ export default function ChatPanel() {
       });
 
       if (!res.ok) {
-        const errText = await res.text();
-        setMessages((prev) => [
+        let friendly = '';
+        try {
+          const data = await res.json();
+          if (res.status === 422 && typeof data?.error === 'string') {
+            if (data.error.includes('JSON inválido')) {
+              friendly = t('chat.toasts.invalidJson') || 'El modelo devolvió un formato inesperado. Intenta de nuevo.';
+            } else if (data.error.includes('Contrato inválido')) {
+              friendly = t('chat.toasts.invalidContract') || 'La respuesta no cumplió el contrato esperado. Ajusté reglas y puedes reintentar.';
+            } else {
+              friendly = data.error;
+            }
+          } else if (typeof data?.error === 'string') {
+            friendly = data.error;
+          }
+        } catch (_e) {
+          const errText = await res.text();
+          friendly = errText || t('saveDraftDialog.toasts.saveError');
+        }
+
+        try { toast({ variant: 'destructive', title: t('chat.toasts.errorTitle'), description: friendly }); } catch (_e) { void _e; }
+        setMessages((prev) => ([
           ...prev,
-          { role: "assistant", content: `Error: ${res.status}. ${errText || t('saveDraftDialog.toasts.saveError')}` },
-        ]);
+          { role: 'assistant', content: `Error: ${res.status}. ${friendly}` },
+        ]));
         setIsSending(false);
         return;
       }
@@ -160,20 +180,31 @@ export default function ChatPanel() {
   return (
     <div className="rounded-md border p-3 space-y-3">
       <div className="font-medium"></div>
-      <Conversation className="relative w-full rounded-xl border bg-background shadow-sm" style={{ height: "12rem" }}>
-        <ConversationContent>
-          {messages.length === 0
-            ? null
-            : messages.map((m, i) => (
-                <Message key={i} from={m.role}>
-                  <MessageContent>{m.content}</MessageContent>
+      <div className="flex w-full justify-end">
+        <div className="w-full max-w-2xl">
+          <Conversation className="relative w-full rounded-xl border bg-background shadow-sm" style={{ height: "12rem" }}>
+            <ConversationContent>
+              {messages.length === 0
+                ? null
+                : messages.map((m, i) => (
+                    <Message key={i} from={m.role}>
+                      <MessageContent>{m.content}</MessageContent>
+                    </Message>
+                  ))}
+              {isSending && (
+                <Message from="assistant">
+                  <MessageContent>
+                    <ConversationTyping className="pl-2" />
+                  </MessageContent>
                 </Message>
-              ))}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
+              )}
+            </ConversationContent>
+            <ConversationScrollButton />
+          </Conversation>
+        </div>
+      </div>
 
-      <div className="mt-4 flex w-full justify-center">
+      <div className="mt-4 flex w-full justify-end">
         <div className="w-full max-w-2xl">
           <PromptInput
             onSubmit={(_message, _event) => {
