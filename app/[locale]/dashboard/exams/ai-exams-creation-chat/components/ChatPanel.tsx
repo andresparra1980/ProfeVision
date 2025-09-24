@@ -5,6 +5,21 @@ import { loadSettings, loadLastDocumentsContext, loadOutput } from "@/lib/persis
 import { useAIChat } from "./AIChatContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
+import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputTextarea,
+  PromptInputToolbar,
+  PromptInputTools,
+  PromptInputSubmit,
+} from "@/components/ai-elements/prompt-input";
 
 interface ChatMessage {
   role: "user" | "system" | "assistant";
@@ -145,35 +160,46 @@ export default function ChatPanel() {
   return (
     <div className="rounded-md border p-3 space-y-3">
       <div className="font-medium"></div>
-      <div className="h-48 overflow-auto rounded bg-muted/30 p-2 space-y-2 text-sm">
-        {messages.length === 0 ? (
-          <div className="text-muted-foreground"></div>
-        ) : (
-          messages.map((m, i) => (
-            <div key={i} className="whitespace-pre-wrap">
-              <span className="font-semibold">{m.role === "user" ? t('chat.you') : m.role === "assistant" ? t('chat.assistant') : t('chat.system')}:</span>{" "}
-              {m.content}
-            </div>
-          ))
-        )}
-      </div>
+      <Conversation className="relative w-full rounded-xl border bg-background shadow-sm" style={{ height: "12rem" }}>
+        <ConversationContent>
+          {messages.length === 0
+            ? null
+            : messages.map((m, i) => (
+                <Message key={i} from={m.role}>
+                  <MessageContent>{m.content}</MessageContent>
+                </Message>
+              ))}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
-      <div className="flex items-end gap-2">
-        <textarea
-          className="flex-1 min-h-20 rounded border p-2 text-sm"
-          placeholder={t('chat.inputPlaceholder')}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          ref={inputRef}
-          autoFocus
-        />
-        <button
-          className="h-10 shrink-0 rounded bg-primary px-3 text-primary-foreground disabled:opacity-50"
-          onClick={onSend}
-          disabled={isSending || input.trim().length === 0}
-        >
-          {isSending ? "…" : t('chat.send')}
-        </button>
+      <div className="mt-4 flex w-full justify-center">
+        <div className="w-full max-w-2xl">
+          <PromptInput
+            onSubmit={(_message, _event) => {
+              onSend();
+            }}
+            className="relative"
+          >
+            <PromptInputBody>
+              <PromptInputTextarea
+                placeholder={t('chat.inputPlaceholder')}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                ref={inputRef}
+                autoFocus
+              />
+            </PromptInputBody>
+            <PromptInputToolbar>
+              <PromptInputTools>{/* Tools/menus can be added later */}</PromptInputTools>
+              <PromptInputSubmit
+                disabled={isSending || input.trim().length === 0}
+                status={isSending ? 'submitted' : undefined}
+                className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
+              />
+            </PromptInputToolbar>
+          </PromptInput>
+        </div>
       </div>
     </div>
   );
