@@ -365,10 +365,10 @@ export async function POST(req: NextRequest) {
     }
 
     const aiData = await aiRes.json();
-    const content: string | undefined = aiData.choices?.[0]?.message?.content;
+    const contentUnknown: unknown = aiData.choices?.[0]?.message?.content;
     logger.log("Respuesta IA bruta recibida");
 
-    if (!content) {
+    if (contentUnknown == null) {
       return NextResponse.json(
         { error: "Respuesta vacía de IA" },
         { status: 502 }
@@ -376,66 +376,76 @@ export async function POST(req: NextRequest) {
     }
 
     // 6) Extraer JSON y validar (tolerante a bloques con ```json ... ```)
-    const stripCodeFences = (s: string) => {
-      let out = s.trim();
-      // Remove opening fence like ```json or ``` plus any whitespace/newline
-      out = out.replace(/^```(?:json|jsonc|javascript|js|ts|typescript)?\s*/i, "");
-      // Remove closing fence even if followed by whitespace/newlines
-      out = out.replace(/\s*```\s*$/i, "");
-      return out.trim();
-    };
     let jsonPayload: unknown;
-    try {
-      const stripped = stripCodeFences(content);
-
-      // Intento directo
+    if (typeof contentUnknown === "object") {
+      // Algunos modelos pueden devolver ya un objeto JSON en message.content
+      jsonPayload = contentUnknown;
+    } else if (typeof contentUnknown === "string") {
+      const stripCodeFences = (s: string) => {
+        let out = s.trim();
+        // Remove opening fence like ```json or ``` plus any whitespace/newline
+        out = out.replace(/^```(?:json|jsonc|javascript|js|ts|typescript)?\s*/i, "");
+        // Remove closing fence even if followed by whitespace/newlines
+        out = out.replace(/\s*```\s*$/i, "");
+        return out.trim();
+      };
       try {
-        jsonPayload = JSON.parse(stripped);
-      } catch {
-        // Buscamos el objeto JSON balanceado más grande { ... } respetando strings y escapes
-        const s = stripped;
-        let inStr = false;
-        let esc = false;
-        let depth = 0;
-        let startIdx = -1;
-        let endIdx = -1;
-        for (let i = 0; i < s.length; i++) {
-          const ch = s[i];
-          if (inStr) {
-            if (esc) {
-              esc = false;
-            } else if (ch === "\\") {
-              esc = true;
-            } else if (ch === '"') {
-              inStr = false;
+        const stripped = stripCodeFences(contentUnknown);
+        // Intento directo
+        try {
+          jsonPayload = JSON.parse(stripped);
+        } catch {
+          // Buscamos el objeto JSON balanceado más grande { ... } respetando strings y escapes
+          const s = stripped;
+          let inStr = false;
+          let esc = false;
+          let depth = 0;
+          let startIdx = -1;
+          let endIdx = -1;
+          for (let i = 0; i < s.length; i++) {
+            const ch = s[i];
+            if (inStr) {
+              if (esc) {
+                esc = false;
+              } else if (ch === "\\") {
+                esc = true;
+              } else if (ch === '"') {
+                inStr = false;
+              }
+              continue;
             }
-            continue;
-          }
-          if (ch === '"') {
-            inStr = true;
-            continue;
-          }
-          if (ch === "{") {
-            if (depth === 0) startIdx = i;
-            depth++;
-          } else if (ch === "}") {
-            depth--;
-            if (depth === 0 && startIdx !== -1) {
-              endIdx = i; // mantén el último cierre balanceado al nivel raíz
+            if (ch === '"') {
+              inStr = true;
+              continue;
             }
+            if (ch === "{") {
+              if (depth === 0) startIdx = i;
+              depth++;
+            } else if (ch === "}") {
+              depth--;
+              if (depth === 0 && startIdx !== -1) {
+                endIdx = i; // mantén el último cierre balanceado al nivel raíz
+              }
+            }
+          }
+          if (startIdx !== -1 && endIdx !== -1) {
+            const candidate = s.slice(startIdx, endIdx + 1);
+            jsonPayload = JSON.parse(candidate);
+          } else {
+            throw new Error("No balanced JSON object found");
           }
         }
-        if (startIdx !== -1 && endIdx !== -1) {
-          const candidate = s.slice(startIdx, endIdx + 1);
-          jsonPayload = JSON.parse(candidate);
-        } else {
-          throw new Error("No balanced JSON object found");
-        }
+      } catch (_e) {
+        logger.error("No se pudo parsear JSON de IA", contentUnknown);
+        return NextResponse.json(
+          { error: "JSON inválido devuelto por IA", raw: contentUnknown },
+          { status: 422 }
+        );
       }
-    } catch (_e) {
-      logger.error("No se pudo parsear JSON de IA", content);
+    } else {
+      logger.error("Contenido de IA con tipo inesperado", typeof contentUnknown);
       return NextResponse.json(
-        { error: "JSON inválido devuelto por IA", raw: content },
+        { error: "Contenido no soportado devuelto por IA", raw: String(contentUnknown) },
         { status: 422 }
       );
     }
