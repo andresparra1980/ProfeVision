@@ -27,8 +27,6 @@ import { supabase } from "@/lib/supabase";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 
 import ChatPanel from "./components/ChatPanel";
-import DocumentContextBar from "./components/DocumentContextBar";
-import ResultsView from "./components/ResultsView";
 import { AIChatProvider } from "./components/AIChatContext";
 import { useAIChat } from "./components/AIChatContext";
 import type { AIExamResult } from "./components/AIChatContext";
@@ -739,32 +737,11 @@ export default function AIExamsCreationChatPage() {
           <Button onClick={() => setShowSaveDraftDialog(true)}>{t('header.saveDraft')}</Button>
         </div>
       </div>
-
-      {/* Chat, resultados y diálogo de guardar dentro del Provider */}
+      <div className="border-t border-black/50 dark:border-white/50"></div>
+      {/* Chat y diálogo de guardar dentro del Provider */}
       <AIChatProvider>
-        <div className="space-y-4">
-          {/* Chat (focused by default) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('chat.title')}</CardTitle>
-              <CardDescription>{t('chat.description')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChatPanel />
-            </CardContent>
-          </Card>
-          {/* Resultados */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('results.title')}</CardTitle>
-              <CardDescription>{t('results.description')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/** Force ResultsView to remount whenever a different exam draft is loaded */}
-              <ResultsView key={loadedExamId ?? 'no-exam'} />
-            </CardContent>
-          </Card>
-        </div>
+        {/* Chat (focused by default) - floating, without surrounding Card */}
+        <ChatPanel />
 
         {/* Save Draft Dialog inside Provider to access AI context */}
         <SaveDraftDialog
@@ -778,25 +755,9 @@ export default function AIExamsCreationChatPage() {
         <DraftLoader />
       </AIChatProvider>
 
-      {/* Contexto de documento (movido al final) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('context.title')}</CardTitle>
-          <CardDescription>{t('context.description')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DocumentContextBar />
-        </CardContent>
-      </Card>
+      {/* Contexto de documento removido: adjuntos se gestionan desde la toolbar del Prompt */}
 
-      {/* Botonera inferior: misma posición en eje X que arriba */}
-      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div></div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setShowClearDialog(true)}>{t('header.clearChat')}</Button>
-          <Button onClick={() => setShowSaveDraftDialog(true)}>{t('header.saveDraft')}</Button>
-        </div>
-      </div>
+      {/* Botonera inferior eliminada: acciones sólo en el header */}
 
       {/* Confirmación Borrar Chat */}
       <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>

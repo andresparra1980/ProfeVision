@@ -8,7 +8,17 @@
   },
   "context": {
     "title": "Contexto de documento",
-    "description": "Sube hasta 5 archivos para ser resumidos por la IA que sirvan de contexto para la generación del examen."
+    "description": "Sube hasta 5 archivos para ser resumidos por la IA que sirvan de contexto para la generación del examen.",
+    "attach": "Adjuntar",
+    "remove": "Eliminar documento",
+    "viewSummary": "Ver resumen",
+    "summaryNotReadyTitle": "Resumen no disponible",
+    "summaryNotReady": "El resumen estará disponible en cuanto termine el procesamiento.",
+    "summaryTitle": "Resumen del documento",
+    "summaryDesc": "Vista previa del resumen generado por IA.",
+    "loadingSummary": "Cargando resumen...",
+    "document": "Documento",
+    "limitDesc": "Solo se permiten 5 documentos."
   },
   "results": {
     "title": "Resultados",
@@ -20,7 +30,9 @@
     "selectCorrect": "Selecciona la respuesta correcta:",
     "true": "Verdadero",
     "false": "Falso",
-    "rationale": "Rationale"
+    "rationale": "Rationale",
+    "hint": "Haz clic para ver las preguntas generadas.",
+    "hintTooltip": "Haz clic en el botón para ver las preguntas generadas."
   },
   "editor": {
     "title": "Editar pregunta",
@@ -105,6 +117,7 @@
     "needLogin": "Debes iniciar sesión para usar la IA.",
     "send": "Enviar",
     "inputPlaceholder": "Escribe tus instrucciones aquí...",
+    "waitingPlaceholder": "Esperando respuesta...",
     "you": "Tú",
     "assistant": "Asistente",
     "system": "Sistema",
@@ -112,7 +125,18 @@
       "successTitle": "Resultados generados",
       "successDesc": "Revisa el examen generado en el panel de Resultados.",
       "errorTitle": "Error",
-      "errorDesc": "Ocurrió un error inesperado. Intenta nuevamente."
+      "errorDesc": "Ocurrió un error inesperado. Intenta nuevamente.",
+      "invalidJson": "Error en la respuesta del asistente. Intenta nuevamente."
+    }
+  },
+  "empty": {
+    "title": "¿Cómo puedo ayudarte hoy?",
+    "subtitle": "Elige una sugerencia o escribe tus instrucciones abajo.",
+    "examples": {
+      "createExam": "Creemos un examen de 5 preguntas acerca de ...",
+      "modifyQuestion": "Modifiquemos la pregunta 2 de este examen y hagámosla sobre ...",
+      "useDocuments": "Usa los documentos adjuntos para generar ... preguntas de opción múltiple.",
+      "moreHarder": "Genérame 3 preguntas adicionales aumentando la dificultad al nivel Avanzado."
     }
   }
 }

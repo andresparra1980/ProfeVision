@@ -186,31 +186,7 @@ No añadas nada fuera del JSON.` },
           response_format: { type: "json_object" },
         };
 
-        // Log request with redacted auth and truncated image content
-        try {
-          const redactedHeaders = { ...headers, Authorization: "Bearer [REDACTED]" };
-          // Prepare a shallow-inspected body where image data is truncated
-          const loggedBody = JSON.parse(JSON.stringify(bodyObj));
-          try {
-            const userContent = loggedBody?.messages?.[1]?.content;
-            if (Array.isArray(userContent)) {
-              for (const part of userContent) {
-                if (part?.type === "image_url" && part?.image_url?.url && typeof part.image_url.url === "string") {
-                  part.image_url.url = truncate(part.image_url.url, 120);
-                }
-              }
-            }
-          } catch (_e) { void _e; }
-          // Stringify body so it doesn't collapse to [Object]
-          logger.api(
-            "/api/documents/summarize vision request",
-            {
-              model: modelName,
-              headers: redactedHeaders,
-              body: JSON.stringify(loggedBody, null, 2),
-            }
-          );
-        } catch (_e) { void _e; }
+        // removed verbose logger.api
 
         const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
@@ -227,11 +203,6 @@ No añadas nada fuera del JSON.` },
           });
         } catch (_e) { void _e; }
         const rawBody = await resp.text();
-        logger.api("/api/documents/summarize vision raw response", {
-          status,
-          headers: headersObj,
-          body: truncate(rawBody, 20000),
-        });
 
         let data: unknown = null;
         try {
@@ -296,17 +267,11 @@ No añadas nada fuera del JSON.` },
           })();
           throw err;
         }
-        // Log the parsed and validated JSON for diagnosis
-        try {
-          logger.api("/api/documents/summarize vision validated json", {
-            result: JSON.stringify(validated.data, null, 2),
-          });
-        } catch (_logErr) { console.error(_logErr as unknown); }
+        // removed verbose logger.api for validated json
         return validated.data;
       };
 
       try {
-        logger.api("/api/documents/summarize image-mode selected model", { model: envPrimary });
         const out = await requestVision(envPrimary || "openrouter/auto");
         return NextResponse.json(out);
       } catch (_e1: unknown) {
