@@ -24,7 +24,7 @@ import {
 import { Noto_Sans } from "next/font/google";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Paperclip, ListChecks, X as XIcon, ChevronDown, FileText } from "lucide-react";
+import { Paperclip, ListChecks, X as XIcon, FileText } from "lucide-react";
 import ResultsView from "./ResultsView";
 import {
   saveLastDocumentsContext,
@@ -164,7 +164,6 @@ export default function ChatPanel() {
     () => documentIds.filter((id) => summariesAvailability[id]),
     [documentIds, summariesAvailability]
   );
-  const totalDocsCount = documentIds.length;
 
   async function openSummaryDialog(targetId?: string) {
     const id = targetId ?? (summaryDocId ?? documentIds[0] ?? null);
@@ -213,8 +212,8 @@ export default function ChatPanel() {
     const out: string[] = [];
     let inList = false;
     let inCode = false;
-    for (let raw of lines) {
-      let line = raw;
+    for (const raw of lines) {
+      const line = raw;
       if (line.trim().startsWith("```") ) {
         if (!inCode) { out.push('<pre><code>'); inCode = true; }
         else { out.push('</code></pre>'); inCode = false; }
@@ -232,8 +231,7 @@ export default function ChatPanel() {
       const li = line.match(/^\s*[-*]\s+(.*)/);
       if (li) {
         if (!inList) { out.push('<ul>'); inList = true; }
-        let txt = li[1];
-        txt = escapeHtml(txt)
+        const txt = escapeHtml(li[1])
           .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
           .replace(/\*(.+?)\*/g, '<em>$1</em>');
         out.push(`<li>${txt}</li>`);
@@ -243,7 +241,7 @@ export default function ChatPanel() {
       }
       // Paragraph
       if (line.trim() === '') { if (inList) { out.push('</ul>'); inList = false; } out.push(''); continue; }
-      let txt = escapeHtml(line)
+      const txt = escapeHtml(line)
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/g, '<em>$1</em>');
       out.push(`<p>${txt}</p>`);
@@ -254,40 +252,54 @@ export default function ChatPanel() {
   }
 
   // Render a structured summary object (like the one returned by summarizer) to HTML
-  function buildStructuredSummaryHtml(data: any): string | null {
+  function buildStructuredSummaryHtml(data: unknown): string | null {
     try {
-      const s = data?.summary ?? data;
-      if (!s || typeof s !== 'object') return null;
+      const base: unknown = (data as { summary?: unknown } | null | undefined)?.summary ?? data;
+      if (!base || typeof base !== 'object') return null;
+      const s = base as Record<string, unknown>;
       const parts: string[] = [];
-      if (typeof s.generalOverview === 'string' && s.generalOverview.trim()) {
-        parts.push(`<h2>Resumen</h2><p>${escapeHtml(s.generalOverview)}</p>`);
+      const generalOverview = typeof s.generalOverview === 'string' ? s.generalOverview : '';
+      if (generalOverview.trim()) {
+        parts.push(`<h2>Resumen</h2><p>${escapeHtml(generalOverview)}</p>`);
       }
-      if (typeof s.academicLevel === 'string' && s.academicLevel.trim()) {
-        parts.push(`<p><strong>Nivel académico:</strong> ${escapeHtml(s.academicLevel)}</p>`);
+      const academicLevel = typeof s.academicLevel === 'string' ? s.academicLevel : '';
+      if (academicLevel.trim()) {
+        parts.push(`<p><strong>Nivel académico:</strong> ${escapeHtml(academicLevel)}</p>`);
       }
-      if (Array.isArray(s.macroTopics) && s.macroTopics.length) {
+      const macroTopics = Array.isArray(s.macroTopics) ? (s.macroTopics as unknown[]) : [];
+      if (macroTopics.length) {
         parts.push('<h2>Temas principales</h2>');
-        for (const mt of s.macroTopics) {
+        for (const mtRaw of macroTopics) {
+          const mt = (mtRaw ?? {}) as Record<string, unknown>;
           parts.push('<div class="mt-3 mb-2">');
-          if (mt?.name) {
-            const badge = mt?.importance ? ` <span class="inline-block align-middle rounded-full border px-2 py-[2px] text-[10px] ml-2">${escapeHtml(String(mt.importance))}</span>` : '';
-            parts.push(`<h3 class="!mt-0">${escapeHtml(String(mt.name))}${badge}</h3>`);
+          const mtName = typeof mt.name === 'string' ? mt.name : undefined;
+          const mtImportance = typeof mt.importance === 'string' ? mt.importance : undefined;
+          if (mtName) {
+            const badge = mtImportance ? ` <span class="inline-block align-middle rounded-full border px-2 py-[2px] text-[10px] ml-2">${escapeHtml(mtImportance)}</span>` : '';
+            parts.push(`<h3 class="!mt-0">${escapeHtml(mtName)}${badge}</h3>`);
           }
-          if (mt?.description) parts.push(`<p>${escapeHtml(String(mt.description))}</p>`);
-          if (Array.isArray(mt?.microTopics) && mt.microTopics.length) {
+          const mtDesc = typeof mt.description === 'string' ? mt.description : undefined;
+          if (mtDesc) parts.push(`<p>${escapeHtml(mtDesc)}</p>`);
+          const microTopics = Array.isArray(mt.microTopics) ? (mt.microTopics as unknown[]) : [];
+          if (microTopics.length) {
             parts.push('<ul>');
-            for (const mic of mt.microTopics) {
+            for (const micRaw of microTopics) {
+              const mic = (micRaw ?? {}) as Record<string, unknown>;
               parts.push('<li>');
-              if (mic?.name) parts.push(`<p><strong>${escapeHtml(String(mic.name))}</strong></p>`);
-              if (mic?.description) parts.push(`<p>${escapeHtml(String(mic.description))}</p>`);
-              if (Array.isArray(mic?.keyTerms) && mic.keyTerms.length) {
+              const micName = typeof mic.name === 'string' ? mic.name : undefined;
+              if (micName) parts.push(`<p><strong>${escapeHtml(micName)}</strong></p>`);
+              const micDesc = typeof mic.description === 'string' ? mic.description : undefined;
+              if (micDesc) parts.push(`<p>${escapeHtml(micDesc)}</p>`);
+              const keyTerms = Array.isArray(mic.keyTerms) ? (mic.keyTerms as unknown[]) : [];
+              if (keyTerms.length) {
                 parts.push('<p><em>Términos clave:</em></p><ul>');
-                for (const t of mic.keyTerms) parts.push(`<li>${escapeHtml(String(t))}</li>`);
+                for (const t of keyTerms) parts.push(`<li>${escapeHtml(String(t as string))}</li>`);
                 parts.push('</ul>');
               }
-              if (Array.isArray(mic?.concepts) && mic.concepts.length) {
+              const concepts = Array.isArray(mic.concepts) ? (mic.concepts as unknown[]) : [];
+              if (concepts.length) {
                 parts.push('<p><em>Conceptos:</em></p><ul>');
-                for (const c of mic.concepts) parts.push(`<li>${escapeHtml(String(c))}</li>`);
+                for (const c of concepts) parts.push(`<li>${escapeHtml(String(c as string))}</li>`);
                 parts.push('</ul>');
               }
               parts.push('</li>');
@@ -309,7 +321,9 @@ export default function ChatPanel() {
     if (typeof val === 'string') return val;
     if (val == null) return '';
     if (typeof val !== 'object') return String(val);
-    const obj: any = val as any;
+    const obj = val as Record<string, unknown>;
+    const choices = Array.isArray(obj.choices as unknown[]) ? (obj.choices as unknown[]) : [];
+    const firstChoice = (choices[0] as { message?: { content?: unknown } } | undefined)?.message?.content;
     const candidates: unknown[] = [
       obj.summary,
       obj.markdown,
@@ -317,7 +331,7 @@ export default function ChatPanel() {
       obj.content,
       obj.output_text,
       obj.result,
-      obj.choices?.[0]?.message?.content,
+      firstChoice,
     ];
     for (const c of candidates) {
       if (typeof c === 'string') return c;
@@ -746,7 +760,7 @@ export default function ChatPanel() {
               <div className="text-muted-foreground">{t('context.loadingSummary', { fallback: 'Cargando resumen...' })}</div>
             ) : summaryContent ? (
               (() => {
-                const structured = buildStructuredSummaryHtml(summaryContent as any);
+                const structured = buildStructuredSummaryHtml(summaryContent);
                 const html = structured ?? mdToHtmlLite(String(getSummaryDisplayText(summaryContent)));
                 return <div dangerouslySetInnerHTML={{ __html: html }} />;
               })()

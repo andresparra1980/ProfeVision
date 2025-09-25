@@ -27,6 +27,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { nanoid } from "nanoid";
+import Image from "next/image";
 import {
   type ChangeEventHandler,
   Children,
@@ -50,8 +51,8 @@ import {
 
 type AttachmentsContext = {
   files: (FileUIPart & { id: string })[];
-  add: (files: File[] | FileList) => void;
-  remove: (id: string) => void;
+  add: (_files: File[] | FileList) => void;
+  remove: (_id: string) => void;
   clear: () => void;
   openFileDialog: () => void;
   fileInputRef: RefObject<HTMLInputElement | null>;
@@ -90,12 +91,13 @@ export function PromptInputAttachment({
       {...props}
     >
       {data.mediaType?.startsWith("image/") && data.url ? (
-        <img
+        <Image
           alt={data.filename || "attachment"}
           className="size-full rounded-md object-cover"
           height={56}
           src={data.url}
           width={56}
+          unoptimized
         />
       ) : (
         <div className="flex size-full items-center justify-center text-muted-foreground">
@@ -120,7 +122,7 @@ export type PromptInputAttachmentsProps = Omit<
   HTMLAttributes<HTMLDivElement>,
   "children"
 > & {
-  children: (attachment: FileUIPart & { id: string }) => React.ReactNode;
+  children: (_attachment: FileUIPart & { id: string }) => React.ReactNode;
 };
 
 export function PromptInputAttachments({
@@ -207,13 +209,13 @@ export type PromptInputProps = Omit<
   // Minimal constraints
   maxFiles?: number;
   maxFileSize?: number; // bytes
-  onError?: (err: {
+  onError?: (_err: {
     code: "max_files" | "max_file_size" | "accept";
     message: string;
   }) => void;
   onSubmit: (
-    message: PromptInputMessage,
-    event: FormEvent<HTMLFormElement>
+    _message: PromptInputMessage,
+    _event: FormEvent<HTMLFormElement>
   ) => void;
 };
 

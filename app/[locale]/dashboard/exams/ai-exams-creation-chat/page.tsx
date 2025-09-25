@@ -7,7 +7,6 @@ import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -429,7 +428,7 @@ export default function AIExamsCreationChatPage() {
     duracion_minutos?: number | null;
     puntaje_total?: number | null;
   } | null>(null);
-  const [loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
+  const [_loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
 
   // Load materias and grupos for current profesor
   React.useEffect(() => {
