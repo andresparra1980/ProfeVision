@@ -152,6 +152,7 @@ function buildSystemPrompt(language: string) {
 
     // Comportamiento crítico
     "COMPORTAMIENTO CRÍTICO:",
+    "- Asegúrate de que el JSON sea balanceado (abre y cierra correctamente las llaves y corchetes).",
     "- No reemplaces preguntas existentes por preguntas nuevas a menos que el usuario lo indique explícitamente cual.",
     "- Si recibes un examen existente en el contexto, SIEMPRE devuelve el examen COMPLETO actualizado bajo la clave 'exam' sin borrar preguntas a menos que el usuario lo indique explícitamente.",
     "- Mantén las preguntas no modificadas exactamente iguales.",
@@ -364,9 +365,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const aiData = await aiRes.json();
-    const contentUnknown: unknown = aiData.choices?.[0]?.message?.content;
-    logger.log("Respuesta IA bruta recibida");
+    // Read raw body as text to log exact response from LLM
+    const rawBody = await aiRes.text();
+    try {
+      const size = rawBody.length;
+      const chunkSize = 8000;
+      const total = Math.ceil(size / chunkSize) || 1;
+      for (let i = 0; i < total; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, size);
+        logger.api("/api/chat:LLM raw chunk", { idx: i + 1, total, start, end, size, chunk: rawBody.slice(start, end) });
+      }
+    } catch (_e) { void _e; }
+
+    // Derive contentUnknown from parsed JSON if possible, otherwise use raw string
+    let contentUnknown: unknown;
+    try {
+      const aiData = JSON.parse(rawBody) as { choices?: Array<{ message?: { content?: unknown } }> };
+      contentUnknown = aiData?.choices?.[0]?.message?.content as unknown;
+    } catch {
+      contentUnknown = rawBody as unknown;
+    }
 
     if (contentUnknown == null) {
       return NextResponse.json(
@@ -377,68 +396,163 @@ export async function POST(req: NextRequest) {
 
     // 6) Extraer JSON y validar (tolerante a bloques con ```json ... ```)
     let jsonPayload: unknown;
-    if (typeof contentUnknown === "object") {
-      // Algunos modelos pueden devolver ya un objeto JSON en message.content
-      jsonPayload = contentUnknown;
+    if (Array.isArray(contentUnknown)) {
+      // Algunos modelos devuelven "content" como una lista de partes
+      // Buscamos primero un objeto, si no, un string con JSON
+      let found: unknown | undefined;
+      for (const part of contentUnknown) {
+        if (part && typeof part === "object") {
+          // OpenAI-style: { type: 'output_text', text: '...' }
+          const text = (part as { text?: unknown }).text;
+          if (typeof text === "string") {
+            try {
+              found = JSON.parse(text);
+              break;
+            } catch { /* continue */ }
+          }
+          // Or the part could already be the object
+          if (!found) {
+            found = part;
+          }
+        } else if (typeof part === "string") {
+          try {
+            found = JSON.parse(part);
+            break;
+          } catch { /* continue */ }
+        }
+      }
+      if (found == null) {
+        logger.error("No se pudo extraer JSON desde arreglo de partes de IA");
+        return NextResponse.json(
+          { error: "JSON inválido devuelto por IA", raw: contentUnknown },
+          { status: 422 }
+        );
+      }
+      jsonPayload = found;
+    } else if (typeof contentUnknown === "object") {
+      // Algunos modelos pueden devolver ya un objeto JSON en message.content o wrappers
+      const obj = contentUnknown as Record<string, unknown>;
+      if (obj && typeof obj === "object" && "exam" in obj) {
+        jsonPayload = obj;
+      } else if (typeof obj.text === "string") {
+        // Unwrap text field containing JSON
+        try {
+          jsonPayload = JSON.parse(obj.text);
+        } catch {
+          // Try normalized parsing
+          const normalizedText = obj.text
+            .replace(/[\u201C\u201D]/g, '"')
+            .replace(/[\u2018\u2019]/g, "'")
+            .replace(/,(\s*[}\]])/g, '$1');
+          jsonPayload = JSON.parse(normalizedText);
+        }
+      } else if (obj && typeof obj.content === "object" && obj.content != null) {
+        jsonPayload = obj.content as unknown;
+      } else {
+        jsonPayload = obj;
+      }
     } else if (typeof contentUnknown === "string") {
-      const stripCodeFences = (s: string) => {
-        let out = s.trim();
-        // Remove opening fence like ```json or ``` plus any whitespace/newline
-        out = out.replace(/^```(?:json|jsonc|javascript|js|ts|typescript)?\s*/i, "");
-        // Remove closing fence even if followed by whitespace/newlines
-        out = out.replace(/\s*```\s*$/i, "");
-        return out.trim();
+      // Minimal, robust strategy: direct parse; detect truncation; minimally repair backslashes inside strings
+      const stripCodeFences = (s: string) => s.trim().replace(/^```(?:json|jsonc|javascript|js|ts|typescript)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+      const normalizeWeirdUnicode = (s: string) => s.replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/[\u2028\u2029]/g, "");
+      const isBalancedBraces = (s: string) => {
+        let inStr = false, esc = false, depth = 0;
+        for (let i = 0; i < s.length; i++) {
+          const ch = s[i];
+          if (inStr) {
+            if (esc) esc = false;
+            else if (ch === '\\') esc = true;
+            else if (ch === '"') inStr = false;
+            continue;
+          }
+          if (ch === '"') { inStr = true; continue; }
+          if (ch === '{') depth++;
+          else if (ch === '}') depth--;
+        }
+        return depth === 0;
+      };
+      const repairInvalidBackslashesInStrings = (s: string) => {
+        let out = "";
+        let inStr = false, esc = false;
+        const isValidEscape = (c: string) => c === '"' || c === '\\' || c === '/' || c === 'b' || c === 'f' || c === 'n' || c === 'r' || c === 't' || c === 'u';
+        for (let i = 0; i < s.length; i++) {
+          const ch = s[i];
+          if (inStr) {
+            if (esc) {
+              out += ch; esc = false; continue;
+            }
+            if (ch === '\\') {
+              const next = s[i + 1] ?? '';
+              if (!isValidEscape(next)) {
+                // insert an extra backslash to make it a valid escape sequence
+                out += '\\';
+              }
+              out += ch; // original backslash
+              continue;
+            }
+            if (ch === '"') { inStr = false; out += ch; continue; }
+            out += ch; continue;
+          }
+          if (ch === '"') { inStr = true; out += ch; continue; }
+          out += ch;
+        }
+        return out;
       };
       try {
-        const stripped = stripCodeFences(contentUnknown);
-        // Intento directo
+        const raw = normalizeWeirdUnicode(contentUnknown);
         try {
-          jsonPayload = JSON.parse(stripped);
-        } catch {
-          // Buscamos el objeto JSON balanceado más grande { ... } respetando strings y escapes
-          const s = stripped;
-          let inStr = false;
-          let esc = false;
-          let depth = 0;
-          let startIdx = -1;
-          let endIdx = -1;
-          for (let i = 0; i < s.length; i++) {
-            const ch = s[i];
-            if (inStr) {
-              if (esc) {
-                esc = false;
-              } else if (ch === "\\") {
-                esc = true;
-              } else if (ch === '"') {
-                inStr = false;
-              }
-              continue;
-            }
-            if (ch === '"') {
-              inStr = true;
-              continue;
-            }
-            if (ch === "{") {
-              if (depth === 0) startIdx = i;
-              depth++;
-            } else if (ch === "}") {
-              depth--;
-              if (depth === 0 && startIdx !== -1) {
-                endIdx = i; // mantén el último cierre balanceado al nivel raíz
-              }
-            }
+          const size = raw.length;
+          const chunkSize = 8000;
+          const total = Math.ceil(size / chunkSize) || 1;
+          logger.api("/api/chat:content-string info", { rawLen: size });
+          for (let i = 0; i < total; i++) {
+            const start = i * chunkSize;
+            const end = Math.min(start + chunkSize, size);
+            logger.api("/api/chat:content-string chunk", { idx: i + 1, total, start, end, size, chunk: raw.slice(start, end) });
           }
-          if (startIdx !== -1 && endIdx !== -1) {
-            const candidate = s.slice(startIdx, endIdx + 1);
-            jsonPayload = JSON.parse(candidate);
-          } else {
-            throw new Error("No balanced JSON object found");
+        } catch (_e) { void _e; }
+        // 1) Try direct parse
+        try {
+          jsonPayload = JSON.parse(raw);
+          try { logger.api("/api/chat:parse success", { path: "direct" }); } catch (_e) { void _e; }
+        } catch {
+          // 2) Strip fences and try again
+          const stripped = stripCodeFences(raw);
+          try {
+            const size = stripped.length;
+            const chunkSize = 8000;
+            const total = Math.ceil(size / chunkSize) || 1;
+            logger.api("/api/chat:content-string stripped", { strippedLen: size });
+            for (let i = 0; i < total; i++) {
+              const start = i * chunkSize;
+              const end = Math.min(start + chunkSize, size);
+              logger.api("/api/chat:content-string stripped chunk", { idx: i + 1, total, start, end, size, chunk: stripped.slice(start, end) });
+            }
+          } catch (_e) { void _e; }
+          // 2a) If looks like object but braces are unbalanced -> treat as truncation
+          if (stripped.trim().startsWith('{') && !isBalancedBraces(stripped)) {
+            logger.error("AI devolvió JSON truncado (braces desbalanceados)", { len: stripped.length, head: stripped.slice(0, 200) });
+            return NextResponse.json({ error: "La IA devolvió JSON incompleto (truncado). Intenta de nuevo." }, { status: 502 });
+          }
+          // 2b) Try parse stripped
+          try {
+            jsonPayload = JSON.parse(stripped);
+            try { logger.api("/api/chat:parse success", { path: "stripped" }); } catch (_e) { void _e; }
+          } catch {
+            // 3) Minimal repair: escape invalid backslashes inside strings and try again
+            const repaired = repairInvalidBackslashesInStrings(stripped);
+            try {
+              jsonPayload = JSON.parse(repaired);
+              try { logger.api("/api/chat:parse success", { path: "repaired-backslashes" }); } catch (_e) { void _e; }
+            } catch {
+              throw new Error('PARSE_FAILED');
+            }
           }
         }
       } catch (_e) {
-        logger.error("No se pudo parsear JSON de IA", contentUnknown);
+        logger.error("No se pudo parsear JSON de IA", { type: typeof contentUnknown, preview: String(contentUnknown).slice(0, 500) });
         return NextResponse.json(
-          { error: "JSON inválido devuelto por IA", raw: contentUnknown },
+          { error: "JSON inválido devuelto por IA", raw: String(contentUnknown).slice(0, 2000) },
           { status: 422 }
         );
       }
@@ -450,15 +564,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Si vino un arreglo en la raíz, intenta encontrar el objeto con clave 'exam'
+    if (Array.isArray(jsonPayload)) {
+      const arr = jsonPayload as unknown[];
+      const withExam = arr.find((x) => x && typeof x === 'object' && 'exam' in (x as Record<string, unknown>));
+      jsonPayload = withExam ?? arr[0];
+    }
+
     jsonPayload = sanitizeAIExamPayload(jsonPayload);
 
-    const validated = ExamSchema.safeParse(jsonPayload);
-    if (!validated.success) {
-      logger.warn("Contrato inválido de IA", validated.error.flatten());
+    const validation = ExamSchema.safeParse(jsonPayload);
+    if (!validation.success) {
+      const details = validation.error.flatten();
+      logger.warn("Contrato inválido de IA", details);
       return NextResponse.json(
         {
           error: "Contrato inválido de IA",
-          details: validated.error.flatten(),
+          details,
           raw: jsonPayload,
         },
         { status: 422 }
@@ -466,7 +588,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 7) Normalizar IDs de preguntas para que sean secuenciales (q1..qN) según el orden
-    const data = validated.data;
+    const data = validation.data;
     const normalized = {
       exam: {
         ...data.exam,
