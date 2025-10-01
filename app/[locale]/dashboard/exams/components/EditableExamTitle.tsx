@@ -82,24 +82,36 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
           autoFocus
           onKeyDown={handleInputKeyDown}
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 flex-shrink-0"
+        <span
+          role="button"
+          tabIndex={0}
+          className="inline-flex items-center justify-center h-8 w-8 p-0 text-green-600 hover:text-green-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
           onClick={handleSaveClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleSaveClick(e as any);
+            }
+          }}
           title={t('common.save')}
         >
           <Check className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 flex-shrink-0"
+        </span>
+        <span
+          role="button"
+          tabIndex={0}
+          className="inline-flex items-center justify-center h-8 w-8 p-0 text-red-600 hover:text-red-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
           onClick={handleCancelClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleCancelClick(e as any);
+            }
+          }}
           title={t('common.cancel')}
         >
           <X className="h-4 w-4" />
-        </Button>
+        </span>
       </div>
     );
   }
