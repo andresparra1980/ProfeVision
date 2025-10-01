@@ -11,6 +11,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 // Zod: response contract schema per DOC_preguntas_ia.md
 const ExamQuestionSchema = z.object({
@@ -144,11 +145,12 @@ function buildSystemPrompt(language: string) {
     "REGLAS IMPORTANTES:",
     "1) Solo usa los tipos permitidos por el contrato (multiple_choice, true_false, short_answer, essay) según lo indicado en el contexto.",
     "2) En preguntas multiple_choice, debe haber entre 2 y 4 opciones y exactamente UNA respuesta correcta.",
-    "3) Las opciones incorrectas deben ser plausibles pero claramente incorrectas.",
-    "4) El JSON debe cumplir EXACTAMENTE con el contrato indicado (estructura con clave raíz 'exam' y arreglo 'questions').",
-    "5) Las preguntas deben ser claras, precisas y educativamente válidas.",
-    "6) Si algún enunciado u opción incluye fórmulas, ecuaciones, expresiones matemáticas, químicas o similares, REPRESENTA esas expresiones en LaTeX (no Markdown) usando delimitadores $...$ para inline y \\[...\\] para display; no agregues prosa fuera del JSON.",
-    "7) No envuelvas la salida en bloques de código ni etiquetas de lenguaje (NO uses ```json).",
+    "3) CRÍTICO: Para 'multiple_choice', el campo 'answer' debe ser el TEXTO COMPLETO de la opción correcta (string), NUNCA un índice numérico (0, 1, 2...). Copia exactamente el texto de la opción.",
+    "4) Las opciones incorrectas deben ser plausibles pero claramente incorrectas.",
+    "5) El JSON debe cumplir EXACTAMENTE con el contrato indicado (estructura con clave raíz 'exam' y arreglo 'questions').",
+    "6) Las preguntas deben ser claras, precisas y educativamente válidas.",
+    "7) Si algún enunciado u opción incluye fórmulas, ecuaciones, expresiones matemáticas, químicas o similares, REPRESENTA esas expresiones en LaTeX (no Markdown) usando delimitadores $...$ para inline y \\[...\\] para display; no agregues prosa fuera del JSON.",
+    "8) No envuelvas la salida en bloques de código ni etiquetas de lenguaje (NO uses ```json).",
 
     // Comportamiento crítico
     "COMPORTAMIENTO CRÍTICO:",
@@ -181,7 +183,7 @@ function buildSystemPrompt(language: string) {
   ].join("\n");
 }
 
-// Sanea payloads de IA para compatibilidad con el contrato (p.ej. difficulty: "mixed" -> "medium")
+// Sanea payloads de IA para compatibilidad con el contrato (p.ej. difficulty: "mixed" -> "medium", numeric answer indices -> option text)
 const sanitizeAIExamPayload = (obj: unknown): unknown => {
   try {
     if (!obj || typeof obj !== "object") return obj;
@@ -194,9 +196,23 @@ const sanitizeAIExamPayload = (obj: unknown): unknown => {
       for (let i = 0; i < exam.questions.length; i++) {
         const q = exam.questions[i];
         if (!q || typeof q !== "object") continue;
+        
+        // Sanitize difficulty
         const diff = (q as Record<string, unknown>).difficulty;
         if (typeof diff !== "string" || !allowed.has(diff)) {
           (q as Record<string, unknown>).difficulty = "medium";
+        }
+        
+        // Sanitize numeric answer indices for multiple_choice questions
+        const qType = (q as Record<string, unknown>).type;
+        const qAnswer = (q as Record<string, unknown>).answer;
+        const qOptions = (q as Record<string, unknown>).options;
+        if (qType === "multiple_choice" && typeof qAnswer === "number" && Array.isArray(qOptions)) {
+          const idx = Math.floor(qAnswer);
+          if (idx >= 0 && idx < qOptions.length && typeof qOptions[idx] === "string") {
+            (q as Record<string, unknown>).answer = qOptions[idx];
+            logger.warn(`Repaired numeric answer index ${idx} to option text for question ${(q as Record<string, unknown>).id}`);
+          }
         }
       }
     }
@@ -212,7 +228,7 @@ function buildUserInstruction(context: z.infer<typeof ChatContextSchema>) {
   const constraints: string[] = [];
   if (questionTypes.includes("multiple_choice")) {
     constraints.push(
-      "Para 'multiple_choice': crea entre 2 y 4 opciones y exactamente UNA correcta."
+      "Para 'multiple_choice': crea entre 2 y 4 opciones y exactamente UNA correcta. El campo 'answer' debe ser el texto completo de la opción correcta, NO un número índice. Ejemplo: si las opciones son ['A', 'B', 'C'], y B es correcta, 'answer' debe ser 'B', no 1."
     );
   }
   if (questionTypes.includes("true_false")) {
@@ -311,49 +327,69 @@ export async function POST(req: NextRequest) {
       ? [OPENAI_MODEL, OPENAI_FALLBACK_MODEL]
       : [OPENAI_MODEL];
 
+    const requestBody = {
+      models,
+      messages: [
+        { role: "system", content: systemPrompt },
+        // Contexto opcional: Resúmenes temáticos por documento (si hay varios docs)
+        ...(context.topicSummaries || []).map((ts) => ({
+          role: "system" as const,
+          content:
+            `Resumen temático del documento (documentId: ${ts.documentId}). ` +
+            `Úsalo SOLO como contexto para alinear los temas; no lo cites literalmente.\n` +
+            `${JSON.stringify(ts.summary)}`,
+        })),
+        // Contexto opcional: examen existente a modificar/expandir
+        ...(context.existingExam
+          ? [
+              {
+                role: "system" as const,
+                content:
+                  "Examen existente provisto por el usuario. Si el usuario solicita cambios, devuelve el examen COMPLETO actualizado.\n" +
+                  `${JSON.stringify(context.existingExam)}`,
+              },
+            ]
+          : []),
+        // Conversación previa del usuario
+        ...messages,
+        // Instrucción final con parámetros estructurados
+        { role: "user", content: userInstruction },
+        // Pista de contrato explícita
+        {
+          role: "system",
+          content:
+            'CONTRATO ESTRUCTURA (responde SOLO con JSON válido): { "exam": { "title": string, "subject": string, "level": string, "language": string, "questions": [ { "id": string, "type": "multiple_choice|true_false|short_answer|essay", "prompt": string, "options": [string], "answer": string|number|boolean|array, "rationale": string, "difficulty": "easy|medium|hard", "taxonomy": "remember|understand|apply|analyze|evaluate|create"|string[], "tags": [string], "source": { "documentId": string|null, "spans": [ { "start": number, "end": number } ] } } ] } }\n\nREGLAS ADICIONALES DEL CONTRATO:\n- Si \'type\' == \'multiple_choice\', \'options\' debe tener entre 2 y 4 elementos y \'answer\' debe ser el TEXTO COMPLETO de la opción correcta (string), NUNCA un número índice.\n- Si \'type\' == \'true_false\', \'answer\' debe ser boolean.\n- Usa ids secuenciales: q1, q2, q3... en el campo \'id\'.\n- Si una pregunta u opción incluye fórmulas/expresiones, represéntalas en LaTeX (inline con $...$, display con \\[...\\]) dentro del string correspondiente.\n- Devuelve SIEMPRE el examen completo bajo la clave \'exam\'.',
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 16000,
+      response_format: { type: "json_object" },
+    };
+
+    // Log request to LLM in chunks (similar to response logging)
+    try {
+      const requestBodyStr = JSON.stringify(requestBody, null, 2);
+      const size = requestBodyStr.length;
+      const chunkSize = 8000;
+      const total = Math.ceil(size / chunkSize) || 1;
+      logger.api("/api/chat:LLM request", { models, messageCount: requestBody.messages.length, size });
+      for (let i = 0; i < total; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, size);
+        logger.api("/api/chat:LLM request chunk", { idx: i + 1, total, start, end, size, chunk: requestBodyStr.slice(start, end) });
+      }
+    } catch (_e) { void _e; }
+
     const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
+        Accept: "application/json",
+        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+        "X-Title": "ProfeVision",
       },
-      body: JSON.stringify({
-        models,
-        messages: [
-          { role: "system", content: systemPrompt },
-          // Contexto opcional: Resúmenes temáticos por documento (si hay varios docs)
-          ...(context.topicSummaries || []).map((ts) => ({
-            role: "system" as const,
-            content:
-              `Resumen temático del documento (documentId: ${ts.documentId}). ` +
-              `Úsalo SOLO como contexto para alinear los temas; no lo cites literalmente.\n` +
-              `${JSON.stringify(ts.summary)}`,
-          })),
-          // Contexto opcional: examen existente a modificar/expandir
-          ...(context.existingExam
-            ? [
-                {
-                  role: "system" as const,
-                  content:
-                    "Examen existente provisto por el usuario. Si el usuario solicita cambios, devuelve el examen COMPLETO actualizado.\n" +
-                    `${JSON.stringify(context.existingExam)}`,
-                },
-              ]
-            : []),
-          // Conversación previa del usuario
-          ...messages,
-          // Instrucción final con parámetros estructurados
-          { role: "user", content: userInstruction },
-          // Pista de contrato explícita
-          {
-            role: "system",
-            content:
-              'CONTRATO ESTRUCTURA (responde SOLO con JSON válido): { "exam": { "title": string, "subject": string, "level": string, "language": string, "questions": [ { "id": string, "type": "multiple_choice|true_false|short_answer|essay", "prompt": string, "options": [string], "answer": string|number|boolean|array, "rationale": string, "difficulty": "easy|medium|hard", "taxonomy": "remember|understand|apply|analyze|evaluate|create"|string[], "tags": [string], "source": { "documentId": string|null, "spans": [ { "start": number, "end": number } ] } } ] } }\n\nREGLAS ADICIONALES DEL CONTRATO:\n- Si \'type\' == \'multiple_choice\', \'options\' debe tener entre 2 y 4 elementos y \'answer\' debe corresponder a UNA única opción correcta.\n- Si \'type\' == \'true_false\', \'answer\' debe ser boolean.\n- Usa ids secuenciales: q1, q2, q3... en el campo \'id\'.\n- Si una pregunta u opción incluye fórmulas/expresiones, represéntalas en LaTeX (inline con $...$, display con \\[...\\]) dentro del string correspondiente.\n- Devuelve SIEMPRE el examen completo bajo la clave \'exam\'.',
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: 40000,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!aiRes.ok) {

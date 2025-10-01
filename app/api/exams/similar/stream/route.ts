@@ -4,6 +4,7 @@ import logger from "@/lib/utils/logger";
 import { runJob } from "@/worker/jobRunner";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 function sseEvent(name: string, data: unknown) {
   return `event: ${name}\n` + `data: ${JSON.stringify(data)}\n\n`;

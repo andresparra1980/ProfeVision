@@ -29,6 +29,10 @@ export function buildChatModel(provider: LLMProvider, temperature = 0): ChatOpen
     temperature,
     configuration: {
       baseURL: provider.baseURL,
+      defaultHeaders: {
+        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+        "X-Title": "ProfeVision",
+      },
     },
   });
 }

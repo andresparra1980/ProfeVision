@@ -107,7 +107,8 @@
       "updated": "Draft updated",
       "updatedDesc": "The draft was updated.",
       "error": "Error",
-      "saveError": "Could not save the draft"
+      "saveError": "Could not save the draft",
+      "invalidContract": "Invalid JSON contract, please try again"
     }
   },
   "chat": {

@@ -29,7 +29,7 @@ export default function SimilarExamMetadataDialog({ open, onOpenChange, onConfir
   const [title, setTitle] = useState("");
   const [materiaId, setMateriaId] = useState<string>("");
   const [duration, setDuration] = useState<string>("60");
-  const [totalScore, setTotalScore] = useState<string>("100");
+  const [totalScore, setTotalScore] = useState<string>("5");
 
   useEffect(() => {
     if (!open) return;
@@ -57,7 +57,7 @@ export default function SimilarExamMetadataDialog({ open, onOpenChange, onConfir
       setTitle("");
       setMateriaId("");
       setDuration("60");
-      setTotalScore("100");
+      setTotalScore("5");
     }
   }, [open]);
 

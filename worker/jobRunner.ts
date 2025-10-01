@@ -205,8 +205,8 @@ async function insertDraftExam(userId: string, draft: any, meta?: StartMeta): Pr
         materia_id: materiaId,
         profesor_id: userId,
         estado: "borrador",
-        duracion_minutos: meta?.durationMinutes ?? null,
-        puntaje_total: meta?.totalScore ?? 100,
+        duracion_minutos: meta?.durationMinutes ?? 60,
+        puntaje_total: meta?.totalScore ?? 5,
       },
     ])
     .select("id")
@@ -217,12 +217,17 @@ async function insertDraftExam(userId: string, draft: any, meta?: StartMeta): Pr
   // Insert preguntas and opciones with manual rollback on failure
   const insertedPreguntaIds: string[] = [];
   try {
+    // Calculate points per question (distribute total score evenly)
+    const totalScore = meta?.totalScore ?? 5;
+    const numQuestions = (draft.exam.questions as any[]).length;
+    const pointsPerQuestion = numQuestions > 0 ? totalScore / numQuestions : 1.0;
+    
     // Insert preguntas
     const preguntasRows = (draft.exam.questions as any[]).map((q, idx) => ({
       examen_id: newExamId,
       texto: String(q.prompt ?? "").slice(0, 8000),
       tipo_id: mapContractTypeToDb(q.type),
-      puntaje: 1.0,
+      puntaje: pointsPerQuestion,
       dificultad: ["easy", "medium", "hard"].includes(q.difficulty) ? q.difficulty : "medium",
       retroalimentacion: q.rationale ?? null,
       orden: idx + 1,

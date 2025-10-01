@@ -108,7 +108,8 @@
       "updated": "Borrador actualizado",
       "updatedDesc": "El borrador fue actualizado.",
       "error": "Error",
-      "saveError": "No se pudo guardar el borrador"
+      "saveError": "No se pudo guardar el borrador",
+      "invalidContract": "Contrato JSON inválido, por favor intente de nuevo"
     }
   },
   "chat": {
