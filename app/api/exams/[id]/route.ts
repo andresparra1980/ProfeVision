@@ -260,6 +260,7 @@ export async function PUT(
       preguntas?: Array<{
         texto: string;
         tipo?: string;
+        retroalimentacion?: string;
         opciones?: Array<{ texto: string; esCorrecta?: boolean }>;
       }>;
       duracion_minutos?: number;
@@ -357,6 +358,7 @@ export async function PUT(
           texto,
           tipo_id: pregunta.tipo || 'opcion_multiple',
           puntaje: pointsPerQuestion,
+          retroalimentacion: (pregunta.retroalimentacion || '').slice(0, 2000),
           orden: i + 1,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),

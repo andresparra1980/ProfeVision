@@ -39,6 +39,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     // 📰 Website pages
     'blog': (await import(`./locales/${locale}/blog.json`)).default,
     'mobile-app': (await import(`./locales/${locale}/mobile-app.json`)).default,
+    // 🧪 Similar Exam job modal (feature namespace)
+    'jobs-similar-exam': (await import(`./locales/${locale}/jobs-similar-exam.json`)).default,
   };
 
   return {

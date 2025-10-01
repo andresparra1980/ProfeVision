@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Pencil, Check, X } from 'lucide-react';
 
 interface EditableExamTitleProps {
@@ -13,7 +12,7 @@ interface EditableExamTitleProps {
 }
 
 const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTitle, onSave }) => {
-  const t = useTranslations('dashboard.exams');
+  const t = useTranslations('dashboard');
   const [isEditing, setIsEditing] = useState(false);
   const [currentTitle, setCurrentTitle] = useState(initialTitle);
 
@@ -78,44 +77,62 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
         <Input
           value={currentTitle}
           onChange={handleInputChange}
-          className="h-8 w-36"
+          className="h-8 flex-grow"
           autoFocus
           onKeyDown={handleInputKeyDown}
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 flex-shrink-0"
+        <span
+          role="button"
+          tabIndex={0}
+          className="inline-flex items-center justify-center h-8 w-8 p-0 text-green-600 hover:text-green-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
           onClick={handleSaveClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleSaveClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
+            }
+          }}
           title={t('common.save')}
         >
           <Check className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 flex-shrink-0"
+        </span>
+        <span
+          role="button"
+          tabIndex={0}
+          className="inline-flex items-center justify-center h-8 w-8 p-0 text-red-600 hover:text-red-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
           onClick={handleCancelClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleCancelClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
+            }
+          }}
           title={t('common.cancel')}
         >
           <X className="h-4 w-4" />
-        </Button>
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-between space-x-1" onClick={(e) => e.stopPropagation()}>
-      <span className="flex-grow truncate" title={initialTitle}>{currentTitle}</span>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground flex-shrink-0"
+    <div className="flex items-start justify-between space-x-2" onClick={(e) => e.stopPropagation()}>
+      <span className="flex-grow break-words" title={initialTitle}>{currentTitle}</span>
+      <span
+        role="button"
+        tabIndex={0}
+        className="inline-flex items-center justify-center h-8 w-8 p-0 text-muted-foreground hover:text-foreground flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
         onClick={handleEditClick}
-        title={t('actions.edit')}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleEditClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
+          }
+        }}
+        title={t('common.edit')}
       >
         <Pencil className="h-4 w-4" />
-      </Button>
+      </span>
     </div>
   );
 };

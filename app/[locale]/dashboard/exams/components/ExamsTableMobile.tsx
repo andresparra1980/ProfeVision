@@ -22,20 +22,38 @@ import {
   Link,
   Calendar,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import SimilarExamModal from "./SimilarExamModal";
+import SimilarExamMetadataDialog, { SimilarExamMeta } from "./SimilarExamMetadataDialog";
+import EditableExamTitle from "./EditableExamTitle";
 
 // Reusable components
 interface ExamCardHeaderProps {
   exam: Exam;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any;
+  t: ReturnType<typeof useTranslations>;
+  onTitleSave: (_examId: string, _newTitle: string) => Promise<void>;
 }
 
-function ExamCardHeader({ exam, t }: ExamCardHeaderProps) {
+function ExamCardHeader({ exam, t, onTitleSave }: ExamCardHeaderProps) {
   return (
-    <div className="flex-1 text-left relative">
-      {/* Group pills - top right */}
+    <div className="flex-1 text-left space-y-2">
+      {/* Title */}
+      <div className="font-medium text-base leading-tight text-card-foreground">
+        <EditableExamTitle
+          examId={exam.id}
+          initialTitle={exam.titulo}
+          onSave={onTitleSave}
+        />
+      </div>
+
+      {/* Subject */}
+      <p className="text-xs text-muted-foreground">
+        {exam.materias?.nombre || "Sin materia"}
+      </p>
+
+      {/* Group pills - below title and subject */}
       {exam.examen_grupo && exam.examen_grupo.length > 0 && (
-        <div className="absolute top-0 right-0 flex flex-wrap gap-1 justify-end">
+        <div className="flex flex-wrap gap-1 justify-start">
           {exam.examen_grupo.map((asignacion: Exam["examen_grupo"][number]) => (
             <span
               key={asignacion.grupo.id}
@@ -47,15 +65,8 @@ function ExamCardHeader({ exam, t }: ExamCardHeaderProps) {
         </div>
       )}
 
-      {/* Title */}
-      <h3 className="font-medium text-base leading-tight text-card-foreground pr-20">
-        {exam.titulo}
-      </h3>
-
-      {/* Subject */}
-      <p className="text-xs text-muted-foreground mt-1 mb-6">
-        {exam.materias?.nombre || "Sin materia"}
-      </p>
+      {/* Spacer */}
+      <div className="h-2" />
 
       {/* Bottom row: Status left, Date right */}
       <div className="flex justify-between items-center">
@@ -77,12 +88,14 @@ interface ExamCardContentProps {
   exam: Exam;
   router: ReturnType<typeof useRouter>;
   onOpenDeleteDialog: (_examId: string) => void;
+  onStartSimilar: (_examId: string) => void;
 }
 
 function ExamCardContent({
   exam,
   router,
   onOpenDeleteDialog,
+  onStartSimilar,
 }: ExamCardContentProps) {
   const t = useTranslations('dashboard.exams');
   
@@ -100,6 +113,14 @@ function ExamCardContent({
         }}
       >
         <Pencil className="mr-2 h-4 w-4" /> {t('actions.edit')}
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400"
+        onClick={() => onStartSimilar(exam.id)}
+      >
+        <Plus className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
       </Button>
       {exam.estado === "borrador" && (
         <Button
@@ -323,6 +344,11 @@ export default function ExamsTableMobile({
 
   // Hook to detect if we're in multi-column layout
   const [isMultiColumn, setIsMultiColumn] = useState(false);
+  const [similarOpen, setSimilarOpen] = useState(false);
+  const [jobId, setJobId] = useState<string | undefined>();
+  const [streamUrl, setStreamUrl] = useState<string | undefined>(undefined);
+  const [metaDialogOpen, setMetaDialogOpen] = useState(false);
+  const [pendingExamId, setPendingExamId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -333,6 +359,54 @@ export default function ExamsTableMobile({
     window.addEventListener("resize", checkScreenSize);
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
+
+  const handleTitleSave = async (examId: string, newTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from("examenes")
+        .update({ titulo: newTitle })
+        .eq("id", examId);
+      
+      if (error) throw error;
+      
+      // Trigger a refresh or update local state if needed
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating exam title:", error);
+      throw error;
+    }
+  };
+
+  const startSimilarJob = async (examId: string, meta?: SimilarExamMeta) => {
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const token = session?.session?.access_token;
+      const res = await fetch(`/api/exams/similar/start`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ sourceExamId: examId, meta }),
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to start job: ${res.status}`);
+      }
+      const json = (await res.json()) as { jobId: string };
+      setJobId(json.jobId);
+      // Build SSE URL with token for ownership validation on server
+      const url = new URL(`/api/exams/similar/stream`, window.location.origin);
+      url.searchParams.set("jobId", json.jobId);
+      if (token) url.searchParams.set("token", token);
+      setStreamUrl(url.toString());
+      setSimilarOpen(true);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPendingExamId(null);
+    }
+  };
+  // removed unused handleStartSimilar
 
   return (
     <div className="px-2 md:px-0 py-4 space-y-4">
@@ -391,13 +465,14 @@ export default function ExamsTableMobile({
               style={getStatusBorderStyle(exam.estado)}
             >
               <div className="p-4">
-                <ExamCardHeader exam={exam} t={t} />
+                <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </div>
               <div className="p-4 border-t bg-muted/20">
                 <ExamCardContent
                   exam={exam}
                   router={router}
                   onOpenDeleteDialog={onOpenDeleteDialog}
+                  onStartSimilar={startSimilarJob}
                 />
               </div>
             </div>
@@ -414,19 +489,43 @@ export default function ExamsTableMobile({
               style={getStatusBorderStyle(exam.estado)}
             >
               <AccordionTrigger className="p-4 hover:no-underline">
-                <ExamCardHeader exam={exam} t={t} />
+                <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </AccordionTrigger>
               <AccordionContent className="p-4 border-t bg-muted/20">
                 <ExamCardContent
                   exam={exam}
                   router={router}
                   onOpenDeleteDialog={onOpenDeleteDialog}
+                  onStartSimilar={startSimilarJob}
                 />
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
       )}
+
+      <SimilarExamModal
+        open={similarOpen}
+        onOpenChange={setSimilarOpen}
+        jobId={jobId}
+        streamUrl={streamUrl}
+        onCompleted={() => {
+          // Refresh exams after completion to show the new draft (when backend is fully wired)
+          // no-op here; parent page fetches list periodically or on demand
+        }}
+        onFailed={() => {
+          // Could show a toast here
+        }}
+      />
+
+      <SimilarExamMetadataDialog
+        open={metaDialogOpen}
+        onOpenChange={setMetaDialogOpen}
+        onConfirm={async (meta) => {
+          if (!pendingExamId) return;
+          await startSimilarJob(pendingExamId, meta);
+        }}
+      />
     </div>
   );
 }

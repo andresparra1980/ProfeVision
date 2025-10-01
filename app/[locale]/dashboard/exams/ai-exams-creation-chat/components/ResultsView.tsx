@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Pencil } from "lucide-react";
 import QuestionEditorDialog, { type ExamQuestion } from "./QuestionEditorDialog";
+import MathText from "@/components/MathText";
 
 export default function ResultsView() {
   const { result, setResult } = useAIChat();
@@ -120,7 +121,9 @@ export default function ResultsView() {
                   <div className="flex flex-col items-start text-left w-full gap-1">
                     <div className="flex items-center gap-2 w-full">
                       <span className="font-medium">{idx + 1}.</span>
-                      <span className="flex-1 whitespace-pre-wrap">{title}</span>
+                      <div className="flex-1 prose prose-sm dark:prose-invert max-w-none">
+                        <MathText text={title} />
+                      </div>
                       {/* difficulty pill removed to give more space to accordion icon */}
                     </div>
                     {/* Removed options and answer preview from header; these are visible in content when expanded */}
@@ -133,9 +136,14 @@ export default function ResultsView() {
                       <div className="text-sm font-medium">{t('results.selectCorrect')}</div>
                       <RadioGroup value={String(correctIdx)} onValueChange={(v) => setCorrectAnswer(idx, Number(v))} className="grid gap-2">
                         {options.map((opt, i) => (
-                          <div key={i} className={`flex items-center gap-2 rounded border p-2 ${i === correctIdx ? "border-primary bg-primary/5" : ""}`}>
+                          <div key={i} className={`flex items-start gap-2 rounded border p-2 ${i === correctIdx ? "border-primary bg-primary/5" : ""}`}>
                             <RadioGroupItem id={`q${idx}-opt${i}`} value={String(i)} />
-                            <Label htmlFor={`q${idx}-opt${i}`} className="font-normal">{String.fromCharCode(65 + i)}. {opt || `Opción ${i + 1}`}</Label>
+                            <Label htmlFor={`q${idx}-opt${i}`} className="font-normal flex-1">
+                              <span className="mr-2">{String.fromCharCode(65 + i)}.</span>
+                              <span className="prose prose-sm dark:prose-invert max-w-none inline-block align-middle">
+                                <MathText text={opt || `Opción ${i + 1}`} />
+                              </span>
+                            </Label>
                           </div>
                         ))}
                       </RadioGroup>
@@ -161,7 +169,9 @@ export default function ResultsView() {
                   {rationale && (
                     <div className="mt-4">
                       <div className="text-sm font-medium mb-1">{t('results.rationale')}</div>
-                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">{rationale}</div>
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                        <MathText text={rationale} />
+                      </div>
                     </div>
                   )}
 

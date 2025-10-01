@@ -122,7 +122,20 @@ export async function POST(request: Request) {
       grupo_id,
       duracion_minutos,
       puntaje_total,
-    } = body;
+    } = body as {
+      titulo: string;
+      descripcion: string;
+      preguntas: Array<{
+        texto: string;
+        tipo?: string;
+        retroalimentacion?: string;
+        opciones?: Array<{ texto: string; esCorrecta?: boolean }>;
+      }>;
+      materia_id: string;
+      grupo_id: string;
+      duracion_minutos?: number;
+      puntaje_total?: number;
+    };
 
     if (!titulo || !materia_id) {
       const dummyReq = new Request('http://localhost/api/exams');
@@ -220,6 +233,7 @@ export async function POST(request: Request) {
             texto: pregunta.texto,
             tipo_id: pregunta.tipo || "opcion_multiple",
             puntaje: pointsPerQuestion, // Use the calculated points per question
+            retroalimentacion: (pregunta.retroalimentacion || '').slice(0, 2000),
             orden: i + 1,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { QuestionContent } from "@/components/exam/question-content";
+import MathText from "@/components/MathText";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -799,12 +800,24 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <QuestionContent html={question.texto} className="text-foreground" />
+                      {(/[$\\]/.test(String(question.texto)) && !String(question.texto).includes('<')) ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <MathText text={String(question.texto)} />
+                        </div>
+                      ) : (
+                        <QuestionContent html={question.texto} className="text-foreground" />
+                      )}
                       {question.retroalimentacion && (
                         <div className="mt-3 text-sm">
                           <span className="font-medium text-muted-foreground">{t('feedback')}:</span>
                           <div className="mt-1">
-                            <QuestionContent html={question.retroalimentacion} className="text-muted-foreground" />
+                            {(/[$\\]/.test(String(question.retroalimentacion)) && !String(question.retroalimentacion).includes('<')) ? (
+                              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                                <MathText text={String(question.retroalimentacion)} />
+                              </div>
+                            ) : (
+                              <QuestionContent html={question.retroalimentacion} className="text-muted-foreground" />
+                            )}
                           </div>
                         </div>
                       )}
@@ -851,7 +864,15 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                                   {String.fromCharCode(65 + optIndex)}
                                 </div>
                               )}
-                              <p className={option.es_correcta ? 'font-medium' : ''}>{option.texto}</p>
+                              <div className={option.es_correcta ? 'font-medium' : ''}>
+                                {(/[$\\]/.test(String(option.texto)) && !String(option.texto).includes('<')) ? (
+                                  <span className="prose prose-sm dark:prose-invert max-w-none">
+                                    <MathText text={String(option.texto)} inline />
+                                  </span>
+                                ) : (
+                                  <p>{option.texto}</p>
+                                )}
+                              </div>
                               {option.es_correcta && (
                                 <span className="text-xs text-green-600 dark:text-green-400">{t('correct')}</span>
                               )}

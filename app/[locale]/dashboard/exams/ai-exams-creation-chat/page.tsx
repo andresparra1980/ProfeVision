@@ -7,7 +7,6 @@ import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -27,8 +26,6 @@ import { supabase } from "@/lib/supabase";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 
 import ChatPanel from "./components/ChatPanel";
-import DocumentContextBar from "./components/DocumentContextBar";
-import ResultsView from "./components/ResultsView";
 import { AIChatProvider } from "./components/AIChatContext";
 import { useAIChat } from "./components/AIChatContext";
 import type { AIExamResult } from "./components/AIChatContext";
@@ -128,6 +125,7 @@ function SaveDraftDialog({
       const mapped = qs.map((q) => {
         const type = q?.type || 'multiple_choice';
         const prompt = q?.prompt || '';
+        const retroalimentacion = (q as Partial<ExamQuestion> & { rationale?: string })?.rationale || '';
         if (type === 'multiple_choice') {
           const options: string[] = Array.isArray(q?.options) ? q.options : [];
           const answer = q?.answer;
@@ -141,6 +139,7 @@ function SaveDraftDialog({
             texto: prompt,
             tipo: 'opcion_multiple',
             opciones: options.map((texto, i) => ({ texto, esCorrecta: i === correctIndex })),
+            retroalimentacion,
           };
         }
         if (type === 'true_false') {
@@ -157,12 +156,14 @@ function SaveDraftDialog({
               { texto: 'Verdadero', esCorrecta: correct === true },
               { texto: 'Falso', esCorrecta: correct === false },
             ],
+            retroalimentacion,
           };
         }
         return {
           texto: prompt,
           tipo: 'respuesta_corta',
           opciones: [],
+          retroalimentacion,
         };
       });
       return mapped;
@@ -188,7 +189,7 @@ function SaveDraftDialog({
         duracion_minutos?: number;
         puntaje_total?: number;
         descripcion: string;
-        preguntas: Array<{ texto: string; tipo: string; opciones: Array<{ texto: string; esCorrecta: boolean }> }>;
+        preguntas: Array<{ texto: string; tipo: string; retroalimentacion?: string; opciones: Array<{ texto: string; esCorrecta: boolean }> }>;
       };
       const payload: ExamPayload = {
         // For edit, only send fields if meaningful to avoid overwriting with empty/NaN
@@ -427,7 +428,7 @@ export default function AIExamsCreationChatPage() {
     duracion_minutos?: number | null;
     puntaje_total?: number | null;
   } | null>(null);
-  const [loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
+  const [_loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
 
   // Load materias and grupos for current profesor
   React.useEffect(() => {
@@ -610,6 +611,7 @@ export default function AIExamsCreationChatPage() {
             id: string;
             texto: string;
             tipo_id: string;
+            retroalimentacion?: string;
             opciones: Array<{ texto: string; es_correcta: boolean; orden: number }>;
           }> = await qRes.json();
 
@@ -623,6 +625,7 @@ export default function AIExamsCreationChatPage() {
                 prompt: p.texto,
                 options: opts,
                 answer: correctIndex >= 0 ? correctIndex : 0,
+                rationale: p.retroalimentacion || '',
               };
             }
             if (p.tipo_id === 'verdadero_falso') {
@@ -633,12 +636,14 @@ export default function AIExamsCreationChatPage() {
                 type: 'true_false',
                 prompt: p.texto,
                 answer,
+                rationale: p.retroalimentacion || '',
               };
             }
             return {
               type: 'short_answer',
               prompt: p.texto,
               answer: '',
+              rationale: p.retroalimentacion || '',
             };
           });
 
@@ -731,32 +736,11 @@ export default function AIExamsCreationChatPage() {
           <Button onClick={() => setShowSaveDraftDialog(true)}>{t('header.saveDraft')}</Button>
         </div>
       </div>
-
-      {/* Chat, resultados y diálogo de guardar dentro del Provider */}
+      <div className="border-t border-black/50 dark:border-white/50"></div>
+      {/* Chat y diálogo de guardar dentro del Provider */}
       <AIChatProvider>
-        <div className="space-y-4">
-          {/* Chat (focused by default) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('chat.title')}</CardTitle>
-              <CardDescription>{t('chat.description')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChatPanel />
-            </CardContent>
-          </Card>
-          {/* Resultados */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('results.title')}</CardTitle>
-              <CardDescription>{t('results.description')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/** Force ResultsView to remount whenever a different exam draft is loaded */}
-              <ResultsView key={loadedExamId ?? 'no-exam'} />
-            </CardContent>
-          </Card>
-        </div>
+        {/* Chat (focused by default) - floating, without surrounding Card */}
+        <ChatPanel />
 
         {/* Save Draft Dialog inside Provider to access AI context */}
         <SaveDraftDialog
@@ -770,25 +754,9 @@ export default function AIExamsCreationChatPage() {
         <DraftLoader />
       </AIChatProvider>
 
-      {/* Contexto de documento (movido al final) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('context.title')}</CardTitle>
-          <CardDescription>{t('context.description')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DocumentContextBar />
-        </CardContent>
-      </Card>
+      {/* Contexto de documento removido: adjuntos se gestionan desde la toolbar del Prompt */}
 
-      {/* Botonera inferior: misma posición en eje X que arriba */}
-      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div></div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setShowClearDialog(true)}>{t('header.clearChat')}</Button>
-          <Button onClick={() => setShowSaveDraftDialog(true)}>{t('header.saveDraft')}</Button>
-        </div>
-      </div>
+      {/* Botonera inferior eliminada: acciones sólo en el header */}
 
       {/* Confirmación Borrar Chat */}
       <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
