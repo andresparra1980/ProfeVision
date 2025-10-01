@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Pencil, Check, X } from 'lucide-react';
 
 interface EditableExamTitleProps {
@@ -90,7 +89,7 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              handleSaveClick(e as any);
+              handleSaveClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
             }
           }}
           title={t('common.save')}
@@ -105,7 +104,7 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              handleCancelClick(e as any);
+              handleCancelClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
             }
           }}
           title={t('common.cancel')}
@@ -127,7 +126,7 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            handleEditClick(e as any);
+            handleEditClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
           }
         }}
         title={t('common.edit')}
