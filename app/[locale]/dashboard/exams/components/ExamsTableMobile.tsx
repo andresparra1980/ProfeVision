@@ -25,19 +25,35 @@ import {
 import { supabase } from "@/lib/supabase";
 import SimilarExamModal from "./SimilarExamModal";
 import SimilarExamMetadataDialog, { SimilarExamMeta } from "./SimilarExamMetadataDialog";
+import EditableExamTitle from "./EditableExamTitle";
 
 // Reusable components
 interface ExamCardHeaderProps {
   exam: Exam;
   t: ReturnType<typeof useTranslations>;
+  onTitleSave: (_examId: string, _newTitle: string) => Promise<void>;
 }
 
-function ExamCardHeader({ exam, t }: ExamCardHeaderProps) {
+function ExamCardHeader({ exam, t, onTitleSave }: ExamCardHeaderProps) {
   return (
-    <div className="flex-1 text-left relative">
-      {/* Group pills - top right */}
+    <div className="flex-1 text-left space-y-2">
+      {/* Title */}
+      <div className="font-medium text-base leading-tight text-card-foreground">
+        <EditableExamTitle
+          examId={exam.id}
+          initialTitle={exam.titulo}
+          onSave={onTitleSave}
+        />
+      </div>
+
+      {/* Subject */}
+      <p className="text-xs text-muted-foreground">
+        {exam.materias?.nombre || "Sin materia"}
+      </p>
+
+      {/* Group pills - below title and subject */}
       {exam.examen_grupo && exam.examen_grupo.length > 0 && (
-        <div className="absolute top-0 right-0 flex flex-wrap gap-1 justify-end">
+        <div className="flex flex-wrap gap-1 justify-start">
           {exam.examen_grupo.map((asignacion: Exam["examen_grupo"][number]) => (
             <span
               key={asignacion.grupo.id}
@@ -49,15 +65,8 @@ function ExamCardHeader({ exam, t }: ExamCardHeaderProps) {
         </div>
       )}
 
-      {/* Title */}
-      <h3 className="font-medium text-base leading-tight text-card-foreground pr-20">
-        {exam.titulo}
-      </h3>
-
-      {/* Subject */}
-      <p className="text-xs text-muted-foreground mt-1 mb-6">
-        {exam.materias?.nombre || "Sin materia"}
-      </p>
+      {/* Spacer */}
+      <div className="h-2" />
 
       {/* Bottom row: Status left, Date right */}
       <div className="flex justify-between items-center">
@@ -351,6 +360,23 @@ export default function ExamsTableMobile({
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
+  const handleTitleSave = async (examId: string, newTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from("examenes")
+        .update({ titulo: newTitle })
+        .eq("id", examId);
+      
+      if (error) throw error;
+      
+      // Trigger a refresh or update local state if needed
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating exam title:", error);
+      throw error;
+    }
+  };
+
   const startSimilarJob = async (examId: string, meta?: SimilarExamMeta) => {
     try {
       const { data: session } = await supabase.auth.getSession();
@@ -439,7 +465,7 @@ export default function ExamsTableMobile({
               style={getStatusBorderStyle(exam.estado)}
             >
               <div className="p-4">
-                <ExamCardHeader exam={exam} t={t} />
+                <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </div>
               <div className="p-4 border-t bg-muted/20">
                 <ExamCardContent
@@ -463,7 +489,7 @@ export default function ExamsTableMobile({
               style={getStatusBorderStyle(exam.estado)}
             >
               <AccordionTrigger className="p-4 hover:no-underline">
-                <ExamCardHeader exam={exam} t={t} />
+                <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </AccordionTrigger>
               <AccordionContent className="p-4 border-t bg-muted/20">
                 <ExamCardContent
