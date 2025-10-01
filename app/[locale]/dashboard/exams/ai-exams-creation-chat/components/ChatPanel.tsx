@@ -541,7 +541,7 @@ export default function ChatPanel() {
       <div className="flex w-full justify-center">
         <div className="w-full sm:w-[62vw] sm:min-w-[640px] max-w-[1200px]">
           <Conversation
-            className={`${notoSans.className} relative w-full rounded-xl bg-transparent shadow-none overflow-y-auto`}
+            className={`${notoSans.className} relative w-full rounded-xl bg-transparent backdrop-blur-sm shadow-none overflow-y-auto`}
             style={{ height: convHeight, maxHeight: convHeight }}
           >
             <ConversationContent>
