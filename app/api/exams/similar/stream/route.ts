@@ -69,95 +69,147 @@ export async function GET(req: NextRequest) {
         succeeded: new Set(),
       };
       let lastStepIndex = -1;
-      while (true) {
-        try {
-          const { data: row } = await supabase
-            .from("procesos_examen_similar")
-            .select("status, step, error_key, draft_exam_id")
-            .eq("id", jobId)
-            .maybeSingle();
 
-          if (!row) {
-            controller.enqueue(encoder.encode(sseEvent("error", { jobId, messageKey: "jobs.similarExam.errors.unknown" })));
-            break;
-          }
+      // Helper to process row updates
+      type Row = { status: string; step: Step | null; error_key: string | null; draft_exam_id: string | null };
+      const processRow = (typed: Row) => {
+        const status = typed.status;
+        const step = typed.step;
 
-          type Row = { status: string; step: Step | null; error_key: string | null; draft_exam_id: string | null };
-          const typed = row as Row;
-          const status = typed.status;
-          const step = typed.step;
-
-          // Emit started for current step
-          if (status === "running" && step) {
-            const idx = steps.indexOf(step);
-            if (idx >= 0 && !seen.started.has(step)) {
-              controller.enqueue(
-                encoder.encode(
-                  sseEvent("progress", { jobId, stepKey: step, status: "started", messageKey: `jobs.similarExam.steps.${step}` }),
-                ),
-              );
-              seen.started.add(step);
-              // Mark previous step succeeded if we advanced
-              if (lastStepIndex >= 0 && idx > lastStepIndex) {
-                const prev = steps[lastStepIndex];
-                if (prev && !seen.succeeded.has(prev)) {
-                  controller.enqueue(
-                    encoder.encode(
-                      sseEvent("progress", { jobId, stepKey: prev, status: "succeeded", messageKey: `jobs.similarExam.steps.${prev}` }),
-                    ),
-                  );
-                  seen.succeeded.add(prev);
-                }
+        // Emit started for current step
+        if (status === "running" && step) {
+          const idx = steps.indexOf(step);
+          if (idx >= 0 && !seen.started.has(step)) {
+            controller.enqueue(
+              encoder.encode(
+                sseEvent("progress", { jobId, stepKey: step, status: "started", messageKey: `jobs.similarExam.steps.${step}` }),
+              ),
+            );
+            seen.started.add(step);
+            // Mark previous step succeeded if we advanced
+            if (lastStepIndex >= 0 && idx > lastStepIndex) {
+              const prev = steps[lastStepIndex];
+              if (prev && !seen.succeeded.has(prev)) {
+                controller.enqueue(
+                  encoder.encode(
+                    sseEvent("progress", { jobId, stepKey: prev, status: "succeeded", messageKey: `jobs.similarExam.steps.${prev}` }),
+                  ),
+                );
+                seen.succeeded.add(prev);
               }
-              lastStepIndex = Math.max(lastStepIndex, idx);
             }
+            lastStepIndex = Math.max(lastStepIndex, idx);
           }
-
-          if (status === "completed") {
-            // Succeed current step if needed
-            if (step && !seen.succeeded.has(step)) {
-              controller.enqueue(
-                encoder.encode(
-                  sseEvent("progress", { jobId, stepKey: step, status: "succeeded", messageKey: `jobs.similarExam.steps.${step}` }),
-                ),
-              );
-              seen.succeeded.add(step);
-            }
-            controller.enqueue(
-              encoder.encode(
-                sseEvent("completed", { jobId, draftExamId: typed.draft_exam_id, messageKey: "jobs.similarExam.status.succeeded" }),
-              ),
-            );
-            break;
-          }
-
-          if (status === "failed") {
-            const rawKey = typed.error_key;
-            const msgKey = rawKey && rawKey.startsWith("jobs.")
-              ? rawKey
-              : `jobs.similarExam.errors.${rawKey ?? "unknown"}`;
-            controller.enqueue(
-              encoder.encode(
-                sseEvent("progress", { jobId, stepKey: step ?? "loadBlueprint", status: "failed", messageKey: msgKey }),
-              ),
-            );
-            controller.enqueue(
-              encoder.encode(
-                sseEvent("failed", { jobId, messageKey: msgKey }),
-              ),
-            );
-            break;
-          }
-
-          // Small delay
-          await new Promise((r) => setTimeout(r, 500));
-        } catch (e) {
-          logger?.error?.("SSE polling loop error", e);
-          break;
         }
+
+        if (status === "completed") {
+          // Succeed current step if needed
+          if (step && !seen.succeeded.has(step)) {
+            controller.enqueue(
+              encoder.encode(
+                sseEvent("progress", { jobId, stepKey: step, status: "succeeded", messageKey: `jobs.similarExam.steps.${step}` }),
+              ),
+            );
+            seen.succeeded.add(step);
+          }
+          controller.enqueue(
+            encoder.encode(
+              sseEvent("completed", { jobId, draftExamId: typed.draft_exam_id, messageKey: "jobs.similarExam.status.succeeded" }),
+            ),
+          );
+          return true; // terminal
+        }
+
+        if (status === "failed") {
+          const rawKey = typed.error_key;
+          const msgKey = rawKey && rawKey.startsWith("jobs.")
+            ? rawKey
+            : `jobs.similarExam.errors.${rawKey ?? "unknown"}`;
+          controller.enqueue(
+            encoder.encode(
+              sseEvent("progress", { jobId, stepKey: step ?? "loadBlueprint", status: "failed", messageKey: msgKey }),
+            ),
+          );
+          controller.enqueue(
+            encoder.encode(
+              sseEvent("failed", { jobId, messageKey: msgKey }),
+            ),
+          );
+          return true; // terminal
+        }
+
+        return false; // not terminal
+      };
+
+      // Fetch initial state
+      try {
+        const { data: row } = await supabase
+          .from("procesos_examen_similar")
+          .select("status, step, error_key, draft_exam_id")
+          .eq("id", jobId)
+          .maybeSingle();
+
+        if (!row) {
+          controller.enqueue(encoder.encode(sseEvent("error", { jobId, messageKey: "jobs.similarExam.errors.unknown" })));
+          controller.close();
+          return;
+        }
+
+        const isTerminal = processRow(row as Row);
+        if (isTerminal) {
+          controller.close();
+          return;
+        }
+      } catch (e) {
+        logger?.error?.("Initial fetch error", e);
+        controller.close();
+        return;
       }
 
-      controller.close();
+      // Subscribe to realtime changes instead of polling
+      const subscription = supabase
+        .channel(`job-${jobId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "procesos_examen_similar",
+            filter: `id=eq.${jobId}`,
+          },
+          (payload) => {
+            try {
+              const row = payload.new as Row;
+              const isTerminal = processRow(row);
+              if (isTerminal) {
+                subscription.unsubscribe();
+                controller.close();
+              }
+            } catch (e) {
+              logger?.error?.("Realtime update error", e);
+              subscription.unsubscribe();
+              controller.close();
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (status === "CHANNEL_ERROR") {
+            logger?.error?.("Realtime subscription error");
+            controller.enqueue(encoder.encode(sseEvent("error", { jobId, messageKey: "jobs.similarExam.errors.unknown" })));
+            subscription.unsubscribe();
+            controller.close();
+          }
+        });
+
+      // Cleanup on stream abort
+      const interval = setInterval(() => {
+        // Heartbeat to keep connection alive
+      }, 30000);
+
+      return () => {
+        clearInterval(interval);
+        subscription.unsubscribe();
+      };
     },
   });
 
