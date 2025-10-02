@@ -53,6 +53,7 @@ interface ExamDetails {
       id: string;
       texto: string;
       es_correcta: boolean;
+      orden: number;
     }>;
   }>;
   examen_grupo?: Array<{
@@ -113,7 +114,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             puntaje,
             orden,
             tipo_pregunta:tipo_id (nombre),
-            opciones_respuesta (*)
+            opciones_respuesta (id, texto, es_correcta, orden)
           ),
           examen_grupo (
             grupo:grupo_id (
@@ -132,6 +133,12 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       // Ordenar preguntas por orden
       if (data.preguntas) {
         data.preguntas.sort((a: { orden: number }, b: { orden: number }) => a.orden - b.orden);
+        // Ordenar opciones de respuesta por orden
+        data.preguntas.forEach((pregunta: any) => {
+          if (pregunta.opciones_respuesta) {
+            pregunta.opciones_respuesta.sort((a: { orden: number }, b: { orden: number }) => a.orden - b.orden);
+          }
+        });
       }
       
       setExam(data as ExamDetails);
