@@ -134,7 +134,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       if (data.preguntas) {
         data.preguntas.sort((a: { orden: number }, b: { orden: number }) => a.orden - b.orden);
         // Ordenar opciones de respuesta por orden
-        data.preguntas.forEach((pregunta: any) => {
+        data.preguntas.forEach((pregunta: { orden: number, opciones_respuesta: Array<{ orden: number }> }) => {
           if (pregunta.opciones_respuesta) {
             pregunta.opciones_respuesta.sort((a: { orden: number }, b: { orden: number }) => a.orden - b.orden);
           }
