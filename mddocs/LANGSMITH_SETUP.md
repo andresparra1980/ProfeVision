@@ -48,7 +48,7 @@ yarn dev
 
 The integration automatically traces:
 
-### Pipeline Level
+### Similar Exam Pipeline
 - **Full pipeline execution** for each exam generation job
 - Metadata includes:
   - Job ID
@@ -59,14 +59,28 @@ The integration automatically traces:
   - Number of questions
   - Random seed
 
-### LLM Call Level
-- **Generate step**: Creating similar exam questions
-- **Validate step**: Validating generated content
-- **Fallback attempts**: When primary model fails
-- Metadata for each call:
-  - Step name
-  - Job ID
-  - Exam details
+### Chat Exam Generation
+- **Complete request/response** for each chat interaction
+- **LLM calls** via ChatOpenAI with automatic tracing
+- **Fallback attempts** when primary model fails
+- Metadata includes:
+  - User ID
+  - Language
+  - Difficulty
+  - Question types
+  - Number of questions
+  - Cost and token usage
+
+### Document Summarization
+- **Text mode**: Summarization of text documents
+- **Vision mode**: Summarization of images/visual documents
+- **Pipeline structure**: `document_summarize` → `ChatOpenAI` → `openrouter_cost`
+- Metadata includes:
+  - Mode (text/vision)
+  - Model used
+  - Token usage
+  - Generation time
+  - Cost breakdown
 
 ## Viewing Traces in LangSmith
 
@@ -77,7 +91,7 @@ The integration automatically traces:
    - **Duration**: Total execution time
    - **Tokens**: Input/output tokens used
    - **Cost**: Estimated cost per run
-   - **Tags**: `exam-generation`, `similar-exam`
+   - **Tags**: `exam-generation`, `similar-exam`, `chat-api`, `document-summarize`, `text-mode`, `vision-mode`
 
 4. Click on any run to see:
    - Full execution trace tree

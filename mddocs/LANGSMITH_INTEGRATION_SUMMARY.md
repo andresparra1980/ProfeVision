@@ -19,6 +19,13 @@
 - ✅ User conversation history tracking
 - ✅ Rich metadata (user, language, difficulty, question types)
 
+#### **Document Summarization** (`/api/documents/summarize`)
+- ✅ Complete pipeline tracing for text and vision modes
+- ✅ LLM call tracking via ChatOpenAI
+- ✅ Cost tracking with openrouter_cost node
+- ✅ Support for both text and image-based summarization
+- ✅ Rich metadata (mode, model, tokens, generation time)
+
 ### 2. **OpenRouter Cost Analytics**
 
 #### **Automatic Cost Tracking**
@@ -129,10 +136,21 @@ Every trace includes:
    - Cleaned verbose console logs
    - Added tags: `exam-generation`, `chat-api`
 
+### Document Summarization API
+7. **`app/api/documents/summarize/route.ts`**
+   - Refactored from 460 to 180 lines with modular architecture
+   - Created `lib/ai/document-summarize/` with schemas, prompts, chains, langsmith, openrouter
+   - Implemented pipeline with `document_summarize` root node
+   - Added `ChatOpenAI` and `openrouter_cost` child nodes
+   - Support for both text and vision (image) modes
+   - Complete LangSmith tracing with metadata
+   - OpenRouter cost tracking integrated
+   - Added tags: `document-summarize`, `text-mode`/`vision-mode`
+
 ### Documentation
-7. **`LANGSMITH_QUICKSTART.md`** - Quick setup guide (2 minutes)
-8. **`mddocs/LANGSMITH_SETUP.md`** - Comprehensive setup and usage
-9. **`mddocs/COST_ANALYTICS.md`** - Cost tracking and optimization guide
+8. **`LANGSMITH_QUICKSTART.md`** - Quick setup guide (2 minutes)
+9. **`mddocs/LANGSMITH_SETUP.md`** - Comprehensive setup and usage
+10. **`mddocs/COST_ANALYTICS.md`** - Cost tracking and optimization guide
 
 ## 🎯 Key Features
 
@@ -182,6 +200,8 @@ Every trace includes:
 - **By model**: `metadata.openrouter_model = "google/gemini-2.5-flash-lite"`
 - **Failed runs**: `status = "error"`
 - **With fallback**: `metadata.is_fallback = true`
+- **By feature**: `tags = "document-summarize"` or `tags = "chat-api"`
+- **By mode**: `metadata.mode = "vision"` or `metadata.mode = "text"`
 
 ### Cost Analysis
 - View in LangSmith Analytics tab
@@ -243,7 +263,7 @@ Every trace includes:
    ```
 
 2. **Use tags for filtering**
-   - Already tagged: `exam-generation`, `chat-api`, `similar-exam`
+   - Already tagged: `exam-generation`, `chat-api`, `similar-exam`, `document-summarize`, `text-mode`, `vision-mode`
    - Add custom tags as needed
 
 3. **Set up alerts**

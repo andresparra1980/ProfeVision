@@ -10,7 +10,7 @@ Every LLM call now includes detailed cost and performance metrics from OpenRoute
 
 ### Per Request Metrics
 
-For each exam generation request (`/api/chat`), we track:
+For each AI request (`/api/chat`, `/api/documents/summarize`, `/api/exams/similar/*`), we track:
 
 #### **Cost Metrics**
 - `openrouter_cost` - Total cost in USD (e.g., 0.001610532 = $0.0016)
@@ -34,14 +34,17 @@ For each exam generation request (`/api/chat`), we track:
 - `openrouter_streamed` - Whether response was streamed
 
 #### **Request Context**
-- `user_id` - Who made the request
+- `user_id` - Who made the request (chat, similar-exam)
 - `language` - Target language
-- `num_questions` - Questions requested
-- `questions_generated` - Questions actually generated
-- `question_types` - Types requested
-- `difficulty` - Difficulty level
-- `has_existing_exam` - Whether editing existing exam
-- `is_fallback` - Whether fallback model was used
+- `num_questions` - Questions requested (chat, similar-exam)
+- `questions_generated` - Questions actually generated (chat)
+- `question_types` - Types requested (chat)
+- `difficulty` - Difficulty level (chat)
+- `has_existing_exam` - Whether editing existing exam (chat)
+- `is_fallback` - Whether fallback model was used (chat)
+- `mode` - "text" or "vision" (document-summarize)
+- `has_text` - Whether text was provided (document-summarize)
+- `has_image` - Whether image was provided (document-summarize)
 
 ## How It Works
 
@@ -115,6 +118,16 @@ Compare providers
 
 **Use case**: Track when primary model fails
 
+### Example 5: Vision Mode Costs
+**Filter**: `metadata.mode = "vision"`
+
+**Use case**: Compare vision vs text summarization costs
+
+### Example 6: Document Summarization
+**Filter**: `tags = "document-summarize"`
+
+**Use case**: Track all document summarization requests
+
 ## Console Logs
 
 ### Successful Generation
@@ -138,6 +151,20 @@ Compare providers
 [WARN] /api/chat:Primary model failed, trying fallback { model: 'google/gemini-2.5-flash-lite', fallbackModel: 'mistralai/ministral-8b' }
 [API] /api/chat:Fallback response received { ... }
 [API] /api/chat:Fallback cost analysis { cost: 0.000234, ... }
+```
+
+### Document Summarization
+```
+[API] /api/documents/summarize:START
+[API] /api/documents/summarize:Initializing LangSmith
+[API] /api/documents/summarize:LangSmith initialized { hasClient: true, hasTracer: true, rootRunId: '...' }
+[API] /api/documents/summarize:trace_metadata { mode: 'text', has_text: true, has_image: false, model: 'google/gemini-2.5-flash-lite' }
+[API] /api/documents/summarize:Text mode { model: 'google/gemini-2.5-flash-lite', textLength: 15234 }
+[API] /api/documents/summarize:Invoking LLM { model: 'google/gemini-2.5-flash-lite', messageCount: 2 }
+[API] /api/documents/summarize:LLM response received { contentType: 'string', hasContent: true, generationId: 'gen-...' }
+[API] /api/documents/summarize:Cost analysis { cost: 0.000523, tokens_prompt: 1234, tokens_completion: 856, ... }
+[API] /api/documents/summarize:Chain completed { hasResult: true, generationId: 'gen-...', hasStats: true }
+[PERF] /api/documents/summarize:OK { ms: 4521 }
 ```
 
 ## Cost Optimization Tips
@@ -184,9 +211,14 @@ Compare providers
 - Fair usage policies
 
 **Cost by Feature**
-- Filter by tags: `chat-api` vs `similar-exam`
+- Filter by tags: `chat-api` vs `similar-exam` vs `document-summarize`
 - See which feature costs more
 - Optimize expensive features
+
+**Cost by Mode** (Document Summarization)
+- Filter by `metadata.mode`: `text` vs `vision`
+- Compare text vs image processing costs
+- Optimize vision model usage
 
 ## Troubleshooting
 
@@ -292,7 +324,17 @@ Tokens per question generated
 - Usually cheaper: ~$0.0002-0.0005
 - Faster but may be less accurate
 
-**Monthly Estimates**:
+**Document Summarization** (Text):
+- ~$0.0003-0.0006 per request
+- ~1000-2000 input tokens
+- ~500-1000 output tokens
+
+**Document Summarization** (Vision):
+- ~$0.001-0.003 per request (higher due to image processing)
+- ~2000-4000 input tokens
+- ~1000-2000 output tokens
+
+**Monthly Estimates** (Combined):
 - 1000 requests/month: ~$1.50-2.00
 - 10000 requests/month: ~$15-20
 - Heavy usage (100k/month): ~$150-200
