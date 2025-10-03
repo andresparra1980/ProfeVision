@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import logger from "@/lib/utils/logger";
-import { traceable } from "langsmith/traceable";
+// Removed traceable; using manual LangSmith root run
 import { ChatOpenAI } from "@langchain/openai";
 import { Client } from "langsmith";
-import { RunnableConfig, RunnableLambda } from "@langchain/core/runnables";
+import { RunnableLambda } from "@langchain/core/runnables";
+import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 
 // Env
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -322,11 +323,39 @@ export async function POST(req: NextRequest) {
   return await handleChatRequest(req, t0);
 }
 
-const handleChatRequest = traceable(
-  async (req: NextRequest, t0: number, config?: { runId?: string }) => {
+async function handleChatRequest(req: NextRequest, t0: number) {
   let traceMetadata: Record<string, string | number | boolean | undefined> = {};
   const langsmithClient = process.env.LANGCHAIN_API_KEY ? new Client() : null;
-  const runId = config?.runId;
+  let rootRunId: string | null = null;
+  let tracer: unknown | null = null;
+  class RootRunCapture extends BaseCallbackHandler {
+    name = "root-run-capture";
+    rootRunId: string | undefined;
+    // New hook name
+    async onChainStart(_serialized: unknown, _inputs: unknown, runId: string, _parentRunId?: string) {
+      if (!this.rootRunId && !_parentRunId) this.rootRunId = runId;
+    }
+    // Back-compat hook name
+    async handleChainStart(_llm: unknown, _prompts: unknown, runId: string, _parentRunId?: string) {
+      if (!this.rootRunId && !_parentRunId) this.rootRunId = runId;
+    }
+  }
+  const rootCapture = new RootRunCapture();
+  interface OpenRouterStats {
+    id?: string;
+    usage?: number;
+    total_cost?: number;
+    tokens_prompt?: number;
+    tokens_completion?: number;
+    native_tokens_prompt?: number;
+    native_tokens_completion?: number;
+    generation_time?: number;
+    latency?: number;
+    model?: string;
+    provider_name?: string;
+    finish_reason?: string;
+    streamed?: boolean;
+  }
   
   try {
     // 1) Auth obligatoria via Supabase
@@ -405,6 +434,33 @@ const handleChatRequest = traceable(
     const systemPrompt = buildSystemPrompt(context.language);
     const userInstruction = buildUserInstruction(context);
 
+    // Create LangSmith root run (best-effort)
+    if (langsmithClient) {
+      try {
+        const run = await langsmithClient.createRun({
+          name: "chat_exam_generation",
+          run_type: "chain",
+          // Minimal inputs for now; we will update with full metadata later
+          inputs: { endpoint: "/api/chat" },
+          project_name: process.env.LANGCHAIN_PROJECT || undefined,
+        });
+        // Some SDKs return { id }, others the full run; handle both
+        // @ts-expect-error tolerate unknown shape
+        rootRunId = run?.id ?? null;
+        // Get a tracer so child nodes attach to this project, combined with parentRunId
+        try {
+          // @ts-expect-error tolerate SDK shape
+          tracer = await langsmithClient.getTracer({
+            projectName: process.env.LANGCHAIN_PROJECT || undefined,
+          });
+        } catch (e) {
+          logger.warn("Could not get LangSmith tracer", { error: String(e) });
+        }
+      } catch (e) {
+        logger.warn("Could not create LangSmith root run", { error: String(e) });
+      }
+    }
+
     // 5) Llamar OpenRouter
     if (!OPENROUTER_API_KEY) {
       logger.error("Falta API Key de OpenRouter");
@@ -479,154 +535,83 @@ const handleChatRequest = traceable(
       tags: ["chat-api", "exam-generation"],
     });
 
-    // Call LLM with fallback support and cost tracking
-    let contentUnknown: unknown;
-    let generationStats: Record<string, unknown> | null = null;
-    
-    // Create config with metadata for LangChain
-    const runConfig: RunnableConfig = {
-      metadata: traceMetadata,
-      tags: ["chat-api", "exam-generation"],
-    };
-    
-    try {
-      const response = await model.invoke(llmMessages, runConfig);
-      contentUnknown = response.content;
-      
-      // Extract generation ID from response headers if available
-      const generationId = response.response_metadata?.id || response.id;
-      
-      logger.api("/api/chat:LLM response received", { 
-        contentType: typeof contentUnknown,
-        hasContent: !!contentUnknown,
-        generationId 
-      });
-      
-      // Fetch detailed stats from OpenRouter
-      if (generationId) {
-        generationStats = await fetchOpenRouterStats(generationId);
-        if (generationStats) {
-          logger.api("/api/chat:Cost analysis", {
-            cost: generationStats.usage || generationStats.total_cost,
-            tokens_prompt: generationStats.tokens_prompt,
-            tokens_completion: generationStats.tokens_completion,
-            generation_time_ms: generationStats.generation_time,
-            model: generationStats.model,
-            provider: generationStats.provider_name,
-          });
+    // Orchestrate LLM + cost as a single Runnable so children appear under one root
+    let generationStats: OpenRouterStats | null = null;
 
-          // Emit a dedicated 'cost' node into the trace with full stats
-          try {
-            const costMetadata = {
-              ...traceMetadata,
-              openrouter_generation_id: generationId,
-              openrouter_cost: generationStats.usage || generationStats.total_cost,
-              openrouter_tokens_prompt: generationStats.tokens_prompt,
-              openrouter_tokens_completion: generationStats.tokens_completion,
-              openrouter_native_tokens_prompt: generationStats.native_tokens_prompt,
-              openrouter_native_tokens_completion: generationStats.native_tokens_completion,
-              openrouter_generation_time_ms: generationStats.generation_time,
-              openrouter_latency_ms: generationStats.latency,
-              openrouter_model: generationStats.model,
-              openrouter_provider: generationStats.provider_name,
-              openrouter_finish_reason: generationStats.finish_reason,
-              openrouter_streamed: generationStats.streamed,
-            } as Record<string, string | number | boolean | undefined>;
-            await new RunnableLambda({ func: async () => null })
-              .withConfig({ metadata: costMetadata, tags: ["openrouter", "cost", "chat-api"] })
-              .invoke(null);
-          } catch (_e) { /* non-blocking */ }
-        }
-      }
-    } catch (error) {
-      // Try fallback model if available
-      if (OPENAI_FALLBACK_MODEL) {
-        logger.warn("/api/chat:Primary model failed, trying fallback", { 
-          model: OPENAI_MODEL,
-          fallbackModel: OPENAI_FALLBACK_MODEL 
-        });
-        const fallbackModel = new ChatOpenAI({
-          apiKey: OPENROUTER_API_KEY,
-          modelName: OPENAI_FALLBACK_MODEL,
-          temperature: 0.7,
-          maxTokens: 16000,
-          configuration: {
-            baseURL: "https://openrouter.ai/api/v1",
-            defaultHeaders: {
-              "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-              "X-Title": "ProfeVision",
-            },
-          },
-          modelKwargs: {
-            response_format: { type: "json_object" },
-          },
-          metadata: {
-            ...traceMetadata,
-            endpoint: "/api/chat",
-            model: OPENAI_FALLBACK_MODEL,
-            is_fallback: true,
-          },
-        });
-        
-        const response = await fallbackModel.invoke(llmMessages);
-        contentUnknown = response.content;
-        
-        // Extract generation ID from fallback response
+    // Wrapper that executes ChatOpenAI and then openrouter_cost as siblings
+    type ChatMsg = { role: "system" | "user" | "assistant"; content: string };
+    const fullPipeline = RunnableLambda.from<ChatMsg[], { content: unknown }>(
+      async (messages: ChatMsg[], config) => {
+        // 1) Execute ChatOpenAI directly (will appear as child node)
+        const response = await model.invoke(messages, config);
+        const content = response.content;
         const generationId = response.response_metadata?.id || response.id;
-        
-        logger.api("/api/chat:Fallback response received", { 
-          contentType: typeof contentUnknown,
-          hasContent: !!contentUnknown,
+
+        logger.api("/api/chat:LLM response received", { 
+          contentType: typeof content,
+          hasContent: !!content,
           generationId 
         });
-        
-        // Fetch detailed stats from OpenRouter for fallback
-        if (generationId) {
-          generationStats = await fetchOpenRouterStats(generationId);
-          if (generationStats) {
-            logger.api("/api/chat:Fallback cost analysis", {
-              cost: generationStats.usage || generationStats.total_cost,
-              tokens_prompt: generationStats.tokens_prompt,
-              tokens_completion: generationStats.tokens_completion,
-              generation_time_ms: generationStats.generation_time,
-              model: generationStats.model,
-              provider: generationStats.provider_name,
-            });
 
-            // Emit a dedicated 'cost' node for fallback as well
-            try {
-              const costMetadata = {
-                ...traceMetadata,
-                is_fallback: true,
-                openrouter_generation_id: generationId,
-                openrouter_cost: generationStats.usage || generationStats.total_cost,
-                openrouter_tokens_prompt: generationStats.tokens_prompt,
-                openrouter_tokens_completion: generationStats.tokens_completion,
-                openrouter_native_tokens_prompt: generationStats.native_tokens_prompt,
-                openrouter_native_tokens_completion: generationStats.native_tokens_completion,
-                openrouter_generation_time_ms: generationStats.generation_time,
-                openrouter_latency_ms: generationStats.latency,
-                openrouter_model: generationStats.model,
-                openrouter_provider: generationStats.provider_name,
-                openrouter_finish_reason: generationStats.finish_reason,
-                openrouter_streamed: generationStats.streamed,
-              } as Record<string, string | number | boolean | undefined>;
-              await new RunnableLambda({ func: async () => null })
-                .withConfig({ metadata: costMetadata, tags: ["openrouter", "cost", "chat-api", "fallback"] })
-                .invoke(null);
-            } catch (_e) { /* non-blocking */ }
+        // 2) Fetch OpenRouter stats and create cost node
+        if (generationId) {
+          const stats = await fetchOpenRouterStats(generationId);
+          if (stats) {
+            generationStats = stats;
+            logger.api("/api/chat:Cost analysis", {
+              cost: stats.usage || stats.total_cost,
+              tokens_prompt: stats.tokens_prompt,
+              tokens_completion: stats.tokens_completion,
+              generation_time_ms: stats.generation_time,
+              model: stats.model,
+              provider: stats.provider_name,
+            });
+            
+            const costMetadata = {
+              ...traceMetadata,
+              openrouter_generation_id: generationId as string,
+              openrouter_cost: (stats.usage || stats.total_cost) as number,
+              openrouter_tokens_prompt: stats.tokens_prompt as number,
+              openrouter_tokens_completion: stats.tokens_completion as number,
+              openrouter_native_tokens_prompt: stats.native_tokens_prompt as number,
+              openrouter_native_tokens_completion: stats.native_tokens_completion as number,
+              openrouter_generation_time_ms: stats.generation_time as number,
+              openrouter_latency_ms: stats.latency as number,
+              openrouter_model: stats.model as string,
+              openrouter_provider: stats.provider_name as string,
+              openrouter_finish_reason: stats.finish_reason as string,
+              openrouter_streamed: stats.streamed as boolean,
+            };
+
+            // Create cost tracking node with empty input and cost metadata
+            await RunnableLambda.from(async () => null)
+              .withConfig({
+                runName: "openrouter_cost",
+                metadata: costMetadata,
+                tags: ["openrouter", "cost", "chat-api"],
+              })
+              .invoke(null, config);
           }
         }
-      } else {
-        logger.error("Error calling LLM", error);
-        return NextResponse.json(
-          { error: "Error al generar contenido con IA" },
-          { status: 502 }
-        );
+        
+        return { content };
       }
-    }
+    );
 
-    if (contentUnknown == null) {
+    // Execute parent runnable with callbacks so children are nested
+    const pipelineResult = await fullPipeline
+      .withConfig({
+        runName: "chat_exam_generation",
+        // attach tracer callbacks
+        callbacks: tracer ? [tracer, rootCapture] : [rootCapture],
+        tags: ["exam-generation", "chat-api"],
+        metadata: traceMetadata,
+      })
+      .invoke(llmMessages);
+
+    const contentUnknownFinal = pipelineResult.content;
+
+    if (contentUnknownFinal == null) {
       return NextResponse.json(
         { error: "Respuesta vacía de IA" },
         { status: 502 }
@@ -635,11 +620,11 @@ const handleChatRequest = traceable(
 
     // 6) Extraer JSON y validar (tolerante a bloques con ```json ... ```)
     let jsonPayload: unknown;
-    if (Array.isArray(contentUnknown)) {
+    if (Array.isArray(contentUnknownFinal)) {
       // Algunos modelos devuelven "content" como una lista de partes
       // Buscamos primero un objeto, si no, un string con JSON
       let found: unknown | undefined;
-      for (const part of contentUnknown) {
+      for (const part of contentUnknownFinal) {
         if (part && typeof part === "object") {
           // OpenAI-style: { type: 'output_text', text: '...' }
           const text = (part as { text?: unknown }).text;
@@ -663,14 +648,14 @@ const handleChatRequest = traceable(
       if (found == null) {
         logger.error("No se pudo extraer JSON desde arreglo de partes de IA");
         return NextResponse.json(
-          { error: "JSON inválido devuelto por IA", raw: contentUnknown },
+          { error: "JSON inválido devuelto por IA", raw: contentUnknownFinal },
           { status: 422 }
         );
       }
       jsonPayload = found;
-    } else if (typeof contentUnknown === "object") {
+    } else if (typeof contentUnknownFinal === "object") {
       // Algunos modelos pueden devolver ya un objeto JSON en message.content o wrappers
-      const obj = contentUnknown as Record<string, unknown>;
+      const obj = contentUnknownFinal as Record<string, unknown>;
       if (obj && typeof obj === "object" && "exam" in obj) {
         jsonPayload = obj;
       } else if (typeof obj.text === "string") {
@@ -690,7 +675,7 @@ const handleChatRequest = traceable(
       } else {
         jsonPayload = obj;
       }
-    } else if (typeof contentUnknown === "string") {
+    } else if (typeof contentUnknownFinal === "string") {
       // Minimal, robust strategy: direct parse; detect truncation; minimally repair backslashes inside strings
       const stripCodeFences = (s: string) => s.trim().replace(/^```(?:json|jsonc|javascript|js|ts|typescript)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
       const normalizeWeirdUnicode = (s: string) => s.replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/[\u2028\u2029]/g, "");
@@ -738,7 +723,7 @@ const handleChatRequest = traceable(
         return out;
       };
       try {
-        const raw = normalizeWeirdUnicode(contentUnknown);
+        const raw = normalizeWeirdUnicode(contentUnknownFinal);
         // 1) Try direct parse
         try {
           jsonPayload = JSON.parse(raw);
@@ -767,16 +752,16 @@ const handleChatRequest = traceable(
           }
         }
       } catch (_e) {
-        logger.error("No se pudo parsear JSON de IA", { type: typeof contentUnknown, size: String(contentUnknown).length });
+        logger.error("No se pudo parsear JSON de IA", { type: typeof contentUnknownFinal, size: String(contentUnknownFinal).length });
         return NextResponse.json(
-          { error: "JSON inválido devuelto por IA", raw: String(contentUnknown).slice(0, 2000) },
+          { error: "JSON inválido devuelto por IA", raw: String(contentUnknownFinal).slice(0, 2000) },
           { status: 422 }
         );
       }
     } else {
-      logger.error("Contenido de IA con tipo inesperado", typeof contentUnknown);
+      logger.error("Contenido de IA con tipo inesperado", typeof contentUnknownFinal);
       return NextResponse.json(
-        { error: "Contenido no soportado devuelto por IA", raw: String(contentUnknown) },
+        { error: "Contenido no soportado devuelto por IA", raw: String(contentUnknownFinal) },
         { status: 422 }
       );
     }
@@ -825,52 +810,75 @@ const handleChatRequest = traceable(
       duration_ms: Date.now() - t0,
       questions_generated: normalized.exam.questions.length,
       // OpenRouter cost and performance data
-      ...(generationStats && {
-        openrouter_generation_id: generationStats.id,
-        openrouter_cost: generationStats.usage || generationStats.total_cost,
-        openrouter_tokens_prompt: generationStats.tokens_prompt,
-        openrouter_tokens_completion: generationStats.tokens_completion,
-        openrouter_native_tokens_prompt: generationStats.native_tokens_prompt,
-        openrouter_native_tokens_completion: generationStats.native_tokens_completion,
-        openrouter_generation_time_ms: generationStats.generation_time,
-        openrouter_latency_ms: generationStats.latency,
-        openrouter_model: generationStats.model,
-        openrouter_provider: generationStats.provider_name,
-        openrouter_finish_reason: generationStats.finish_reason,
-        openrouter_streamed: generationStats.streamed,
-      }),
+      ...(generationStats
+        ? {
+            openrouter_generation_id: (generationStats as OpenRouterStats).id,
+            openrouter_cost: (generationStats as OpenRouterStats).usage || (generationStats as OpenRouterStats).total_cost,
+            openrouter_tokens_prompt: (generationStats as OpenRouterStats).tokens_prompt,
+            openrouter_tokens_completion: (generationStats as OpenRouterStats).tokens_completion,
+            openrouter_native_tokens_prompt: (generationStats as OpenRouterStats).native_tokens_prompt,
+            openrouter_native_tokens_completion: (generationStats as OpenRouterStats).native_tokens_completion,
+            openrouter_generation_time_ms: (generationStats as OpenRouterStats).generation_time,
+            openrouter_latency_ms: (generationStats as OpenRouterStats).latency,
+            openrouter_model: (generationStats as OpenRouterStats).model,
+            openrouter_provider: (generationStats as OpenRouterStats).provider_name,
+            openrouter_finish_reason: (generationStats as OpenRouterStats).finish_reason,
+            openrouter_streamed: (generationStats as OpenRouterStats).streamed,
+          }
+        : {}),
     };
     logger.api("/api/chat:final_metadata", finalMetadata);
     
-    // Update LangSmith run with final metadata
-    if (langsmithClient && runId) {
+    // Update visible LangSmith root run (captured from pipeline)
+    if (langsmithClient && rootCapture.rootRunId) {
       try {
-        await langsmithClient.updateRun(runId, {
+        const updatePayload = {
           outputs: { questions_generated: normalized.exam.questions.length },
           extra: { metadata: finalMetadata },
-        });
+          end_time: new Date().toISOString(),
+          error: undefined,
+          metadata: finalMetadata,
+        } as Record<string, unknown>;
+        await langsmithClient.updateRun(rootCapture.rootRunId, updatePayload);
       } catch (e) {
-        // Non-blocking - just log if update fails
-        logger.warn("Failed to update LangSmith run", { runId, error: String(e) });
+        logger.warn("Failed to finalize visible LangSmith root run", { rootRunId: rootCapture.rootRunId, error: String(e) });
+      }
+    }
+
+    // Update and end manual LangSmith root run (best-effort)
+    if (langsmithClient && rootRunId) {
+      try {
+        // Force metadata into top-level to appear in the root Metadata panel
+        const updatePayload = {
+          outputs: { questions_generated: normalized.exam.questions.length },
+          extra: { metadata: finalMetadata },
+          end_time: new Date().toISOString(),
+          error: undefined,
+          metadata: finalMetadata,
+        } as Record<string, unknown>;
+        await langsmithClient.updateRun(rootRunId, updatePayload);
+      } catch (e) {
+        logger.warn("Failed to finalize LangSmith root run", { rootRunId, error: String(e) });
       }
     }
 
     return NextResponse.json(normalized);
   } catch (error) {
     logger.error("/api/chat:ERROR", error);
+    // Try to end root run with error info
+    if (langsmithClient && rootRunId) {
+      try {
+        await langsmithClient.updateRun(rootRunId, {
+          end_time: new Date().toISOString(),
+          error: String(error),
+        });
+      } catch (e) {
+        logger.warn("Failed to end LangSmith run on error", { rootRunId, error: String(e) });
+      }
+    }
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }
     );
   }
-  },
-  {
-    name: "chat_exam_generation",
-    run_type: "chain",
-    metadata: {
-      endpoint: "/api/chat",
-      feature: "exam-question-generation",
-    },
-    tags: ["exam-generation", "chat-api"],
-  }
-);
+}
