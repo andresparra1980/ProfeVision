@@ -1,459 +1,197 @@
 import { NextRequest, NextResponse } from "next/server";
+import logger from "@/lib/utils/logger";
+
+// Import refactored modules
+import { SummarizeRequestSchema, TopicSummaryResult } from "@/lib/ai/document-summarize/schemas";
+import { invokeTextSummarization, invokeVisionSummarization } from "@/lib/ai/document-summarize/chains";
+import { validateBasicStructure } from "@/lib/ai/document-summarize/json-parser";
+import { createCostMetadata } from "@/lib/ai/document-summarize/openrouter";
+import {
+  RootRunCapture,
+  initializeLangSmithTracing,
+  finalizeLangSmithRun,
+  endLangSmithRunWithError,
+} from "@/lib/ai/document-summarize/langsmith";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-import { createOpenAI } from "@ai-sdk/openai";
-import logger from "@/lib/utils/logger";
-import { generateObject } from "ai";
-import { z } from "zod";
-
-// Simple JSON schema type for our summary
-export interface TopicSummaryResult {
-  generalOverview: string;
-  academicLevel: string;
-  macroTopics: Array<{
-    name: string;
-    description: string;
-    importance: "high" | "medium" | "low";
-    microTopics: Array<{
-      name: string;
-      description: string;
-      keyTerms: string[];
-      concepts: string[];
-    }>;
-  }>;
-}
-
-// Zod schema mirroring TopicSummaryResult
-const microTopicSchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  keyTerms: z.array(z.string()),
-  concepts: z.array(z.string()),
-});
-
-const macroTopicSchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  importance: z.enum(["high", "medium", "low"]),
-  microTopics: z.array(microTopicSchema).min(0),
-});
-
-const summarySchema = z.object({
-  generalOverview: z.string(),
-  academicLevel: z.string(),
-  macroTopics: z.array(macroTopicSchema).min(0),
-});
-
-function buildPrompt(text: string) {
-  return `You are an expert academic content analyzer. Read the following document content and produce a structured topic summary in Spanish for educators. Return STRICT JSON ONLY matching this exact schema:
-{
-  "generalOverview": string,
-  "academicLevel": string, // e.g., "Primaria", "Secundaria", "Universidad"
-  "macroTopics": [
-    {
-      "name": string,
-      "description": string,
-      "importance": "high" | "medium" | "low",
-      "microTopics": [
-        {
-          "name": string,
-          "description": string,
-          "keyTerms": string[],
-          "concepts": string[]
-        }
-      ]
-    }
-  ]
-}
-Rules:
-- Output must be VALID JSON with no extra commentary.
-- Be concise but informative.
-- If content is short, macroTopics may be empty.
-
-Document content (truncated if long):\n\n${text}`;
-}
 
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const text: string | undefined = body?.text;
-    const imageData: string | undefined = body?.imageData || body?.options?.imageData;
-    const options = body?.options || {};
+  const t0 = Date.now();
+  logger.api("/api/documents/summarize:START");
 
-    // Decide mode: image vs text
+  return await handleSummarizeRequest(req, t0);
+}
+
+async function handleSummarizeRequest(req: NextRequest, t0: number) {
+  let traceMetadata: Record<string, string | number | boolean | undefined> = {};
+
+  // Initialize LangSmith tracing
+  logger.api("/api/documents/summarize:Initializing LangSmith");
+  const { client: langsmithClient, tracer, rootRunId } = await initializeLangSmithTracing();
+  const rootCapture = new RootRunCapture();
+
+  logger.api("/api/documents/summarize:LangSmith initialized", {
+    hasClient: !!langsmithClient,
+    hasTracer: !!tracer,
+    rootRunId,
+  });
+
+  try {
+    // 1) Parse and validate request
+    const body = await req.json();
+    const parsed = SummarizeRequestSchema.safeParse(body);
+
+    if (!parsed.success) {
+      logger.warn("Invalid request payload", parsed.error.flatten());
+      return NextResponse.json(
+        { error: "Invalid request", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { text, imageData, options = {} } = parsed.data;
     const isImageMode = !!imageData && typeof imageData === "string";
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) {
+    // 2) Check API key
+    if (!process.env.OPENROUTER_API_KEY) {
       return NextResponse.json({ error: "Missing OPENROUTER_API_KEY" }, { status: 500 });
     }
 
+    // 3) Build trace metadata
+    traceMetadata = {
+      mode: isImageMode ? "vision" : "text",
+      has_text: !!text,
+      has_image: !!imageData,
+      model: options.model || (isImageMode ? process.env.OPENAI_IMAGE_SUMMARY_MODEL : process.env.OPENAI_MODEL) || "auto",
+    };
+    logger.api("/api/documents/summarize:trace_metadata", traceMetadata);
+
+    const callbacks = tracer ? [tracer, rootCapture] : [rootCapture];
+
+    let result: TopicSummaryResult;
+    let generationId: string | undefined;
+    let generationStats: any = null;
+
+    // 4) Execute appropriate chain
     if (isImageMode) {
-      // Vision summarization path
-      // Per request: use env-configured models directly; allow 'openrouter/auto' as fallback
-      const envPrimary = process.env.OPENAI_IMAGE_SUMMARY_MODEL || "";
-      const envFallback = process.env.OPENAI_IMAGE_SUMMARY_FALBACK_MODEL || "";
-      const temperature = typeof options?.temperature === "number" ? options.temperature : 0.2;
-      const maxOutputTokens = typeof options?.maxOutputTokens === "number" ? options.maxOutputTokens : 20000;
+      // Vision mode
+      const visionModel = options.model || process.env.OPENAI_IMAGE_SUMMARY_MODEL || "openrouter/auto";
+      const temperature = options.temperature ?? 0.2;
+      const maxOutputTokens = options.maxOutputTokens ?? 20000;
 
-      const prompt = `Eres un asistente educativo. Analiza la(s) imagen(es) y produce un resumen temático en Español, estructurado para docentes.
+      logger.api("/api/documents/summarize:Invoking vision chain", {
+        model: visionModel,
+        temperature,
+        maxOutputTokens,
+      });
 
-Debes devolver EXCLUSIVAMENTE JSON VÁLIDO con las SIGUIENTES CLAVES y ESTRUCTURA EXACTAS (sin texto adicional):
-{
-  "generalOverview": string,
-  "academicLevel": string, // p.ej.: "Primaria", "Secundaria", "Universidad"
-  "macroTopics": [
-    {
-      "name": string,
-      "description": string,
-      "importance": "high" | "medium" | "low",
-      "microTopics": [
-        {
-          "name": string,
-          "description": string,
-          "keyTerms": string[],
-          "concepts": string[]
-        }
-      ]
-    }
-  ]
-}
+      const visionResult = await invokeVisionSummarization({
+        imageData: imageData!,
+        model: visionModel,
+        temperature,
+        maxOutputTokens,
+        callbacks,
+        metadata: traceMetadata,
+      });
 
-Reglas:
-- Usa EXACTAMENTE estos nombres de propiedades en inglés: generalOverview, academicLevel, macroTopics, name, description, importance, microTopics, keyTerms, concepts.
-- No incluyas comentarios, ni Markdown, ni texto fuera del JSON.
-- Sé conciso pero informativo.
-`;
-
-      // Validate supported image content types if data URL
-      if (imageData.startsWith("data:")) {
-        const m = imageData.match(/^data:([^;]+);base64,/i);
-        const mime = m?.[1] || "";
-        const supported = /^(image\/(png|jpe?g|webp|gif))$/i.test(mime);
-        if (!supported) {
-          logger.warn(
-            "summarize: unsupported image mime for vision (expected png|jpg|jpeg|webp|gif)",
-            { mime }
-          );
-        }
+      result = visionResult.result;
+      generationId = visionResult.generationId;
+      generationStats = visionResult.stats;
+    } else {
+      // Text mode
+      if (!text || typeof text !== "string") {
+        return NextResponse.json({ error: "Missing 'text'" }, { status: 400 });
       }
 
-      const truncate = (s: string, n = 120) => (s.length > n ? s.slice(0, n) + "…[truncated]" : s);
+      const maxChars = options.maxChars || 20000;
+      const trimmed = text.length > maxChars ? text.slice(0, maxChars) : text;
+      const textModel = options.model || process.env.OPENAI_MODEL || "openrouter/auto";
+      const temperature = options.temperature ?? 0.3;
+      const maxOutputTokens = options.maxOutputTokens || options.maxTokens || 2200;
 
-      type VisionUserContent = Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
-      const buildMessages = () => [
-        { role: "system", content: `Eres un experto analista de contenido académico. Devuelve SOLO JSON válido con el SIGUIENTE ESQUEMA EXACTO y claves en inglés:
-{
-  "generalOverview": string,
-  "academicLevel": string,
-  "macroTopics": [
-    {
-      "name": string,
-      "description": string,
-      "importance": "high" | "medium" | "low",
-      "microTopics": [
-        { "name": string, "description": string, "keyTerms": string[], "concepts": string[] }
-      ]
-    }
-  ]
-}
-No añadas nada fuera del JSON.` },
-        {
-          role: "user" as const,
-          content: [
-            { type: "text", text: prompt },
-            // OpenRouter expects the image in image_url.url (data URL or remote URL)
-            { type: "image_url", image_url: { url: imageData } },
-          ] as VisionUserContent,
-        },
-      ];
+      logger.api("/api/documents/summarize:Invoking text chain", {
+        model: textModel,
+        temperature,
+        maxOutputTokens,
+        textLength: trimmed.length,
+      });
 
-      const requestVision = async (modelName: string) => {
-        const headers = {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-          "X-Title": "ProfeVision",
-        } as const;
+      const textResult = await invokeTextSummarization({
+        text: trimmed,
+        model: textModel,
+        temperature,
+        maxOutputTokens,
+        callbacks,
+        metadata: traceMetadata,
+      });
 
-        const bodyObj = {
-          model: modelName,
-          messages: buildMessages(),
-          temperature,
-          max_tokens: maxOutputTokens,
-          response_format: { type: "json_object" },
-        };
-
-        // removed verbose logger.api
-
-        const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers,
-          body: JSON.stringify(bodyObj),
-        });
-
-        // Capture full response for diagnostics
-        const status = resp.status;
-        const headersObj: Record<string, string> = {};
-        try {
-          Array.from(resp.headers.entries()).forEach(([k, v]) => {
-            headersObj[k] = v;
-          });
-        } catch (_e) { void _e; }
-        const rawBody = await resp.text();
-
-        let data: unknown = null;
-        try {
-          data = JSON.parse(rawBody);
-        } catch (_e) {
-          void _e; // leave data as null; will be handled below
-        }
-        if (!resp.ok || !data) {
-          logger.error("summarize vision non-OK", {
-            status,
-            headers: headersObj,
-            details: truncate(rawBody, 20000),
-          });
-          const err = new Error(`OpenRouter vision ${status}: ${truncate(rawBody, 2000)}`) as Error & { code?: string };
-          err.code = "TRANSPORT_ERROR";
-          throw err;
-        }
-        interface ORMessage { content?: unknown }
-        interface ORChoice { message?: ORMessage }
-        interface ORResponse { choices?: ORChoice[] }
-        const choices = (data as ORResponse).choices;
-        const content = Array.isArray(choices)
-          ? choices[0]?.message?.content
-          : undefined;
-        if (!content) {
-          const err = new Error("Empty content");
-          (err as Error & { code?: string }).code = "PARSE_ERROR";
-          throw err;
-        }
-        let contentText: string;
-        if (typeof content === "string") contentText = content;
-        else if (Array.isArray(content)) {
-          // Join any text parts if provider returns content as an array of parts
-          contentText = content
-            .map((p: unknown) => (typeof (p as { text?: string })?.text === "string" ? (p as { text?: string }).text as string : ""))
-            .filter(Boolean)
-            .join("\n");
-        } else {
-          const err = new Error("Unsupported content shape");
-          (err as Error & { code?: string }).code = "PARSE_ERROR";
-          throw err;
-        }
-        let jsonObj: unknown;
-        try {
-          jsonObj = JSON.parse(contentText);
-        } catch (_e) {
-          const match = contentText.match(/\{[\s\S]*\}/);
-          if (match) jsonObj = JSON.parse(match[0]);
-          else {
-            const err = new Error("Model did not return JSON content") as Error & { code?: string };
-            err.code = "PARSE_ERROR";
-            throw err;
-          }
-        }
-        const validated = summarySchema.safeParse(jsonObj);
-        if (!validated.success) {
-          const err = new Error("Response failed schema validation: " + validated.error.message) as Error & { code?: string; parsed?: string };
-          err.code = "VALIDATION_ERROR";
-          // Attach a preview of parsed JSON for diagnostics
-          err.parsed = (() => {
-            try { return JSON.stringify(jsonObj).slice(0, 2000); } catch (_e: unknown) { console.error(_e); return undefined; }
-          })();
-          throw err;
-        }
-        // removed verbose logger.api for validated json
-        return validated.data;
-      };
-
-      try {
-        const out = await requestVision(envPrimary || "openrouter/auto");
-        return NextResponse.json(out);
-      } catch (_e1: unknown) {
-        // Do not fallback if it's a parse/validation issue; surface to client for diagnosis
-        const code = (_e1 as { code?: string } | undefined)?.code;
-        if (code === "VALIDATION_ERROR" || code === "PARSE_ERROR") {
-          logger.warn("summarize image-mode primary returned parse/validation issue; skipping fallback", {
-            code,
-            message: String((_e1 as Error)?.message || _e1),
-            parsedPreview: (_e1 as { parsed?: string })?.parsed,
-          });
-          return NextResponse.json(
-            { error: (_e1 as Error)?.message || "Unprocessable LLM response", code: code || "UNPROCESSABLE" },
-            { status: 422 }
-          );
-        }
-        if (code !== "TRANSPORT_ERROR") {
-          // Unknown/non-transport error -> surface without fallback
-          logger.warn("summarize image-mode primary error; not a transport error, skipping fallback", {
-            code,
-            message: String((_e1 as Error)?.message || _e1),
-          });
-          return NextResponse.json(
-            { error: (_e1 as Error)?.message || "Unprocessable LLM response", code: code || "UNPROCESSABLE" },
-            { status: 422 }
-          );
-        }
-        logger.api("/api/documents/summarize image-mode fallback model", {
-          model: envFallback,
-          reason: "TRANSPORT_ERROR from primary",
-          error: String((_e1 as Error)?.message || _e1),
-        });
-        const out = await requestVision(envFallback);
-        return NextResponse.json(out);
-      }
+      result = textResult.result;
+      generationId = textResult.generationId;
+      generationStats = textResult.stats;
     }
 
-    // Text summarization path
-    if (!text || typeof text !== "string") {
-      return NextResponse.json({ error: "Missing 'text'" }, { status: 400 });
-    }
-
-    // Cap text length to keep token usage reasonable
-    const maxChars = (options?.maxChars as number) || 20000;
-    const trimmed = text.length > maxChars ? text.slice(0, maxChars) : text;
-
-    const model = options?.model || process.env.OPENAI_MODEL || "openrouter/auto";
-    const temperature = typeof options?.temperature === "number" ? options.temperature : 0.3;
-    const maxOutputTokens =
-      typeof options?.maxOutputTokens === "number"
-        ? options.maxOutputTokens
-        : typeof options?.maxTokens === "number"
-          ? options.maxTokens
-          : 2200;
-
-    // Prepare prompt
-    const prompt = buildPrompt(trimmed);
-
-    // OpenRouter client for Vercel AI SDK
-    const openrouter = createOpenAI({
-      apiKey,
-      baseURL: "https://openrouter.ai/api/v1",
-      headers: {
-        // Recommended by OpenRouter to improve request handling
-        Accept: "application/json",
-        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-        "X-Title": "ProfeVision",
-      },
+    logger.api("/api/documents/summarize:Chain completed", {
+      hasResult: !!result,
+      generationId,
+      hasStats: !!generationStats,
     });
 
-    // Helper fallback using OpenRouter chat/completions directly
-    const requestViaChatCompletions = async (targetModel: string) => {
-      const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-          "X-Title": "ProfeVision",
-        },
-        body: JSON.stringify({
-          model: targetModel,
-          messages: [
-            { role: "system", content: "You are an expert academic content analyzer. Return STRICT JSON ONLY." },
-            { role: "user", content: prompt },
-          ],
-          temperature,
-          max_tokens: maxOutputTokens,
-          response_format: { type: "json_object" },
-        }),
-      });
-      if (!resp.ok) {
-        const details = await resp.text();
-        throw new Error(`OpenRouter chat/completions ${resp.status}: ${details}`);
-      }
-      const raw = await resp.text();
-      let data: unknown;
-      try {
-        data = JSON.parse(raw);
-      } catch {
-        console.error("/api/documents/summarize OpenRouter non-JSON body:", raw.slice(0, 500));
-        throw new Error("OpenRouter returned non-JSON body");
-      }
-      interface ORMessage { content?: string }
-      interface ORChoice { message?: ORMessage }
-      interface ORResponse { choices?: ORChoice[] }
-      const content: string | undefined = Array.isArray((data as ORResponse).choices)
-        ? (data as ORResponse).choices![0]?.message?.content
-        : undefined;
-      if (!content || typeof content !== "string") {
-        throw new Error("Empty completion content from OpenRouter");
-      }
-      let jsonObj: unknown;
-      try {
-        jsonObj = JSON.parse(content);
-      } catch {
-        const match = content.match(/\{[\s\S]*\}/);
-        if (match) jsonObj = JSON.parse(match[0]);
-        else throw new Error("Model did not return JSON content");
-      }
-      const validated = summarySchema.safeParse(jsonObj);
-      if (!validated.success) {
-        throw new Error("Response failed schema validation: " + validated.error.message);
-      }
-      return validated.data;
-    };
-
-    // Generate schema-validated object preferring chat/completions on OpenRouter
-    let parsedResponse: unknown;
-    try {
-      parsedResponse = await requestViaChatCompletions(model);
-    } catch (err: unknown) {
-      console.warn("/api/documents/summarize chat/completions attempt failed, retrying with generateObject", (err as Error)?.message || err);
-      try {
-        const { object } = await generateObject({
-          model: openrouter(model),
-          prompt,
-          temperature,
-          maxOutputTokens,
-          schema: summarySchema,
-          schemaName: "TopicSummary",
-        });
-        parsedResponse = object;
-      } catch (err2: unknown) {
-        console.warn("/api/documents/summarize generateObject attempt failed, retrying with openrouter/auto", (err2 as Error)?.message || err2);
-        const fallbackModel = "openrouter/auto";
-        try {
-          const { object } = await generateObject({
-            model: openrouter(fallbackModel),
-            prompt,
-            temperature,
-            maxOutputTokens,
-            schema: summarySchema,
-            schemaName: "TopicSummary",
-          });
-          parsedResponse = object;
-        } catch (err3: unknown) {
-          console.warn("/api/documents/summarize final fallback to chat/completions", (err3 as Error)?.message || err3);
-          parsedResponse = await requestViaChatCompletions(fallbackModel);
-        }
-      }
-    }
-
-    // Basic shape check (defensive)
-    const pr = parsedResponse as Partial<TopicSummaryResult> | undefined;
-    if (
-      !pr ||
-      typeof pr.generalOverview !== "string" ||
-      typeof pr.academicLevel !== "string" ||
-      !Array.isArray((pr as { macroTopics?: unknown }).macroTopics)
-    ) {
+    // 5) Validate basic structure (defensive)
+    if (!validateBasicStructure(result)) {
+      logger.error("Invalid response structure from AI", { result });
       return NextResponse.json(
         { error: "Invalid response structure from AI" },
         { status: 502 }
       );
     }
 
-    return NextResponse.json(pr as TopicSummaryResult);
-  } catch (e: unknown) {
-    const err = e as Error & { stack?: string };
-    console.error("/api/documents/summarize error", err?.message || e, err?.stack || "");
-    return NextResponse.json({ error: "Internal error", details: err?.message || String(e) }, { status: 500 });
+    // 6) Build final metadata
+    const finalMetadata = {
+      ...traceMetadata,
+      success: true,
+      duration_ms: Date.now() - t0,
+      generation_id: generationId,
+      ...(generationStats ? createCostMetadata(generationStats) : {}),
+    };
+
+    // 7) Finalize LangSmith run
+    if (langsmithClient && rootRunId) {
+      logger.api("/api/documents/summarize:Finalizing LangSmith run", { rootRunId });
+      await finalizeLangSmithRun(langsmithClient, rootRunId, finalMetadata, {
+        summary: result,
+      });
+      logger.api("/api/documents/summarize:LangSmith run finalized");
+    } else {
+      logger.warn("/api/documents/summarize:No LangSmith client or rootRunId", {
+        hasClient: !!langsmithClient,
+        rootRunId,
+      });
+    }
+
+    logger.api("/api/documents/summarize:final_metadata", finalMetadata);
+    logger.perf("/api/documents/summarize:OK", { ms: Date.now() - t0 });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    logger.error("/api/documents/summarize:ERROR", error);
+
+    // End LangSmith run with error
+    if (langsmithClient && rootRunId) {
+      await endLangSmithRunWithError(langsmithClient, rootRunId, error);
+    }
+
+    const finalMetadata = {
+      ...traceMetadata,
+      success: false,
+      duration_ms: Date.now() - t0,
+      error: String(error),
+    };
+    logger.api("/api/documents/summarize:final_metadata", finalMetadata);
+
+    return NextResponse.json(
+      { error: "Internal error", details: (error as Error)?.message || String(error) },
+      { status: 500 }
+    );
   }
 }
