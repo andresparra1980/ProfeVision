@@ -1,5 +1,10 @@
 import { ChatOpenAI } from "@langchain/openai";
 
+// LangSmith tracing is automatically enabled via environment variables:
+// LANGCHAIN_TRACING_V2=true
+// LANGCHAIN_API_KEY=<your-api-key>
+// LANGCHAIN_PROJECT=<project-name>
+
 export type LLMProvider = {
   model: string;
   apiKey: string;
@@ -22,7 +27,7 @@ export function getFallbackProvider(): LLMProvider | null {
   return { apiKey, model, baseURL };
 }
 
-export function buildChatModel(provider: LLMProvider, temperature = 0): ChatOpenAI {
+export function buildChatModel(provider: LLMProvider, temperature = 0, metadata?: Record<string, string | number | undefined>): ChatOpenAI {
   return new ChatOpenAI({
     apiKey: provider.apiKey,
     modelName: provider.model,
@@ -34,6 +39,8 @@ export function buildChatModel(provider: LLMProvider, temperature = 0): ChatOpen
         "X-Title": "ProfeVision",
       },
     },
+    // Metadata for LangSmith tracing
+    metadata: metadata || {},
   });
 }
 

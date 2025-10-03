@@ -28,7 +28,7 @@ async function loadPrompt(rel: string): Promise<string> {
 
 type ChatMessage = { role: "system" | "user"; content: string };
 
-async function generateSimilarExam(input: PipelineInput): Promise<z.infer<typeof ExamSchema>> {
+async function generateSimilarExam(input: PipelineInput, jobId?: string): Promise<z.infer<typeof ExamSchema>> {
   const sanitized = sanitizeAIExamPayload(input.sourceExam);
   const sanitizedExam = ExamSchema.parse(sanitized);
   const primary = getPrimaryProvider();
@@ -39,7 +39,13 @@ async function generateSimilarExam(input: PipelineInput): Promise<z.infer<typeof
   }
   const genPrompt = await loadPrompt("generate.txt");
   const call = async () => {
-    const model = buildChatModel(primary, 0);
+    const model = buildChatModel(primary, 0, {
+      job_id: jobId,
+      step: "generate",
+      exam_title: sanitizedExam.exam.title,
+      language: input.language,
+      num_questions: sanitizedExam.exam.questions.length,
+    });
     // Treat output as unknown and validate with Zod
     const structured = model.withStructuredOutput(ExamSchema) as unknown as { invoke: (_msgs: ChatMessage[]) => Promise<unknown> };
     const referenceQuestions = sanitizedExam.exam.questions.map((q) => ({
@@ -60,7 +66,13 @@ async function generateSimilarExam(input: PipelineInput): Promise<z.infer<typeof
   };
   const callFallback = fallback
     ? async () => {
-        const model = buildChatModel(fallback, 0);
+        const model = buildChatModel(fallback, 0, {
+          job_id: jobId,
+          step: "generate_fallback",
+          exam_title: sanitizedExam.exam.title,
+          language: input.language,
+          num_questions: sanitizedExam.exam.questions.length,
+        });
         const structured = model.withStructuredOutput(ExamSchema) as unknown as { invoke: (_msgs: ChatMessage[]) => Promise<unknown> };
         const referenceQuestions = sanitizedExam.exam.questions.map((q) => ({
           type: q.type,
@@ -82,7 +94,7 @@ async function generateSimilarExam(input: PipelineInput): Promise<z.infer<typeof
   return withFallback(call, callFallback);
 }
 
-async function validateAndRecommend(exam: z.infer<typeof ExamSchema>, language: string): Promise<z.infer<typeof ExamSchema>> {
+async function validateAndRecommend(exam: z.infer<typeof ExamSchema>, language: string, jobId?: string): Promise<z.infer<typeof ExamSchema>> {
   // First validate strictly with Zod
   const parsed = ExamSchema.parse(exam);
   // Then ask LLM for recommendations (non-blocking)
@@ -92,7 +104,12 @@ async function validateAndRecommend(exam: z.infer<typeof ExamSchema>, language: 
   const valPrompt = await loadPrompt("validate.txt");
   const recommendationsSchema = z.object({ blockers: z.array(z.string()).default([]), warnings: z.array(z.string()).default([]), suggestions: z.array(z.string()).default([]) });
   const call = async () => {
-    const model = buildChatModel(primary, 0);
+    const model = buildChatModel(primary, 0, {
+      job_id: jobId,
+      step: "validate",
+      exam_title: exam.exam.title,
+      language,
+    });
     const structured = model.withStructuredOutput(recommendationsSchema) as unknown as { invoke: (_msgs: ChatMessage[]) => Promise<unknown> };
     const messages: ChatMessage[] = [
       { role: "system", content: valPrompt },
@@ -108,7 +125,12 @@ async function validateAndRecommend(exam: z.infer<typeof ExamSchema>, language: 
   };
   const callFallback = fallback
     ? async () => {
-        const model = buildChatModel(fallback, 0);
+        const model = buildChatModel(fallback, 0, {
+          job_id: jobId,
+          step: "validate_fallback",
+          exam_title: exam.exam.title,
+          language,
+        });
         const structured = model.withStructuredOutput(recommendationsSchema) as unknown as { invoke: (_msgs: ChatMessage[]) => Promise<unknown> };
         const messages: ChatMessage[] = [
           { role: "system", content: valPrompt },
@@ -135,7 +157,7 @@ export type StepKey = "loadBlueprint" | "generate" | "validate" | "apply" | "ran
 export type StepStatus = "started" | "succeeded" | "failed";
 export type OnStep = (_step: StepKey, _status: StepStatus) => void | Promise<void>;
 
-export async function runPipelineWithHooks(input: PipelineInput, onStep: OnStep): Promise<PipelineOutput> {
+export async function runPipelineWithHooks(input: PipelineInput, onStep: OnStep, jobId?: string): Promise<PipelineOutput> {
   const parsed = PipelineInputSchema.parse(input);
   const minMs = Number(process.env.SIMILAR_EXAM_MIN_STEP_MS ?? 400);
   const minQuickMs = Math.min(150, Math.floor(minMs / 2));
@@ -154,14 +176,14 @@ export async function runPipelineWithHooks(input: PipelineInput, onStep: OnStep)
   // Step B: Generate similar exam via LLM (with fallback)
   await onStep("generate", "started");
   const t0B = Date.now();
-  const generated = await generateSimilarExam(parsed);
+  const generated = await generateSimilarExam(parsed, jobId);
   await ensureMin(t0B, minMs);
   await onStep("generate", "succeeded");
 
   // Step C: Validate
   await onStep("validate", "started");
   const t0C = Date.now();
-  const validated = await validateAndRecommend(generated, parsed.language);
+  const validated = await validateAndRecommend(generated, parsed.language, jobId);
   await ensureMin(t0C, minMs);
   await onStep("validate", "succeeded");
 

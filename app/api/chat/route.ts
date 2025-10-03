@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import logger from "@/lib/utils/logger";
+import { traceable } from "langsmith/traceable";
+import { ChatOpenAI } from "@langchain/openai";
+import { Client } from "langsmith";
+import { RunnableConfig, RunnableLambda } from "@langchain/core/runnables";
 
 // Env
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -12,6 +16,65 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+// Helper to fetch OpenRouter generation stats with retry
+async function fetchOpenRouterStats(generationId: string): Promise<Record<string, unknown> | null> {
+  // OpenRouter stats may take a moment to be available, so we retry with delays
+  const maxRetries = 3;
+  const delays = [500, 1000, 2000]; // ms
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      // Wait before retry (except first attempt)
+      if (attempt > 0) {
+        await new Promise(resolve => setTimeout(resolve, delays[attempt - 1]));
+      }
+      
+      const response = await fetch(
+        `https://openrouter.ai/api/v1/generation?id=${generationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          },
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data?.data || null;
+      }
+      
+      // If 404, the stats might not be ready yet, retry
+      if (response.status === 404 && attempt < maxRetries - 1) {
+        logger.api("OpenRouter stats not ready yet, retrying...", { 
+          generationId, 
+          attempt: attempt + 1,
+          nextDelayMs: delays[attempt] 
+        });
+        continue;
+      }
+      
+      // Other errors or last attempt
+      logger.warn("Failed to fetch OpenRouter stats", { 
+        generationId, 
+        status: response.status,
+        attempt: attempt + 1 
+      });
+      return null;
+      
+    } catch (error) {
+      if (attempt === maxRetries - 1) {
+        logger.warn("Error fetching OpenRouter stats", { 
+          generationId, 
+          error: String(error),
+          attempts: maxRetries 
+        });
+      }
+    }
+  }
+  
+  return null;
+}
 
 // Zod: response contract schema per DOC_preguntas_ia.md
 const ExamQuestionSchema = z.object({
@@ -254,7 +317,17 @@ function buildUserInstruction(context: z.infer<typeof ChatContextSchema>) {
 export async function POST(req: NextRequest) {
   const t0 = Date.now();
   logger.api("/api/chat:START");
+  
+  // Wrap the entire handler with LangSmith tracing
+  return await handleChatRequest(req, t0);
+}
 
+const handleChatRequest = traceable(
+  async (req: NextRequest, t0: number, config?: { runId?: string }) => {
+  let traceMetadata: Record<string, string | number | boolean | undefined> = {};
+  const langsmithClient = process.env.LANGCHAIN_API_KEY ? new Client() : null;
+  const runId = config?.runId;
+  
   try {
     // 1) Auth obligatoria via Supabase
     const authHeader = req.headers.get("authorization");
@@ -307,6 +380,24 @@ export async function POST(req: NextRequest) {
       );
     }
     const { messages, context } = parsed.data;
+    
+    // Add metadata to current trace for LangSmith
+    traceMetadata = {
+      user_id: user.id,
+      language: context.language,
+      num_questions: context.numQuestions,
+      question_types: context.questionTypes.join(", "),
+      difficulty: context.difficulty,
+      has_existing_exam: !!context.existingExam,
+      num_documents: context.documentIds?.length || 0,
+      num_topic_summaries: context.topicSummaries?.length || 0,
+      message_count: messages.length,
+      model: OPENAI_MODEL,
+      has_fallback: !!OPENAI_FALLBACK_MODEL,
+    };
+    
+    // Log metadata for debugging
+    logger.api("/api/chat:trace_metadata", traceMetadata);
 
     // 3) Límite de numQuestions ya validado por Zod (<=50)
 
@@ -323,104 +414,216 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const models = OPENAI_FALLBACK_MODEL
-      ? [OPENAI_MODEL, OPENAI_FALLBACK_MODEL]
-      : [OPENAI_MODEL];
-
-    const requestBody = {
-      models,
-      messages: [
-        { role: "system", content: systemPrompt },
-        // Contexto opcional: Resúmenes temáticos por documento (si hay varios docs)
-        ...(context.topicSummaries || []).map((ts) => ({
-          role: "system" as const,
-          content:
-            `Resumen temático del documento (documentId: ${ts.documentId}). ` +
-            `Úsalo SOLO como contexto para alinear los temas; no lo cites literalmente.\n` +
-            `${JSON.stringify(ts.summary)}`,
-        })),
-        // Contexto opcional: examen existente a modificar/expandir
-        ...(context.existingExam
-          ? [
-              {
-                role: "system" as const,
-                content:
-                  "Examen existente provisto por el usuario. Si el usuario solicita cambios, devuelve el examen COMPLETO actualizado.\n" +
-                  `${JSON.stringify(context.existingExam)}`,
-              },
-            ]
-          : []),
-        // Conversación previa del usuario
-        ...messages,
-        // Instrucción final con parámetros estructurados
-        { role: "user", content: userInstruction },
-        // Pista de contrato explícita
-        {
-          role: "system",
-          content:
-            'CONTRATO ESTRUCTURA (responde SOLO con JSON válido): { "exam": { "title": string, "subject": string, "level": string, "language": string, "questions": [ { "id": string, "type": "multiple_choice|true_false|short_answer|essay", "prompt": string, "options": [string], "answer": string|number|boolean|array, "rationale": string, "difficulty": "easy|medium|hard", "taxonomy": "remember|understand|apply|analyze|evaluate|create"|string[], "tags": [string], "source": { "documentId": string|null, "spans": [ { "start": number, "end": number } ] } } ] } }\n\nREGLAS ADICIONALES DEL CONTRATO:\n- Si \'type\' == \'multiple_choice\', \'options\' debe tener entre 2 y 4 elementos y \'answer\' debe ser el TEXTO COMPLETO de la opción correcta (string), NUNCA un número índice.\n- Si \'type\' == \'true_false\', \'answer\' debe ser boolean.\n- Usa ids secuenciales: q1, q2, q3... en el campo \'id\'.\n- Si una pregunta u opción incluye fórmulas/expresiones, represéntalas en LaTeX (inline con $...$, display con \\[...\\]) dentro del string correspondiente.\n- Devuelve SIEMPRE el examen completo bajo la clave \'exam\'.',
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 16000,
-      response_format: { type: "json_object" },
-    };
-
-    // Log request to LLM in chunks (similar to response logging)
-    try {
-      const requestBodyStr = JSON.stringify(requestBody, null, 2);
-      const size = requestBodyStr.length;
-      const chunkSize = 8000;
-      const total = Math.ceil(size / chunkSize) || 1;
-      logger.api("/api/chat:LLM request", { models, messageCount: requestBody.messages.length, size });
-      for (let i = 0; i < total; i++) {
-        const start = i * chunkSize;
-        const end = Math.min(start + chunkSize, size);
-        logger.api("/api/chat:LLM request chunk", { idx: i + 1, total, start, end, size, chunk: requestBodyStr.slice(start, end) });
-      }
-    } catch (_e) { void _e; }
-
-    const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-        "X-Title": "ProfeVision",
+    // Build messages array for LangChain
+    const llmMessages = [
+      { role: "system" as const, content: systemPrompt },
+      // Contexto opcional: Resúmenes temáticos por documento (si hay varios docs)
+      ...(context.topicSummaries || []).map((ts) => ({
+        role: "system" as const,
+        content:
+          `Resumen temático del documento (documentId: ${ts.documentId}). ` +
+          `Úsalo SOLO como contexto para alinear los temas; no lo cites literalmente.\n` +
+          `${JSON.stringify(ts.summary)}`,
+      })),
+      // Contexto opcional: examen existente a modificar/expandir
+      ...(context.existingExam
+        ? [
+            {
+              role: "system" as const,
+              content:
+                "Examen existente provisto por el usuario. Si el usuario solicita cambios, devuelve el examen COMPLETO actualizado.\n" +
+                `${JSON.stringify(context.existingExam)}`,
+            },
+          ]
+        : []),
+      // Conversación previa del usuario
+      ...messages,
+      // Instrucción final con parámetros estructurados
+      { role: "system" as const, content: userInstruction },
+      // Pista de contrato explícita
+      {
+        role: "system" as const,
+        content:
+          'CONTRATO ESTRUCTURA (responde SOLO con JSON válido): { "exam": { "title": string, "subject": string, "level": string, "language": string, "questions": [ { "id": string, "type": "multiple_choice|true_false|short_answer|essay", "prompt": string, "options": [string], "answer": string|number|boolean|array, "rationale": string, "difficulty": "easy|medium|hard", "taxonomy": "remember|understand|apply|analyze|evaluate|create"|string[], "tags": [string], "source": { "documentId": string|null, "spans": [ { "start": number, "end": number } ] } } ] } }\n\nREGLAS ADICIONALES DEL CONTRATO:\n- Si \'type\' == \'multiple_choice\', \'options\' debe tener entre 2 y 4 elementos y \'answer\' debe ser el TEXTO COMPLETO de la opción correcta (string), NUNCA un número índice.\n- Si \'type\' == \'true_false\', \'answer\' debe ser boolean.\n- Usa ids secuenciales: q1, q2, q3... en el campo \'id\'.\n- Si una pregunta u opción incluye fórmulas/expresiones, represéntalas en LaTeX (inline con $...$, display con \\[...\\]) dentro del string correspondiente.\n- Devuelve SIEMPRE el examen completo bajo la clave \'exam\'.',
       },
-      body: JSON.stringify(requestBody),
+    ];
+
+    // Log request summary (full details available in LangSmith)
+    logger.api("/api/chat:LLM request", { 
+      model: OPENAI_MODEL, 
+      messageCount: llmMessages.length,
+      hasFallback: !!OPENAI_FALLBACK_MODEL 
     });
 
-    if (!aiRes.ok) {
-      const txt = await aiRes.text();
-      logger.error("Error OpenRouter", txt);
-      return NextResponse.json(
-        { error: "Error al generar contenido con IA" },
-        { status: 502 }
-      );
-    }
+    // Use ChatOpenAI with LangSmith tracing
+    const model = new ChatOpenAI({
+      apiKey: OPENROUTER_API_KEY,
+      modelName: OPENAI_MODEL,
+      temperature: 0.7,
+      maxTokens: 16000,
+      configuration: {
+        baseURL: "https://openrouter.ai/api/v1",
+        defaultHeaders: {
+          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+          "X-Title": "ProfeVision",
+        },
+      },
+      modelKwargs: {
+        response_format: { type: "json_object" },
+      },
+      // Ensure LLM node itself carries identifying metadata
+      metadata: {
+        endpoint: "/api/chat",
+        feature: "exam-question-generation",
+      },
+      tags: ["chat-api", "exam-generation"],
+    });
 
-    // Read raw body as text to log exact response from LLM
-    const rawBody = await aiRes.text();
-    try {
-      const size = rawBody.length;
-      const chunkSize = 8000;
-      const total = Math.ceil(size / chunkSize) || 1;
-      for (let i = 0; i < total; i++) {
-        const start = i * chunkSize;
-        const end = Math.min(start + chunkSize, size);
-        logger.api("/api/chat:LLM raw chunk", { idx: i + 1, total, start, end, size, chunk: rawBody.slice(start, end) });
-      }
-    } catch (_e) { void _e; }
-
-    // Derive contentUnknown from parsed JSON if possible, otherwise use raw string
+    // Call LLM with fallback support and cost tracking
     let contentUnknown: unknown;
+    let generationStats: Record<string, unknown> | null = null;
+    
+    // Create config with metadata for LangChain
+    const runConfig: RunnableConfig = {
+      metadata: traceMetadata,
+      tags: ["chat-api", "exam-generation"],
+    };
+    
     try {
-      const aiData = JSON.parse(rawBody) as { choices?: Array<{ message?: { content?: unknown } }> };
-      contentUnknown = aiData?.choices?.[0]?.message?.content as unknown;
-    } catch {
-      contentUnknown = rawBody as unknown;
+      const response = await model.invoke(llmMessages, runConfig);
+      contentUnknown = response.content;
+      
+      // Extract generation ID from response headers if available
+      const generationId = response.response_metadata?.id || response.id;
+      
+      logger.api("/api/chat:LLM response received", { 
+        contentType: typeof contentUnknown,
+        hasContent: !!contentUnknown,
+        generationId 
+      });
+      
+      // Fetch detailed stats from OpenRouter
+      if (generationId) {
+        generationStats = await fetchOpenRouterStats(generationId);
+        if (generationStats) {
+          logger.api("/api/chat:Cost analysis", {
+            cost: generationStats.usage || generationStats.total_cost,
+            tokens_prompt: generationStats.tokens_prompt,
+            tokens_completion: generationStats.tokens_completion,
+            generation_time_ms: generationStats.generation_time,
+            model: generationStats.model,
+            provider: generationStats.provider_name,
+          });
+
+          // Emit a dedicated 'cost' node into the trace with full stats
+          try {
+            const costMetadata = {
+              ...traceMetadata,
+              openrouter_generation_id: generationId,
+              openrouter_cost: generationStats.usage || generationStats.total_cost,
+              openrouter_tokens_prompt: generationStats.tokens_prompt,
+              openrouter_tokens_completion: generationStats.tokens_completion,
+              openrouter_native_tokens_prompt: generationStats.native_tokens_prompt,
+              openrouter_native_tokens_completion: generationStats.native_tokens_completion,
+              openrouter_generation_time_ms: generationStats.generation_time,
+              openrouter_latency_ms: generationStats.latency,
+              openrouter_model: generationStats.model,
+              openrouter_provider: generationStats.provider_name,
+              openrouter_finish_reason: generationStats.finish_reason,
+              openrouter_streamed: generationStats.streamed,
+            } as Record<string, string | number | boolean | undefined>;
+            await new RunnableLambda({ func: async () => null })
+              .withConfig({ metadata: costMetadata, tags: ["openrouter", "cost", "chat-api"] })
+              .invoke(null);
+          } catch (_e) { /* non-blocking */ }
+        }
+      }
+    } catch (error) {
+      // Try fallback model if available
+      if (OPENAI_FALLBACK_MODEL) {
+        logger.warn("/api/chat:Primary model failed, trying fallback", { 
+          model: OPENAI_MODEL,
+          fallbackModel: OPENAI_FALLBACK_MODEL 
+        });
+        const fallbackModel = new ChatOpenAI({
+          apiKey: OPENROUTER_API_KEY,
+          modelName: OPENAI_FALLBACK_MODEL,
+          temperature: 0.7,
+          maxTokens: 16000,
+          configuration: {
+            baseURL: "https://openrouter.ai/api/v1",
+            defaultHeaders: {
+              "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+              "X-Title": "ProfeVision",
+            },
+          },
+          modelKwargs: {
+            response_format: { type: "json_object" },
+          },
+          metadata: {
+            ...traceMetadata,
+            endpoint: "/api/chat",
+            model: OPENAI_FALLBACK_MODEL,
+            is_fallback: true,
+          },
+        });
+        
+        const response = await fallbackModel.invoke(llmMessages);
+        contentUnknown = response.content;
+        
+        // Extract generation ID from fallback response
+        const generationId = response.response_metadata?.id || response.id;
+        
+        logger.api("/api/chat:Fallback response received", { 
+          contentType: typeof contentUnknown,
+          hasContent: !!contentUnknown,
+          generationId 
+        });
+        
+        // Fetch detailed stats from OpenRouter for fallback
+        if (generationId) {
+          generationStats = await fetchOpenRouterStats(generationId);
+          if (generationStats) {
+            logger.api("/api/chat:Fallback cost analysis", {
+              cost: generationStats.usage || generationStats.total_cost,
+              tokens_prompt: generationStats.tokens_prompt,
+              tokens_completion: generationStats.tokens_completion,
+              generation_time_ms: generationStats.generation_time,
+              model: generationStats.model,
+              provider: generationStats.provider_name,
+            });
+
+            // Emit a dedicated 'cost' node for fallback as well
+            try {
+              const costMetadata = {
+                ...traceMetadata,
+                is_fallback: true,
+                openrouter_generation_id: generationId,
+                openrouter_cost: generationStats.usage || generationStats.total_cost,
+                openrouter_tokens_prompt: generationStats.tokens_prompt,
+                openrouter_tokens_completion: generationStats.tokens_completion,
+                openrouter_native_tokens_prompt: generationStats.native_tokens_prompt,
+                openrouter_native_tokens_completion: generationStats.native_tokens_completion,
+                openrouter_generation_time_ms: generationStats.generation_time,
+                openrouter_latency_ms: generationStats.latency,
+                openrouter_model: generationStats.model,
+                openrouter_provider: generationStats.provider_name,
+                openrouter_finish_reason: generationStats.finish_reason,
+                openrouter_streamed: generationStats.streamed,
+              } as Record<string, string | number | boolean | undefined>;
+              await new RunnableLambda({ func: async () => null })
+                .withConfig({ metadata: costMetadata, tags: ["openrouter", "cost", "chat-api", "fallback"] })
+                .invoke(null);
+            } catch (_e) { /* non-blocking */ }
+          }
+        }
+      } else {
+        logger.error("Error calling LLM", error);
+        return NextResponse.json(
+          { error: "Error al generar contenido con IA" },
+          { status: 502 }
+        );
+      }
     }
 
     if (contentUnknown == null) {
@@ -536,57 +739,35 @@ export async function POST(req: NextRequest) {
       };
       try {
         const raw = normalizeWeirdUnicode(contentUnknown);
-        try {
-          const size = raw.length;
-          const chunkSize = 8000;
-          const total = Math.ceil(size / chunkSize) || 1;
-          logger.api("/api/chat:content-string info", { rawLen: size });
-          for (let i = 0; i < total; i++) {
-            const start = i * chunkSize;
-            const end = Math.min(start + chunkSize, size);
-            logger.api("/api/chat:content-string chunk", { idx: i + 1, total, start, end, size, chunk: raw.slice(start, end) });
-          }
-        } catch (_e) { void _e; }
         // 1) Try direct parse
         try {
           jsonPayload = JSON.parse(raw);
-          try { logger.api("/api/chat:parse success", { path: "direct" }); } catch (_e) { void _e; }
+          logger.api("/api/chat:JSON parsed", { method: "direct", size: raw.length });
         } catch {
           // 2) Strip fences and try again
           const stripped = stripCodeFences(raw);
-          try {
-            const size = stripped.length;
-            const chunkSize = 8000;
-            const total = Math.ceil(size / chunkSize) || 1;
-            logger.api("/api/chat:content-string stripped", { strippedLen: size });
-            for (let i = 0; i < total; i++) {
-              const start = i * chunkSize;
-              const end = Math.min(start + chunkSize, size);
-              logger.api("/api/chat:content-string stripped chunk", { idx: i + 1, total, start, end, size, chunk: stripped.slice(start, end) });
-            }
-          } catch (_e) { void _e; }
           // 2a) If looks like object but braces are unbalanced -> treat as truncation
           if (stripped.trim().startsWith('{') && !isBalancedBraces(stripped)) {
-            logger.error("AI devolvió JSON truncado (braces desbalanceados)", { len: stripped.length, head: stripped.slice(0, 200) });
+            logger.error("AI devolvió JSON truncado", { len: stripped.length });
             return NextResponse.json({ error: "La IA devolvió JSON incompleto (truncado). Intenta de nuevo." }, { status: 502 });
           }
           // 2b) Try parse stripped
           try {
             jsonPayload = JSON.parse(stripped);
-            try { logger.api("/api/chat:parse success", { path: "stripped" }); } catch (_e) { void _e; }
+            logger.api("/api/chat:JSON parsed", { method: "stripped", size: stripped.length });
           } catch {
             // 3) Minimal repair: escape invalid backslashes inside strings and try again
             const repaired = repairInvalidBackslashesInStrings(stripped);
             try {
               jsonPayload = JSON.parse(repaired);
-              try { logger.api("/api/chat:parse success", { path: "repaired-backslashes" }); } catch (_e) { void _e; }
+              logger.api("/api/chat:JSON parsed", { method: "repaired", size: repaired.length });
             } catch {
               throw new Error('PARSE_FAILED');
             }
           }
         }
       } catch (_e) {
-        logger.error("No se pudo parsear JSON de IA", { type: typeof contentUnknown, preview: String(contentUnknown).slice(0, 500) });
+        logger.error("No se pudo parsear JSON de IA", { type: typeof contentUnknown, size: String(contentUnknown).length });
         return NextResponse.json(
           { error: "JSON inválido devuelto por IA", raw: String(contentUnknown).slice(0, 2000) },
           { status: 422 }
@@ -636,6 +817,44 @@ export async function POST(req: NextRequest) {
     };
 
     logger.perf("/api/chat:OK", { ms: Date.now() - t0 });
+
+    // Add final metadata to trace including OpenRouter stats
+    const finalMetadata = {
+      ...traceMetadata,
+      success: true,
+      duration_ms: Date.now() - t0,
+      questions_generated: normalized.exam.questions.length,
+      // OpenRouter cost and performance data
+      ...(generationStats && {
+        openrouter_generation_id: generationStats.id,
+        openrouter_cost: generationStats.usage || generationStats.total_cost,
+        openrouter_tokens_prompt: generationStats.tokens_prompt,
+        openrouter_tokens_completion: generationStats.tokens_completion,
+        openrouter_native_tokens_prompt: generationStats.native_tokens_prompt,
+        openrouter_native_tokens_completion: generationStats.native_tokens_completion,
+        openrouter_generation_time_ms: generationStats.generation_time,
+        openrouter_latency_ms: generationStats.latency,
+        openrouter_model: generationStats.model,
+        openrouter_provider: generationStats.provider_name,
+        openrouter_finish_reason: generationStats.finish_reason,
+        openrouter_streamed: generationStats.streamed,
+      }),
+    };
+    logger.api("/api/chat:final_metadata", finalMetadata);
+    
+    // Update LangSmith run with final metadata
+    if (langsmithClient && runId) {
+      try {
+        await langsmithClient.updateRun(runId, {
+          outputs: { questions_generated: normalized.exam.questions.length },
+          extra: { metadata: finalMetadata },
+        });
+      } catch (e) {
+        // Non-blocking - just log if update fails
+        logger.warn("Failed to update LangSmith run", { runId, error: String(e) });
+      }
+    }
+
     return NextResponse.json(normalized);
   } catch (error) {
     logger.error("/api/chat:ERROR", error);
@@ -644,4 +863,14 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+  },
+  {
+    name: "chat_exam_generation",
+    run_type: "chain",
+    metadata: {
+      endpoint: "/api/chat",
+      feature: "exam-question-generation",
+    },
+    tags: ["exam-generation", "chat-api"],
+  }
+);
