@@ -47,6 +47,43 @@ export default function ChatPanel() {
   const [padBottom, setPadBottom] = useState<number>(0);
   const [minHeight, setMinHeight] = useState<number | undefined>(undefined);
 
+  // Add bottom sheet styles
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .bottom-sheet[data-state="open"] {
+        animation: slideInFromBottom 0.3s ease-out;
+      }
+      .bottom-sheet[data-state="closed"] {
+        animation: slideOutToBottom 0.3s ease-in;
+      }
+      @keyframes slideInFromBottom {
+        from {
+          transform: translateX(-50%) translateY(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slideOutToBottom {
+        from {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(-50%) translateY(100%);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   // Custom hooks for managing state
   const documentContext = useDocumentContext();
   const { messages, isSending, sendMessage } = useChatMessages({
@@ -288,7 +325,19 @@ export default function ChatPanel() {
 
       {/* Results Drawer (bottom sheet) */}
       <Dialog open={resultsOpen} onOpenChange={setResultsOpen}>
-        <DialogContent className="inset-x-0 bottom-4 top-auto left-0 right-0 translate-x-0 translate-y-0 w-full max-w-3xl mx-auto rounded-2xl p-4 sm:p-6 shadow-xl data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom duration-500">
+        <DialogContent 
+          className="bottom-sheet sm:max-w-3xl p-4 sm:p-6 data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom"
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: '50%',
+            top: 'auto',
+            transform: 'translateX(-50%) translateY(0)',
+            width: '100%',
+            maxWidth: '48rem',
+            borderRadius: '1rem 1rem 0 0',
+          }}
+        >
           <DialogHeader>
             <DialogTitle>{t('results.title')}</DialogTitle>
             <DialogDescription>{t('results.description')}</DialogDescription>
