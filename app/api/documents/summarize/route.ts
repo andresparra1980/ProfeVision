@@ -5,7 +5,7 @@ import logger from "@/lib/utils/logger";
 import { SummarizeRequestSchema, TopicSummaryResult } from "@/lib/ai/document-summarize/schemas";
 import { invokeTextSummarization, invokeVisionSummarization } from "@/lib/ai/document-summarize/chains";
 import { validateBasicStructure } from "@/lib/ai/document-summarize/json-parser";
-import { createCostMetadata } from "@/lib/ai/document-summarize/openrouter";
+import { createCostMetadata, OpenRouterStats } from "@/lib/ai/document-summarize/openrouter";
 import {
   RootRunCapture,
   initializeLangSmithTracing,
@@ -71,7 +71,7 @@ async function handleSummarizeRequest(req: NextRequest, t0: number) {
 
     let result: TopicSummaryResult;
     let generationId: string | undefined;
-    let generationStats: any = null;
+    let generationStats: OpenRouterStats | null | undefined = null;
 
     // 4) Execute appropriate chain
     if (isImageMode) {

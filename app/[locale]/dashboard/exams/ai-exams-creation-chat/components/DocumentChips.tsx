@@ -8,9 +8,9 @@ interface DocumentChipsProps {
   docMeta: Record<string, { fileName?: string; mime?: string }>;
   summariesAvailability: Record<string, boolean>;
   jobs: Array<{ documentId: string; status: string }>;
-  onDelete: (id: string) => void;
+  onDelete: (_id: string) => void;
   isSending: boolean;
-  t: (key: string, options?: { fallback?: string }) => string;
+  t: (_key: string, _options?: { fallback?: string }) => string;
 }
 
 export function DocumentChips({

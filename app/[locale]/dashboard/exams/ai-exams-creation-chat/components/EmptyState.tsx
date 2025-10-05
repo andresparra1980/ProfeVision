@@ -2,8 +2,8 @@
 import React from 'react';
 
 interface EmptyStateProps {
-  onExampleClick: (text: string) => void;
-  t: (key: string, options?: { fallback?: string }) => string;
+  onExampleClick: (_text: string) => void;
+  t: (_key: string, _options?: { fallback?: string }) => string;
 }
 
 export function EmptyState({ onExampleClick, t }: EmptyStateProps) {

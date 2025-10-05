@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { loadSettings } from "@/lib/persistence/browser";
-import { useAIChat } from "./AIChatContext";
+import { useAIChat, type AIExamResult } from './AIChatContext';
 import { useToast } from "@/components/ui/use-toast";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
@@ -89,7 +89,7 @@ export default function ChatPanel() {
   const { messages, isSending, sendMessage } = useChatMessages({
     settings,
     result,
-    setResult: (r) => setResult(r as any),
+    setResult: (r) => setResult(r as AIExamResult | null),
     onToast: toast,
     t,
   });

@@ -91,7 +91,7 @@ export function useDocumentContext() {
 
   const onFileSelected = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    onError: (message: string) => void
+    onError: (_message: string) => void
   ) => {
     const inputEl = fileInputRef.current;
     const file = inputEl?.files?.[0] || e.target.files?.[0] || null;

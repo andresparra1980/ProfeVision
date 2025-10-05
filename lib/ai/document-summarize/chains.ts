@@ -199,7 +199,7 @@ export async function invokeVisionSummarization(params: {
   const fullPipeline = RunnableLambda.from<VisionMsg, { content: string; generationId?: string }>(
     async (msgs: VisionMsg, config) => {
       // Execute ChatOpenAI directly (will appear as child node)
-      const response = await llm.invoke(msgs as any, config);
+      const response = await llm.invoke(msgs as unknown as Parameters<typeof llm.invoke>[0], config);
       const content = String(response.content);
       const generationId = response.response_metadata?.id || response.id;
 

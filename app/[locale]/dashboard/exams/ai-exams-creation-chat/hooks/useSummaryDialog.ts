@@ -4,7 +4,7 @@ interface UseSummaryDialogProps {
   documentIds: string[];
   summariesAvailability: Record<string, boolean>;
   jobs: Array<{ documentId: string; status: string }>;
-  getSummary: (id: string) => Promise<unknown>;
+  getSummary: (_id: string) => Promise<unknown>;
 }
 
 export function useSummaryDialog({

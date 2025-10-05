@@ -6,14 +6,14 @@ import { mdToHtmlLite } from '../utils/formatting';
 
 interface SummaryDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   summaryLoading: boolean;
   summaryDocId: string | null;
   summaryContent: unknown | null;
   availableSummaryDocIds: string[];
   docMeta: Record<string, { fileName?: string; mime?: string }>;
-  onDocumentChange: (docId: string) => void;
-  t: (key: string, options?: { fallback?: string }) => string;
+  onDocumentChange: (_docId: string) => void;
+  t: (_key: string, _options?: { fallback?: string }) => string;
 }
 
 export function SummaryDialog({

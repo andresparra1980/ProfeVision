@@ -10,9 +10,9 @@ interface ChatMessage {
 interface UseChatMessagesProps {
   settings: { language?: string };
   result: unknown;
-  setResult: (result: unknown) => void;
-  onToast: (options: { title: string; description?: string; variant?: 'destructive' }) => void;
-  t: (key: string, options?: { fallback?: string }) => string;
+  setResult: (_result: unknown) => void;
+  onToast: (_options: { title: string; description?: string; variant?: 'destructive' }) => void;
+  t: (_key: string, _options?: { fallback?: string }) => string;
 }
 
 export function useChatMessages({ settings, result, setResult, onToast, t }: UseChatMessagesProps) {
