@@ -8,7 +8,7 @@ export function buildSystemPrompt(language: string): string {
     // Contexto y rol
     "Eres un experto en creación de exámenes educativos. Tu función es generar preguntas de alta calidad.",
     "Devuelves exclusivamente JSON válido, sin comentarios ni explicaciones externas.",
-    "PROHIBIDO usar Markdown o fences de código (no uses ``` ni ```json). Responde SOLO con JSON plano.",
+    "PROHIBIDO usar Markdown o fences de código. Responde SOLO con JSON plano.",
     "No agregues texto antes o después del JSON (ni notas, ni 'Aquí tienes', ni bloques de ejemplo).",
 
     // Reglas importantes

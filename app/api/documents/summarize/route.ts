@@ -104,8 +104,19 @@ async function handleSummarizeRequest(req: NextRequest, t0: number) {
         return NextResponse.json({ error: "Missing 'text'" }, { status: 400 });
       }
 
-      const maxChars = options.maxChars || 20000;
+      const maxChars = options.maxChars || 50000;
       const trimmed = text.length > maxChars ? text.slice(0, maxChars) : text;
+      
+      // Log if text was truncated
+      if (text.length > maxChars) {
+        logger.warn("/api/documents/summarize:Text truncated", {
+          originalLength: text.length,
+          truncatedTo: maxChars,
+          charsLost: text.length - maxChars,
+          percentLost: Math.round(((text.length - maxChars) / text.length) * 100),
+        });
+      }
+      
       const textModel = options.model || process.env.OPENAI_MODEL || "openrouter/auto";
       const temperature = options.temperature ?? 0.3;
       const maxOutputTokens = options.maxOutputTokens || options.maxTokens || 2200;
@@ -115,6 +126,7 @@ async function handleSummarizeRequest(req: NextRequest, t0: number) {
         temperature,
         maxOutputTokens,
         textLength: trimmed.length,
+        wasTruncated: text.length > maxChars,
       });
 
       const textResult = await invokeTextSummarization({
