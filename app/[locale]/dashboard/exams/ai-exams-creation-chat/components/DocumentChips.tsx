@@ -1,0 +1,64 @@
+"use client";
+import React from 'react';
+import { X as XIcon } from 'lucide-react';
+import { formatFileName } from '../utils/formatting';
+
+interface DocumentChipsProps {
+  documentIds: string[];
+  docMeta: Record<string, { fileName?: string; mime?: string }>;
+  summariesAvailability: Record<string, boolean>;
+  jobs: Array<{ documentId: string; status: string }>;
+  onDelete: (id: string) => void;
+  isSending: boolean;
+  t: (key: string, options?: { fallback?: string }) => string;
+}
+
+export function DocumentChips({
+  documentIds,
+  docMeta,
+  summariesAvailability,
+  jobs,
+  onDelete,
+  isSending,
+  t,
+}: DocumentChipsProps) {
+  if (documentIds.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 ml-2">
+      {documentIds.map((id) => (
+        <div key={id} className="flex items-center gap-2 border px-2 py-1 text-xs bg-background">
+          <span role="img" aria-label="doc">
+            📄
+          </span>
+          <span className="max-w-[160px] truncate" title={docMeta[id]?.fileName || id}>
+            {formatFileName(docMeta[id]?.fileName || id.replace(/^local:/, ''), 18)}
+          </span>
+          <span className="text-[10px] text-muted-foreground">
+            {summariesAvailability[id] ? (
+              '✔️'
+            ) : jobs.find(
+                (j) => j.documentId === id && (j.status === 'queued' || j.status === 'summarizing')
+              ) ? (
+              <span style={{ filter: 'grayscale(100%)' }}>🧠</span>
+            ) : (
+              '—'
+            )}
+          </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(id);
+            }}
+            className="ml-1 text-muted-foreground hover:text-red-600"
+            title={t('context.remove', { fallback: 'Quitar' })}
+            disabled={isSending}
+          >
+            <XIcon className="h-3 w-3" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}

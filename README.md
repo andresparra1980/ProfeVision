@@ -21,7 +21,8 @@ Hemos implementado mejoras significativas en la calidad del código:
 
 - **Frontend**: Next.js 14+, TypeScript, Tailwind CSS, Shadcn/UI
 - **Backend**: Next.js API Routes, Supabase (Auth, PostgreSQL, Storage, Edge Functions)
-- **AI**: OpenRouter.ai (GPT-4, Claude 3, Mixtral)
+- **AI**: OpenRouter.ai (GPT-4, Claude 3, Gemini), LangChain
+- **Observability**: LangSmith (AI tracing, cost analytics)
 - **Procesamiento de Imágenes**: MediaDevices API, jsQR/zxing, TensorFlow.js/OpenCV.js
 - **Payments**: PayU API
 
@@ -83,12 +84,32 @@ Consulta [CONTRIBUTING.md](./CONTRIBUTING.md) para conocer nuestras pautas de co
 
 Asegúrate de tener las siguientes variables en tu `.env.local`:
 
-```
+```bash
+# OpenRouter (Required)
 OPENROUTER_API_KEY=tu_api_key_de_openrouter
-OPENAI_MODEL=gpt-4
+OPENAI_MODEL=google/gemini-2.5-flash-lite
+OPENAI_FALLBACK_MODEL=mistralai/ministral-8b
+
+# LangSmith (Optional - for AI observability)
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=tu_api_key_de_langsmith
+LANGCHAIN_PROJECT=ProfeVision
 ```
 
-- `OPENROUTER_API_KEY`: Obtén tu API Key en https://openrouter.ai/
-- `OPENAI_MODEL`: Modelo recomendado: `gpt-4` o `claude-3-opus` (puedes cambiarlo según disponibilidad y calidad deseada).
+### API Keys
+- **OpenRouter**: Obtén tu API Key en [openrouter.ai](https://openrouter.ai/)
+- **LangSmith**: Obtén tu API Key en [smith.langchain.com/settings](https://smith.langchain.com/settings)
+
+### Modelos Recomendados
+- **Primario**: `google/gemini-2.5-flash-lite` (rápido y económico)
+- **Fallback**: `mistralai/ministral-8b` (backup confiable)
+- **Alternativas**: `openai/gpt-4`, `anthropic/claude-3-opus`
+
+### Observabilidad (Opcional)
+Ver **[LANGSMITH_QUICKSTART.md](./LANGSMITH_QUICKSTART.md)** para configurar tracing completo de IA con:
+- 📊 Análisis de costos en tiempo real
+- 🔍 Debugging de prompts y respuestas
+- 📈 Métricas de rendimiento
+- 💰 Tracking de tokens y gastos
 
 No se requiere configuración adicional en Supabase para esta funcionalidad.

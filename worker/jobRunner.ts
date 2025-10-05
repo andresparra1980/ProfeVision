@@ -3,6 +3,7 @@ import { runPipelineWithHooks, PipelineInputSchema } from "@/lib/ai/similar-exam
 import { JobsSimilarExamKeys } from "@/lib/ai/similar-exam/utils/i18nKeys";
 import { ExamSchema } from "@/lib/ai/similar-exam/schemas/exam";
 import { ZodError } from "zod";
+import { traceable } from "langsmith/traceable";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
@@ -305,17 +306,37 @@ export async function runJob(jobId: string, payload: unknown) {
     const sourceExam = await loadSourceExam(jobRow.source_exam_id);
     const parsed = PipelineInputSchema.parse({ sourceExam, language: sourceExam.exam.language, seed: jobRow.seed ?? 42 });
 
-    // Drive step transitions via pipeline hooks
-    const { draftExam } = await runPipelineWithHooks(
+    // Drive step transitions via pipeline hooks with LangSmith tracing
+    const runTracedPipeline = traceable(
+      async () => {
+        return await runPipelineWithHooks(
+          {
+            sourceExam: parsed.sourceExam,
+            language: parsed.language,
+            seed: parsed.seed,
+          },
+          async (step, status) => {
+            await emitStep(jobId, step, status);
+          },
+          jobId,
+        );
+      },
       {
-        sourceExam: parsed.sourceExam,
-        language: parsed.language,
-        seed: parsed.seed,
-      },
-      async (step, status) => {
-        await emitStep(jobId, step, status);
-      },
+        name: "similar_exam_pipeline",
+        metadata: {
+          job_id: jobId,
+          user_id: jobRow.user_id,
+          source_exam_id: jobRow.source_exam_id,
+          language: sourceExam.exam.language,
+          seed: jobRow.seed ?? 42,
+          exam_title: sourceExam.exam.title,
+          num_questions: sourceExam.exam.questions.length,
+        },
+        tags: ["exam-generation", "similar-exam"],
+      }
     );
+    
+    const { draftExam } = await runTracedPipeline();
 
     const meta: StartMeta | undefined = (jobRow as any)?.error_meta?.input ?? undefined;
     // Double-check before inserting in case of race
