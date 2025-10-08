@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Download, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import * as XLSX from "xlsx";
 import logger from "@/lib/utils/logger";
@@ -116,10 +116,8 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       setFile(file);
     } catch (error) {
       logger.error('Error reading file:', error);
-      toast({
-        title: t('components.excelImport.error.title'),
+      toast.error(t('components.excelImport.error.title'), {
         description: t('components.excelImport.error.readingFile'),
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -164,10 +162,8 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
   logger.log(`[IMPORT] Usuario autenticado: ${user?.id}`);
   logger.log(`[IMPORT] GroupId: ${groupId}`);
     if (preview.length === 0) {
-      toast({
-        title: t('components.excelImport.error.title'),
+      toast.error(t('components.excelImport.error.title'), {
         description: t('components.excelImport.error.noDataToImport'),
-        variant: "destructive",
       });
       return;
     }
@@ -258,10 +254,8 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
           throw relationError;
         }
 
-        toast({
-          title: "Éxito",
+        toast.success("Éxito", {
           description: `Se importaron y asignaron ${estudianteIds.length} estudiantes al grupo`,
-          variant: "default",
         });
         shouldNotifyParent = true;
       } else {
@@ -272,17 +266,13 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
           .select();
         logger.log("Resultado de importación:", { data, error, preview_length: preview.length });
         if (error) {
-          toast({
-            title: "Error",
+          toast.error("Error", {
             description: error.message || "No se pudieron importar los estudiantes",
-            variant: "destructive",
           });
         } else {
           const successCount = data?.length || 0;
-          toast({
-            title: "Éxito",
+          toast.success("Éxito", {
             description: `Se importaron ${successCount} estudiantes correctamente`,
-            variant: "default",
           });
           shouldNotifyParent = true;
         }
@@ -294,10 +284,8 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       if (fileInput) fileInput.value = "";
     } catch (error: Error | unknown) {
       logger.error("Error importing students:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: error instanceof Error ? error.message : "No se pudieron importar los estudiantes",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);

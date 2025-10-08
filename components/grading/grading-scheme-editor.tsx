@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable, DropResult, DroppableProvided, DraggableProvided } from '@hello-pangea/dnd';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 import { GradingScheme, GradingPeriod, GradingComponent, ComponentType } from '@/lib/types/grading';
@@ -86,20 +86,16 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
 
       // Validar que las fechas estén establecidas
       if (!updatedScheme.fecha_inicio || !updatedScheme.fecha_fin) {
-        toast({
-          title: t('error.title'),
+        toast.error(t('error.title'), {
           description: t('error.missingDates'),
-          variant: 'destructive',
         });
         return;
       }
 
       // Validar que la fecha de fin sea posterior a la de inicio
       if (new Date(updatedScheme.fecha_fin) <= new Date(updatedScheme.fecha_inicio)) {
-        toast({
-          title: t('error.title'),
+        toast.error(t('error.title'), {
           description: t('error.invalidDates'),
-          variant: 'destructive',
         });
         return;
       }
@@ -107,10 +103,8 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       // Validar que los porcentajes de los periodos sumen 100%
       const periodosTotal = updatedScheme.periodos.reduce((sum, p) => sum + p.porcentaje, 0);
       if (Math.abs(periodosTotal - 100) > 0.01) {
-        toast({
-          title: t('error.title'),
+        toast.error(t('error.title'), {
           description: t('error.periodsSum'),
-          variant: 'destructive',
         });
         return;
       }
@@ -119,10 +113,8 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       for (const periodo of updatedScheme.periodos) {
         const componentesTotal = periodo.componentes.reduce((sum, c) => sum + c.porcentaje, 0);
         if (Math.abs(componentesTotal - periodo.porcentaje) > 0.01) {
-          toast({
-            title: t('error.title'),
+          toast.error(t('error.title'), {
             description: `${t('error.componentsSum')} "${periodo.nombre}" ${t('error.componentsSumValue')} ${periodo.porcentaje}%`,
-            variant: 'destructive',
           });
           return;
         }
@@ -131,10 +123,8 @@ export function GradingSchemeEditor({ initialScheme, groupId, onSave }: Props) {
       await onSave(updatedScheme);
     } catch (error) {
       console.error('Error al guardar:', error);
-      toast({
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: t('error.saving'),
-        variant: 'destructive',
       });
     } finally {
       setSaving(false);

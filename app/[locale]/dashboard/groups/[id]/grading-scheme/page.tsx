@@ -156,8 +156,7 @@ export default function GradingSchemePage() {
       const updatedScheme = await response.json();
       setInitialScheme(updatedScheme as GradingScheme);
 
-      toast({
-        title: t('success.title'),
+      toast.success(t('success.title'), {
         description: t('success.schemeSaved'),
       });
 

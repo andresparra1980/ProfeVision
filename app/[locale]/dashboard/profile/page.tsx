@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
 import { useRouter } from "@/i18n/navigation";
@@ -95,9 +95,7 @@ export default function ProfilePage() {
       errorObject: errorObj 
     });
     
-    toast({ 
-      variant: "destructive", 
-      title: t('common.error'), 
+    toast.error(t('common.error'), { 
       description: `${t('profile.messages.updateError')}: ${errorObj?.message || t('profile.messages.unknownError')}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`
     });
   }, [t]);
@@ -137,8 +135,7 @@ export default function ProfilePage() {
       }
       logger.log('[ProfilePage] Profesor data updated.');
 
-      toast({
-        title: t('profile.messages.updated'),
+      toast.success(t('profile.messages.updated'), {
         description: t('profile.messages.updateSuccess'),
       });
       

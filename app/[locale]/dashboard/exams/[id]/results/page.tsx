@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from '@/lib/supabase';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -150,7 +150,6 @@ const PDFExportButton = dynamic(
 export default function ExamResultsPage() {
   const params = useParams();
   const router = useRouter();
-  const { toast } = useToast();
   const t = useTranslations('dashboard.exams.results');
   const tc = useTranslations('common');
   const locale = useLocale();
@@ -487,15 +486,13 @@ export default function ExamResultsPage() {
       if (DEBUG) {
         // Registramos el error en un logger en lugar de la consola
       }
-      toast({
-        title: t('error'),
+      toast.error(t('error'), {
         description: t('loadingError'),
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [params.id, toast, selectedGroupId, initializing, t]);
+  }, [params.id, selectedGroupId, initializing, t]);
 
   useEffect(() => {
     fetchExamResults();
@@ -609,24 +606,19 @@ export default function ExamResultsPage() {
         return updatedResultados;
       });
 
-      toast({
-        title: t('toast.answerUpdated'),
+      toast.success(t('toast.answerUpdated'), {
         description: t('toast.answerUpdatedDesc'),
       });
 
     } catch (error) {
       if (typeof error === 'object' && error !== null && 'message' in error) {
-        toast({
-          title: t('toast.updateError'),
+        toast.error(t('toast.updateError'), {
           description: String(error.message) || t('toast.updateErrorDesc'),
-          variant: "destructive",
         });
       } else {
-              toast({
-        title: t('toast.updateError'),
-        description: t('toast.updateErrorDesc'),
-        variant: "destructive",
-      });
+        toast.error(t('toast.updateError'), {
+          description: t('toast.updateErrorDesc'),
+        });
       }
     } finally {
       setUpdatingAnswer(false);
@@ -811,10 +803,8 @@ export default function ExamResultsPage() {
       const gradeValue = parseFloat(manualGrade);
       
       if (isNaN(gradeValue) || gradeValue < 0 || gradeValue > 5) {
-        toast({
-          title: tc('messages.error'),
+        toast.error(tc('messages.error'), {
           description: t('toast.gradeValidationError'),
-          variant: "destructive",
         });
         return;
       }
@@ -838,8 +828,7 @@ export default function ExamResultsPage() {
       // Refrescar los resultados
       await fetchExamResults();
       
-      toast({
-        title: t('toast.gradeSaved'),
+      toast.success(t('toast.gradeSaved'), {
         description: t('toast.gradeSavedDesc'),
       });
       
@@ -847,16 +836,12 @@ export default function ExamResultsPage() {
       
     } catch (error) {
       if (typeof error === 'object' && error !== null && 'message' in error) {
-        toast({
-          title: t('toast.saveError'),
+        toast.error(t('toast.saveError'), {
           description: String(error.message) || t('toast.saveErrorDesc'),
-          variant: "destructive",
         });
       } else {
-        toast({
-          title: t('toast.saveError'),
+        toast.error(t('toast.saveError'), {
           description: t('toast.saveErrorDesc'),
-          variant: "destructive",
         });
       }
     } finally {
@@ -867,10 +852,8 @@ export default function ExamResultsPage() {
   // Función para exportar resultados a Excel
   const handleExportToExcel = () => {
     if (!examDetails || resultados.length === 0) {
-      toast({
-        title: tc('messages.error'),
+      toast.error(tc('messages.error'), {
         description: t('toast.noResultsError'),
-        variant: "destructive",
       });
       return;
     }
@@ -964,16 +947,13 @@ export default function ExamResultsPage() {
       // Generar el archivo y descargarlo
       XLSX.writeFile(wb, `resultados_${examDetails.titulo.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
 
-      toast({
-        title: tc('messages.success'),
-      description: t('toast.exportSuccess'),
-    });
+      toast.success(tc('messages.success'), {
+        description: t('toast.exportSuccess'),
+      });
     } catch (_error) {
-      toast({
-        title: tc('messages.error'),
-      description: t('toast.exportError'),
-      variant: "destructive",
-    });
+      toast.error(tc('messages.error'), {
+        description: t('toast.exportError'),
+      });
       if (DEBUG) {
         // Registramos el error en un logger en lugar de la consola
       }
@@ -983,17 +963,14 @@ export default function ExamResultsPage() {
 
   const handleExportToPDF = async (updateProgress: (_progress: number) => void) => {
     if (!examDetails || resultados.length === 0) {
-      toast({
-        title: tc('messages.error'),
+      toast.error(tc('messages.error'), {
         description: t('toast.noResultsError'),
-        variant: "destructive",
       });
       return;
     }
 
     try {
-      toast({
-        title: t('toast.preparingPDF'),
+      toast.info(t('toast.preparingPDF'), {
         description: t('toast.preparingPDFDesc'),
       });
       
@@ -1003,16 +980,13 @@ export default function ExamResultsPage() {
       // Actualizar los resultados con las imágenes cargadas
       setResultados(updatedResultados);
       
-      toast({
-        title: t('toast.pdfGenerated'),
+      toast.success(t('toast.pdfGenerated'), {
         description: t('toast.pdfGeneratedDesc'),
       });
     } catch (_error) {
-      toast({
-        title: tc('messages.error'),
-      description: t('toast.pdfError'),
-      variant: "destructive",
-    });
+      toast.error(tc('messages.error'), {
+        description: t('toast.pdfError'),
+      });
       if (DEBUG) {
         // Registramos el error en un logger en lugar de la consola
       }

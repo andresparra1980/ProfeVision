@@ -19,33 +19,36 @@
 - [x] `app/[locale]/dashboard/exams/ai-exams-creation-chat/hooks/useExamDraft.ts`
 
 ### Groups
-- [x] `app/[locale]/dashboard/groups/[id]/grades/page.tsx` - ✅ COMPLETO (imports + sintaxis)
-- [x] `app/[locale]/dashboard/groups/[id]/grading-scheme/page.tsx` - Solo import actualizado
-- [x] `app/[locale]/dashboard/groups/[id]/students/page.tsx` - Solo import actualizado
-- [x] `app/[locale]/dashboard/groups/page.tsx` - Solo import actualizado
+- [x] `app/[locale]/dashboard/groups/[id]/grades/page.tsx` - ✅ COMPLETO
+- [x] `app/[locale]/dashboard/groups/[id]/grading-scheme/page.tsx` - ✅ COMPLETO
+- [x] `app/[locale]/dashboard/groups/[id]/students/page.tsx` - ✅ COMPLETO (8 toasts)
+- [x] `app/[locale]/dashboard/groups/page.tsx` - ✅ COMPLETO (5 toasts)
 
-## 🔄 Pendientes (Solo Sintaxis de toast())
+### Exams
+- [x] `app/[locale]/dashboard/exams/[id]/edit/page.tsx` - ✅ COMPLETO (15 toasts)
+- [x] `app/[locale]/dashboard/exams/[id]/export/page.tsx` - ✅ COMPLETO (4 toasts)
+- [x] `app/[locale]/dashboard/exams/[id]/results/page.tsx` - ✅ COMPLETO (15 toasts)
 
-Estos archivos ya tienen el import de Sonner pero necesitan actualizar las llamadas a toast():
+### Components
+- [x] `components/grades/grades-excel-modal.tsx` - ✅ COMPLETO (14 toasts)
+- [x] `components/students/excel-import.tsx` - ✅ COMPLETO (6 toasts)
+- [x] `components/grading/grading-scheme-editor.tsx` - ✅ COMPLETO (5 toasts)
 
-1. `app/[locale]/dashboard/groups/[id]/grading-scheme/page.tsx` - 1 toast()
-2. `app/[locale]/dashboard/groups/[id]/students/page.tsx` - ~8 toast()
-3. `app/[locale]/dashboard/groups/page.tsx` - ~5 toast()
-4. `app/[locale]/dashboard/exams/[id]/edit/page.tsx` - ~15 toast()
-5. `app/[locale]/dashboard/exams/[id]/export/page.tsx` - ~4 toast()
-6. `app/[locale]/dashboard/exams/[id]/results/page.tsx` - Needs full migration
-7. `app/[locale]/dashboard/exams/create/page.tsx` - Needs full migration
-8. `app/[locale]/dashboard/exams/create-with-ai/page.tsx` - Needs full migration
-9. `app/[locale]/dashboard/settings/page.tsx` - Needs full migration
-10. `app/[locale]/dashboard/students/page.tsx` - Needs full migration
-11. `app/[locale]/dashboard/profile/page.tsx` - Needs full migration
-12. `app/[locale]/dashboard/subjects/page.tsx` - Needs full migration
-13. `app/[locale]/dashboard/layout.tsx` - Needs full migration
-14. `app/[locale]/dashboard/entities/page.tsx` - Needs full migration
-15. `components/grades/grades-excel-modal.tsx` - Needs full migration
-16. `components/grading/grading-scheme-editor.tsx` - Needs full migration
-17. `components/students/excel-import.tsx` - Needs full migration
-18. `components/exam/wizard-steps/results.tsx` - Needs full migration
+### Dashboard Pages
+- [x] `app/[locale]/dashboard/exams/create/page.tsx` - ✅ COMPLETO (6 toasts)
+- [x] `app/[locale]/dashboard/students/page.tsx` - ✅ COMPLETO (6 toasts)
+- [x] `app/[locale]/dashboard/subjects/page.tsx` - ✅ COMPLETO (4 toasts)
+- [x] `app/[locale]/dashboard/entities/page.tsx` - ✅ COMPLETO (2 toasts)
+- [x] `app/[locale]/dashboard/settings/page.tsx` - ✅ COMPLETO (3 toasts)
+- [x] `app/[locale]/dashboard/profile/page.tsx` - ✅ COMPLETO (2 toasts)
+- [x] `app/[locale]/dashboard/layout.tsx` - ✅ COMPLETO (1 toast)
+- [x] `components/exam/wizard-steps/results.tsx` - ✅ COMPLETO (2 toasts)
+
+## ✅ MIGRACIÓN COMPLETADA
+
+**Total: 123 toasts migrados en 22 archivos**
+
+Todos los archivos con toasts de Radix UI han sido migrados a Sonner.
 
 ## Patrón de Migración
 

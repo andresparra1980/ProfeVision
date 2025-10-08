@@ -92,9 +92,7 @@ export default function GroupsPage() {
       errorObject: errorObj
     });
 
-    toast({
-      variant: "destructive",
-      title: `${t('error.title')} ${context}`,
+    toast.error(`${t('error.title')} ${context}`, {
       description: `${t('error.description')}: ${errorObj?.message || t('error.unknown')}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`
     });
   }, [t]);
@@ -272,8 +270,7 @@ export default function GroupsPage() {
           .eq("id", editingGrupo.id);
 
         if (error) throw error;
-        toast({
-          title: t('toast.updateTitle'),
+        toast.success(t('toast.updateTitle'), {
           description: t('toast.updateDescription'),
         });
       } else {
@@ -292,8 +289,7 @@ export default function GroupsPage() {
           .insert(dataToInsert);
 
         if (error) throw error;
-        toast({
-          title: t('toast.createTitle'),
+        toast.success(t('toast.createTitle'), {
           description: t('toast.createDescription'),
         });
       }
@@ -322,8 +318,7 @@ export default function GroupsPage() {
 
       if (error) throw error;
       
-      toast({
-        title: t('toast.deleteTitle'),
+      toast.success(t('toast.deleteTitle'), {
         description: t('toast.deleteDescription'),
       });
       
@@ -352,12 +347,14 @@ export default function GroupsPage() {
 
       if (error) throw error;
       
-      toast({
-        title: grupo.estado === 'activo' ? t('toast.archivedTitle') : t('toast.activatedTitle'),
-        description: grupo.estado === 'activo' 
-          ? t('toast.archivedDescription') 
-          : t('toast.activatedDescription'),
-      });
+      toast.success(
+        grupo.estado === 'activo' ? t('toast.archivedTitle') : t('toast.activatedTitle'),
+        {
+          description: grupo.estado === 'activo' 
+            ? t('toast.archivedDescription') 
+            : t('toast.activatedDescription'),
+        }
+      );
       
       loadGrupos();
     } catch (error: unknown) {

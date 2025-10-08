@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Building2, Save } from "lucide-react";
 import { Plus } from "lucide-react";
 import { BookOpen } from "lucide-react";
@@ -216,9 +216,7 @@ export default function CreateExamPage() {
       setMaterias(data || []);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : t('exams.messages.loadingError');
-      toast({
-        variant: 'destructive',
-        title: t('exams.messages.loadingError'),
+      toast.error(t('exams.messages.loadingError'), {
         description: errorMessage,
       });
     }
@@ -239,9 +237,7 @@ export default function CreateExamPage() {
       setGrupos(data || []);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : t('exams.messages.loadingError');
-      toast({
-        variant: 'destructive',
-        title: t('exams.messages.loadingError'),
+      toast.error(t('exams.messages.loadingError'), {
         description: errorMessage,
       });
     }
@@ -455,16 +451,13 @@ export default function CreateExamPage() {
       // Clear localStorage after successful creation
       localStorage.removeItem('examQuestions');
 
-      toast({
-        title: t('common.success'),
+      toast.success(t('common.success'), {
         description: t('exams.messages.createSuccess'),
       });
       router.push('/dashboard/exams');
     } catch (error) {
       console.error('Error al crear el examen:', error);
-      toast({
-        variant: 'destructive',
-        title: t('common.error'),
+      toast.error(t('common.error'), {
         description: error instanceof Error ? error.message : t('exams.messages.createError', { defaultValue: 'Error al crear el examen' }),
       });
     } finally {
@@ -584,16 +577,13 @@ export default function CreateExamPage() {
         // Eliminar datos del localStorage después de procesarlos
         localStorage.removeItem(`examImport_${importId}`);
         
-        toast({
-          title: t('exams.createWithAI.importedTitle', { defaultValue: 'Examen importado' }),
+        toast.success(t('exams.createWithAI.importedTitle', { defaultValue: 'Examen importado' }), {
           description: `${t('exams.createWithAI.importedDesc', { defaultValue: 'Se han importado' })} ${preguntasImportadas.length} ${t('exams.createWithAI.questionsImported', { defaultValue: 'preguntas correctamente' })}`,
         });
         
       } catch (error) {
         console.error('Error al procesar datos importados:', error);
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
+        toast.error(t('common.error'), {
           description: t('exams.createWithAI.importError', { defaultValue: 'No se pudieron procesar los datos importados' }),
         });
       }

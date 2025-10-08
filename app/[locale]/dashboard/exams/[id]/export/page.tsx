@@ -149,10 +149,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       }
     } catch (error) {
       console.error("Error fetching exam details:", error);
-      toast({
-        title: t('common.error'),
+      toast.error(t('common.error'), {
         description: t('exams.messages.loadError'),
-        variant: "destructive",
       });
       router.push("/dashboard/exams");
     } finally {
@@ -332,7 +330,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
         } catch {
           // ignore
         }
-        toast({ title: t("common.error"), description: msg, variant: "destructive" });
+        toast.error(t("common.error"), { description: msg });
         return;
       }
       const blob = await res.blob();
@@ -344,10 +342,10 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast({ title: t("exams.messages.success"), description: t("exams.export.success") });
+      toast.success(t("exams.messages.success"), { description: t("exams.export.success") });
     } catch (e) {
       console.error(e);
-      toast({ title: t("common.error"), description: t("exams.export.error"), variant: "destructive" });
+      toast.error(t("common.error"), { description: t("exams.export.error") });
     } finally {
       setCompiling(false);
     }

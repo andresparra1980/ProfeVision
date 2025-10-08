@@ -82,10 +82,8 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
     } catch (error: unknown) {
       console.error("Error fetching group details:", error);
       const errorMessage = error instanceof Error ? error.message : t('error.loadingGroup');
-      toast({
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: errorMessage,
-        variant: "destructive",
       });
       router.push("/dashboard/groups");
     } finally {
@@ -117,10 +115,8 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
     } catch (error: unknown) {
       console.error("Error fetching group students:", error);
       const errorMessage = error instanceof Error ? error.message : t('error.loadingStudents');
-      toast({
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: errorMessage,
-        variant: "destructive",
       });
     }
   }, [groupId, t]);
@@ -151,10 +147,8 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
     } catch (error: unknown) {
       console.error("Error searching students:", error);
       const errorMessage = error instanceof Error ? error.message : t('error.searchingStudents');
-      toast({
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: errorMessage,
-        variant: "destructive",
       });
     } finally {
       setIsSearching(false);
@@ -162,10 +156,8 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
   }, [searchQuery, groupStudents, t]);
 
   const handleImportComplete = useCallback(() => {
-    toast({
-      title: t('success.title'),
+    toast.success(t('success.title'), {
       description: t('success.importComplete'),
-      variant: "default",
     });
     
     fetchGroupStudents();
@@ -190,17 +182,14 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
       setSearchQuery("");
       setSearchResults([]);
       
-      toast({
-        title: t('success.studentAdded'),
+      toast.success(t('success.studentAdded'), {
         description: t('success.studentAddedDescription'),
       });
     } catch (error: unknown) {
       console.error("Error adding student to group:", error);
       const errorMessage = error instanceof Error ? error.message : t('error.addingStudent');
-      toast({
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: errorMessage,
-        variant: "destructive",
       });
     } finally {
       setIsAdding(false);
@@ -219,17 +208,14 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
       // Refresh the list
       fetchGroupStudents();
       
-      toast({
-        title: t('success.studentRemoved'),
+      toast.success(t('success.studentRemoved'), {
         description: t('success.studentRemovedDescription'),
       });
     } catch (error: unknown) {
       console.error("Error removing student from group:", error);
       const errorMessage = error instanceof Error ? error.message : t('error.removingStudent');
-      toast({
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: errorMessage,
-        variant: "destructive",
       });
     }
   }, [fetchGroupStudents, t]);

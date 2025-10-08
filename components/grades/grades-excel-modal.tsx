@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Download, AlertCircle } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { ComponenteCalificacion, Estudiante, Periodo } from '@/lib/types/database';
 import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase/client';
@@ -74,10 +74,8 @@ export function GradesExcelModal({
       // Validar extensión del archivo
       const fileExt = selectedFile.name.split('.').pop()?.toLowerCase();
       if (fileExt !== 'xlsx' && fileExt !== 'xls') {
-        toast({
-          title: "Formato inválido",
+        toast.error("Formato inválido", {
           description: "Por favor, selecciona un archivo Excel (.xlsx o .xls)",
-          variant: "destructive",
         });
         return;
       }
@@ -86,10 +84,8 @@ export function GradesExcelModal({
       const data = await readExcelFile(selectedFile);
       
       if (!data || data.length === 0) {
-        toast({
-          title: "Archivo vacío",
+        toast.error("Archivo vacío", {
           description: "El archivo no contiene datos para importar",
-          variant: "destructive",
         });
         return;
       }
@@ -100,30 +96,22 @@ export function GradesExcelModal({
       setErrors(errors);
       
       if (valid.length === 0) {
-        toast({
-          title: "Datos inválidos",
+        toast.error("Datos inválidos", {
           description: "No se encontraron registros válidos para importar",
-          variant: "destructive",
         });
       } else if (valid.length > 0 && errors.length > 0) {
-        toast({
-          title: "Advertencia",
+        toast.warning("Advertencia", {
           description: `Se encontraron ${valid.length} registros válidos y ${errors.length} con errores`,
-          variant: "destructive",
         });
       } else if (valid.length > 0) {
-        toast({
-          title: "Archivo válido",
+        toast.success("Archivo válido", {
           description: `Se encontraron ${valid.length} calificaciones para importar`,
-          variant: "default",
         });
       }
     } catch (error) {
       logger.error("Error reading Excel file:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "No se pudo procesar el archivo. Asegúrate de que sea un archivo Excel válido y no esté dañado.",
-        variant: "destructive",
       });
     }
   };
@@ -233,19 +221,15 @@ export function GradesExcelModal({
   
   const handleSubmit = async () => {
     if (!componente) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "No se ha seleccionado un componente de calificación",
-        variant: "destructive",
       });
       return;
     }
 
     if (preview.length === 0) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "No hay datos válidos para importar",
-        variant: "destructive",
       });
       return;
     }
@@ -286,18 +270,15 @@ export function GradesExcelModal({
 
       if (error) throw error;
 
-      toast({
-        title: "Éxito",
+      toast.success("Éxito", {
         description: "Calificaciones importadas correctamente",
       });
 
       onImportComplete(calificaciones);
     } catch (error) {
       logger.error('Error al importar calificaciones:', error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "No se pudieron importar las calificaciones",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -366,10 +347,8 @@ export function GradesExcelModal({
         componentesPeriodo: !!componentesPeriodo,
         todasCalificaciones: !!todasCalificaciones
       });
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Faltan datos necesarios para la exportación del periodo",
-        variant: "destructive",
       });
       return;
     }
@@ -459,18 +438,15 @@ export function GradesExcelModal({
     XLSX.utils.book_append_sheet(wb, ws, `Periodo ${periodoActual.nombre}`);
     XLSX.writeFile(wb, `calificaciones_periodo_${periodoActual.nombre}_${materia.nombre.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
 
-    toast({
-      title: "Éxito",
+    toast.success("Éxito", {
       description: "Calificaciones del periodo exportadas correctamente",
     });
   };
 
   const handleExportFinal = () => {
     if (!materia || !grupo || !todosComponentes || !todasCalificaciones || !periodos || !componentes) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Faltan datos necesarios para la exportación final",
-        variant: "destructive",
       });
       return;
     }
@@ -588,8 +564,7 @@ export function GradesExcelModal({
     XLSX.utils.book_append_sheet(wb, ws, "Calificaciones Finales");
     XLSX.writeFile(wb, `calificaciones_finales_${materia.nombre.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
 
-    toast({
-      title: "Éxito",
+    toast.success("Éxito", {
       description: "Calificaciones finales exportadas correctamente",
     });
   };

@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { OMRForm } from '@/components/exam/omr-form';
 import { 
@@ -114,7 +114,6 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   const [saved, setSaved] = useState(false);
   const [isDuplicate, setIsDuplicate] = useState<boolean>(false);
   const [duplicateInfo, setDuplicateInfo] = useState<DuplicateInfo | null>(null);
-  const { toast } = useToast();
 
   const selectedAnswersForOMR = useMemo(() => {
     // if (DEBUG) console.log('[Results] Memoizing selectedAnswersForOMR', answers);
@@ -765,12 +764,10 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         }
         
         // Mostrar notificación de éxito
-              toast({
-        title: isDuplicate ? t('toasts.resultsUpdated') : t('toasts.resultsSaved'),
+        toast.success(isDuplicate ? t('toasts.resultsUpdated') : t('toasts.resultsSaved'), {
           description: isDuplicate 
             ? `La calificación anterior ha sido reemplazada correctamente.`
             : `La calificación del examen ha sido registrada correctamente.`,
-          variant: "default",
         });
         
         // Marcar como guardado
@@ -795,10 +792,8 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       }
       
       // Mostrar notificación de error
-      toast({
-        title: t('toasts.saveError'),
+      toast.error(t('toasts.saveError'), {
         description: (error as Error).message || t('toasts.saveErrorDescription'),
-        variant: "destructive",
       });
       
       setSaving(false);
