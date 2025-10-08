@@ -1,8 +1,7 @@
 "use client";
 
 import { ThemeProvider } from '@/components/shared/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
-import { Toaster as SonnerToaster } from "sonner";
+import { Toaster } from "sonner";
 import React from 'react';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +14,6 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     >
       {children}
       <Toaster />
-      <SonnerToaster />
     </ThemeProvider>
   );
 } 

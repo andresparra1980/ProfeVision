@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase/client';
 import { GradesTable } from '@/components/grades/grades-table';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { ComponenteCalificacion, Estudiante, Periodo, EsquemaCalificacion } from '@/lib/types/database';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,6 @@ export default function GradesPage({ params }: GradesPageProps) {
   const resolvedParams = use(params);
   const groupId = resolvedParams.id;
   const router = useRouter();
-  const { toast } = useToast();
   const t = useTranslations('dashboard.groups.grades');
   const [isLoading, setIsLoading] = useState(true);
   const [esquema, setEsquema] = useState<EsquemaCalificacion | null>(null);
@@ -179,9 +178,7 @@ export default function GradesPage({ params }: GradesPageProps) {
 
       if (esquemasError) {
         console.error('Error al cargar esquema:', esquemasError);
-        toast({
-          variant: 'destructive',
-          title: t('error.title'),
+        toast.error(t('error.title'), {
           description: t('error.loadingScheme'),
         });
         return;
@@ -189,8 +186,7 @@ export default function GradesPage({ params }: GradesPageProps) {
 
       // Si no hay esquema o hay más de uno (no debería ocurrir), redirigir a la página de creación
       if (!esquemas || esquemas.length === 0) {
-        toast({
-          title: t('error.noScheme'),
+        toast(t('error.noScheme'), {
           description: t('error.mustCreateScheme'),
         });
         router.push(`/dashboard/groups/${groupId}/grading-scheme`);
@@ -310,9 +306,7 @@ export default function GradesPage({ params }: GradesPageProps) {
 
     } catch (error) {
       console.error('Error al cargar datos:', error);
-      toast({
-        variant: 'destructive',
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: t('error.loadingData'),
       });
     } finally {
@@ -325,9 +319,7 @@ export default function GradesPage({ params }: GradesPageProps) {
     
     // Verificar si el componente está bloqueado
     if (componentesBloqueados[componenteId]) {
-      toast({
-        variant: 'destructive',
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: t('error.gradeLocked'),
       });
       return;
@@ -335,9 +327,7 @@ export default function GradesPage({ params }: GradesPageProps) {
 
     // Verificar si el componente está vinculado a un examen
     if (componentesVinculados[componenteId]) {
-      toast({
-        variant: 'destructive',
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: `${t('error.gradeLinked')} "${componentesVinculados[componenteId].titulo}" ${t('error.cannotModify')}.`,
       });
       return;
@@ -404,9 +394,7 @@ export default function GradesPage({ params }: GradesPageProps) {
       }
     } catch (error) {
       console.error('Error al guardar calificación:', error);
-      toast({
-        variant: 'destructive',
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: t('error.savingGrade'),
       });
     }
@@ -415,9 +403,7 @@ export default function GradesPage({ params }: GradesPageProps) {
   const toggleComponenteLock = (componenteId: string) => {
     // No permitir el desbloqueo de componentes vinculados a exámenes
     if (componentesVinculados[componenteId]) {
-      toast({
-        variant: 'destructive',
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: `${t('error.componentLinked')} "${componentesVinculados[componenteId].titulo}" ${t('error.cannotUnlock')}.`,
       });
       return;
@@ -433,9 +419,7 @@ export default function GradesPage({ params }: GradesPageProps) {
   const handleImportGrades = (componenteId: string) => {
     // No permitir importar calificaciones en componentes vinculados a exámenes
     if (componentesVinculados[componenteId]) {
-      toast({
-        variant: 'destructive',
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: `${t('error.componentLinked')} "${componentesVinculados[componenteId].titulo}" ${t('error.cannotImport')}.`,
       });
       return;

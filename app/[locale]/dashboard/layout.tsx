@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
 import { ScanExamFeature } from "@/components/exam/scan-exam-feature";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import type { User, Session } from '@supabase/supabase-js';
 import { SidebarProvider } from "@/lib/contexts/sidebar-context";
 import logger from "@/lib/utils/logger";
@@ -67,8 +67,7 @@ export default function DashboardLayout({
         // toast({ variant: "destructive", title: "Error al cerrar sesión", ... }); 
       } else {
         // Only toast success if signOut didn't error
-        toast({ 
-          title: t('user.logoutSuccessTitle', { defaultValue: locale === 'en' ? 'Signed out' : 'Sesión cerrada' }), 
+        toast.success(t('user.logoutSuccessTitle', { defaultValue: locale === 'en' ? 'Signed out' : 'Sesión cerrada' }), { 
           description: t('user.logoutSuccessDescription', { defaultValue: locale === 'en' ? 'You have been signed out successfully.' : 'Has cerrado sesión correctamente.' }) 
         });
       }

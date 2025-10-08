@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logger } from "@/lib/utils/logger";
 
@@ -74,9 +74,7 @@ export default function EntitiesPage() {
     });
     
     const toastMessage = `Error: ${errorObj?.message || 'Desconocido'}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`;
-    toast({ 
-      variant: "destructive", 
-      title: `Error en ${context}`, 
+    toast.error(`Error en ${context}`, { 
       description: toastMessage
     });
   }, []);
@@ -149,10 +147,8 @@ export default function EntitiesPage() {
         throw apiError;
       }
 
-      toast({
-        title: t('toast.successTitle'),
+      toast.success(t('toast.successTitle'), {
         description: t('toast.successDescription'),
-        variant: 'default',
       });
 
       setFormData({

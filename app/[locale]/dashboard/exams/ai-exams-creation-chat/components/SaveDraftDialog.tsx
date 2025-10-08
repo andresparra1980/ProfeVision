@@ -1,7 +1,7 @@
 import React from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,7 +47,6 @@ export function SaveDraftDialog({
   grupos,
   existing,
 }: SaveDraftDialogProps) {
-  const { toast } = useToast();
   const t = useTranslations("ai_exams_chat");
   const { result } = useAIChat();
   const { mapAIQuestionsToApi } = useExamMapper(result);
@@ -205,27 +204,27 @@ export function SaveDraftDialog({
           void _e;
         }
 
-        toast({
-          title: isEditing
+        toast.success(
+          isEditing
             ? t("saveDraftDialog.toasts.updated")
             : t("saveDraftDialog.toasts.saved"),
-          description: isEditing
-            ? t("saveDraftDialog.toasts.updatedDesc")
-            : t("saveDraftDialog.toasts.savedDesc"),
-        });
+          {
+            description: isEditing
+              ? t("saveDraftDialog.toasts.updatedDesc")
+              : t("saveDraftDialog.toasts.savedDesc"),
+          }
+        );
         router.push("/dashboard/exams");
       } catch (e) {
-        toast({
-          title: t("saveDraftDialog.toasts.error"),
+        toast.error(t("saveDraftDialog.toasts.error"), {
           description:
             e instanceof Error ? e.message : t("saveDraftDialog.toasts.saveError"),
-          variant: "destructive",
         });
       } finally {
         setSavingDraft(false);
       }
     },
-    [existing?.id, isEditing, mapAIQuestionsToApi, router, t, toast]
+    [existing?.id, isEditing, mapAIQuestionsToApi, router, t]
   );
 
   return (

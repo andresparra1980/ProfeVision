@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const t = useTranslations('dashboard.settings');
@@ -48,10 +48,8 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
-      toast({
-        title: t('errors.title'),
+      toast.error(t('errors.title'), {
         description: t('errors.fetchProfile'),
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -96,17 +94,14 @@ export default function SettingsPage() {
 
       if (updateError) throw updateError;
 
-      toast({
-        title: t('messages.profileUpdated'),
+      toast.success(t('messages.profileUpdated'), {
         description: t('messages.changesSaved'),
       });
     } catch (error: unknown) {
       const err = error as { message?: string };
       console.error("Error updating profile:", err);
-      toast({
-        title: t('errors.title'),
+      toast.error(t('errors.title'), {
         description: t('errors.saveChanges'),
-        variant: "destructive",
       });
     } finally {
       setSaving(false);

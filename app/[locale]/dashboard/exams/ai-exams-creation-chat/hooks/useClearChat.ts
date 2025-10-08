@@ -1,5 +1,5 @@
 import React from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { clearPersistedAIExamDraft } from "../components/AIChatContext";
 import { clearLastDocumentContext } from "@/lib/persistence/browser";
@@ -9,7 +9,6 @@ import { clearIndexedDBStores } from "../utils/indexeddb-helpers";
  * Hook to handle clearing chat and all persisted data
  */
 export function useClearChat() {
-  const { toast } = useToast();
   const t = useTranslations("ai_exams_chat");
   const [clearing, setClearing] = React.useState(false);
 
@@ -23,8 +22,7 @@ export function useClearChat() {
       // Clear IndexedDB docs and outputs
       await clearIndexedDBStores();
 
-      toast({
-        title: t("clearToasts.successTitle"),
+      toast.success(t("clearToasts.successTitle"), {
         description: t("clearToasts.successDesc"),
       });
 
@@ -33,15 +31,13 @@ export function useClearChat() {
         window.location.reload();
       }
     } catch (_e) {
-      toast({
-        title: t("clearToasts.errorTitle"),
+      toast.error(t("clearToasts.errorTitle"), {
         description: t("clearToasts.errorDesc"),
-        variant: "destructive",
       });
     } finally {
       setClearing(false);
     }
-  }, [t, toast]);
+  }, [t]);
 
   return { clearing, handleClearChat };
 }

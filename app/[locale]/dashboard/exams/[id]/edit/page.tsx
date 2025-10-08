@@ -12,7 +12,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { QuestionContent } from "@/components/exam/question-content";
 import MathText from "@/components/MathText";
 import { supabase } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import logger from "@/lib/utils/logger";
@@ -100,10 +100,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       setExam(data);
     } catch (error) {
       logger.error("Error fetching exam details:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: t('messages.loadError'),
-        variant: "destructive",
       });
       router.push("/dashboard/exams");
     } finally {
@@ -137,10 +135,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       setQuestions(formattedQuestions);
     } catch (error) {
       logger.error("Error fetching questions:", error);
-      toast({
-        title: t('errors.error'),
+      toast.error(t('errors.error'), {
         description: t('errors.loadQuestions'),
-        variant: "destructive",
       });
     }
   }, [examId, t]);
@@ -220,10 +216,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       
       // Validaciones
       if (!currentQuestion.texto.trim()) {
-        toast({
-          title: "Error",
+        toast.error("Error", {
           description: t('validation.questionRequired'),
-          variant: "destructive",
         });
         return;
       }
@@ -236,10 +230,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       // Validar que al menos una opción tenga texto
       const hasValidOptions = currentQuestion.opciones.some(opt => opt.texto.trim() !== "");
       if (!hasValidOptions) {
-        toast({
-          title: "Error",
+        toast.error("Error", {
           description: t('validation.optionsRequired'),
-          variant: "destructive",
         });
         return;
       }
@@ -295,8 +287,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       await recalculatePointsPerQuestion(questions.length + 1);
 
       // Actualizar el estado
-      toast({
-        title: "Éxito",
+      toast.success("Éxito", {
         description: t('messages.questionAdded'),
       });
 
@@ -322,10 +313,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       setEditorKey(prevKey => prevKey + 1);
     } catch (error) {
       logger.error("Error adding question:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: t('messages.addError'),
-        variant: "destructive",
       });
     } finally {
       setSaving(false);
@@ -362,8 +351,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         await recalculatePointsPerQuestion(newQuestionCount);
       }
 
-      toast({
-        title: "Éxito",
+      toast.success("Éxito", {
         description: t('messages.questionDeleted'),
       });
 
@@ -371,10 +359,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       fetchQuestions();
     } catch (error) {
       logger.error("Error deleting question:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: t('messages.deleteError'),
-        variant: "destructive",
       });
     } finally {
       setSaving(false);
@@ -388,10 +374,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       
       // Verificar que tenga al menos una pregunta
       if (questions.length === 0) {
-        toast({
-          title: "Error",
+        toast.error("Error", {
           description: t('validation.cantPublishNoQuestions'),
-          variant: "destructive",
         });
         return;
       }
@@ -419,8 +403,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         throw new Error(errorData.error || 'Error al publicar el examen');
       }
 
-      toast({
-        title: "Éxito",
+      toast.success("Éxito", {
         description: t('messages.examPublished'),
       });
 
@@ -428,10 +411,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       fetchExamDetails();
     } catch (error) {
       logger.error("Error publishing exam:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: t('messages.publishError'),
-        variant: "destructive",
       });
     } finally {
       setSaving(false);
@@ -540,16 +521,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       // Recargar preguntas para actualizar la UI
       fetchQuestions();
 
-      toast({
-        title: "Éxito",
+      toast.success("Éxito", {
         description: newStatus ? t('messages.questionEnabled') : t('messages.questionDisabled'),
       });
     } catch (error) {
       logger.error("Error toggling question status:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: t('messages.toggleError', { action: newStatus ? 'habilitar' : 'deshabilitar' }),
-        variant: "destructive",
       });
     } finally {
       setSaving(false);
@@ -596,10 +574,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         
         if (error) {
           logger.warn("Error updating question points:", error);
-          toast({
-            title: "Advertencia",
+          toast.warning("Advertencia", {
             description: "No se pudieron actualizar los puntajes de las preguntas en la base de datos",
-            variant: "destructive",
           });
         }
       }
@@ -654,18 +630,15 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         setQuestions(updatedQuestions);
       }
 
-      toast({
-        title: "Éxito",
+      toast.success("Éxito", {
         description: t('messages.answerUpdated'),
       });
     } catch (error) {
       logger.error("Error updating correct answer:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: typeof error === 'object' && error !== null && 'message' in error 
           ? String(error.message) 
           : t('messages.updateAnswerError'),
-        variant: "destructive",
       });
     } finally {
       setSaving(false);

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { PlusCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
@@ -57,9 +57,7 @@ export default function SubjectsPage() {
       errorObject: errorObj 
     });
     
-    toast({ 
-      variant: "destructive", 
-      title: `Error en ${context}`, 
+    toast.error(`Error en ${context}`, { 
       description: `Error: ${errorObj?.message || 'Desconocido'}${status ? ` (${status})` : ''}${code ? ` [${code}]` : ''}`
     });
   }, []);
@@ -131,8 +129,7 @@ export default function SubjectsPage() {
           .eq("id", editingMateria.id);
 
         if (error) throw error;
-        toast({
-          title: "Materia actualizada",
+        toast.success("Materia actualizada", {
           description: "La materia ha sido actualizada correctamente.",
         });
       } else {
@@ -147,8 +144,7 @@ export default function SubjectsPage() {
           });
 
         if (error) throw error;
-        toast({
-          title: t('toast.createTitle'),
+        toast.success(t('toast.createTitle'), {
           description: t('toast.createDescription'),
         });
       }
@@ -182,8 +178,7 @@ export default function SubjectsPage() {
 
       if (error) throw error;
       
-      toast({
-        title: t('toast.deleteTitle'),
+      toast.success(t('toast.deleteTitle'), {
         description: t('toast.deleteDescription'),
       });
       

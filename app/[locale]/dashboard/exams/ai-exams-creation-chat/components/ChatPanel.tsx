@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { loadSettings } from "@/lib/persistence/browser";
 import { useAIChat, type AIExamResult } from './AIChatContext';
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   Conversation,
@@ -38,7 +38,6 @@ export default function ChatPanel() {
   const t = useTranslations('ai_exams_chat');
   const settings = useMemo(() => loadSettings(), []);
   const { result, setResult } = useAIChat();
-  const { toast } = useToast();
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const [input, setInput] = useState("");
   const [resultsOpen, setResultsOpen] = useState(false);
@@ -90,7 +89,6 @@ export default function ChatPanel() {
     settings,
     result,
     setResult: (r) => setResult(r as AIExamResult | null),
-    onToast: toast,
     t,
   });
   const summaryDialog = useSummaryDialog({
@@ -171,9 +169,7 @@ export default function ChatPanel() {
 
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     documentContext.onFileSelected(e, (msg) => {
-      toast({
-        variant: 'destructive',
-        title: t('context.uploadErrorTitle', { fallback: 'Error al subir' }),
+      toast.error(t('context.uploadErrorTitle', { fallback: 'Error al subir' }), {
         description: msg,
       });
     });

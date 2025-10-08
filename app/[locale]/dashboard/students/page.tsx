@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -90,20 +90,16 @@ export default function StudentsPage() {
         .limit(1);
 
       if (groupError) {
-        toast({
-          title: t('error.title'),
+        toast.error(t('error.title'), {
           description: t('error.verifyGroups'),
-          variant: "destructive",
         });
         return;
       }
 
       setHasGroups(count !== null && count > 0);
     } catch (_error) {
-      toast({
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: t('error.verifyGroups'),
-        variant: "destructive",
       });
     }
   }, [router, t]);
@@ -155,10 +151,8 @@ export default function StudentsPage() {
       
       setStudents(uniqueStudents);
     } catch (_error) {
-      toast({
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: t('error.loadingStudents'),
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -186,10 +180,8 @@ export default function StudentsPage() {
       if (gruposError) throw gruposError;
       setGrupos(data || []);
     } catch (_error) {
-      toast({
-        title: t('error.title'),
+      toast.error(t('error.title'), {
         description: t('error.loadingGroups'),
-        variant: "destructive",
       });
     }
   }, [t]);
@@ -282,8 +274,7 @@ export default function StudentsPage() {
       }
 
       // Éxito
-      toast({
-        title: "Estudiante agregado",
+      toast.success("Estudiante agregado", {
         description: "El estudiante ha sido agregado al grupo exitosamente",
       });
 
@@ -364,10 +355,8 @@ export default function StudentsPage() {
       }
     } catch (error: unknown) {
       const err = error as { message?: string };
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: err.message || "No se pudo cargar la información del estudiante",
-        variant: "destructive",
       });
     } finally {
       setLoadingDetails(false);

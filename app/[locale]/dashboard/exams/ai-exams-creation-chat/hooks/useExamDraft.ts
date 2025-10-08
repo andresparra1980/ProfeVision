@@ -1,6 +1,6 @@
 import React from "react";
 import { supabase } from "@/lib/supabase";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export type Materia = {
   id: string;
@@ -27,7 +27,6 @@ export type EditingExam = {
  * Hook to load materias and grupos for the current profesor
  */
 export function useExamDraft(profesorId: string | undefined) {
-  const { toast } = useToast();
   const [materias, setMaterias] = React.useState<Materia[]>([]);
   const [grupos, setGrupos] = React.useState<Grupo[]>([]);
   const [editingExam, setEditingExam] = React.useState<EditingExam | null>(null);
@@ -51,15 +50,13 @@ export function useExamDraft(profesorId: string | undefined) {
           .order("nombre");
         setGrupos(gruposData || []);
       } catch {
-        toast({
-          variant: "destructive",
-          title: "Error",
+        toast.error("Error", {
           description: "No se pudieron cargar materias y grupos",
         });
       }
     };
     load();
-  }, [profesorId, toast]);
+  }, [profesorId]);
 
   return { materias, grupos, editingExam, setEditingExam };
 }
