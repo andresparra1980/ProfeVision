@@ -12,7 +12,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { QuestionContent } from "@/components/exam/question-content";
 import MathText from "@/components/MathText";
 import { supabase } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import logger from "@/lib/utils/logger";

@@ -2,7 +2,7 @@ import React from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { useAIChat } from "./AIChatContext";
 import type { AIExamResult } from "./AIChatContext";
@@ -30,7 +30,6 @@ export function DraftLoader({ setEditingExam, setLoadedExamId }: DraftLoaderProp
   const searchParams = useSearchParams();
   const locale = useLocale();
   const t = useTranslations("ai_exams_chat");
-  const { toast } = useToast();
   const examId = searchParams?.get("examId");
   const loadingRef = React.useRef(false);
 
@@ -255,14 +254,11 @@ export function DraftLoader({ setEditingExam, setLoadedExamId }: DraftLoaderProp
           void _e;
         }
         loadedOnce.add(examId);
-        toast({
-          title: t("loadDraft.successTitle"),
+        toast.success(t("loadDraft.successTitle"), {
           description: t("loadDraft.successDesc"),
         });
       } catch (e) {
-        toast({
-          variant: "destructive",
-          title: t("loadDraft.errorTitle"),
+        toast.error(t("loadDraft.errorTitle"), {
           description:
             e instanceof Error ? e.message : t("loadDraft.errorDesc"),
         });

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { loadLastDocumentsContext, loadOutput } from '@/lib/persistence/browser';
 
@@ -11,11 +12,10 @@ interface UseChatMessagesProps {
   settings: { language?: string };
   result: unknown;
   setResult: (_result: unknown) => void;
-  onToast: (_options: { title: string; description?: string; variant?: 'destructive' }) => void;
   t: (_key: string, _options?: { fallback?: string }) => string;
 }
 
-export function useChatMessages({ settings, result, setResult, onToast, t }: UseChatMessagesProps) {
+export function useChatMessages({ settings, result, setResult, t }: UseChatMessagesProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
 
@@ -134,7 +134,7 @@ export function useChatMessages({ settings, result, setResult, onToast, t }: Use
         }
 
         try {
-          onToast({ variant: 'destructive', title: t('chat.toasts.errorTitle'), description: friendly });
+          toast.error(t('chat.toasts.errorTitle'), { description: friendly });
         } catch (_e) {
           void _e;
         }
@@ -146,7 +146,7 @@ export function useChatMessages({ settings, result, setResult, onToast, t }: Use
       const json = await res.json();
       setResult(json);
       try {
-        onToast({ title: t('chat.toasts.successTitle'), description: t('chat.toasts.successDesc') });
+        toast.success(t('chat.toasts.successTitle'), { description: t('chat.toasts.successDesc') });
       } catch (_e) {
         void _e;
       }
@@ -156,10 +156,8 @@ export function useChatMessages({ settings, result, setResult, onToast, t }: Use
       ]);
     } catch (_e) {
       try {
-        onToast({
-          title: t('chat.toasts.errorTitle'),
+        toast.error(t('chat.toasts.errorTitle'), {
           description: t('chat.toasts.errorDesc'),
-          variant: 'destructive',
         });
       } catch (_e2) {
         void _e2;

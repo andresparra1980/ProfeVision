@@ -9,7 +9,7 @@ import type { GradingScheme } from '@/lib/types/grading';
 import type { Database } from '@/lib/types/database';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 // Prefijo _ para indicar que no se utiliza
 type _EsquemaCalificacion = Database['public']['Tables']['esquemas_calificacion']['Row'] & {
@@ -43,7 +43,6 @@ interface ComponenteCalificacion {
 export default function GradingSchemePage() {
   const params = useParams();
   const router = useRouter();
-  const { toast } = useToast();
   const t = useTranslations('dashboard.groups.gradingScheme');
   const groupId = params.id as string;
   const [initialScheme, setInitialScheme] = useState<GradingScheme | null>(null);

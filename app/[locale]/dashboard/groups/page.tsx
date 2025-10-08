@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { ChevronLeft, TriangleAlert, Archive, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { useProfesor } from "@/lib/hooks/useProfesor";

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import {
   Dialog,
@@ -96,7 +96,6 @@ export default function SimilarExamModal({
   // Namespace is the filename: jobs-similar-exam
   // Keys in JSON start with jobs.similarExam.*
   const tJobs = useTranslations("jobs-similar-exam");
-  const { toast } = useToast();
   const router = useRouter();
   const [events, setEvents] = useState<ProgressEvent[]>([]);
   const [status, setStatus] = useState<"idle" | "running" | "completed" | "failed">("idle");
@@ -139,7 +138,7 @@ export default function SimilarExamModal({
         if (!terminalHandledRef.current) {
           terminalHandledRef.current = true;
           // Toast success
-          toast({ title: tJobs("jobs.similarExam.status.succeeded") });
+          toast.success(tJobs("jobs.similarExam.status.succeeded"));
           if (onCompleted) onCompleted(data.draftExamId);
           // Redirect to edit page for the new draft
           router.push({ pathname: "/dashboard/exams/[id]/edit", params: { id: data.draftExamId } });
@@ -157,11 +156,10 @@ export default function SimilarExamModal({
         if (!terminalHandledRef.current) {
           terminalHandledRef.current = true;
           // Toast error
-          toast({
-            variant: "destructive",
-            title: tJobs("jobs.similarExam.status.failed"),
-            description: data.messageKey ? tJobs(data.messageKey as Parameters<typeof tJobs>[0]) : undefined,
-          });
+          toast.error(
+            tJobs("jobs.similarExam.status.failed"),
+            data.messageKey ? { description: tJobs(data.messageKey as Parameters<typeof tJobs>[0]) } : undefined
+          );
           if (onFailed) onFailed(data.messageKey);
         }
         cleanupAndClose();
@@ -174,7 +172,7 @@ export default function SimilarExamModal({
       if (terminalHandledRef.current || statusRef.current === "completed" || statusRef.current === "failed") return;
       setStatus("failed");
       setErrorKey(JobsSimilarExamKeys.errors.unknown);
-      toast({ variant: "destructive", title: tJobs("jobs.similarExam.status.failed"), description: tJobs(JobsSimilarExamKeys.errors.unknown) });
+      toast.error(tJobs("jobs.similarExam.status.failed"), { description: tJobs(JobsSimilarExamKeys.errors.unknown) });
       if (onFailed) onFailed(JobsSimilarExamKeys.errors.unknown);
       try { src.close(); } catch (_e) { /* ignore */ }
     };
@@ -191,7 +189,7 @@ export default function SimilarExamModal({
       src.removeEventListener("error", onError as EventListener);
       try { src.close(); } catch (_e) { /* ignore */ }
     };
-  }, [open, jobId, onCompleted, onFailed, router, tJobs, toast, streamUrl]);
+  }, [open, jobId, onCompleted, onFailed, router, tJobs, streamUrl]);
 
   const stepStatusMap = useMemo(() => {
     const acc: Record<StepKey, "idle" | "started" | "succeeded" | "failed"> = {
