@@ -56,17 +56,45 @@ ProfeVision/
 └── package.json
 ```
 
-### Plataforma de Deployment: **Railway** ✅
+### Estrategia de Deployment: **Por Fases** ✅
 
-**Decisión**: Desplegar el servicio OMR en Railway.
+**Decisión**: Deployment progresivo según etapa del proyecto.
+
+#### Fase 0: **Hetzner** (0-500 usuarios) ✅ INICIAL
+
+**Plataforma**: Servidor Hetzner actual ($8/mes)
+- 3 CPUs AMD EPYC-Rome
+- 4GB RAM
+- Ubuntu 24.04 LTS
+
+**Justificación:**
+- ✅ **Costo $0 adicional**: Ya se paga el servidor
+- ✅ **Recursos disponibles**: 78% RAM libre, 3 CPUs
+- ✅ **Red interna**: Latencia ~1ms entre Next.js y OMR
+- ✅ **Control total**: SSH, logs, debugging directo
+- ✅ **Elimina overhead de spawn**: Mejora 60-70% velocidad (~2-3s)
+- ✅ **Sin cold starts**: Proceso Python siempre activo
+
+**Implementación:**
+- Docker container con FastAPI (puerto 8000)
+- docker-compose para gestión
+- Nginx como reverse proxy
+- systemd para auto-start
+
+#### Fase 1: **Railway** (500+ usuarios) - FUTURO
+
+**Cuándo migrar:**
+- OMR usa >80% CPU/RAM en Hetzner
+- Necesitas redundancia geográfica
+- Quieres separar completamente Next.js y OMR
 
 **Justificación:**
 - ✅ Configuración sencilla con subdirectorios (monorepo-friendly)
 - ✅ Auto-deploy desde Git integrado
-- ✅ CLI potente para desarrollo
-- ✅ Precio competitivo ($5-10/mes)
+- ✅ Vertical auto-scaling
 - ✅ Logs y métricas incluidos
 - ✅ Health checks automáticos
+- ⚠️ Costo: $10-15/mes adicional
 
 ---
 
@@ -96,20 +124,39 @@ Migrar el procesamiento OMR a un **microservicio independiente** basado en FastA
 
 ### Resultado Esperado
 
+**Fase 0 (Inicial - Hetzner):**
+```
+┌────────────────────────────────────────────────┐
+│      Servidor Hetzner ($8/mes)                 │
+│                                                │
+│  ┌──────────────────────────────────────────┐ │
+│  │  Nginx (Port 80/443)                     │ │
+│  │  - Reverse proxy + SSL                   │ │
+│  └───────┬──────────────────────────────────┘ │
+│          │                                     │
+│  ┌───────▼──────────┐    ┌──────────────────┐ │
+│  │  Next.js:3000    │───▶│ Docker Container │ │
+│  │  - PM2 managed   │    │  FastAPI OMR     │ │
+│  │                  │◀───│  Port: 8000      │ │
+│  └──────────────────┘    └──────────────────┘ │
+│         (localhost:8000 - red interna ~1ms)   │
+└────────────────────────────────────────────────┘
+```
+
+**Fase 1 (Escala futura - Railway):**
 ```
 ┌─────────────────────────────────────┐
-│  Next.js (Vercel Serverless)        │
+│  Next.js (Vercel/Hetzner)           │
 │  - UI/UX                             │
 │  - Business Logic                    │
-│  - Database (Supabase)               │
 └──────────────┬──────────────────────┘
-               │ HTTP POST
+               │ HTTP POST (internet)
                ↓
 ┌─────────────────────────────────────┐
-│  OMR Service (Railway/Render)       │
+│  OMR Service (Railway)              │
 │  - FastAPI                           │
 │  - Python + OpenCV                   │
-│  - Image Processing                  │
+│  - Auto-scaling                      │
 └─────────────────────────────────────┘
 ```
 
@@ -252,14 +299,16 @@ const { stdout } = await execPromise(command); // Spawn nuevo proceso Python
 
 ### Ventajas de la Arquitectura
 
-| Aspecto | Antes | Después |
-|---------|-------|---------|
-| **Deployment** | Servidor único VPS | Next.js (Vercel) + OMR (Railway) |
-| **Escalabilidad** | Vertical (más RAM/CPU) | Horizontal (auto-scaling independiente) |
-| **Costos** | $30-50/mes (servidor grande) | $5-15/mes (optimizado por servicio) |
-| **Performance** | ~1s (spawn overhead) | ~500ms (proceso persistente) |
-| **Mantenimiento** | Complejo (2 runtimes) | Simple (servicios separados) |
-| **Monitoreo** | Logs mezclados | Métricas por servicio |
+| Aspecto | Antes (exec Python) | Fase 0: Hetzner Docker | Fase 1: Railway |
+|---------|---------------------|------------------------|-----------------|
+| **Deployment** | spawn process en cada request | Docker container + Next.js mismo servidor | Next.js (Vercel) + OMR (Railway) |
+| **Escalabilidad** | No escalable | Limitado al servidor (vertical) | Horizontal (auto-scaling independiente) |
+| **Costos** | Incluido en Hetzner ($8/mes) | $8/mes (sin cambio) | $18-28/mes total |
+| **Performance** | 3.6-4.3s (spawn + OpenCV) | 0.8-1.5s (60-70% mejora) | 0.8-1.5s + latencia red (~50ms) |
+| **Latencia red** | 0ms (mismo proceso) | ~1ms (localhost) | ~50-100ms (internet) |
+| **Mantenimiento** | Complejo (2 runtimes mezclados) | Aislado (Docker) | Simple (servicios separados) |
+| **Monitoreo** | Logs mezclados Node.js/Python | Logs Docker separados | Métricas por servicio + dashboard |
+| **Redundancia** | ❌ Punto único de falla | ❌ Punto único de falla | ✅ Auto-healing + load balancing |
 
 ---
 
@@ -848,40 +897,72 @@ Estamos migrando el procesamiento de exámenes a una arquitectura más robusta.
 
 ## Análisis de Costos
 
-### Costo Actual (Estimado)
+### Costo Actual
 
 ```
-Servidor VPS (DigitalOcean/AWS):
-- 4 vCPU, 8GB RAM, 160GB SSD
-- Costo: $40-60/mes
-- Razón: Necesita recursos para Node.js + Python + OpenCV
+Servidor Hetzner:
+- 3 CPUs AMD EPYC-Rome
+- 4GB RAM (solo 22% en uso)
+- Ubuntu 24.04 LTS
+- Costo: $8/mes
+- Uso: Next.js + otros servicios (sin OMR dedicado)
 ```
 
-### Costo Nuevo (Proyectado)
+### Estrategia de Costos por Fases
 
-**Configuración Elegida: Railway** ✅
+#### Fase 0: Hetzner (0-500 usuarios) ✅ INICIAL
 
 ```
-Next.js (Vercel):
-- Hobby Plan: $0/mes (límite 100GB bandwidth)
-- Pro Plan: $20/mes (1TB bandwidth) ← Si excedes free tier
+Servidor Hetzner:
+- Costo: $8/mes (sin cambio)
+- Servicios:
+  * Next.js (PM2) - puerto 3000
+  * OMR FastAPI (Docker) - puerto 8000
+  * Nginx - reverse proxy
+- Recursos disponibles: 78% RAM libre, 3 CPUs
+- Red interna: localhost (~1ms latencia)
+
+Total: $8/mes
+Costo adicional: $0
+```
+
+**Ventajas económicas:**
+- ✅ Aprovecha recursos ya pagados
+- ✅ Sin costo adicional vs spawn actual
+- ✅ Mejora performance sin inversión
+- ✅ Tiempo para validar arquitectura antes de pagar Railway
+
+#### Fase 1: Railway (500+ usuarios) - FUTURO
+
+**Cuándo migrar:**
+- CPU del servidor >80% de manera sostenida
+- RAM >80% de manera sostenida
+- Latencia de red se vuelve crítica
+- Necesitas redundancia geográfica
+
+```
+Next.js (opciones):
+- Opción A: Mantener en Hetzner - $8/mes
+- Opción B: Migrar a Vercel Pro - $20/mes
 
 OMR Service (Railway):
-- Starter: $5/mes (512MB RAM, 1 vCPU)
-- Pro: $10/mes (1GB RAM, 2 vCPU) ← Recomendado para producción
+- Starter: $5/mes (512MB RAM, 1 vCPU) ← Para pruebas
+- Pro: $10-15/mes (1GB RAM, 2 vCPU) ← Recomendado producción
 
-Total: $10-30/mes
-Ahorro: $10-30/mes (25-50% vs VPS actual)
+Total estimado:
+- Hetzner + Railway: $18-23/mes
+- Vercel + Railway: $30-35/mes
 ```
 
-**Alternativas (Solo como backup):**
+**Alternativas de Railway (Solo como backup):**
 
-| Plataforma | Costo OMR Service | Total con Vercel | Ahorro |
-|------------|-------------------|------------------|--------|
-| Render | $0-7/mes | $0-27/mes | 30-60% |
-| Fly.io | $3-6/mes | $3-26/mes | 35-65% |
+| Plataforma | Costo OMR Service | Monorepo Support | Auto-scaling |
+|------------|-------------------|------------------|--------------|
+| Railway | $10-15/mes | ✅ Nativo | ✅ Vertical |
+| Render | $7-15/mes | ⚠️ Config manual | ✅ Vertical |
+| Fly.io | $3-8/mes | ⚠️ Config manual | ✅ Horizontal |
 
-**Por qué Railway:**
+**Por qué Railway (cuando sea necesario):**
 - ✅ Mejor soporte para monorepo
 - ✅ CLI más robusto
 - ✅ Auto-deploy Git integrado
@@ -1023,6 +1104,501 @@ Antes de pasar a producción, validar:
 ---
 
 ## Guía de Deployment
+
+### Hetzner Deployment con Docker (Fase 0 - RECOMENDADO INICIAL)
+
+Esta guía asume que ya tienes un servidor Hetzner con Ubuntu 24.04 LTS ejecutando Next.js con PM2.
+
+---
+
+#### 1. Preparación del Servidor
+
+**Verificar recursos disponibles:**
+
+```bash
+# Conectar al servidor
+ssh user@your-hetzner-server.com
+
+# Verificar recursos
+free -h          # RAM disponible (debe tener >1.5GB libre)
+nproc            # CPUs disponibles
+df -h            # Espacio en disco
+```
+
+**Instalar Docker y Docker Compose:**
+
+```bash
+# Actualizar sistema
+sudo apt update && sudo apt upgrade -y
+
+# Instalar dependencias
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+
+# Agregar repositorio oficial de Docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Instalar Docker
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# Agregar usuario al grupo docker
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Verificar instalación
+docker --version
+docker compose version
+```
+
+---
+
+#### 2. Clonar/Actualizar Repositorio ProfeVision
+
+```bash
+# Si aún no está clonado
+cd ~
+git clone https://github.com/andresparra1980/profevision.git
+cd profevision
+
+# Si ya existe, actualizar
+cd ~/profevision
+git pull origin main
+git checkout feature/omr-service-implementation  # O la rama correspondiente
+```
+
+---
+
+#### 3. Configurar Variables de Entorno
+
+```bash
+# Crear archivo de variables de entorno para OMR service
+cd ~/profevision/omr-service
+nano .env
+
+# Agregar el siguiente contenido:
+```
+
+**Archivo `omr-service/.env`:**
+
+```bash
+# Puerto del servicio
+PORT=8000
+
+# Logging
+LOG_LEVEL=info
+
+# Seguridad
+API_KEY=your_secure_random_api_key_here  # Genera con: openssl rand -hex 32
+MAX_IMAGE_SIZE_MB=10
+
+# CORS - Permitir solo tu dominio Next.js
+ALLOWED_ORIGINS=http://localhost:3000,https://profevision.com,https://www.profevision.com
+
+# Debug (solo desarrollo)
+ENABLE_DEBUG_IMAGES=false
+```
+
+---
+
+#### 4. Crear docker-compose.yml
+
+**Archivo `omr-service/docker-compose.yml`:**
+
+```yaml
+version: '3.8'
+
+services:
+  omr-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: profevision-omr
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - API_KEY=${API_KEY}
+      - MAX_IMAGE_SIZE_MB=${MAX_IMAGE_SIZE_MB:-10}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+    env_file:
+      - .env
+    volumes:
+      # Opcional: persistir logs
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - profevision-net
+    # Limitar recursos (ajustar según necesidad)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  profevision-net:
+    driver: bridge
+```
+
+---
+
+#### 5. Construir y Ejecutar Container
+
+```bash
+cd ~/profevision/omr-service
+
+# Construir imagen Docker
+docker compose build
+
+# Iniciar servicio en background
+docker compose up -d
+
+# Verificar que está corriendo
+docker compose ps
+docker compose logs -f
+
+# Verificar health check
+curl http://localhost:8000/health
+# Esperado: {"status":"healthy","service":"omr-processor",...}
+```
+
+---
+
+#### 6. Configurar Nginx como Reverse Proxy
+
+**Editar configuración de Nginx para ProfeVision:**
+
+```bash
+sudo nano /etc/nginx/sites-available/profevision
+```
+
+**Archivo `/etc/nginx/sites-available/profevision`:**
+
+```nginx
+# Upstream para Next.js
+upstream nextjs_backend {
+    server localhost:3000;
+}
+
+# Upstream para OMR Service
+upstream omr_backend {
+    server localhost:8000;
+    keepalive 32;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name profevision.com www.profevision.com;
+
+    # Redirigir HTTP a HTTPS (cuando configures SSL)
+    # return 301 https://$host$request_uri;
+
+    # Logs
+    access_log /var/log/nginx/profevision-access.log;
+    error_log /var/log/nginx/profevision-error.log;
+
+    # Rate limiting para OMR (prevenir abuso)
+    limit_req_zone $binary_remote_addr zone=omr_limit:10m rate=10r/m;
+
+    # Next.js app (principal)
+    location / {
+        proxy_pass http://nextjs_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 60s;
+    }
+
+    # OMR Service (solo acceso interno - IMPORTANTE)
+    # Este endpoint NO debe ser público, solo usado por Next.js internamente
+    location /api/omr-internal/ {
+        # Opcional: Restringir a localhost solamente
+        allow 127.0.0.1;
+        deny all;
+
+        limit_req zone=omr_limit burst=5 nodelay;
+
+        proxy_pass http://omr_backend/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Timeout mayor para procesamiento OMR
+        proxy_read_timeout 30s;
+        proxy_connect_timeout 10s;
+
+        # Limitar tamaño de upload
+        client_max_body_size 10M;
+    }
+
+    # Health check público (opcional, para monitoreo)
+    location /api/omr-health {
+        proxy_pass http://omr_backend/health;
+        proxy_http_version 1.1;
+        access_log off;
+    }
+}
+
+# HTTPS configuration (agregar después de configurar SSL)
+# server {
+#     listen 443 ssl http2;
+#     listen [::]:443 ssl http2;
+#     server_name profevision.com www.profevision.com;
+#
+#     ssl_certificate /etc/letsencrypt/live/profevision.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/profevision.com/privkey.pem;
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_ciphers HIGH:!aNULL:!MD5;
+#
+#     # ... (mismo contenido de locations que arriba)
+# }
+```
+
+**Activar configuración y reiniciar Nginx:**
+
+```bash
+# Verificar sintaxis
+sudo nginx -t
+
+# Recargar configuración
+sudo systemctl reload nginx
+
+# Verificar status
+sudo systemctl status nginx
+```
+
+---
+
+#### 7. Configurar Auto-Start con systemd (Opcional pero Recomendado)
+
+**Crear servicio systemd para auto-start del container:**
+
+```bash
+sudo nano /etc/systemd/system/profevision-omr.service
+```
+
+**Archivo `/etc/systemd/system/profevision-omr.service`:**
+
+```ini
+[Unit]
+Description=ProfeVision OMR Service (Docker Compose)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/YOUR_USER/profevision/omr-service
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**Activar servicio:**
+
+```bash
+# Recargar systemd
+sudo systemctl daemon-reload
+
+# Habilitar auto-start
+sudo systemctl enable profevision-omr.service
+
+# Iniciar servicio
+sudo systemctl start profevision-omr.service
+
+# Verificar status
+sudo systemctl status profevision-omr.service
+```
+
+---
+
+#### 8. Actualizar Next.js para Usar el Servicio Local
+
+**Agregar variable de entorno en Next.js:**
+
+```bash
+# En tu servidor, editar .env.production
+cd ~/profevision
+nano .env.production
+
+# Agregar:
+OMR_SERVICE_URL=http://localhost:8000
+OMR_SERVICE_API_KEY=your_secure_random_api_key_here  # Mismo que en omr-service/.env
+OMR_TIMEOUT_MS=30000
+```
+
+**Reiniciar Next.js (si usas PM2):**
+
+```bash
+pm2 restart profevision
+pm2 logs profevision
+```
+
+---
+
+#### 9. Configurar Firewall (UFW)
+
+```bash
+# Verificar status
+sudo ufw status
+
+# Permitir solo puertos necesarios
+sudo ufw allow 22/tcp    # SSH
+sudo ufw allow 80/tcp    # HTTP
+sudo ufw allow 443/tcp   # HTTPS
+
+# NO abrir puerto 8000 (OMR solo interno)
+# sudo ufw deny 8000/tcp  # Asegurar que esté bloqueado
+
+# Habilitar firewall
+sudo ufw enable
+
+# Verificar
+sudo ufw status verbose
+```
+
+---
+
+#### 10. Testing y Verificación
+
+```bash
+# 1. Health check desde el servidor
+curl http://localhost:8000/health
+
+# 2. Health check vía Nginx (si configuraste /api/omr-health)
+curl http://profevision.com/api/omr-health
+
+# 3. Procesar imagen de prueba (desde el servidor)
+curl -X POST http://localhost:8000/process \
+  -H "X-API-Key: your_api_key_here" \
+  -F "file=@/path/to/test_exam.jpg" \
+  -o result.json
+
+# 4. Verificar logs del container
+docker compose logs -f omr-service
+
+# 5. Monitorear recursos
+docker stats profevision-omr
+
+# 6. Probar desde Next.js
+# Hacer un scan de examen desde la UI de ProfeVision
+# Verificar logs: pm2 logs profevision
+```
+
+---
+
+#### 11. Monitoreo y Mantenimiento
+
+**Scripts útiles:**
+
+```bash
+# Ver logs en tiempo real
+docker compose logs -f
+
+# Reiniciar servicio
+docker compose restart
+
+# Detener servicio
+docker compose down
+
+# Actualizar código y reiniciar
+cd ~/profevision
+git pull origin main
+cd omr-service
+docker compose build
+docker compose up -d
+
+# Limpiar imágenes antiguas (liberar espacio)
+docker image prune -a
+
+# Ver uso de recursos
+docker stats
+```
+
+**Logs persistentes:**
+
+```bash
+# Configurar rotación de logs Docker
+sudo nano /etc/docker/daemon.json
+```
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+```
+
+```bash
+sudo systemctl restart docker
+```
+
+---
+
+#### 12. Configurar SSL con Let's Encrypt (Recomendado)
+
+```bash
+# Instalar Certbot
+sudo apt install -y certbot python3-certbot-nginx
+
+# Obtener certificado SSL (asegúrate de tener DNS apuntando al servidor)
+sudo certbot --nginx -d profevision.com -d www.profevision.com
+
+# Verificar renovación automática
+sudo certbot renew --dry-run
+
+# Certbot creará un cron job automático para renovar
+```
+
+---
+
+### Checklist Deployment Hetzner
+
+- [ ] Docker y Docker Compose instalados
+- [ ] Repositorio clonado/actualizado
+- [ ] Variables de entorno configuradas (.env)
+- [ ] docker-compose.yml creado
+- [ ] Container construido y ejecutándose
+- [ ] Health check responde: `curl localhost:8000/health`
+- [ ] Nginx configurado con reverse proxy
+- [ ] Nginx recargado sin errores
+- [ ] systemd service configurado y habilitado
+- [ ] Firewall (UFW) configurado correctamente
+- [ ] Puerto 8000 NO expuesto públicamente
+- [ ] Next.js configurado con OMR_SERVICE_URL
+- [ ] Next.js reiniciado y funcionando
+- [ ] Test de procesamiento exitoso
+- [ ] Logs funcionando correctamente
+- [ ] SSL configurado con Let's Encrypt (producción)
+- [ ] Monitoreo configurado
+
+---
 
 ### Railway Deployment (Monorepo - Step-by-Step)
 
