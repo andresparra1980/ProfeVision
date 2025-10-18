@@ -24,6 +24,52 @@
 
 ---
 
+## Decisiones Arquitectónicas Finales
+
+**Fecha de decisión**: 18 de octubre de 2025
+
+### Estructura de Repositorio: **Monorepo** ✅
+
+**Decisión**: Mantener el servicio OMR dentro del repositorio ProfeVision en el directorio `omr-service/`.
+
+**Justificación:**
+- ✅ Equipo pequeño (1-2 desarrolladores)
+- ✅ Primer microservicio del proyecto
+- ✅ Simplifica desarrollo local y sincronización de cambios
+- ✅ Railway soporta nativamente subdirectorios con `root directory`
+- ✅ Versionado sincronizado entre Next.js API y servicio OMR
+- ✅ Fácil migración a repo separado en el futuro si es necesario
+
+**Estructura:**
+```
+ProfeVision/
+├── app/                    # Next.js application
+├── components/
+├── lib/
+├── omr-service/           # ⭐ Nuevo microservicio FastAPI
+│   ├── omr_api.py
+│   ├── omr_standalone.py
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   ├── railway.toml
+│   └── tests/
+└── package.json
+```
+
+### Plataforma de Deployment: **Railway** ✅
+
+**Decisión**: Desplegar el servicio OMR en Railway.
+
+**Justificación:**
+- ✅ Configuración sencilla con subdirectorios (monorepo-friendly)
+- ✅ Auto-deploy desde Git integrado
+- ✅ CLI potente para desarrollo
+- ✅ Precio competitivo ($5-10/mes)
+- ✅ Logs y métricas incluidos
+- ✅ Health checks automáticos
+
+---
+
 ## Resumen Ejecutivo
 
 ### Problema Actual
@@ -43,7 +89,7 @@ ProfeVision actualmente utiliza un **script Python** (`scripts/omr/omr_standalon
 Migrar el procesamiento OMR a un **microservicio independiente** basado en FastAPI, permitiendo:
 
 - ✅ Next.js en Vercel (serverless)
-- ✅ Servicio OMR en Railway/Render (contenedor Docker)
+- ✅ Servicio OMR en Railway (contenedor Docker)
 - ✅ Escalabilidad independiente
 - ✅ Separación de responsabilidades
 - ✅ Mejor observabilidad
@@ -270,33 +316,63 @@ OMR Service:
 
 ## Fases de Implementación
 
+### Paso Inicial: Crear Branch de Desarrollo
+
+**IMPORTANTE**: Antes de comenzar, crear una nueva branch para el desarrollo del servicio OMR:
+
+```bash
+# En tu máquina de desarrollo
+git checkout main
+git pull origin main
+git checkout -b feature/omr-service-implementation
+```
+
+**Convención de commits:**
+- `feat(omr): descripción` - Nueva funcionalidad
+- `fix(omr): descripción` - Corrección de bugs
+- `test(omr): descripción` - Tests
+- `docs(omr): descripción` - Documentación
+- `chore(omr): descripción` - Tareas de mantenimiento
+
+---
+
 ### Fase 1: Preparación del Servicio OMR (Semana 1)
 
-**Objetivo**: Crear la API FastAPI wrapper del script existente
+**Objetivo**: Crear la API FastAPI wrapper del script existente dentro del monorepo
 
 **Tareas:**
 
-- [ ] Crear directorio `omr-service/` en root del proyecto
+- [ ] Crear directorio `omr-service/` en root del proyecto ProfeVision
+- [ ] Actualizar `.gitignore` para archivos Python del servicio
 - [ ] Escribir `omr-service/omr_api.py` (FastAPI app)
 - [ ] Copiar `scripts/omr/omr_standalone.py` a `omr-service/`
 - [ ] Crear `omr-service/requirements.txt`
 - [ ] Crear `omr-service/Dockerfile`
+- [ ] Crear `omr-service/railway.toml` (configuración para monorepo)
 - [ ] Crear `omr-service/.env.example`
+- [ ] Crear `omr-service/.dockerignore`
 - [ ] Documentar API en `omr-service/README.md`
 
-**Estructura esperada:**
+**Estructura esperada en monorepo:**
 
 ```
-omr-service/
-├── omr_api.py                 # FastAPI application
-├── omr_standalone.py          # Código existente (copiado)
-├── requirements.txt           # Python dependencies
-├── Dockerfile                 # Container definition
-├── .dockerignore              # Excluir archivos innecesarios
-├── .env.example               # Variables de entorno
-├── README.md                  # Documentación del servicio
-└── tests/
-    └── test_omr_api.py        # Tests básicos
+ProfeVision/                       # Root del proyecto
+├── app/                           # Next.js app
+├── components/
+├── lib/
+├── omr-service/                  # ⭐ Nuevo microservicio
+│   ├── omr_api.py                # FastAPI application
+│   ├── omr_standalone.py         # Código existente (copiado)
+│   ├── requirements.txt          # Python dependencies
+│   ├── Dockerfile                # Container definition
+│   ├── railway.toml              # Railway config (root directory)
+│   ├── .dockerignore             # Excluir archivos innecesarios
+│   ├── .env.example              # Variables de entorno
+│   ├── README.md                 # Documentación del servicio
+│   └── tests/
+│       └── test_omr_api.py       # Tests básicos
+├── .gitignore                    # Actualizado para Python
+└── package.json
 ```
 
 **Entregables:**
@@ -396,39 +472,67 @@ export async function processOMR(imageFile: File): Promise<OMRResult> {
 
 ### Fase 4: Deployment del Servicio OMR (Semana 2-3)
 
-**Objetivo**: Desplegar el servicio OMR en Railway/Render
+**Objetivo**: Desplegar el servicio OMR en Railway
 
-**Opciones de Deployment:**
+**Plataforma Elegida: Railway** ✅
 
-| Plataforma | Costo/mes | Pros | Contras | Recomendado |
-|------------|-----------|------|---------|-------------|
-| **Railway** | $5-10 | Fácil, auto-deploy, logs | Créditos limitados free tier | ⭐⭐⭐⭐⭐ |
-| **Render** | $7-15 | Free tier, simple | Cold starts en free | ⭐⭐⭐⭐ |
-| **Fly.io** | $3-8 | Edge, Docker native | Más complejo | ⭐⭐⭐⭐ |
-| **DigitalOcean** | $5-12 | Predecible, simple | Setup manual | ⭐⭐⭐ |
+| Aspecto | Railway | Alternativas |
+|---------|---------|--------------|
+| **Costo** | $5-10/mes | Render: $7-15, Fly.io: $3-8 |
+| **Monorepo** | ✅ Nativo (root directory) | ⚠️ Configuración adicional |
+| **Auto-deploy** | ✅ Git integrado | ✅ Disponible |
+| **CLI** | ✅ Potente | ⚠️ Limitado |
+| **Logs/Metrics** | ✅ Incluidos | ✅ Incluidos |
+| **Elegido** | **SÍ** | No (backup) |
 
-**Decisión: Railway (Recomendado)**
-
-**Pasos para Railway:**
+**Pasos para Railway (Monorepo):**
 
 ```bash
+# IMPORTANTE: Ejecutar desde ROOT del proyecto ProfeVision
+
 # 1. Instalar Railway CLI
 npm install -g @railway/cli
 
 # 2. Login
 railway login
 
-# 3. Crear proyecto
-cd omr-service
+# 3. Crear proyecto (desde root, NO desde omr-service/)
+cd /path/to/ProfeVision  # Root del repo
 railway init
+# Seleccionar: "Create new project"
+# Nombre: "profevision-omr-service"
 
-# 4. Deploy
+# 4. Link a repo Git
+railway link
+
+# 5. Configurar root directory (desde Railway dashboard)
+# Settings → Root Directory: omr-service/
+
+# 6. Deploy
 railway up
 
-# 5. Obtener URL pública
+# 7. Obtener URL pública
 railway domain
 # Output: https://omr-service-production-xxxx.up.railway.app
 ```
+
+**Configuración Railway para Monorepo:**
+
+El archivo `omr-service/railway.toml` configura Railway para usar solo el subdirectorio:
+
+```toml
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 3
+```
+
+**NOTA**: Railway detecta automáticamente el Dockerfile en `omr-service/` cuando configuras el root directory.
 
 **Configuración:**
 
@@ -755,44 +859,33 @@ Servidor VPS (DigitalOcean/AWS):
 
 ### Costo Nuevo (Proyectado)
 
-**Opción 1: Railway (Recomendado)**
+**Configuración Elegida: Railway** ✅
 
 ```
 Next.js (Vercel):
 - Hobby Plan: $0/mes (límite 100GB bandwidth)
-- Pro Plan: $20/mes (1TB bandwidth, unlimited proyectos)
+- Pro Plan: $20/mes (1TB bandwidth) ← Si excedes free tier
 
 OMR Service (Railway):
 - Starter: $5/mes (512MB RAM, 1 vCPU)
-- Pro: $10/mes (1GB RAM, 2 vCPU) ← Recomendado
+- Pro: $10/mes (1GB RAM, 2 vCPU) ← Recomendado para producción
 
 Total: $10-30/mes
-Ahorro: $10-30/mes (25-50%)
+Ahorro: $10-30/mes (25-50% vs VPS actual)
 ```
 
-**Opción 2: Render**
+**Alternativas (Solo como backup):**
 
-```
-Next.js (Vercel): $0-20/mes
-OMR Service (Render):
-- Free tier: $0/mes (con cold starts)
-- Starter: $7/mes (sin cold starts)
+| Plataforma | Costo OMR Service | Total con Vercel | Ahorro |
+|------------|-------------------|------------------|--------|
+| Render | $0-7/mes | $0-27/mes | 30-60% |
+| Fly.io | $3-6/mes | $3-26/mes | 35-65% |
 
-Total: $7-27/mes
-Ahorro: $13-53/mes (30-60%)
-```
-
-**Opción 3: Fly.io**
-
-```
-Next.js (Vercel): $0-20/mes
-OMR Service (Fly.io):
-- 256MB RAM: ~$3/mes
-- 512MB RAM: ~$6/mes
-
-Total: $3-26/mes
-Ahorro: $14-57/mes (35-65%)
-```
+**Por qué Railway:**
+- ✅ Mejor soporte para monorepo
+- ✅ CLI más robusto
+- ✅ Auto-deploy Git integrado
+- ✅ No requiere configuración adicional para subdirectorios
 
 ### ROI Análisis
 
@@ -931,65 +1024,102 @@ Antes de pasar a producción, validar:
 
 ## Guía de Deployment
 
-### Railway Deployment (Step-by-Step)
+### Railway Deployment (Monorepo - Step-by-Step)
 
-**1. Preparación**
+**IMPORTANTE**: Esta configuración es específica para monorepo. Railway desplegará SOLO el subdirectorio `omr-service/`.
+
+---
+
+**1. Preparación Local**
 
 ```bash
-# Clonar repo y navegar a servicio
-cd profevision
-cd omr-service
+# Verificar que estás en ROOT del proyecto ProfeVision (NO en omr-service/)
+cd /path/to/ProfeVision
 
-# Verificar Dockerfile
+# Verificar estructura
+ls -la
+# Debes ver: app/, components/, lib/, omr-service/, package.json
+
+# Construir y probar Docker localmente
+cd omr-service
 docker build -t omr-service .
 docker run -p 8000:8000 omr-service
 
-# Probar localmente
+# Probar health check
 curl http://localhost:8000/health
+# Esperado: {"status":"healthy",...}
+
+# Regresar a root
+cd ..
 ```
 
 **2. Crear Proyecto en Railway**
 
 ```bash
-# Instalar CLI
+# Asegúrate de estar en ROOT (no en omr-service/)
+pwd
+# Debe mostrar: /path/to/ProfeVision
+
+# Instalar Railway CLI (si aún no lo tienes)
 npm install -g @railway/cli
 
 # Login
 railway login
 
-# Inicializar proyecto
+# Inicializar proyecto DESDE ROOT
 railway init
 # Seleccionar: "Create new project"
 # Nombre: "profevision-omr-service"
 
-# Link a repo Git (opcional)
+# Link a repo Git
 railway link
+# Seleccionar tu repo ProfeVision
 ```
 
-**3. Configurar Variables de Entorno**
+**3. Configurar Root Directory (CRÍTICO para monorepo)**
 
 ```bash
-# Via CLI
+# Opción A: Via Railway Dashboard (Recomendado)
+# 1. Ir a railway.app
+# 2. Seleccionar proyecto "profevision-omr-service"
+# 3. Ir a Settings → Service Settings
+# 4. Root Directory: omr-service/
+# 5. Watch Paths: omr-service/**
+# 6. Save Changes
+
+# Opción B: Via railway.toml (ya incluido en omr-service/)
+# El archivo omr-service/railway.toml ya contiene la configuración
+```
+
+**4. Configurar Variables de Entorno**
+
+```bash
+# Via CLI (desde root del proyecto)
 railway variables set PORT=8000
 railway variables set LOG_LEVEL=info
-railway variables set API_KEY=<generate-random-key>
+railway variables set API_KEY=$(openssl rand -hex 32)  # Genera key aleatoria
 railway variables set ALLOWED_ORIGINS=https://profevision.vercel.app
 
-# O via Dashboard:
-# railway.app → Project → Variables
+# O via Dashboard (Recomendado):
+# railway.app → Project → Variables → New Variable
 ```
 
-**4. Deploy**
+**5. Deploy**
 
 ```bash
+# IMPORTANTE: Ejecutar desde ROOT del proyecto
+
 # Deploy desde código local
 railway up
 
-# O configurar auto-deploy desde GitHub
+# O configurar auto-deploy desde GitHub (Recomendado para producción)
 # railway.app → Project → Settings → Connect to GitHub
+# - Seleccionar repo: ProfeVision
+# - Branch: main (o feature/omr-service-implementation)
+# - Watch Paths: omr-service/**
 ```
 
-**5. Configurar Dominio**
+**6. Configurar Dominio**
 
 ```bash
 # Generar dominio público
@@ -997,17 +1127,22 @@ railway domain
 
 # Output: https://omr-service-production-xxxx.up.railway.app
 
-# O configurar custom domain (opcional)
-# railway.app → Project → Settings → Custom Domain
+# Agregar a .env.production de Next.js:
+# OMR_SERVICE_URL=https://omr-service-production-xxxx.up.railway.app
+
+# Custom domain (opcional)
+# railway.app → Settings → Networking → Custom Domain
 # Agregar: omr.profevision.com
 ```
 
-**6. Configurar Health Checks**
+**7. Configuración railway.toml (Ya incluido)**
 
-```yaml
-# railway.toml (crear en raíz de omr-service/)
+El archivo `omr-service/railway.toml` contiene:
+
+```toml
 [build]
 builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 healthcheckPath = "/health"
