@@ -72,7 +72,7 @@ export async function generateMetadata({
     openGraph: {
       type: 'website',
       locale: locale === 'en' ? 'en_US' : 'es_ES',
-      url: `https://www.profevision.com/${locale}`,
+      url: `https://profevision.com/${locale}`,
       title: locale === 'en' 
         ? 'ProfeVision - The Best App to Scan and Grade Paper Exams with AI'
         : 'ProfeVisión - La Mejor Aplicación para Escanear y Calificar Exámenes en Papel con IA',
@@ -139,7 +139,7 @@ export default async function LocaleLayout({
             "description": locale === 'en' 
               ? "ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students' education."
               : "ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes.",
-            "url": `https://www.profevision.com/${locale}`,
+            "url": `https://profevision.com/${locale}`,
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "Web, iOS, Android",
             "offers": {

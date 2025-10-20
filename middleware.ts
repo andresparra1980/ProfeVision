@@ -14,13 +14,30 @@ const intlMiddleware = createIntlMiddleware({
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hostname = request.nextUrl.hostname;
   const defaultLocale = 'es';
   const supportedLocales = ['es', 'en'] as const;
+  
+  // 🏷️ Normalizar host: redirigir www -> apex
+  if (hostname === 'www.profevision.com') {
+    const url = new URL(request.url);
+    url.hostname = 'profevision.com';
+    console.log(`[Middleware] Redirecting www to apex: ${url.toString()}`);
+    return NextResponse.redirect(url, 308);
+  }
+
+  // 🔍 Evitar indexación en entorno de testing
+  const baseResponse = NextResponse.next();
+  if (hostname === 'testing.profevision.com') {
+    baseResponse.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  }
   
   // 🔐 Rutas que NO deben ser localizadas (callbacks de Supabase)
   if (nonLocalizedRoutes.some(route => pathname.startsWith(route))) {
     console.log(`[Middleware] Non-localized route: ${pathname}`);
     const resp = await handleAuthMiddleware(request);
+    // Propagar cabeceras base (noindex en testing)
+    baseResponse.headers.forEach((v, k) => resp.headers.set(k, v));
     // Enforce no-cache for all page responses
     resp.headers.set('Cache-Control', 'no-store, must-revalidate');
     return resp;
@@ -51,6 +68,8 @@ export async function middleware(request: NextRequest) {
   
   // 🔐 Aplicar lógica de autenticación a rutas localizadas
   const authResponse = await handleAuthMiddleware(request, intlResponse);
+  // Propagar cabeceras base (noindex en testing)
+  baseResponse.headers.forEach((v, k) => authResponse.headers.set(k, v));
   
   // 🌍 Detectar locale y agregarlo como header para SEO
   const locale = intlResponse.headers.get('x-next-intl-locale') || (pathname.startsWith('/en') ? 'en' : 'es');

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: '%s | ProfeVisión'
   },
   description: 'ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Resgistrate gratis!',
-  metadataBase: new URL('https://www.profevision.com'),
+  metadataBase: new URL('https://profevision.com'),
   alternates: {
     canonical: '/',
     languages: {

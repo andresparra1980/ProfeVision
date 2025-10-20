@@ -33,7 +33,17 @@ const nextConfig: NextConfig = {
 
   // Configure redirects if needed
   async redirects() {
-    return [];
+    return [
+      // Force apex domain (redirect www to apex)
+      {
+        source: '/:path*',
+        has: [
+          { type: 'host', value: 'www.profevision.com' },
+        ],
+        destination: 'https://profevision.com/:path*',
+        permanent: true,
+      },
+    ];
   },
 
   // Configure custom headers for better caching
