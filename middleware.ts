@@ -32,6 +32,17 @@ export async function middleware(request: NextRequest) {
     baseResponse.headers.set('X-Robots-Tag', 'noindex, nofollow');
   }
   
+  // 🗺️ No interferir con sitemap y robots
+  if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
+    return baseResponse;
+  }
+  // Redirigir sitemap localizado a raíz
+  if (/^\/(es|en)\/sitemap\.xml$/.test(pathname)) {
+    const url = new URL(request.url);
+    url.pathname = '/sitemap.xml';
+    return NextResponse.redirect(url, 308);
+  }
+  
   // 🔐 Rutas que NO deben ser localizadas (callbacks de Supabase)
   if (nonLocalizedRoutes.some(route => pathname.startsWith(route))) {
     console.log(`[Middleware] Non-localized route: ${pathname}`);
@@ -230,6 +241,6 @@ export const config = {
      * - security.txt (legacy location)
      * - .git/ (ignore probes from browser extensions/scanners)
      */
-    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|.git/).*)",
+    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/).*)",
   ],
 };
