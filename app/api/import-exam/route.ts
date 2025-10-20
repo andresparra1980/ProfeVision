@@ -27,6 +27,21 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const AI_MODEL = process.env.OPENAI_MODEL || "google/gemini-2.0-flash-lite-001";
 
+// Función para limpiar asteriscos de las opciones
+function cleanOptionsFromMarkers(preguntas: ImportedQuestion[]): ImportedQuestion[] {
+  return preguntas.map(pregunta => ({
+    ...pregunta,
+    opciones: Object.entries(pregunta.opciones).reduce((acc, [key, value]) => {
+      // Remover asteriscos solo al inicio o final (marcadores), no en el medio (ej: operaciones matemáticas)
+      if (value) {
+        // Remover asteriscos al inicio y final, preservando los del medio
+        acc[key] = value.replace(/^\*+|\*+$/g, '').trim();
+      }
+      return acc;
+    }, {} as typeof pregunta.opciones)
+  }));
+}
+
 // Función para procesar PDFs con OpenRouter
 async function processPDFWithAI(
   pdfBuffer: Buffer,
@@ -88,7 +103,7 @@ async function processPDFWithAI(
             content: [
               {
                 type: "text",
-                text: 'Extrae todas las preguntas y sus opciones de este examen. Para cada pregunta, identifica cuál es la opción que está claramente marcada como correcta (resaltada, subrayada, en negrita, etc.). No tomar decisiones basadas en el texto de la pregunta, solo analiza si alguna opción está marcada con el asterisco o resaltada. Si ninguna opción está marcada claramente como correcta, establece "respuesta_correcta" como null.',
+                text: 'Extrae todas las preguntas y sus opciones de este examen. Para cada pregunta, identifica cuál es la opción que está claramente marcada como correcta (resaltada, subrayada, en negrita, con asterisco (*), etc.). IMPORTANTE: Incluye el asterisco en el texto de la opción si está presente, ya que será removido posteriormente. No tomes decisiones basadas en el texto de la pregunta, solo analiza si alguna opción está marcada visualmente. Si ninguna opción está marcada claramente como correcta, establece "respuesta_correcta" como null.',
               },
               {
                 type: "file",
@@ -155,7 +170,8 @@ async function processPDFWithAI(
       primer_pregunta: preguntas.length > 0 ? preguntas[0] : null,
     });
 
-    return preguntas;
+    // Limpiar asteriscos de las opciones
+    return cleanOptionsFromMarkers(preguntas);
   } catch (error) {
     logger.error("OpenRouter OCR - Error crítico", error);
     console.error("Error al procesar PDF con IA:", error);
@@ -177,9 +193,10 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
     
     INSTRUCCIONES IMPORTANTES:
     1. Identifica cada pregunta y sus opciones de respuesta (a, b, c, d, etc.)
-    2. Si una opción está claramente marcada como correcta (con un asterisco al final del texto de la respuesta), indícalo en 'respuesta_correcta'
-    3. No analices el texto de las preguntas para identificar la respuesta correcta, solo analiza si alguna opción está marcada con el asterisco. Si no está marcada ninguna, establece 'respuesta_correcta' como null
-    4. Devuelve SOLO un objeto JSON válido con el siguiente formato exacto:
+    2. Si una opción está claramente marcada como correcta (con un asterisco * al inicio o final del texto de la respuesta), indícalo en 'respuesta_correcta' e INCLUYE el asterisco en el texto de la opción
+    3. No analices el texto de las preguntas para identificar la respuesta correcta, solo analiza si alguna opción está marcada con asterisco. Si no está marcada ninguna, establece 'respuesta_correcta' como null
+    4. Los asteriscos serán removidos automáticamente después, así que DEBES incluirlos en el texto de las opciones si están presentes
+    5. Devuelve SOLO un objeto JSON válido con el siguiente formato exacto:
     
     {
       "preguntas": [
@@ -256,7 +273,8 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
       num_preguntas: preguntas.length,
     });
 
-    return preguntas;
+    // Limpiar asteriscos de las opciones
+    return cleanOptionsFromMarkers(preguntas);
   } catch (error) {
     logger.error("OpenRouter Text - Error crítico", error);
     console.error("Error al procesar texto con IA:", error);
