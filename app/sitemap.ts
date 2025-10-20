@@ -1,44 +1,70 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://www.profevision.com'
-  
-  return [
-    {
-      url: baseUrl,
+  const baseUrl = 'https://profevision.com'
+
+  const locales = ['es', 'en'] as const
+
+  const slugsByLocale: Record<typeof locales[number], string[]> = {
+    es: [
+      // contenido estático / marketing
+      'privacidad',
+      'terminos',
+      'cookies',
+      'como-funciona',
+      'precios',
+      'contacto',
+      'blog',
+      'examenes-con-ia',
+      'examenes-papel',
+      'gestion-instituciones',
+      'gestion-materias',
+      'gestion-grupos',
+      'gestion-estudiantes',
+      'reportes',
+      'aplicacion-movil',
+    ],
+    en: [
+      'privacy',
+      'terms',
+      'cookies',
+      'how-it-works',
+      'pricing',
+      'contact',
+      'blog',
+      'exams-with-ai',
+      'paper-exams',
+      'institutions-management',
+      'subjects-management',
+      'groups-management',
+      'students-management',
+      'reports',
+      'mobile-app',
+    ],
+  }
+
+  const entries: MetadataRoute.Sitemap = []
+
+  // home por locale
+  for (const locale of locales) {
+    entries.push({
+      url: `${baseUrl}/${locale}`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
-    },
-    {
-      url: `${baseUrl}/auth/register`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/auth/login`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/cookies`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-  ]
-} 
+    })
+
+    for (const slug of slugsByLocale[locale]) {
+      entries.push({
+        url: `${baseUrl}/${locale}/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      })
+    }
+  }
+
+  // Nota: Excluimos páginas de autenticación del sitemap (no index)
+
+  return entries
+}
