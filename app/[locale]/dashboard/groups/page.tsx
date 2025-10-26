@@ -250,6 +250,21 @@ export default function GroupsPage() {
     loadGrupos();
   }, [mostrarArchivados, loadGrupos]);
 
+  // Cleanup DOM when delete dialog closes to prevent pointer-events issues
+  useEffect(() => {
+    if (!confirmDelete) {
+      const cleanupDOM = () => {
+        // Remove pointer-events from body and html
+        document.body.style.pointerEvents = '';
+        document.documentElement.style.pointerEvents = '';
+      };
+
+      // Run cleanup after dialog animation completes
+      const timeoutId = setTimeout(cleanupDOM, 300);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [confirmDelete]);
 
   const onSubmit = async (data: GrupoFormValues) => {
     if (!profesor) return;
@@ -485,18 +500,24 @@ export default function GroupsPage() {
       )}
 
       {/* Enhanced Delete Confirmation Dialog */}
-      <Dialog 
-        open={confirmDelete} 
+      <Dialog
+        open={confirmDelete}
         onOpenChange={(isOpen) => {
           setConfirmDelete(isOpen);
           if (!isOpen) {
             setGroupNameToConfirmDelete(null);
             setTypedGroupName("");
           }
-        }} 
+        }}
         modal={true}
       >
-        <DialogContent className="sm:max-w-md border-red-500 dark:border-red-700 shadow-xl rounded-lg bg-card dark:bg-background">
+        <DialogContent
+          className="sm:max-w-md border-red-500 dark:border-red-700 shadow-xl rounded-lg bg-card dark:bg-background"
+          onCloseAutoFocus={(e) => {
+            // Prevent focus trap issues
+            e.preventDefault();
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold flex items-center">
               <TriangleAlert className="h-7 w-7 mr-2 text-red-600 dark:text-red-400" />
