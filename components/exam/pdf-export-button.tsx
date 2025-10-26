@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FileText, Loader2, Check, X } from 'lucide-react';
-import { Document, Page, Text, View, StyleSheet, Image, PDFDownloadLink } from '@react-pdf/renderer';
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,27 +14,41 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from '@/lib/utils';
 import logger from '@/lib/utils/logger';
-import { supabase } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
-// Define specific types for the data
+// Types for the component
 interface Estudiante {
   id: string;
-  nombres: string;
-  apellidos: string;
   identificacion: string;
+  nombre?: string;
+  apellido?: string;
+}
+
+interface OpcionRespuesta {
+  id: string;
+  orden: number;
+  texto?: string;
+  es_correcta?: boolean;
 }
 
 interface RespuestaEstudiante {
   id: string;
+  pregunta_id: string;
+  opcion_id: string;
+  es_correcta: boolean;
+  puntaje_obtenido: number;
   pregunta: {
+    id: string;
     orden: number;
+    num_opciones: number;
+    habilitada: boolean;
+    opciones_respuesta: OpcionRespuesta[];
   };
   opcion_respuesta: {
+    id: string;
     orden: number;
   };
-  es_correcta: boolean;
 }
 
 interface ResultadoExamen {
@@ -41,32 +56,48 @@ interface ResultadoExamen {
   estudiante: Estudiante;
   puntaje_obtenido: number;
   porcentaje: number;
+  fecha_calificacion: string;
   respuestas_estudiante: RespuestaEstudiante[];
+  examen_escaneado?: {
+    archivo_original: string;
+    archivo_procesado: string;
+    ruta_s3_original: string;
+    ruta_s3_procesado: string;
+  };
   imagenBase64?: string;
 }
 
 interface ExamDetails {
+  id: string;
+  titulo?: string;
   materias?: {
     nombre: string;
   };
   grupos?: {
+    id: string;
     nombre: string;
   };
-  materia_id?: string;
+  entidades_educativas?: {
+    nombre: string;
+  };
 }
 
-// Types for the component
+interface ImageResponse {
+  resultId: string;
+  imagenBase64: string | null;
+}
+
 interface PDFExportButtonProps {
-  resultados: ResultadoExamen[];
-  examDetails: ExamDetails | null;
+  examId?: string;
+  groupId?: string | null;
   fileName: string;
   buttonText?: string;
-  onPrepare: (_updateProgress: (_progress: number) => void) => Promise<void>;
-  className?: string;
   totalPreguntas?: number;
+  resultados: ResultadoExamen[];
+  examDetails: ExamDetails | null;
 }
 
-// Styles for the PDF
+// PDF Styles
 const styles = StyleSheet.create({
   page: {
     padding: 30,
@@ -78,15 +109,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
-  section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
-  },
-  subHeader: {
-    fontSize: 14,
-    marginBottom: 10,
-    fontWeight: 'bold',
+  studentInfo: {
+    marginBottom: 20,
   },
   row: {
     flexDirection: 'row',
@@ -95,9 +119,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 5,
     paddingBottom: 5,
-  },
-  studentInfo: {
-    marginBottom: 20,
   },
   label: {
     width: 150,
@@ -108,15 +129,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
   },
-  answersGrid: {
-    marginTop: 20,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
   answersHeader: {
     fontSize: 14,
     marginBottom: 10,
     fontWeight: 'bold',
+  },
+  answersGrid: {
+    marginTop: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   answerItem: {
     width: '25%',
@@ -145,22 +166,119 @@ const styles = StyleSheet.create({
   },
 });
 
-// Constante para las letras de las opciones
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-// PDF Document Component
-const ExamPDF = ({ resultados, examDetails, institucionNombre, totalPreguntas = 0 }: { 
-  resultados: ResultadoExamen[]; 
-  examDetails: ExamDetails | null; 
-  institucionNombre: string;
-  totalPreguntas: number;
-}) => {
-  return (
+// The exported button component
+export function PDFExportButton({
+  examId: providedExamId,
+  groupId,
+  fileName,
+  buttonText = 'Reporte en PDF',
+  totalPreguntas = 0,
+  resultados,
+  examDetails
+}: PDFExportButtonProps) {
+  const params = useParams();
+  const examId = providedExamId || (typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '');
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
+  const [isPrepared, setIsPrepared] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [progress, setProgress] = useState(0);
+  const [resultadosWithImages, setResultadosWithImages] = useState<ResultadoExamen[]>([]);
+  const [institucionNombre, setInstitucionNombre] = useState('INSTITUCIÓN ACADÉMICA');
+  const t = useTranslations('dashboard.exams.results.pdfExport');
+
+  const handlePrepare = async () => {
+    if (!examId) {
+      toast.error('Error', { description: 'No exam ID provided' });
+      return;
+    }
+
+    setIsOpen(true);
+    setIsPreparing(true);
+    setIsPrepared(false);
+    setHasError(false);
+    setErrorMessage('');
+    setProgress(0);
+
+    try {
+      // Fetch optimized images from server
+      const queryParams = new URLSearchParams();
+      if (groupId) {
+        queryParams.append('groupId', groupId);
+      }
+
+      setProgress(20);
+      logger.log('Fetching optimized images...');
+
+      const response = await fetch(`/api/exams/${examId}/results/images?${queryParams.toString()}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch images: ${response.statusText}`);
+      }
+
+      const data = await response.json() as { success: boolean; images: ImageResponse[] };
+      setProgress(60);
+
+      logger.log('Images fetched:', data.images?.length || 0);
+
+      // Merge images with results
+      const imagesMap = new Map(data.images?.map((img) => [img.resultId, img.imagenBase64]) || []);
+
+      const merged = resultados.map(resultado => ({
+        ...resultado,
+        imagenBase64: imagesMap.get(resultado.id) || undefined
+      }));
+
+      setResultadosWithImages(merged);
+      setProgress(80);
+
+      // Get institution name
+      setInstitucionNombre(
+        examDetails?.entidades_educativas?.nombre ||
+        'INSTITUCIÓN ACADÉMICA'
+      );
+
+      setProgress(100);
+      setIsPrepared(true);
+
+      toast.success(t('pdfGeneratedSuccess'), {
+        description: t('pdfGeneratedCorrectly')
+      });
+
+    } catch (error) {
+      logger.error('Error preparing PDF:', error);
+      setHasError(true);
+      setErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred');
+
+      toast.error(t('generationError'), {
+        description: error instanceof Error ? error.message : t('errorOccurred')
+      });
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!isPreparing) {
+      setIsOpen(false);
+      setIsPrepared(false);
+      setHasError(false);
+      setErrorMessage('');
+      setProgress(0);
+    }
+  };
+
+  // PDF Document Component
+  const ExamPDF = () => (
     <Document>
-      {resultados.map((resultado) => (
+      {resultadosWithImages.map((resultado) => (
         <Page key={resultado.id} size="A4" style={styles.page}>
           <Text style={styles.header}>{institucionNombre}</Text>
-          
+
           <View style={styles.studentInfo}>
             <View style={styles.row}>
               <Text style={styles.label}>Materia:</Text>
@@ -172,176 +290,64 @@ const ExamPDF = ({ resultados, examDetails, institucionNombre, totalPreguntas = 
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Identificacion Estudiante:</Text>
-              <Text style={styles.value}>{resultado.estudiante.identificacion}</Text>
+              <Text style={styles.value}>{resultado.estudiante?.identificacion || 'N/A'}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Nota:</Text>
-              <Text style={styles.value}>{resultado.puntaje_obtenido.toFixed(2)}</Text>
+              <Text style={styles.value}>{(resultado.puntaje_obtenido || 0).toFixed(2)}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Porcentaje:</Text>
-              <Text style={styles.value}>{resultado.porcentaje.toFixed(1)}%</Text>
+              <Text style={styles.value}>{(resultado.porcentaje || 0).toFixed(1)}%</Text>
             </View>
           </View>
-          
+
           <Text style={styles.answersHeader}>Respuestas Detectadas</Text>
           <View style={styles.answersGrid}>
-            {/* Generar un array con todas las preguntas de 1 a totalPreguntas */}
-            {Array.from({ length: Math.max(totalPreguntas, 
-              ...resultado.respuestas_estudiante.map(r => r.pregunta.orden)) }, 
-              (_, i) => i + 1)
-              .map((ordenPregunta) => {
-                // Buscar si existe respuesta para esta pregunta
-                const respuesta = resultado.respuestas_estudiante
-                  .find(r => r.pregunta.orden === ordenPregunta);
-                
-                if (respuesta) {
-                  // Si hay respuesta, mostrarla normalmente
-                  return (
-                    <View key={`pregunta-${ordenPregunta}`} style={styles.answerItem}>
-                      <Text style={styles.questionNumber}>{ordenPregunta}.</Text>
-                      <Text style={styles.answerLetter}>
-                        {OPTION_LETTERS[respuesta.opcion_respuesta.orden - 1]}
-                      </Text>
-                      <Text style={styles.indicator}>
-                        {respuesta.es_correcta ? '(Correcta)' : '(Incorrecta)'}
-                      </Text>
-                    </View>
-                  );
-                } else {
-                  // Si no hay respuesta, mostrar N/A e Incorrecta
-                  return (
-                    <View key={`pregunta-sin-respuesta-${ordenPregunta}`} style={styles.answerItem}>
-                      <Text style={styles.questionNumber}>{ordenPregunta}.</Text>
-                      <Text style={styles.answerLetter}>
-                        N/A
-                      </Text>
-                      <Text style={styles.indicator}>
-                        (Incorrecta)
-                      </Text>
-                    </View>
-                  );
-                }
-              })}
+            {Array.from({
+              length: Math.max(totalPreguntas, ...(resultado.respuestas_estudiante || []).map((r) => r?.pregunta?.orden || 0))
+            }, (_, i) => i + 1).map((ordenPregunta) => {
+              const respuesta = (resultado.respuestas_estudiante || []).find((r) => r?.pregunta?.orden === ordenPregunta);
+
+              if (respuesta && respuesta.opcion_respuesta) {
+                return (
+                  <View key={`pregunta-${ordenPregunta}`} style={styles.answerItem}>
+                    <Text style={styles.questionNumber}>{ordenPregunta}.</Text>
+                    <Text style={styles.answerLetter}>
+                      {OPTION_LETTERS[respuesta.opcion_respuesta.orden - 1]}
+                    </Text>
+                    <Text style={styles.indicator}>
+                      {respuesta.es_correcta ? '(Correcta)' : '(Incorrecta)'}
+                    </Text>
+                  </View>
+                );
+              } else {
+                return (
+                  <View key={`pregunta-sin-respuesta-${ordenPregunta}`} style={styles.answerItem}>
+                    <Text style={styles.questionNumber}>{ordenPregunta}.</Text>
+                    <Text style={styles.answerLetter}>N/A</Text>
+                    <Text style={styles.indicator}>(Incorrecta)</Text>
+                  </View>
+                );
+              }
+            })}
           </View>
 
           {resultado.imagenBase64 && (
-            /* eslint-disable-next-line jsx-a11y/alt-text */
-            <Image 
-              src={`data:image/png;base64,${resultado.imagenBase64}`} 
-              style={styles.image} 
+            // eslint-disable-next-line jsx-a11y/alt-text
+            <Image
+              src={`data:image/png;base64,${resultado.imagenBase64}`}
+              style={styles.image}
             />
           )}
         </Page>
       ))}
     </Document>
   );
-};
-
-// The exported button component
-export function PDFExportButton({ 
-  resultados, 
-  examDetails, 
-  fileName, 
-  buttonText = 'Reporte en PDF', 
-  onPrepare, 
-  className,
-  totalPreguntas = 0 
-}: PDFExportButtonProps) {
-  const [isClient, setIsClient] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPrepared, setIsPrepared] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [institucionNombre, setInstitucionNombre] = useState('INSTITUCIÓN ACADÉMICA');
-  const t = useTranslations('dashboard.exams.results.pdfExport');
-
-  // Make sure we're on the client side
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Reset state when modal is closed
-  useEffect(() => {
-    if (!isOpen) {
-      setHasError(false);
-      setProgress(0);
-    }
-  }, [isOpen]);
-
-  const handlePrepare = async () => {
-    setIsOpen(true);
-    setIsLoading(true);
-    setIsPrepared(false);
-    setHasError(false);
-    setProgress(0);
-
-    try {
-      // Use the real progress updates from image loading
-      await onPrepare((newProgress) => {
-        setProgress(newProgress);
-      });
-
-      // For debugging - log the examDetails structure
-      logger.log("examDetails:", examDetails);
-      logger.log("Available exam data fields:", Object.keys(examDetails || {}));
-      
-      // Get the institution name from the database
-      if (examDetails?.materia_id) {
-        try {
-          const { data, error } = await supabase
-            .from('materias')
-            .select('entidad_id, entidades_educativas:entidad_id(nombre)')
-            .eq('id', examDetails.materia_id)
-            .single();
-            
-          if (data && !error) {
-            // Correctly access the nested Join result
-            const nombre = data.entidades_educativas?.nombre;
-            if (nombre) {
-              setInstitucionNombre(nombre);
-              logger.log("Institution name found:", nombre);
-            }
-          } else {
-            logger.error("Error fetching institution name:", error);
-          }
-        } catch (err) {
-          logger.error("Error in Supabase query:", err);
-        }
-      }
-
-      // Set to 100% when complete
-      setProgress(100);
-      setIsPrepared(true);
-    } catch (error) {
-      logger.error('Error preparing PDF:', error);
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
-
-  if (!isClient) {
-    return (
-      <Button 
-        disabled 
-        variant="secondary"
-        className="flex items-center"
-      >
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Cargando...
-      </Button>
-    );
-  }
 
   return (
     <>
-      <Button 
+      <Button
         variant="default"
         className="flex items-center"
         onClick={handlePrepare}
@@ -350,28 +356,28 @@ export function PDFExportButton({
         {buttonText}
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {isLoading ? t('generatingPDF') : 
-               isPrepared ? t('pdfReady') : 
+              {isPreparing ? t('generatingPDF') :
+               isPrepared ? t('pdfReady') :
                hasError ? t('generationError') : t('generatingPDF')}
             </DialogTitle>
             <DialogDescription>
-              {isLoading ? t('preparingInfo') : 
-               isPrepared ? t('pdfGeneratedSuccess') : 
-               hasError ? t('errorOccurred') : 
+              {isPreparing ? t('preparingInfo') :
+               isPrepared ? t('pdfGeneratedSuccess') :
+               hasError ? (errorMessage || t('errorOccurred')) :
                t('preparingDocument')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="py-6">
-            {isLoading && (
+            {isPreparing && (
               <div className="space-y-6">
                 <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
-                  <div 
-                    className="bg-primary h-full rounded-full transition-all duration-300 ease-in-out" 
+                  <div
+                    className="bg-primary h-full rounded-full transition-all duration-300 ease-in-out"
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
@@ -390,19 +396,14 @@ export function PDFExportButton({
                   </div>
                   <span className="text-sm font-medium">{t('pdfGeneratedCorrectly')}</span>
                 </div>
-                
+
                 <div className="flex justify-center mt-4">
-                  <PDFDownloadLink 
-                    document={<ExamPDF resultados={resultados} examDetails={examDetails} institucionNombre={institucionNombre} totalPreguntas={totalPreguntas} />} 
+                  <PDFDownloadLink
+                    document={<ExamPDF />}
                     fileName={fileName}
-                    className={cn(
-                      "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium",
-                      "transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                      "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-10 px-6 py-2 w-full sm:w-auto",
-                      className
-                    )}
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-10 px-6 py-2 w-full sm:w-auto"
                   >
-                    {({ loading }) => 
+                    {({ loading }) =>
                       loading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -431,17 +432,19 @@ export function PDFExportButton({
           </div>
 
           <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between sm:space-x-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleClose}
+              disabled={isPreparing}
             >
               {t('close')}
             </Button>
-            
+
             {hasError && (
-              <Button 
-                variant="default" 
+              <Button
+                variant="default"
                 onClick={handlePrepare}
+                disabled={isPreparing}
               >
                 {t('retry')}
               </Button>
