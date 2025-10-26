@@ -72,12 +72,12 @@ interface ExamDetails {
   titulo?: string;
   materias?: {
     nombre: string;
+    entidades_educativas?: {
+      nombre: string;
+    };
   };
   grupos?: {
     id: string;
-    nombre: string;
-  };
-  entidades_educativas?: {
     nombre: string;
   };
 }
@@ -130,33 +130,35 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   answersHeader: {
-    fontSize: 14,
-    marginBottom: 10,
+    fontSize: 13,
+    marginBottom: 8,
+    marginTop: 10,
     fontWeight: 'bold',
   },
   answersGrid: {
-    marginTop: 20,
+    marginTop: 15,
+    marginBottom: 15,
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   answerItem: {
-    width: '25%',
+    width: '20%',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 5,
   },
   questionNumber: {
-    width: 30,
-    fontSize: 12,
+    width: 25,
+    fontSize: 11,
     fontWeight: 'bold',
   },
   answerLetter: {
-    fontSize: 12,
-    marginRight: 4,
+    fontSize: 11,
+    marginRight: 3,
   },
   indicator: {
-    fontSize: 12,
-    marginLeft: 4,
+    fontSize: 10,
+    marginLeft: 3,
   },
   image: {
     marginTop: 20,
@@ -238,7 +240,7 @@ export function PDFExportButton({
 
       // Get institution name
       setInstitucionNombre(
-        examDetails?.entidades_educativas?.nombre ||
+        examDetails?.materias?.entidades_educativas?.nombre ||
         'INSTITUCIÓN ACADÉMICA'
       );
 
@@ -281,28 +283,28 @@ export function PDFExportButton({
 
           <View style={styles.studentInfo}>
             <View style={styles.row}>
-              <Text style={styles.label}>Materia:</Text>
-              <Text style={styles.value}>{examDetails?.materias?.nombre || 'Sin materia'}</Text>
+              <Text style={styles.label}>{t('content.subject')}</Text>
+              <Text style={styles.value}>{examDetails?.materias?.nombre || t('content.noSubject')}</Text>
             </View>
             <View style={styles.row}>
-              <Text style={styles.label}>Grupo:</Text>
-              <Text style={styles.value}>{examDetails?.grupos?.nombre || 'Sin grupo'}</Text>
+              <Text style={styles.label}>{t('content.group')}</Text>
+              <Text style={styles.value}>{examDetails?.grupos?.nombre || t('content.noGroup')}</Text>
             </View>
             <View style={styles.row}>
-              <Text style={styles.label}>Identificacion Estudiante:</Text>
-              <Text style={styles.value}>{resultado.estudiante?.identificacion || 'N/A'}</Text>
+              <Text style={styles.label}>{t('content.studentIdentification')}</Text>
+              <Text style={styles.value}>{resultado.estudiante?.identificacion || t('content.notAvailable')}</Text>
             </View>
             <View style={styles.row}>
-              <Text style={styles.label}>Nota:</Text>
+              <Text style={styles.label}>{t('content.score')}</Text>
               <Text style={styles.value}>{(resultado.puntaje_obtenido || 0).toFixed(2)}</Text>
             </View>
             <View style={styles.row}>
-              <Text style={styles.label}>Porcentaje:</Text>
+              <Text style={styles.label}>{t('content.percentage')}</Text>
               <Text style={styles.value}>{(resultado.porcentaje || 0).toFixed(1)}%</Text>
             </View>
           </View>
 
-          <Text style={styles.answersHeader}>Respuestas Detectadas</Text>
+          <Text style={styles.answersHeader}>{t('content.detectedAnswers')}</Text>
           <View style={styles.answersGrid}>
             {Array.from({
               length: Math.max(totalPreguntas, ...(resultado.respuestas_estudiante || []).map((r) => r?.pregunta?.orden || 0))
@@ -317,7 +319,7 @@ export function PDFExportButton({
                       {OPTION_LETTERS[respuesta.opcion_respuesta.orden - 1]}
                     </Text>
                     <Text style={styles.indicator}>
-                      {respuesta.es_correcta ? '(Correcta)' : '(Incorrecta)'}
+                      {respuesta.es_correcta ? t('content.correct') : t('content.incorrect')}
                     </Text>
                   </View>
                 );
@@ -325,8 +327,8 @@ export function PDFExportButton({
                 return (
                   <View key={`pregunta-sin-respuesta-${ordenPregunta}`} style={styles.answerItem}>
                     <Text style={styles.questionNumber}>{ordenPregunta}.</Text>
-                    <Text style={styles.answerLetter}>N/A</Text>
-                    <Text style={styles.indicator}>(Incorrecta)</Text>
+                    <Text style={styles.answerLetter}>{t('content.notAvailable')}</Text>
+                    <Text style={styles.indicator}>{t('content.incorrect')}</Text>
                   </View>
                 );
               }

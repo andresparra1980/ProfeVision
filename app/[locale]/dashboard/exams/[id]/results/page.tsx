@@ -91,6 +91,9 @@ interface ExamDetails {
   puntaje_total?: number;
   materias?: {
     nombre: string;
+    entidades_educativas?: {
+      nombre: string;
+    };
   };
   grupo_id?: string;
   grupos?: {
@@ -177,7 +180,10 @@ export default function ExamResultsPage() {
         .from('examenes')
         .select(`
           *,
-          materias(nombre)
+          materias(
+            nombre,
+            entidades_educativas(nombre)
+          )
         `)
         .eq('id', examId)
         .single();

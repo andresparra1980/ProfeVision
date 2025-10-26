@@ -476,7 +476,20 @@
         "couldNotGenerate": "No se pudo generar el PDF",
         "close": "Cerrar",
         "retry": "Reintentar",
-        "noQuestions": "No hay preguntas"
+        "noQuestions": "No hay preguntas",
+        "content": {
+          "subject": "Materia:",
+          "group": "Grupo:",
+          "studentIdentification": "Identificacion Estudiante:",
+          "score": "Nota:",
+          "percentage": "Porcentaje:",
+          "detectedAnswers": "Respuestas Detectadas",
+          "correct": "(Correcta)",
+          "incorrect": "(Incorrecta)",
+          "noSubject": "Sin materia",
+          "noGroup": "Sin grupo",
+          "notAvailable": "N/A"
+        }
       }
     },
     "responses": {
