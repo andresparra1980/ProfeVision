@@ -8,6 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type QuestionType = "multiple_choice" | "true_false" | "short_answer" | "essay" | string;
 
@@ -141,9 +147,19 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
                 {(local.options || []).map((opt, idx) => (
                   <div key={idx} className="flex items-center gap-2">
                     <Input value={opt} onChange={(e) => updateOption(idx, e.target.value)} className="flex-1" />
-                    <Button variant="secondary" size="icon" onClick={() => removeOption(idx)} title={t('editor.delete')}>
-                      ×
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="secondary" size="icon" onClick={() => removeOption(idx)}>
+                            ×
+                            <span className="sr-only">{t('editor.delete')}</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{t('editor.delete')}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 ))}
               </div>

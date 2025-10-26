@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Pencil, Trash2, School } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { Database } from "@/lib/types/database";
 
 type Materia = Database["public"]["Tables"]["materias"]["Row"] & {
@@ -17,26 +24,48 @@ interface SubjectCardProps {
 }
 
 export function SubjectCard({ materia, onEdit, onDelete }: SubjectCardProps) {
+  const t = useTranslations('dashboard.common');
+
   return (
     <Card>
       <CardHeader className="pb-2">
         <div className="flex justify-between">
           <CardTitle className="text-xl">{materia.nombre}</CardTitle>
           <div className="flex space-x-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => onEdit(materia)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => onDelete(materia)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onEdit(materia)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">{t('edit')}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('edit')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onDelete(materia)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">{t('delete')}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('delete')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
         {materia.entidades_educativas && (

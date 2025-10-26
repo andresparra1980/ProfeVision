@@ -1,6 +1,12 @@
 "use client";
 import React from 'react';
 import { X as XIcon } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { formatFileName } from '../utils/formatting';
 
 interface DocumentChipsProps {
@@ -45,18 +51,27 @@ export function DocumentChips({
               '—'
             )}
           </span>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(id);
-            }}
-            className="ml-1 text-muted-foreground hover:text-red-600"
-            title={t('context.remove', { fallback: 'Quitar' })}
-            disabled={isSending}
-          >
-            <XIcon className="h-3 w-3" />
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(id);
+                  }}
+                  className="ml-1 text-muted-foreground hover:text-red-600"
+                  disabled={isSending}
+                >
+                  <XIcon className="h-3 w-3" />
+                  <span className="sr-only">{t('context.remove', { fallback: 'Quitar' })}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t('context.remove', { fallback: 'Quitar' })}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       ))}
     </div>

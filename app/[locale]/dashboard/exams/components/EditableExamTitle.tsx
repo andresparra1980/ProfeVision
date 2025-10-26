@@ -3,6 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Pencil, Check, X } from 'lucide-react';
 
 interface EditableExamTitleProps {
@@ -81,36 +87,54 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
           autoFocus
           onKeyDown={handleInputKeyDown}
         />
-        <span
-          role="button"
-          tabIndex={0}
-          className="inline-flex items-center justify-center h-8 w-8 p-0 text-green-600 hover:text-green-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
-          onClick={handleSaveClick}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handleSaveClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
-            }
-          }}
-          title={t('common.save')}
-        >
-          <Check className="h-4 w-4" />
-        </span>
-        <span
-          role="button"
-          tabIndex={0}
-          className="inline-flex items-center justify-center h-8 w-8 p-0 text-red-600 hover:text-red-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
-          onClick={handleCancelClick}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handleCancelClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
-            }
-          }}
-          title={t('common.cancel')}
-        >
-          <X className="h-4 w-4" />
-        </span>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                role="button"
+                tabIndex={0}
+                className="inline-flex items-center justify-center h-8 w-8 p-0 text-green-600 hover:text-green-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
+                onClick={handleSaveClick}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleSaveClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
+                  }
+                }}
+              >
+                <Check className="h-4 w-4" />
+                <span className="sr-only">{t('common.save')}</span>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t('common.save')}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                role="button"
+                tabIndex={0}
+                className="inline-flex items-center justify-center h-8 w-8 p-0 text-red-600 hover:text-red-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
+                onClick={handleCancelClick}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleCancelClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
+                  }
+                }}
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">{t('common.cancel')}</span>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t('common.cancel')}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     );
   }
@@ -118,21 +142,30 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
   return (
     <div className="flex items-start justify-between space-x-2" onClick={(e) => e.stopPropagation()}>
       <span className="flex-grow break-words" title={initialTitle}>{currentTitle}</span>
-      <span
-        role="button"
-        tabIndex={0}
-        className="inline-flex items-center justify-center h-8 w-8 p-0 text-muted-foreground hover:text-foreground flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
-        onClick={handleEditClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleEditClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
-          }
-        }}
-        title={t('common.edit')}
-      >
-        <Pencil className="h-4 w-4" />
-      </span>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              role="button"
+              tabIndex={0}
+              className="inline-flex items-center justify-center h-8 w-8 p-0 text-muted-foreground hover:text-foreground flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
+              onClick={handleEditClick}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleEditClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
+                }
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+              <span className="sr-only">{t('common.edit')}</span>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{t('common.edit')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 };

@@ -7,16 +7,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
-  MoreVertical, 
-  Pencil, 
-  Users, 
-  Calculator, 
-  BookOpen, 
-  Archive, 
-  ArchiveRestore, 
-  Trash2, 
-  Calendar 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  MoreVertical,
+  Pencil,
+  Users,
+  Calculator,
+  BookOpen,
+  Archive,
+  ArchiveRestore,
+  Trash2,
+  Calendar
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -70,12 +76,21 @@ export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDelete
             </div>
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">{t('openMenu')}</span>
-              </Button>
-            </DropdownMenuTrigger>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">{t('openMenu')}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('actions')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEditAction(grupo)}>
                 <Pencil className="h-4 w-4 mr-2" />

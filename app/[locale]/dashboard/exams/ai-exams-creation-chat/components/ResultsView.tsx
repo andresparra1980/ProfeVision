@@ -120,8 +120,8 @@ export default function ResultsView() {
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <div className="flex flex-col items-start text-left w-full gap-1">
                     <div className="flex items-center gap-2 w-full">
-                      <span className="font-medium">{idx + 1}.</span>
-                      <div className="flex-1 prose prose-sm dark:prose-invert max-w-none">
+                      <span className="font-bold">{idx + 1}.</span>
+                      <div className="flex-1 prose prose-sm dark:prose-invert max-w-none font-bold">
                         <MathText text={title} />
                       </div>
                       {/* difficulty pill removed to give more space to accordion icon */}
@@ -169,7 +169,7 @@ export default function ResultsView() {
                   {rationale && (
                     <div className="mt-4">
                       <div className="text-sm font-medium mb-1">{t('results.rationale')}</div>
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground italic">
                         <MathText text={rationale} />
                       </div>
                     </div>

@@ -23,6 +23,12 @@ import {
 import { Noto_Sans } from "next/font/google";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Paperclip, ListChecks, FileText } from "lucide-react";
 import ResultsView from "./ResultsView";
 import { useDocumentContext } from "../hooks/useDocumentContext";
@@ -222,19 +228,32 @@ export default function ChatPanel() {
           >
             <PromptInputBody>
               <div className="relative">
-                <button
-                  type="button"
-                  onClick={documentContext.triggerFilePicker}
-                  className="absolute left-2 top-2 text-muted-foreground hover:text-foreground"
-                  title={
-                    documentContext.documentIds.length >= 5
-                      ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
-                      : t('context.attach', { fallback: 'Adjuntar documento' })
-                  }
-                  disabled={isSending || documentContext.isUploading || documentContext.documentIds.length >= 5}
-                >
-                  <Paperclip className="h-6 w-6 top-1 left-1 absolute" />
-                </button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={documentContext.triggerFilePicker}
+                        className="absolute left-2 top-2 text-muted-foreground hover:text-foreground"
+                        disabled={isSending || documentContext.isUploading || documentContext.documentIds.length >= 5}
+                      >
+                        <Paperclip className="h-6 w-6 top-1 left-1 absolute" />
+                        <span className="sr-only">
+                          {documentContext.documentIds.length >= 5
+                            ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
+                            : t('context.attach', { fallback: 'Adjuntar documento' })}
+                        </span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {documentContext.documentIds.length >= 5
+                          ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
+                          : t('context.attach', { fallback: 'Adjuntar documento' })}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <PromptInputTextarea
                   placeholder={
                     isSending
@@ -253,41 +272,64 @@ export default function ChatPanel() {
             <PromptInputToolbar>
               <PromptInputTools>
                 {/* Results button at far left (priority) */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={`gap-2 ${hasResults ? 'border-primary text-primary' : ''}`}
-                  onClick={() => setResultsOpen(true)}
-                  title={hasResults ? t('results.hint') : undefined}
-                  aria-label={t('results.title')}
-                >
-                  <ListChecks className="h-4 w-4" />
-                  <span>{t('results.title')}</span>
-                  <span className="ml-1">{resultsCount}</span>
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className={`gap-2 ${hasResults ? 'border-primary text-primary' : ''}`}
+                        onClick={() => setResultsOpen(true)}
+                        aria-label={t('results.title')}
+                      >
+                        <ListChecks className="h-4 w-4" />
+                        <span>{t('results.title')}</span>
+                        <span className="ml-1">{resultsCount}</span>
+                      </Button>
+                    </TooltipTrigger>
+                    {hasResults && (
+                      <TooltipContent>
+                        <p>{t('results.hint')}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
 
                 {/* Documents summary icon (muted to not compete with Results) */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  title={
-                    summaryDialog.availableSummaryDocIds.length > 0
-                      ? t('context.viewSummary', { fallback: 'Ver resumen' })
-                      : t('context.summaryNotReady', { fallback: 'Resumen aún no disponible' })
-                  }
-                  onClick={() => summaryDialog.openSummaryDialog()}
-                  disabled={summaryDialog.availableSummaryDocIds.length === 0}
-                  className={`relative text-muted-foreground hover:text-foreground`}
-                >
-                  <FileText className="h-4 w-4" />
-                  {summaryDialog.availableSummaryDocIds.length > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] leading-none h-4 min-w-4 px-1">
-                      {summaryDialog.availableSummaryDocIds.length}
-                    </span>
-                  )}
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => summaryDialog.openSummaryDialog()}
+                        disabled={summaryDialog.availableSummaryDocIds.length === 0}
+                        className={`relative text-muted-foreground hover:text-foreground`}
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span className="sr-only">
+                          {summaryDialog.availableSummaryDocIds.length > 0
+                            ? t('context.viewSummary', { fallback: 'Ver resumen' })
+                            : t('context.summaryNotReady', { fallback: 'Resumen aún no disponible' })}
+                        </span>
+                        {summaryDialog.availableSummaryDocIds.length > 0 && (
+                          <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] leading-none h-4 min-w-4 px-1">
+                            {summaryDialog.availableSummaryDocIds.length}
+                          </span>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {summaryDialog.availableSummaryDocIds.length > 0
+                          ? t('context.viewSummary', { fallback: 'Ver resumen' })
+                          : t('context.summaryNotReady', { fallback: 'Resumen aún no disponible' })}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 {/* Hidden file input */}
                 <input
                   ref={documentContext.fileInputRef}
