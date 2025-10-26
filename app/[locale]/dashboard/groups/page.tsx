@@ -294,9 +294,10 @@ export default function GroupsPage() {
         });
       }
       
+      // Close dialog and reload data
       setOpenDialog(false);
       setEditingGrupo(null);
-      loadGrupos();
+      await loadGrupos();
     } catch (error: unknown) {
       handleSupabaseError(t('error.savingGroup'), error);
     }
@@ -305,6 +306,14 @@ export default function GroupsPage() {
   const handleEdit = (grupo: Grupo) => {
     setEditingGrupo(grupo);
     setOpenDialog(true);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setOpenDialog(open);
+    // Reset editingGrupo when closing the modal
+    if (!open) {
+      setEditingGrupo(null);
+    }
   };
 
   const confirmDeleteGrupo = async () => {
@@ -428,7 +437,7 @@ export default function GroupsPage() {
           </Button>
           <GroupFormModal
             open={openDialog}
-            onOpenChangeAction={setOpenDialog}
+            onOpenChangeAction={handleOpenChange}
             editingGrupo={editingGrupo}
             entidades={entidades}
             materias={materias}

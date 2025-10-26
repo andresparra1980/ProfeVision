@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -198,7 +198,7 @@ export function GroupFormModal({
       // Cargar datos del grupo para editar
       form.setValue("nombre", editingGrupo.nombre);
       form.setValue("descripcion", editingGrupo.descripcion || "");
-      
+
       if (editingGrupo.materias) {
         const entidadId = editingGrupo.materias.entidades_educativas?.id;
         if (entidadId) {
@@ -206,7 +206,7 @@ export function GroupFormModal({
           form.setValue("materia_id", editingGrupo.materias.id);
         }
       }
-      
+
       form.setValue("periodo_escolar", editingGrupo.periodo_escolar || "");
     } else if (open && !editingGrupo) {
       // Limpiar formulario para nuevo grupo
@@ -222,25 +222,46 @@ export function GroupFormModal({
     }
   }, [open, editingGrupo, form]);
 
+  // Cleanup DOM when dialog closes to prevent pointer-events issues
+  useEffect(() => {
+    if (!open) {
+      const cleanupDOM = () => {
+        // Remove pointer-events from body and html
+        document.body.style.pointerEvents = '';
+        document.documentElement.style.pointerEvents = '';
+      };
+
+      // Run cleanup after dialog animation completes
+      const timeoutId = setTimeout(cleanupDOM, 300);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open]);
+
   const onSubmit = async (data: GrupoFormValues) => {
     await onSubmitAction(data);
-  };
-
-  const handleClose = () => {
-    onOpenChangeAction(false);
   };
 
   return (
     <>
       {!mostrarArchivados && (
-        <Dialog open={open} onOpenChange={onOpenChangeAction} modal={true}>
-          <DialogTrigger asChild>
-            <Button onClick={() => onOpenChangeAction(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              {t('newGroup')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[525px] bg-[#FAFAF4] dark:bg-[#171717]">
+        <>
+          <Button onClick={() => onOpenChangeAction(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            {t('newGroup')}
+          </Button>
+          <Dialog
+            open={open}
+            onOpenChange={onOpenChangeAction}
+            modal={true}
+          >
+            <DialogContent
+              className="sm:max-w-[525px] bg-[#FAFAF4] dark:bg-[#171717]"
+              onCloseAutoFocus={(e) => {
+                // Prevent focus trap issues
+                e.preventDefault();
+              }}
+            >
             <DialogHeader>
               <DialogTitle>{editingGrupo ? t('editTitle') : t('newTitle')}</DialogTitle>
               <DialogDescription>
@@ -459,10 +480,10 @@ export function GroupFormModal({
               </div>
               
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleClose}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChangeAction(false)}
                 >
                   {t('cancel')}
                 </Button>
@@ -472,7 +493,8 @@ export function GroupFormModal({
               </DialogFooter>
             </form>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </>
       )}
     </>
   );
