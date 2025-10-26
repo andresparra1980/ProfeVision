@@ -22,15 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from 'next/image';
 import * as XLSX from 'xlsx';
-import dynamic from 'next/dynamic';
-
-// Import react-pdf components (but disable due to client-only usage)
-// These imports are only referenced in code that is disabled for ESLint
-
-//import { Document, Page, Text, View, StyleSheet, Image as PDFImage } from '@react-pdf/renderer';
-
-// We've replaced the dynamic PDFExportButton with a regular Button component
-// to avoid issues with passing JSX elements to a string prop
+import { PDFExportButton } from '@/components/exam/pdf-export-button';
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -133,19 +125,7 @@ interface ResultadoExamenItem {
   examenes_escaneados?: Record<string, unknown>[];
 }
 
-// Dynamic import for PDF generator component (client-side only)
-const PDFExportButton = dynamic(
-  () => import('@/components/exam/pdf-export-button').then(mod => mod.PDFExportButton),
-  { 
-    ssr: false,
-          loading: () => (
-        <Button variant="secondary" disabled className="flex items-center">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Loading PDF...
-        </Button>
-      )
-  }
-);
+// PDFExportButton is now imported statically above - no dynamic import needed
 
 export default function ExamResultsPage() {
   const params = useParams();
@@ -629,161 +609,9 @@ export default function ExamResultsPage() {
 
   // Función para mostrar el diálogo de detalles
   const handleShowDetails = async (resultado: ResultadoExamen) => {
-    // Load the base64 image if needed and not already loaded
-    let resultadoWithImage = resultado;
-    if (resultado.examen_escaneado?.ruta_s3_procesado && !resultado.imagenBase64) {
-      try {
-        const signedUrl = await getStorageUrl(resultado.examen_escaneado.ruta_s3_procesado);
-        if (signedUrl) {
-          const base64Image = await fetchImageAsBase64(signedUrl);
-          if (base64Image) {
-            resultadoWithImage = {
-              ...resultado,
-              imagenBase64: base64Image
-            };
-          }
-        }
-      } catch (_error) {
-        if (DEBUG) {
-          // Log the error
-        }
-      }
-    }
-    
-    setSelectedResultado(resultadoWithImage);
+    // Simply set the selected result - images are loaded by ImageWithSignedUrl component
+    setSelectedResultado(resultado);
     setShowDetailsDialog(true);
-  };
-
-  // Función para obtener URL firmada
-  const getStorageUrl = async (filePath: string | null | undefined) => {
-    if (!filePath) return '';
-    
-    try {
-      const { data, error: _error } = await supabase
-        .storage
-        .from('examenes-escaneados')
-        .createSignedUrl(filePath, 3600);
-
-      if (_error) {
-        return '';
-      }
-
-      return data.signedUrl;
-    } catch (_error) {
-      return '';
-    }
-  };
-
-  // Función para convertir imagen a base64
-  // Descarga una imagen y retorna base64 PNG (si la imagen es webp, la convierte a png)
-  const fetchImageAsBase64 = async (url: string): Promise<string | null> => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      // Detectar tipo de imagen por content-type o extensión
-      const contentType = blob.type;
-      const isWebp = contentType === 'image/webp' || url.toLowerCase().endsWith('.webp');
-      // Si es webp, convertir a png usando canvas
-      if (isWebp) {
-        return await new Promise((resolve, reject) => {
-          const img = new window.Image();
-          img.crossOrigin = 'Anonymous';
-          img.onload = function () {
-            try {
-              const canvas = document.createElement('canvas');
-              canvas.width = img.width;
-              canvas.height = img.height;
-              const ctx = canvas.getContext('2d');
-              if (!ctx) throw new Error('No 2D context');
-              ctx.drawImage(img, 0, 0);
-              // Exportar a PNG y extraer base64
-              const pngDataUrl = canvas.toDataURL('image/png');
-              const base64Data = pngDataUrl.split(',')[1];
-              resolve(base64Data);
-            } catch (e) {
-              reject(e);
-            }
-          };
-          img.onerror = reject;
-          // Para cargar desde blob
-          img.src = URL.createObjectURL(blob);
-        });
-      } else {
-        // Si ya es png u otro formato soportado, retornar base64 directo
-        return await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64String = reader.result as string;
-            // Extraer solo la parte base64
-            const base64Data = base64String.split(',')[1];
-            resolve(base64Data);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      }
-    } catch (_error) {
-      if (DEBUG) {
-        // Log the error
-      }
-      return null;
-    }
-  };
-
-  // Función para cargar imágenes en base64 para todas las resultusos con progreso real
-  const loadImagesForPDF = async (updateProgress: (_progress: number) => void): Promise<ResultadoExamen[]> => {
-    const resultadosWithImages = [...resultados];
-    
-    // Calculate total images to track progress
-    const imagesToProcess = resultados.filter(r => r.examen_escaneado?.ruta_s3_procesado && !r.imagenBase64).length;
-    let processedImages = 0;
-    
-    // Update initial progress
-    updateProgress(0);
-    
-    // If no images to process, return immediately
-    if (imagesToProcess === 0) {
-      updateProgress(100);
-      return resultadosWithImages;
-    }
-    
-    // Process images in batches to avoid too many parallel requests
-    const batchSize = 5;
-    for (let i = 0; i < resultadosWithImages.length; i += batchSize) {
-      const batch = resultadosWithImages.slice(i, i + batchSize);
-      
-      await Promise.all(
-        batch.map(async (resultado, index) => {
-          const actualIndex = i + index;
-          if (resultado.examen_escaneado?.ruta_s3_procesado && !resultado.imagenBase64) {
-            try {
-              const signedUrl = await getStorageUrl(resultado.examen_escaneado.ruta_s3_procesado);
-              if (signedUrl) {
-                const base64Image = await fetchImageAsBase64(signedUrl);
-                if (base64Image) {
-                  resultadosWithImages[actualIndex] = {
-                    ...resultado,
-                    imagenBase64: base64Image
-                  };
-                }
-              }
-            } catch (_error) {
-              if (DEBUG) {
-                // Log the error
-              }
-            } finally {
-              // Increment processed count
-              processedImages++;
-              // Update progress - calculate percentage
-              const progressPercentage = Math.round((processedImages / imagesToProcess) * 100);
-              updateProgress(progressPercentage);
-            }
-          }
-        })
-      );
-    }
-    
-    return resultadosWithImages;
   };
 
   // Función para mostrar el diálogo de calificación manual
@@ -961,38 +789,6 @@ export default function ExamResultsPage() {
   };
 
 
-  const handleExportToPDF = async (updateProgress: (_progress: number) => void) => {
-    if (!examDetails || resultados.length === 0) {
-      toast.error(tc('messages.error'), {
-        description: t('toast.noResultsError'),
-      });
-      return;
-    }
-
-    try {
-      toast.info(t('toast.preparingPDF'), {
-        description: t('toast.preparingPDFDesc'),
-      });
-      
-      // Cargar imágenes para los resultados con seguimiento de progreso real
-      const updatedResultados = await loadImagesForPDF(updateProgress);
-      
-      // Actualizar los resultados con las imágenes cargadas
-      setResultados(updatedResultados);
-      
-      toast.success(t('toast.pdfGenerated'), {
-        description: t('toast.pdfGeneratedDesc'),
-      });
-    } catch (_error) {
-      toast.error(tc('messages.error'), {
-        description: t('toast.pdfError'),
-      });
-      if (DEBUG) {
-        // Registramos el error en un logger en lugar de la consola
-      }
-    }
-  };
-
   // Nueva función para manejar la selección de grupo
   const handleGroupSelect = (grupoId: string) => {
     // Solo tomar acción si el grupo seleccionado es diferente al actual
@@ -1100,23 +896,23 @@ export default function ExamResultsPage() {
           {resultados.length > 0 && (
             <div>
               <div className="hidden sm:block">
-                <PDFExportButton 
-                  resultados={resultados} 
-                  examDetails={examDetails}
+                <PDFExportButton
+                  groupId={selectedGroupId}
                   fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
                   buttonText={t('generatePDFReport')}
-                  onPrepare={(updateProgress) => handleExportToPDF(updateProgress)}
                   totalPreguntas={totalPreguntas}
+                  resultados={resultados}
+                  examDetails={examDetails}
                 />
               </div>
               <div className="sm:hidden block">
-                <PDFExportButton 
-                  resultados={resultados} 
-                  examDetails={examDetails}
+                <PDFExportButton
+                  groupId={selectedGroupId}
                   fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
                   buttonText={t('pdfReport')}
-                  onPrepare={(updateProgress) => handleExportToPDF(updateProgress)}
                   totalPreguntas={totalPreguntas}
+                  resultados={resultados}
+                  examDetails={examDetails}
                 />
               </div>
             </div>
