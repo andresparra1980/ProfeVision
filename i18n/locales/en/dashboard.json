@@ -352,6 +352,18 @@
         "highestScore": "Highest score",
         "lowestScore": "Lowest score"
       },
+      "questionAnalysis": {
+        "title": "Question Analysis",
+        "description": "Percentage of correct answers per question",
+        "question": "Question",
+        "correctPercentage": "% Correct",
+        "chartTitle": "Question Difficulty",
+        "noData": "Not enough data for analysis",
+        "easiest": "Easiest",
+        "hardest": "Hardest",
+        "totalResponses": "Total responses",
+        "correctResponses": "Correct responses"
+      },
       "studentResults": "Student Results",
       "studentsSection": "Students",
       "studentsSectionDescription": "Results of students in this exam",

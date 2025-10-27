@@ -354,6 +354,18 @@
         "highestScore": "Puntaje más alto",
         "lowestScore": "Puntaje más bajo"
       },
+      "questionAnalysis": {
+        "title": "Análisis de Preguntas",
+        "description": "Porcentaje de respuestas correctas por pregunta",
+        "question": "Pregunta",
+        "correctPercentage": "% Correctas",
+        "chartTitle": "Dificultad de las Preguntas",
+        "noData": "No hay datos suficientes para análisis",
+        "easiest": "Más fácil",
+        "hardest": "Más difícil",
+        "totalResponses": "Respuestas totales",
+        "correctResponses": "Respuestas correctas"
+      },
       "studentResults": "Resultados por Estudiante",
       "studentsSection": "Estudiantes",
       "studentsSectionDescription": "Resultados de los estudiantes en este examen",
