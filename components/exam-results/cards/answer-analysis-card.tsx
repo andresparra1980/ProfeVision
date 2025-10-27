@@ -255,15 +255,17 @@ export function AnswerAnalysisCard({ resultados, totalPreguntas }: AnswerAnalysi
             categories={categories}
             colors={colors}
             valueFormatter={(value) => `${Math.round(value)}%`}
-            yAxisWidth={56}
+            yAxisWidth={0}
             stack={true}
             minValue={0}
             maxValue={100}
+            barCategoryGap="20%"
             showAnimation={true}
             showLegend={false}
-            showGridLines={true}
+            showGridLines={false}
+            showYAxis={false}
             customTooltip={CustomTooltip}
-            className="h-80"
+            className="h-72"
           />
         </div>
         <div className="mt-4 pt-4 border-t text-xs italic font-bold text-muted-foreground">
