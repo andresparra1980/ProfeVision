@@ -53,6 +53,7 @@
     "@tiptap/pm": "^2.11.7",
     "@tiptap/react": "^2.11.7",
     "@tiptap/starter-kit": "^2.11.7",
+    "@tremor/react": "^3.18.7",
     "@types/js-cookie": "^3.0.6",
     "@types/uuid": "^10.0.0",
     "ai": "^5.0.51",

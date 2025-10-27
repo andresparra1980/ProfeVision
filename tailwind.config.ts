@@ -13,6 +13,7 @@ const config: Config = {
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./types/**/*.{js,ts,jsx,tsx,mdx}",
     "*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
   ],
   // Force JIT mode for better hot reloading
   mode: "jit",
