@@ -360,12 +360,19 @@
         "chartTitle": "Question Difficulty",
         "noData": "Not enough data for analysis",
         "average": "Average",
-        "easiest": "Easiest",
-        "hardest": "Hardest",
+        "highest": "Highest",
+        "lowest": "Lowest",
         "questionsAnalyzed": "Questions analyzed",
         "of": "of",
         "totalResponses": "Total responses",
         "correctResponses": "Correct responses",
+        "axis": {
+          "questionPrefix": "Q"
+        },
+        "tooltip": {
+          "question": "Question",
+          "disabled": "Disabled"
+        },
         "legend": {
           "easy": "Easy",
           "medium": "Medium",
