@@ -6,8 +6,8 @@ interface UseGroupSelectionProps {
   examId: string | string[];
   availableGroups: GrupoExamen[];
   selectedGroupId: string | null;
-  onGroupChange: (groupId: string) => void;
-  setLoading: (loading: boolean) => void;
+  onGroupChange: (_groupId: string) => void;
+  setLoading: (_loading: boolean) => void;
 }
 
 export function useGroupSelection({

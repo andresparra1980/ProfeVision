@@ -5,10 +5,10 @@ import type { GrupoExamen } from '../utils/types';
 
 interface GroupSelectionDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   availableGroups: GrupoExamen[];
   selectedGroupId: string | null;
-  onSelect: (groupId: string) => void;
+  onSelect: (_groupId: string) => void;
 }
 
 export function GroupSelectionDialog({

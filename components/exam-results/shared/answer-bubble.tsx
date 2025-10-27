@@ -13,7 +13,6 @@ interface AnswerBubbleProps {
 export function AnswerBubble({
   letter,
   isSelected,
-  isCorrect,
   isDisabled = false,
   onClick,
   className

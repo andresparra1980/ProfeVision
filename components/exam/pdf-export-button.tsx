@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FileText, Loader2, Check, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+// NOTE: We lazy-load @react-pdf/renderer to avoid HMR issues with fontkit/@swc/helpers
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -97,76 +97,7 @@ interface PDFExportButtonProps {
   examDetails: ExamDetails | null;
 }
 
-// PDF Styles
-const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    backgroundColor: '#ffffff',
-  },
-  header: {
-    fontSize: 18,
-    marginBottom: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  studentInfo: {
-    marginBottom: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    borderBottomColor: '#EEEEEE',
-    borderBottomWidth: 1,
-    alignItems: 'center',
-    paddingTop: 5,
-    paddingBottom: 5,
-  },
-  label: {
-    width: 150,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  value: {
-    flex: 1,
-    fontSize: 12,
-  },
-  answersHeader: {
-    fontSize: 13,
-    marginBottom: 8,
-    marginTop: 10,
-    fontWeight: 'bold',
-  },
-  answersGrid: {
-    marginTop: 15,
-    marginBottom: 15,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  answerItem: {
-    width: '20%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  questionNumber: {
-    width: 25,
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
-  answerLetter: {
-    fontSize: 11,
-    marginRight: 3,
-  },
-  indicator: {
-    fontSize: 10,
-    marginLeft: 3,
-  },
-  image: {
-    marginTop: 20,
-    width: '100%',
-    height: 350,
-    objectFit: 'contain',
-  },
-});
+// Styles are memoized once the PDF lib is loaded
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
@@ -191,7 +122,81 @@ export function PDFExportButton({
   const [progress, setProgress] = useState(0);
   const [resultadosWithImages, setResultadosWithImages] = useState<ResultadoExamen[]>([]);
   const [institucionNombre, setInstitucionNombre] = useState('INSTITUCIÓN ACADÉMICA');
+  const [pdfLib, setPdfLib] = useState<null | typeof import('@react-pdf/renderer')>(null);
   const t = useTranslations('dashboard.exams.results.pdfExport');
+
+  const styles = useMemo(() => {
+    if (!pdfLib) return null as unknown as Record<string, never>;
+    return pdfLib.StyleSheet.create({
+      page: {
+        padding: 30,
+        backgroundColor: '#ffffff',
+      },
+      header: {
+        fontSize: 18,
+        marginBottom: 20,
+        textAlign: 'center',
+        fontWeight: 'bold',
+      },
+      studentInfo: {
+        marginBottom: 20,
+      },
+      row: {
+        flexDirection: 'row',
+        borderBottomColor: '#EEEEEE',
+        borderBottomWidth: 1,
+        alignItems: 'center',
+        paddingTop: 5,
+        paddingBottom: 5,
+      },
+      label: {
+        width: 150,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
+      value: {
+        flex: 1,
+        fontSize: 12,
+      },
+      answersHeader: {
+        fontSize: 13,
+        marginBottom: 8,
+        marginTop: 10,
+        fontWeight: 'bold',
+      },
+      answersGrid: {
+        marginTop: 15,
+        marginBottom: 15,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+      },
+      answerItem: {
+        width: '20%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5,
+      },
+      questionNumber: {
+        width: 25,
+        fontSize: 11,
+        fontWeight: 'bold',
+      },
+      answerLetter: {
+        fontSize: 11,
+        marginRight: 3,
+      },
+      indicator: {
+        fontSize: 10,
+        marginLeft: 3,
+      },
+      image: {
+        marginTop: 20,
+        width: '100%',
+        height: 350,
+        objectFit: 'contain',
+      },
+    });
+  }, [pdfLib]);
 
   const handlePrepare = async () => {
     if (!examId) {
@@ -244,6 +249,10 @@ export function PDFExportButton({
         'INSTITUCIÓN ACADÉMICA'
       );
 
+      // Lazy-load PDF library right before enabling download UI
+      const lib = await import('@react-pdf/renderer');
+      setPdfLib(lib);
+
       setProgress(100);
       setIsPrepared(true);
 
@@ -274,35 +283,37 @@ export function PDFExportButton({
     }
   };
 
-  // PDF Document Component
-  const ExamPDF = () => (
-    <Document>
-      {resultadosWithImages.map((resultado) => (
-        <Page key={resultado.id} size="A4" style={styles.page}>
-          <Text style={styles.header}>{institucionNombre}</Text>
+  const RenderedExamPDF = () => {
+    if (!pdfLib || !styles) return null;
+    const { Document, Page, Text, View, Image } = pdfLib;
+    return (
+      <Document>
+        {resultadosWithImages.map((resultado) => (
+          <Page key={resultado.id} size="A4" style={styles.page}>
+            <Text style={styles.header}>{institucionNombre}</Text>
 
-          <View style={styles.studentInfo}>
-            <View style={styles.row}>
-              <Text style={styles.label}>{t('content.subject')}</Text>
-              <Text style={styles.value}>{examDetails?.materias?.nombre || t('content.noSubject')}</Text>
+            <View style={styles.studentInfo}>
+              <View style={styles.row}>
+                <Text style={styles.label}>{t('content.subject')}</Text>
+                <Text style={styles.value}>{examDetails?.materias?.nombre || t('content.noSubject')}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.label}>{t('content.group')}</Text>
+                <Text style={styles.value}>{examDetails?.grupos?.nombre || t('content.noGroup')}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.label}>{t('content.studentIdentification')}</Text>
+                <Text style={styles.value}>{resultado.estudiante?.identificacion || t('content.notAvailable')}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.label}>{t('content.score')}</Text>
+                <Text style={styles.value}>{(resultado.puntaje_obtenido || 0).toFixed(2)}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.label}>{t('content.percentage')}</Text>
+                <Text style={styles.value}>{(resultado.porcentaje || 0).toFixed(1)}%</Text>
+              </View>
             </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>{t('content.group')}</Text>
-              <Text style={styles.value}>{examDetails?.grupos?.nombre || t('content.noGroup')}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>{t('content.studentIdentification')}</Text>
-              <Text style={styles.value}>{resultado.estudiante?.identificacion || t('content.notAvailable')}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>{t('content.score')}</Text>
-              <Text style={styles.value}>{(resultado.puntaje_obtenido || 0).toFixed(2)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>{t('content.percentage')}</Text>
-              <Text style={styles.value}>{(resultado.porcentaje || 0).toFixed(1)}%</Text>
-            </View>
-          </View>
 
           <Text style={styles.answersHeader}>{t('content.detectedAnswers')}</Text>
           <View style={styles.answersGrid}>
@@ -344,8 +355,9 @@ export function PDFExportButton({
           )}
         </Page>
       ))}
-    </Document>
-  );
+      </Document>
+    );
+  };
 
   return (
     <>
@@ -400,25 +412,32 @@ export function PDFExportButton({
                 </div>
 
                 <div className="flex justify-center mt-4">
-                  <PDFDownloadLink
-                    document={<ExamPDF />}
-                    fileName={fileName}
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-10 px-6 py-2 w-full sm:w-auto"
-                  >
-                    {({ loading }) =>
-                      loading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t('preparingPDF')}
-                        </>
-                      ) : (
-                        <>
-                          <FileText className="mr-2 h-4 w-4" />
-                          {t('downloadPDF')}
-                        </>
-                      )
-                    }
-                  </PDFDownloadLink>
+                  {pdfLib ? (
+                    <pdfLib.PDFDownloadLink
+                      document={<RenderedExamPDF />}
+                      fileName={fileName}
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-10 px-6 py-2 w-full sm:w-auto"
+                    >
+                      {({ loading }: { loading: boolean }) =>
+                        loading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {t('preparingPDF')}
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="mr-2 h-4 w-4" />
+                            {t('downloadPDF')}
+                          </>
+                        )
+                      }
+                    </pdfLib.PDFDownloadLink>
+                  ) : (
+                    <div className="inline-flex items-center text-sm text-muted-foreground">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('preparingPDF')}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

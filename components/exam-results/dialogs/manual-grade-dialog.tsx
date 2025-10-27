@@ -8,10 +8,10 @@ import type { Estudiante } from '../utils/types';
 
 interface ManualGradeDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   estudiante: Estudiante | null;
   manualGrade: string;
-  onGradeChange: (grade: string) => void;
+  onGradeChange: (_grade: string) => void;
   isSubmitting: boolean;
   onSave: () => Promise<void>;
 }

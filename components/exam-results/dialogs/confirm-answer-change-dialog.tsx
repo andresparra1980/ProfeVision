@@ -6,7 +6,7 @@ import type { PendingUpdate } from '../utils/types';
 
 interface ConfirmAnswerChangeDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   pendingUpdate: PendingUpdate | null;
   updatingAnswer: boolean;
   onConfirm: () => Promise<void>;

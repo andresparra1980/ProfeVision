@@ -7,7 +7,7 @@ interface AnswerBubblesGridProps {
   respuestas: RespuestaEstudiante[];
   totalPreguntas: number;
   resultadoId?: string;
-  onBubbleClick?: (respuesta: RespuestaEstudiante, opcionOrden: number, resultadoId: string, opcionId: string) => void;
+  onBubbleClick?: (_respuesta: RespuestaEstudiante, _opcionOrden: number, _resultadoId: string, _opcionId: string) => void;
   readonly?: boolean;
 }
 

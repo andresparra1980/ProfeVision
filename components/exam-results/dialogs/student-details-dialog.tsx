@@ -8,10 +8,10 @@ import type { ResultadoExamen, RespuestaEstudiante } from '../utils/types';
 
 interface StudentDetailsDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   resultado: ResultadoExamen | null;
   totalPreguntas: number;
-  onBubbleClick: (respuesta: RespuestaEstudiante, opcionOrden: number, resultadoId: string, opcionId: string) => void;
+  onBubbleClick: (_respuesta: RespuestaEstudiante, _opcionOrden: number, _resultadoId: string, _opcionId: string) => void;
 }
 
 export function StudentDetailsDialog({

@@ -7,8 +7,8 @@ interface StudentsResultsTableProps {
   todosEstudiantes: Estudiante[];
   resultados: ResultadoExamen[];
   verSoloConExamen: boolean;
-  onShowDetails: (resultado: ResultadoExamen) => void;
-  onShowManualGrade: (estudiante: Estudiante) => void;
+  onShowDetails: (_resultado: ResultadoExamen) => void;
+  onShowManualGrade: (_estudiante: Estudiante) => void;
 }
 
 export function StudentsResultsTable({
