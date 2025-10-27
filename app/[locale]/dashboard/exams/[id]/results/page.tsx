@@ -42,6 +42,9 @@ export default function ExamResultsPage() {
   const t = useTranslations('dashboard.exams.results');
   const tc = useTranslations('common');
 
+  // Ensure exam ID exists and is a string
+  const examId = typeof params.id === 'string' ? params.id : '';
+
   // Local UI state
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [selectedResultado, setSelectedResultado] = useState<ResultadoExamen | null>(null);
@@ -58,7 +61,7 @@ export default function ExamResultsPage() {
     selectedGroupId,
     setResultados,
     fetchExamResults,
-  } = useExamResults(params.id);
+  } = useExamResults(examId);
 
   const {
     pendingUpdate,
@@ -68,7 +71,7 @@ export default function ExamResultsPage() {
     handleBubbleClick,
     handleConfirmUpdate,
   } = useAnswerUpdate({
-    examId: params.id,
+    examId,
     setResultados,
     setSelectedResultado,
   });
@@ -83,7 +86,7 @@ export default function ExamResultsPage() {
     handleShowManualGradeDialog,
     handleSaveManualGrade,
   } = useManualGrade({
-    examId: params.id,
+    examId,
     onGradeSaved: fetchExamResults,
   });
 
@@ -93,7 +96,7 @@ export default function ExamResultsPage() {
     handleToggleGroupSelectionModal,
     handleModalOpenChange,
   } = useGroupSelection({
-    examId: params.id,
+    examId,
     availableGroups,
     selectedGroupId,
     onGroupChange: fetchExamResults,
