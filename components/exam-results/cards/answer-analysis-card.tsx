@@ -173,10 +173,13 @@ export function AnswerAnalysisCard({ resultados, totalPreguntas }: AnswerAnalysi
 
     const { totalResponses, answerCounts, noAnswerCount, correctLetter, numOpciones } = questionData._meta;
 
+    // Calculate valid answers (excluding no answer)
+    const validAnswersCount = totalResponses - noAnswerCount;
+
     return (
       <div className="rounded-md border bg-popover text-popover-foreground shadow-md px-3 py-2 min-w-[200px]">
         <div className="text-xs font-semibold mb-2 pb-2 border-b">
-          {t('tooltip.question')} {questionNum} ({totalResponses} {t('tooltip.responses')})
+          {t('tooltip.question')} {questionNum} ({validAnswersCount} {t('tooltip.responses')})
         </div>
         <div className="space-y-1.5">
           {/* Show all options */}
