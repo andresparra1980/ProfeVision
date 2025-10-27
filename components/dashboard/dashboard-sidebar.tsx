@@ -97,7 +97,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
   const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || t('user.defaultName', { defaultValue: 'Usuario' });
 
   return (
-    <>
+    <TooltipProvider>
       <Button
         variant="ghost"
         size="icon"
@@ -137,29 +137,27 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
             )}
             <div className={cn("flex items-center", isCollapsed && !isMobile ? "mx-auto" : "ml-auto")}>
               {!isMobile && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={toggleCollapse}
-                        className="hidden md:flex"
-                      >
-                        {isCollapsed ? 
-                          <PanelLeftOpen className="h-5 w-5" /> : 
-                          <PanelLeftClose className="h-5 w-5" />
-                        }
-                        <span className="sr-only">
-                          {isCollapsed ? t('ui.expandMenu', { defaultValue: 'Expandir menú' }) : t('ui.collapseMenu', { defaultValue: 'Contraer menú' })}
-                        </span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                      {isCollapsed ? t('ui.expandMenu', { defaultValue: 'Expandir menú' }) : t('ui.collapseMenu', { defaultValue: 'Contraer menú' })}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={toggleCollapse}
+                      className="hidden md:flex"
+                    >
+                      {isCollapsed ?
+                        <PanelLeftOpen className="h-5 w-5" /> :
+                        <PanelLeftClose className="h-5 w-5" />
+                      }
+                      <span className="sr-only">
+                        {isCollapsed ? t('ui.expandMenu', { defaultValue: 'Expandir menú' }) : t('ui.collapseMenu', { defaultValue: 'Contraer menú' })}
+                      </span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {isCollapsed ? t('ui.expandMenu', { defaultValue: 'Expandir menú' }) : t('ui.collapseMenu', { defaultValue: 'Contraer menú' })}
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>
@@ -167,40 +165,85 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
           <nav className={cn("space-y-1 py-6", isCollapsed && !isMobile ? "px-2" : "px-4")}>
             {navItems.map((item) => (
               item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
-                    isCollapsed && !isMobile ? "justify-center px-2" : "space-x-2 px-3",
-                    "text-card-foreground hover:bg-accent hover:text-accent-foreground"
-                  )}
-                  title={isCollapsed && !isMobile ? item.title : undefined}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {(!isCollapsed || isMobile) && <span>{item.title}</span>}
-                </a>
+                isCollapsed && !isMobile ? (
+                  <Tooltip key={item.href}>
+                    <TooltipTrigger asChild>
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsOpen(false)}
+                        className={cn(
+                          "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+                          "justify-center px-2",
+                          "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
+                      </a>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {item.title}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+                      "space-x-2 px-3",
+                      "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                  </a>
+                )
               ) : (
-                <Link
-                  key={item.href}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  href={item.href as any}
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
-                    isCollapsed && !isMobile ? "justify-center px-2" : "space-x-2 px-3",
-                    pathname === item.href
-                      ? "bg-primary/10 text-primary"
-                      : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
-                  )}
-                  title={isCollapsed && !isMobile ? item.title : undefined}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {(!isCollapsed || isMobile) && <span>{item.title}</span>}
-                </Link>
+                isCollapsed && !isMobile ? (
+                  <Tooltip key={item.href}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        href={item.href as any}
+                        onClick={() => setIsOpen(false)}
+                        className={cn(
+                          "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+                          "justify-center px-2",
+                          pathname === item.href
+                            ? "bg-primary/10 text-primary"
+                            : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {item.title}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Link
+                    key={item.href}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    href={item.href as any}
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+                      "space-x-2 px-3",
+                      pathname === item.href
+                        ? "bg-primary/10 text-primary"
+                        : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                  </Link>
+                )
               )
             ))}
           </nav>
@@ -246,32 +289,44 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
             </>
           ) : (
             <div className="border-t py-4 flex flex-col items-center gap-2">
-              <Link
-                href="/dashboard/profile"
-                className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
-                  pathname === "/dashboard/profile"
-                    ? "bg-primary/10 text-primary"
-                    : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-                title={t('user.myProfile', { defaultValue: 'Mi perfil' })}
-              >
-                <UserCircle className="h-5 w-5" />
-              </Link>
-              <Button 
-                variant="ghost"
-                size="icon" 
-                disabled={isLoggingOut} 
-                onClick={handleLogout}
-                className="text-destructive hover:bg-destructive/10 text-red-600 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
-                title={t('user.logout', { defaultValue: 'Cerrar sesión' })}
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/dashboard/profile"
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
+                      pathname === "/dashboard/profile"
+                        ? "bg-primary/10 text-primary"
+                        : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <UserCircle className="h-5 w-5" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  {t('user.myProfile', { defaultValue: 'Mi perfil' })}
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={isLoggingOut}
+                    onClick={handleLogout}
+                    className="text-destructive hover:bg-destructive/10 text-red-600 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  {t('user.logout', { defaultValue: 'Cerrar sesión' })}
+                </TooltipContent>
+              </Tooltip>
             </div>
           )}
         </div>
       </aside>
-    </>
+    </TooltipProvider>
   );
 } 
