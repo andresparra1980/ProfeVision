@@ -51,8 +51,7 @@
     "create": "Crear Examen",
     "createNewDesc": "Diseña un nuevo examen para tus estudiantes",
     "createDesc": "Define la información básica del examen",
-    
-    
+
     "backToExams": "Volver a Exámenes",
     "questions": "preguntas",
     "subjectRequired": "Materia Requerida",
@@ -378,7 +377,22 @@
         "legend": {
           "easy": "Fácil",
           "medium": "Media",
-          "hard": "Difícil"
+          "hard": "Difícil",
+          "explanation": "% de estudiantes que respondieron correctamente la pregunta"
+        }
+      },
+      "answerAnalysis": {
+        "title": "Distribución de Respuestas por Pregunta",
+        "description": "Patrón de respuestas elegidas por los estudiantes en cada pregunta",
+        "noData": "No hay datos suficientes para análisis",
+        "hint": "Pasa el cursor sobre cada barra para ver el detalle de respuestas. La respuesta correcta se muestra en negrita con ✓",
+        "axis": {
+          "questionPrefix": "P"
+        },
+        "tooltip": {
+          "question": "Pregunta",
+          "responses": "respuestas",
+          "noAnswer": "Sin respuesta"
         }
       },
       "studentResults": "Resultados por Estudiante",
@@ -456,7 +470,7 @@
         "resultsHeader": "RESULTADOS",
         "subjectLabel": "Materia",
         "totalScoreLabel": "Puntaje Total",
-        "groupLabel": "Grupo", 
+        "groupLabel": "Grupo",
         "creationDateLabel": "Fecha de Creación",
         "noSubjectAvailable": "Sin materia",
         "noGroupAvailable": "Sin grupo",

@@ -17,6 +17,7 @@ import { useGroupSelection } from '@/components/exam-results/hooks/use-group-sel
 import { ExamDetailsCard } from '@/components/exam-results/cards/exam-details-card';
 import { StatisticsCard } from '@/components/exam-results/cards/statistics-card';
 import { QuestionAnalysisCard } from '@/components/exam-results/cards/question-analysis-card';
+import { AnswerAnalysisCard } from '@/components/exam-results/cards/answer-analysis-card';
 
 // Tables
 import { StudentsResultsTable } from '@/components/exam-results/tables/students-results-table';
@@ -263,8 +264,11 @@ export default function ExamResultsPage() {
         </div>
       )}
 
-      {/* Question Analysis Card (NEW) */}
+      {/* Question Analysis Card */}
       <QuestionAnalysisCard resultados={resultados} totalPreguntas={totalPreguntas} />
+
+      {/* Answer Distribution Analysis Card (NEW) */}
+      <AnswerAnalysisCard resultados={resultados} totalPreguntas={totalPreguntas} />
 
       {/* Filter checkbox */}
       <div className="flex items-center space-x-2">

@@ -42,8 +42,8 @@ export function QuestionAnalysisCard({ resultados, totalPreguntas }: QuestionAna
       // Color bars by success rate: <60% rose, 60-79% amber, >=80% emerald
       const percentVal = parseFloat(percentage.toFixed(1));
       const excelente = percentage >= 80 ? percentVal : 0;
-      const bueno = percentage >= 60 && percentage < 80 ? percentVal : 0;
-      const bajo = percentage < 60 ? percentVal : 0;
+      const bueno = percentage >= 50 && percentage < 80 ? percentVal : 0;
+      const bajo = percentage < 50 ? percentVal : 0;
 
       return {
         question: questionNum,
@@ -175,7 +175,7 @@ export function QuestionAnalysisCard({ resultados, totalPreguntas }: QuestionAna
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Chart */}
-        <div className="rounded-md border bg-card p-3 text-foreground dark:text-foreground [&_.recharts-text]:fill-foreground [&_.recharts-cartesian-axis-tick-value]:fill-current overflow-visible">
+        <div className="rounded-md border-2 bg-card p-3 text-foreground dark:text-foreground [&_.recharts-text]:fill-foreground [&_.recharts-cartesian-axis-tick-value]:fill-current overflow-visible">
           <BarChart
             data={questionStats.map(stat => ({
               ...stat,
@@ -196,20 +196,24 @@ export function QuestionAnalysisCard({ resultados, totalPreguntas }: QuestionAna
             barCategoryGap="20%"
             className="h-72"
           />
-          <div className="flex flex-wrap gap-4 pt-2 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm bg-emerald-500"></div>
-            <span className="text-muted-foreground">(≥80%)</span>
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-2 text-xs border-t mt-3 pt-3">
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-emerald-500"></div>
+                <span className="text-muted-foreground">(≥80%)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-amber-500"></div>
+                <span className="text-muted-foreground">(50-79%)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-rose-500"></div>
+                <span className="text-muted-foreground">(&lt;50%)</span>
+              </div>
+              <span className="text-muted-foreground font-bold italic">{t('legend.explanation')}</span>
+            </div>
+          
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm bg-amber-500"></div>
-            <span className="text-muted-foreground">(60-79%)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm bg-rose-500"></div>
-            <span className="text-muted-foreground">(&lt;60%)</span>
-          </div>
-        </div>
         </div>
         {/* Statistics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
@@ -224,11 +228,11 @@ export function QuestionAnalysisCard({ resultados, totalPreguntas }: QuestionAna
 
           {/* Highest */}
           <div className="space-y-1">
-            <div className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+            <div className="flex items-center gap-1 text-xs text-primary">
               <TrendingUp className="h-3 w-3" />
               <span>{t('highest')}</span>
             </div>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+            <p className="text-2xl font-bold text-primary">
               {statistics.highest}%
             </p>
             <p className="text-xs text-muted-foreground">{t('axis.questionPrefix')}{statistics.easiestQ}</p>
@@ -236,11 +240,11 @@ export function QuestionAnalysisCard({ resultados, totalPreguntas }: QuestionAna
 
           {/* Lowest */}
           <div className="space-y-1">
-            <div className="flex items-center gap-1 text-xs text-rose-600 dark:text-rose-400">
+            <div className="flex items-center gap-1 text-xs text-secondary">
               <TrendingDown className="h-3 w-3" />
               <span>{t('lowest')}</span>
             </div>
-            <p className="text-2xl font-bold text-rose-600 dark:text-rose-400">
+            <p className="text-2xl font-bold text-secondary">
               {statistics.lowest}%
             </p>
             <p className="text-xs text-muted-foreground">{t('axis.questionPrefix')}{statistics.hardestQ}</p>
