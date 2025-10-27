@@ -114,4 +114,38 @@
     filter: drop-shadow(0 0 6px #fbbf24) drop-shadow(0 0 12px #f472b6)
       drop-shadow(0 0 18px #a78bfa);
   }
+
+  /* Mono data display with reveal animation */
+  .mono-data {
+    font-weight: 400; /* light */
+    color: transparent;
+    text-align: right;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(to right, black 0%, black 100%);
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    animation: reveal-background 0.5s ease-out forwards,
+      reveal-text 0.1s ease-out 0.5s forwards;
+  }
+
+  @keyframes reveal-background {
+    0% {
+      background-size: 0% 100%;
+    }
+    100% {
+      background-size: 100% 100%;
+    }
+  }
+
+  @keyframes reveal-text {
+    0% {
+      color: transparent;
+    }
+    100% {
+      color: white;
+    }
+  }
 }

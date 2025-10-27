@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
+import { monoFont } from '@/lib/fonts';
 import type { Estudiante, ResultadoExamen } from '../utils/types';
 
 interface StudentsResultsTableProps {
@@ -57,13 +58,21 @@ export function StudentsResultsTable({
                     const resultado = resultados.find(r => r.estudiante.id === estudiante.id);
                     return (
                       <tr key={estudiante.id} className="border-b hover:bg-muted/50">
-                        <td className="py-2 px-4">{estudiante.apellidos}, {estudiante.nombres}</td>
-                        <td className="py-2 px-4">{estudiante.identificacion}</td>
-                        <td className="py-2 px-4 text-center">
-                          {resultado ? resultado.puntaje_obtenido.toFixed(2) : '-'}
+                        <td className="py-2 px-4">
+                          <div className={`${monoFont}`}>{estudiante.apellidos}, {estudiante.nombres}</div>
+                        </td>
+                        <td className="py-2 px-4">
+                          <div className={`${monoFont}`}>{estudiante.identificacion}</div>
                         </td>
                         <td className="py-2 px-4 text-center">
-                          {resultado ? resultado.porcentaje.toFixed(1) + '%' : '-'}
+                          <div className={`${monoFont}`}>
+                            {resultado ? resultado.puntaje_obtenido.toFixed(2) : '-'}
+                          </div>
+                        </td>
+                        <td className="py-2 px-4 text-center">
+                          <div className={`${monoFont}`}>
+                            {resultado ? resultado.porcentaje.toFixed(1) + '%' : '-'}
+                          </div>
                         </td>
                         <td className="py-2 px-4 text-center">
                           {resultado ? (

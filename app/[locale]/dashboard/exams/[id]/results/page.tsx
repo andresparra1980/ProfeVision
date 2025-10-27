@@ -6,6 +6,7 @@ import { useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import dynamic from 'next/dynamic';
 
 // Hooks
 import { useExamResults } from '@/components/exam-results/hooks/use-exam-results';
@@ -13,20 +14,48 @@ import { useAnswerUpdate } from '@/components/exam-results/hooks/use-answer-upda
 import { useManualGrade } from '@/components/exam-results/hooks/use-manual-grade';
 import { useGroupSelection } from '@/components/exam-results/hooks/use-group-selection';
 
-// Cards
+// Cards (lightweight - load immediately)
 import { ExamDetailsCard } from '@/components/exam-results/cards/exam-details-card';
 import { StatisticsCard } from '@/components/exam-results/cards/statistics-card';
-import { QuestionAnalysisCard } from '@/components/exam-results/cards/question-analysis-card';
-import { AnswerAnalysisCard } from '@/components/exam-results/cards/answer-analysis-card';
 
-// Tables
-import { StudentsResultsTable } from '@/components/exam-results/tables/students-results-table';
+// Heavy components - lazy load with spinner
+import { LoadingSpinner } from '@/components/shared/loading-spinner';
 
-// Dialogs
-import { ConfirmAnswerChangeDialog } from '@/components/exam-results/dialogs/confirm-answer-change-dialog';
-import { StudentDetailsDialog } from '@/components/exam-results/dialogs/student-details-dialog';
-import { ManualGradeDialog } from '@/components/exam-results/dialogs/manual-grade-dialog';
-import { GroupSelectionDialog } from '@/components/exam-results/dialogs/group-selection-dialog';
+const QuestionAnalysisCard = dynamic(
+  () => import('@/components/exam-results/cards/question-analysis-card').then(mod => ({ default: mod.QuestionAnalysisCard })),
+  { loading: () => <LoadingSpinner message="Loading question analysis..." /> }
+);
+
+const AnswerAnalysisCard = dynamic(
+  () => import('@/components/exam-results/cards/answer-analysis-card').then(mod => ({ default: mod.AnswerAnalysisCard })),
+  { loading: () => <LoadingSpinner message="Loading answer analysis..." /> }
+);
+
+const StudentsResultsTable = dynamic(
+  () => import('@/components/exam-results/tables/students-results-table').then(mod => ({ default: mod.StudentsResultsTable })),
+  { loading: () => <LoadingSpinner message="Loading students table..." /> }
+);
+
+// Dialogs - lazy load (shown on demand)
+const ConfirmAnswerChangeDialog = dynamic(
+  () => import('@/components/exam-results/dialogs/confirm-answer-change-dialog').then(mod => ({ default: mod.ConfirmAnswerChangeDialog })),
+  { ssr: false }
+);
+
+const StudentDetailsDialog = dynamic(
+  () => import('@/components/exam-results/dialogs/student-details-dialog').then(mod => ({ default: mod.StudentDetailsDialog })),
+  { ssr: false }
+);
+
+const ManualGradeDialog = dynamic(
+  () => import('@/components/exam-results/dialogs/manual-grade-dialog').then(mod => ({ default: mod.ManualGradeDialog })),
+  { ssr: false }
+);
+
+const GroupSelectionDialog = dynamic(
+  () => import('@/components/exam-results/dialogs/group-selection-dialog').then(mod => ({ default: mod.GroupSelectionDialog })),
+  { ssr: false }
+);
 
 // Shared
 import { ResultsPageHeader } from '@/components/exam-results/shared/results-page-header';
