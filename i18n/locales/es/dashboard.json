@@ -51,8 +51,7 @@
     "create": "Crear Examen",
     "createNewDesc": "Diseña un nuevo examen para tus estudiantes",
     "createDesc": "Define la información básica del examen",
-    
-    
+
     "backToExams": "Volver a Exámenes",
     "questions": "preguntas",
     "subjectRequired": "Materia Requerida",
@@ -354,6 +353,48 @@
         "highestScore": "Puntaje más alto",
         "lowestScore": "Puntaje más bajo"
       },
+      "questionAnalysis": {
+        "title": "Análisis de Preguntas",
+        "description": "Porcentaje de respuestas correctas por pregunta",
+        "question": "Pregunta",
+        "correctPercentage": "% Correctas",
+        "chartTitle": "Dificultad de las Preguntas",
+        "noData": "No hay datos suficientes para análisis",
+        "average": "Promedio",
+        "highest": "Más alto",
+        "lowest": "Más bajo",
+        "questionsAnalyzed": "Preguntas analizadas",
+        "of": "de",
+        "totalResponses": "Respuestas totales",
+        "correctResponses": "Respuestas correctas",
+        "axis": {
+          "questionPrefix": "P"
+        },
+        "tooltip": {
+          "question": "Pregunta",
+          "disabled": "Deshabilitada"
+        },
+        "legend": {
+          "easy": "Fácil",
+          "medium": "Media",
+          "hard": "Difícil",
+          "explanation": "% de estudiantes que respondieron correctamente la pregunta"
+        }
+      },
+      "answerAnalysis": {
+        "title": "Distribución de Respuestas por Pregunta",
+        "description": "Patrón de respuestas elegidas por los estudiantes en cada pregunta",
+        "noData": "No hay datos suficientes para análisis",
+        "hint": "Pasa el cursor sobre cada barra para ver el detalle de respuestas. La respuesta correcta se muestra en negrita con ✓",
+        "axis": {
+          "questionPrefix": "P"
+        },
+        "tooltip": {
+          "question": "Pregunta",
+          "responses": "respuestas",
+          "noAnswer": "Sin respuesta"
+        }
+      },
       "studentResults": "Resultados por Estudiante",
       "studentsSection": "Estudiantes",
       "studentsSectionDescription": "Resultados de los estudiantes en este examen",
@@ -429,7 +470,7 @@
         "resultsHeader": "RESULTADOS",
         "subjectLabel": "Materia",
         "totalScoreLabel": "Puntaje Total",
-        "groupLabel": "Grupo", 
+        "groupLabel": "Grupo",
         "creationDateLabel": "Fecha de Creación",
         "noSubjectAvailable": "Sin materia",
         "noGroupAvailable": "Sin grupo",

@@ -13,6 +13,7 @@ const config: Config = {
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./types/**/*.{js,ts,jsx,tsx,mdx}",
     "*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
   ],
   // Force JIT mode for better hot reloading
   mode: "jit",
@@ -36,6 +37,21 @@ const config: Config = {
     "from-[#0b890f]/50",
     "via-[#ffd60a]/50",
     "to-[#bc152b]/50",
+    // Tremor chart colors - required for custom hex colors in charts
+    ...["[#ef4444]"].flatMap((customColor) => [
+      `bg-${customColor}`,
+      `border-${customColor}`,
+      `hover:bg-${customColor}`,
+      `hover:border-${customColor}`,
+      `hover:text-${customColor}`,
+      `fill-${customColor}`,
+      `ring-${customColor}`,
+      `stroke-${customColor}`,
+      `text-${customColor}`,
+      `ui-selected:bg-${customColor}`,
+      `ui-selected:border-${customColor}`,
+      `ui-selected:text-${customColor}`,
+    ]),
     // Common Tailwind color patterns
     {
       pattern:
@@ -48,6 +64,10 @@ const config: Config = {
     {
       pattern:
         /border-(red|green|blue|yellow|purple|pink|indigo|gray|slate|zinc|neutral|stone|orange|amber|lime|emerald|teal|cyan|sky|violet|fuchsia|rose)-(50|100|200|300|400|500|600|700|800|900|950)/,
+    },
+    {
+      pattern:
+        /fill-(red|green|blue|yellow|purple|pink|indigo|gray|slate|zinc|neutral|stone|orange|amber|lime|emerald|teal|cyan|sky|violet|fuchsia|rose)-(50|100|200|300|400|500|600|700|800|900|950)/,
     },
   ],
   theme: {

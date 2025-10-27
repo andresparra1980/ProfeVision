@@ -352,6 +352,48 @@
         "highestScore": "Highest score",
         "lowestScore": "Lowest score"
       },
+      "questionAnalysis": {
+        "title": "Question Analysis",
+        "description": "Percentage of correct answers per question",
+        "question": "Question",
+        "correctPercentage": "% Correct",
+        "chartTitle": "Question Difficulty",
+        "noData": "Not enough data for analysis",
+        "average": "Average",
+        "highest": "Highest",
+        "lowest": "Lowest",
+        "questionsAnalyzed": "Questions analyzed",
+        "of": "of",
+        "totalResponses": "Total responses",
+        "correctResponses": "Correct responses",
+        "axis": {
+          "questionPrefix": "Q"
+        },
+        "tooltip": {
+          "question": "Question",
+          "disabled": "Disabled"
+        },
+        "legend": {
+          "easy": "Easy",
+          "medium": "Medium",
+          "hard": "Hard",
+          "explanation": "% of students who answered the question correctly"
+        }
+      },
+      "answerAnalysis": {
+        "title": "Answer Distribution by Question",
+        "description": "Pattern of answers chosen by students for each question",
+        "noData": "Not enough data for analysis",
+        "hint": "Hover over each bar to see answer details. The correct answer is shown in bold with ✓",
+        "axis": {
+          "questionPrefix": "Q"
+        },
+        "tooltip": {
+          "question": "Question",
+          "responses": "responses",
+          "noAnswer": "No answer"
+        }
+      },
       "studentResults": "Student Results",
       "studentsSection": "Students",
       "studentsSectionDescription": "Results of students in this exam",

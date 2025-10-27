@@ -1,689 +1,115 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { ChevronLeft, Loader2, Save, AlertCircle, Download, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { supabase } from '@/lib/supabase';
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Image from 'next/image';
+import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
-import { PDFExportButton } from '@/components/exam/pdf-export-button';
 
-// Configurar flag de debug para mensajes de consola
-const DEBUG = process.env.NODE_ENV === 'development';
+// Hooks
+import { useExamResults } from '@/components/exam-results/hooks/use-exam-results';
+import { useAnswerUpdate } from '@/components/exam-results/hooks/use-answer-update';
+import { useManualGrade } from '@/components/exam-results/hooks/use-manual-grade';
+import { useGroupSelection } from '@/components/exam-results/hooks/use-group-selection';
 
-interface Estudiante {
-  id: string;
-  nombres: string;
-  apellidos: string;
-  identificacion: string;
-}
+// Cards
+import { ExamDetailsCard } from '@/components/exam-results/cards/exam-details-card';
+import { StatisticsCard } from '@/components/exam-results/cards/statistics-card';
+import { QuestionAnalysisCard } from '@/components/exam-results/cards/question-analysis-card';
+import { AnswerAnalysisCard } from '@/components/exam-results/cards/answer-analysis-card';
 
-interface OpcionRespuesta {
-  id: string;
-  orden: number;
-  pregunta_id: string;
-  es_correcta: boolean;
-}
+// Tables
+import { StudentsResultsTable } from '@/components/exam-results/tables/students-results-table';
 
-interface RespuestaEstudiante {
-  id: string;
-  pregunta_id: string;
-  opcion_id: string;
-  es_correcta: boolean;
-  puntaje_obtenido: number;
-  pregunta: {
-    id: string;
-    orden: number;
-    num_opciones: number;
-    habilitada: boolean;
-    opciones_respuesta: OpcionRespuesta[];
-  };
-  opcion_respuesta: {
-    id: string;
-    orden: number;
-  };
-}
+// Dialogs
+import { ConfirmAnswerChangeDialog } from '@/components/exam-results/dialogs/confirm-answer-change-dialog';
+import { StudentDetailsDialog } from '@/components/exam-results/dialogs/student-details-dialog';
+import { ManualGradeDialog } from '@/components/exam-results/dialogs/manual-grade-dialog';
+import { GroupSelectionDialog } from '@/components/exam-results/dialogs/group-selection-dialog';
 
-interface ResultadoExamen {
-  id: string;
-  estudiante: Estudiante;
-  puntaje_obtenido: number;
-  porcentaje: number;
-  fecha_calificacion: string;
-  respuestas_estudiante: RespuestaEstudiante[];
-  examen_escaneado?: {
-    archivo_original: string;
-    archivo_procesado: string;
-    ruta_s3_original: string;
-    ruta_s3_procesado: string;
-  };
-  imagenBase64?: string;
-}
+// Shared
+import { ResultsPageHeader } from '@/components/exam-results/shared/results-page-header';
+import { ResultsPageActions } from '@/components/exam-results/shared/results-page-actions';
 
-interface GrupoExamen {
-  id: string;
-  grupo_id: string;
-  nombre: string;
-}
-
-interface ExamDetails {
-  id: string;
-  titulo: string;
-  estado: string;
-  creado_en: string;
-  created_at?: string;
-  puntaje_total?: number;
-  materias?: {
-    nombre: string;
-    entidades_educativas?: {
-      nombre: string;
-    };
-  };
-  grupo_id?: string;
-  grupos?: {
-    id: string;
-    nombre: string;
-  };
-  grupos_asignados?: GrupoExamen[];
-  [key: string]: unknown;
-}
-
-// Constante para las letras de las opciones
-const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-
-// Define interfaces for the Supabase results
-interface ExamenGrupoItem {
-  id: string;
-  grupo_id: string;
-  grupos?: {
-    id: string;
-    nombre: string;
-  };
-}
-
-interface ResultadoExamenItem {
-  id: string;
-  estudiante_id: string;
-  puntaje_obtenido: number;
-  porcentaje: number;
-  fecha_calificacion: string;
-  estudiante: Estudiante;
-  respuestas_estudiante: Record<string, unknown>[];
-  examenes_escaneados?: Record<string, unknown>[];
-}
-
-// PDFExportButton is now imported statically above - no dynamic import needed
+// Types
+import type { ResultadoExamen } from '@/components/exam-results/utils/types';
+import { DEBUG } from '@/components/exam-results/utils/constants';
 
 export default function ExamResultsPage() {
   const params = useParams();
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations('dashboard.exams.results');
   const tc = useTranslations('common');
-  const locale = useLocale();
-  const [loading, setLoading] = useState(true);
-  const [examDetails, setExamDetails] = useState<ExamDetails | null>(null);
-  const [resultados, setResultados] = useState<ResultadoExamen[]>([]);
-  const [todosEstudiantes, setTodosEstudiantes] = useState<Estudiante[]>([]);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  // Ensure exam ID exists and is a string
+  const examId = typeof params.id === 'string' ? params.id : '';
+
+  // Local UI state
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [showManualGradeDialog, setShowManualGradeDialog] = useState(false);
   const [selectedResultado, setSelectedResultado] = useState<ResultadoExamen | null>(null);
-  const [selectedEstudiante, setSelectedEstudiante] = useState<Estudiante | null>(null);
-  const [manualGrade, setManualGrade] = useState<string>('');
-  const [isSubmittingGrade, setIsSubmittingGrade] = useState(false);
-  const [pendingUpdate, setPendingUpdate] = useState<{
-    respuestaId: string;
-    opcionId: string;
-    resultadoId: string;
-    preguntaOrden: number;
-    nuevaLetra: string;
-  } | null>(null);
-  const [updatingAnswer, setUpdatingAnswer] = useState(false);
   const [verSoloConExamen, setVerSoloConExamen] = useState(false);
-  const [totalPreguntas, setTotalPreguntas] = useState<number>(0);
-  
-  // New state for group selection
-  const [showGroupSelectionModal, setShowGroupSelectionModal] = useState(false);
-  const [availableGroups, setAvailableGroups] = useState<GrupoExamen[]>([]);
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
-  // New state to track if we're initializing from storage
-  const [initializing, setInitializing] = useState(true);
+  // Business logic via hooks
+  const {
+    loading,
+    examDetails,
+    resultados,
+    todosEstudiantes,
+    totalPreguntas,
+    availableGroups,
+    selectedGroupId,
+    setResultados,
+    fetchExamResults,
+  } = useExamResults(examId);
 
-  // Define fetchExamResults with useCallback para usarlo en el useEffect
-  const fetchExamResults = useCallback(async (groupIdOverride?: string) => {
-    try {
-      setLoading(true);
-      const examId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
-      
-      // Usar el groupIdOverride si se proporciona, de lo contrario usar selectedGroupId
-      const groupIdToUse = groupIdOverride || selectedGroupId;
+  const {
+    pendingUpdate,
+    updatingAnswer,
+    showConfirmDialog,
+    setShowConfirmDialog,
+    handleBubbleClick,
+    handleConfirmUpdate,
+  } = useAnswerUpdate({
+    examId,
+    setResultados,
+    setSelectedResultado,
+  });
 
-      // Obtener detalles del examen
-      const { data: examData, error: examError } = await supabase
-        .from('examenes')
-        .select(`
-          *,
-          materias(
-            nombre,
-            entidades_educativas(nombre)
-          )
-        `)
-        .eq('id', examId)
-        .single();
+  const {
+    showManualGradeDialog,
+    setShowManualGradeDialog,
+    selectedEstudiante,
+    manualGrade,
+    setManualGrade,
+    isSubmittingGrade,
+    handleShowManualGradeDialog,
+    handleSaveManualGrade,
+  } = useManualGrade({
+    examId,
+    onGradeSaved: fetchExamResults,
+  });
 
-      if (examError) {
-        if (DEBUG) {
-          // Registramos el error en un logger en lugar de la consola
-        }
-        throw examError;
-      }
+  const {
+    showGroupSelectionModal,
+    handleGroupSelect,
+    handleToggleGroupSelectionModal,
+    handleModalOpenChange,
+  } = useGroupSelection({
+    examId,
+    availableGroups,
+    selectedGroupId,
+    onGroupChange: fetchExamResults,
+    setLoading: () => {}, // Loading is handled by fetchExamResults
+  });
 
-      setExamDetails(examData);
-
-      // Obtener el número total de preguntas del examen
-      const { data: preguntasData, error: preguntasError } = await supabase
-        .from('preguntas')
-        .select('orden')
-        .eq('examen_id', examId)
-        .order('orden', { ascending: false })
-        .limit(1);
-
-      if (preguntasError) {
-        if (DEBUG) {
-          // Registramos el error en un logger en lugar de la consola
-        }
-      } else if (preguntasData && preguntasData.length > 0) {
-        // El orden más alto representa el número total de preguntas
-        setTotalPreguntas(preguntasData[0].orden);
-      }
-
-      // Obtener todas las relaciones con grupos a través de examen_grupo
-      const { data: examenGruposData, error: examenGruposError } = await supabase
-        .from('examen_grupo')
-        .select(`
-          id,
-          grupo_id,
-          grupos(id, nombre)
-        `)
-        .eq('examen_id', examId);
-
-      if (examenGruposError) {
-        if (DEBUG) {
-          // Registramos el error en un logger en lugar de la consola
-        }
-      } else if (examenGruposData && examenGruposData.length > 0) {
-        // Transformar los datos de grupos para manejarlos más fácilmente
-        const grupos = examenGruposData.map((item: ExamenGrupoItem) => ({
-          id: item.id,
-          grupo_id: item.grupo_id,
-          nombre: item.grupos?.nombre || 'Sin nombre'
-        }));
-        
-        setAvailableGroups(grupos);
-        
-        // Si hay más de un grupo y no hay grupo seleccionado o se proporcionó un override
-        let grupoToUse: GrupoExamen | undefined;
-        
-        if (groupIdOverride) {
-          // Si hay un ID de grupo específico para usar, buscar ese grupo
-          grupoToUse = grupos.find((g: GrupoExamen) => g.grupo_id === groupIdOverride);
-        } else if (initializing && grupos.length > 0) {
-          // Si estamos inicializando, intentar cargar desde localStorage
-          try {
-            const storedGroupId = localStorage.getItem(`exam_${examId}_selected_group`);
-            
-            if (storedGroupId) {
-              // Verificar que el grupo guardado exista en los grupos disponibles
-              const storedGroup = grupos.find((g: GrupoExamen) => g.grupo_id === storedGroupId);
-              if (storedGroup) {
-                grupoToUse = storedGroup;
-              } else {
-                // Si el grupo guardado ya no existe, usar el primero
-                grupoToUse = grupos[0];
-              }
-            } else {
-              // Si no hay grupo guardado, usar el primero
-              grupoToUse = grupos[0];
-            }
-          } catch (_error) {
-            // Si hay un error al acceder a localStorage (ej. en modo privado), usar el primer grupo
-            grupoToUse = grupos[0];
-          }
-          
-          // Ya no estamos inicializando
-          setInitializing(false);
-        } else if (selectedGroupId) {
-          // Si hay un grupo seleccionado, usarlo
-          grupoToUse = grupos.find((g: GrupoExamen) => g.grupo_id === selectedGroupId);
-        } else if (grupos.length > 0) {
-          // Si no hay grupo seleccionado, usar el primer grupo por defecto
-          grupoToUse = grupos[0];
-        }
-          
-        if (grupoToUse) {
-          // Actualizar el ID de grupo seleccionado si es necesario
-          if (grupoToUse.grupo_id !== selectedGroupId) {
-            setSelectedGroupId(grupoToUse.grupo_id);
-            
-            // Guardar el grupo seleccionado en localStorage
-            try {
-              localStorage.setItem(`exam_${examId}_selected_group`, grupoToUse.grupo_id);
-            } catch (_error) {
-              // Manejar el error silenciosamente
-              if (DEBUG) {
-                // Registramos el error en un logger en lugar de la consola
-              }
-            }
-          }
-          
-          // Agregar información del grupo al objeto de detalles del examen
-          setExamDetails(prevDetails => prevDetails ? {
-            ...prevDetails,
-            grupo_id: grupoToUse!.grupo_id,
-            grupos: {
-              id: grupoToUse!.grupo_id,
-              nombre: grupoToUse!.nombre
-            },
-            grupos_asignados: grupos
-          } : null);
-
-          // Obtener todos los estudiantes del grupo
-          const { data: estudiantesGrupo, error: estudiantesError } = await supabase
-            .from('estudiantes')
-            .select('*')
-            .in('id', (
-              await supabase
-                .from('estudiante_grupo')
-                .select('estudiante_id')
-                .eq('grupo_id', grupoToUse.grupo_id)
-            ).data?.map((row: { estudiante_id: string }) => row.estudiante_id) || [])
-            .order('apellidos', { ascending: true })
-            .order('nombres', { ascending: true });
-
-          if (estudiantesError) {
-            if (DEBUG) {
-              // Registramos el error en un logger en lugar de la consola
-            }
-          } else {
-            setTodosEstudiantes(estudiantesGrupo || []);
-          }
-        }
-      }
-
-      // Obtener resultados con todas las relaciones en una sola consulta
-      const { data: resultsData, error: resultsError } = await supabase
-        .from('resultados_examen')
-        .select(`
-          id,
-          estudiante_id,
-          puntaje_obtenido,
-          porcentaje,
-          fecha_calificacion,
-          estudiante:estudiantes!inner(
-            id,
-            nombres,
-            apellidos,
-            identificacion
-          ),
-          respuestas_estudiante(
-            id,
-            pregunta_id,
-            opcion_id,
-            es_correcta,
-            puntaje_obtenido,
-            pregunta:preguntas!inner(
-              id,
-              orden,
-              habilitada,
-              opciones_respuesta(
-                id,
-                orden,
-                es_correcta
-              )
-            ),
-            opcion_respuesta:opciones_respuesta(
-              id,
-              orden
-            )
-          ),
-          examenes_escaneados(
-            id,
-            archivo_original,
-            archivo_procesado,
-            ruta_s3_original,
-            ruta_s3_procesado
-          )
-        `)
-        .eq('examen_id', examId);
-
-      if (resultsError) {
-        if (DEBUG) {
-          // Registramos el error en un logger en lugar de la consola
-        }
-        throw resultsError;
-      }
-
-      if (!resultsData || resultsData.length === 0) {
-        setResultados([]);
-        setLoading(false);
-        return;
-      }
-
-      // Si hay un grupo seleccionado, filtramos los resultados para ese grupo
-      let filteredResults = resultsData;
-      if (groupIdToUse) {
-        // Obtener los IDs de estudiantes del grupo seleccionado
-        const { data: estudiantesDelGrupo } = await supabase
-          .from('estudiante_grupo')
-          .select('estudiante_id')
-          .eq('grupo_id', groupIdToUse);
-        
-        const estudianteIds = estudiantesDelGrupo?.map((e: { estudiante_id: string }) => e.estudiante_id) || [];
-        
-        // Filtrar resultados solo para los estudiantes del grupo seleccionado
-        filteredResults = resultsData.filter((result: ResultadoExamenItem) => 
-          estudianteIds.includes(result.estudiante_id)
-        );
-      }
-
-      // Asegurarnos de que los datos coincidan con el tipo ResultadoExamen
-      const typedResults: ResultadoExamen[] = filteredResults
-        .map((result: Record<string, unknown>): ResultadoExamen | null => {
-          const estudiante = result.estudiante as Estudiante | undefined;
-          if (!estudiante) return null;
-
-          const respuestasEstudiante = result.respuestas_estudiante as Array<Record<string, unknown>> | undefined;
-          const respuestas = Array.isArray(respuestasEstudiante) 
-            ? respuestasEstudiante
-                .map((respuesta): RespuestaEstudiante | null => {
-                  const pregunta = respuesta.pregunta as Record<string, unknown> | undefined;
-                  const opcionRespuesta = respuesta.opcion_respuesta as Record<string, unknown> | undefined;
-                  
-                  if (!pregunta || !opcionRespuesta) return null;
-
-                  const opcionesRespuesta = pregunta.opciones_respuesta as OpcionRespuesta[] | undefined;
-
-                  return {
-                    id: respuesta.id as string,
-                    pregunta_id: respuesta.pregunta_id as string,
-                    opcion_id: respuesta.opcion_id as string,
-                    es_correcta: respuesta.es_correcta as boolean,
-                    puntaje_obtenido: respuesta.puntaje_obtenido as number,
-                    pregunta: {
-                      id: pregunta.id as string,
-                      orden: pregunta.orden as number,
-                      num_opciones: opcionesRespuesta?.length || 4,
-                      habilitada: pregunta.habilitada as boolean,
-                      opciones_respuesta: opcionesRespuesta || []
-                    },
-                    opcion_respuesta: {
-                      id: opcionRespuesta.id as string,
-                      orden: opcionRespuesta.orden as number
-                    }
-                  };
-                })
-                .filter((r: RespuestaEstudiante | null): r is RespuestaEstudiante => r !== null)
-            : [];
-
-          const examenesEscaneados = result.examenes_escaneados as Array<Record<string, unknown>> | undefined;
-          const examenEscaneado = examenesEscaneados?.[0];
-
-          return {
-            id: result.id as string,
-            estudiante: {
-              id: estudiante.id,
-              nombres: estudiante.nombres,
-              apellidos: estudiante.apellidos,
-              identificacion: estudiante.identificacion
-            },
-            puntaje_obtenido: result.puntaje_obtenido as number,
-            porcentaje: result.porcentaje as number,
-            fecha_calificacion: result.fecha_calificacion as string,
-            respuestas_estudiante: respuestas,
-            examen_escaneado: examenEscaneado ? {
-              archivo_original: examenEscaneado.archivo_original as string,
-              archivo_procesado: examenEscaneado.archivo_procesado as string,
-              ruta_s3_original: examenEscaneado.ruta_s3_original as string,
-              ruta_s3_procesado: examenEscaneado.ruta_s3_procesado as string
-            } : undefined
-          };
-        })
-        .filter((resultado: ResultadoExamen | null): resultado is ResultadoExamen => resultado !== null);
-
-      setResultados(typedResults);
-    } catch (_error) {
-      if (DEBUG) {
-        // Registramos el error en un logger en lugar de la consola
-      }
-      toast.error(t('error'), {
-        description: t('loadingError'),
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [params.id, selectedGroupId, initializing, t]);
-
-  useEffect(() => {
-    fetchExamResults();
-  }, [fetchExamResults]);
-
-  // Función para convertir número a letra (1 -> A, 2 -> B, etc.)
-  const getLetterFromNumber = (num: number) => {
-    return String.fromCharCode(64 + num);
-  };
-
-  // Función para obtener el color de la burbuja según la opción
-  const getAnswerBubbleStyle = (letter: string) => {
-    switch (letter.toUpperCase()) {
-      case 'A': return 'bg-blue-500';
-      case 'B': return 'bg-green-500';
-      case 'C': return 'bg-yellow-500';
-      case 'D': return 'bg-purple-500';
-      case 'E': return 'bg-pink-500';
-      case 'F': return 'bg-indigo-500';
-      case 'G': return 'bg-red-500';
-      case 'H': return 'bg-orange-500';
-      default: return 'bg-gray-400';
-    }
-  };
-
-  // Función para manejar el click en una burbuja
-  const handleBubbleClick = async (
-    respuesta: RespuestaEstudiante,
-    opcionOrden: number,
-    resultadoId: string,
-    opcionId: string
-  ) => {
-    // No permitir cambios si la pregunta está deshabilitada
-    if (!respuesta.pregunta.habilitada) return;
-
-    // No permitir seleccionar la misma opción
-    if (respuesta.opcion_respuesta.orden === opcionOrden) return;
-
-    // Preparar datos para el modal de confirmación
-    setPendingUpdate({
-      respuestaId: respuesta.id,
-      opcionId,
-      resultadoId,
-      preguntaOrden: respuesta.pregunta.orden,
-      nuevaLetra: getLetterFromNumber(opcionOrden)
-    });
-
-    // Mostrar el modal de confirmación
-    setShowConfirmDialog(true);
-  };
-
-  // Función para confirmar y actualizar la respuesta
-  const handleConfirmUpdate = async () => {
-    if (!pendingUpdate) return;
-
-    try {
-      setUpdatingAnswer(true);
-
-      const response = await fetch(`/api/exams/${params.id}/update-answer`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          respuestaId: pendingUpdate.respuestaId,
-          opcionId: pendingUpdate.opcionId,
-        }),
-      });
-
-      if (!response.ok) {
-        const _error = await response.json();
-        throw new Error(_error.error || 'Error al actualizar la respuesta');
-      }
-
-      const result = await response.json();
-
-      // Actualizar el estado local con la nueva información
-      setResultados(prevResultados => {
-        const updatedResultados = prevResultados.map(resultado => {
-          if (resultado.id === pendingUpdate.resultadoId) {
-            const updatedResultado = {
-              ...resultado,
-              puntaje_obtenido: result.puntajeObtenido,
-              porcentaje: result.porcentaje,
-              respuestas_estudiante: resultado.respuestas_estudiante.map(respuesta => {
-                if (respuesta.id === pendingUpdate.respuestaId) {
-                  return {
-                    ...respuesta,
-                    opcion_id: pendingUpdate.opcionId,
-                    es_correcta: result.es_correcta,
-                    opcion_respuesta: {
-                      ...respuesta.opcion_respuesta,
-                      orden: OPTION_LETTERS.indexOf(pendingUpdate.nuevaLetra) + 1
-                    }
-                  };
-                }
-                return respuesta;
-              })
-            };
-            
-            // Si este resultado es el que está seleccionado actualmente en el modal, actualizarlo también
-            if (selectedResultado && selectedResultado.id === resultado.id) {
-              setTimeout(() => setSelectedResultado(updatedResultado), 0);
-            }
-            
-            return updatedResultado;
-          }
-          return resultado;
-        });
-        
-        return updatedResultados;
-      });
-
-      toast.success(t('toast.answerUpdated'), {
-        description: t('toast.answerUpdatedDesc'),
-      });
-
-    } catch (error) {
-      if (typeof error === 'object' && error !== null && 'message' in error) {
-        toast.error(t('toast.updateError'), {
-          description: String(error.message) || t('toast.updateErrorDesc'),
-        });
-      } else {
-        toast.error(t('toast.updateError'), {
-          description: t('toast.updateErrorDesc'),
-        });
-      }
-    } finally {
-      setUpdatingAnswer(false);
-      setShowConfirmDialog(false);
-      setPendingUpdate(null);
-    }
-  };
-
-  // Función para mostrar el diálogo de detalles
-  const handleShowDetails = async (resultado: ResultadoExamen) => {
-    // Simply set the selected result - images are loaded by ImageWithSignedUrl component
+  // Handlers
+  const handleShowDetails = (resultado: ResultadoExamen) => {
     setSelectedResultado(resultado);
     setShowDetailsDialog(true);
   };
 
-  // Función para mostrar el diálogo de calificación manual
-  const handleShowManualGradeDialog = (estudiante: Estudiante) => {
-    setSelectedEstudiante(estudiante);
-    setManualGrade('');
-    setShowManualGradeDialog(true);
-  };
-
-  // Función para guardar la calificación manual
-  const handleSaveManualGrade = async () => {
-    if (!selectedEstudiante || !manualGrade) return;
-    
-    try {
-      setIsSubmittingGrade(true);
-      
-      const gradeValue = parseFloat(manualGrade);
-      
-      if (isNaN(gradeValue) || gradeValue < 0 || gradeValue > 5) {
-        toast.error(tc('messages.error'), {
-          description: t('toast.gradeValidationError'),
-        });
-        return;
-      }
-      
-      const response = await fetch(`/api/exams/${params.id}/manual-grade`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          estudianteId: selectedEstudiante.id,
-          puntaje: gradeValue,
-        }),
-      });
-
-      if (!response.ok) {
-        const _error = await response.json();
-        throw new Error(_error.error || 'Error al guardar la calificación');
-      }
-      
-      // Refrescar los resultados
-      await fetchExamResults();
-      
-      toast.success(t('toast.gradeSaved'), {
-        description: t('toast.gradeSavedDesc'),
-      });
-      
-      setShowManualGradeDialog(false);
-      
-    } catch (error) {
-      if (typeof error === 'object' && error !== null && 'message' in error) {
-        toast.error(t('toast.saveError'), {
-          description: String(error.message) || t('toast.saveErrorDesc'),
-        });
-      } else {
-        toast.error(t('toast.saveError'), {
-          description: t('toast.saveErrorDesc'),
-        });
-      }
-    } finally {
-      setIsSubmittingGrade(false);
-    }
-  };
-
-  // Función para exportar resultados a Excel
   const handleExportToExcel = () => {
     if (!examDetails || resultados.length === 0) {
       toast.error(tc('messages.error'), {
@@ -708,15 +134,15 @@ export default function ExamResultsPage() {
         .filter(estudiante => !resultados.some(r => r.estudiante.id === estudiante.id))
         .forEach(estudiante => {
           dataToExport.push({
-                    [t('excel.lastName')]: estudiante.apellidos,
-        [t('excel.firstName')]: estudiante.nombres,
-        [t('excel.identification')]: estudiante.identificacion,
-        [t('excel.score')]: t('excel.notPresented'),
-        [t('excel.percentage')]: "0.00%",
-        [t('excel.gradedDate')]: ""
+            [t('excel.lastName')]: estudiante.apellidos,
+            [t('excel.firstName')]: estudiante.nombres,
+            [t('excel.identification')]: estudiante.identificacion,
+            [t('excel.score')]: t('excel.notPresented'),
+            [t('excel.percentage')]: "0.00%",
+            [t('excel.gradedDate')]: ""
           });
         });
-      
+
       // Ordenar datos por apellidos en orden ascendente usando etiqueta localizada
       const lastNameLabel = t('excel.lastName');
       dataToExport.sort((a, b) => {
@@ -724,10 +150,10 @@ export default function ExamResultsPage() {
         const bLast = String(b[lastNameLabel] ?? '');
         return aLast.localeCompare(bLast, locale);
       });
-      
+
       // Crear un libro de trabajo
       const wb = XLSX.utils.book_new();
-      
+
       // Preparar los datos del encabezado
       const headerData = [
         [`${t('excel.resultsHeader')}: ${examDetails.titulo}`],
@@ -740,13 +166,13 @@ export default function ExamResultsPage() {
         [''],
         [t('excel.statisticsHeader')],
         [`${t('excel.studentsWithExamLabel')}: ${resultados.length} ${t('excel.of')} ${todosEstudiantes.length}`],
-        [`${t('excel.averageLabel')}: ${resultados.length > 0 ? (resultados.reduce((sum, r: ResultadoExamen) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2) : t('na')}`],
-        [`${t('excel.highestScoreLabel')}: ${resultados.length > 0 ? Math.max(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2) : t('na')}`],
-        [`${t('excel.lowestScoreLabel')}: ${resultados.length > 0 ? Math.min(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2) : t('na')}`],
+        [`${t('excel.averageLabel')}: ${resultados.length > 0 ? (resultados.reduce((sum, r) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2) : t('na')}`],
+        [`${t('excel.highestScoreLabel')}: ${resultados.length > 0 ? Math.max(...resultados.map((r) => r.puntaje_obtenido)).toFixed(2) : t('na')}`],
+        [`${t('excel.lowestScoreLabel')}: ${resultados.length > 0 ? Math.min(...resultados.map((r) => r.puntaje_obtenido)).toFixed(2) : t('na')}`],
         [''],
         [''] // Línea en blanco antes de los datos de estudiantes
       ];
-      
+
       // Crear cabeceras de columnas (localizadas)
       const columnsRow = [
         t('excel.lastName'),
@@ -756,28 +182,28 @@ export default function ExamResultsPage() {
         t('excel.percentage'),
         t('excel.gradedDate')
       ];
-      
+
       // Combinar todo en una matriz
       const allData = [...headerData, columnsRow];
-      
+
       // Agregar los datos de estudiantes convertidos a filas
       dataToExport.forEach(row => {
         allData.push(Object.values(row));
       });
-      
+
       // Crear hoja y añadirla al libro
       const ws = XLSX.utils.aoa_to_sheet(allData);
-      
+
       // Aplicar estilos (merge cells para título y secciones)
       ws['!merges'] = [
         { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // Título
         { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } }, // Detalles del examen
         { s: { r: 8, c: 0 }, e: { r: 8, c: 5 } }  // Estadísticas
       ];
-      
+
       // Añadir la hoja al libro
       XLSX.utils.book_append_sheet(wb, ws, t('excel.sheetName'));
-      
+
       // Generar el archivo y descargarlo
       XLSX.writeFile(wb, `resultados_${examDetails.titulo.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
 
@@ -794,56 +220,7 @@ export default function ExamResultsPage() {
     }
   };
 
-
-  // Nueva función para manejar la selección de grupo
-  const handleGroupSelect = (grupoId: string) => {
-    // Solo tomar acción si el grupo seleccionado es diferente al actual
-    if (grupoId !== selectedGroupId) {
-      // Cerrar el modal primero
-      setShowGroupSelectionModal(false);
-      
-      // Actualizar la UI para mostrar que estamos cargando
-      setLoading(true);
-      
-      // Guardar el grupo seleccionado en localStorage
-      try {
-        const examId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
-        localStorage.setItem(`exam_${examId}_selected_group`, grupoId);
-      } catch (_error) {
-        // Manejar el error silenciosamente
-        if (DEBUG) {
-          // Registramos el error en un logger en lugar de la consola
-        }
-      }
-      
-      // Llamar a fetchExamResults con el nuevo ID de grupo
-      fetchExamResults(grupoId);
-    } else {
-      // Si es el mismo grupo, solo cerrar el modal
-      setShowGroupSelectionModal(false);
-    }
-  };
-
-  const handleToggleGroupSelectionModal = () => {
-    setShowGroupSelectionModal(prev => !prev);
-  };
-
-  // Manejar el cierre del modal con X
-  const handleModalOpenChange = (open: boolean) => {
-    if (!open) {
-      // Si se cierra y no hay grupo seleccionado pero hay grupos disponibles
-      if (!selectedGroupId && availableGroups.length > 0) {
-        const defaultGroupId = availableGroups[0].grupo_id;
-        // Actualizar la UI para mostrar que estamos cargando
-        setLoading(true);
-        
-        // Llamar a fetchExamResults con el grupo por defecto
-        fetchExamResults(defaultGroupId);
-      }
-    }
-    setShowGroupSelectionModal(open);
-  };
-
+  // Loading state
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -854,744 +231,102 @@ export default function ExamResultsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => router.back()} 
-          className="h-9"
-        >
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          {t('backToExams')}
-        </Button>
+      {/* Header with back button and group selector */}
+      <ResultsPageHeader
+        onBack={() => router.back()}
+        availableGroups={availableGroups}
+        selectedGroup={examDetails?.grupos}
+        onToggleGroupModal={handleToggleGroupSelectionModal}
+      />
 
-        {availableGroups.length > 1 && (
-          <Button 
-            onClick={handleToggleGroupSelectionModal}
-            variant="outline"
-            className="flex items-center text-xs sm:text-sm bg-card text-foreground dark:text-foreground dark:hover:text-background"
-          >
-            <div className="flex items-center px-3 py-2 w-full h-full">
-              <Users className="mr-2 h-4 w-4 " />
-              <span className="truncate max-w-[150px] sm:max-w-[200px] md:max-w-none">
-                GRUPO: {examDetails?.grupos?.nombre || 'Sin grupo'}
-              </span>
-            </div>
-          </Button>
-        )}
-      </div>
-
+      {/* Title and action buttons */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t('title')}: {examDetails?.titulo || t('loading')}</h2>
-          <p className="text-muted-foreground">
-            {t('description')}
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {t('title')}: {examDetails?.titulo || t('loading')}
+          </h2>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-                      <Button 
-              onClick={handleExportToExcel}
-              variant="default"
-              className="flex items-center"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">{t('downloadExcel')}</span>
-              <span className="inline sm:hidden">{t('excelReport')}</span>
-            </Button>
-          
-          {resultados.length > 0 && (
-            <div>
-              <div className="hidden sm:block">
-                <PDFExportButton
-                  groupId={selectedGroupId}
-                  fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
-                  buttonText={t('generatePDFReport')}
-                  totalPreguntas={totalPreguntas}
-                  resultados={resultados}
-                  examDetails={examDetails}
-                />
-              </div>
-              <div className="sm:hidden block">
-                <PDFExportButton
-                  groupId={selectedGroupId}
-                  fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
-                  buttonText={t('pdfReport')}
-                  totalPreguntas={totalPreguntas}
-                  resultados={resultados}
-                  examDetails={examDetails}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        <ResultsPageActions
+          examDetails={examDetails}
+          resultados={resultados}
+          totalPreguntas={totalPreguntas}
+          selectedGroupId={selectedGroupId}
+          onExportExcel={handleExportToExcel}
+        />
       </div>
 
+      {/* Cards grid */}
       {examDetails && (
         <div className="flex flex-col sm:flex-row gap-4">
-                      <Card className="flex-1">
-              <CardHeader>
-                <CardTitle>{t('examDetails')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">{t('subject')}:</div>
-                    <div>{examDetails.materias?.nombre || t('noSubject')}</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">{t('totalScore')}:</div>
-                    <div>{examDetails.puntaje_total}</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">{t('group')}:</div>
-                    <div>{examDetails.grupos?.nombre || t('noGroup')}</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">{t('creationDate')}:</div>
-                    <div>{examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : t('notAvailable')}</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-          <Card className="flex-1">
-            <CardHeader>
-              <CardTitle>{t('statisticsTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">{t('studentsWithExam')}:</div>
-                  <div>{resultados.length} {t('of')} {todosEstudiantes.length}</div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">{t('average')}:</div>
-                  <div>
-                    {resultados.length > 0
-                      ? (resultados.reduce((sum, r: ResultadoExamen) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2)
-                      : t('na')
-                    }
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">{t('highestScore')}:</div>
-                  <div>
-                    {resultados.length > 0
-                      ? Math.max(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
-                      : t('na')
-                    }
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">{t('lowestScore')}:</div>
-                  <div>
-                    {resultados.length > 0
-                      ? Math.min(...resultados.map((r: ResultadoExamen) => r.puntaje_obtenido)).toFixed(2)
-                      : t('na')
-                    }
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ExamDetailsCard examDetails={examDetails} />
+          <StatisticsCard resultados={resultados} todosEstudiantes={todosEstudiantes} />
         </div>
       )}
 
-      <div>
-        <div className="flex items-center space-x-2 mb-4">
-          <input
-            type="checkbox"
-            id="ver-solo-con-examen"
-            checked={verSoloConExamen}
-            onChange={(e) => setVerSoloConExamen(e.target.checked)}
-            className="rounded border-gray-300 text-primary focus:ring-primary"
-          />
-                  <label htmlFor="ver-solo-con-examen" className="text-sm">
+      {/* Question Analysis Card */}
+      <QuestionAnalysisCard resultados={resultados} totalPreguntas={totalPreguntas} />
+
+      {/* Answer Distribution Analysis Card (NEW) */}
+      <AnswerAnalysisCard resultados={resultados} totalPreguntas={totalPreguntas} />
+
+      {/* Filter checkbox */}
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="ver-solo-con-examen"
+          checked={verSoloConExamen}
+          onChange={(e) => setVerSoloConExamen(e.target.checked)}
+          className="rounded border-gray-300 text-primary focus:ring-primary"
+        />
+        <label htmlFor="ver-solo-con-examen" className="text-sm">
           {t('checkbox.showOnlyGraded')}
         </label>
-        </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('studentsSection')}</CardTitle>
-            <CardDescription>
-              {t('studentsSectionDescription')}
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
-            {todosEstudiantes.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {t('emptyState.noResultsMessage')}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-muted/50">
-                                      <th className="py-2 px-4 text-left">{t('table.name')}</th>
-                <th className="py-2 px-4 text-left">{t('table.identification')}</th>
-                <th className="py-2 px-4 text-center">{t('table.score')}</th>
-                <th className="py-2 px-4 text-center">{t('table.percentage')}</th>
-                <th className="py-2 px-4 text-center">{t('table.status')}</th>
-                <th className="py-2 px-4 text-center">{t('table.actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {todosEstudiantes
-                      .filter(estudiante => {
-                        if (!verSoloConExamen) return true;
-                        return resultados.some(r => r.estudiante.id === estudiante.id);
-                      })
-                      .map(estudiante => {
-                        const resultado = resultados.find(r => r.estudiante.id === estudiante.id);
-                        return (
-                          <tr key={estudiante.id} className="border-b hover:bg-muted/50">
-                            <td className="py-2 px-4">{estudiante.apellidos}, {estudiante.nombres}</td>
-                            <td className="py-2 px-4">{estudiante.identificacion}</td>
-                            <td className="py-2 px-4 text-center">
-                              {resultado ? resultado.puntaje_obtenido.toFixed(2) : '-'}
-                            </td>
-                            <td className="py-2 px-4 text-center">
-                              {resultado ? resultado.porcentaje.toFixed(1) + '%' : '-'}
-                            </td>
-                            <td className="py-2 px-4 text-center">
-                              {resultado ? (
-                                                  <span className="px-2 py-1 rounded-full text-xs bg-primary text-primary-foreground font-medium shadow-sm">
-                    {t('status.graded')}
-                  </span>
-                              ) : (
-                                                <span className="px-2 py-1 rounded-full text-xs bg-accent text-accent-foreground font-medium shadow-sm">
-                  {t('status.notPresented')}
-                </span>
-                              )}
-                            </td>
-                            <td className="py-2 px-4 text-center">
-                              {resultado ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleShowDetails(resultado)}
-                                >
-                                  {t('viewDetailsButton')}
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleShowManualGradeDialog(estudiante)}
-                                >
-                                  {t('dialogs.enterGrade')}
-                                </Button>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
 
-      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('dialogs.confirmChangeTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('dialogs.confirmChangeDescription', {
-                question: pendingUpdate?.preguntaOrden || 0,
-                option: pendingUpdate?.nuevaLetra || ''
-              })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowConfirmDialog(false);
-                setPendingUpdate(null);
-              }}
-              disabled={updatingAnswer}
-            >
-              {tc('buttons.cancel')}
-            </Button>
-            <Button
-              onClick={handleConfirmUpdate}
-              disabled={updatingAnswer}
-            >
-              {updatingAnswer ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('dialogs.updating')}
-                </>
-              ) : (
-                t('dialogs.confirmChangeButton')
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Students table */}
+      <StudentsResultsTable
+        todosEstudiantes={todosEstudiantes}
+        resultados={resultados}
+        verSoloConExamen={verSoloConExamen}
+        onShowDetails={handleShowDetails}
+        onShowManualGrade={handleShowManualGradeDialog}
+      />
 
-      {/* Nuevo diálogo para mostrar detalles del examen de un estudiante */}
-      <Dialog 
-        open={showDetailsDialog} 
+      {/* Dialogs */}
+      <ConfirmAnswerChangeDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        pendingUpdate={pendingUpdate}
+        updatingAnswer={updatingAnswer}
+        onConfirm={handleConfirmUpdate}
+      />
+
+      <StudentDetailsDialog
+        open={showDetailsDialog}
         onOpenChange={setShowDetailsDialog}
-      >
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t('modal.title')}</DialogTitle>
-            <DialogDescription>
-              {t('modal.description')} {selectedResultado?.estudiante.nombres} {selectedResultado?.estudiante.apellidos}
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedResultado && (
-            <Tabs defaultValue="answers" className="mt-2">
-              <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="answers">{t('modal.responses')}</TabsTrigger>
-            <TabsTrigger value="original">{t('modal.originalImage')}</TabsTrigger>
-            <TabsTrigger value="processed">{t('modal.processedImage')}</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="answers">
-                <div className="pt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <p className="font-medium">{t('modal.scoreLabel')}: {selectedResultado?.puntaje_obtenido.toFixed(2)}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {t('table.percentage')}: {selectedResultado?.porcentaje.toFixed(1)}%
-                      </p>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {t('modal.totalQuestions')}: {totalPreguntas} | {t('modal.validQuestions')}: {selectedResultado?.respuestas_estudiante.length}
-                    </div>
-                  </div>
+        resultado={selectedResultado}
+        totalPreguntas={totalPreguntas}
+        onBubbleClick={handleBubbleClick}
+      />
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      {/* Primera columna: preguntas hasta 20 */}
-                      {selectedResultado && Array.from({ length: Math.min(20, totalPreguntas) }, (_, i) => i + 1).map((orden: number) => {
-                        // Buscar si existe respuesta para esta pregunta
-                        const respuesta = selectedResultado.respuestas_estudiante.find(
-                          r => r.pregunta.orden === orden
-                        );
-                        
-                        if (respuesta) {
-                          // Si la pregunta tiene respuesta, mostrarla normalmente
-                          return (
-                            <div 
-                              key={respuesta.id} 
-                              className={`flex items-center`}
-                            >
-                              <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
-                                {respuesta.pregunta.orden}.
-                              </span>
-                              <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                                {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
-                                  const letter = getLetterFromNumber(num);
-                                  const isSelected = respuesta.opcion_respuesta.orden === num;
-                                  const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
-                                  
-                                  return (
-                                    <div 
-                                      key={`bubble-${respuesta.id}-${num}`}
-                                      className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                        ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
-                                        ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
-                                      `}
-                                      onClick={() => {
-                                        if (!respuesta.pregunta.habilitada || !opcion) return;
-                                        handleBubbleClick(
-                                          respuesta,
-                                          num,
-                                          selectedResultado.id,
-                                          opcion.id
-                                        );
-                                      }}
-                                    >
-                                      {isSelected ? letter : ''}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                              <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                                {respuesta.es_correcta ? '✓' : '✗'}
-                              </span>
-                            </div>
-                          );
-                        } else {
-                          // Si la pregunta no tiene respuesta, mostrar burbujas vacías con X
-                          return (
-                            <div 
-                              key={`pregunta-sin-respuesta-${orden}`} 
-                              className="flex items-center"
-                              data-testid={`pregunta-sin-respuesta-${orden}`}
-                            >
-                              <span className="text-sm font-medium min-w-[25px]">
-                                {orden}.
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                {[1, 2, 3, 4].map((num) => (
-                                  <div 
-                                    key={`bubble-sin-respuesta-${orden}-${num}`}
-                                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold bg-gray-200"
-                                  >
-                                    {/* Burbuja vacía */}
-                                  </div>
-                                ))}
-                              </div>
-                              <span className="ml-2 text-xs text-red-600">
-                                ✗
-                              </span>
-                            </div>
-                          );
-                        }
-                      })}
-                    </div>
-                    <div className="space-y-2">
-                      {/* Segunda columna: preguntas mayores a 20 */}
-                      {selectedResultado && totalPreguntas > 20 && (
-                        Array.from({ length: totalPreguntas - 20 }, (_, i) => i + 21).map((orden: number) => {
-                          // Buscar si existe respuesta para esta pregunta
-                          const respuesta = selectedResultado.respuestas_estudiante.find(
-                            r => r.pregunta.orden === orden
-                          );
-                          
-                          if (respuesta) {
-                            // Si la pregunta tiene respuesta, mostrarla normalmente
-                            return (
-                              <div 
-                                key={respuesta.id} 
-                                className={`flex items-center`}
-                              >
-                                <span className={`text-sm font-medium min-w-[25px] ${!respuesta.pregunta.habilitada ? 'line-through opacity-40' : ''}`}>
-                                  {respuesta.pregunta.orden}.
-                                </span>
-                                <div className={`flex items-center space-x-1 ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                                  {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
-                                    const letter = getLetterFromNumber(num);
-                                    const isSelected = respuesta.opcion_respuesta.orden === num;
-                                    const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
-                                    
-                                    return (
-                                      <div 
-                                        key={`bubble-${respuesta.id}-${num}`}
-                                        className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
-                                          ${isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200'}
-                                          ${!respuesta.pregunta.habilitada ? '' : 'cursor-pointer hover:opacity-80 transition-opacity'}
-                                        `}
-                                        onClick={() => {
-                                          if (!respuesta.pregunta.habilitada || !opcion) return;
-                                          handleBubbleClick(
-                                            respuesta,
-                                            num,
-                                            selectedResultado.id,
-                                            opcion.id
-                                          );
-                                        }}
-                                      >
-                                        {isSelected ? letter : ''}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                                <span className={`ml-2 text-xs ${respuesta.es_correcta ? 'text-green-600' : 'text-red-600'} ${!respuesta.pregunta.habilitada ? 'opacity-30' : ''}`}>
-                                  {respuesta.es_correcta ? '✓' : '✗'}
-                                </span>
-                              </div>
-                            );
-                          } else {
-                            // Si la pregunta no tiene respuesta, mostrar burbujas vacías con X
-                            return (
-                              <div 
-                                key={`pregunta-sin-respuesta-${orden}`} 
-                                className="flex items-center"
-                                data-testid={`pregunta-sin-respuesta-${orden}`}
-                              >
-                                <span className="text-sm font-medium min-w-[25px]">
-                                  {orden}.
-                                </span>
-                                <div className="flex items-center space-x-1">
-                                  {[1, 2, 3, 4].map((num) => (
-                                    <div 
-                                      key={`bubble-sin-respuesta-${orden}-${num}`}
-                                      className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold bg-gray-200"
-                                    >
-                                      {/* Burbuja vacía */}
-                                    </div>
-                                  ))}
-                                </div>
-                                <span className="ml-2 text-xs text-red-600">
-                                  ✗
-                                </span>
-                              </div>
-                            );
-                          }
-                        })
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
+      <ManualGradeDialog
+        open={showManualGradeDialog}
+        onOpenChange={setShowManualGradeDialog}
+        estudiante={selectedEstudiante}
+        manualGrade={manualGrade}
+        onGradeChange={setManualGrade}
+        isSubmitting={isSubmittingGrade}
+        onSave={handleSaveManualGrade}
+      />
 
-              <TabsContent value="original">
-                {selectedResultado.examen_escaneado?.ruta_s3_original ? (
-                  <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-card dark:bg-card">
-                    <ImageWithSignedUrl
-                      path={selectedResultado.examen_escaneado.ruta_s3_original}
-                      alt="Imagen original del examen"
-                    />
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    {t('dialogs.noOriginalImage')}
-                  </div>
-                )}
-              </TabsContent>
-
-              <TabsContent value="processed">
-                {selectedResultado.examen_escaneado?.ruta_s3_procesado ? (
-                  <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-card dark:bg-card">
-                    <ImageWithSignedUrl
-                      path={selectedResultado.examen_escaneado.ruta_s3_procesado}
-                      alt="Imagen procesada del examen"
-                    />
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    {t('dialogs.noProcessedImage')}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          )}
-          
-          <DialogFooter>
-            <Button onClick={() => setShowDetailsDialog(false)}>{t('dialogs.close')}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal para ingresar calificación manual */}
-      <Dialog open={showManualGradeDialog} onOpenChange={setShowManualGradeDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('dialogs.manualGradeTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('dialogs.manualGradeDescription')}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md mt-3 mb-4 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-            <AlertCircle className="h-5 w-5 flex-shrink-0" />
-            <span className="text-sm">
-              {t('dialogs.manualGradeWarning')}
-            </span>
-          </div>
-          
-          <div className="space-y-4 py-2">
-            <div>
-              <Label htmlFor="estudiante">{t('dialogs.studentLabel')}</Label>
-              <Input 
-                id="estudiante" 
-                value={selectedEstudiante ? `${selectedEstudiante.apellidos}, ${selectedEstudiante.nombres}` : ''} 
-                disabled 
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="grade">{t('dialogs.gradeLabel')}</Label>
-              <Input 
-                id="grade" 
-                type="number" 
-                step="0.1"
-                min="0" 
-                max="5" 
-                value={manualGrade} 
-                onChange={(e) => setManualGrade(e.target.value)}
-                className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowManualGradeDialog(false)}
-              disabled={isSubmittingGrade}
-            >
-              {tc('buttons.cancel')}
-            </Button>
-            <Button
-              onClick={handleSaveManualGrade}
-              disabled={isSubmittingGrade || !manualGrade}
-            >
-              {isSubmittingGrade ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('dialogs.saving')}
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {t('dialogs.saveGrade')}
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Group Selection Dialog */}
-      <Dialog open={showGroupSelectionModal} onOpenChange={handleModalOpenChange}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t('dialogs.groupSelectionTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('dialogs.groupSelectionDescription')}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {availableGroups.map((grupo) => (
-              <Button
-                key={grupo.grupo_id}
-                onClick={() => handleGroupSelect(grupo.grupo_id)}
-                variant={selectedGroupId === grupo.grupo_id ? "default" : "outline"}
-                className="w-full justify-start"
-              >
-                {grupo.nombre}
-              </Button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <GroupSelectionDialog
+        open={showGroupSelectionModal}
+        onOpenChange={handleModalOpenChange}
+        availableGroups={availableGroups}
+        selectedGroupId={selectedGroupId}
+        onSelect={handleGroupSelect}
+      />
     </div>
   );
 }
-
-function ImageWithSignedUrl({ path, alt }: { path: string, alt: string }) {
-  const [imageSrc, setImageSrc] = useState<string>(''); // Blob URL state
-  const [error, setError] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
-  const blobUrlRef = useRef<string>('');
-
-  const getStorageUrl = async (filePath: string | null | undefined) => {
-    if (!filePath) return '';
-    
-    try {
-      const { data, error: _error } = await supabase
-        .storage
-        .from('examenes-escaneados')
-        .createSignedUrl(filePath, 3600);
-
-      if (_error) return '';
-      return data.signedUrl;
-    } catch (_error) {
-      return '';
-    }
-  };
-
-  useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    async function fetchImage() {
-      try {
-        setLoading(true);
-        setError(false);
-
-        const url = await getStorageUrl(path);
-        if (!url) {
-          if (isMounted) setError(true);
-          return;
-        }
-
-        // Fetch la imagen sin cookies para evitar problemas de Cloudflare
-        const response = await fetch(url, {
-          credentials: 'omit',  // No enviar cookies
-          mode: 'cors',
-          signal: controller.signal,
-          headers: {
-            'Accept': 'image/*',
-          }
-        });
-
-        if (!response.ok) {
-          if (isMounted) setError(true);
-          return;
-        }
-
-        const blob = await response.blob();
-        
-        // Verificar que sea una imagen válida
-        if (!blob.type.startsWith('image/')) {
-          if (isMounted) setError(true);
-          return;
-        }
-
-        const blobUrl = URL.createObjectURL(blob);
-        blobUrlRef.current = blobUrl;
-        
-        if (isMounted) {
-          setImageSrc(blobUrl);
-          setLoading(false);
-        } else {
-          // Si el componente se desmontó, limpiar el blob URL inmediatamente
-          URL.revokeObjectURL(blobUrl);
-        }
-
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          // Request fue cancelado, no mostrar error
-          return;
-        }
-        if (isMounted) {
-          setError(true);
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchImage();
-
-         // Cleanup function
-     return () => {
-       isMounted = false;
-       controller.abort();
-       if (blobUrlRef.current) {
-         URL.revokeObjectURL(blobUrlRef.current);
-       }
-     };
-  }, [path]);
-
-  if (error) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        Error al cargar la imagen
-      </div>
-    );
-  }
-
-  if (loading || !imageSrc) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  return (
-    <Image
-      src={imageSrc} // Usar blob URL en lugar de signed URL
-      alt={alt}
-      className="w-full h-full object-contain"
-      width={800}
-      height={600}
-      onError={() => setError(true)}
-      unoptimized // Necesario para blob URLs
-    />
-  );
-} 
