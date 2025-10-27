@@ -359,10 +359,18 @@
         "correctPercentage": "% Correct",
         "chartTitle": "Question Difficulty",
         "noData": "Not enough data for analysis",
+        "average": "Average",
         "easiest": "Easiest",
         "hardest": "Hardest",
+        "questionsAnalyzed": "Questions analyzed",
+        "of": "of",
         "totalResponses": "Total responses",
-        "correctResponses": "Correct responses"
+        "correctResponses": "Correct responses",
+        "legend": {
+          "easy": "Easy",
+          "medium": "Medium",
+          "hard": "Hard"
+        }
       },
       "studentResults": "Student Results",
       "studentsSection": "Students",
