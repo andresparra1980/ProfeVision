@@ -252,12 +252,12 @@ export default function ExamsPage() {
     <div className="space-y-4">
       <TitleCardWithDepth
         title={
-          <AuroraText className="text-2xl font-bold tracking-tight">
+          <AuroraText className="text-4xl font-bold tracking-tight">
             {t("exams.title")}
           </AuroraText>
         }
         description={t("exams.description")}
-        titleClassName="!text-3xl !mb-1.5"
+        titleClassName="!text-4xl !mb-1.5"
         actions={
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <Button
