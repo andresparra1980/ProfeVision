@@ -102,7 +102,7 @@ export function SubjectFormModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
       <DialogTrigger asChild>
-        <Button onClick={() => onCancel()}>
+        <Button onClick={() => onCancel()} className="w-full sm:w-auto">
           <PlusCircle className="mr-2 h-4 w-4" />
           {tSubjects('addSubject')}
         </Button>
