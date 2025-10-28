@@ -85,9 +85,9 @@ export function TitleCardWithDepth({
         boxShadow: 'var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)',
       }}
     >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
         {/* Title and description section */}
-        <div className="flex items-start gap-3 flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 flex-1 min-w-0 w-full sm:w-auto">
           {/* Optional icon */}
           {icon && (
             <div className="flex-shrink-0 mt-1">
@@ -96,7 +96,7 @@ export function TitleCardWithDepth({
           )}
 
           {/* Text content */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 w-full sm:w-auto text-center sm:text-left">
             <h2
               className={cn(
                 // Enhanced font styling
