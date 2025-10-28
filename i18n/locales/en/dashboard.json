@@ -1030,7 +1030,8 @@
   },
   "main": {
     "title": "Dashboard",
-    "welcome": "Welcome to ProfeVision, your exam management platform.",
+    "welcome1": "Welcome to ",
+    "welcome2": ", your exam management platform.",
     "stats": {
       "totalInstitutions": "Institutions",
       "totalSubjects": "Subjects",

@@ -14,7 +14,13 @@ export default function DashboardPage() {
       {/* Título */}
       <TitleCardWithDepth
         title={t('main.title')}
-        description={t('main.welcome')}
+        description={
+          <>
+            {t('main.welcome1')}
+            <span className="text-secondary font-semibold">ProfeVision</span>
+            {t('main.welcome2')}
+          </>
+        }
       />
 
       {/* Estadísticas Generales */}

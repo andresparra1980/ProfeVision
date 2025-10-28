@@ -1031,7 +1031,8 @@
   },
   "main": {
     "title": "Dashboard",
-    "welcome": "Bienvenido a ProfeVision, tu plataforma de gestión de exámenes.",
+    "welcome1": "Bienvenido a ",
+    "welcome2": ", tu plataforma de gestión de exámenes.",
     "stats": {
       "totalInstitutions": "Instituciones",
       "totalSubjects": "Materias",
