@@ -26,6 +26,7 @@ import { supabase } from "@/lib/supabase";
 import SimilarExamModal from "./SimilarExamModal";
 import SimilarExamMetadataDialog, { SimilarExamMeta } from "./SimilarExamMetadataDialog";
 import EditableExamTitle from "./EditableExamTitle";
+import { monoFont } from "@/lib/fonts";
 
 // Reusable components
 interface ExamCardHeaderProps {
@@ -38,7 +39,7 @@ function ExamCardHeader({ exam, t, onTitleSave }: ExamCardHeaderProps) {
   return (
     <div className="flex-1 text-left space-y-2">
       {/* Title */}
-      <div className="font-medium text-base leading-tight text-card-foreground">
+      <div className="font-bold text-base leading-tight text-card-foreground">
         <EditableExamTitle
           examId={exam.id}
           initialTitle={exam.titulo}
@@ -47,7 +48,7 @@ function ExamCardHeader({ exam, t, onTitleSave }: ExamCardHeaderProps) {
       </div>
 
       {/* Subject */}
-      <p className="text-xs text-muted-foreground">
+      <p className={`${monoFont}`}>
         {exam.materias?.nombre || "Sin materia"}
       </p>
 
