@@ -60,11 +60,11 @@ export function GradingStats() {
   const timeSavedFormatted = formatTimeSaved(stats.tiempoAhorradoSegundos, locale);
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5 text-purple-600" />
-          {t('gradedExams')}
+          <Clock className="h-5 w-5 text-purple-600 shrink-0" />
+          <span className="break-words">{t('gradedExams')}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -88,26 +88,23 @@ export function GradingStats() {
           <div className="text-3xl font-bold text-purple-600">
             {timeSavedFormatted}
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            {t('timeSavedContext')}
-          </p>
         </div>
 
         {/* Barra de progreso visual - Eficiencia */}
         {stats.examenesCalificados > 0 && (
           <div className="pt-4 border-t">
-            <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-              <span>
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 gap-2">
+              <span className="shrink-0">
                 {locale === 'es' ? 'Eficiencia' : 'Efficiency'}
               </span>
-              <span className="font-semibold text-primary">
-                {locale === 'es' ? '98.3% más rápido' : '98.3% faster'}
+              <span className="font-semibold text-primary text-right">
+                {locale === 'es' ? '93.3% más rápido' : '93.3% faster'}
               </span>
             </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div className="h-2 bg-muted rounded-full overflow-hidden w-full">
               <div
                 className="h-full bg-primary transition-all duration-500 ease-out"
-                style={{ width: '98.3%' }}
+                style={{ width: '90%' }}
               />
             </div>
           </div>

@@ -20,10 +20,14 @@ export default function DashboardPage() {
       {/* Estadísticas Generales */}
       <StatsOverview />
 
-      {/* Grid de 2 columnas: Exámenes Recientes y Stats de Calificación */}
+      {/* Grid de 2 columnas: Stats de Calificación y Exámenes Recientes */}
       <div className="grid gap-4 md:grid-cols-2">
-        <RecentExamsList />
-        <GradingStats />
+        <div className="min-w-0">
+          <GradingStats />
+        </div>
+        <div className="min-w-0">
+          <RecentExamsList />
+        </div>
       </div>
     </div>
   );

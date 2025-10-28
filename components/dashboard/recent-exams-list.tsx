@@ -1,13 +1,19 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Edit, BarChart3 } from 'lucide-react';
 import { useDashboardStats } from '@/lib/hooks/use-dashboard-stats';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { monoFont } from '@/lib/fonts';
 
 // Helper para formatear fecha relativa
 function formatRelativeDate(dateString: string, locale: string): string {
@@ -58,17 +64,77 @@ export function RecentExamsList() {
   const locale = useLocale();
   const router = useRouter();
 
-  // Mapeo de estados a variantes de badge
-  const getStatusVariant = (estado: string) => {
-    switch (estado) {
-      case 'publicado':
-        return 'default';
-      case 'borrador':
-        return 'warning'; // Color amarillo/accent
-      case 'archivado':
-        return 'outline';
+  // Función para obtener el badge con estilo rotado (copiado de ExamsTableMobile)
+  const getStatusBadge = (status: string) => {
+    const baseStyle: React.CSSProperties = {
+      padding: "3px 8px",
+      fontSize: "12px",
+      fontWeight: "800",
+      letterSpacing: "0.025em",
+      transform: "rotate(-5deg)",
+      display: "inline-block",
+      position: "relative",
+      borderRadius: "3px",
+      textTransform: "uppercase" as const,
+    };
+
+    switch (status) {
+      case "borrador":
+        return (
+          <span
+            style={{
+              ...baseStyle,
+              background: "color-mix(in srgb, var(--accent) 80%, transparent)",
+              color: "black",
+              boxShadow:
+                "inset 0 -2px 0 color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
+            }}
+          >
+            {t('examStatus.borrador')}
+          </span>
+        );
+      case "publicado":
+        return (
+          <span
+            style={{
+              ...baseStyle,
+              background: "color-mix(in srgb, var(--primary) 80%, transparent)",
+              color: "black",
+              boxShadow:
+                "inset 0 -2px 0 color-mix(in srgb, var(--primary) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
+            }}
+          >
+            {t('examStatus.publicado')}
+          </span>
+        );
+      case "archivado":
+        return (
+          <span
+            style={{
+              ...baseStyle,
+              background: "color-mix(in srgb, var(--muted) 80%, transparent)",
+              color: "black",
+              boxShadow:
+                "inset 0 -2px 0 color-mix(in srgb, var(--muted) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
+            }}
+          >
+            {t('examStatus.archivado')}
+          </span>
+        );
       default:
-        return 'secondary';
+        return (
+          <span
+            style={{
+              ...baseStyle,
+              background: "color-mix(in srgb, var(--muted) 80%, transparent)",
+              color: "black",
+              boxShadow:
+                "inset 0 -2px 0 color-mix(in srgb, var(--muted) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
+            }}
+          >
+            {status}
+          </span>
+        );
     }
   };
 
@@ -110,67 +176,91 @@ export function RecentExamsList() {
     );
   }
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('recentExams')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {stats.examenesRecientes.map((examen) => (
-            <div
-              key={examen.id}
-              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+  // Componente para el contenido del examen (info básica)
+  const ExamHeader = ({ examen }: { examen: typeof stats.examenesRecientes[0] }) => (
+    <div className="flex-1 min-w-0 w-full space-y-2">
+      {/* Línea 1: Título en bold */}
+      <h4 className="font-bold text-base text-left break-words">{examen.titulo}</h4>
+
+      {/* Línea 2: Materia en monofont + Tiempo relativo */}
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        {examen.materia_nombre && (
+          <span className={`${monoFont}`}>{examen.materia_nombre}</span>
+        )}
+        <span className="shrink-0">•</span>
+        <span className="shrink-0">{formatRelativeDate(examen.fecha_creacion, locale)}</span>
+      </div>
+
+      {/* Línea 3: Group pills - above status badge */}
+      {examen.grupos_nombres && examen.grupos_nombres.length > 0 && (
+        <div className="flex flex-wrap gap-1 justify-start">
+          {examen.grupos_nombres.map((nombreGrupo, index) => (
+            <span
+              key={`${examen.id}-${nombreGrupo}-${index}`}
+              className="inline-flex items-center justify-center rounded-full bg-secondary text-white px-2 py-0.5 text-[10px] font-medium shadow-sm"
             >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium text-sm truncate">{examen.titulo}</h4>
-                  <Badge variant={getStatusVariant(examen.estado)}>
-                    {t(`examStatus.${examen.estado}`)}
-                  </Badge>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-muted-foreground">
-                  {examen.materia_nombre && (
-                    <>
-                      <span className="truncate">{examen.materia_nombre}</span>
-                      {examen.grupo_nombre && <span className="hidden sm:inline">•</span>}
-                    </>
-                  )}
-                  {examen.grupo_nombre && (
-                    <>
-                      <span className="truncate">{examen.grupo_nombre}</span>
-                      <span className="hidden sm:inline">•</span>
-                    </>
-                  )}
-                  <span>{formatRelativeDate(examen.fecha_creacion, locale)}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/edit`)}
-                  className="flex-1 sm:flex-none"
-                >
-                  <Edit className="h-3.5 w-3.5 sm:mr-1" />
-                  <span className="hidden sm:inline">{t('actions.edit')}</span>
-                </Button>
-                {/* Solo mostrar botón de resultados si el examen NO está en borrador */}
-                {examen.estado !== 'borrador' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/results`)}
-                    className="flex-1 sm:flex-none"
-                  >
-                    <BarChart3 className="h-3.5 w-3.5 sm:mr-1" />
-                    <span className="hidden sm:inline">{t('actions.viewResults')}</span>
-                  </Button>
-                )}
-              </div>
-            </div>
+              {nombreGrupo}
+            </span>
           ))}
         </div>
+      )}
+
+      {/* Línea 4: Badge de estado */}
+      <div className="flex justify-start">
+        {getStatusBadge(examen.estado)}
+      </div>
+    </div>
+  );
+
+  // Componente para los botones de acción
+  const ExamActions = ({ examen }: { examen: typeof stats.examenesRecientes[0] }) => (
+    <div className="flex flex-col gap-2 w-full">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/edit`)}
+        className="w-full justify-start"
+      >
+        <Edit className="h-3.5 w-3.5 mr-2" />
+        {t('actions.edit')}
+      </Button>
+      {examen.estado !== 'borrador' && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/results`)}
+          className="w-full justify-start"
+        >
+          <BarChart3 className="h-3.5 w-3.5 mr-2" />
+          {t('actions.viewResults')}
+        </Button>
+      )}
+    </div>
+  );
+
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader>
+        <CardTitle className="break-words">{t('recentExams')}</CardTitle>
+      </CardHeader>
+      <CardContent className="overflow-hidden">
+        {/* Siempre mostrar en formato acordeón */}
+        <Accordion type="single" collapsible className="w-full space-y-2">
+          {stats.examenesRecientes.map((examen) => (
+            <AccordionItem
+              value={examen.id}
+              key={examen.id}
+              className="border rounded-md shadow-sm bg-card overflow-hidden"
+            >
+              <AccordionTrigger className="p-3 hover:no-underline [&>svg]:shrink-0">
+                <ExamHeader examen={examen} />
+              </AccordionTrigger>
+              <AccordionContent className="p-3 border-t bg-muted/20 overflow-hidden">
+                <ExamActions examen={examen} />
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </CardContent>
     </Card>
   );
