@@ -1031,6 +1031,27 @@
   "main": {
     "title": "Dashboard",
     "welcome": "Welcome to ProfeVision, your exam management platform.",
+    "stats": {
+      "totalInstitutions": "Institutions",
+      "totalSubjects": "Subjects",
+      "activeGroups": "Active Groups",
+      "archivedGroups": "Archived Groups",
+      "totalStudents": "Students",
+      "recentExams": "Recent Exams",
+      "gradedExams": "Graded Exams",
+      "timeSaved": "Time Saved",
+      "timeSavedContext": "Without ProfeVision: 5 min/exam • With ProfeVision: 5 s/exam",
+      "noExams": "No recent exams",
+      "examStatus": {
+        "borrador": "Draft",
+        "publicado": "Published",
+        "archivado": "Archived"
+      },
+      "actions": {
+        "edit": "Edit",
+        "viewResults": "View Results"
+      }
+    },
     "metrics": {
       "examsCreated": "Exams created",
       "studentsEvaluated": "Students evaluated",
@@ -1296,7 +1317,12 @@
       "title": "Error",
       "fetchProfile": "Could not load profile information",
       "noSession": "No active session",
-      "saveChanges": "Could not save changes"
+      "saveChanges": "Could not save changes",
+      "serverConfig": "Server configuration error",
+      "unauthorizedMissing": "Authentication token required",
+      "unauthorized": "Unauthorized",
+      "fetchData": "Error fetching data",
+      "internal": "Internal server error"
     }
   }
 }
