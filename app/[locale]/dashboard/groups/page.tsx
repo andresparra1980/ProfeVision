@@ -19,6 +19,7 @@ import logger from "@/lib/utils/logger";
 import { AuthError } from "@supabase/supabase-js";
 import { GroupCard } from "./components/GroupCard";
 import { GroupFormModal } from "./components/GroupFormModal";
+import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
   materias: {
@@ -427,42 +428,40 @@ export default function GroupsPage() {
   //    Now, loading only refers to the local loading for groups/materias/etc.
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-          <div className="text-sm text-muted-foreground">
-            {t('description')}
+      <TitleCardWithDepth
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Button
+              variant="default"
+              onClick={() => setMostrarArchivados(!mostrarArchivados)}
+              className="bg-rose-500 text-primary-foreground hover:bg-rose-600 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/90 transition-colors w-full sm:w-auto"
+            >
+              {mostrarArchivados ? (
+                <>
+                  <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.showActive')}
+                </>
+              ) : (
+                <>
+                  <Archive className="mr-2 h-4 w-4" /> {t('buttons.showArchived')}
+                </>
+              )}
+            </Button>
+            <GroupFormModal
+              open={openDialog}
+              onOpenChangeAction={handleOpenChange}
+              editingGrupo={editingGrupo}
+              entidades={entidades}
+              materias={materias}
+              materiasFiltradas={materiasFiltradas}
+              onSubmitAction={onSubmit}
+              onSetMateriasFiltradasAction={setMateriasFiltradas}
+              mostrarArchivados={mostrarArchivados}
+            />
           </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="default"
-            onClick={() => setMostrarArchivados(!mostrarArchivados)}
-            className="bg-rose-500 text-primary-foreground hover:bg-rose-600 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/90 transition-colors"
-          >
-            {mostrarArchivados ? (
-              <>
-                <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.showActive')}
-              </>
-            ) : (
-              <>
-                <Archive className="mr-2 h-4 w-4" /> {t('buttons.showArchived')}
-              </>
-            )}
-          </Button>
-          <GroupFormModal
-            open={openDialog}
-            onOpenChangeAction={handleOpenChange}
-            editingGrupo={editingGrupo}
-            entidades={entidades}
-            materias={materias}
-            materiasFiltradas={materiasFiltradas}
-            onSubmitAction={onSubmit}
-            onSetMateriasFiltradasAction={setMateriasFiltradas}
-            mostrarArchivados={mostrarArchivados}
-          />
-        </div>
-      </div>
+        }
+      />
 
       {/* Content Section - Spinner only depends on local 'loading' now */}
       {loading ? ( // Use the local loading state for the content spinner

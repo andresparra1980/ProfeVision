@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 interface FormData {
   nombres: string;
@@ -497,28 +498,25 @@ export default function StudentsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
-          <p className="text-muted-foreground">
-            {t('description')}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => router.push("/dashboard/groups")}
-            className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90"
-          >
-            <Folders className="mr-2 h-4 w-4" /> {t('actions.manageGroups')}
-          </Button>
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> {t('actions.createStudent')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-[#FAFAF4] dark:bg-[#171717]">
+      <TitleCardWithDepth
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => router.push("/dashboard/groups")}
+              className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90 w-full sm:w-auto"
+            >
+              <Folders className="mr-2 h-4 w-4" /> {t('actions.manageGroups')}
+            </Button>
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <Plus className="mr-2 h-4 w-4" /> {t('actions.createStudent')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-[#FAFAF4] dark:bg-[#171717]">
               <DialogHeader>
                 <DialogTitle>{t('form.title')}</DialogTitle>
                 <DialogDescription>
@@ -624,8 +622,9 @@ export default function StudentsPage() {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <Card>
         <CardHeader>

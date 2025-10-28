@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button"; // Added for dialogs
 import { useTranslations } from "next-intl";
+import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 
 interface Exam {
@@ -249,32 +250,33 @@ export default function ExamsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex flex-col gap-2">
+      <TitleCardWithDepth
+        title={
           <AuroraText className="text-2xl font-bold tracking-tight">
             {t("exams.title")}
           </AuroraText>
-          <p className="text-muted-foreground">
-            {t("exams.description")}
-          </p>
-        </div>
-        <div className="flex items-center space-x-2 flex-shrink-0">
-          <Button
-            onClick={() => setShowImportDialog(true)}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            {t("exams.import.actions.import")}
-          </Button>
-          <Button
-            onClick={handleCreateExam}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            {t("exams.actions.createWithAI")}
-          </Button>
-        </div>
-      </div>
+        }
+        description={t("exams.description")}
+        titleClassName="!text-3xl !mb-1.5"
+        actions={
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <Button
+              onClick={() => setShowImportDialog(true)}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white w-full sm:w-auto"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              {t("exams.import.actions.import")}
+            </Button>
+            <Button
+              onClick={handleCreateExam}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white w-full sm:w-auto"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {t("exams.actions.createWithAI")}
+            </Button>
+          </div>
+        }
+      />
 
 
         <ExamsTableMobile

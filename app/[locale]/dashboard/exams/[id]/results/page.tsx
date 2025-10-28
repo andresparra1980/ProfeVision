@@ -60,6 +60,7 @@ const GroupSelectionDialog = dynamic(
 // Shared
 import { ResultsPageHeader } from '@/components/exam-results/shared/results-page-header';
 import { ResultsPageActions } from '@/components/exam-results/shared/results-page-actions';
+import { TitleCardWithDepth } from '@/components/shared/title-card-with-depth';
 
 // Types
 import type { ResultadoExamen } from '@/components/exam-results/utils/types';
@@ -268,22 +269,24 @@ export default function ExamResultsPage() {
         onToggleGroupModal={handleToggleGroupSelectionModal}
       />
 
-      {/* Title and action buttons */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
+      {/* Title card with depth */}
+      <TitleCardWithDepth
+        title={
+          <>
             {t('title')}: {examDetails?.titulo || t('loading')}
-          </h2>
-          <p className="text-muted-foreground">{t('description')}</p>
-        </div>
-        <ResultsPageActions
-          examDetails={examDetails}
-          resultados={resultados}
-          totalPreguntas={totalPreguntas}
-          selectedGroupId={selectedGroupId}
-          onExportExcel={handleExportToExcel}
-        />
-      </div>
+          </>
+        }
+        description={t('description')}
+        actions={
+          <ResultsPageActions
+            examDetails={examDetails}
+            resultados={resultados}
+            totalPreguntas={totalPreguntas}
+            selectedGroupId={selectedGroupId}
+            onExportExcel={handleExportToExcel}
+          />
+        }
+      />
 
       {/* Cards grid */}
       {examDetails && (

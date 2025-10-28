@@ -13,6 +13,7 @@ import type { Database } from "@/lib/types/database";
 import { SubjectCard } from "./components/SubjectCard";
 import { SubjectFormModal } from "./components/SubjectFormModal";
 import { DeleteConfirmationModal } from "./components/DeleteConfirmationModal";
+import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 type Materia = Database["public"]["Tables"]["materias"]["Row"];
 type EntidadEducativa = Database["public"]["Tables"]["entidades_educativas"]["Row"];
@@ -203,22 +204,20 @@ export default function SubjectsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-          <p className="text-muted-foreground">
-            {t('description')}
-          </p>
-        </div>
-        <SubjectFormModal
-          open={openDialog}
-          onOpenChange={setOpenDialog}
-          editingMateria={editingMateria}
-          entidades={entidades}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-        />
-      </div>
+      <TitleCardWithDepth
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <SubjectFormModal
+            open={openDialog}
+            onOpenChange={setOpenDialog}
+            editingMateria={editingMateria}
+            entidades={entidades}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+          />
+        }
+      />
 
       {loading ? (
         <div className="flex h-40 items-center justify-center">

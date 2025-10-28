@@ -14,6 +14,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logger } from "@/lib/utils/logger";
+import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 interface EducationalEntity {
   id: string;
@@ -173,22 +174,17 @@ export default function EntitiesPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
-          <p className="text-muted-foreground">
-            {entities.length === 0 
-              ? t('emptyDescription')
-              : t('description')}
-          </p>
-        </div>
-        <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> {t('newEntity')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px] bg-[#FAFAF4] dark:bg-[#171717]">
+      <TitleCardWithDepth
+        title={t('title')}
+        description={entities.length === 0 ? t('emptyDescription') : t('description')}
+        actions={
+          <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto">
+                <Plus className="mr-2 h-4 w-4" /> {t('newEntity')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px] bg-[#FAFAF4] dark:bg-[#171717]">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
                 <DialogTitle>{t('form.addTitle')}</DialogTitle>
@@ -237,7 +233,8 @@ export default function EntitiesPage() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+        }
+      />
 
       {entities.length === 0 && !loading ? (
         <Card className="mt-4">
