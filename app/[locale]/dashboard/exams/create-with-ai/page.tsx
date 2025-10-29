@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Building2, Save } from "lucide-react";
 import { Plus } from "lucide-react";
 import { BookOpen } from "lucide-react";
@@ -211,9 +211,7 @@ export default function CreateExamPage() {
       setMaterias(data || []);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : t('messages.loadingError');
-      toast({
-        variant: "destructive",
-        title: t('messages.loadingError'),
+      toast.error(t('messages.loadingError'), {
         description: errorMessage,
       });
     }
@@ -234,9 +232,7 @@ export default function CreateExamPage() {
       setGrupos(data || []);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : t('messages.loadingError');
-      toast({
-        variant: "destructive",
-        title: t('messages.loadingError'),
+      toast.error(t('messages.loadingError'), {
         description: errorMessage,
       });
     }
@@ -452,16 +448,13 @@ export default function CreateExamPage() {
       // Clear localStorage after successful creation
       localStorage.removeItem('examQuestions');
 
-      toast({
-        title: t('messages.success'),
+      toast.success(t('messages.success'), {
         description: t('messages.examCreated'),
       });
       router.push('/dashboard/exams');
     } catch (error) {
       console.error('Error al crear el examen:', error);
-      toast({
-        variant: "destructive",
-        title: t('messages.error'),
+      toast.error(t('messages.error'), {
         description: error instanceof Error ? error.message : t('messages.createError'),
       });
     } finally {

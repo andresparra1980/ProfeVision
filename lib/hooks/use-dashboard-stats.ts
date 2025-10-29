@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export interface DashboardStats {
@@ -86,10 +86,8 @@ export function useDashboardStats() {
       });
       setError(errorObj);
 
-      toast({
-        title: "Error al cargar estadísticas",
+      toast.error("Error al cargar estadísticas", {
         description: errorObj.message,
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
