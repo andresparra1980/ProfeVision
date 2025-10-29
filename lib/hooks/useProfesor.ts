@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/types/database';
 import { AuthError } from '@supabase/supabase-js';
 import { logger } from '@/lib/utils/logger';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 export type Profesor = Database['public']['Tables']['profesores']['Row'] & {
   telefono?: string | null;
@@ -173,7 +173,7 @@ export function useProfesor() {
       }
       
       setProfesor(data);
-      toast({ title: 'Perfil actualizado', description: 'Tus datos han sido actualizados.' });
+      toast.success('Perfil actualizado', { description: 'Tus datos han sido actualizados.' });
       return { success: true, data };
     } catch (error: unknown) {
       const isAuthError = error instanceof AuthError;
@@ -201,10 +201,8 @@ export function useProfesor() {
 
       setError(errorObj);
 
-      toast({
-        title: 'Error al actualizar',
+      toast.error('Error al actualizar', {
         description: `Error ${status ? `(${status}) ` : ''}: ${errorObj.message}`,
-        variant: 'destructive',
       });
 
       return { success: false, error: errorObj };
