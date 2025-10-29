@@ -25,7 +25,7 @@ export function StudentDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('modal.title')}</DialogTitle>
           <DialogDescription>
@@ -36,42 +36,45 @@ export function StudentDetailsDialog({
         {resultado && (
           <Tabs defaultValue="answers" className="mt-2">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="answers">{t('modal.responses')}</TabsTrigger>
-              <TabsTrigger value="original">{t('modal.originalImage')}</TabsTrigger>
-              <TabsTrigger value="processed">{t('modal.processedImage')}</TabsTrigger>
+              <TabsTrigger value="answers" className="text-xs md:text-sm truncate">{t('modal.responses')}</TabsTrigger>
+              <TabsTrigger value="original" className="text-xs md:text-sm truncate">{t('modal.originalImage')}</TabsTrigger>
+              <TabsTrigger value="processed" className="text-xs md:text-sm truncate">{t('modal.processedImage')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="answers">
-              <div className="pt-4">
-                <div className="flex justify-between items-center mb-4">
+              <div className="pt-3">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 mb-4 px-2">
                   <div>
-                    <p className="font-medium">{t('modal.scoreLabel')}: {resultado.puntaje_obtenido.toFixed(2)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {t('table.percentage')}: {resultado.porcentaje.toFixed(1)}%
-                    </p>
+                    <p className="text-xs md:text-sm font-mono font-bold">{t('modal.scoreLabel')}: {resultado.puntaje_obtenido.toFixed(2)}</p>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {t('modal.totalQuestions')}: {totalPreguntas} | {t('modal.validQuestions')}: {resultado.respuestas_estudiante.length}
+                  <div className="text-xs text-muted-foreground font-mono md:text-right">
+                    <span className="block md:inline">{t('modal.totalQuestions')}: {totalPreguntas}</span>
+                    <span className="hidden md:inline"> | </span>
+                    <span className="block md:inline">{t('modal.validQuestions')}: {resultado.respuestas_estudiante.length}</span>
                   </div>
                 </div>
 
-                <AnswerBubblesGrid
+                <div className="flex items-center justify-center">
+                  <AnswerBubblesGrid
                   respuestas={resultado.respuestas_estudiante}
                   totalPreguntas={totalPreguntas}
                   resultadoId={resultado.id}
                   onBubbleClick={onBubbleClick}
                   readonly={false}
-                />
+                  />
+                </div>
               </div>
             </TabsContent>
 
             <TabsContent value="original">
               {resultado.examen_escaneado?.ruta_s3_original ? (
-                <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-card dark:bg-card">
-                  <ImageWithSignedUrl
-                    path={resultado.examen_escaneado.ruta_s3_original}
-                    alt="Imagen original del examen"
-                  />
+                <div className="relative w-full max-w-[500px] h-[55vh] border rounded-lg overflow-hidden bg-card dark:bg-card mx-auto flex items-center justify-center">
+                  <div className="w-full h-full">
+                    <ImageWithSignedUrl
+                      path={resultado.examen_escaneado.ruta_s3_original}
+                      alt="Imagen original del examen"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
@@ -82,11 +85,13 @@ export function StudentDetailsDialog({
 
             <TabsContent value="processed">
               {resultado.examen_escaneado?.ruta_s3_procesado ? (
-                <div className="relative w-full h-[600px] border rounded-lg overflow-hidden bg-card dark:bg-card">
-                  <ImageWithSignedUrl
-                    path={resultado.examen_escaneado.ruta_s3_procesado}
-                    alt="Imagen procesada del examen"
-                  />
+                <div className="relative w-full max-w-[500px] h-[55vh] border rounded-lg overflow-hidden bg-card dark:bg-card mx-auto flex items-center justify-center">
+                  <div className="w-full h-full">
+                    <ImageWithSignedUrl
+                      path={resultado.examen_escaneado.ruta_s3_procesado}
+                      alt="Imagen procesada del examen"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">

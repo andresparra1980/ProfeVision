@@ -28,13 +28,13 @@ export function AnswerBubblesGrid({
           className="flex items-center"
         >
           <span className={cn(
-            'text-sm font-medium min-w-[25px]',
+            'text-xs font-medium font-mono min-w-[30px]',
             !respuesta.pregunta.habilitada && 'line-through opacity-40'
           )}>
-            {respuesta.pregunta.orden}.
+            {respuesta.pregunta.orden}. 
           </span>
           <div className={cn(
-            'flex items-center space-x-1',
+            'flex items-center gap-1.5',
             !respuesta.pregunta.habilitada && 'opacity-30'
           )}>
             {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
@@ -58,7 +58,7 @@ export function AnswerBubblesGrid({
             })}
           </div>
           <span className={cn(
-            'ml-2 text-xs',
+            'text-xs',
             respuesta.es_correcta ? 'text-green-600' : 'text-red-600',
             !respuesta.pregunta.habilitada && 'opacity-30'
           )}>
@@ -74,8 +74,8 @@ export function AnswerBubblesGrid({
         key={`pregunta-sin-respuesta-${orden}`}
         className="flex items-center"
       >
-        <span className="text-sm font-medium min-w-[25px]">{orden}.</span>
-        <div className="flex items-center space-x-1">
+        <span className="text-xs font-medium font-mono min-w-[30px]">{orden}. </span>
+        <div className="flex items-center gap-1.5">
           {[1, 2, 3, 4].map((num) => (
             <AnswerBubble
               key={`bubble-sin-respuesta-${orden}-${num}`}
@@ -85,22 +85,28 @@ export function AnswerBubblesGrid({
             />
           ))}
         </div>
-        <span className="ml-2 text-xs text-red-600">✗</span>
+        <span className="text-xs text-red-600">✗</span>
       </div>
     );
   };
 
   return (
-    <div className="grid grid-cols-2 gap-6">
-      <div className="space-y-2">
-        {/* First column: questions 1-20 */}
-        {Array.from({ length: Math.min(20, totalPreguntas) }, (_, i) => i + 1).map(renderQuestion)}
-      </div>
-      <div className="space-y-2">
-        {/* Second column: questions 21+ */}
-        {totalPreguntas > 20 &&
-          Array.from({ length: totalPreguntas - 20 }, (_, i) => i + 21).map(renderQuestion)
-        }
+    <div className="bg-white dark:bg-muted border-2 rounded-lg shadow-md p-4 md:p-6 mx-auto overflow-auto w-full max-w-[500px]" style={{ maxHeight: '55vh' }}>
+      <div className="flex gap-3 md:gap-6 items-start">
+        <div className="space-y-1.5 flex-1 flex flex-col items-end">
+          {/* First column: questions 1-20 */}
+          {Array.from({ length: Math.min(20, totalPreguntas) }, (_, i) => i + 1).map(renderQuestion)}
+        </div>
+        
+        {/* Vertical separator */}
+        <div className="w-px bg-border flex-shrink-0 self-stretch" />
+        
+        <div className="space-y-1.5 flex-1 flex flex-col items-start">
+          {/* Second column: questions 21+ */}
+          {totalPreguntas > 20 &&
+            Array.from({ length: totalPreguntas - 20 }, (_, i) => i + 21).map(renderQuestion)
+          }
+        </div>
       </div>
     </div>
   );
