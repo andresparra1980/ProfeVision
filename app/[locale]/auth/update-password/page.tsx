@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ModeToggle } from "@/components/shared/mode-toggle";
 import { supabase } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -160,8 +160,7 @@ function UpdatePasswordContent() {
         throw error;
       }
 
-      toast({
-        title: t('success'),
+      toast.success(t('success'), {
         description: t('successDescription'),
       });
       
@@ -179,9 +178,7 @@ function UpdatePasswordContent() {
       } else if (error instanceof Error) {
         errorMsg = error.message;
       }
-      toast({
-        variant: "destructive",
-        title: t('error'),
+      toast.error(t('error'), {
         description: errorMsg,
       });
     } finally {

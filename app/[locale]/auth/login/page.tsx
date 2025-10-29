@@ -12,8 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
+import { getAuthErrorMessage } from "@/lib/utils/auth-errors";
 import {
   Card,
   CardContent,
@@ -51,10 +52,8 @@ export default function LoginPage() {
 
   async function onSubmit(data: LoginFormValues) {
     if (!captchaToken) {
-      toast({
-        variant: "destructive",
-        title: tErrors('validationError'),
-        description: tErrors('captchaRequired'),
+      toast.error(tErrors('captchaRequired'), {
+        description: tErrors('validationError'),
       });
       return;
     }
@@ -73,14 +72,12 @@ export default function LoginPage() {
         throw error;
       }
 
-              // 🔄 Redirección localizada
-        router.push(routes.dashboard.home());
+      // 🔄 Redirección localizada
+      router.push(routes.dashboard.home());
       router.refresh();
     } catch (error: unknown) {
-      toast({
-        variant: "destructive",
-        title: t('loginError'),
-        description: error instanceof Error ? error.message : tErrors('generalError'),
+      toast.error(t('loginError'), {
+        description: getAuthErrorMessage(error, tErrors),
       });
       
       // Resetear el CAPTCHA en caso de error
@@ -151,11 +148,7 @@ export default function LoginPage() {
               onSuccess={(token) => setCaptchaToken(token)}
               onError={() => {
                 setCaptchaToken(null);
-                toast({
-                  variant: "destructive",
-                  title: tErrors('captchaError'),
-                  description: tErrors('captchaError'),
-                });
+                toast.error(tErrors('captchaError'));
               }}
               onExpire={() => setCaptchaToken(null)}
               className="mx-auto"

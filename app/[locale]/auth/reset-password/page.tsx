@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { resetPassword } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { logger } from "@/lib/utils/logger";
+import { getAuthErrorMessage } from "@/lib/utils/auth-errors";
 import {
   Card,
   CardContent,
@@ -47,10 +48,8 @@ export default function ResetPasswordPage() {
 
   async function onSubmit(data: ResetFormValues) {
     if (!captchaToken) {
-      toast({
-        variant: "destructive",
-        title: tErrors('validationError'),
-        description: tErrors('captchaRequired'),
+      toast.error(tErrors('captchaRequired'), {
+        description: tErrors('validationError'),
       });
       return;
     }
@@ -70,8 +69,7 @@ export default function ResetPasswordPage() {
 
       logger.auth("Password reset email sent", { email: data.email });
       setIsSubmitted(true);
-      toast({
-        title: t('success'),
+      toast.success(t('success'), {
         description: t('successDescription'),
       });
     } catch (error: unknown) {
@@ -80,10 +78,8 @@ export default function ResetPasswordPage() {
         email: data.email
       });
       
-      toast({
-        variant: "destructive",
-        title: t('error') || 'Error',
-        description: error instanceof Error ? error.message : tErrors('generalError'),
+      toast.error(t('error') || 'Error', {
+        description: getAuthErrorMessage(error, tErrors),
       });
       
       // Resetear el CAPTCHA en caso de error
@@ -158,11 +154,7 @@ export default function ResetPasswordPage() {
               onSuccess={(token) => setCaptchaToken(token)}
               onError={() => {
                 setCaptchaToken(null);
-                toast({
-                  variant: "destructive",
-                  title: tErrors('captchaError'),
-                  description: tErrors('captchaError'),
-                });
+                toast.error(tErrors('captchaError'));
               }}
               onExpire={() => setCaptchaToken(null)}
               className="mx-auto"
