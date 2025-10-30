@@ -436,7 +436,7 @@ export default function GroupsPage() {
             <Button
               variant="default"
               onClick={() => setMostrarArchivados(!mostrarArchivados)}
-              className="bg-rose-500 text-primary-foreground hover:bg-rose-600 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/90 transition-colors w-full sm:w-auto"
+              className="bg-secondary text-primary-foreground dark:bg-secondary dark:text-white transition-colors w-full sm:w-auto"
             >
               {mostrarArchivados ? (
                 <>

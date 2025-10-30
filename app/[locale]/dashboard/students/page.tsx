@@ -381,9 +381,10 @@ export default function StudentsPage() {
           <p className="text-muted-foreground max-w-md mx-auto mb-6">
             {t('empty.noGroups.description')}
           </p>
-          <Button 
+          <Button
+            variant="default"
             onClick={() => router.push("/dashboard/groups")}
-            className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90"
+            className="bg-secondary text-primary-foreground dark:bg-secondary dark:text-white transition-colors w-full sm:w-auto"
           >
             <Folders className="mr-2 h-4 w-4" /> {t('empty.noGroups.createGroup')}
           </Button>
@@ -408,9 +409,9 @@ export default function StudentsPage() {
             >
               <UserPlus className="mr-2 h-4 w-4" /> {t('empty.noStudents.createStudent')}
             </Button>
-            <Button 
+            <Button
               onClick={() => router.push("/dashboard/groups")}
-              className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90"
+              className="bg-secondary text-primary-foreground dark:bg-secondary dark:text-white transition-colors w-full sm:w-auto"
             >
               <Folders className="mr-2 h-4 w-4" /> {t('empty.noStudents.manageGroups')}
             </Button>
@@ -504,9 +505,9 @@ export default function StudentsPage() {
         actions={
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <Button
-              variant="outline"
+              variant="default"
               onClick={() => router.push("/dashboard/groups")}
-              className="bg-secondary text-white hover:bg-secondary/90 dark:text-black dark:hover:bg-secondary/90 w-full sm:w-auto"
+              className="bg-secondary text-primary-foreground dark:bg-secondary dark:text-white transition-colors w-full sm:w-auto"
             >
               <Folders className="mr-2 h-4 w-4" /> {t('actions.manageGroups')}
             </Button>

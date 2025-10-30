@@ -77,20 +77,20 @@ export function TitleCardWithDepth({
         'border-border/50 dark:border-border/30',
         // Subtle background enhancement
         'bg-gradient-to-br from-card to-card/95',
-        // Padding
-        'p-6',
+        // Responsive padding - much more compact vertically on mobile, especially top
+        'px-4 pt-1.5 pb-2 sm:p-6',
         className
       )}
       style={{
         boxShadow: 'var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)',
       }}
     >
-      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-1 sm:gap-4">
         {/* Title and description section */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 flex-1 min-w-0 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-3 flex-1 min-w-0 w-full sm:w-auto">
           {/* Optional icon */}
           {icon && (
-            <div className="flex-shrink-0 mt-1">
+            <div className="flex-shrink-0 mt-0 sm:mt-1">
               {icon}
             </div>
           )}
@@ -101,18 +101,17 @@ export function TitleCardWithDepth({
               className={cn(
                 // Enhanced font styling
                 'text-3xl font-extrabold tracking-tight',
-                // Radial gradient text effect from center (subtle in light mode, more pronounced in dark)
-                'bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))]',
-                'from-foreground via-foreground to-foreground/90',
-                'dark:from-foreground dark:via-foreground dark:to-foreground/80',
+                // Enhanced gradient text effect - more pronounced for consistency
+                'bg-gradient-to-br from-foreground via-foreground to-foreground/80',
+                'dark:from-foreground dark:via-foreground dark:to-foreground/70',
                 'bg-clip-text text-transparent',
-                // Text shadow for depth (applied via style)
-                '[text-shadow:0_2px_10px_rgba(0,0,0,0.1)]',
-                'dark:[text-shadow:0_2px_15px_rgba(255,255,255,0.1)]',
+                // Enhanced text shadow for depth - visible on all screen sizes
+                '[text-shadow:0_2px_12px_rgba(0,0,0,0.15),0_1px_4px_rgba(0,0,0,0.1)]',
+                'dark:[text-shadow:0_2px_18px_rgba(255,255,255,0.15),0_1px_6px_rgba(255,255,255,0.1)]',
                 // Letter spacing for elegance
                 'tracking-tight leading-tight',
-                // Margin
-                'mb-1.5',
+                // No margin on mobile, minimal margin on desktop
+                'mb-0 sm:mb-1.5',
                 titleClassName
               )}
             >
@@ -127,8 +126,8 @@ export function TitleCardWithDepth({
                   // Subtle shadow
                   '[text-shadow:0_1px_2px_rgba(0,0,0,0.05)]',
                   'dark:[text-shadow:0_1px_3px_rgba(0,0,0,0.3)]',
-                  // Better readability
-                  'leading-relaxed tracking-wide',
+                  // Better readability - more compact line height on mobile
+                  'leading-snug sm:leading-relaxed tracking-wide',
                   descriptionClassName
                 )}
               >
