@@ -1,9 +1,9 @@
 # Plan de Implementación: Sistema de Tiers y Permisos
 
-**Fecha**: 2025-10-29
+**Fecha**: 2025-10-30
 **Estado**: Pendiente de implementación
 **Prioridad**: Alta
-**Estimación**: 7-9 horas de desarrollo (+1 hora por página de suscripción)
+**Estimación**: 9-11 horas de desarrollo (+2 horas por modal de bienvenida y página pública de pricing)
 
 ---
 
@@ -15,19 +15,28 @@ Implementar un sistema de permisos por tiers (FREE, PLUS, ADMIN, GRANDFATHERED) 
 - **Generación IA de exámenes**: Límite de 1/mes para FREE
 - **Reseteo mensual**: Basado en fecha de registro individual de cada usuario
 - **Usuarios existentes**: Grandfathered (sin restricciones, beneficio temporal)
-- **Página de Suscripción**: Reemplazar página de Reportes por "Mi Plan" con pricing cards
+- **Modal de bienvenida**: Mostrar al primer login con opciones de planes (Free vs Plus)
+- **Precios definidos**: $5 USD/mes o $50 USD/año (precio de lanzamiento)
+- **Toggle mensual/anual**: Componente para cambiar entre facturación mensual y anual
+- **Página de Suscripción (Dashboard)**: Reemplazar página de Reportes por "Mi Plan" con pricing cards
+- **Página de Pricing (Pública)**: Actualizar `/pricing` con nuevos precios y toggle
 - **Integración futura**: Preparar estructura para Polar.sh sin implementar
 
 ---
 
 ## Configuración de Tiers
 
-| Tier | Escaneos/mes | Gen. IA/mes | Límites adicionales | Pago |
-|------|-------------|-------------|---------------------|------|
-| **FREE** | 50 | 1 | Básicos | No |
-| **PLUS** | 500 | 100 | Razonables | Sí |
-| **ADMIN** | Ilimitado | Ilimitado | Ninguno | No |
-| **GRANDFATHERED** | Ilimitado | Ilimitado | Ninguno | No |
+| Tier | Escaneos/mes | Gen. IA/mes | Límites adicionales | Precio |
+|------|-------------|-------------|---------------------|--------|
+| **FREE** | 50 | 1 | Básicos | $0 |
+| **PLUS** | 500 | 100 | Razonables | $5/mes o $50/año |
+| **ADMIN** | Ilimitado | Ilimitado | Ninguno | - |
+| **GRANDFATHERED** | Ilimitado | Ilimitado | Ninguno | $0 (temporal) |
+
+**Precios de Lanzamiento**:
+- **Mensual**: $5 USD/mes
+- **Anual**: $50 USD/año (~$4.17/mes, ahorra 17%)
+- Los precios están claramente marcados como "precio de lanzamiento"
 
 **Nota sobre GRANDFATHERED**:
 - Todos los usuarios registrados ANTES de implementar el sistema de tiers
@@ -89,11 +98,13 @@ ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'active'
   CHECK (subscription_status IN ('active', 'cancelled', 'expired')),
 ADD COLUMN IF NOT EXISTS subscription_cycle_start TIMESTAMPTZ DEFAULT now(),
 ADD COLUMN IF NOT EXISTS polar_subscription_id TEXT,
-ADD COLUMN IF NOT EXISTS polar_customer_id TEXT;
+ADD COLUMN IF NOT EXISTS polar_customer_id TEXT,
+ADD COLUMN IF NOT EXISTS first_login_completed BOOLEAN DEFAULT false;
 
--- Marcar usuarios existentes como grandfathered
+-- Marcar usuarios existentes como grandfathered Y como ya logueados
 UPDATE public.profesores
-SET subscription_tier = 'grandfathered'
+SET subscription_tier = 'grandfathered',
+    first_login_completed = true
 WHERE created_at < now();
 
 COMMENT ON COLUMN public.profesores.subscription_tier IS
@@ -106,6 +117,8 @@ COMMENT ON COLUMN public.profesores.polar_subscription_id IS
   'ID de suscripción en Polar.sh (para futura integración)';
 COMMENT ON COLUMN public.profesores.polar_customer_id IS
   'ID de cliente en Polar.sh (para futura integración)';
+COMMENT ON COLUMN public.profesores.first_login_completed IS
+  'Indica si el usuario ya completó su primer login y vio el modal de bienvenida';
 ```
 
 **Validaciones**:
@@ -1586,6 +1599,523 @@ Agregar a `i18n/locales/es.json` y `en.json`:
 
 ---
 
+### 3.7 Modal de Bienvenida (Primer Login)
+
+**Objetivo**: Mostrar modal al primer login del usuario presentando los planes disponibles.
+
+#### APIs de Primer Login
+
+**Archivo nuevo**: `app/api/tiers/check-welcome/route.ts`
+
+Verifica si el usuario debe ver el modal de bienvenida.
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ showWelcome: false })
+    }
+
+    // Obtener estado de first_login_completed
+    const { data: profesor, error } = await supabase
+      .from('profesores')
+      .select('first_login_completed')
+      .eq('id', user.id)
+      .single()
+
+    if (error || !profesor) {
+      return NextResponse.json({ showWelcome: false })
+    }
+
+    return NextResponse.json({
+      showWelcome: !profesor.first_login_completed
+    })
+  } catch (error) {
+    console.error('Error in check-welcome:', error)
+    return NextResponse.json({ showWelcome: false })
+  }
+}
+```
+
+**Archivo nuevo**: `app/api/tiers/complete-welcome/route.ts`
+
+Marca el primer login como completado.
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    // Actualizar campo first_login_completed
+    const { error: updateError } = await supabase
+      .from('profesores')
+      .update({ first_login_completed: true })
+      .eq('id', user.id)
+
+    if (updateError) {
+      console.error('Error updating first_login_completed:', updateError)
+      return NextResponse.json(
+        { error: 'Failed to update welcome status' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error in complete-welcome:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+#### Hook useWelcomeModal
+
+**Archivo nuevo**: `lib/hooks/useWelcomeModal.ts`
+
+```typescript
+'use client'
+
+import { useEffect, useState } from 'react'
+
+export function useWelcomeModal() {
+  const [showWelcome, setShowWelcome] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function checkFirstLogin() {
+      try {
+        const res = await fetch('/api/tiers/check-welcome')
+        const data = await res.json()
+
+        if (data.showWelcome) {
+          setShowWelcome(true)
+        }
+      } catch (error) {
+        console.error('Error checking welcome status:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkFirstLogin()
+  }, [])
+
+  return { showWelcome, setShowWelcome, loading }
+}
+```
+
+#### Componente WelcomeTierModal
+
+**Archivo nuevo**: `components/shared/welcome-tier-modal.tsx`
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { PricingCardV2, BillingPeriod } from './pricing-card-v2'
+import { BillingPeriodToggle } from './billing-period-toggle'
+import { Sparkles, ArrowRight } from 'lucide-react'
+import { toast } from 'sonner'
+
+interface WelcomeTierModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onComplete: () => void
+}
+
+export function WelcomeTierModal({
+  open,
+  onOpenChange,
+  onComplete
+}: WelcomeTierModalProps) {
+  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual')
+
+  const handleUpgrade = () => {
+    toast.info('Próximamente disponible', {
+      description: 'La actualización a Plus estará disponible muy pronto.'
+    })
+  }
+
+  const handleContinueFree = async () => {
+    await fetch('/api/tiers/complete-welcome', { method: 'POST' })
+    onComplete()
+    onOpenChange(false)
+  }
+
+  // Configuración de tiers (ver plan completo para detalles)
+  const freeTier = {
+    name: 'free' as const,
+    displayName: 'Free',
+    monthlyPrice: 0,
+    annualPrice: 0,
+    description: 'Perfecto para empezar y probar la plataforma',
+    isCurrentPlan: true,
+    features: [
+      { name: 'Generaciones con IA', included: true, value: '1/mes' },
+      { name: 'Escaneos de exámenes', included: true, value: '50/mes' },
+      { name: 'Estudiantes ilimitados', included: true },
+      { name: 'Grupos ilimitados', included: true },
+      { name: 'Exportar a PDF', included: true },
+      { name: 'Soporte prioritario', included: false },
+      { name: 'Analíticas avanzadas', included: false },
+    ],
+  }
+
+  const plusTier = {
+    name: 'plus' as const,
+    displayName: 'Plus',
+    monthlyPrice: 5,
+    annualPrice: 50,
+    description: 'Para profesores que necesitan más capacidad',
+    isRecommended: true,
+    features: [
+      { name: 'Generaciones con IA', included: true, value: '100/mes' },
+      { name: 'Escaneos de exámenes', included: true, value: '500/mes' },
+      { name: 'Estudiantes ilimitados', included: true },
+      { name: 'Grupos ilimitados', included: true },
+      { name: 'Exportar a PDF', included: true },
+      { name: 'Soporte prioritario', included: true },
+      { name: 'Analíticas avanzadas', included: true },
+    ],
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-[#0b890f]/10 p-3 rounded-full">
+              <Sparkles className="h-6 w-6 text-[#0b890f]" />
+            </div>
+            <div>
+              <DialogTitle className="text-2xl">
+                ¡Bienvenido a ProfeVision!
+              </DialogTitle>
+              <DialogDescription className="text-base mt-2">
+                Estás en el plan <strong>Free</strong>. Puedes actualizar en cualquier momento.
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <BillingPeriodToggle
+          period={billingPeriod}
+          onChange={setBillingPeriod}
+          className="my-6"
+        />
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <PricingCardV2 tier={freeTier} billingPeriod={billingPeriod} compact />
+          <PricingCardV2 tier={plusTier} billingPeriod={billingPeriod} onUpgrade={handleUpgrade} compact />
+        </div>
+
+        <div className="flex justify-center pt-4 border-t">
+          <Button
+            onClick={handleContinueFree}
+            variant="ghost"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Continuar con plan Free
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+```
+
+#### Integrar en Dashboard Layout
+
+**Archivo a modificar**: `app/[locale]/dashboard/layout.tsx`
+
+Agregar el modal de bienvenida al layout del dashboard:
+
+```typescript
+'use client'
+
+import { WelcomeTierModal } from '@/components/shared/welcome-tier-modal'
+import { useWelcomeModal } from '@/lib/hooks/useWelcomeModal'
+
+export default function DashboardLayout({ children }) {
+  const { showWelcome, setShowWelcome } = useWelcomeModal()
+
+  return (
+    <>
+      {/* Modal de bienvenida */}
+      <WelcomeTierModal
+        open={showWelcome}
+        onOpenChange={setShowWelcome}
+        onComplete={() => setShowWelcome(false)}
+      />
+
+      {/* Resto del layout */}
+      {children}
+    </>
+  )
+}
+```
+
+---
+
+### 3.8 Componentes de Pricing Mejorados
+
+**Objetivo**: Crear componentes reutilizables para mostrar precios con toggle mensual/anual.
+
+#### Componente PricingCardV2
+
+**Archivo nuevo**: `components/shared/pricing-card-v2.tsx`
+
+Versión mejorada de PricingCard con soporte para billing mensual/anual y precios dinámicos.
+
+Ver código completo en la respuesta anterior (incluye pricing, badges, features).
+
+#### Componente BillingPeriodToggle
+
+**Archivo nuevo**: `components/shared/billing-period-toggle.tsx`
+
+Toggle para cambiar entre facturación mensual y anual con badge de ahorro.
+
+```typescript
+'use client'
+
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+
+export type BillingPeriod = 'monthly' | 'annual'
+
+interface BillingPeriodToggleProps {
+  period: BillingPeriod
+  onChange: (period: BillingPeriod) => void
+  className?: string
+}
+
+export function BillingPeriodToggle({
+  period,
+  onChange,
+  className
+}: BillingPeriodToggleProps) {
+  return (
+    <div className={cn('flex items-center justify-center gap-4', className)}>
+      <Label
+        htmlFor="billing-toggle"
+        className={cn(
+          'font-medium transition-colors cursor-pointer',
+          period === 'monthly' ? 'text-foreground' : 'text-muted-foreground'
+        )}
+      >
+        Mensual
+      </Label>
+      <Switch
+        id="billing-toggle"
+        checked={period === 'annual'}
+        onCheckedChange={(checked) => onChange(checked ? 'annual' : 'monthly')}
+        className="data-[state=checked]:bg-[#0b890f]"
+      />
+      <Label
+        htmlFor="billing-toggle"
+        className={cn(
+          'font-medium transition-colors cursor-pointer flex items-center gap-2',
+          period === 'annual' ? 'text-foreground' : 'text-muted-foreground'
+        )}
+      >
+        Anual
+        <Badge variant="secondary" className="bg-[#0b890f]/10 text-[#0b890f] text-xs">
+          Ahorra 17%
+        </Badge>
+      </Label>
+    </div>
+  )
+}
+```
+
+**Nota**: Los componentes PricingCard y PricingCardV2 pueden coexistir. PricingCardV2 es la versión nueva con soporte para billing periods, mientras que PricingCard es la versión simple original.
+
+---
+
+### 3.9 Actualizar Página Pública de Pricing
+
+**Objetivo**: Reemplazar la página `/pricing` actual con los nuevos precios y componentes.
+
+**Archivo a modificar**: `app/[locale]/(website)/pricing/page.tsx` (reemplazo completo)
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { Link } from "@/i18n/navigation"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Zap, CheckCircle } from "lucide-react"
+import { PricingCardV2, BillingPeriod } from '@/components/shared/pricing-card-v2'
+import { BillingPeriodToggle } from '@/components/shared/billing-period-toggle'
+
+export default function PricingPage() {
+  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual')
+
+  const freeTier = {
+    name: 'free' as const,
+    displayName: 'Free',
+    monthlyPrice: 0,
+    annualPrice: 0,
+    description: 'Perfecto para empezar y probar la plataforma',
+    features: [
+      { name: 'Generaciones con IA', included: true, value: '1/mes' },
+      { name: 'Escaneos de exámenes', included: true, value: '50/mes' },
+      { name: 'Estudiantes ilimitados', included: true },
+      { name: 'Grupos ilimitados', included: true },
+      { name: 'Exportar a PDF', included: true },
+      { name: 'Soporte prioritario', included: false },
+      { name: 'Analíticas avanzadas', included: false },
+    ],
+  }
+
+  const plusTier = {
+    name: 'plus' as const,
+    displayName: 'Plus',
+    monthlyPrice: 5,
+    annualPrice: 50,
+    description: 'Para profesores que necesitan más capacidad',
+    isRecommended: true,
+    features: [
+      { name: 'Generaciones con IA', included: true, value: '100/mes' },
+      { name: 'Escaneos de exámenes', included: true, value: '500/mes' },
+      { name: 'Estudiantes ilimitados', included: true },
+      { name: 'Grupos ilimitados', included: true },
+      { name: 'Exportar a PDF', included: true },
+      { name: 'Soporte prioritario', included: true },
+      { name: 'Analíticas avanzadas', included: true },
+    ],
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      {/* Hero Section */}
+      <section className="py-12 md:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5 -z-10" />
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <Badge className="bg-[#0b890f] text-white hover:bg-[#0b890f]/80">
+              <Zap className="h-3 w-3 mr-1" />
+              Precio de Lanzamiento
+            </Badge>
+            <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              Precios <span className="text-[#0b890f]">simples y transparentes</span>
+            </h1>
+            <p className="max-w-[800px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              Empieza gratis y actualiza cuando necesites más capacidad
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-16 md:py-24">
+        <div className="container px-4 md:px-6">
+          <BillingPeriodToggle
+            period={billingPeriod}
+            onChange={setBillingPeriod}
+            className="mb-12"
+          />
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <PricingCardV2 tier={freeTier} billingPeriod={billingPeriod} />
+            <PricingCardV2 tier={plusTier} billingPeriod={billingPeriod} />
+          </div>
+        </div>
+      </section>
+
+      {/* Features Comparison */}
+      <section className="py-16 md:py-24 bg-muted/50">
+        <div className="container px-4 md:px-6">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Todas las funcionalidades incluidas
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[
+              'Creación de exámenes con editor visual',
+              'Generación IA de preguntas',
+              'Escaneo y calificación automática',
+              'Gestión de grupos y estudiantes',
+              'Múltiples versiones de exámenes',
+              'Exportación a PDF y LaTeX',
+              'Reportes y analíticas básicas',
+              'Esquemas de calificación flexibles',
+              'Importación desde Excel',
+            ].map((feature, idx) => (
+              <div key={idx} className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-[#0b890f] flex-shrink-0 mt-0.5" />
+                <span className="text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 md:py-24 bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-white">
+              ¿Listo para empezar?
+            </h2>
+            <p className="max-w-[600px] text-white/90 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              Crea tu cuenta gratis y empieza a crear exámenes hoy mismo
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button
+                asChild
+                size="lg"
+                variant="secondary"
+                className="bg-white text-[#0b890f] hover:bg-white/90"
+              >
+                <Link href={'/auth/register'}>Empezar gratis</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                className="bg-white/10 text-white hover:bg-white/20 border border-white/20 backdrop-blur-sm"
+              >
+                <Link href={'/how-it-works'}>Ver cómo funciona</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+```
+
+---
+
 ## Fase 4: Tipos y Validaciones
 
 ### 4.1 Actualizar database.ts
@@ -1601,6 +2131,7 @@ export interface Profesor {
   subscription_cycle_start: string
   polar_subscription_id: string | null
   polar_customer_id: string | null
+  first_login_completed: boolean
 }
 ```
 
@@ -1853,6 +2384,11 @@ Agregar al JSON existente:
   - [ ] TierBadge muestra correctamente en dashboard
   - [ ] UsageIndicator actualiza en tiempo real
   - [ ] LimitReachedModal aparece cuando se alcanza límite
+  - [ ] Modal de bienvenida aparece en primer login
+  - [ ] Modal de bienvenida NO aparece en logins posteriores
+  - [ ] Toggle mensual/anual funciona correctamente
+  - [ ] Precios se calculan correctamente (mensual vs anual)
+  - [ ] Página pública de pricing muestra nuevos precios
   - [ ] Textos en español e inglés correctos
 
 ---
@@ -1867,6 +2403,7 @@ Agregar las nuevas tablas y campos a `mddocs/DATABASE_SCHEMA.md`:
    - `subscription_cycle_start`
    - `polar_subscription_id`
    - `polar_customer_id`
+   - `first_login_completed` ⭐ **NUEVO**
 
 2. Nueva tabla `tier_limits`
 3. Nueva tabla `usage_tracking`
@@ -1945,7 +2482,7 @@ Preparado para integración futura con webhook en `/api/webhooks/polar`.
 
 ## Archivos a Crear/Modificar
 
-### Nuevos archivos (19)
+### Nuevos archivos (27)
 
 **Base de datos (via MCP)**:
 - 4 migraciones vía `mcp__supabase__apply_migration`
@@ -1955,14 +2492,22 @@ Preparado para integración futura con webhook en `/api/webhooks/polar`.
 - `lib/types/tiers.ts`
 - `lib/validations/tier-schemas.ts`
 - `app/api/tiers/usage/route.ts`
+- `app/api/tiers/check-welcome/route.ts` ⭐ **NUEVO**
+- `app/api/tiers/complete-welcome/route.ts` ⭐ **NUEVO**
 - `app/api/webhooks/polar/route.ts`
 
-**Frontend**:
+**Frontend - Componentes Básicos**:
 - `lib/hooks/useTierLimits.ts`
+- `lib/hooks/useWelcomeModal.ts` ⭐ **NUEVO**
 - `components/shared/tier-badge.tsx`
 - `components/shared/usage-indicator.tsx`
 - `components/shared/limit-reached-modal.tsx`
-- `components/shared/pricing-card.tsx` ⭐ **NUEVO**
+
+**Frontend - Pricing Components**:
+- `components/shared/pricing-card.tsx` (versión simple para dashboard)
+- `components/shared/pricing-card-v2.tsx` ⭐ **NUEVO** (versión con billing toggle)
+- `components/shared/billing-period-toggle.tsx` ⭐ **NUEVO**
+- `components/shared/welcome-tier-modal.tsx` ⭐ **NUEVO**
 
 **i18n**:
 - Claves en `es.json` y `en.json` (tiers + subscription)
@@ -1971,13 +2516,15 @@ Preparado para integración futura con webhook en `/api/webhooks/polar`.
 - Actualizar `mddocs/DATABASE_SCHEMA.md`
 - Actualizar `CLAUDE.md`
 
-### Archivos modificados (5)
+### Archivos modificados (6)
 
-- `app/api/exams/save-results/route.ts`
-- `app/api/chat/route.ts`
-- `lib/types/database.ts`
-- `app/[locale]/dashboard/reports/page.tsx` ⭐ **REEMPLAZO COMPLETO**
-- `components/dashboard/dashboard-sidebar.tsx` ⭐ **NUEVO** (cambiar "Reportes" → "Mi Plan")
+- `app/api/exams/save-results/route.ts` (verificar límites de escaneo)
+- `app/api/chat/route.ts` (verificar límites de IA)
+- `lib/types/database.ts` (agregar campos de tiers + first_login_completed)
+- `app/[locale]/dashboard/reports/page.tsx` ⭐ **REEMPLAZO COMPLETO** (Mi Plan)
+- `app/[locale]/dashboard/layout.tsx` ⭐ **NUEVO** (agregar modal de bienvenida)
+- `app/[locale]/(website)/pricing/page.tsx` ⭐ **REEMPLAZO COMPLETO** (nueva versión con toggle)
+- `components/dashboard/dashboard-sidebar.tsx` (cambiar "Reportes" → "Mi Plan")
 
 ---
 
@@ -2147,6 +2694,16 @@ Para dudas o problemas con esta implementación, revisar:
 
 ---
 
-**Última actualización**: 2025-10-29
-**Versión del plan**: 1.0
+**Última actualización**: 2025-10-30
+**Versión del plan**: 2.0
 **Estado**: Listo para implementar
+
+**Cambios en v2.0**:
+- ✅ Agregado campo `first_login_completed` en tabla profesores
+- ✅ Agregado modal de bienvenida para primer login
+- ✅ Agregado toggle mensual/anual con precios definidos ($5/mes, $50/año)
+- ✅ Agregado componente PricingCardV2 con soporte para billing periods
+- ✅ Agregado componente BillingPeriodToggle
+- ✅ Actualización de página pública de pricing
+- ✅ Nuevas APIs: check-welcome y complete-welcome
+- ✅ Hook useWelcomeModal para gestionar primer login
