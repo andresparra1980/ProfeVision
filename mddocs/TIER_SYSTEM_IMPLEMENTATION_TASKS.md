@@ -21,10 +21,10 @@
 - **Fase 1**: [x] Base de Datos (4/4 tareas)
 - **Fase 2**: [x] Backend/APIs (5/5 tareas)
 - **Fase 3**: [x] Componentes Base (5/5 tareas)
-- **Fase 4**: [ ] Páginas Principales (0/4 tareas)
+- **Fase 4**: [x] Páginas Principales (4/4 tareas)
 - **Fase 5**: [ ] Integración y Testing (0/3 tareas)
 
-**Total**: 15/22 tareas completadas
+**Total**: 19/22 tareas completadas
 
 ---
 
@@ -309,19 +309,19 @@
 
 ### 4.1 - Crear página de Suscripción (Dashboard)
 
-- [ ] Reemplazar `app/[locale]/dashboard/reports/page.tsx` completamente
-  - [ ] Implementar página con `useTierLimits`
-  - [ ] Mostrar `TierBadge` en header
-  - [ ] Mostrar warning para usuarios `grandfathered`
-  - [ ] Card de "Uso Actual" con `UsageIndicator` para AI y Scans
-  - [ ] Sección de Pricing con 2 `PricingCard` (Free y Plus)
-  - [ ] Card de FAQ
-  - [ ] Handler `handleUpgrade` con toast "Próximamente disponible"
-  - [ ] Validar página en navegador
-- [ ] Modificar `components/dashboard/dashboard-sidebar.tsx`
-  - [ ] Cambiar título de "Reports" a "Mi Plan" / "Suscripción"
-  - [ ] Cambiar ícono a `Crown`
-  - [ ] Validar cambio en sidebar
+- [x] Reemplazar `app/[locale]/dashboard/reports/page.tsx` completamente
+  - [x] Implementar página con `useTierLimits`
+  - [x] Mostrar `TierBadge` en header
+  - [x] Mostrar warning para usuarios `grandfathered`
+  - [x] Card de "Uso Actual" con `UsageIndicator` para AI y Scans
+  - [x] Sección de Pricing con 2 `PricingCard` (Free y Plus)
+  - [x] Card de FAQ
+  - [x] Handler `handleUpgrade` con toast "Próximamente disponible"
+  - [x] Validar página en navegador
+- [x] Modificar `components/dashboard/dashboard-sidebar.tsx`
+  - [x] Cambiar título de "Reports" a "Mi Plan" / "Suscripción"
+  - [x] Cambiar ícono a `Crown`
+  - [x] Validar cambio en sidebar
 
 **Archivos modificados**: `app/[locale]/dashboard/reports/page.tsx`, `components/dashboard/dashboard-sidebar.tsx`
 **Archivos de traducciones**: `i18n/locales/es.json`, `i18n/locales/en.json` (agregar claves `subscription.*`)
@@ -331,22 +331,22 @@
 
 ### 4.2 - Crear modal de bienvenida (Primer Login)
 
-- [ ] Crear archivo `lib/hooks/useWelcomeModal.ts`
-  - [ ] Implementar hook que llama a `/api/tiers/check-welcome`
-  - [ ] Estado: `showWelcome`, `setShowWelcome`, `loading`
-  - [ ] Validar hook
-- [ ] Crear archivo `components/shared/welcome-tier-modal.tsx`
-  - [ ] Implementar modal con `Dialog` de Shadcn UI
-  - [ ] Props: `open`, `onOpenChange`, `onComplete`
-  - [ ] Mostrar título de bienvenida
-  - [ ] Mostrar toggle mensual/anual (crear `BillingPeriodToggle`)
-  - [ ] Mostrar 2 `PricingCardV2` (Free y Plus) con precios dinámicos
-  - [ ] Botón "Continuar con plan Free" que llama a `/api/tiers/complete-welcome`
-  - [ ] Validar modal
-- [ ] Integrar en `app/[locale]/dashboard/layout.tsx`
-  - [ ] Agregar `useWelcomeModal` hook
-  - [ ] Renderizar `WelcomeTierModal`
-  - [ ] Validar que se muestra solo en primer login
+- [x] Crear archivo `lib/hooks/useWelcomeModal.ts`
+  - [x] Implementar hook que llama a `/api/tiers/check-welcome`
+  - [x] Estado: `showWelcome`, `setShowWelcome`, `loading`
+  - [x] Validar hook
+- [x] Crear archivo `components/shared/welcome-tier-modal.tsx`
+  - [x] Implementar modal con `Dialog` de Shadcn UI
+  - [x] Props: `open`, `onOpenChange`, `onComplete`
+  - [x] Mostrar título de bienvenida
+  - [x] Mostrar toggle mensual/anual (crear `BillingPeriodToggle`)
+  - [x] Mostrar 2 `PricingCardV2` (Free y Plus) con precios dinámicos
+  - [x] Botón "Continuar con plan Free" que llama a `/api/tiers/complete-welcome`
+  - [x] Validar modal
+- [x] Integrar en `app/[locale]/dashboard/layout.tsx`
+  - [x] Agregar `useWelcomeModal` hook
+  - [x] Renderizar `WelcomeTierModal`
+  - [x] Validar que se muestra solo en primer login
 
 **Archivos nuevos**: `lib/hooks/useWelcomeModal.ts`, `components/shared/welcome-tier-modal.tsx`
 **Archivos modificados**: `app/[locale]/dashboard/layout.tsx`
@@ -356,17 +356,17 @@
 
 ### 4.3 - Crear componentes de pricing mejorados
 
-- [ ] Crear archivo `components/shared/pricing-card-v2.tsx`
-  - [ ] Versión mejorada de `PricingCard` con soporte para billing mensual/anual
-  - [ ] Props: `tier`, `billingPeriod`, `onUpgrade`, `compact`
-  - [ ] Mostrar precio dinámico según `billingPeriod`
-  - [ ] Badge "Precio de lanzamiento"
-  - [ ] Validar renderizado
-- [ ] Crear archivo `components/shared/billing-period-toggle.tsx`
-  - [ ] Toggle con `Switch` de Shadcn UI
-  - [ ] Props: `period`, `onChange`, `className`
-  - [ ] Mostrar "Mensual" y "Anual" con badge "Ahorra 17%"
-  - [ ] Validar funcionamiento
+- [x] Crear archivo `components/shared/pricing-card-v2.tsx`
+  - [x] Versión mejorada de `PricingCard` con soporte para billing mensual/anual
+  - [x] Props: `tier`, `billingPeriod`, `onUpgrade`, `compact`
+  - [x] Mostrar precio dinámico según `billingPeriod`
+  - [x] Badge "Precio de lanzamiento"
+  - [x] Validar renderizado
+- [x] Crear archivo `components/shared/billing-period-toggle.tsx`
+  - [x] Toggle con `Switch` de Shadcn UI
+  - [x] Props: `period`, `onChange`, `className`
+  - [x] Mostrar "Mensual" y "Anual" con badge "Ahorra 17%"
+  - [x] Validar funcionamiento
 
 **Archivos nuevos**: `components/shared/pricing-card-v2.tsx`, `components/shared/billing-period-toggle.tsx`
 **Validación**: Renderizar componentes y verificar cambio de precio
@@ -375,13 +375,13 @@
 
 ### 4.4 - Actualizar página pública de Pricing
 
-- [ ] Reemplazar `app/[locale]/(website)/pricing/page.tsx` completamente
-  - [ ] Estado: `billingPeriod` con toggle
-  - [ ] Renderizar `BillingPeriodToggle`
-  - [ ] Renderizar 2 `PricingCardV2` (Free y Plus)
-  - [ ] Hero section con título "Precios de Lanzamiento"
-  - [ ] Botón de CTA "Comenzar Gratis"
-  - [ ] Validar página pública
+- [x] Reemplazar `app/[locale]/(website)/pricing/page.tsx` completamente
+  - [x] Estado: `billingPeriod` con toggle
+  - [x] Renderizar `BillingPeriodToggle`
+  - [x] Renderizar 2 `PricingCardV2` (Free y Plus)
+  - [x] Hero section con título "Precios de Lanzamiento"
+  - [x] Botón de CTA "Comenzar Gratis"
+  - [x] Validar página pública
 
 **Archivos modificados**: `app/[locale]/(website)/pricing/page.tsx`
 **Validación**: Navegar a `/pricing` y verificar nueva página
@@ -391,11 +391,11 @@
 ### ✅ Checkpoint Fase 4
 
 **Validación antes de continuar:**
-- [ ] Página de suscripción funciona en dashboard
-- [ ] Modal de bienvenida se muestra en primer login
-- [ ] Página pública de pricing actualizada
-- [ ] Todas las traducciones agregadas
-- [ ] Ejecutar `yarn build` sin errores
+- [x] Página de suscripción funciona en dashboard
+- [x] Modal de bienvenida se muestra en primer login
+- [x] Página pública de pricing actualizada
+- [x] Todas las traducciones agregadas
+- [x] Ejecutar `yarn build` sin errores
 
 ---
 

@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
   FileText,
   Users,
-  BarChart3,
+  Crown,
   Settings,
   Menu,
   X,
@@ -77,9 +77,9 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
       icon: Users,
     },
     {
-      title: t('navigation.reports'),
+      title: t('navigation.subscription', { defaultValue: 'Mi Plan' }),
       href: '/dashboard/reports',
-      icon: BarChart3,
+      icon: Crown,
     },
     {
       title: t('navigation.settings'),
