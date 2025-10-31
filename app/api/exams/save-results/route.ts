@@ -6,6 +6,7 @@ import * as _path from "path";
 import sharp from "sharp";
 import logger from "@/lib/utils/logger";
 import { getApiTranslator } from '@/i18n/api';
+import TierService from '@/lib/services/tier-service';
 
 const DEBUG = process.env.NODE_ENV === "development";
 
@@ -319,6 +320,36 @@ export async function POST(req: NextRequest) {
         logger.error("Error al obtener profesor_id:", error);
       }
       // Continuamos sin profesor_id
+    }
+
+    // Check tier limits for scan feature
+    if (profesorId) {
+      try {
+        const limitCheck = await TierService.checkFeatureAccess(profesorId, 'scan');
+
+        if (!limitCheck.allowed) {
+          if (DEBUG) {
+            logger.log('Scan limit reached for profesor:', profesorId, limitCheck);
+          }
+          return NextResponse.json(
+            {
+              error: 'Límite de escaneos alcanzado',
+              details: {
+                limit: limitCheck.limit,
+                used: limitCheck.used,
+                tier: limitCheck.tier,
+                cycle_end: limitCheck.cycle_end,
+              },
+            },
+            { status: 403 }
+          );
+        }
+      } catch (tierError) {
+        if (DEBUG) {
+          logger.error('Error checking tier limits:', tierError);
+        }
+        // Continue even if tier check fails (don't block existing functionality)
+      }
     }
 
     // Verificar si ya existe un registro para este examen y estudiante
@@ -957,6 +988,21 @@ export async function POST(req: NextRequest) {
       // Log but don't fail if cleanup has issues
       if (DEBUG) {
         logger.warn("Error during temporary file cleanup:", cleanupError);
+      }
+    }
+
+    // Increment scan usage count after successful save
+    if (profesorId) {
+      try {
+        await TierService.incrementUsage(profesorId, 'scan', 1);
+        if (DEBUG) {
+          logger.log('Incremented scan usage for profesor:', profesorId);
+        }
+      } catch (tierError) {
+        if (DEBUG) {
+          logger.error('Error incrementing scan usage:', tierError);
+        }
+        // Don't fail the request if usage increment fails
       }
     }
 

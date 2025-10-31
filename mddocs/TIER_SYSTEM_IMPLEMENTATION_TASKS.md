@@ -17,14 +17,14 @@
 
 ## 📊 Progreso General
 
-- **Fase 0**: [ ] Preparación (0/1 tarea)
-- **Fase 1**: [ ] Base de Datos (0/4 tareas)
-- **Fase 2**: [ ] Backend/APIs (0/5 tareas)
-- **Fase 3**: [ ] Componentes Base (0/5 tareas)
+- **Fase 0**: [x] Preparación (1/1 tarea)
+- **Fase 1**: [x] Base de Datos (4/4 tareas)
+- **Fase 2**: [x] Backend/APIs (5/5 tareas)
+- **Fase 3**: [x] Componentes Base (5/5 tareas)
 - **Fase 4**: [ ] Páginas Principales (0/4 tareas)
 - **Fase 5**: [ ] Integración y Testing (0/3 tareas)
 
-**Total**: 0/22 tareas completadas
+**Total**: 15/22 tareas completadas
 
 ---
 
@@ -32,17 +32,17 @@
 
 ### 0.1 - Crear feature branch para implementación
 
-- [ ] Verificar estado actual del repositorio
-  - [ ] Ejecutar `git status` para verificar que no hay cambios pendientes
-  - [ ] Verificar que estamos en la rama `main`
-  - [ ] Hacer pull de últimos cambios: `git pull origin main`
-- [ ] Crear y cambiar a nueva feature branch
-  - [ ] Ejecutar `git checkout -b feature/tier-system-implementation`
-  - [ ] Verificar que estamos en la nueva branch: `git branch --show-current`
-- [ ] Validar estado del proyecto
-  - [ ] Ejecutar `yarn install` para asegurar dependencias actualizadas
-  - [ ] Ejecutar `yarn build` para verificar que el proyecto compila
-  - [ ] Ejecutar `yarn lint` para verificar que no hay errores de linting
+- [x] Verificar estado actual del repositorio
+  - [x] Ejecutar `git status` para verificar que no hay cambios pendientes
+  - [x] Verificar que estamos en la rama `main`
+  - [x] Hacer pull de últimos cambios: `git pull origin main`
+- [x] Crear y cambiar a nueva feature branch
+  - [x] Ejecutar `git checkout -b feature/tier-system-implementation`
+  - [x] Verificar que estamos en la nueva branch: `git branch --show-current`
+- [x] Validar estado del proyecto
+  - [x] Ejecutar `yarn install` para asegurar dependencias actualizadas
+  - [x] Ejecutar `yarn build` para verificar que el proyecto compila
+  - [x] Ejecutar `yarn lint` para verificar que no hay errores de linting
 
 **Branch**: `feature/tier-system-implementation`
 **Validación**: `git branch --show-current` debe mostrar `feature/tier-system-implementation`
@@ -52,11 +52,11 @@
 ### ✅ Checkpoint Fase 0
 
 **Validación antes de continuar:**
-- [ ] Feature branch creada exitosamente
-- [ ] Repositorio sin cambios pendientes
-- [ ] Proyecto compila sin errores
-- [ ] Linter pasa sin errores
-- [ ] Listo para comenzar implementación
+- [x] Feature branch creada exitosamente
+- [x] Repositorio sin cambios pendientes
+- [x] Proyecto compila sin errores
+- [x] Linter pasa sin errores
+- [x] Listo para comenzar implementación
 
 ---
 
@@ -64,10 +64,10 @@
 
 ### 1.1 - Agregar campos de suscripción a tabla `profesores`
 
-- [ ] Ejecutar migración `add_subscription_tiers_to_profesores`
-  - [ ] Agregar columnas: `subscription_tier`, `subscription_status`, `subscription_cycle_start`, `polar_subscription_id`, `polar_customer_id`, `first_login_completed`
-  - [ ] Marcar usuarios existentes como `grandfathered` y `first_login_completed = true`
-  - [ ] Validar que migración se aplicó correctamente con `mcp__supabase__list_tables`
+- [x] Ejecutar migración `add_subscription_tiers_to_profesores`
+  - [x] Agregar columnas: `subscription_tier`, `subscription_status`, `subscription_cycle_start`, `polar_subscription_id`, `polar_customer_id`, `first_login_completed`
+  - [x] Marcar usuarios existentes como `grandfathered` y `first_login_completed = true`
+  - [x] Validar que migración se aplicó correctamente con `mcp__supabase__list_tables`
 
 **Archivos afectados**: Base de datos (migración)
 **Herramienta**: `mcp__supabase__apply_migration`
@@ -77,12 +77,12 @@
 
 ### 1.2 - Crear tabla `tier_limits`
 
-- [ ] Ejecutar migración `create_tier_limits_table`
-  - [ ] Crear tabla con columnas: `tier`, `ai_generations_per_month`, `scans_per_month`, `max_students`, `max_groups`, `features`
-  - [ ] Insertar configuración inicial para tiers: `free`, `plus`, `admin`, `grandfathered`
-  - [ ] Crear trigger `update_tier_limits_updated_at`
-  - [ ] Habilitar RLS con política `tier_limits_select_all`
-  - [ ] Validar datos insertados correctamente
+- [x] Ejecutar migración `create_tier_limits_table`
+  - [x] Crear tabla con columnas: `tier`, `ai_generations_per_month`, `scans_per_month`, `max_students`, `max_groups`, `features`
+  - [x] Insertar configuración inicial para tiers: `free`, `plus`, `admin`, `grandfathered`
+  - [x] Crear trigger `update_tier_limits_updated_at`
+  - [x] Habilitar RLS con política `tier_limits_select_all`
+  - [x] Validar datos insertados correctamente
 
 **Archivos afectados**: Base de datos (migración)
 **Herramienta**: `mcp__supabase__apply_migration`
@@ -92,12 +92,12 @@
 
 ### 1.3 - Crear tabla `usage_tracking`
 
-- [ ] Ejecutar migración `create_usage_tracking_table`
-  - [ ] Crear tabla con columnas: `id`, `profesor_id`, `month_year`, `ai_generations_used`, `scans_used`, `cycle_start_date`, `cycle_end_date`
-  - [ ] Crear índices para performance
-  - [ ] Crear trigger `update_usage_tracking_updated_at`
-  - [ ] Habilitar RLS con políticas: `usage_tracking_select_own`, `usage_tracking_insert_own`, `usage_tracking_update_own`
-  - [ ] Validar estructura de tabla
+- [x] Ejecutar migración `create_usage_tracking_table`
+  - [x] Crear tabla con columnas: `id`, `profesor_id`, `month_year`, `ai_generations_used`, `scans_used`, `cycle_start_date`, `cycle_end_date`
+  - [x] Crear índices para performance
+  - [x] Crear trigger `update_usage_tracking_updated_at`
+  - [x] Habilitar RLS con políticas: `usage_tracking_select_own`, `usage_tracking_insert_own`, `usage_tracking_update_own`
+  - [x] Validar estructura de tabla
 
 **Archivos afectados**: Base de datos (migración)
 **Herramienta**: `mcp__supabase__apply_migration`
@@ -107,12 +107,12 @@
 
 ### 1.4 - Crear funciones SQL de gestión de tiers
 
-- [ ] Ejecutar migración `create_tier_management_functions`
-  - [ ] Crear función `calculate_cycle_dates`
-  - [ ] Crear función `get_or_create_usage_tracking`
-  - [ ] Crear función `check_feature_limit`
-  - [ ] Crear función `increment_feature_usage`
-  - [ ] Validar funciones con llamadas de prueba
+- [x] Ejecutar migración `create_tier_management_functions`
+  - [x] Crear función `calculate_cycle_dates`
+  - [x] Crear función `get_or_create_usage_tracking`
+  - [x] Crear función `check_feature_limit`
+  - [x] Crear función `increment_feature_usage`
+  - [x] Validar funciones con llamadas de prueba
 
 **Archivos afectados**: Base de datos (migración)
 **Herramienta**: `mcp__supabase__apply_migration`
@@ -123,11 +123,11 @@
 ### ✅ Checkpoint Fase 1
 
 **Validación antes de continuar:**
-- [ ] Todas las tablas creadas: `profesores` (modificada), `tier_limits`, `usage_tracking`
-- [ ] Todas las funciones SQL operativas
-- [ ] RLS habilitado en todas las tablas
-- [ ] Datos de prueba insertados correctamente en `tier_limits`
-- [ ] Consultar advisors de seguridad: `mcp__supabase__get_advisors` (type: security)
+- [x] Todas las tablas creadas: `profesores` (modificada), `tier_limits`, `usage_tracking`
+- [x] Todas las funciones SQL operativas
+- [x] RLS habilitado en todas las tablas
+- [x] Datos de prueba insertados correctamente en `tier_limits`
+- [x] Consultar advisors de seguridad: `mcp__supabase__get_advisors` (type: security)
 
 ---
 
@@ -135,15 +135,15 @@
 
 ### 2.1 - Crear servicio de Tiers
 
-- [ ] Crear archivo `lib/services/tier-service.ts`
-  - [ ] Implementar clase `TierService` con métodos:
-    - [ ] `checkFeatureAccess(profesorId, feature)`
-    - [ ] `incrementUsage(profesorId, feature)`
-    - [ ] `getTierLimits(tier)`
-    - [ ] `getCurrentTier(profesorId)`
-    - [ ] `getUsageStats(profesorId)`
-  - [ ] Agregar tipos TypeScript: `SubscriptionTier`, `Feature`, `TierLimits`, `UsageStats`
-  - [ ] Validar que el servicio compila sin errores
+- [x] Crear archivo `lib/services/tier-service.ts`
+  - [x] Implementar clase `TierService` con métodos:
+    - [x] `checkFeatureAccess(profesorId, feature)`
+    - [x] `incrementUsage(profesorId, feature)`
+    - [x] `getTierLimits(tier)`
+    - [x] `getCurrentTier(profesorId)`
+    - [x] `getUsageStats(profesorId)`
+  - [x] Agregar tipos TypeScript: `SubscriptionTier`, `Feature`, `TierLimits`, `UsageStats`
+  - [x] Validar que el servicio compila sin errores
 
 **Archivos nuevos**: `lib/services/tier-service.ts`
 **Validación**: Compilación TypeScript exitosa
@@ -152,12 +152,12 @@
 
 ### 2.2 - Modificar API de escaneo para validar límites
 
-- [ ] Modificar `app/api/exams/save-results/route.ts`
-  - [ ] Importar `TierService`
-  - [ ] Agregar verificación de límite con `checkFeatureAccess(profesor.id, 'scan')`
-  - [ ] Retornar error 403 si límite alcanzado
-  - [ ] Incrementar contador con `incrementUsage(profesor.id, 'scan')`
-  - [ ] Validar que no rompe funcionalidad existente
+- [x] Modificar `app/api/exams/save-results/route.ts`
+  - [x] Importar `TierService`
+  - [x] Agregar verificación de límite con `checkFeatureAccess(profesor.id, 'scan')`
+  - [x] Retornar error 403 si límite alcanzado
+  - [x] Incrementar contador con `incrementUsage(profesor.id, 'scan')`
+  - [x] Validar que no rompe funcionalidad existente
 
 **Archivos modificados**: `app/api/exams/save-results/route.ts`
 **Validación**: Probar escaneo manual con usuario Free (simular límite alcanzado)
@@ -166,12 +166,12 @@
 
 ### 2.3 - Modificar API de Chat IA para validar límites
 
-- [ ] Modificar `app/api/chat/route.ts`
-  - [ ] Importar `TierService`
-  - [ ] Agregar verificación de límite con `checkFeatureAccess(profesor.id, 'ai_generation')`
-  - [ ] Retornar error 403 si límite alcanzado
-  - [ ] Incrementar contador SOLO después de generación exitosa con `incrementUsage(profesor.id, 'ai_generation')`
-  - [ ] Validar que no rompe funcionalidad existente
+- [x] Modificar `app/api/chat/route.ts`
+  - [x] Importar `TierService`
+  - [x] Agregar verificación de límite con `checkFeatureAccess(profesor.id, 'ai_generation')`
+  - [x] Retornar error 403 si límite alcanzado
+  - [x] Incrementar contador SOLO después de generación exitosa con `incrementUsage(profesor.id, 'ai_generation')`
+  - [x] Validar que no rompe funcionalidad existente
 
 **Archivos modificados**: `app/api/chat/route.ts`
 **Validación**: Probar generación IA con usuario Free (simular límite alcanzado)
@@ -180,12 +180,12 @@
 
 ### 2.4 - Crear API de estadísticas de uso
 
-- [ ] Crear archivo `app/api/tiers/usage/route.ts`
-  - [ ] Implementar `GET` handler
-  - [ ] Verificar autenticación con `verifyTeacherAuth`
-  - [ ] Obtener estadísticas con `TierService.getUsageStats(profesor.id)`
-  - [ ] Retornar JSON con estructura: `tier`, `ai_generation`, `scans`, `cycle`
-  - [ ] Validar respuesta con Postman o curl
+- [x] Crear archivo `app/api/tiers/usage/route.ts`
+  - [x] Implementar `GET` handler
+  - [x] Verificar autenticación con `verifyTeacherAuth`
+  - [x] Obtener estadísticas con `TierService.getUsageStats(profesor.id)`
+  - [x] Retornar JSON con estructura: `tier`, `ai_generation`, `scans`, `cycle`
+  - [x] Validar respuesta con Postman o curl
 
 **Archivos nuevos**: `app/api/tiers/usage/route.ts`
 **Validación**: Llamar API y verificar respuesta JSON
@@ -194,15 +194,15 @@
 
 ### 2.5 - Crear APIs de primer login
 
-- [ ] Crear archivo `app/api/tiers/check-welcome/route.ts`
-  - [ ] Implementar `GET` handler
-  - [ ] Verificar si usuario debe ver modal de bienvenida
-  - [ ] Retornar `{ showWelcome: boolean }`
-- [ ] Crear archivo `app/api/tiers/complete-welcome/route.ts`
-  - [ ] Implementar `POST` handler
-  - [ ] Actualizar `first_login_completed = true`
-  - [ ] Retornar `{ success: boolean }`
-- [ ] Validar ambas APIs
+- [x] Crear archivo `app/api/tiers/check-welcome/route.ts`
+  - [x] Implementar `GET` handler
+  - [x] Verificar si usuario debe ver modal de bienvenida
+  - [x] Retornar `{ showWelcome: boolean }`
+- [x] Crear archivo `app/api/tiers/complete-welcome/route.ts`
+  - [x] Implementar `POST` handler
+  - [x] Actualizar `first_login_completed = true`
+  - [x] Retornar `{ success: boolean }`
+- [x] Validar ambas APIs
 
 **Archivos nuevos**: `app/api/tiers/check-welcome/route.ts`, `app/api/tiers/complete-welcome/route.ts`
 **Validación**: Llamar APIs con usuario de prueba
@@ -212,12 +212,12 @@
 ### ✅ Checkpoint Fase 2
 
 **Validación antes de continuar:**
-- [ ] `TierService` funciona correctamente
-- [ ] API de escaneo valida límites
-- [ ] API de Chat IA valida límites
-- [ ] API de estadísticas retorna datos correctos
-- [ ] APIs de primer login funcionan
-- [ ] Ejecutar `yarn build` sin errores
+- [x] `TierService` funciona correctamente
+- [x] API de escaneo valida límites
+- [x] API de Chat IA valida límites
+- [x] API de estadísticas retorna datos correctos
+- [x] APIs de primer login funcionan
+- [x] Ejecutar `yarn build` sin errores
 
 ---
 
@@ -225,12 +225,12 @@
 
 ### 3.1 - Crear hook `useTierLimits`
 
-- [ ] Crear archivo `lib/hooks/useTierLimits.ts`
-  - [ ] Implementar hook que llama a `/api/tiers/usage`
-  - [ ] Estado: `usage`, `loading`, `error`
-  - [ ] Métodos: `refetch`, `canUseScan`, `canUseAI`
-  - [ ] Auto-refresh cada 5 minutos
-  - [ ] Validar hook con componente de prueba
+- [x] Crear archivo `lib/hooks/useTierLimits.ts`
+  - [x] Implementar hook que llama a `/api/tiers/usage`
+  - [x] Estado: `usage`, `loading`, `error`
+  - [x] Métodos: `refetch`, `canUseScan`, `canUseAI`
+  - [x] Auto-refresh cada 5 minutos
+  - [x] Validar hook con componente de prueba
 
 **Archivos nuevos**: `lib/hooks/useTierLimits.ts`
 **Validación**: Crear componente temporal que use el hook
@@ -239,11 +239,11 @@
 
 ### 3.2 - Crear componente `TierBadge`
 
-- [ ] Crear archivo `components/shared/tier-badge.tsx`
-  - [ ] Implementar componente con prop `tier` y `size`
-  - [ ] Configuración de colores e íconos para cada tier: `free`, `plus`, `admin`, `grandfathered`
-  - [ ] Usar Lucide icons: `Star`, `Crown`, `Shield`, `Sparkles`
-  - [ ] Validar renderizado en Storybook o página de prueba
+- [x] Crear archivo `components/shared/tier-badge.tsx`
+  - [x] Implementar componente con prop `tier` y `size`
+  - [x] Configuración de colores e íconos para cada tier: `free`, `plus`, `admin`, `grandfathered`
+  - [x] Usar Lucide icons: `Star`, `Crown`, `Shield`, `Sparkles`
+  - [x] Validar renderizado en Storybook o página de prueba
 
 **Archivos nuevos**: `components/shared/tier-badge.tsx`
 **Validación**: Renderizar badge con cada tier
@@ -252,12 +252,12 @@
 
 ### 3.3 - Crear componente `UsageIndicator`
 
-- [ ] Crear archivo `components/shared/usage-indicator.tsx`
-  - [ ] Implementar componente con props: `label`, `used`, `limit`, `warningThreshold`
-  - [ ] Usar `Progress` de Shadcn UI
-  - [ ] Mostrar barra de progreso con colores según porcentaje
-  - [ ] Manejar caso ilimitado (`limit === -1`)
-  - [ ] Validar renderizado
+- [x] Crear archivo `components/shared/usage-indicator.tsx`
+  - [x] Implementar componente con props: `label`, `used`, `limit`, `warningThreshold`
+  - [x] Usar `Progress` de Shadcn UI
+  - [x] Mostrar barra de progreso con colores según porcentaje
+  - [x] Manejar caso ilimitado (`limit === -1`)
+  - [x] Validar renderizado
 
 **Archivos nuevos**: `components/shared/usage-indicator.tsx`
 **Validación**: Renderizar con diferentes valores de uso
@@ -266,13 +266,13 @@
 
 ### 3.4 - Crear componente `LimitReachedModal`
 
-- [ ] Crear archivo `components/shared/limit-reached-modal.tsx`
-  - [ ] Implementar modal con `AlertDialog` de Shadcn UI
-  - [ ] Props: `open`, `onOpenChange`, `feature`, `daysUntilReset`
-  - [ ] Mostrar mensaje de límite alcanzado
-  - [ ] Mostrar días hasta reseteo
-  - [ ] Incluir botón "Entendido" (upgrade vendrá después)
-  - [ ] Validar funcionamiento
+- [x] Crear archivo `components/shared/limit-reached-modal.tsx`
+  - [x] Implementar modal con `AlertDialog` de Shadcn UI
+  - [x] Props: `open`, `onOpenChange`, `feature`, `daysUntilReset`
+  - [x] Mostrar mensaje de límite alcanzado
+  - [x] Mostrar días hasta reseteo
+  - [x] Incluir botón "Entendido" (upgrade vendrá después)
+  - [x] Validar funcionamiento
 
 **Archivos nuevos**: `components/shared/limit-reached-modal.tsx`
 **Validación**: Abrir modal de prueba
@@ -281,14 +281,14 @@
 
 ### 3.5 - Crear componente `PricingCard`
 
-- [ ] Crear archivo `components/shared/pricing-card.tsx`
-  - [ ] Implementar componente con prop `tier` y `onUpgrade`
-  - [ ] Mostrar nombre, precio, descripción
-  - [ ] Lista de features con checkmarks
-  - [ ] Badge "Recomendado" para Plus
-  - [ ] Badge "Plan Actual" si `isCurrentPlan`
-  - [ ] Botón de upgrade
-  - [ ] Validar renderizado
+- [x] Crear archivo `components/shared/pricing-card.tsx`
+  - [x] Implementar componente con prop `tier` y `onUpgrade`
+  - [x] Mostrar nombre, precio, descripción
+  - [x] Lista de features con checkmarks
+  - [x] Badge "Recomendado" para Plus
+  - [x] Badge "Plan Actual" si `isCurrentPlan`
+  - [x] Botón de upgrade
+  - [x] Validar renderizado
 
 **Archivos nuevos**: `components/shared/pricing-card.tsx`
 **Validación**: Renderizar card de Free y Plus
@@ -298,10 +298,10 @@
 ### ✅ Checkpoint Fase 3
 
 **Validación antes de continuar:**
-- [ ] Todos los componentes base funcionan
-- [ ] Hook `useTierLimits` retorna datos correctos
-- [ ] Componentes se renderizan sin errores
-- [ ] Ejecutar `yarn build` sin errores
+- [x] Todos los componentes base funcionan
+- [x] Hook `useTierLimits` retorna datos correctos
+- [x] Componentes se renderizan sin errores
+- [x] Ejecutar `yarn build` sin errores
 
 ---
 
