@@ -28,10 +28,43 @@ export async function GET(req: NextRequest) {
     // Get usage statistics
     const usageStats = await TierService.getUsageStats(supabase, user.id);
 
-    return NextResponse.json({
-      success: true,
-      data: usageStats,
-    });
+    // Transform to match the frontend interface
+    const tierDisplayNames: Record<string, string> = {
+      free: 'Free',
+      plus: 'Plus',
+      admin: 'Admin',
+      grandfathered: 'Grandfathered',
+    };
+
+    const response = {
+      tier: {
+        name: usageStats.tier,
+        display_name: tierDisplayNames[usageStats.tier] || usageStats.tier,
+      },
+      ai_generation: {
+        used: usageStats.ai_generation.used,
+        limit: usageStats.ai_generation.limit,
+        remaining: usageStats.ai_generation.remaining,
+        percentage: usageStats.ai_generation.limit === -1
+          ? 0
+          : Math.round((usageStats.ai_generation.used / usageStats.ai_generation.limit) * 100),
+      },
+      scans: {
+        used: usageStats.scans.used,
+        limit: usageStats.scans.limit,
+        remaining: usageStats.scans.remaining,
+        percentage: usageStats.scans.limit === -1
+          ? 0
+          : Math.round((usageStats.scans.used / usageStats.scans.limit) * 100),
+      },
+      cycle: {
+        start: usageStats.cycle.start,
+        end: usageStats.cycle.end,
+        daysUntilReset: usageStats.cycle.days_until_reset,
+      },
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     logger.error('Error in GET /api/tiers/usage:', error);
     return NextResponse.json(
