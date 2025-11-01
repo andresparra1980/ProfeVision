@@ -11,50 +11,9 @@ import {
 } from "@/components/ui/card";
 import { Check, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type PricingTier = "free" | "plus";
-
-interface TierInfo {
-  name: string;
-  displayName: string;
-  price: number;
-  description: string;
-  features: string[];
-  popular?: boolean;
-}
-
-const tierData: Record<PricingTier, TierInfo> = {
-  free: {
-    name: "free",
-    displayName: "Free",
-    price: 0,
-    description: "Perfecto para empezar con lo básico",
-    features: [
-      "1 generación de examen con IA por mes",
-      "50 escaneos de exámenes por mes",
-      "Hasta 100 estudiantes",
-      "Hasta 5 grupos",
-      "Acceso a todas las funciones básicas",
-      "Soporte por email",
-    ],
-  },
-  plus: {
-    name: "plus",
-    displayName: "Plus",
-    price: 5,
-    description: "Para profesores que necesitan más potencia",
-    features: [
-      "Generaciones ilimitadas con IA",
-      "Escaneos ilimitados de exámenes",
-      "Estudiantes ilimitados",
-      "Grupos ilimitados",
-      "Acceso a todas las funciones premium",
-      "Soporte prioritario",
-      "Acceso anticipado a nuevas funciones",
-    ],
-    popular: true,
-  },
-};
 
 interface PricingCardProps {
   tier: PricingTier;
@@ -69,44 +28,64 @@ export function PricingCard({
   isCurrentPlan = false,
   className,
 }: PricingCardProps) {
-  const info = tierData[tier];
+  const t = useTranslations("tiers.pricing");
+
+  // Get tier info from translations
+  const displayName = t(`${tier}.name`, { defaultValue: tier === "free" ? "Free" : "Plus" });
+  const description = t(`${tier}.description`, { defaultValue: "" });
+  const price = tier === "free" ? 0 : 5;
+  const isPopular = tier === "plus";
+
+  // Get features list
+  const features = [
+    t(`${tier}.features.${tier === "free" ? "aiGenerations" : "unlimitedAI"}`, { defaultValue: "" }),
+    t(`${tier}.features.${tier === "free" ? "scans" : "unlimitedScans"}`, { defaultValue: "" }),
+    t(`${tier}.features.${tier === "free" ? "students" : "unlimitedStudents"}`, { defaultValue: "" }),
+    t(`${tier}.features.${tier === "free" ? "groups" : "unlimitedGroups"}`, { defaultValue: "" }),
+    t(`${tier}.features.${tier === "free" ? "basicFeatures" : "premiumFeatures"}`, { defaultValue: "" }),
+    t(`${tier}.features.${tier === "free" ? "emailSupport" : "prioritySupport"}`, { defaultValue: "" }),
+  ];
+
+  if (tier === "plus") {
+    features.push(t("plus.features.earlyAccess", { defaultValue: "" }));
+  }
 
   return (
     <Card
       className={cn(
         "relative flex flex-col",
-        info.popular && "border-purple-500 border-2 shadow-lg",
+        isPopular && "border-purple-500 border-2 shadow-lg",
         className
       )}
     >
       {/* Badges en la parte superior */}
       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 flex gap-2">
-        {info.popular && (
+        {isPopular && (
           <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
             <Sparkles className="h-3 w-3" />
-            Recomendado
+            {t("badges.recommended", { defaultValue: "Recommended" })}
           </div>
         )}
         {isCurrentPlan && (
           <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-            Plan Actual
+            {t("badges.currentPlan", { defaultValue: "Current Plan" })}
           </div>
         )}
       </div>
 
-      <CardHeader className={cn(info.popular && "pt-8")}>
-        <CardTitle className="text-2xl">{info.displayName}</CardTitle>
-        <CardDescription>{info.description}</CardDescription>
+      <CardHeader className={cn(isPopular && "pt-8")}>
+        <CardTitle className="text-2xl">{displayName}</CardTitle>
+        <CardDescription>{description}</CardDescription>
         <div className="mt-4">
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-bold">
-              ${info.price}
+              ${price}
             </span>
-            <span className="text-muted-foreground">/mes</span>
+            <span className="text-muted-foreground">{t("billing.perMonth", { defaultValue: "/month" })}</span>
           </div>
-          {info.price > 0 && (
+          {price > 0 && (
             <p className="text-xs text-muted-foreground mt-1">
-              Precio de lanzamiento
+              {t("badges.launchPrice", { defaultValue: "Launch price" })}
             </p>
           )}
         </div>
@@ -114,7 +93,7 @@ export function PricingCard({
 
       <CardContent className="flex-1">
         <ul className="space-y-3">
-          {info.features.map((feature, index) => (
+          {features.map((feature, index) => (
             <li key={index} className="flex items-start gap-3">
               <div className="flex items-center justify-center h-5 w-5 rounded-full bg-green-100 dark:bg-green-900/30 flex-shrink-0 mt-0.5">
                 <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
@@ -130,18 +109,18 @@ export function PricingCard({
       <CardFooter>
         {isCurrentPlan ? (
           <Button variant="outline" className="w-full" disabled>
-            Plan actual
+            {t("actions.currentPlan", { defaultValue: "Current plan" })}
           </Button>
         ) : (
           <Button
             className={cn(
               "w-full",
-              info.popular &&
+              isPopular &&
                 "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
             )}
             onClick={onUpgrade}
           >
-            {tier === "free" ? "Comenzar gratis" : "Actualizar a Plus"}
+            {tier === "free" ? t("actions.startFree", { defaultValue: "Start for free" }) : t("actions.upgradePlus", { defaultValue: "Upgrade to Plus" })}
           </Button>
         )}
       </CardFooter>

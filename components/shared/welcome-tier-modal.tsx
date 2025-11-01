@@ -15,6 +15,7 @@ import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface WelcomeTierModalProps {
   open: boolean;
@@ -27,6 +28,7 @@ export function WelcomeTierModal({
   onOpenChange,
   onComplete,
 }: WelcomeTierModalProps) {
+  const t = useTranslations("tiers");
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("annual");
   const [completing, setCompleting] = useState(false);
 
@@ -45,7 +47,7 @@ export function WelcomeTierModal({
           "[WelcomeTierModal] Error getting session:",
           sessionError
         );
-        toast.error("Error al completar bienvenida");
+        toast.error(t("welcome.successDesc", { defaultValue: "Error completing welcome" }));
         return;
       }
 
@@ -68,16 +70,15 @@ export function WelcomeTierModal({
     } catch (err: unknown) {
       const errorObj = err as Error;
       logger.error("[WelcomeTierModal] Error:", errorObj);
-      toast.error("Error al completar bienvenida");
+      toast.error(t("welcome.successDesc", { defaultValue: "Error completing welcome" }));
     } finally {
       setCompleting(false);
     }
   };
 
   const handleUpgrade = () => {
-    toast.info("Próximamente disponible", {
-      description:
-        "La funcionalidad de pago estará disponible pronto. ¡Mantente atento!",
+    toast.info(t("pricing.comingSoon", { defaultValue: "Coming Soon" }), {
+      description: t("pricing.comingSoonDesc", { defaultValue: "Payment functionality will be available soon. Stay tuned!" }),
     });
   };
 
@@ -91,11 +92,10 @@ export function WelcomeTierModal({
             </div>
           </div>
           <DialogTitle className="text-3xl">
-            ¡Bienvenido a ProfeVision!
+            {t("welcome.title", { defaultValue: "Welcome to ProfeVision!" })}
           </DialogTitle>
           <DialogDescription className="text-base mt-2">
-            Elige el plan que mejor se adapte a tus necesidades. Puedes
-            actualizar en cualquier momento.
+            {t("welcome.description", { defaultValue: "Choose the plan that best fits your needs. You can upgrade at any time." })}
           </DialogDescription>
         </DialogHeader>
 
@@ -131,11 +131,11 @@ export function WelcomeTierModal({
               className="text-muted-foreground hover:text-foreground"
             >
               {completing
-                ? "Configurando tu cuenta..."
-                : "Continuar con el plan Free"}
+                ? t("welcome.configuringAccount", { defaultValue: "Setting up your account..." })
+                : t("welcome.continueFree", { defaultValue: "Continue with Free plan" })}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              Puedes actualizar a Plus en cualquier momento desde tu perfil
+              {t("welcome.upgradeAnytime", { defaultValue: "You can upgrade to Plus at any time from your profile" })}
             </p>
           </div>
         </div>

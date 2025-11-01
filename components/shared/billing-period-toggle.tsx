@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export type BillingPeriod = "monthly" | "annual";
 
@@ -15,6 +16,8 @@ export function BillingPeriodToggle({
   onChange,
   className,
 }: BillingPeriodToggleProps) {
+  const t = useTranslations("tiers.pricing");
+
   return (
     <div className={cn("flex items-center justify-center gap-3", className)}>
       <button
@@ -26,7 +29,7 @@ export function BillingPeriodToggle({
             : "text-muted-foreground hover:text-foreground"
         )}
       >
-        Mensual
+        {t("billing.monthly", { defaultValue: "Monthly" })}
       </button>
 
       <button
@@ -38,9 +41,9 @@ export function BillingPeriodToggle({
             : "text-muted-foreground hover:text-foreground"
         )}
       >
-        Anual
+        {t("billing.annual", { defaultValue: "Annual" })}
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-500 text-white">
-          Ahorra 17%
+          {t("badges.save", { defaultValue: "Save 17%" })}
         </span>
       </button>
     </div>

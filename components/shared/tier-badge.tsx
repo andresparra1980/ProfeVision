@@ -1,5 +1,8 @@
+"use client";
+
 import { Star, Crown, Shield, Sparkles, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export type SubscriptionTier = "free" | "plus" | "admin" | "grandfathered";
 
@@ -10,7 +13,7 @@ interface TierBadgeProps {
 }
 
 interface TierConfig {
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
   bgColor: string;
   textColor: string;
@@ -19,28 +22,28 @@ interface TierConfig {
 
 const tierConfigs: Record<SubscriptionTier, TierConfig> = {
   free: {
-    label: "Free",
+    labelKey: "pricing.free.name",
     icon: Star,
     bgColor: "bg-gray-100 dark:bg-gray-800",
     textColor: "text-gray-700 dark:text-gray-300",
     iconColor: "text-gray-500 dark:text-gray-400",
   },
   plus: {
-    label: "Plus",
+    labelKey: "pricing.plus.name",
     icon: Crown,
     bgColor: "bg-gradient-to-r from-purple-500 to-pink-500",
     textColor: "text-white",
     iconColor: "text-white",
   },
   admin: {
-    label: "Admin",
+    labelKey: "pricing.plus.name", // Admin uses Plus label
     icon: Shield,
     bgColor: "bg-gradient-to-r from-blue-500 to-cyan-500",
     textColor: "text-white",
     iconColor: "text-white",
   },
   grandfathered: {
-    label: "Legacy",
+    labelKey: "subscription.grandfathered.title",
     icon: Sparkles,
     bgColor: "bg-gradient-to-r from-amber-500 to-orange-500",
     textColor: "text-white",
@@ -64,9 +67,13 @@ const sizeClasses = {
 };
 
 export function TierBadge({ tier, size = "md", className }: TierBadgeProps) {
+  const t = useTranslations("tiers");
   const config = tierConfigs[tier];
   const sizes = sizeClasses[size];
   const Icon = config.icon;
+
+  // Get label from translations
+  const label = t(config.labelKey, { defaultValue: tier === "free" ? "Free" : tier === "plus" ? "Plus" : "Legacy" });
 
   return (
     <div
@@ -79,7 +86,7 @@ export function TierBadge({ tier, size = "md", className }: TierBadgeProps) {
       )}
     >
       <Icon className={cn(sizes.icon, config.iconColor)} />
-      <span>{config.label}</span>
+      <span>{label}</span>
     </div>
   );
 }

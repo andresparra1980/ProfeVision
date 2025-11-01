@@ -1,5 +1,8 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Infinity as InfinityIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface UsageIndicatorProps {
   label: string;
@@ -16,6 +19,8 @@ export function UsageIndicator({
   warningThreshold = 80,
   className,
 }: UsageIndicatorProps) {
+  const t = useTranslations("tiers");
+
   // Caso ilimitado
   const isUnlimited = limit === -1;
 
@@ -50,7 +55,7 @@ export function UsageIndicator({
           {isUnlimited ? (
             <>
               <InfinityIcon className="h-4 w-4" />
-              <span>Ilimitado</span>
+              <span>{t("usage.unlimited", { defaultValue: "Unlimited" })}</span>
             </>
           ) : (
             <span>
@@ -80,17 +85,20 @@ export function UsageIndicator({
         <div className="text-xs text-gray-500 dark:text-gray-400">
           {percentage >= 100 && (
             <span className="text-red-600 dark:text-red-400 font-medium">
-              Límite alcanzado
+              {t("limits.reached.title", { defaultValue: "Limit reached" })}
             </span>
           )}
           {percentage >= warningThreshold && percentage < 100 && (
             <span className="text-yellow-600 dark:text-yellow-400 font-medium">
-              Cerca del límite ({Math.round(percentage)}%)
+              {t("limits.warning.approaching", { percentage: Math.round(percentage), defaultValue: `Near limit (${Math.round(percentage)}%)` })}
             </span>
           )}
           {percentage < warningThreshold && (
             <span>
-              {limit - used} restante{limit - used !== 1 ? "s" : ""}
+              {t(limit - used === 1 ? "limits.warning.remaining" : "limits.warning.remainingPlural", {
+                count: limit - used,
+                defaultValue: `${limit - used} remaining`
+              })}
             </span>
           )}
         </div>

@@ -38,6 +38,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const t = useTranslations('dashboard');
+  const tTiers = useTranslations('tiers');
   const locale = useLocale();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -165,8 +166,8 @@ export default function DashboardLayout({
           onOpenChange={setShowWelcome}
           onComplete={() => {
             setShowWelcome(false);
-            toast.success("¡Bienvenido a ProfeVision!", {
-              description: "Tu cuenta ha sido configurada correctamente.",
+            toast.success(tTiers('welcome.success', { defaultValue: 'Welcome to ProfeVision!' }), {
+              description: tTiers('welcome.successDesc', { defaultValue: 'Your account has been set up successfully.' }),
             });
           }}
         />
