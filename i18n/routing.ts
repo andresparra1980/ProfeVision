@@ -167,9 +167,9 @@ export const pathnames = {
     es: '/dashboard/materias', 
     en: '/dashboard/subjects' 
   },
-  '/dashboard/reports': { 
-    es: '/dashboard/reportes', 
-    en: '/dashboard/reports' 
+  '/dashboard/subscription': {
+    es: '/dashboard/suscripcion',
+    en: '/dashboard/subscription'
   },
   '/dashboard/settings': { 
     es: '/dashboard/configuracion', 

@@ -78,7 +78,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
     },
     {
       title: t('navigation.subscription', { defaultValue: 'Mi Plan' }),
-      href: '/dashboard/reports',
+      href: '/dashboard/subscription',
       icon: Crown,
     },
     {

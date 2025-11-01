@@ -12,23 +12,23 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 export default function SubscriptionPage() {
-  const t = useTranslations('dashboard.subscription');
+  const t = useTranslations('tiers');
   const { usage, loading } = useTierLimits();
 
   const handleUpgrade = () => {
-    toast.info("Próximamente disponible", {
-      description: "La funcionalidad de pago estará disponible pronto. ¡Mantente atento!",
+    toast.info(t("pricing.comingSoon", { defaultValue: "Coming Soon" }), {
+      description: t("pricing.comingSoonDesc", { defaultValue: "Payment functionality will be available soon. Stay tuned!" }),
     });
   };
 
   if (loading) {
-    return <LoadingSpinner message={t('loading', { defaultValue: 'Cargando información de suscripción...' })} />;
+    return <LoadingSpinner message={t('subscription.loading', { defaultValue: 'Loading subscription information...' })} />;
   }
 
   if (!usage) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-muted-foreground">{t('error', { defaultValue: 'No se pudo cargar la información de suscripción' })}</p>
+        <p className="text-muted-foreground">{t('subscription.error', { defaultValue: 'Could not load subscription information' })}</p>
       </div>
     );
   }
@@ -42,10 +42,10 @@ export default function SubscriptionPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">
-            {t('title', { defaultValue: 'Mi Plan' })}
+            {t('subscription.title', { defaultValue: 'My Plan' })}
           </h2>
           <p className="text-muted-foreground">
-            {t('description', { defaultValue: 'Gestiona tu suscripción y revisa tu uso actual' })}
+            {t('subscription.description', { defaultValue: 'Manage your subscription and review your current usage' })}
           </p>
         </div>
         <TierBadge tier={currentTier} size="lg" />
@@ -56,11 +56,11 @@ export default function SubscriptionPage() {
         <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-900/20">
           <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           <AlertTitle className="text-amber-800 dark:text-amber-200">
-            {t('grandfathered.title', { defaultValue: 'Plan Legacy Temporal' })}
+            {t('subscription.grandfathered.title', { defaultValue: 'Temporary Legacy Plan' })}
           </AlertTitle>
           <AlertDescription className="text-amber-700 dark:text-amber-300">
-            {t('grandfathered.description', {
-              defaultValue: 'Como usuario existente, tienes acceso ilimitado temporalmente. Este plan legacy será reemplazado eventualmente por un plan estándar. Te notificaremos con anticipación sobre cualquier cambio.'
+            {t('subscription.grandfathered.description', {
+              defaultValue: 'As an existing user, you have unlimited access temporarily. This legacy plan will eventually be replaced by a standard plan. We will notify you in advance about any changes.'
             })}
           </AlertDescription>
         </Alert>
@@ -71,25 +71,25 @@ export default function SubscriptionPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            {t('usage.title', { defaultValue: 'Uso Actual' })}
+            {t('subscription.usage.title', { defaultValue: 'Current Usage' })}
           </CardTitle>
           <CardDescription>
-            {t('usage.description', {
-              defaultValue: 'Tu ciclo se renueva el'
+            {t('subscription.usage.description', {
+              defaultValue: 'Your cycle renews on the'
             })} {new Date(usage.cycle.end).toLocaleDateString('es', {
               day: 'numeric',
               month: 'long'
-            })} ({usage.cycle.daysUntilReset} {usage.cycle.daysUntilReset === 1 ? t('usage.day', { defaultValue: 'día' }) : t('usage.days', { defaultValue: 'días' })})
+            })} ({usage.cycle.daysUntilReset} {usage.cycle.daysUntilReset === 1 ? t('subscription.usage.day', { defaultValue: 'day' }) : t('subscription.usage.days', { defaultValue: 'days' })})
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <UsageIndicator
-            label={t('usage.aiGenerations', { defaultValue: 'Generaciones con IA' })}
+            label={t('subscription.usage.aiGenerations', { defaultValue: 'AI Generations' })}
             used={usage.ai_generation.used}
             limit={usage.ai_generation.limit}
           />
           <UsageIndicator
-            label={t('usage.scans', { defaultValue: 'Escaneos de exámenes' })}
+            label={t('subscription.usage.scans', { defaultValue: 'Exam Scans' })}
             used={usage.scans.used}
             limit={usage.scans.limit}
           />
@@ -100,7 +100,7 @@ export default function SubscriptionPage() {
       {!isGrandfathered && (
         <div>
           <h3 className="text-2xl font-bold mb-4">
-            {t('plans.title', { defaultValue: 'Planes Disponibles' })}
+            {t('subscription.plans.title', { defaultValue: 'Available Plans' })}
           </h3>
           <div className="grid gap-6 md:grid-cols-2">
             <PricingCard
@@ -122,37 +122,37 @@ export default function SubscriptionPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <HelpCircle className="h-5 w-5" />
-            {t('faq.title', { defaultValue: 'Preguntas Frecuentes' })}
+            {t('subscription.faq.title', { defaultValue: 'Frequently Asked Questions' })}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <h4 className="font-semibold mb-1">
-              {t('faq.q1.question', { defaultValue: '¿Qué sucede si alcanzo mi límite mensual?' })}
+              {t('subscription.faq.q1.question', { defaultValue: 'What happens if I reach my monthly limit?' })}
             </h4>
             <p className="text-sm text-muted-foreground">
-              {t('faq.q1.answer', {
-                defaultValue: 'Si alcanzas tu límite mensual, no podrás usar esa función hasta que se renueve tu ciclo. Puedes actualizar a Plus para obtener acceso ilimitado.'
+              {t('subscription.faq.q1.answer', {
+                defaultValue: 'If you reach your monthly limit, you won\'t be able to use that feature until your cycle renews. You can upgrade to Plus to get unlimited access.'
               })}
             </p>
           </div>
           <div>
             <h4 className="font-semibold mb-1">
-              {t('faq.q2.question', { defaultValue: '¿Cuándo se renueva mi límite mensual?' })}
+              {t('subscription.faq.q2.question', { defaultValue: 'When does my monthly limit renew?' })}
             </h4>
             <p className="text-sm text-muted-foreground">
-              {t('faq.q2.answer', {
-                defaultValue: 'Tu límite se renueva automáticamente cada mes en la fecha de inicio de tu ciclo de facturación.'
+              {t('subscription.faq.q2.answer', {
+                defaultValue: 'Your limit renews automatically every month on your billing cycle start date.'
               })}
             </p>
           </div>
           <div>
             <h4 className="font-semibold mb-1">
-              {t('faq.q3.question', { defaultValue: '¿Puedo cancelar mi suscripción en cualquier momento?' })}
+              {t('subscription.faq.q3.question', { defaultValue: 'Can I cancel my subscription at any time?' })}
             </h4>
             <p className="text-sm text-muted-foreground">
-              {t('faq.q3.answer', {
-                defaultValue: 'Sí, puedes cancelar tu suscripción en cualquier momento. Mantendrás acceso a las funciones premium hasta el final de tu periodo de facturación actual.'
+              {t('subscription.faq.q3.answer', {
+                defaultValue: 'Yes, you can cancel your subscription at any time. You will maintain access to premium features until the end of your current billing period.'
               })}
             </p>
           </div>
