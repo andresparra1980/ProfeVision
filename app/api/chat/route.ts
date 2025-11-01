@@ -30,6 +30,7 @@ import {
 } from "@/lib/ai/chat/langsmith";
 import { verifyTeacherAuth } from "@/lib/auth/verify-teacher";
 import TierService from "@/lib/services/tier-service";
+import { createClient } from "@/lib/supabase/server";
 
 // Env
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -80,9 +81,12 @@ async function handleChatRequest(req: NextRequest, t0: number) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
 
+    // Create Supabase client with user context
+    const supabase = createClient();
+
     // Check tier limits for AI generation feature
     try {
-      const limitCheck = await TierService.checkFeatureAccess(user.id, 'ai_generation');
+      const limitCheck = await TierService.checkFeatureAccess(supabase, user.id, 'ai_generation');
 
       if (!limitCheck.allowed) {
         logger.log('AI generation limit reached for user:', user.id, limitCheck);
@@ -357,7 +361,7 @@ async function handleChatRequest(req: NextRequest, t0: number) {
 
     // Increment AI generation usage count after successful generation
     try {
-      await TierService.incrementUsage(user.id, 'ai_generation', 1);
+      await TierService.incrementUsage(supabase, user.id, 'ai_generation', 1);
       logger.log('Incremented AI generation usage for user:', user.id);
     } catch (tierError) {
       logger.error('Error incrementing AI generation usage:', tierError);

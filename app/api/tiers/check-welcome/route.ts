@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyTeacherAuth } from '@/lib/auth/verify-teacher';
 import TierService from '@/lib/services/tier-service';
+import { createClient } from '@/lib/supabase/server';
 import logger from '@/lib/utils/logger';
 
 /**
@@ -21,8 +22,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Create Supabase client with user context
+    const supabase = createClient();
+
     // Check if user should see welcome modal
-    const showWelcome = await TierService.shouldShowWelcome(user.id);
+    const showWelcome = await TierService.shouldShowWelcome(supabase, user.id);
 
     return NextResponse.json({
       success: true,

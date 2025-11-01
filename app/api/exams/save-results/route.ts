@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
 import { promises as _fsPromises } from "fs";
 import * as _path from "path";
@@ -7,12 +6,9 @@ import sharp from "sharp";
 import logger from "@/lib/utils/logger";
 import { getApiTranslator } from '@/i18n/api';
 import TierService from '@/lib/services/tier-service';
+import { createAdminSupabaseClient } from '@/lib/supabase/server';
 
 const DEBUG = process.env.NODE_ENV === "development";
-
-// Configuración para el cliente de Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // Configuración para el bucket S3
 const s3BucketName = process.env.S3_BUCKET_NAME || "examenes-escaneados";
@@ -272,13 +268,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Inicializar cliente de Supabase
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
+    // Inicializar cliente de Supabase con permisos de admin
+    const supabase = createAdminSupabaseClient();
 
     // Extraer información del QR
     const examId =
@@ -325,7 +316,7 @@ export async function POST(req: NextRequest) {
     // Check tier limits for scan feature
     if (profesorId) {
       try {
-        const limitCheck = await TierService.checkFeatureAccess(profesorId, 'scan');
+        const limitCheck = await TierService.checkFeatureAccess(supabase, profesorId, 'scan');
 
         if (!limitCheck.allowed) {
           if (DEBUG) {
@@ -994,7 +985,7 @@ export async function POST(req: NextRequest) {
     // Increment scan usage count after successful save
     if (profesorId) {
       try {
-        await TierService.incrementUsage(profesorId, 'scan', 1);
+        await TierService.incrementUsage(supabase, profesorId, 'scan', 1);
         if (DEBUG) {
           logger.log('Incremented scan usage for profesor:', profesorId);
         }

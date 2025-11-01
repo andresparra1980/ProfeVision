@@ -1,7 +1,6 @@
 import { supabase as clientSupabase } from "./supabase/client";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-// Re-export the client instance
+// Re-export the client instance for browser use
 export const supabase = clientSupabase;
 
 // Improved site URL detection with better fallbacks
@@ -29,19 +28,6 @@ export const getSiteUrl = () => {
 
 // Get the site URL
 export const siteUrl = getSiteUrl();
-
-// For service/admin operations that need the service key
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
-
-export function getServiceSupabase(): SupabaseClient {
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
 
 // User data type for signup
 interface UserSignupData {

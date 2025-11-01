@@ -1,0 +1,119 @@
+{
+  "subscription": {
+    "loading": "Cargando información de suscripción...",
+    "error": "No se pudo cargar la información de suscripción",
+    "title": "Mi Plan",
+    "description": "Gestiona tu suscripción y revisa tu uso actual",
+    "grandfathered": {
+      "title": "Plan Legacy Temporal",
+      "description": "Como usuario existente, tienes acceso ilimitado temporalmente. Este plan legacy será reemplazado eventualmente por un plan estándar. Te notificaremos con anticipación sobre cualquier cambio."
+    },
+    "usage": {
+      "title": "Uso Actual",
+      "description": "Tu ciclo se renueva el",
+      "day": "día",
+      "days": "días",
+      "aiGenerations": "Generaciones con IA",
+      "scans": "Escaneos de exámenes"
+    },
+    "plans": {
+      "title": "Planes Disponibles"
+    },
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "q1": {
+        "question": "¿Qué sucede si alcanzo mi límite mensual?",
+        "answer": "Si alcanzas tu límite mensual, no podrás usar esa función hasta que se renueve tu ciclo. Puedes actualizar a Plus para obtener acceso ilimitado."
+      },
+      "q2": {
+        "question": "¿Cuándo se renueva mi límite mensual?",
+        "answer": "Tu límite se renueva automáticamente cada mes en la fecha de inicio de tu ciclo de facturación."
+      },
+      "q3": {
+        "question": "¿Puedo cancelar mi suscripción en cualquier momento?",
+        "answer": "Sí, puedes cancelar tu suscripción en cualquier momento. Mantendrás acceso a las funciones premium hasta el final de tu periodo de facturación actual."
+      }
+    }
+  },
+  "pricing": {
+    "comingSoon": "Próximamente disponible",
+    "comingSoonDesc": "La funcionalidad de pago estará disponible pronto. ¡Mantente atento!",
+    "free": {
+      "name": "Free",
+      "description": "Perfecto para empezar con lo básico",
+      "features": {
+        "aiGenerations": "1 generación de examen con IA por mes",
+        "scans": "50 escaneos de exámenes por mes",
+        "students": "Hasta 100 estudiantes",
+        "groups": "Hasta 5 grupos",
+        "basicFeatures": "Acceso a todas las funciones básicas",
+        "emailSupport": "Soporte por email"
+      }
+    },
+    "plus": {
+      "name": "Plus",
+      "description": "Para profesores que necesitan más potencia",
+      "features": {
+        "unlimitedAI": "Generaciones ilimitadas con IA",
+        "unlimitedScans": "Escaneos ilimitados de exámenes",
+        "unlimitedStudents": "Estudiantes ilimitados",
+        "unlimitedGroups": "Grupos ilimitados",
+        "premiumFeatures": "Acceso a todas las funciones premium",
+        "prioritySupport": "Soporte prioritario",
+        "earlyAccess": "Acceso anticipado a nuevas funciones"
+      }
+    },
+    "badges": {
+      "recommended": "Recomendado",
+      "currentPlan": "Plan Actual",
+      "launchPrice": "Precio de lanzamiento",
+      "save": "Ahorra 17%"
+    },
+    "billing": {
+      "monthly": "Mensual",
+      "annual": "Anual",
+      "perMonth": "/mes",
+      "billedAnnually": "facturado anualmente",
+      "saveAmount": "Ahorra"
+    },
+    "actions": {
+      "startFree": "Comenzar gratis",
+      "upgradePlus": "Actualizar a Plus",
+      "currentPlan": "Plan actual"
+    }
+  },
+  "welcome": {
+    "title": "¡Bienvenido a ProfeVision!",
+    "description": "Elige el plan que mejor se adapte a tus necesidades. Puedes actualizar en cualquier momento.",
+    "continueFree": "Continuar con el plan Free",
+    "configuringAccount": "Configurando tu cuenta...",
+    "upgradeAnytime": "Puedes actualizar a Plus en cualquier momento desde tu perfil",
+    "success": "¡Bienvenido a ProfeVision!",
+    "successDesc": "Tu cuenta ha sido configurada correctamente."
+  },
+  "limits": {
+    "reached": {
+      "title": "Límite alcanzado",
+      "description": "Has alcanzado el límite mensual de {feature} disponibles en tu plan actual.",
+      "ai": "generaciones de IA",
+      "scans": "escaneos",
+      "daysUntilReset": {
+        "today": "Tu límite se restablecerá mañana",
+        "tomorrow": "Tu límite se restablecerá en 1 día",
+        "multiple": "Tu límite se restablecerá en {days} días"
+      },
+      "waitOrUpgrade": "Puedes esperar hasta que se restablezca tu límite, o actualizar a un plan superior para obtener más {feature} mensuales.",
+      "understood": "Entendido"
+    },
+    "warning": {
+      "approaching": "Cerca del límite ({percentage}%)",
+      "remaining": "{count} restante",
+      "remainingPlural": "{count} restantes"
+    }
+  },
+  "usage": {
+    "unlimited": "Ilimitado",
+    "used": "usado",
+    "of": "de"
+  }
+}

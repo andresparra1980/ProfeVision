@@ -1,4 +1,4 @@
-import { getServiceSupabase } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import logger from '@/lib/utils/logger';
 
 // ==================== TYPES ====================
@@ -58,17 +58,17 @@ export interface FeatureLimitCheck {
 export class TierService {
   /**
    * Check if a professor can access a feature based on their tier limits
+   * @param supabase - Supabase client instance
    * @param profesorId - The professor's UUID
    * @param feature - The feature to check ('ai_generation' or 'scan')
    * @returns Promise<FeatureLimitCheck>
    */
   static async checkFeatureAccess(
+    supabase: SupabaseClient,
     profesorId: string,
     feature: Feature
   ): Promise<FeatureLimitCheck> {
     try {
-      const supabase = getServiceSupabase();
-
       const { data, error } = await supabase.rpc('check_feature_limit', {
         p_profesor_id: profesorId,
         p_feature: feature,
@@ -88,19 +88,19 @@ export class TierService {
 
   /**
    * Increment the usage counter for a feature
+   * @param supabase - Supabase client instance
    * @param profesorId - The professor's UUID
    * @param feature - The feature to increment ('ai_generation' or 'scan')
    * @param amount - The amount to increment (default: 1)
    * @returns Promise<{ success: boolean }>
    */
   static async incrementUsage(
+    supabase: SupabaseClient,
     profesorId: string,
     feature: Feature,
     amount: number = 1
   ): Promise<{ success: boolean }> {
     try {
-      const supabase = getServiceSupabase();
-
       const { data, error } = await supabase.rpc('increment_feature_usage', {
         p_profesor_id: profesorId,
         p_feature: feature,
@@ -121,13 +121,12 @@ export class TierService {
 
   /**
    * Get the tier limits configuration for a specific tier
+   * @param supabase - Supabase client instance
    * @param tier - The subscription tier
    * @returns Promise<TierLimits>
    */
-  static async getTierLimits(tier: SubscriptionTier): Promise<TierLimits> {
+  static async getTierLimits(supabase: SupabaseClient, tier: SubscriptionTier): Promise<TierLimits> {
     try {
-      const supabase = getServiceSupabase();
-
       const { data, error } = await supabase
         .from('tier_limits')
         .select('*')
@@ -148,13 +147,12 @@ export class TierService {
 
   /**
    * Get the current subscription tier for a professor
+   * @param supabase - Supabase client instance
    * @param profesorId - The professor's UUID
    * @returns Promise<SubscriptionTier>
    */
-  static async getCurrentTier(profesorId: string): Promise<SubscriptionTier> {
+  static async getCurrentTier(supabase: SupabaseClient, profesorId: string): Promise<SubscriptionTier> {
     try {
-      const supabase = getServiceSupabase();
-
       const { data, error } = await supabase
         .from('profesores')
         .select('subscription_tier')
@@ -175,18 +173,17 @@ export class TierService {
 
   /**
    * Get comprehensive usage statistics for a professor
+   * @param supabase - Supabase client instance
    * @param profesorId - The professor's UUID
    * @returns Promise<UsageStats>
    */
-  static async getUsageStats(profesorId: string): Promise<UsageStats> {
+  static async getUsageStats(supabase: SupabaseClient, profesorId: string): Promise<UsageStats> {
     try {
-      const supabase = getServiceSupabase();
-
       // Get current tier
-      const tier = await this.getCurrentTier(profesorId);
+      const tier = await this.getCurrentTier(supabase, profesorId);
 
       // Get tier limits
-      const limits = await this.getTierLimits(tier);
+      const limits = await this.getTierLimits(supabase, tier);
 
       // Get usage tracking
       const { data: usage, error } = await supabase
@@ -247,13 +244,12 @@ export class TierService {
 
   /**
    * Check if a professor should see the welcome modal
+   * @param supabase - Supabase client instance
    * @param profesorId - The professor's UUID
    * @returns Promise<boolean>
    */
-  static async shouldShowWelcome(profesorId: string): Promise<boolean> {
+  static async shouldShowWelcome(supabase: SupabaseClient, profesorId: string): Promise<boolean> {
     try {
-      const supabase = getServiceSupabase();
-
       const { data, error } = await supabase
         .from('profesores')
         .select('first_login_completed')
@@ -274,15 +270,15 @@ export class TierService {
 
   /**
    * Mark the welcome flow as completed for a professor
+   * @param supabase - Supabase client instance
    * @param profesorId - The professor's UUID
    * @returns Promise<{ success: boolean }>
    */
   static async completeWelcome(
+    supabase: SupabaseClient,
     profesorId: string
   ): Promise<{ success: boolean }> {
     try {
-      const supabase = getServiceSupabase();
-
       const { error } = await supabase
         .from('profesores')
         .update({ first_login_completed: true })

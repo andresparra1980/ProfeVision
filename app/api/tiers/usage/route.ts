@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyTeacherAuth } from '@/lib/auth/verify-teacher';
 import TierService from '@/lib/services/tier-service';
+import { createClient } from '@/lib/supabase/server';
 import logger from '@/lib/utils/logger';
 
 /**
@@ -21,8 +22,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Create Supabase client with user context
+    const supabase = createClient();
+
     // Get usage statistics
-    const usageStats = await TierService.getUsageStats(user.id);
+    const usageStats = await TierService.getUsageStats(supabase, user.id);
 
     return NextResponse.json({
       success: true,

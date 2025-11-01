@@ -1,4 +1,4 @@
-import { getServiceSupabase } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import logger from '@/lib/utils/logger';
 
@@ -31,17 +31,18 @@ interface OmrServiceCallbackData {
 
 /**
  * Sube una imagen escaneada a Supabase Storage y crea un trabajo de procesamiento
+ * @param supabase - Supabase client instance
  * @param file Archivo de imagen para procesar
  * @param examId ID opcional del examen
  * @returns Resultado del procesamiento
  */
 export async function uploadScanToStorage(
+  supabase: SupabaseClient,
   file: File | Blob,
   examId?: string,
   studentId?: string,
   groupId?: string
 ): Promise<ProcessingResult> {
-  const supabase = getServiceSupabase();
   
   // Generar un ID único para el trabajo
   const jobId = uuidv4();
@@ -113,10 +114,10 @@ export async function uploadScanToStorage(
     }
     throw new Error(`Error creating scan job: ${jobError.message}`);
   }
-  
+
   // Notificar al microservicio de OMR
-  await notifyOmrService(jobId, filePath, scanData);
-  
+  await notifyOmrService(supabase, jobId, filePath, scanData);
+
   return {
     jobId,
     uploadUrl: publicUrl,
@@ -127,27 +128,28 @@ export async function uploadScanToStorage(
 
 /**
  * Notifica al microservicio de OMR que hay un nuevo trabajo para procesar
+ * @param supabase - Supabase client instance
  * @param jobId ID del trabajo
  * @param filePath Ruta del archivo en Supabase Storage
  * @param scanData Datos del escaneo
  */
 async function notifyOmrService(
-  jobId: string, 
-  filePath: string, 
+  supabase: SupabaseClient,
+  jobId: string,
+  filePath: string,
   scanData: ScanData
 ): Promise<void> {
   try {
     const omrServiceEndpoint = process.env.OMR_SERVICE_ENDPOINT;
-    
+
     if (!omrServiceEndpoint) {
       if (DEBUG) {
         logger.log('OMR service endpoint not configured. Job queued:', { jobId, filePath });
       }
       return;
     }
-    
+
     // Obtener URL firmada para que el microservicio pueda acceder a la imagen
-    const supabase = getServiceSupabase();
     const { data, error } = await supabase
       .storage
       .from('exam-scans')
@@ -200,11 +202,11 @@ async function notifyOmrService(
 
 /**
  * Obtiene el estado de un trabajo de procesamiento
+ * @param supabase - Supabase client instance
  * @param jobId ID del trabajo
  * @returns Datos del trabajo o null si no existe
  */
-export async function getProcessingJob(jobId: string): Promise<ProcessingResult | null> {
-  const supabase = getServiceSupabase();
+export async function getProcessingJob(supabase: SupabaseClient, jobId: string): Promise<ProcessingResult | null> {
   
   const { data, error } = await supabase
     .from('exam_scan_jobs')
@@ -251,16 +253,17 @@ export async function getProcessingJob(jobId: string): Promise<ProcessingResult 
 
 /**
  * Actualiza el estado de un trabajo de procesamiento
+ * @param supabase - Supabase client instance
  * @param jobId ID del trabajo
  * @param status Nuevo estado
  * @param result Resultado del procesamiento (opcional)
  */
 export async function updateJobStatus(
-  jobId: string, 
+  supabase: SupabaseClient,
+  jobId: string,
   status: 'processing' | 'completed' | 'failed',
   result?: Record<string, unknown>
 ): Promise<void> {
-  const supabase = getServiceSupabase();
   
   const updates: Record<string, unknown> = {
     status,

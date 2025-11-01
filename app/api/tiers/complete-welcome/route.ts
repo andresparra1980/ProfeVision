@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyTeacherAuth } from '@/lib/auth/verify-teacher';
 import TierService from '@/lib/services/tier-service';
+import { createClient } from '@/lib/supabase/server';
 import logger from '@/lib/utils/logger';
 
 /**
@@ -21,8 +22,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Create Supabase client with user context
+    const supabase = createClient();
+
     // Mark welcome as completed
-    const result = await TierService.completeWelcome(user.id);
+    const result = await TierService.completeWelcome(supabase, user.id);
 
     return NextResponse.json({
       success: result.success,
