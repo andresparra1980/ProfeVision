@@ -29,7 +29,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Paperclip, ListChecks, FileText, AlertCircle } from "lucide-react";
+import { Paperclip, ListChecks, FileText } from "lucide-react";
 import ResultsView from "./ResultsView";
 import { useDocumentContext } from "../hooks/useDocumentContext";
 import { useSummaryDialog } from "../hooks/useSummaryDialog";
@@ -39,7 +39,6 @@ import { SummaryDialog } from "./SummaryDialog";
 import { EmptyState } from "./EmptyState";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { LimitReachedModal } from "@/components/shared/limit-reached-modal";
-import { UsageIndicator } from "@/components/shared/usage-indicator";
 
 const notoSans = Noto_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
@@ -59,6 +58,7 @@ export default function ChatPanel() {
   // Tier limits hook
   const { usage, loading: tierLoading, canUseAI } = useTierLimits();
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const toastShownRef = useRef(false);
 
   // Add bottom sheet styles
   useEffect(() => {
@@ -131,6 +131,33 @@ export default function ChatPanel() {
     }
   }, []);
 
+  // Mostrar toast informativo de uso de IA (solo una vez)
+  useEffect(() => {
+    if (!tierLoading && usage && !toastShownRef.current) {
+      toastShownRef.current = true;
+
+      const isUnlimited = usage.ai_generation.limit === -1;
+      const percentage = usage.ai_generation.percentage;
+
+      if (isUnlimited) {
+        toast.info(tTiers('features.ai_generations'), {
+          description: `${tTiers('usage.unlimited')} - ${tTiers('subscription.grandfathered.title')}`,
+          duration: 4000,
+        });
+      } else if (percentage >= 80) {
+        toast.warning(tTiers('features.ai_generations'), {
+          description: tTiers('limits.warning.approaching_ai'),
+          duration: 5000,
+        });
+      } else {
+        toast.info(tTiers('features.ai_generations'), {
+          description: `${usage.ai_generation.used} ${tTiers('usage.of')} ${usage.ai_generation.limit} ${tTiers('usage.used')}`,
+          duration: 3000,
+        });
+      }
+    }
+  }, [usage, tierLoading, tTiers]);
+
   // Measure prompt height to reserve space and avoid vertical scrollbar
   useEffect(() => {
     function updatePadding() {
@@ -198,29 +225,6 @@ export default function ChatPanel() {
 
   return (
     <div ref={rootRef} className="flex flex-col overflow-x-clip overflow-y-hidden space-y-0" style={{ minHeight }}>
-      {/* Indicador de uso de IA (solo cuando NO está cargando) */}
-      {!tierLoading && usage && (
-        <div className="flex w-full justify-center mb-3">
-          <div className="w-full sm:w-[62vw] sm:min-w-[640px] max-w-[1200px] px-4">
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-              <UsageIndicator
-                label={tTiers('features.ai_generations')}
-                used={usage.ai_generation.used}
-                limit={usage.ai_generation.limit}
-                warningThreshold={80}
-              />
-              {/* Warning si está cerca del límite */}
-              {usage.ai_generation.percentage >= 80 && usage.ai_generation.percentage < 100 && (
-                <div className="mt-3 flex items-start gap-2 text-sm text-yellow-800 dark:text-yellow-200">
-                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <p>{tTiers('limits.warning.approaching_ai')}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="flex w-full justify-center">
         <div className="w-full sm:w-[62vw] sm:min-w-[640px] max-w-[1200px]">
           <Conversation
