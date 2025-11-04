@@ -8,9 +8,10 @@ interface InstructionsProps {
   onNext: () => void;
   scanUsage?: UsageData;
   canScan?: boolean;
+  loading?: boolean;
 }
 
-export function Instructions({ onNext, scanUsage, canScan = true }: InstructionsProps) {
+export function Instructions({ onNext, scanUsage, canScan = true, loading = false }: InstructionsProps) {
   const t = useTranslations('wizard-step-instructions');
   const tTiers = useTranslations('tiers');
 
@@ -30,8 +31,8 @@ export function Instructions({ onNext, scanUsage, canScan = true }: Instructions
         </div>
       )}
 
-      {/* Warning si no puede escanear */}
-      {!canScan && (
+      {/* Warning si no puede escanear (solo cuando NO está cargando) */}
+      {!loading && !canScan && scanUsage && (
         <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-red-800 dark:text-red-200">

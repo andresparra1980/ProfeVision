@@ -57,7 +57,7 @@ export default function ChatPanel() {
   const [minHeight, setMinHeight] = useState<number | undefined>(undefined);
 
   // Tier limits hook
-  const { usage, canUseAI } = useTierLimits();
+  const { usage, loading: tierLoading, canUseAI } = useTierLimits();
   const [showLimitModal, setShowLimitModal] = useState(false);
 
   // Add bottom sheet styles
@@ -178,7 +178,8 @@ export default function ChatPanel() {
 
   const handleSend = () => {
     // Verificar límites antes de enviar
-    if (!canUseAI()) {
+    // Solo verificar si NO está cargando y los datos ya están disponibles
+    if (!tierLoading && usage && !canUseAI()) {
       setShowLimitModal(true);
       return;
     }
@@ -197,8 +198,8 @@ export default function ChatPanel() {
 
   return (
     <div ref={rootRef} className="flex flex-col overflow-x-clip overflow-y-hidden space-y-0" style={{ minHeight }}>
-      {/* Indicador de uso de IA */}
-      {usage && (
+      {/* Indicador de uso de IA (solo cuando NO está cargando) */}
+      {!tierLoading && usage && (
         <div className="flex w-full justify-center mb-3">
           <div className="w-full sm:w-[62vw] sm:min-w-[640px] max-w-[1200px] px-4">
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
@@ -389,7 +390,7 @@ export default function ChatPanel() {
                 />
               </PromptInputTools>
               <PromptInputSubmit
-                disabled={isSending || input.trim().length === 0 || !canUseAI()}
+                disabled={isSending || input.trim().length === 0 || (!tierLoading && usage ? !canUseAI() : false)}
                 status={isSending ? 'submitted' : undefined}
                 className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               />

@@ -29,7 +29,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
   } = useImageContext();
 
   // Tier limits hook
-  const { usage, canUseScan } = useTierLimits();
+  const { usage, loading: tierLoading, canUseScan } = useTierLimits();
 
   const [step, setStep] = useState(1);
   const [scanData, setScanData] = useState<ScanData>({});
@@ -123,7 +123,8 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
 
   const handleNext = () => {
     // Verificar límites antes de pasar del paso 1 (instrucciones) al paso 2 (captura)
-    if (step === 1 && !canUseScan()) {
+    // Solo verificar si NO está cargando y los datos ya están disponibles
+    if (step === 1 && !tierLoading && usage && !canUseScan()) {
       setShowLimitModal(true);
       return;
     }
@@ -258,7 +259,8 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
           <Instructions
             onNext={handleNext}
             scanUsage={usage?.scans}
-            canScan={canUseScan()}
+            canScan={tierLoading ? true : canUseScan()}
+            loading={tierLoading}
           />
         )}
         {step === 2 && (
