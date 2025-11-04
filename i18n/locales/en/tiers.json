@@ -1,4 +1,8 @@
 {
+  "features": {
+    "ai_generations": "AI Generations",
+    "scans": "Exam Scans"
+  },
   "subscription": {
     "loading": "Loading subscription information...",
     "error": "Could not load subscription information",
@@ -107,6 +111,7 @@
     },
     "warning": {
       "approaching": "Near limit ({percentage}%)",
+      "approaching_ai": "You are approaching your monthly limit for AI generations. Consider upgrading to Plus for unlimited access.",
       "remaining": "{count} remaining",
       "remainingPlural": "{count} remaining"
     }

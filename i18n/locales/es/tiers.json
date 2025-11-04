@@ -1,4 +1,8 @@
 {
+  "features": {
+    "ai_generations": "Generaciones con IA",
+    "scans": "Escaneos de exámenes"
+  },
   "subscription": {
     "loading": "Cargando información de suscripción...",
     "error": "No se pudo cargar la información de suscripción",
@@ -107,6 +111,7 @@
     },
     "warning": {
       "approaching": "Cerca del límite ({percentage}%)",
+      "approaching_ai": "Te estás acercando al límite mensual de generaciones con IA. Considera actualizar a Plus para acceso ilimitado.",
       "remaining": "{count} restante",
       "remainingPlural": "{count} restantes"
     }
