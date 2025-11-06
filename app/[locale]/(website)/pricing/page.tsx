@@ -48,6 +48,24 @@ export default function PricingPage() {
                   "Elige el plan perfecto para ti. Actualiza en cualquier momento.",
               })}
             </p>
+
+            {/* Founders Plan CTA */}
+            <div className="flex flex-col items-center gap-3 pt-4">
+              <Button
+                asChild
+                size="lg"
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold"
+              >
+                <Link href="/auth/register">
+                  {t("pricing.hero.foundersButton", { defaultValue: "Iniciar ahora en nuestro Plan Fundador" })}
+                </Link>
+              </Button>
+              <p className="text-xs text-muted-foreground max-w-md">
+                {t("pricing.hero.foundersNote", {
+                  defaultValue: "Plan gratuito con generación de IA y escaneos ilimitados por tiempo limitado."
+                })}
+              </p>
+            </div>
           </div>
         </div>
       </section>

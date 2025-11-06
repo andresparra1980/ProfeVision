@@ -273,7 +273,9 @@
       "badge": "Special Launch",
       "title": "Free During the",
       "titleHighlight": "Launch",
-      "description": "Take advantage of free access to ProfeVision while we're in the launch phase. All features available at no cost."
+      "description": "Take advantage of free access to ProfeVision while we're in the launch phase. All features available at no cost.",
+      "foundersButton": "Start now with our Founders Plan",
+      "foundersNote": "Free plan with unlimited AI generation and scans for a limited time."
     },
     "launch": {
       "title": "Launch Plan",
