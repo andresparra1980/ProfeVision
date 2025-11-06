@@ -12,6 +12,14 @@
       "title": "Temporary Legacy Plan",
       "description": "As an existing user, you have unlimited access temporarily. This legacy plan will eventually be replaced by a standard plan. We will notify you in advance about any changes."
     },
+    "plus": {
+      "title": "Plus Plan",
+      "description": "Premium plan with unlimited access to all ProfeVision features."
+    },
+    "free": {
+      "title": "Free Plan",
+      "description": "Free plan with basic features."
+    },
     "usage": {
       "title": "Current Usage",
       "description": "Your cycle renews on the",

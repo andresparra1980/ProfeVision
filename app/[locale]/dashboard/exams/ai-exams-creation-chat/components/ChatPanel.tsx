@@ -138,10 +138,21 @@ export default function ChatPanel() {
 
       const isUnlimited = usage.ai_generation.limit === -1;
       const percentage = usage.ai_generation.percentage;
+      const tierName = usage.tier.name; // free, plus, grandfathered, admin
 
       if (isUnlimited) {
+        // Determinar mensaje según el tier
+        let tierLabel = '';
+        if (tierName === 'grandfathered') {
+          tierLabel = tTiers('subscription.grandfathered.title');
+        } else if (tierName === 'plus') {
+          tierLabel = tTiers('subscription.plus.title');
+        } else {
+          tierLabel = tTiers(`subscription.${tierName}.title`, { defaultValue: tierName });
+        }
+
         toast.info(tTiers('features.ai_generations'), {
-          description: `${tTiers('usage.unlimited')} - ${tTiers('subscription.grandfathered.title')}`,
+          description: `${tTiers('usage.unlimited')} - ${tierLabel}`,
           duration: 4000,
         });
       } else if (percentage >= 80) {

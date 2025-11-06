@@ -58,12 +58,12 @@ export function LimitReachedModal({
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-left space-y-3">
-            <p>
+            <div>
               {t("limits.reached.description", {
                 feature: featureLabel,
                 defaultValue: `You have reached the monthly limit of ${featureLabel} available in your current plan.`
               })}
-            </p>
+            </div>
 
             {/* Días hasta reseteo */}
             <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200">
@@ -73,12 +73,12 @@ export function LimitReachedModal({
               </span>
             </div>
 
-            <p className="text-sm">
+            <div className="text-sm">
               {t("limits.reached.waitOrUpgrade", {
                 feature: featureLabel,
                 defaultValue: `You can wait until your limit resets, or upgrade to a higher plan to get more monthly ${featureLabel}.`
               })}
-            </p>
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
