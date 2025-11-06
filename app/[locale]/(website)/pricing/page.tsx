@@ -53,7 +53,7 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className="py-16 md:py-24">
+      <section className="py-8 md:py-12">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-8">
             {/* Toggle de facturación */}
@@ -82,8 +82,9 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Features Comparison (Optional) */}
-      <section className="py-16 md:py-24 bg-muted/50">
+      {/* Features Comparison */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5 -z-10" />
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
             <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
