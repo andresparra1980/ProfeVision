@@ -9,10 +9,11 @@ import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { AlertTriangle, Calendar, HelpCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function SubscriptionPage() {
   const t = useTranslations('tiers');
+  const locale = useLocale();
   const { usage, loading } = useTierLimits();
 
   const handleUpgrade = () => {
@@ -76,7 +77,7 @@ export default function SubscriptionPage() {
           <CardDescription>
             {t('subscription.usage.description', {
               defaultValue: 'Your cycle renews on the'
-            })} {new Date(usage.cycle.end).toLocaleDateString('es', {
+            })} {new Date(usage.cycle.end).toLocaleDateString(locale, {
               day: 'numeric',
               month: 'long'
             })} ({usage.cycle.daysUntilReset} {usage.cycle.daysUntilReset === 1 ? t('subscription.usage.day', { defaultValue: 'day' }) : t('subscription.usage.days', { defaultValue: 'days' })})
