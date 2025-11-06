@@ -10,6 +10,7 @@ interface UsageIndicatorProps {
   limit: number;
   warningThreshold?: number; // Porcentaje para warning (default 80)
   className?: string;
+  hideLabel?: boolean; // Ocultar label y mostrar solo barra de progreso
 }
 
 export function UsageIndicator({
@@ -18,6 +19,7 @@ export function UsageIndicator({
   limit,
   warningThreshold = 80,
   className,
+  hideLabel = false,
 }: UsageIndicatorProps) {
   const t = useTranslations("tiers");
 
@@ -43,6 +45,30 @@ export function UsageIndicator({
       return "text-yellow-600 dark:text-yellow-400";
     return "text-gray-700 dark:text-gray-300";
   };
+
+  // Si hideLabel es true, solo mostramos barra de progreso
+  if (hideLabel && !isUnlimited) {
+    return (
+      <div className={cn("space-y-2", className)}>
+        <div className="relative">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+            <div
+              className={cn(
+                "h-full transition-all duration-300 ease-in-out",
+                getProgressColor()
+              )}
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Si es unlimited y hideLabel, no mostramos nada
+  if (hideLabel && isUnlimited) {
+    return null;
+  }
 
   return (
     <div className={cn("space-y-2", className)}>

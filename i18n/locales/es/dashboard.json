@@ -1326,5 +1326,11 @@
       "fetchData": "Error al obtener datos",
       "internal": "Error interno del servidor"
     }
+  },
+  "tierUsage": {
+    "title": "Uso del Plan",
+    "cycleReset": "Se reinicia en",
+    "day": "día",
+    "days": "días"
   }
 }

@@ -22,11 +22,11 @@ export function ResultsPageActions({
   const t = useTranslations('dashboard.exams.results');
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
       <Button
         onClick={onExportExcel}
         variant="default"
-        className="flex items-center"
+        className="flex items-center w-full sm:w-auto"
       >
         <Download className="mr-2 h-4 w-4" />
         <span className="hidden sm:inline">{t('downloadExcel')}</span>
@@ -34,8 +34,8 @@ export function ResultsPageActions({
       </Button>
 
       {resultados.length > 0 && (
-        <div>
-          <div className="hidden sm:block">
+        <>
+          <div className="hidden sm:block w-full sm:w-auto">
             <PDFExportButton
               groupId={selectedGroupId}
               fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
@@ -45,7 +45,7 @@ export function ResultsPageActions({
               examDetails={examDetails}
             />
           </div>
-          <div className="sm:hidden block">
+          <div className="sm:hidden block w-full">
             <PDFExportButton
               groupId={selectedGroupId}
               fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
@@ -55,7 +55,7 @@ export function ResultsPageActions({
               examDetails={examDetails}
             />
           </div>
-        </div>
+        </>
       )}
     </div>
   );

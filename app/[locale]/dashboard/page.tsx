@@ -4,6 +4,7 @@ import { TitleCardWithDepth } from '@/components/shared/title-card-with-depth';
 import { StatsOverview } from '@/components/dashboard/stats-overview';
 import { RecentExamsList } from '@/components/dashboard/recent-exams-list';
 import { GradingStats } from '@/components/dashboard/grading-stats';
+import { TierUsageStats } from '@/components/dashboard/tier-usage-stats';
 import { useTranslations } from 'next-intl';
 
 export default function DashboardPage() {
@@ -26,10 +27,11 @@ export default function DashboardPage() {
       {/* Estadísticas Generales */}
       <StatsOverview />
 
-      {/* Grid de 2 columnas: Stats de Calificación y Exámenes Recientes */}
+      {/* Grid de 2 columnas: Columna izquierda con Stats + Uso del Plan, Columna derecha con Exámenes Recientes */}
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-4">
           <GradingStats />
+          <TierUsageStats />
         </div>
         <div className="min-w-0">
           <RecentExamsList />

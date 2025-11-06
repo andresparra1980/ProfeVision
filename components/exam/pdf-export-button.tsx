@@ -362,8 +362,8 @@ export function PDFExportButton({
   return (
     <>
       <Button
-        variant="default"
-        className="flex items-center"
+        variant="secondary"
+        className="flex items-center w-full sm:w-auto bg-secondary text-primary-foreground dark:bg-secondary dark:text-white transition-colors"
         onClick={handlePrepare}
       >
         <FileText className="mr-2 h-4 w-4" />

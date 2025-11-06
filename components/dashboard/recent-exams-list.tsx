@@ -238,6 +238,9 @@ export function RecentExamsList() {
     </div>
   );
 
+  // Limitar a 5 exámenes recientes
+  const recentExams = stats.examenesRecientes.slice(0, 5);
+
   return (
     <Card className="overflow-hidden">
       <CardHeader>
@@ -246,7 +249,7 @@ export function RecentExamsList() {
       <CardContent className="overflow-hidden">
         {/* Siempre mostrar en formato acordeón */}
         <Accordion type="single" collapsible className="w-full space-y-2">
-          {stats.examenesRecientes.map((examen) => (
+          {recentExams.map((examen) => (
             <AccordionItem
               value={examen.id}
               key={examen.id}
