@@ -30,7 +30,12 @@ export function useTierLimits() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const router = useRouter();
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const routerRef = useRef(router);
+
+  // Mantener router actualizado en ref para evitar dependencias
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   const fetchUsage = useCallback(async () => {
     try {
@@ -50,7 +55,7 @@ export function useTierLimits() {
 
       if (!session) {
         logger.log("[useTierLimits] No session found, redirecting to login");
-        router.push("/auth/login");
+        routerRef.current.push("/auth/login");
         return;
       }
 
@@ -65,7 +70,7 @@ export function useTierLimits() {
 
       if (response.status === 401) {
         logger.log("[useTierLimits] Unauthorized, redirecting to login");
-        router.push("/auth/login");
+        routerRef.current.push("/auth/login");
         return;
       }
 
@@ -93,23 +98,25 @@ export function useTierLimits() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []); // Sin dependencias - usa routerRef
 
   useEffect(() => {
     // Fetch inicial
     fetchUsage();
 
-    // Auto-refresh cada 5 minutos (300000 ms)
-    intervalRef.current = setInterval(() => {
-      logger.log("[useTierLimits] Auto-refreshing usage stats");
-      fetchUsage();
-    }, 300000);
+    // Refresh cuando el usuario vuelve al tab (más eficiente que polling)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        logger.log("[useTierLimits] Tab visible, refreshing usage stats");
+        fetchUsage();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Cleanup
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchUsage]);
 
