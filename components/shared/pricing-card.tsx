@@ -81,7 +81,10 @@ export function PricingCard({
             <span className="text-4xl font-bold">
               ${price}
             </span>
-            <span className="text-muted-foreground">{t("billing.perMonth", { defaultValue: "/month" })}</span>
+            <span className="text-muted-foreground">
+              <span className="text-xs font-medium">USD</span>
+              {t("billing.perMonth", { defaultValue: "/month" })}
+            </span>
           </div>
           {price > 0 && (
             <p className="text-xs text-muted-foreground mt-1">

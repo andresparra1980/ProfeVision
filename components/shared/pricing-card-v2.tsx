@@ -94,6 +94,7 @@ export function PricingCardV2({
               ${displayPrice.toFixed(billingPeriod === "annual" && price > 0 ? 2 : 0)}
             </span>
             <span className="text-muted-foreground">
+              <span className="text-xs font-medium">USD</span>
               {t("billing.perMonth", { defaultValue: "/month" })}
               {billingPeriod === "annual" && price > 0 && (
                 <span className="text-xs block">{t("billing.billedAnnually", { defaultValue: "billed annually" })}</span>
@@ -107,7 +108,7 @@ export function PricingCardV2({
               </p>
               {billingPeriod === "annual" && (
                 <p className="text-xs font-semibold text-green-600 dark:text-green-400">
-                  ${price}/{t("billing.annual", { defaultValue: "Annual" }).toLowerCase()} - {t("billing.saveAmount", { defaultValue: "Save" })} ${(monthlyPrice * 12 - price).toFixed(0)}
+                  ${price} USD/{t("billing.annual", { defaultValue: "Annual" }).toLowerCase()} - {t("billing.saveAmount", { defaultValue: "Save" })} ${(monthlyPrice * 12 - price).toFixed(0)} USD
                 </p>
               )}
             </div>
