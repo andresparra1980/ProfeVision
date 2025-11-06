@@ -127,7 +127,8 @@
       "successDesc": "Review the generated exam on the Results panel.",
       "errorTitle": "Error",
       "errorDesc": "An unexpected error occurred. Please try again.",
-      "invalidJson": "Error in the assistant's response. Try again."
+      "invalidJson": "Error in the assistant's response. Try again.",
+      "invalidContract": "The response did not meet the expected contract. Rules adjusted, you can retry."
     }
   },
   "empty": {
