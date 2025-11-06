@@ -9,8 +9,8 @@
     "title": "My Plan",
     "description": "Manage your subscription and review your current usage",
     "grandfathered": {
-      "title": "Temporary Legacy Plan",
-      "description": "As an existing user, you have unlimited access temporarily. This legacy plan will eventually be replaced by a standard plan. We will notify you in advance about any changes."
+      "title": "Founders Plan",
+      "description": "Thank you for being one of ProfeVision's first users! Your invaluable support helps us turn a dream into a service that will help teachers take back control of their time and save them tedious hours grading exams manually. For now, you can use all features without limits. For any questions, requests, or suggestions, write to us at founders@profevision.com"
     },
     "plus": {
       "title": "Plus Plan",

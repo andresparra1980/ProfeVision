@@ -73,7 +73,7 @@ export function TierBadge({ tier, size = "md", className }: TierBadgeProps) {
   const Icon = config.icon;
 
   // Get label from translations
-  const label = t(config.labelKey, { defaultValue: tier === "free" ? "Free" : tier === "plus" ? "Plus" : "Legacy" });
+  const label = t(config.labelKey, { defaultValue: tier === "free" ? "Free" : tier === "plus" ? "Plus" : "Founders" });
 
   return (
     <div

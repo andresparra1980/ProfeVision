@@ -97,7 +97,7 @@ WHERE profesor_id = '78f64700-c962-419d-8716-94e7d8f7be30';
 **TC-GRAND-001: AI Chat - Toast Informativo**
 - **Acción**: Abrir `/dashboard/exams/ai-exams-creation-chat`
 - **Resultado Esperado**:
-  - ✅ Aparece toast azul (info) con mensaje: "Unlimited - Temporary Legacy Plan"
+  - ✅ Aparece toast azul (info) con mensaje: "Ilimitado - Plan Fundador" (español) o "Unlimited - Founders Plan" (inglés)
   - ✅ Toast desaparece después de 4 segundos
   - ✅ Toast solo aparece UNA vez (no reaparece al navegar)
   - ✅ No hay indicador de uso permanente en la UI
@@ -682,29 +682,29 @@ SELECT check_feature_limit('78f64700-c962-419d-8716-94e7d8f7be30', 'scan');
 - [x] TC-FREE-007: No puede escanear con límite alcanzado
 
 ### Tier PLUS
-- [ ] TC-PLUS-001: AI Chat ilimitado
-- [ ] TC-PLUS-002: Scan ilimitado
+- [x] TC-PLUS-001: AI Chat ilimitado
+- [x] TC-PLUS-002: Scan ilimitado
 
 ### Límites
-- [ ] TC-LIM-001: Transición de disponible a warning
-- [ ] TC-LIM-002: Contador incrementa en DB
-- [ ] TC-LIM-003: Transición de estados en Scan
-- [ ] TC-LIM-004: No se puede bypassear límite
+- [x] TC-LIM-001: Transición de disponible a warning
+- [x] TC-LIM-002: Contador incrementa en DB
+- [x] TC-LIM-003: Transición de estados en Scan
+- [x] TC-LIM-004: No se puede bypassear límite
 
 ### UI/UX
-- [ ] TC-UI-001: No flash de warning durante carga
-- [ ] TC-UI-002: Toast solo aparece una vez
-- [ ] TC-UI-003: Sin scrollbar inesperado
-- [ ] TC-UI-004: Modal con contenido correcto
-- [ ] TC-UI-005: Días hasta reseteo dinámicos
+- [x] TC-UI-001: No flash de warning durante carga
+- [x] TC-UI-002: Toast solo aparece una vez
+- [x] TC-UI-003: Sin scrollbar inesperado
+- [x] TC-UI-004: Modal con contenido correcto
+- [x] TC-UI-005: Días hasta reseteo dinámicos
 
 ### i18n
-- [ ] TC-I18N-001: Scan Wizard español
-- [ ] TC-I18N-002: AI Chat español
-- [ ] TC-I18N-003: Modal español
-- [ ] TC-I18N-004: Scan Wizard inglés
-- [ ] TC-I18N-005: AI Chat inglés
-- [ ] TC-I18N-006: Modal inglés
+- [x] TC-I18N-001: Scan Wizard español
+- [x] TC-I18N-002: AI Chat español
+- [x] TC-I18N-003: Modal español
+- [x] TC-I18N-004: Scan Wizard inglés
+- [x] TC-I18N-005: AI Chat inglés
+- [x] TC-I18N-006: Modal inglés
 
 ### Ciclo de Facturación
 - [ ] TC-CYCLE-001: Función `calculate_cycle_dates()` correcta
@@ -721,17 +721,17 @@ SELECT check_feature_limit('78f64700-c962-419d-8716-94e7d8f7be30', 'scan');
 
 ### Progreso General
 
-**Completadas**: 11/33 pruebas principales (33%)
+**Completadas**: 28/33 pruebas principales (85%)
 
 | Categoría | Completadas | Total | Progreso |
 |-----------|-------------|-------|----------|
 | Tier GRANDFATHERED | 4/4 | 4 | ✅ 100% |
 | Tier FREE | 7/7 | 7 | ✅ 100% |
-| Tier PLUS | 0/2 | 2 | ⏳ 0% |
-| Límites | 0/4 | 4 | ⏳ 0% |
-| UI/UX | 0/5 | 5 | ⏳ 0% |
-| i18n | 0/6 | 6 | ⏳ 0% |
-| Ciclo Facturación | 0/5 | 5 | ⏳ 0% |
+| Tier PLUS | 2/2 | 2 | ✅ 100% |
+| Límites | 4/4 | 4 | ✅ 100% |
+| UI/UX | 5/5 | 5 | ✅ 100% |
+| i18n | 6/6 | 6 | ✅ 100% |
+| Ciclo Facturación | 0/5 | 5 | ⏳ 0% (Pendiente para implementación de pagos) |
 
 ### Resultados Detallados
 
@@ -748,6 +748,23 @@ SELECT check_feature_limit('78f64700-c962-419d-8716-94e7d8f7be30', 'scan');
 | TC-FREE-005 | ✅ Pasó | Warning amarillo "42 of 50 (84%)" | 2025-11-06 |
 | TC-FREE-006 | ✅ Pasó | Borde rojo, botón disabled | 2025-11-06 |
 | TC-FREE-007 | ✅ Pasó | Modal aparece, no permite avanzar | 2025-11-06 |
+| TC-PLUS-001 | ✅ Pasó | Toast "Plan Plus", sin restricciones | 2025-11-06 |
+| TC-PLUS-002 | ✅ Pasó | Indicador "∞ Unlimited", sin límites | 2025-11-06 |
+| TC-LIM-001 | ✅ Pasó | Transición info→warning correcta | 2025-11-06 |
+| TC-LIM-002 | ✅ Pasó | Contadores incrementan en DB | 2025-11-06 |
+| TC-LIM-003 | ✅ Pasó | 3 estados visuales (azul→amarillo→rojo) | 2025-11-06 |
+| TC-LIM-004 | ✅ Pasó | No se puede bypassear con DevTools | 2025-11-06 |
+| TC-UI-001 | ✅ Pasó | No flash de warning durante carga | 2025-11-06 |
+| TC-UI-002 | ✅ Pasó | Toast aparece solo una vez | 2025-11-06 |
+| TC-UI-003 | ✅ Pasó | Sin scrollbar inesperado | 2025-11-06 |
+| TC-UI-004 | ✅ Pasó | Modal con contenido correcto | 2025-11-06 |
+| TC-UI-005 | ✅ Pasó | Días hasta reseteo dinámicos | 2025-11-06 |
+| TC-I18N-001 | ✅ Pasó | Scan Wizard español correcto | 2025-11-06 |
+| TC-I18N-002 | ✅ Pasó | AI Chat español correcto | 2025-11-06 |
+| TC-I18N-003 | ✅ Pasó | Modal español correcto | 2025-11-06 |
+| TC-I18N-004 | ✅ Pasó | Scan Wizard inglés correcto | 2025-11-06 |
+| TC-I18N-005 | ✅ Pasó | AI Chat inglés correcto | 2025-11-06 |
+| TC-I18N-006 | ✅ Pasó | Modal inglés correcto | 2025-11-06 |
 
 **Leyenda:**
 - ✅ = Pasó
@@ -760,7 +777,9 @@ SELECT check_feature_limit('78f64700-c962-419d-8716-94e7d8f7be30', 'scan');
 
 | Issue | Descripción | Solución | Estado |
 |-------|-------------|----------|--------|
-| Hydration Error | `<p>` dentro de `<p>` en limit-reached-modal.tsx | Cambiar `<p>` internos por `<div>` | ✅ Resuelto |
+| Hydration Error | `<p>` dentro de `<p>` en limit-reached-modal.tsx:61 | Cambiar `<p>` internos por `<div>` | ✅ Resuelto |
+| Toast Tier Incorrecto | AI Chat siempre mostraba "Plan Legacy Temporal" incluso en tier PLUS | Detectar `usage.tier.name` y mostrar label correcto según tier (plus/grandfathered/free) | ✅ Resuelto |
+| Traducciones Faltantes | No existían traducciones para `subscription.plus.title` y `subscription.free.title` | Agregar traducciones en es/en para todos los tiers | ✅ Resuelto |
 
 ---
 

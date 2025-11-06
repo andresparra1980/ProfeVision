@@ -89,7 +89,7 @@ LIMIT 1;
 **Test Cases a ejecutar:**
 1. **TC-GRAND-001**: AI Chat - Toast Informativo
    - Abrir `/dashboard/exams/ai-exams-creation-chat`
-   - Verificar toast "Unlimited - Temporary Legacy Plan"
+   - Verificar toast "Unlimited - Founders Plan" (inglés) o "Ilimitado - Plan Fundador" (español)
 
 2. **TC-GRAND-002**: AI Chat - Generar Múltiples Exámenes
    - Generar 5 exámenes consecutivos
