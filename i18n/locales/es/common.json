@@ -931,6 +931,7 @@
     "title": "Términos y Condiciones de ProfeVision",
     "effective": "Vigente desde el 27 de junio de 2025",
     "intro": "Gracias por tu interés en ProfeVision (\"ProfeVision\", \"nosotros\", \"nuestro\"), que ofrece los servicios disponibles en www.profevision.com y en nuestras aplicaciones móviles. Al usar ProfeVision, aceptas estos Términos y nuestra Política de Privacidad. Por favor, léelos con atención.",
+    "noteLabel": "Nota:",
     "section1": {
       "title": "1. Aceptación de los Términos",
       "content": "Al crear una cuenta, acceder o usar ProfeVision, aceptas cumplir con estos Términos y nuestra Política de Privacidad. Si usas ProfeVision en nombre de una institución educativa o empresa, asegúrate de tener la autoridad para aceptar estos Términos en su nombre."
@@ -1030,7 +1031,8 @@
     },
     "section15": {
       "title": "15. Contacto",
-      "content": "Si tienes dudas o necesitas ayuda, escríbenos a info@profevision.com o a:",
+      "intro": "Si tienes dudas o necesitas ayuda, escríbenos a:",
+      "orAddress": "O a la dirección:",
       "address": {
         "name": "ProfeVision",
         "line1": "647 Santino Meadows Apt. 525",
