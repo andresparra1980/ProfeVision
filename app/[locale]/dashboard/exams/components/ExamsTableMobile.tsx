@@ -27,6 +27,7 @@ import SimilarExamModal from "./SimilarExamModal";
 import SimilarExamMetadataDialog, { SimilarExamMeta } from "./SimilarExamMetadataDialog";
 import EditableExamTitle from "./EditableExamTitle";
 import { monoFont } from "@/lib/fonts";
+import { ExamsPageSkeleton } from "./ExamsPageSkeleton";
 
 // Reusable components
 interface ExamCardHeaderProps {
@@ -418,9 +419,7 @@ export default function ExamsTableMobile({
         className="w-full bg-card dark:bg-card placeholder:text-muted-foreground max-w-sm"
       />
       {loading ? (
-        <div className="flex justify-center items-center h-64 p-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
+        <ExamsPageSkeleton />
       ) : filteredExams.length === 0 ? (
         <div className="p-4 text-center space-y-4 mt-8">
           <FileText className="mx-auto h-16 w-16 text-muted-foreground/50" />
