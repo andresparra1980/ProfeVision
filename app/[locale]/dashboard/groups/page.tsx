@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase/client";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 import { Link } from "@/i18n/navigation";
 import type { Database } from "@/lib/types/database";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 import logger from "@/lib/utils/logger";
@@ -375,34 +376,41 @@ export default function GroupsPage() {
         title={t('title')}
         description={t('description')}
         actions={
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Button
-              variant="default"
-              onClick={() => setMostrarArchivados(!mostrarArchivados)}
-              className="bg-secondary text-primary-foreground dark:bg-secondary dark:text-white transition-colors w-full sm:w-auto"
-            >
-              {mostrarArchivados ? (
-                <>
-                  <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.showActive')}
-                </>
-              ) : (
-                <>
-                  <Archive className="mr-2 h-4 w-4" /> {t('buttons.showArchived')}
-                </>
-              )}
-            </Button>
-            <GroupFormModal
-              open={openDialog}
-              onOpenChangeAction={handleOpenChange}
-              editingGrupo={editingGrupo}
-              entidades={entidades}
-              materias={materias}
-              materiasFiltradas={materiasFiltradas}
-              onSubmitAction={onSubmit}
-              onSetMateriasFiltradasAction={setMateriasFiltradas}
-              mostrarArchivados={mostrarArchivados}
-            />
-          </div>
+          loading || profesorLoading ? (
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Skeleton className="h-10 w-full sm:w-40" />
+              <Skeleton className="h-10 w-full sm:w-32" />
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button
+                variant="default"
+                onClick={() => setMostrarArchivados(!mostrarArchivados)}
+                className="bg-secondary text-primary-foreground dark:bg-secondary dark:text-white transition-colors w-full sm:w-auto"
+              >
+                {mostrarArchivados ? (
+                  <>
+                    <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.showActive')}
+                  </>
+                ) : (
+                  <>
+                    <Archive className="mr-2 h-4 w-4" /> {t('buttons.showArchived')}
+                  </>
+                )}
+              </Button>
+              <GroupFormModal
+                open={openDialog}
+                onOpenChangeAction={handleOpenChange}
+                editingGrupo={editingGrupo}
+                entidades={entidades}
+                materias={materias}
+                materiasFiltradas={materiasFiltradas}
+                onSubmitAction={onSubmit}
+                onSetMateriasFiltradasAction={setMateriasFiltradas}
+                mostrarArchivados={mostrarArchivados}
+              />
+            </div>
+          )
         }
       />
 
