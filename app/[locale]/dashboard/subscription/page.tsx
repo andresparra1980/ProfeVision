@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
 import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SubscriptionPage() {
   const t = useTranslations('tiers');
@@ -32,7 +33,13 @@ export default function SubscriptionPage() {
       <TitleCardWithDepth
         title={t('subscription.title', { defaultValue: 'My Plan' })}
         description={t('subscription.description', { defaultValue: 'Manage your subscription and review your current usage' })}
-        actions={<TierBadge tier={currentTier} size="lg" />}
+        actions={
+          loading ? (
+            <Skeleton className="h-7 w-20" />
+          ) : (
+            <TierBadge tier={currentTier} size="lg" />
+          )
+        }
       />
 
       {loading ? (

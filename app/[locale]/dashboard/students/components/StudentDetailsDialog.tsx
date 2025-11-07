@@ -21,7 +21,7 @@ interface StudentDetails {
 
 interface StudentDetailsDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   studentId: string | null;
 }
 

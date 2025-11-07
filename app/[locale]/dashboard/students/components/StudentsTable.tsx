@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Users, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,7 +17,7 @@ interface Student {
 interface StudentsTableProps {
   students: Student[];
   searchQuery: string;
-  onViewDetails: (studentId: string) => void;
+  onViewDetails: (_studentId: string) => void;
   loadingDetails: boolean;
   selectedStudentId: string | null;
 }

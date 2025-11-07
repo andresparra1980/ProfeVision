@@ -29,7 +29,7 @@ interface Grupo {
 
 interface StudentFormModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   grupos: Grupo[];
   onSuccess: () => void;
 }

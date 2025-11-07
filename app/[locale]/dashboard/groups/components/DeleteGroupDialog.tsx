@@ -13,11 +13,11 @@ import logger from "@/lib/utils/logger";
 
 interface DeleteGroupDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   groupId: string | null;
   groupName: string | null;
   onSuccess: () => void;
-  onError: (context: string, error: unknown) => void;
+  onError: (_context: string, _error: unknown) => void;
 }
 
 export function DeleteGroupDialog({
