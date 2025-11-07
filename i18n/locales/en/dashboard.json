@@ -496,7 +496,18 @@
         "showOnlyGraded": "Show only students with graded exam"
       },
       "emptyState": {
-        "noResultsMessage": "No results available for this exam."
+        "noResultsMessage": "No results available for this exam.",
+        "noSearchResults": "No students found matching that criteria"
+      },
+      "searchPlaceholder": "Search by name or last name...",
+      "pagination": {
+        "showing": "Showing",
+        "of": "of",
+        "students": "students",
+        "noResults": "No results",
+        "page": "Page",
+        "previous": "Previous",
+        "next": "Next"
       },
       "common": {
         "cancel": "Cancel"
@@ -1194,6 +1205,14 @@
       "actions": {
         "viewDetails": "View Details"
       }
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "students": "students",
+      "page": "Page",
+      "previous": "Previous",
+      "next": "Next"
     },
     "details": {
       "title": "Student Details",

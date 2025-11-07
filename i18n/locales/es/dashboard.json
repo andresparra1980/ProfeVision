@@ -497,7 +497,18 @@
         "showOnlyGraded": "Ver solo estudiantes con examen calificado"
       },
       "emptyState": {
-        "noResultsMessage": "No hay resultados disponibles para este examen."
+        "noResultsMessage": "No hay resultados disponibles para este examen.",
+        "noSearchResults": "No se encontraron estudiantes con ese criterio"
+      },
+      "searchPlaceholder": "Buscar por nombre o apellidos...",
+      "pagination": {
+        "showing": "Mostrando",
+        "of": "de",
+        "students": "estudiantes",
+        "noResults": "Sin resultados",
+        "page": "Página",
+        "previous": "Anterior",
+        "next": "Siguiente"
       },
       "common": {
         "cancel": "Cancelar"
@@ -1195,6 +1206,14 @@
       "actions": {
         "viewDetails": "Ver Detalles"
       }
+    },
+    "pagination": {
+      "showing": "Mostrando",
+      "of": "de",
+      "students": "estudiantes",
+      "page": "Página",
+      "previous": "Anterior",
+      "next": "Siguiente"
     },
     "details": {
       "title": "Detalles del Estudiante",
