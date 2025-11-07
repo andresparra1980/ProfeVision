@@ -103,11 +103,6 @@ export default function EntitiesPage() {
     fetchEntities();
   }, [fetchEntities]);
 
-  // Show loading skeleton
-  if (loading) {
-    return <EntitiesPageSkeleton />;
-  }
-
   return (
     <div className="space-y-4">
       <TitleCardWithDepth
@@ -126,7 +121,9 @@ export default function EntitiesPage() {
         onSuccess={fetchEntities}
       />
 
-      {entities.length === 0 && !loading ? (
+      {loading ? (
+        <EntitiesPageSkeleton />
+      ) : entities.length === 0 ? (
         <EmptyEntitiesState onCreateEntity={() => setIsFormOpen(true)} />
       ) : (
         <Card>

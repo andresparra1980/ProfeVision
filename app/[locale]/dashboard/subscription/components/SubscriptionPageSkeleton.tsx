@@ -2,21 +2,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 /**
- * Loading skeleton for Subscription page
- * Mimics the structure of tier badge, usage cards, and pricing cards
+ * Loading skeleton for Subscription page content
+ * Shows loading state for usage cards and pricing (header with badge loads immediately)
  */
 export function SubscriptionPageSkeleton() {
   return (
-    <div className="space-y-6">
-      {/* Header with title and badge */}
-      <div className="flex items-center justify-between">
-        <div>
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-4 w-full max-w-md mt-2" />
-        </div>
-        <Skeleton className="h-8 w-24" />
-      </div>
-
+    <>
       {/* Usage Card */}
       <Card>
         <CardHeader>
@@ -54,6 +45,6 @@ export function SubscriptionPageSkeleton() {
           </Card>
         ))}
       </div>
-    </div>
+    </>
   );
 }

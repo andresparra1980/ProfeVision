@@ -170,11 +170,6 @@ export default function StudentsPage() {
     setShowDetails(true);
   };
 
-  // Show loading skeleton for entire page
-  if (loading) {
-    return <StudentsPageSkeleton />;
-  }
-
   return (
     <div className="space-y-4">
       <TitleCardWithDepth
@@ -206,32 +201,35 @@ export default function StudentsPage() {
         onSuccess={fetchStudents}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('table.title')}</CardTitle>
-          <CardDescription>
-            {t('table.description')}
-          </CardDescription>
-          <div className="mt-4 flex items-center justify-between">
-            <Input
-              placeholder={t('table.search')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-sm"
-            />
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => fetchStudents()}
-              className="ml-2"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" /> {t('table.refreshList')}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Show empty states or table */}
-          {!hasGroups || students.length === 0 ? (
+      {loading ? (
+        <StudentsPageSkeleton />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('table.title')}</CardTitle>
+            <CardDescription>
+              {t('table.description')}
+            </CardDescription>
+            <div className="mt-4 flex items-center justify-between">
+              <Input
+                placeholder={t('table.search')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchStudents()}
+                className="ml-2"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" /> {t('table.refreshList')}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {/* Show empty states or table */}
+            {!hasGroups || students.length === 0 ? (
             <EmptyStudentsState
               hasGroups={hasGroups}
               hasStudents={students.length > 0}
@@ -254,8 +252,9 @@ export default function StudentsPage() {
               />
             </>
           )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 } 

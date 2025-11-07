@@ -55,12 +55,9 @@ export default function SettingsPage() {
     fetchProfile();
   }, [fetchProfile]);
 
-  if (loading) {
-    return <SettingsPageSkeleton />;
-  }
-
   return (
     <div className="space-y-6">
+      {/* Header - Always visible */}
       <div>
         <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
         <p className="text-muted-foreground">
@@ -68,15 +65,21 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <ProfileForm
-        profileData={profileData}
-        loading={loading}
-        onUpdate={fetchProfile}
-      />
+      {loading ? (
+        <SettingsPageSkeleton />
+      ) : (
+        <>
+          <ProfileForm
+            profileData={profileData}
+            loading={loading}
+            onUpdate={fetchProfile}
+          />
 
-      <PasswordSection />
+          <PasswordSection />
 
-      <NotificationsSection />
+          <NotificationsSection />
+        </>
+      )}
     </div>
   );
 } 

@@ -3,18 +3,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FormSkeleton } from "@/components/shared/skeletons";
 
 /**
- * Loading skeleton for Settings page
- * Mimics the structure of the profile form with multiple cards
+ * Loading skeleton for Settings page content
+ * Shows loading state for form cards only (title loads immediately)
  */
 export function SettingsPageSkeleton() {
   return (
-    <div className="space-y-6">
-      {/* Page title */}
-      <div>
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-4 w-full max-w-md mt-2" />
-      </div>
-
+    <>
       {/* Profile form card */}
       <Card>
         <CardHeader>
@@ -47,6 +41,6 @@ export function SettingsPageSkeleton() {
           <Skeleton className="h-4 w-full max-w-xs" />
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 }

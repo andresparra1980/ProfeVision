@@ -22,24 +22,12 @@ export default function SubscriptionPage() {
     });
   };
 
-  if (loading) {
-    return <SubscriptionPageSkeleton />;
-  }
-
-  if (!usage) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-muted-foreground">{t('subscription.error', { defaultValue: 'Could not load subscription information' })}</p>
-      </div>
-    );
-  }
-
-  const isGrandfathered = usage.tier.name === "grandfathered";
-  const currentTier = usage.tier.name as SubscriptionTier;
+  const isGrandfathered = usage?.tier.name === "grandfathered";
+  const currentTier = (usage?.tier.name || "free") as SubscriptionTier;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header - Always visible */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">
@@ -51,6 +39,15 @@ export default function SubscriptionPage() {
         </div>
         <TierBadge tier={currentTier} size="lg" />
       </div>
+
+      {loading ? (
+        <SubscriptionPageSkeleton />
+      ) : !usage ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="text-muted-foreground">{t('subscription.error', { defaultValue: 'Could not load subscription information' })}</p>
+        </div>
+      ) : (
+        <>
 
       {/* Warning para usuarios grandfathered */}
       {isGrandfathered && (
@@ -159,6 +156,8 @@ export default function SubscriptionPage() {
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }
