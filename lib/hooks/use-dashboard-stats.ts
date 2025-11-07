@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
 import { toast } from "sonner";
@@ -27,6 +27,12 @@ export function useDashboardStats() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const router = useRouter();
+  const routerRef = useRef(router);
+
+  // Mantener router actualizado en ref para evitar dependencias
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -51,7 +57,7 @@ export function useDashboardStats() {
         logger.log(
           "[useDashboardStats] No session found, redirecting to login"
         );
-        router.push("/auth/login");
+        routerRef.current.push("/auth/login");
         return;
       }
 
@@ -66,7 +72,7 @@ export function useDashboardStats() {
 
       if (response.status === 401) {
         logger.log("[useDashboardStats] Unauthorized, redirecting to login");
-        router.push("/auth/login");
+        routerRef.current.push("/auth/login");
         return;
       }
 
@@ -92,7 +98,7 @@ export function useDashboardStats() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []); // Sin dependencias - usa routerRef
 
   useEffect(() => {
     fetchStats();

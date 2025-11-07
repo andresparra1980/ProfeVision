@@ -273,7 +273,9 @@
       "badge": "Special Launch",
       "title": "Free During the",
       "titleHighlight": "Launch",
-      "description": "Take advantage of free access to ProfeVision while we're in the launch phase. All features available at no cost."
+      "description": "Take advantage of free access to ProfeVision while we're in the launch phase. All features available at no cost.",
+      "foundersButton": "Start now with our Founders Plan",
+      "foundersNote": "Free plan with unlimited AI generation and scans for a limited time. No credit card required."
     },
     "launch": {
       "title": "Launch Plan",
@@ -314,6 +316,10 @@
           "support": "Dedicated support"
         }
       }
+    },
+    "comparison": {
+      "title": "All the features you need",
+      "description": "Both plans include full access to the platform"
     },
     "cta": {
       "title": "Ready to Revolutionize Your Assessments?",
@@ -955,6 +961,7 @@
     "title": "ProfeVision Terms and Conditions",
     "effective": "Effective since June 27, 2025",
     "intro": "Thank you for your interest in ProfeVision (\"ProfeVision\", \"we\", \"our\"), which offers services available at www.profevision.com and on our mobile applications. By using ProfeVision, you agree to these Terms and our Privacy Policy. Please read them carefully.",
+    "noteLabel": "Note:",
     "section1": {
       "title": "1. Acceptance of Terms",
       "content": "By creating an account, accessing or using ProfeVision, you agree to comply with these Terms and our Privacy Policy. If you use ProfeVision on behalf of an educational institution or company, make sure you have the authority to accept these Terms on their behalf."
@@ -1054,7 +1061,8 @@
     },
     "section15": {
       "title": "15. Contact",
-      "content": "If you have questions or need help, write to us at info@profevision.com or to:",
+      "intro": "If you have questions or need help, write to us at:",
+      "orAddress": "Or to the address:",
       "address": {
         "name": "ProfeVision",
         "line1": "647 Santino Meadows Apt. 525",

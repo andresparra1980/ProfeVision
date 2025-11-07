@@ -37,11 +37,14 @@ import { useChatMessages } from "../hooks/useChatMessages";
 import { DocumentChips } from "./DocumentChips";
 import { SummaryDialog } from "./SummaryDialog";
 import { EmptyState } from "./EmptyState";
+import { useTierLimits } from "@/lib/hooks/useTierLimits";
+import { LimitReachedModal } from "@/components/shared/limit-reached-modal";
 
 const notoSans = Noto_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export default function ChatPanel() {
   const t = useTranslations('ai_exams_chat');
+  const tTiers = useTranslations('tiers');
   const settings = useMemo(() => loadSettings(), []);
   const { result, setResult } = useAIChat();
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -51,6 +54,11 @@ export default function ChatPanel() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [padBottom, setPadBottom] = useState<number>(0);
   const [minHeight, setMinHeight] = useState<number | undefined>(undefined);
+
+  // Tier limits hook
+  const { usage, loading: tierLoading, canUseAI } = useTierLimits();
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const toastShownRef = useRef(false);
 
   // Add bottom sheet styles
   useEffect(() => {
@@ -123,6 +131,44 @@ export default function ChatPanel() {
     }
   }, []);
 
+  // Mostrar toast informativo de uso de IA (solo una vez)
+  useEffect(() => {
+    if (!tierLoading && usage && !toastShownRef.current) {
+      toastShownRef.current = true;
+
+      const isUnlimited = usage.ai_generation.limit === -1;
+      const percentage = usage.ai_generation.percentage;
+      const tierName = usage.tier.name; // free, plus, grandfathered, admin
+
+      if (isUnlimited) {
+        // Determinar mensaje según el tier
+        let tierLabel = '';
+        if (tierName === 'grandfathered') {
+          tierLabel = tTiers('subscription.grandfathered.title');
+        } else if (tierName === 'plus') {
+          tierLabel = tTiers('subscription.plus.title');
+        } else {
+          tierLabel = tTiers(`subscription.${tierName}.title`, { defaultValue: tierName });
+        }
+
+        toast.info(tTiers('features.ai_generations'), {
+          description: `${tTiers('usage.unlimited')} - ${tierLabel}`,
+          duration: 4000,
+        });
+      } else if (percentage >= 80) {
+        toast.warning(tTiers('features.ai_generations'), {
+          description: tTiers('limits.warning.approaching_ai'),
+          duration: 5000,
+        });
+      } else {
+        toast.info(tTiers('features.ai_generations'), {
+          description: `${usage.ai_generation.used} ${tTiers('usage.of')} ${usage.ai_generation.limit} ${tTiers('usage.used')}`,
+          duration: 3000,
+        });
+      }
+    }
+  }, [usage, tierLoading, tTiers]);
+
   // Measure prompt height to reserve space and avoid vertical scrollbar
   useEffect(() => {
     function updatePadding() {
@@ -169,6 +215,13 @@ export default function ChatPanel() {
   };
 
   const handleSend = () => {
+    // Verificar límites antes de enviar
+    // Solo verificar si NO está cargando y los datos ya están disponibles
+    if (!tierLoading && usage && !canUseAI()) {
+      setShowLimitModal(true);
+      return;
+    }
+
     sendMessage(input);
     setInput('');
   };
@@ -352,9 +405,9 @@ export default function ChatPanel() {
                 />
               </PromptInputTools>
               <PromptInputSubmit
-                disabled={isSending || input.trim().length === 0}
+                disabled={isSending || input.trim().length === 0 || (!tierLoading && usage ? !canUseAI() : false)}
                 status={isSending ? 'submitted' : undefined}
-                className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
+                className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </PromptInputToolbar>
           </PromptInput>
@@ -397,6 +450,14 @@ export default function ChatPanel() {
         docMeta={documentContext.docMeta}
         onDocumentChange={summaryDialog.openSummaryDialog}
         t={t}
+      />
+
+      {/* Modal de límite alcanzado */}
+      <LimitReachedModal
+        open={showLimitModal}
+        onOpenChange={setShowLimitModal}
+        feature="ai_generation"
+        daysUntilReset={usage?.cycle.daysUntilReset || 0}
       />
     </div>
   );

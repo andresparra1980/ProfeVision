@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
 import { promises as _fsPromises } from "fs";
 import * as _path from "path";
 import sharp from "sharp";
 import logger from "@/lib/utils/logger";
 import { getApiTranslator } from '@/i18n/api';
+import TierService from '@/lib/services/tier-service';
+import { createAdminSupabaseClient } from '@/lib/supabase/server';
 
 const DEBUG = process.env.NODE_ENV === "development";
-
-// Configuración para el cliente de Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // Configuración para el bucket S3
 const s3BucketName = process.env.S3_BUCKET_NAME || "examenes-escaneados";
@@ -271,13 +268,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Inicializar cliente de Supabase
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
+    // Inicializar cliente de Supabase con permisos de admin
+    const supabase = createAdminSupabaseClient();
 
     // Extraer información del QR
     const examId =
@@ -319,6 +311,36 @@ export async function POST(req: NextRequest) {
         logger.error("Error al obtener profesor_id:", error);
       }
       // Continuamos sin profesor_id
+    }
+
+    // Check tier limits for scan feature
+    if (profesorId) {
+      try {
+        const limitCheck = await TierService.checkFeatureAccess(supabase, profesorId, 'scan');
+
+        if (!limitCheck.allowed) {
+          if (DEBUG) {
+            logger.log('Scan limit reached for profesor:', profesorId, limitCheck);
+          }
+          return NextResponse.json(
+            {
+              error: 'Límite de escaneos alcanzado',
+              details: {
+                limit: limitCheck.limit,
+                used: limitCheck.used,
+                tier: limitCheck.tier,
+                cycle_end: limitCheck.cycle_end,
+              },
+            },
+            { status: 403 }
+          );
+        }
+      } catch (tierError) {
+        if (DEBUG) {
+          logger.error('Error checking tier limits:', tierError);
+        }
+        // Continue even if tier check fails (don't block existing functionality)
+      }
     }
 
     // Verificar si ya existe un registro para este examen y estudiante
@@ -957,6 +979,21 @@ export async function POST(req: NextRequest) {
       // Log but don't fail if cleanup has issues
       if (DEBUG) {
         logger.warn("Error during temporary file cleanup:", cleanupError);
+      }
+    }
+
+    // Increment scan usage count after successful save
+    if (profesorId) {
+      try {
+        await TierService.incrementUsage(supabase, profesorId, 'scan', 1);
+        if (DEBUG) {
+          logger.log('Incremented scan usage for profesor:', profesorId);
+        }
+      } catch (tierError) {
+        if (DEBUG) {
+          logger.error('Error incrementing scan usage:', tierError);
+        }
+        // Don't fail the request if usage increment fails
       }
     }
 

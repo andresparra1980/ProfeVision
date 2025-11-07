@@ -1,6 +1,6 @@
 # ProfeVision - Database Schema (Public Schema)
 
-**Fecha**: 2025-10-28
+**Fecha**: 2025-11-04
 **Base de Datos**: PostgreSQL (Supabase)
 **Schema**: `public`
 **RLS**: Habilitado en todas las tablas
@@ -15,8 +15,9 @@
 4. [Exámenes](#exámenes)
 5. [Resultados y Respuestas](#resultados-y-respuestas)
 6. [Grading Schemes](#grading-schemes)
-7. [Procesos y Jobs](#procesos-y-jobs)
-8. [Relaciones Clave](#relaciones-clave)
+7. [Sistema de Tiers y Suscripciones](#sistema-de-tiers-y-suscripciones)
+8. [Procesos y Jobs](#procesos-y-jobs)
+9. [Relaciones Clave](#relaciones-clave)
 
 ---
 
@@ -34,11 +35,19 @@
 | `cargo` | text | nullable, updatable | - | Cargo o puesto |
 | `biografia` | text | nullable, updatable | - | Biografía del profesor |
 | `foto_url` | text | nullable, updatable | - | URL de foto de perfil |
+| `subscription_tier` | text | updatable | 'grandfathered' | Tier de suscripción |
+| `subscription_status` | text | updatable | 'active' | Estado de suscripción |
+| `subscription_cycle_start` | date | nullable, updatable | - | Inicio del ciclo de facturación |
+| `polar_subscription_id` | text | nullable, updatable | - | ID de suscripción en Polar.sh |
+| `polar_customer_id` | text | nullable, updatable | - | ID de cliente en Polar.sh |
+| `first_login_completed` | bool | updatable | false | Si completó el primer login |
 | `created_at` | timestamptz | updatable | now() | Fecha de creación |
 | `updated_at` | timestamptz | updatable | now() | Fecha de actualización |
 
 **Constraints**:
 - FK: `id` → `auth.users.id`
+- CHECK: `subscription_tier IN ('free', 'plus', 'admin', 'grandfathered')`
+- CHECK: `subscription_status IN ('active', 'cancelled', 'past_due')`
 
 **RLS**: ✅ Habilitado
 **Rows**: 30
@@ -566,6 +575,121 @@
 
 ---
 
+## Sistema de Tiers y Suscripciones
+
+### `tier_limits`
+**Descripción**: Configuración de límites por tier de suscripción
+
+| Columna | Tipo | Opciones | Default | Descripción |
+|---------|------|----------|---------|-------------|
+| `id` | uuid | PK, updatable | gen_random_uuid() | ID del tier |
+| `tier` | text | unique, updatable | - | Nombre del tier |
+| `ai_generations_per_month` | int4 | updatable | - | Generaciones IA por mes (-1 = ilimitado) |
+| `scans_per_month` | int4 | updatable | - | Escaneos por mes (-1 = ilimitado) |
+| `max_students` | int4 | updatable | - | Máximo de estudiantes (-1 = ilimitado) |
+| `max_groups` | int4 | updatable | - | Máximo de grupos (-1 = ilimitado) |
+| `features` | jsonb | updatable | '{}' | Features adicionales |
+| `created_at` | timestamptz | updatable | now() | Fecha de creación |
+| `updated_at` | timestamptz | updatable | now() | Fecha de actualización |
+
+**Constraints**:
+- UNIQUE: `tier`
+- CHECK: `tier IN ('free', 'plus', 'admin', 'grandfathered')`
+
+**Valores Actuales**:
+- **free**: 1 generación IA, 50 escaneos, 100 estudiantes, 5 grupos
+- **plus**: Ilimitado todo
+- **admin**: Ilimitado todo
+- **grandfathered**: Ilimitado todo (temporal)
+
+**RLS**: ✅ Habilitado (SELECT público)
+**Rows**: 4
+
+---
+
+### `usage_tracking`
+**Descripción**: Tracking de uso mensual por profesor
+
+| Columna | Tipo | Opciones | Default | Descripción |
+|---------|------|----------|---------|-------------|
+| `id` | uuid | PK, updatable | gen_random_uuid() | ID del tracking |
+| `profesor_id` | uuid | updatable | - | ID del profesor |
+| `month_year` | text | updatable | - | Mes/año (YYYY-MM) |
+| `ai_generations_used` | int4 | updatable | 0 | Generaciones IA usadas |
+| `scans_used` | int4 | updatable | 0 | Escaneos usados |
+| `cycle_start_date` | date | updatable | - | Inicio del ciclo |
+| `cycle_end_date` | date | updatable | - | Fin del ciclo |
+| `created_at` | timestamptz | updatable | now() | Fecha de creación |
+| `updated_at` | timestamptz | updatable | now() | Fecha de actualización |
+
+**Constraints**:
+- FK: `profesor_id` → `profesores.id`
+- UNIQUE: `(profesor_id, month_year)`
+
+**Índices**:
+- `idx_usage_tracking_profesor_month` ON `(profesor_id, month_year)`
+
+**RLS**: ✅ Habilitado (SELECT/INSERT/UPDATE propios)
+**Rows**: Variable
+
+---
+
+### Funciones SQL del Sistema de Tiers
+
+#### `calculate_cycle_dates(cycle_start date)`
+**Descripción**: Calcula fechas de inicio y fin del ciclo de facturación actual
+
+**Returns**: `TABLE(cycle_start_date date, cycle_end_date date)`
+
+**Ejemplo**:
+```sql
+SELECT * FROM calculate_cycle_dates('2025-01-15'::date);
+-- Retorna el rango de fechas del ciclo actual
+```
+
+---
+
+#### `get_or_create_usage_tracking(p_profesor_id uuid)`
+**Descripción**: Obtiene o crea el registro de tracking para el ciclo actual
+
+**Returns**: `uuid` (ID del registro de tracking)
+
+**Ejemplo**:
+```sql
+SELECT get_or_create_usage_tracking('...');
+-- Retorna el ID del registro de tracking del mes actual
+```
+
+---
+
+#### `check_feature_limit(p_profesor_id uuid, p_feature text)`
+**Descripción**: Verifica si el profesor puede usar una feature
+
+**Returns**: `RECORD(can_use boolean, used integer, limit integer, remaining integer)`
+
+**Features**: `'ai_generation'` | `'scan'`
+
+**Ejemplo**:
+```sql
+SELECT * FROM check_feature_limit('...', 'ai_generation');
+-- { can_use: true, used: 5, limit: 10, remaining: 5 }
+```
+
+---
+
+#### `increment_feature_usage(p_profesor_id uuid, p_feature text)`
+**Descripción**: Incrementa el contador de uso de una feature
+
+**Returns**: `void`
+
+**Ejemplo**:
+```sql
+SELECT increment_feature_usage('...', 'scan');
+-- Incrementa scans_used en 1
+```
+
+---
+
 ## Procesos y Jobs
 
 ### `procesos_examen_similar`
@@ -661,6 +785,17 @@ componentes_calificacion
 calificaciones           examenes
 ```
 
+### Sistema de Tiers
+```
+profesores
+    ↓ (subscription_tier)
+tier_limits (config)
+
+profesores
+    ↓ 1:N
+usage_tracking (tracking mensual)
+```
+
 ---
 
 ## Funciones RLS
@@ -712,13 +847,25 @@ CREATE INDEX IF NOT EXISTS idx_estudiante_grupo_estudiante_id
 
 ---
 
-**Total Tablas**: 23
+**Total Tablas**: 25 (23 originales + 2 sistema de tiers)
 **Total Rows**: ~24,000 (aprox)
 **RLS**: Habilitado en todas las tablas
 **Auth**: Supabase Auth (schema `auth`)
 
 ---
 
-**Generado**: 2025-10-28
-**Fuente**: Supabase MCP list_tables
-**Versión**: 1.0
+## Cambios Recientes
+
+### 2025-11-04: Sistema de Tiers y Suscripciones
+- ✅ Agregados campos de subscription a tabla `profesores`
+- ✅ Nueva tabla `tier_limits` (configuración de tiers)
+- ✅ Nueva tabla `usage_tracking` (tracking de uso mensual)
+- ✅ Funciones SQL: `calculate_cycle_dates`, `get_or_create_usage_tracking`, `check_feature_limit`, `increment_feature_usage`
+- ✅ DEFAULT de `subscription_tier` cambiado a 'grandfathered'
+- 📋 Tiers disponibles: free, plus, admin, grandfathered
+
+---
+
+**Última Actualización**: 2025-11-04
+**Fuente**: Supabase MCP + Migraciones manuales
+**Versión**: 1.1

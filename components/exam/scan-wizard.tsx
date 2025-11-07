@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 import { Instructions, ImageCapture, Processing, Results, Confirmation } from './wizard-steps';
 import { ScanData, ProcessingResult } from './types';
 import { ImageProvider, useImageContext } from './contexts';
+import { useTierLimits } from '@/lib/hooks/useTierLimits';
+import { LimitReachedModal } from '@/components/shared/limit-reached-modal';
 import logger from '@/lib/utils/logger';
 
 // Debug flag
@@ -18,16 +20,20 @@ interface ScanWizardProps {
 // Inner content component that uses the ImageContext
 function ScanWizardContent({ onClose }: { onClose: () => void }) {
   const t = useTranslations('scan-wizard');
-  const { 
-    setProcessedImageData, 
+  const {
+    setProcessedImageData,
     setOnProcessingComplete,
     finalOutput,
     processedImageData,
     clearImageData
   } = useImageContext();
-  
+
+  // Tier limits hook
+  const { usage, loading: tierLoading, canUseScan } = useTierLimits();
+
   const [step, setStep] = useState(1);
   const [scanData, setScanData] = useState<ScanData>({});
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const processingImage = useRef(false); // Ref to track processing status
   const processedImageId = useRef<string | null>(null); // Track the current image being processed
 
@@ -116,6 +122,13 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
   }, [processedImageData, step, handleRetake]);
 
   const handleNext = () => {
+    // Verificar límites antes de pasar del paso 1 (instrucciones) al paso 2 (captura)
+    // Solo verificar si NO está cargando y los datos ya están disponibles
+    if (step === 1 && !tierLoading && usage && !canUseScan()) {
+      setShowLimitModal(true);
+      return;
+    }
+
     if (step === 2) {
       // If we're moving from capture to processing, ensure the image is in the context
       if (scanData.originalImage) {
@@ -242,7 +255,14 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
         {t('description')}
       </DialogDescription>
       <div className="flex-1 overflow-y-auto">
-        {step === 1 && <Instructions onNext={handleNext} />}
+        {step === 1 && (
+          <Instructions
+            onNext={handleNext}
+            scanUsage={usage?.scans}
+            canScan={tierLoading ? true : canUseScan()}
+            loading={tierLoading}
+          />
+        )}
         {step === 2 && (
           <ImageCapture
             onCapture={handleImageCapture}
@@ -298,6 +318,14 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
           </Button>
         </div>
       )}
+
+      {/* Modal de límite alcanzado */}
+      <LimitReachedModal
+        open={showLimitModal}
+        onOpenChange={setShowLimitModal}
+        feature="scan"
+        daysUntilReset={usage?.cycle.daysUntilReset || 0}
+      />
     </>
   );
 }

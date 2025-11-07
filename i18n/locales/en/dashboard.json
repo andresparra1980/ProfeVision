@@ -5,7 +5,7 @@
     "students": "Students",
     "groups": "Groups",
     "subjects": "Subjects",
-    "reports": "Reports",
+    "subscription": "My Plan",
     "settings": "Settings",
     "profile": "Profile",
     "entities": "Educational Entities",
@@ -1325,5 +1325,11 @@
       "fetchData": "Error fetching data",
       "internal": "Internal server error"
     }
+  },
+  "tierUsage": {
+    "title": "Plan Usage",
+    "cycleReset": "Resets in",
+    "day": "day",
+    "days": "days"
   }
 }

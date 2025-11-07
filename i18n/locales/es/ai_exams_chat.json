@@ -127,7 +127,8 @@
       "successDesc": "Revisa el examen generado en el panel de Resultados.",
       "errorTitle": "Error",
       "errorDesc": "Ocurrió un error inesperado. Intenta nuevamente.",
-      "invalidJson": "Error en la respuesta del asistente. Intenta nuevamente."
+      "invalidJson": "Error en la respuesta del asistente. Intenta nuevamente.",
+      "invalidContract": "La respuesta no cumplió el contrato esperado. Ajusté reglas y puedes reintentar."
     }
   },
   "empty": {

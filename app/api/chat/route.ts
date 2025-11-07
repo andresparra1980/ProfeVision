@@ -29,6 +29,8 @@ import {
   endLangSmithRunWithError,
 } from "@/lib/ai/chat/langsmith";
 import { verifyTeacherAuth } from "@/lib/auth/verify-teacher";
+import TierService from "@/lib/services/tier-service";
+import { createClient } from "@/lib/supabase/server";
 
 // Env
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -77,6 +79,33 @@ async function handleChatRequest(req: NextRequest, t0: number) {
         status: 401,
       };
       return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+
+    // Create Supabase client with user context
+    const supabase = createClient();
+
+    // Check tier limits for AI generation feature
+    try {
+      const limitCheck = await TierService.checkFeatureAccess(supabase, user.id, 'ai_generation');
+
+      if (!limitCheck.allowed) {
+        logger.log('AI generation limit reached for user:', user.id, limitCheck);
+        return NextResponse.json(
+          {
+            error: 'Límite de generaciones de IA alcanzado',
+            details: {
+              limit: limitCheck.limit,
+              used: limitCheck.used,
+              tier: limitCheck.tier,
+              cycle_end: limitCheck.cycle_end,
+            },
+          },
+          { status: 403 }
+        );
+      }
+    } catch (tierError) {
+      logger.error('Error checking tier limits:', tierError);
+      // Continue even if tier check fails (don't block existing functionality)
     }
 
     // 2) Validate request payload
@@ -328,6 +357,15 @@ async function handleChatRequest(req: NextRequest, t0: number) {
       await finalizeLangSmithRun(langsmithClient, rootRunId, finalMetadata, {
         questions_generated: normalized.exam.questions.length,
       });
+    }
+
+    // Increment AI generation usage count after successful generation
+    try {
+      await TierService.incrementUsage(supabase, user.id, 'ai_generation', 1);
+      logger.log('Incremented AI generation usage for user:', user.id);
+    } catch (tierError) {
+      logger.error('Error incrementing AI generation usage:', tierError);
+      // Don't fail the request if usage increment fails
     }
 
     return NextResponse.json(normalized);

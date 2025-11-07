@@ -64,9 +64,9 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold mb-4">{t('terms.section4.title')}</h2>
               <div className="space-y-4">
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
+                  <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300 list-disc list-inside">
                     {(t.raw('terms.section4.items') as string[]).map((item, index) => (
-                      <li key={index}>• {item}</li>
+                      <li key={index}>{item}</li>
                     ))}
                   </ul>
                 </div>
@@ -88,7 +88,7 @@ export default function TermsPage() {
               </div>
               <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4 mt-4">
                 <p className="text-sm text-teal-900 dark:text-teal-100 font-medium">
-                  <strong>Nota:</strong> {t('terms.section5.note')}
+                  <strong>{t('terms.noteLabel')}</strong> {t('terms.section5.note')}
                 </p>
               </div>
             </section>
@@ -96,9 +96,9 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">{t('terms.section6.title')}</h2>
               <div className="bg-muted/50 rounded-lg p-6">
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-2 text-sm list-disc list-inside">
                   {(t.raw('terms.section6.items') as string[]).map((item, index) => (
-                    <li key={index}>• {item}</li>
+                    <li key={index}>{item}</li>
                   ))}
                 </ul>
               </div>
@@ -121,9 +121,9 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">{t('terms.section9.title')}</h2>
               <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
-                <ul className="space-y-2 text-sm text-yellow-700 dark:text-yellow-300">
+                <ul className="space-y-2 text-sm text-yellow-700 dark:text-yellow-300 list-disc list-inside">
                   {(t.raw('terms.section9.items') as string[]).map((item, index) => (
-                    <li key={index}>• {item}</li>
+                    <li key={index}>{item}</li>
                   ))}
                 </ul>
               </div>
@@ -179,11 +179,14 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold mb-4">{t('terms.section15.title')}</h2>
               <div className="bg-card border rounded-lg p-6">
                 <p className="text-base leading-relaxed mb-4">
-                  {t('terms.section15.content')}{" "}
+                  {t('terms.section15.intro')}
+                </p>
+                <p className="text-base mb-2">
                   <a href="mailto:info@profevision.com" className="text-primary hover:underline font-medium">
                     info@profevision.com
-                  </a> o a:
+                  </a>
                 </p>
+                <p className="text-base mb-4">{t('terms.section15.orAddress')}</p>
                 <div className="text-sm text-muted-foreground">
                   <p className="font-medium">{t('terms.section15.address.name')}</p>
                   <p>{t('terms.section15.address.line1')}</p>

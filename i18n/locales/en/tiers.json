@@ -1,0 +1,132 @@
+{
+  "features": {
+    "ai_generations": "AI Generations",
+    "scans": "Exam Scans"
+  },
+  "subscription": {
+    "loading": "Loading subscription information...",
+    "error": "Could not load subscription information",
+    "title": "My Plan",
+    "description": "Manage your subscription and review your current usage",
+    "grandfathered": {
+      "title": "Founders Plan",
+      "description": "Thank you for being one of ProfeVision's first users! Your invaluable support helps us turn a dream into a service that will help teachers take back control of their time and save them tedious hours grading exams manually. For now, you can use all features without limits. For any questions, requests, or suggestions, write to us at founders@profevision.com"
+    },
+    "plus": {
+      "title": "Plus Plan",
+      "description": "Premium plan with unlimited access to all ProfeVision features."
+    },
+    "free": {
+      "title": "Free Plan",
+      "description": "Free plan with basic features."
+    },
+    "usage": {
+      "title": "Current Usage",
+      "description": "Your cycle renews on the",
+      "day": "day",
+      "days": "days",
+      "aiGenerations": "AI Generations",
+      "scans": "Exam Scans"
+    },
+    "plans": {
+      "title": "Available Plans"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": {
+        "question": "What happens if I reach my monthly limit?",
+        "answer": "If you reach your monthly limit, you won't be able to use that feature until your cycle renews. You can upgrade to Plus to get unlimited access."
+      },
+      "q2": {
+        "question": "When does my monthly limit renew?",
+        "answer": "Your limit renews automatically every month on your billing cycle start date."
+      },
+      "q3": {
+        "question": "Can I cancel my subscription at any time?",
+        "answer": "Yes, you can cancel your subscription at any time. You will maintain access to premium features until the end of your current billing period."
+      }
+    }
+  },
+  "pricing": {
+    "comingSoon": "Coming Soon",
+    "comingSoonDesc": "Payment functionality will be available soon. Stay tuned!",
+    "free": {
+      "name": "Free",
+      "description": "Perfect for getting started with the basics",
+      "features": {
+        "aiGenerations": "1 AI exam generation per month",
+        "scans": "50 exam scans per month",
+        "students": "Up to 100 students",
+        "groups": "Up to 5 groups",
+        "basicFeatures": "Access to all basic features",
+        "emailSupport": "Email support"
+      }
+    },
+    "plus": {
+      "name": "Plus",
+      "description": "For teachers who need more power",
+      "features": {
+        "unlimitedAI": "Unlimited AI generations",
+        "unlimitedScans": "Unlimited exam scans",
+        "unlimitedStudents": "Unlimited students",
+        "unlimitedGroups": "Unlimited groups",
+        "premiumFeatures": "Access to all premium features",
+        "prioritySupport": "Priority support",
+        "earlyAccess": "Early access to new features"
+      }
+    },
+    "badges": {
+      "recommended": "Recommended",
+      "currentPlan": "Current Plan",
+      "launchPrice": "Launch price",
+      "save": "Save 17%"
+    },
+    "billing": {
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "perMonth": "/month",
+      "billedAnnually": "billed annually",
+      "saveAmount": "Save"
+    },
+    "actions": {
+      "startFree": "Start for free",
+      "upgradePlus": "Upgrade to Plus",
+      "currentPlan": "Current plan"
+    }
+  },
+  "welcome": {
+    "title": "Welcome to ProfeVision!",
+    "description": "Choose the plan that best fits your needs. You can upgrade at any time.",
+    "continueFree": "Continue with Free plan",
+    "configuringAccount": "Setting up your account...",
+    "upgradeAnytime": "You can upgrade to Plus at any time from your profile",
+    "success": "Welcome to ProfeVision!",
+    "successDesc": "Your account has been set up successfully."
+  },
+  "limits": {
+    "reached": {
+      "title": "Limit Reached",
+      "description": "You have reached the monthly limit of {feature} available in your current plan.",
+      "ai": "AI generations",
+      "scans": "scans",
+      "daysUntilReset": {
+        "today": "Your limit will reset tomorrow",
+        "tomorrow": "Your limit will reset in 1 day",
+        "multiple": "Your limit will reset in {days} days"
+      },
+      "waitOrUpgrade": "You can wait until your limit resets, or upgrade to a higher plan to get more monthly {feature}.",
+      "understood": "Got it"
+    },
+    "warning": {
+      "approaching": "Near limit ({percentage}%)",
+      "approaching_ai": "You are approaching your monthly limit for AI generations. Consider upgrading to Plus for unlimited access.",
+      "remaining": "{count} remaining",
+      "remainingPlural": "{count} remaining"
+    }
+  },
+  "usage": {
+    "unlimited": "Unlimited",
+    "used": "used",
+    "of": "of"
+  }
+}

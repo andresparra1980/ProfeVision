@@ -11,6 +11,8 @@ import type { User, Session } from '@supabase/supabase-js';
 import { SidebarProvider } from "@/lib/contexts/sidebar-context";
 import logger from "@/lib/utils/logger";
 import { useTranslations, useLocale } from 'next-intl';
+import { useWelcomeModal } from "@/lib/hooks/useWelcomeModal";
+import { WelcomeTierModal } from "@/components/shared/welcome-tier-modal";
 
 // Helper function to delete cookies by name prefix
 function deleteSupabaseCookies() {
@@ -36,10 +38,12 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const t = useTranslations('dashboard');
+  const tTiers = useTranslations('tiers');
   const locale = useLocale();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { showWelcome, setShowWelcome } = useWelcomeModal();
 
   const handleLogout = async () => {
     let signOutError: Error | null = null;
@@ -155,6 +159,18 @@ export default function DashboardLayout({
           </main>
         </div>
         <ScanExamFeature />
+
+        {/* Welcome Modal para primer login */}
+        <WelcomeTierModal
+          open={showWelcome}
+          onOpenChange={setShowWelcome}
+          onComplete={() => {
+            setShowWelcome(false);
+            toast.success(tTiers('welcome.success', { defaultValue: 'Welcome to ProfeVision!' }), {
+              description: tTiers('welcome.successDesc', { defaultValue: 'Your account has been set up successfully.' }),
+            });
+          }}
+        />
       </div>
     </SidebarProvider>
   );
