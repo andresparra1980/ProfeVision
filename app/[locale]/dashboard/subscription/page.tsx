@@ -5,7 +5,7 @@ import { TierBadge, SubscriptionTier } from "@/components/shared/tier-badge";
 import { UsageIndicator } from "@/components/shared/usage-indicator";
 import { PricingCard } from "@/components/shared/pricing-card";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { SubscriptionPageSkeleton } from "./components/SubscriptionPageSkeleton";
 import { AlertTriangle, Calendar, HelpCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
@@ -23,7 +23,7 @@ export default function SubscriptionPage() {
   };
 
   if (loading) {
-    return <LoadingSpinner message={t('subscription.loading', { defaultValue: 'Loading subscription information...' })} />;
+    return <SubscriptionPageSkeleton />;
   }
 
   if (!usage) {
