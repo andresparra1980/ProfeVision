@@ -17,6 +17,7 @@ import { AuthError } from "@supabase/supabase-js";
 import { GroupCard } from "./components/GroupCard";
 import { GroupFormModal } from "./components/GroupFormModal";
 import { DeleteGroupDialog } from "./components/DeleteGroupDialog";
+import { GroupsPageSkeleton } from "./components/GroupsPageSkeleton";
 import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
@@ -436,10 +437,8 @@ export default function GroupsPage() {
       />
 
       {/* Content Section - Spinner only depends on local 'loading' now */}
-      {loading ? ( // Use the local loading state for the content spinner
-        <div className="flex h-40 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-        </div>
+      {loading ? (
+        <GroupsPageSkeleton />
       ) : grupos.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-10">
