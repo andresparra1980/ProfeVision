@@ -13,6 +13,7 @@ import type { Database } from "@/lib/types/database";
 import { SubjectCard } from "./components/SubjectCard";
 import { SubjectFormModal } from "./components/SubjectFormModal";
 import { DeleteConfirmationModal } from "./components/DeleteConfirmationModal";
+import { SubjectsPageSkeleton } from "./components/SubjectsPageSkeleton";
 import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 type Materia = Database["public"]["Tables"]["materias"]["Row"];
@@ -220,9 +221,7 @@ export default function SubjectsPage() {
       />
 
       {loading ? (
-        <div className="flex h-40 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-        </div>
+        <SubjectsPageSkeleton />
       ) : materias.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-10">
