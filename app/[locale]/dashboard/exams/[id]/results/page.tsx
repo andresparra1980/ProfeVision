@@ -18,22 +18,26 @@ import { useGroupSelection } from '@/components/exam-results/hooks/use-group-sel
 import { ExamDetailsCard } from '@/components/exam-results/cards/exam-details-card';
 import { StatisticsCard } from '@/components/exam-results/cards/statistics-card';
 
-// Heavy components - lazy load with spinner
-import { LoadingSpinner } from '@/components/shared/loading-spinner';
+// Heavy components - lazy load with skeletons
+import {
+  QuestionAnalysisCardSkeleton,
+  AnswerAnalysisCardSkeleton,
+  StudentsResultsTableSkeleton,
+} from '@/components/exam-results/skeletons';
 
 const QuestionAnalysisCard = dynamic(
   () => import('@/components/exam-results/cards/question-analysis-card').then(mod => ({ default: mod.QuestionAnalysisCard })),
-  { loading: () => <LoadingSpinner message="Loading question analysis..." /> }
+  { loading: () => <QuestionAnalysisCardSkeleton /> }
 );
 
 const AnswerAnalysisCard = dynamic(
   () => import('@/components/exam-results/cards/answer-analysis-card').then(mod => ({ default: mod.AnswerAnalysisCard })),
-  { loading: () => <LoadingSpinner message="Loading answer analysis..." /> }
+  { loading: () => <AnswerAnalysisCardSkeleton /> }
 );
 
 const StudentsResultsTable = dynamic(
   () => import('@/components/exam-results/tables/students-results-table').then(mod => ({ default: mod.StudentsResultsTable })),
-  { loading: () => <LoadingSpinner message="Loading students table..." /> }
+  { loading: () => <StudentsResultsTableSkeleton /> }
 );
 
 // Dialogs - lazy load (shown on demand)
@@ -299,46 +303,13 @@ export default function ExamResultsPage() {
         </div>
 
         {/* Question Analysis skeleton */}
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-8 flex-1" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <QuestionAnalysisCardSkeleton />
 
         {/* Answer Analysis skeleton */}
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-64 w-full" />
-          </CardContent>
-        </Card>
+        <AnswerAnalysisCardSkeleton />
 
         {/* Students table skeleton */}
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <StudentsResultsTableSkeleton />
       </div>
     );
   }
