@@ -14,7 +14,8 @@ import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 import {
   EntityFormModal,
   EntitiesTable,
-  EmptyEntitiesState
+  EmptyEntitiesState,
+  EntitiesPageSkeleton
 } from "./components";
 
 interface EducationalEntity {
@@ -102,6 +103,11 @@ export default function EntitiesPage() {
     fetchEntities();
   }, [fetchEntities]);
 
+  // Show loading skeleton
+  if (loading) {
+    return <EntitiesPageSkeleton />;
+  }
+
   return (
     <div className="space-y-4">
       <TitleCardWithDepth
@@ -139,13 +145,7 @@ export default function EntitiesPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <EntitiesTable entities={entities} searchQuery={searchQuery} />
-            )}
+            <EntitiesTable entities={entities} searchQuery={searchQuery} />
           </CardContent>
         </Card>
       )}

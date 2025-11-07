@@ -14,7 +14,8 @@ import {
   StudentFormModal,
   StudentsTable,
   StudentDetailsDialog,
-  EmptyStudentsState
+  EmptyStudentsState,
+  StudentsPageSkeleton
 } from "./components";
 
 interface Student {
@@ -169,45 +170,10 @@ export default function StudentsPage() {
     setShowDetails(true);
   };
 
-  const renderStudentsList = () => {
-    if (loading) {
-      return (
-        <div className="flex justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-        </div>
-      );
-    }
-
-    // Show empty states
-    if (!hasGroups || students.length === 0) {
-      return (
-        <EmptyStudentsState
-          hasGroups={hasGroups}
-          hasStudents={students.length > 0}
-          onCreateStudent={() => setIsFormOpen(true)}
-          onManageGroups={() => router.push("/dashboard/groups")}
-        />
-      );
-    }
-
-    // Show students table
-    return (
-      <>
-        <StudentsTable
-          students={students}
-          searchQuery={searchQuery}
-          onViewDetails={handleViewDetails}
-          loadingDetails={false}
-          selectedStudentId={selectedStudentId}
-        />
-        <StudentDetailsDialog
-          open={showDetails}
-          onOpenChange={setShowDetails}
-          studentId={selectedStudentId}
-        />
-      </>
-    );
-  };
+  // Show loading skeleton for entire page
+  if (loading) {
+    return <StudentsPageSkeleton />;
+  }
 
   return (
     <div className="space-y-4">
@@ -264,7 +230,30 @@ export default function StudentsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {renderStudentsList()}
+          {/* Show empty states or table */}
+          {!hasGroups || students.length === 0 ? (
+            <EmptyStudentsState
+              hasGroups={hasGroups}
+              hasStudents={students.length > 0}
+              onCreateStudent={() => setIsFormOpen(true)}
+              onManageGroups={() => router.push("/dashboard/groups")}
+            />
+          ) : (
+            <>
+              <StudentsTable
+                students={students}
+                searchQuery={searchQuery}
+                onViewDetails={handleViewDetails}
+                loadingDetails={false}
+                selectedStudentId={selectedStudentId}
+              />
+              <StudentDetailsDialog
+                open={showDetails}
+                onOpenChange={setShowDetails}
+                studentId={selectedStudentId}
+              />
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

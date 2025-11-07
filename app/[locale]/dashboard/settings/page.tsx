@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { ProfileForm, PasswordSection, NotificationsSection } from "./components";
+import { ProfileForm, PasswordSection, NotificationsSection, SettingsPageSkeleton } from "./components";
 
 export default function SettingsPage() {
   const t = useTranslations('dashboard.settings');
@@ -56,19 +56,7 @@ export default function SettingsPage() {
   }, [fetchProfile]);
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
-          <p className="text-muted-foreground">
-            {t('description')}
-          </p>
-        </div>
-        <div className="flex justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
+    return <SettingsPageSkeleton />;
   }
 
   return (
