@@ -85,9 +85,9 @@ export function TitleCardWithDepth({
         boxShadow: 'var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)',
       }}
     >
-      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-1 sm:gap-4">
+      <div className="flex flex-row flex-wrap justify-between items-center gap-3 sm:gap-4">
         {/* Title and description section */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-3 flex-1 min-w-0 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-3 flex-1 min-w-[400px]">
           {/* Optional icon */}
           {icon && (
             <div className="flex-shrink-0 mt-0 sm:mt-1">
@@ -96,7 +96,7 @@ export function TitleCardWithDepth({
           )}
 
           {/* Text content */}
-          <div className="flex-1 min-w-0 w-full sm:w-auto text-center sm:text-left">
+          <div className="flex-1 min-w-0 text-center sm:text-left overflow-hidden">
             <h2
               className={cn(
                 // Enhanced font styling
@@ -110,8 +110,12 @@ export function TitleCardWithDepth({
                 'dark:[text-shadow:0_2px_18px_rgba(255,255,255,0.15),0_1px_6px_rgba(255,255,255,0.1)]',
                 // Letter spacing for elegance
                 'tracking-tight leading-tight',
-                // No margin on mobile, minimal margin on desktop
+                // Minimal margin on desktop
                 'mb-0 sm:mb-1.5',
+                // Allow text to wrap if too long
+                'break-words',
+                // Truncate after 5 lines
+                'line-clamp-5',
                 titleClassName
               )}
             >
@@ -126,7 +130,7 @@ export function TitleCardWithDepth({
                   // Subtle shadow
                   '[text-shadow:0_1px_2px_rgba(0,0,0,0.05)]',
                   'dark:[text-shadow:0_1px_3px_rgba(0,0,0,0.3)]',
-                  // Better readability - more compact line height on mobile
+                  // Better readability
                   'leading-snug sm:leading-relaxed tracking-wide',
                   descriptionClassName
                 )}
