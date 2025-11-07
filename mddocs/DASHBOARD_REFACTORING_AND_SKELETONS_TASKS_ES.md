@@ -596,13 +596,21 @@ export function TableSkeleton({ rows = 5, columns = 4 }: TableSkeletonProps) {
 
 ## Seguimiento de Progreso
 
-### Fase 1: Refactorización
-- [ ] Etapa 1.1: `/students` (0/6 tareas)
-- [ ] Etapa 1.2: `/settings` (0/5 tareas)
-- [ ] Etapa 1.3: `/entities` (0/5 tareas)
-- [ ] Etapa 1.4: `/groups` (0/2 tareas)
+### Fase 1: Refactorización ✅ COMPLETADA
+- [x] Etapa 1.1: `/students` (6/6 tareas) - Completada 2025-11-07
+  - Reducción: 659 → 272 líneas (~59%)
+  - Componentes: StudentFormModal, StudentsTable, StudentDetailsDialog, EmptyStudentsState
+- [x] Etapa 1.2: `/settings` (5/5 tareas) - Completada 2025-11-07
+  - Reducción: 229 → 94 líneas (~59%)
+  - Componentes: ProfileForm, PasswordSection, NotificationsSection
+- [x] Etapa 1.3: `/entities` (5/5 tareas) - Completada 2025-11-07
+  - Reducción: 300 → 153 líneas (~49%)
+  - Componentes: EntityFormModal, EntitiesTable, EmptyEntitiesState
+- [x] Etapa 1.4: `/groups` (2/2 tareas) - Completada 2025-11-07
+  - Reducción: 584 → 492 líneas (~15%)
+  - Componentes: DeleteGroupDialog
 
-### Fase 2: Skeletons
+### Fase 2: Skeletons 🔄 EN PROGRESO
 - [ ] Etapa 2.1: Biblioteca (0/6 tareas)
 - [ ] Etapa 2.2: Skeletons de página (0/7 tareas)
 - [ ] Etapa 2.3: Importaciones dinámicas (0/3 tareas)
@@ -646,6 +654,6 @@ Parte de la iniciativa de refactorización del dashboard
 
 ---
 
-**Versión del Documento**: 1.0
-**Última Actualización**: 2025-11-06
-**Estado**: Listo para Implementación
+**Versión del Documento**: 1.1
+**Última Actualización**: 2025-11-07
+**Estado**: Fase 1 Completada - Fase 2 En Progreso
