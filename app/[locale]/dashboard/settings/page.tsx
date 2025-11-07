@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { ProfileForm, PasswordSection, NotificationsSection, SettingsPageSkeleton } from "./components";
+import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 export default function SettingsPage() {
   const t = useTranslations('dashboard.settings');
@@ -58,12 +59,10 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       {/* Header - Always visible */}
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
-        <p className="text-muted-foreground">
-          {t('description')}
-        </p>
-      </div>
+      <TitleCardWithDepth
+        title={t('title')}
+        description={t('description')}
+      />
 
       {loading ? (
         <SettingsPageSkeleton />

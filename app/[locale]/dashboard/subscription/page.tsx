@@ -10,6 +10,7 @@ import { AlertTriangle, Calendar, HelpCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
+import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 export default function SubscriptionPage() {
   const t = useTranslations('tiers');
@@ -28,17 +29,11 @@ export default function SubscriptionPage() {
   return (
     <div className="space-y-6">
       {/* Header - Always visible */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {t('subscription.title', { defaultValue: 'My Plan' })}
-          </h2>
-          <p className="text-muted-foreground">
-            {t('subscription.description', { defaultValue: 'Manage your subscription and review your current usage' })}
-          </p>
-        </div>
-        <TierBadge tier={currentTier} size="lg" />
-      </div>
+      <TitleCardWithDepth
+        title={t('subscription.title', { defaultValue: 'My Plan' })}
+        description={t('subscription.description', { defaultValue: 'Manage your subscription and review your current usage' })}
+        actions={<TierBadge tier={currentTier} size="lg" />}
+      />
 
       {loading ? (
         <SubscriptionPageSkeleton />

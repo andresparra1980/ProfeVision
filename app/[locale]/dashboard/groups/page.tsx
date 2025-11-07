@@ -369,36 +369,6 @@ export default function GroupsPage() {
 
 
 
-  // 1. Handle Initial Professor Load (only if professor isn't loaded yet)
-  if (profesorLoading && !profesor) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // 2. Handle Professor Load Error
-  if (profesorError) {
-     return (
-      <div className="flex h-screen items-center justify-center text-center text-destructive">
-        {t('error.professorLoad')}: {profesorError.message}
-      </div>
-     );
-  }
-
-  // 3. Handle Logged Out / No Professor State
-  if (!profesor) {
-     // This should be hit after SIGNED_OUT and failed refresh
-     return (
-       <div className="flex h-screen items-center justify-center text-center text-muted-foreground">
-         {t('error.professorAuth')}
-       </div>
-     );
-  }
-
-  // 4. Professor is loaded, render the main content
-  //    Now, loading only refers to the local loading for groups/materias/etc.
   return (
     <div className="space-y-6">
       <TitleCardWithDepth
@@ -436,8 +406,24 @@ export default function GroupsPage() {
         }
       />
 
-      {/* Content Section - Spinner only depends on local 'loading' now */}
-      {loading ? (
+      {/* Handle professor loading/error states */}
+      {profesorError ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-10">
+            <div className="text-center text-destructive">
+              {t('error.professorLoad')}: {profesorError.message}
+            </div>
+          </CardContent>
+        </Card>
+      ) : !profesor && !profesorLoading ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-10">
+            <div className="text-center text-muted-foreground">
+              {t('error.professorAuth')}
+            </div>
+          </CardContent>
+        </Card>
+      ) : loading || profesorLoading ? (
         <GroupsPageSkeleton />
       ) : grupos.length === 0 ? (
         <Card>
