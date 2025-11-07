@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { Student } from '@/lib/types/database';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -21,11 +22,7 @@ const PDFGenerator = dynamic(
   () => import('@/components/exam/pdf-generator').then(mod => mod.PDFGenerator),
   {
     ssr: false,
-    loading: () => (
-      <div className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-        Loading...
-      </div>
-    )
+    loading: () => <Skeleton className="h-10 w-32" />
   }
 );
 

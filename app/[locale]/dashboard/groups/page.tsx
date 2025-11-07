@@ -4,21 +4,21 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ChevronLeft, TriangleAlert, Archive, Trash2 } from "lucide-react";
+import { ChevronLeft, Archive } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 import { Link } from "@/i18n/navigation";
 import type { Database } from "@/lib/types/database";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 import logger from "@/lib/utils/logger";
 import { AuthError } from "@supabase/supabase-js";
 import { GroupCard } from "./components/GroupCard";
 import { GroupFormModal } from "./components/GroupFormModal";
+import { DeleteGroupDialog } from "./components/DeleteGroupDialog";
+import { GroupsPageSkeleton } from "./components/GroupsPageSkeleton";
 import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 
 type Grupo = Database["public"]["Tables"]["grupos"]["Row"] & {
@@ -61,7 +61,6 @@ export default function GroupsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [groupNameToConfirmDelete, setGroupNameToConfirmDelete] = useState<string | null>(null);
-  const [typedGroupName, setTypedGroupName] = useState("");
   const { profesor, loading: profesorLoading, error: profesorError } = useProfesor();
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
 
@@ -332,31 +331,6 @@ export default function GroupsPage() {
     }
   };
 
-  const confirmDeleteGrupo = async () => {
-    if (!deletingId) return;
-    logger.log(`[GroupsPage] Attempting to delete group ID: ${deletingId}`);
-    try {
-      const { error } = await supabase
-        .from("grupos")
-        .delete()
-        .eq("id", deletingId);
-
-      if (error) throw error;
-      
-      toast.success(t('toast.deleteTitle'), {
-        description: t('toast.deleteDescription'),
-      });
-      
-      loadGrupos();
-    } catch (error: unknown) {
-      handleSupabaseError(t('error.deletingGroup'), error);
-    } finally {
-      setDeletingId(null);
-      setConfirmDelete(false);
-      setGroupNameToConfirmDelete(null);
-      setTypedGroupName("");
-    }
-  };
 
   const toggleArchivarGrupo = async (grupo: Grupo) => {
     logger.log(`[GroupsPage] Toggling archive state for group ID: ${grupo.id} to ${grupo.estado === 'activo' ? 'archivado' : 'activo'}`);
@@ -396,78 +370,69 @@ export default function GroupsPage() {
 
 
 
-  // 1. Handle Initial Professor Load (only if professor isn't loaded yet)
-  if (profesorLoading && !profesor) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // 2. Handle Professor Load Error
-  if (profesorError) {
-     return (
-      <div className="flex h-screen items-center justify-center text-center text-destructive">
-        {t('error.professorLoad')}: {profesorError.message}
-      </div>
-     );
-  }
-
-  // 3. Handle Logged Out / No Professor State
-  if (!profesor) {
-     // This should be hit after SIGNED_OUT and failed refresh
-     return (
-       <div className="flex h-screen items-center justify-center text-center text-muted-foreground">
-         {t('error.professorAuth')}
-       </div>
-     );
-  }
-
-  // 4. Professor is loaded, render the main content
-  //    Now, loading only refers to the local loading for groups/materias/etc.
   return (
     <div className="space-y-6">
       <TitleCardWithDepth
         title={t('title')}
         description={t('description')}
         actions={
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Button
-              variant="default"
-              onClick={() => setMostrarArchivados(!mostrarArchivados)}
-              className="bg-secondary text-primary-foreground dark:bg-secondary dark:text-white transition-colors w-full sm:w-auto"
-            >
-              {mostrarArchivados ? (
-                <>
-                  <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.showActive')}
-                </>
-              ) : (
-                <>
-                  <Archive className="mr-2 h-4 w-4" /> {t('buttons.showArchived')}
-                </>
-              )}
-            </Button>
-            <GroupFormModal
-              open={openDialog}
-              onOpenChangeAction={handleOpenChange}
-              editingGrupo={editingGrupo}
-              entidades={entidades}
-              materias={materias}
-              materiasFiltradas={materiasFiltradas}
-              onSubmitAction={onSubmit}
-              onSetMateriasFiltradasAction={setMateriasFiltradas}
-              mostrarArchivados={mostrarArchivados}
-            />
-          </div>
+          loading || profesorLoading ? (
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Skeleton className="h-10 w-full sm:w-40" />
+              <Skeleton className="h-10 w-full sm:w-32" />
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button
+                variant="default"
+                onClick={() => setMostrarArchivados(!mostrarArchivados)}
+                className="bg-secondary text-primary-foreground dark:bg-secondary dark:text-white transition-colors w-full sm:w-auto"
+              >
+                {mostrarArchivados ? (
+                  <>
+                    <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.showActive')}
+                  </>
+                ) : (
+                  <>
+                    <Archive className="mr-2 h-4 w-4" /> {t('buttons.showArchived')}
+                  </>
+                )}
+              </Button>
+              <GroupFormModal
+                open={openDialog}
+                onOpenChangeAction={handleOpenChange}
+                editingGrupo={editingGrupo}
+                entidades={entidades}
+                materias={materias}
+                materiasFiltradas={materiasFiltradas}
+                onSubmitAction={onSubmit}
+                onSetMateriasFiltradasAction={setMateriasFiltradas}
+                mostrarArchivados={mostrarArchivados}
+              />
+            </div>
+          )
         }
       />
 
-      {/* Content Section - Spinner only depends on local 'loading' now */}
-      {loading ? ( // Use the local loading state for the content spinner
-        <div className="flex h-40 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-        </div>
+      {/* Handle professor loading/error states */}
+      {profesorError ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-10">
+            <div className="text-center text-destructive">
+              {t('error.professorLoad')}: {profesorError.message}
+            </div>
+          </CardContent>
+        </Card>
+      ) : !profesor && !profesorLoading ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-10">
+            <div className="text-center text-muted-foreground">
+              {t('error.professorAuth')}
+            </div>
+          </CardContent>
+        </Card>
+      ) : loading || profesorLoading ? (
+        <GroupsPageSkeleton />
       ) : grupos.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-10">
@@ -498,87 +463,24 @@ export default function GroupsPage() {
         </div>
       )}
 
-      {/* Enhanced Delete Confirmation Dialog */}
-      <Dialog
+      {/* Delete Confirmation Dialog */}
+      <DeleteGroupDialog
         open={confirmDelete}
         onOpenChange={(isOpen) => {
           setConfirmDelete(isOpen);
           if (!isOpen) {
             setGroupNameToConfirmDelete(null);
-            setTypedGroupName("");
+            setDeletingId(null);
           }
         }}
-        modal={true}
-      >
-        <DialogContent
-          className="sm:max-w-md border-red-500 dark:border-red-700 shadow-xl rounded-lg bg-card dark:bg-background"
-          onCloseAutoFocus={(e) => {
-            // Prevent focus trap issues
-            e.preventDefault();
-          }}
-        >
-          <DialogHeader>
-            <DialogTitle className="text-red-600 dark:text-red-400 text-2xl font-bold flex items-center">
-              <TriangleAlert className="h-7 w-7 mr-2 text-red-600 dark:text-red-400" />
-              {t('deleteDialog.title')}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="text-gray-600 dark:text-white">
-          <p>
-                {t('deleteDialog.mainMessage')} {" "}
-                <span className="font-semibold">{groupNameToConfirmDelete || t('deleteDialog.selectedGroup')}</span>.
-              </p>
-              <p>
-                {t('deleteDialog.irreversible')} <span className="font-semibold uppercase">{t('deleteDialog.irreversibleText')}</span> {t('deleteDialog.resultingIn')}:
-              </p>
-              <ul className="list-disc list-inside ml-4 text-sm mt-2">
-                <li>{t('deleteDialog.consequence1')}</li>
-                <li>{t('deleteDialog.consequence2')}</li>
-                <li>{t('deleteDialog.consequence3')}</li>
-                <li>{t('deleteDialog.consequence4')}</li>
-              </ul>
-              <p className="mt-3">
-                {t('deleteDialog.confirmMessage')}
-              </p>
-              <p className="mt-3">
-                {t('deleteDialog.archiveAlternative')} <span className="font-semibold">{t('deleteDialog.archiveText')}</span> {t('deleteDialog.archiveReason')}
-              </p>
-          </div>
-          <div className="grid gap-3 py-3">
-            <Label htmlFor="group-confirm-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('deleteDialog.typePrompt')} &quot;<span className="font-semibold text-red-600 dark:text-red-400">{groupNameToConfirmDelete}</span>&quot; {t('deleteDialog.typeConfirm')}:
-            </Label>
-            <Input
-              id="group-confirm-name"
-              value={typedGroupName}
-              onChange={(e) => setTypedGroupName(e.target.value)}
-              placeholder={t('deleteDialog.placeholder')}
-              className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-red-500 focus:ring-red-500"
-              autoFocus
-            />
-          </div>
-          <DialogFooter className="mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setConfirmDelete(false);
-                setGroupNameToConfirmDelete(null);
-                setTypedGroupName("");
-              }}
-            >
-              {t('deleteDialog.cancel')}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDeleteGrupo}
-              disabled={typedGroupName !== groupNameToConfirmDelete}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              {t('deleteDialog.confirm')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        groupId={deletingId}
+        groupName={groupNameToConfirmDelete}
+        onSuccess={() => {
+          setDeletingId(null);
+          loadGrupos();
+        }}
+        onError={handleSupabaseError}
+      />
     </div>
   );
 } 

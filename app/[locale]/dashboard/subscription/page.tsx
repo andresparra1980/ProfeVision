@@ -5,11 +5,13 @@ import { TierBadge, SubscriptionTier } from "@/components/shared/tier-badge";
 import { UsageIndicator } from "@/components/shared/usage-indicator";
 import { PricingCard } from "@/components/shared/pricing-card";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { SubscriptionPageSkeleton } from "./components/SubscriptionPageSkeleton";
 import { AlertTriangle, Calendar, HelpCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
+import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SubscriptionPage() {
   const t = useTranslations('tiers');
@@ -22,35 +24,32 @@ export default function SubscriptionPage() {
     });
   };
 
-  if (loading) {
-    return <LoadingSpinner message={t('subscription.loading', { defaultValue: 'Loading subscription information...' })} />;
-  }
-
-  if (!usage) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-muted-foreground">{t('subscription.error', { defaultValue: 'Could not load subscription information' })}</p>
-      </div>
-    );
-  }
-
-  const isGrandfathered = usage.tier.name === "grandfathered";
-  const currentTier = usage.tier.name as SubscriptionTier;
+  const isGrandfathered = usage?.tier.name === "grandfathered";
+  const currentTier = (usage?.tier.name || "free") as SubscriptionTier;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {t('subscription.title', { defaultValue: 'My Plan' })}
-          </h2>
-          <p className="text-muted-foreground">
-            {t('subscription.description', { defaultValue: 'Manage your subscription and review your current usage' })}
-          </p>
+      {/* Header - Always visible */}
+      <TitleCardWithDepth
+        title={t('subscription.title', { defaultValue: 'My Plan' })}
+        description={t('subscription.description', { defaultValue: 'Manage your subscription and review your current usage' })}
+        actions={
+          loading ? (
+            <Skeleton className="h-7 w-20" />
+          ) : (
+            <TierBadge tier={currentTier} size="lg" />
+          )
+        }
+      />
+
+      {loading ? (
+        <SubscriptionPageSkeleton />
+      ) : !usage ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="text-muted-foreground">{t('subscription.error', { defaultValue: 'Could not load subscription information' })}</p>
         </div>
-        <TierBadge tier={currentTier} size="lg" />
-      </div>
+      ) : (
+        <>
 
       {/* Warning para usuarios grandfathered */}
       {isGrandfathered && (
@@ -159,6 +158,8 @@ export default function SubscriptionPage() {
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }
