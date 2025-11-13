@@ -1,9 +1,20 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { headers } from 'next/headers';
 import '@/styles/globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const ibmPlexSans = IBM_Plex_Sans({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-sans',
+  style: ['normal'],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: '500',
+  subsets: ['latin'],
+  variable: '--font-mono',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -35,7 +46,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`min-h-screen bg-background font-sans antialiased ${inter.className}`}
+        className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
         suppressHydrationWarning
       >
         {children}

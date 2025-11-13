@@ -6,6 +6,7 @@ import { RecentExamsList } from '@/components/dashboard/recent-exams-list';
 import { GradingStats } from '@/components/dashboard/grading-stats';
 import { TierUsageStats } from '@/components/dashboard/tier-usage-stats';
 import { useTranslations } from 'next-intl';
+import { logoFont } from '@/lib/fonts';
 
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
@@ -18,7 +19,7 @@ export default function DashboardPage() {
         description={
           <>
             {t('main.welcome1')}
-            <span className="text-secondary font-semibold">ProfeVision</span>
+            <span className={`text-secondary font-semibold ${logoFont}`}>ProfeVision</span>
             {t('main.welcome2')}
           </>
         }

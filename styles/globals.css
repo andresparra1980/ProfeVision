@@ -74,6 +74,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    line-height: 28px;
   }
   :root:not(.dark) main:not(.auth-main):not(.legal-main) {
     background-color: #f8f9fa !important;

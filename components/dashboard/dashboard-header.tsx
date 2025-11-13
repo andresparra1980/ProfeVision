@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTranslations } from 'next-intl';
+import { logoFont } from "@/lib/fonts";
 
 export default function DashboardHeader() {
   const { isCollapsed, isMobile } = useSidebar();
@@ -66,7 +67,7 @@ export default function DashboardHeader() {
         {/* Logo para móviles - siempre en el centro */}
         <span className="absolute left-1/2 transform -translate-x-1/2 text-xl font-bold text-secondary md:hidden">
             <div className="relative">
-              <span className="font-bold text-xl text-secondary dark:text-secondary">ProfeVision</span>
+              <span className={`font-bold text-xl text-secondary dark:text-secondary ${logoFont}`}>ProfeVision</span>
               <div className="absolute  -right-1 text-[8px] text-black dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
                 Beta
               </div>
@@ -77,7 +78,7 @@ export default function DashboardHeader() {
         {isCollapsed && !isMobile && (
           <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
             <div className="relative">
-              <span className="font-bold text-xl text-secondary dark:text-secondary">ProfeVision</span>
+              <span className={`font-bold text-xl text-secondary dark:text-secondary ${logoFont}`}>ProfeVision</span>
               <div className="absolute  -right-1 text-[8px] dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
                 Beta
               </div>

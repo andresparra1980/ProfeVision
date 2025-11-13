@@ -1,5 +1,6 @@
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
+import { logoFont } from '@/lib/fonts'
 
 export function SiteFooter() {
   const t = useTranslations('common')
@@ -11,10 +12,10 @@ export function SiteFooter() {
           <div className="col-span-1 md:col-span-2 lg:col-span-2 text-center md:text-left">
             <Link href="/" className="flex items-center gap-2 mb-3 hover:opacity-80 transition-opacity justify-center md:justify-start w-fit mx-auto md:mx-0" title={`ProfeVisión - ${t('navigation.home')}`}>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
-                <span className="font-bold text-white">PV</span>
+                <span className={`font-bold text-white ${logoFont}`}>PV</span>
               </div>
               <div className="relative">
-                <span className="font-bold text-secondary dark:text-white text-xl">ProfeVision</span>
+                <span className={`font-bold text-secondary dark:text-white text-xl ${logoFont}`}>ProfeVision</span>
                 <div className="absolute -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full leading-none">
                   Beta
                 </div>
@@ -162,7 +163,7 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="border-t mt-8 md:mt-12 pt-4 md:pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-xs text-muted-foreground">
+          <p className={`text-xs text-muted-foreground ${logoFont}`}>
             &copy; {new Date().getFullYear()} ProfeVision. {t('footer.copyright')}
           </p>
           <div className="flex gap-4 mt-2 md:mt-0">

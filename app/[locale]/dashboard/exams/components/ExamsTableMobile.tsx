@@ -457,7 +457,7 @@ export default function ExamsTableMobile({
         </div>
       ) : isMultiColumn ? (
         // Multi-column layout: always expanded
-        <div className="w-full grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 items-start auto-rows-min">
+        <div className="w-full grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 items-start auto-rows-min">
           {filteredExams.map((exam) => (
             <div
               key={exam.id}

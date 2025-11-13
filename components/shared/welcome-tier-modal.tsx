@@ -16,6 +16,7 @@ import { logger } from "@/lib/utils/logger";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { logoFont } from "@/lib/fonts";
 
 interface WelcomeTierModalProps {
   open: boolean;
@@ -91,7 +92,7 @@ export function WelcomeTierModal({
               <Sparkles className="h-8 w-8 text-white" />
             </div>
           </div>
-          <DialogTitle className="text-3xl">
+          <DialogTitle className={`text-3xl ${logoFont}`}>
             {t("welcome.title", { defaultValue: "Welcome to ProfeVision!" })}
           </DialogTitle>
           <DialogDescription className="text-base mt-2">

@@ -8,6 +8,7 @@ import { ModeToggle } from "@/components/shared/mode-toggle"
 import { LanguageSwitcher } from "@/components/shared/language-switcher"
 import { MainNavigation } from "@/components/shared/main-navigation"
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react"
+import { logoFont } from "@/lib/fonts"
 import { 
   BookOpen, 
   Brain, 
@@ -100,10 +101,10 @@ export function SiteHeader() {
         <div className="container flex h-16 items-center justify-between relative">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" title={`ProfeVisión - ${t('navigation.home')} | ${t('homepage.hero.title')}`}>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
-              <span className="font-bold text-white">PV</span>
+              <span className={`font-bold text-white ${logoFont}`}>PV</span>
             </div>
             <div className="relative">
-              <span className="font-bold text-xl text-secondary dark:text-white">ProfeVision</span>
+              <span className={`font-bold text-xl text-secondary dark:text-white ${logoFont}`}>ProfeVision</span>
               <div className="absolute -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full leading-none">
                 Beta
               </div>

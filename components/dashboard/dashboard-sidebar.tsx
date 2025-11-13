@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/sidebar-context';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTranslations } from 'next-intl';
+import { logoFont } from '@/lib/fonts';
 
 // Definir un tipo más específico para el usuario
 interface User {
@@ -128,7 +129,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
             {(!isCollapsed || isMobile) && (
               <Link href="/" className="hidden md:flex items-center space-x-2">
                 <div className="relative">
-                  <span className="font-bold text-xl text-secondary dark:text-secondary">ProfeVision</span>
+                  <span className={`font-bold text-xl text-secondary dark:text-secondary ${logoFont}`}>ProfeVision</span>
                   <div className="absolute  -right-1 text-[8px] dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
                     Beta
                   </div>
@@ -282,7 +283,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
               </div>
 
               <div className="border-t p-4">
-                <p className="text-xs text-card-foreground">
+                <p className={`text-xs text-card-foreground ${logoFont}`}>
                   &copy; {new Date().getFullYear()} ProfeVision
                 </p>
               </div>

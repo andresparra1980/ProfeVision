@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
@@ -37,6 +38,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations('dashboard');
   const tTiers = useTranslations('tiers');
   const locale = useLocale();
@@ -44,6 +46,9 @@ export default function DashboardLayout({
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { showWelcome, setShowWelcome } = useWelcomeModal();
+
+  // Pages that should use full width (not constrained to 1024px)
+  const isFullWidthPage = pathname?.includes('/grades');
 
   const handleLogout = async () => {
     let signOutError: Error | null = null;
@@ -154,7 +159,9 @@ export default function DashboardLayout({
           <DashboardHeader />
           <main className="flex-1 overflow-y-auto pl-2 pt-2 pr-2 pb-20 md:pb-2">
             <div className="bg-background dark:bg-background bg-graph-paper dark:bg-graph-paper-dark text-foreground rounded-2xl min-h-full p-4 md:p-6 shadow-sm">
-              {children}
+              <div className={isFullWidthPage ? "w-full" : "max-w-[1024px] mx-auto"}>
+                {children}
+              </div>
             </div>
           </main>
         </div>
