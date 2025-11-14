@@ -574,37 +574,50 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      // After running the script and before trying to find the processed image,
-      // add a small delay to allow the file system to update
-      if (DEBUG) {
-        logger.log(`[${requestId}] OMR script completed, waiting for file system updates...`);
-      }
+      // Handle the processed image path
+      // If using new service, the image was already saved; if using legacy, need to find it
+      let processedImagePath: string;
+      let processedFileName: string;
 
-      // Wait for a moment to let the file system catch up
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (normalizedResult.processed_image_path) {
+        // New service: image already saved, use the path from result
+        processedImagePath = normalizedResult.processed_image_path;
+        processedFileName = path.basename(processedImagePath);
 
-      // Handle the processed image path - the Python script appends "questions_detected.jpeg" to the original filename
-      const originalDir = path.dirname(filePath);
-      const originalFileNameWithoutExt = path.basename(filePath, `.${extension}`);
-      const processedFileName = `${originalFileNameWithoutExt}questions_detected.jpeg`;
-      const processedImagePath = path.join(originalDir, processedFileName);
-
-      // Check if the processed image exists
-      try {
-        await fs.access(processedImagePath);
         if (DEBUG) {
-          logger.log(`[${requestId}] Processed image found at:`, processedImagePath);
+          logger.log(`[${requestId}] Using processed image path from new service:`, processedImagePath);
         }
-      } catch (_error) {
+      } else {
+        // Legacy service: the Python script appends "questions_detected.jpeg" to the original filename
         if (DEBUG) {
-          logger.error(`[${requestId}] Processed image not found at expected path:`, processedImagePath);
+          logger.log(`[${requestId}] OMR script completed, waiting for file system updates...`);
         }
-        const { t } = await getApiTranslator(request, 'exams.process-scan');
-        return NextResponse.json({ 
-          success: false, 
-          error: t('errors.processedNotFound'),
-          error_details: { message: "No se pudo encontrar la imagen procesada" }
-        }, { status: 500 });
+
+        // Wait for a moment to let the file system catch up
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const originalDir = path.dirname(filePath);
+        const originalFileNameWithoutExt = path.basename(filePath, `.${extension}`);
+        processedFileName = `${originalFileNameWithoutExt}questions_detected.jpeg`;
+        processedImagePath = path.join(originalDir, processedFileName);
+
+        // Check if the processed image exists
+        try {
+          await fs.access(processedImagePath);
+          if (DEBUG) {
+            logger.log(`[${requestId}] Processed image found at:`, processedImagePath);
+          }
+        } catch (_error) {
+          if (DEBUG) {
+            logger.error(`[${requestId}] Processed image not found at expected path:`, processedImagePath);
+          }
+          const { t } = await getApiTranslator(request, 'exams.process-scan');
+          return NextResponse.json({
+            success: false,
+            error: t('errors.processedNotFound'),
+            error_details: { message: "No se pudo encontrar la imagen procesada" }
+          }, { status: 500 });
+        }
       }
 
       // Get public URLs for the images

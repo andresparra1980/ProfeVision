@@ -198,10 +198,10 @@ async def process_omr(
         logger.info(f"Processing image: {file.filename} ({len(file_content)} bytes)")
 
         # Initialize OMR processor
-        processor = StandaloneOMRProcessor(temp_file_path)
+        processor = StandaloneOMRProcessor(debug_mode=debug or ENABLE_DEBUG_IMAGES)
 
         # Process image
-        result = processor.process()
+        result = processor.process_image(temp_file_path)
 
         # Parse result
         if not result:
