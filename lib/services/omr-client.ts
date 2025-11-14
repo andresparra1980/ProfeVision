@@ -61,14 +61,21 @@ export interface OMRClientOptions {
  * Custom error class for OMR service errors
  */
 export class OMRServiceError extends Error {
+  public readonly statusCode?: number;
+  public readonly errorCode?: string;
+  public readonly details?: Record<string, unknown>;
+
   constructor(
     message: string,
-    public statusCode?: number,
-    public errorCode?: string,
-    public details?: Record<string, unknown>
+    statusCode?: number,
+    errorCode?: string,
+    details?: Record<string, unknown>
   ) {
     super(message);
     this.name = "OMRServiceError";
+    this.statusCode = statusCode;
+    this.errorCode = errorCode;
+    this.details = details;
   }
 }
 
