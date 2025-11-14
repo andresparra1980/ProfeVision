@@ -9,13 +9,9 @@ WORKDIR /app
 
 # Install system dependencies required for OpenCV and pyzbar
 RUN apt-get update && apt-get install -y \
-    # OpenCV dependencies
-    libgl1-mesa-glx \
+    # OpenCV dependencies (Debian 12/Bookworm compatible)
+    libgl1 \
     libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgomp1 \
     # pyzbar dependencies
     libzbar0 \
     # Build tools
@@ -36,14 +32,12 @@ WORKDIR /app
 
 # Install only runtime system dependencies (no build tools)
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
+    # OpenCV runtime dependencies (Debian 12/Bookworm compatible)
+    libgl1 \
     libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgomp1 \
+    # pyzbar runtime dependencies
     libzbar0 \
-    # Add curl for health checks
+    # Health check tool
     curl \
     && rm -rf /var/lib/apt/lists/*
 
