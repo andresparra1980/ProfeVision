@@ -7,9 +7,14 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import logger from '@/lib/utils/logger';
 import { getApiTranslator } from '@/i18n/api';
+import { processOMRImage, OMRServiceError } from '@/lib/services/omr-client';
 
 // Configure debug flag
 const DEBUG = process.env.NODE_ENV === 'development';
+
+// Feature flags for OMR service migration
+const USE_NEW_OMR_SERVICE = process.env.OMR_USE_NEW_SERVICE === 'true';
+const OMR_CANARY_PERCENTAGE = parseInt(process.env.OMR_CANARY_PERCENTAGE || '0', 10);
 
 // Promisify exec for cleaner async/await usage
 const execPromise = promisify(exec);
@@ -201,6 +206,93 @@ async function runEnvironmentDiagnostic() {
 // Run diagnostic on startup
 runEnvironmentDiagnostic();
 
+/**
+ * Process image using the new OMR HTTP service
+ * @param imageFile - Image file to process
+ * @returns OMR result
+ */
+async function processWithNewOMRService(imageFile: File | Blob): Promise<{
+  success: boolean;
+  qr_data?: string | null;
+  answers?: Array<{
+    number: number;
+    value: string | null;
+    confidence?: number;
+  }>;
+  processed_image?: string | null;
+  error?: string;
+  error_code?: string;
+}> {
+  try {
+    logger.log('[OMR] Using new HTTP service');
+
+    const result = await processOMRImage(imageFile, {
+      debug: DEBUG,
+    });
+
+    // Transform result to match expected format
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error || 'Processing failed',
+        error_code: result.error_code,
+      };
+    }
+
+    // Map answers to legacy format (with both snake_case and camelCase)
+    const mappedAnswers = result.answers?.map((ans) => ({
+      number: ans.number,
+      question_number: ans.number, // Legacy field
+      value: ans.value,
+      answer_value: ans.value || '', // Legacy field
+      confidence: ans.confidence,
+      num_options: ans.num_options,
+    })) || [];
+
+    return {
+      success: true,
+      qr_data: result.qr_data || null,
+      answers: mappedAnswers,
+      processed_image: result.processed_image || null,
+    };
+  } catch (error) {
+    logger.error('[OMR] Error with new service:', error);
+
+    if (error instanceof OMRServiceError) {
+      return {
+        success: false,
+        error: error.message,
+        error_code: error.errorCode,
+      };
+    }
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      error_code: 'INTERNAL_ERROR',
+    };
+  }
+}
+
+/**
+ * Determine whether to use the new OMR service
+ * Based on feature flag and canary percentage
+ */
+function shouldUseNewService(): boolean {
+  // If explicitly enabled, use it
+  if (USE_NEW_OMR_SERVICE) {
+    return true;
+  }
+
+  // If canary percentage is set, use probabilistic routing
+  if (OMR_CANARY_PERCENTAGE > 0) {
+    const random = Math.random() * 100;
+    return random < OMR_CANARY_PERCENTAGE;
+  }
+
+  return false;
+}
+
 // Function to parse and normalize QR data
 function normalizeQRData(qrData: string | Record<string, unknown>): Record<string, unknown> {
   // If QR data is already properly structured, return it
@@ -346,10 +438,63 @@ export async function POST(request: NextRequest) {
         : request.nextUrl.origin;
     
     const _fullPublicUrl = new URL(publicPath, baseUrl).toString();
-    
+
     try {
-      // Process the image using the Python OMR script
-      const omrResult = await runOMRScript(filePath, jobId);
+      // Determine which OMR processing method to use
+      const useNewService = shouldUseNewService();
+
+      if (DEBUG) {
+        logger.log(`[${requestId}] Using ${useNewService ? 'NEW HTTP' : 'LEGACY Python'} service`);
+      }
+
+      let omrResult: OMRResult;
+
+      if (useNewService) {
+        // Process with new HTTP service
+        try {
+          const blob = new Blob([fileBuffer], { type: scan.type });
+          const serviceResult = await processWithNewOMRService(blob);
+
+          if (!serviceResult.success) {
+            // Fallback to legacy if new service fails
+            logger.warn('[OMR] New service failed, falling back to legacy');
+            omrResult = await runOMRScript(filePath, jobId);
+          } else {
+            // Transform service result to OMRResult format
+            omrResult = {
+              qr_data: serviceResult.qr_data,
+              answers: serviceResult.answers || [],
+            };
+
+            // Store processed image from base64 if available
+            if (serviceResult.processed_image) {
+              // Extract base64 data (remove data:image/jpeg;base64, prefix)
+              const base64Data = serviceResult.processed_image.replace(/^data:image\/\w+;base64,/, '');
+              const imageBuffer = Buffer.from(base64Data, 'base64');
+
+              // Save processed image to disk
+              const originalFileNameWithoutExt = path.basename(filePath, `.${extension}`);
+              const processedFileName = `${originalFileNameWithoutExt}questions_detected.jpeg`;
+              const processedImagePath = path.join(uploadsDir, processedFileName);
+
+              await fs.writeFile(processedImagePath, imageBuffer);
+
+              omrResult.processed_image_path = processedImagePath;
+
+              if (DEBUG) {
+                logger.log(`[${requestId}] Saved processed image from HTTP service:`, processedImagePath);
+              }
+            }
+          }
+        } catch (httpError) {
+          // Fallback to legacy on error
+          logger.error('[OMR] HTTP service error, falling back to legacy:', httpError);
+          omrResult = await runOMRScript(filePath, jobId);
+        }
+      } else {
+        // Process with legacy Python script
+        omrResult = await runOMRScript(filePath, jobId);
+      }
       
       // If we got here, the script executed successfully
       if (DEBUG) {
