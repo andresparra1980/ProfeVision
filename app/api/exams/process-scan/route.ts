@@ -684,7 +684,7 @@ export async function POST(request: NextRequest) {
       }
       
       // Return success response with URLs and results
-      return NextResponse.json({
+      const response: Record<string, unknown> = {
         success: true,
         result: {
           ...normalizedResult,
@@ -694,8 +694,20 @@ export async function POST(request: NextRequest) {
           student_info: normalizedResult.student_info
         },
         publicUrl: _fullPublicUrl,
-        processedImageUrl: processedPublicUrl
-      });
+      };
+
+      // In Vercel, include base64 image since /uploads directory doesn't exist
+      // In VPS, include public URL to the uploaded file
+      if (isVercel && omrResult.processed_image_base64) {
+        response.processedImage = omrResult.processed_image_base64; // Base64 data URL
+        if (DEBUG) {
+          logger.log(`[${requestId}] Including base64 processed image for Vercel (${omrResult.processed_image_base64.length} chars)`);
+        }
+      } else {
+        response.processedImageUrl = processedPublicUrl; // Public URL
+      }
+
+      return NextResponse.json(response);
       
     } catch (error) {
       // Log error and return error response
