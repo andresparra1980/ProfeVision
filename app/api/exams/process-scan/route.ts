@@ -670,25 +670,12 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Get public URLs for the images
-      const processedPublicPath = `/uploads/omr/${processedFileName}`;
-      
-      // Add a timestamp to the processed URL to ensure it's unique
-      const timestamp = Date.now();
-      const processedPublicPathWithTimestamp = `${processedPublicPath}?t=${timestamp}`;
-      const processedPublicUrl = new URL(processedPublicPathWithTimestamp, request.nextUrl.origin).toString();
-      
-      if (DEBUG) {
-        logger.log(`[${requestId}] Original URL: ${_fullPublicUrl}`);
-        logger.log(`[${requestId}] Processed URL with timestamp: ${processedPublicUrl}`);
-      }
-      
-      // Return success response with URLs and results
+      // Build response
       const response: Record<string, unknown> = {
         success: true,
         result: {
           ...normalizedResult,
-          qr_data: normalizedResult.qr_data, // Ensure QR data is included at the correct level
+          qr_data: normalizedResult.qr_data,
           answers: normalizedResult.answers,
           processed_image_path: processedImagePath,
           student_info: normalizedResult.student_info
@@ -697,14 +684,26 @@ export async function POST(request: NextRequest) {
       };
 
       // In Vercel, include base64 image since /uploads directory doesn't exist
-      // In VPS, include public URL to the uploaded file
+      // In VPS, construct and include public URL to the uploaded file
       if (isVercel && omrResult.processed_image_base64) {
-        response.processedImage = omrResult.processed_image_base64; // Base64 data URL
+        // Vercel: Return base64 directly
+        response.processedImage = omrResult.processed_image_base64;
         if (DEBUG) {
           logger.log(`[${requestId}] Including base64 processed image for Vercel (${omrResult.processed_image_base64.length} chars)`);
         }
       } else {
-        response.processedImageUrl = processedPublicUrl; // Public URL
+        // VPS: Construct public URL
+        const processedPublicPath = `/uploads/omr/${processedFileName}`;
+        const timestamp = Date.now();
+        const processedPublicPathWithTimestamp = `${processedPublicPath}?t=${timestamp}`;
+        const processedPublicUrl = new URL(processedPublicPathWithTimestamp, request.nextUrl.origin).toString();
+
+        response.processedImageUrl = processedPublicUrl;
+
+        if (DEBUG) {
+          logger.log(`[${requestId}] Original URL: ${_fullPublicUrl}`);
+          logger.log(`[${requestId}] Processed URL with timestamp: ${processedPublicUrl}`);
+        }
       }
 
       return NextResponse.json(response);
