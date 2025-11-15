@@ -60,11 +60,31 @@ function runTectonic(cwd: string, jobName: string): Promise<{ code: number; stdo
   });
 }
 
+/**
+ * Sanitize filename to only include ASCII-safe characters
+ * HTTP headers cannot contain special characters like ñ, á, etc.
+ */
+function sanitizeFilename(filename: string): string {
+  return filename
+    .normalize("NFD") // Decompose accented characters
+    .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+    .replace(/[^a-zA-Z0-9-_]/g, "-") // Replace non-alphanumeric with dash
+    .replace(/-+/g, "-") // Replace multiple dashes with single dash
+    .replace(/^-|-$/g, "") // Remove leading/trailing dashes
+    .substring(0, 100) // Limit length
+    || "exam"; // Fallback if empty
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const tex: string = body?.tex ?? "";
-    const jobName: string = body?.options?.jobName ?? "exam";
+    const rawJobName: string = body?.options?.jobName ?? "exam";
+
+    // Sanitize filename to prevent header errors with special characters
+    const jobName = sanitizeFilename(rawJobName);
+
+    logger.log(`[LaTeX] Compiling: ${rawJobName} → ${jobName}`);
 
     if (!tex || typeof tex !== "string") {
       return NextResponse.json({ error: "Body.tex requerido" }, { status: 400 });
