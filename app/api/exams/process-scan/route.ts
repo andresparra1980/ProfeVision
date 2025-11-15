@@ -9,6 +9,10 @@ import logger from '@/lib/utils/logger';
 import { getApiTranslator } from '@/i18n/api';
 import { processOMRImage, OMRServiceError } from '@/lib/services/omr-client';
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 10; // Vercel Free tier limit (10s)
+// For Pro tier: export const maxDuration = 60;
+
 // Configure debug flag
 const DEBUG = process.env.NODE_ENV === 'development' || process.env.ENABLE_OMR_DEBUG === 'true';
 

@@ -7,6 +7,8 @@ import { compileLatex, LaTeXServiceError } from "@/lib/services/latex-client";
 import logger from "@/lib/utils/logger";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 10; // Vercel Free tier limit (10s)
+// For Pro tier: export const maxDuration = 60;
 
 // Feature flag for LaTeX service migration
 const USE_NEW_LATEX_SERVICE = process.env.LATEX_USE_NEW_SERVICE === 'true';
