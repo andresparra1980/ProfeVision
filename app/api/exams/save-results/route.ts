@@ -53,13 +53,12 @@ async function compressImage(
         limitInputPixels: 0, // Sin límite de píxeles
       });
 
-      // Si es la imagen original, rotarla 90 grados a la derecha para corregir la orientación
-      if (isOriginal) {
-        sharpInstance.rotate(90);
-        if (DEBUG)
-          logger.log(
-            "Aplicando rotación de 90° a imagen original para corregir orientación"
-          );
+      // Rotar automáticamente según metadatos EXIF
+      // rotate() sin argumentos respeta la orientación EXIF de la imagen
+      sharpInstance.rotate();
+
+      if (DEBUG && isOriginal) {
+        logger.log("Aplicando auto-rotación según EXIF para imagen original");
       }
 
       // Redimensionar si es muy grande
