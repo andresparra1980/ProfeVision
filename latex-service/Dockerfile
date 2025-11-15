@@ -13,12 +13,12 @@ RUN apt-get update && apt-get install -y \
     # Download tools
     curl \
     ca-certificates \
-    # Runtime dependencies for Tectonic
+    # Runtime dependencies for Tectonic (Debian 12/Bookworm compatible)
     libfontconfig1 \
     libgraphite2-3 \
     libharfbuzz0b \
-    libicu72 \
-    libpng16-16 \
+    libicu-dev \
+    libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Tectonic
@@ -46,12 +46,10 @@ WORKDIR /app
 
 # Install only runtime system dependencies (no build tools)
 RUN apt-get update && apt-get install -y \
-    # Runtime dependencies for Tectonic
+    # Runtime dependencies for Tectonic (Debian 12/Bookworm compatible)
     libfontconfig1 \
     libgraphite2-3 \
     libharfbuzz0b \
-    libicu72 \
-    libpng16-16 \
     # Health check tool
     curl \
     && rm -rf /var/lib/apt/lists/*

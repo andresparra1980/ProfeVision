@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Optional
 
 import aiofiles
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
@@ -209,7 +209,7 @@ async def root():
     }
 
 
-@app.post("/compile", dependencies=[verify_api_key])
+@app.post("/compile", dependencies=[Depends(verify_api_key)])
 async def compile_latex(request: CompileRequest):
     """
     Compile LaTeX source code to PDF
