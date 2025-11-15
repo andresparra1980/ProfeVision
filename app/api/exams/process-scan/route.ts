@@ -462,8 +462,14 @@ export async function POST(request: NextRequest) {
           } else {
             // Transform service result to OMRResult format
             omrResult = {
-              qr_data: serviceResult.qr_data,
-              answers: serviceResult.answers || [],
+              qr_data: serviceResult.qr_data ?? undefined,
+              answers: (serviceResult.answers || []).map(ans => ({
+                question_number: ans.number,
+                answer_value: ans.value ?? '',
+                confidence: ans.confidence,
+                number: ans.number,
+                value: ans.value ?? '',
+              })),
             };
 
             // Store processed image from base64 if available
