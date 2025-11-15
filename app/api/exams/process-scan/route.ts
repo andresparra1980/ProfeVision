@@ -30,6 +30,7 @@ interface OMRResult {
   }>;
   processed_image_path?: string;
   processedImagePath?: string;
+  processed_image_base64?: string; // Base64 image for Vercel (where files in /tmp are not publicly accessible)
   original_image_path?: string;
   originalImagePath?: string;
   qr_data?: string | Record<string, unknown>;
@@ -120,11 +121,24 @@ async function runOMRScript(imagePath: string, _unused: string): Promise<OMRResu
 // Ensure uploads directory exists
 async function ensureUploadsDirectory() {
   const cwd = process.cwd();
-  const publicUploadsDir = path.join(cwd, 'public', 'uploads', 'omr');
-  
+
+  // Vercel sets VERCEL=1 automatically in their environment
+  // Use /tmp in Vercel (serverless, read-only filesystem)
+  // Use public/uploads in VPS/local (persistent filesystem)
+  const isVercel = process.env.VERCEL === '1';
+
+  const uploadsDir = isVercel
+    ? path.join('/tmp', 'omr-uploads')
+    : path.join(cwd, 'public', 'uploads', 'omr');
+
   try {
-    await fs.mkdir(publicUploadsDir, { recursive: true });
-    return publicUploadsDir;
+    await fs.mkdir(uploadsDir, { recursive: true });
+
+    if (DEBUG) {
+      logger.log(`Using uploads directory: ${uploadsDir} (environment: ${isVercel ? 'Vercel/tmp' : 'VPS/public'})`);
+    }
+
+    return uploadsDir;
   } catch (error) {
     logger.error('Error creating uploads directory:', error);
     throw error;
@@ -442,9 +456,11 @@ export async function POST(request: NextRequest) {
     try {
       // Determine which OMR processing method to use
       const useNewService = shouldUseNewService();
+      const isVercel = process.env.VERCEL === '1';
 
       if (DEBUG) {
         logger.log(`[${requestId}] Using ${useNewService ? 'NEW HTTP' : 'LEGACY Python'} service`);
+        logger.log(`[${requestId}] Environment: ${isVercel ? 'Vercel (serverless)' : 'VPS/Local'}`);
       }
 
       let omrResult: OMRResult;
@@ -456,7 +472,12 @@ export async function POST(request: NextRequest) {
           const serviceResult = await processWithNewOMRService(blob);
 
           if (!serviceResult.success) {
-            // Fallback to legacy if new service fails
+            // Fallback to legacy only if NOT on Vercel (no Python available there)
+            if (isVercel) {
+              logger.error('[OMR] New service failed on Vercel, no fallback available');
+              throw new Error(`OMR service failed: ${serviceResult.error || 'Unknown error'}`);
+            }
+
             logger.warn('[OMR] New service failed, falling back to legacy');
             omrResult = await runOMRScript(filePath, jobId);
           } else {
@@ -487,18 +508,37 @@ export async function POST(request: NextRequest) {
 
               omrResult.processed_image_path = processedImagePath;
 
+              // In Vercel, also include base64 since files in /tmp are not publicly accessible
+              // In VPS, this is optional but can be useful for immediate display
+              if (isVercel) {
+                omrResult.processed_image_base64 = serviceResult.processed_image;
+              }
+
               if (DEBUG) {
                 logger.log(`[${requestId}] Saved processed image from HTTP service:`, processedImagePath);
+                if (isVercel) {
+                  logger.log(`[${requestId}] Including base64 image in response (Vercel environment)`);
+                }
               }
             }
           }
         } catch (httpError) {
-          // Fallback to legacy on error
+          // Fallback to legacy only if NOT on Vercel
+          if (isVercel) {
+            logger.error('[OMR] HTTP service error on Vercel, no fallback available:', httpError);
+            throw httpError;
+          }
+
           logger.error('[OMR] HTTP service error, falling back to legacy:', httpError);
           omrResult = await runOMRScript(filePath, jobId);
         }
       } else {
-        // Process with legacy Python script
+        // Process with legacy Python script (not available on Vercel)
+        if (isVercel) {
+          const { t } = await getApiTranslator(request, 'exams.process-scan');
+          throw new Error(t('OMR legacy service not available on Vercel. Set OMR_USE_NEW_SERVICE=true'));
+        }
+
         omrResult = await runOMRScript(filePath, jobId);
       }
       
