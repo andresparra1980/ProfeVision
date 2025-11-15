@@ -10,7 +10,7 @@ import { getApiTranslator } from '@/i18n/api';
 import { processOMRImage, OMRServiceError } from '@/lib/services/omr-client';
 
 // Configure debug flag
-const DEBUG = process.env.NODE_ENV === 'development';
+const DEBUG = process.env.NODE_ENV === 'development' || process.env.ENABLE_OMR_DEBUG === 'true';
 
 // Feature flags for OMR service migration
 const USE_NEW_OMR_SERVICE = process.env.OMR_USE_NEW_SERVICE === 'true';

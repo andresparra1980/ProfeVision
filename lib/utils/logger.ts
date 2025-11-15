@@ -3,8 +3,8 @@
  * Only outputs logs in development mode to avoid exposing sensitive data in production
  */
 
-// Check if we're in development mode
-const IS_DEV = process.env.NODE_ENV === "development";
+// Check if we're in development mode or debug is explicitly enabled
+const IS_DEV = process.env.NODE_ENV === "development" || process.env.ENABLE_DEBUG_LOGS === "true";
 
 /**
  * Función auxiliar segura que encapsula console para evitar errores de linting
