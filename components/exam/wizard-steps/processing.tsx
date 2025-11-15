@@ -188,8 +188,8 @@ export function Processing() {
             qrData: normalizedQrData,
             responseKeys: Object.keys(data),
             resultKeys: data.result ? Object.keys(data.result) : [],
+            processedImage: data.processedImage ? 'base64 present' : null,
             processedImageUrl: data.processedImageUrl,
-            processedImagePath: data.result?.processed_image_path,
             originalImagePath: data.result?.original_image_path || data.publicUrl
           };
           logger.log('API Response debug info:', debugInfo);
@@ -208,18 +208,18 @@ export function Processing() {
           data: normalizedQrData
         });
         
-        // Determine processed image URL - prefer the direct URL from API response
-        const processedImg = data.processedImageUrl || 
-                             data.result?.processed_image_path || 
+        // Determine processed image URL - prefer base64 (Vercel) or URL (VPS) from API response
+        const processedImg = data.processedImage ||    // Vercel: base64 image
+                             data.processedImageUrl || // VPS: public URL
                              '';
                              
         if (DEBUG) {
           logger.log('Using processed image URL:', processedImg);
           logger.log('Original image URL:', processedImageData);
-          // Log the extracted processedImageUrl from response data
-          logger.log('processedImageUrl from API:', {
-            directUrl: data.processedImageUrl,
-            fromResult: data.result?.processed_image_path,
+          // Log the extracted processedImage/URL from response data
+          logger.log('processedImage from API:', {
+            base64: data.processedImage ? `base64 (${data.processedImage.substring(0, 50)}...)` : null,
+            urlVPS: data.processedImageUrl,
             publicUrl: data.publicUrl,
             responseKeys: Object.keys(data)
           });
@@ -230,11 +230,11 @@ export function Processing() {
           answers: data.result?.answers || data.answers || {},
           originalImage: processedImageData,
           // Force use different URL for processed image to avoid using the same image
-          processedImage: (processedImg && processedImg !== processedImageData) 
-                          ? processedImg 
+          processedImage: (processedImg && processedImg !== processedImageData)
+                          ? processedImg
                           : (data.publicUrl && data.publicUrl !== processedImageData)
                             ? data.publicUrl
-                            : data.result?.processed_image_path || '',
+                            : '',
         };
         
         if (DEBUG) {
