@@ -435,12 +435,35 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   // Función para cargar imagen desde URL y convertirla a base64
   const loadImageAsBase64 = async (url: string): Promise<string> => {
     try {
-      // Si ya es un data URL, devolverlo directamente
+      // Si ya es un data URL, convertirlo a blob y comprimirlo
       if (url.startsWith('data:')) {
         if (DEBUG) {
-          logger.log('La imagen ya es un data URL, devolviéndola directamente');
+          logger.log('La imagen ya es un data URL, comprimiéndola...');
         }
-        return url;
+
+        // Convertir data URL a blob
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        if (DEBUG) {
+          logger.log('Data URL original:', blob.size, 'bytes');
+        }
+
+        // Comprimir
+        const compressedBlob = await compressImage(blob);
+
+        if (DEBUG) {
+          logger.log('Data URL comprimida:', compressedBlob.size, 'bytes',
+                    `(${((compressedBlob.size / blob.size) * 100).toFixed(1)}%)`);
+        }
+
+        // Convertir a base64
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error('Error al leer el archivo'));
+          reader.readAsDataURL(compressedBlob);
+        });
       }
       
       if (DEBUG) {
@@ -516,20 +539,36 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         return new Promise((resolve, reject) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
-          
+
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            
+
+            // Escalar la imagen si es muy grande (mismo límite que compressImage)
+            let width = img.width;
+            let height = img.height;
+            const maxSize = 800;
+
+            if (width > maxSize || height > maxSize) {
+              if (width > height) {
+                height = Math.round((height * maxSize) / width);
+                width = maxSize;
+              } else {
+                width = Math.round((width * maxSize) / height);
+                height = maxSize;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
             const ctx = canvas.getContext('2d');
             if (!ctx) {
               reject(new Error('No se pudo obtener contexto de canvas'));
               return;
             }
-            
-            ctx.drawImage(img, 0, 0);
-            resolve(canvas.toDataURL('image/jpeg', 0.7));
+
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.8)); // 80% - misma calidad que backend
           };
           
           img.onerror = () => {
@@ -593,8 +632,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         // Dibujar la imagen en el canvas con el nuevo tamaño
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convertir a Blob con calidad reducida
-        // Reducir calidad a 60% para evitar exceder límite de Vercel (4.5MB)
+        // Convertir a Blob con calidad 80% (igual que backend con WebP)
         canvas.toBlob(
           (result) => {
             if (result) {
@@ -604,7 +642,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             }
           },
           'image/jpeg',
-          0.6 // Reducido de 0.7 a 0.6 (60%) para Vercel
+          0.8 // 80% - misma calidad que backend usa para WebP
         );
       };
       
