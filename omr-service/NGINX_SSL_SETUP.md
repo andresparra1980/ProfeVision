@@ -10,6 +10,26 @@ Esta guía te ayudará a configurar el servicio OMR con un subdominio seguro usa
 - **Rate limiting**: 10 req/s por IP
 - **Puerto expuesto**: Solo 80 y 443 (Nginx)
 
+## 📁 Archivos de Configuración de Nginx
+
+Hay **dos archivos** de configuración de Nginx en este directorio:
+
+1. **`nginx-omr-service-precertbot.conf`** ⭐ **USA ESTE PRIMERO**
+   - Configuración inicial SIN SSL
+   - Úsalo ANTES de ejecutar Certbot
+   - Solo escucha en puerto 80 (HTTP)
+
+2. **`nginx-omr-service.conf`** 📖 Solo referencia
+   - Configuración completa CON SSL
+   - Solo para referencia de cómo se ve después de Certbot
+   - **NO lo uses directamente** (causará error porque los certificados no existen todavía)
+
+**Proceso correcto:**
+1. Copiar `nginx-omr-service-precertbot.conf` → Nginx
+2. Ejecutar Certbot
+3. Certbot modifica el archivo automáticamente y agrega SSL
+4. El resultado final será similar a `nginx-omr-service.conf`
+
 ## 📋 Prerrequisitos
 
 Antes de empezar, asegúrate de tener:
@@ -69,7 +89,9 @@ sudo systemctl status nginx
 sudo systemctl enable nginx
 ```
 
-## 📝 Paso 3: Copiar Configuración de Nginx
+## 📝 Paso 3: Copiar Configuración Inicial de Nginx (Sin SSL)
+
+**IMPORTANTE:** Usa el archivo `nginx-omr-service-precertbot.conf` que NO tiene las líneas SSL todavía. Certbot las agregará automáticamente después.
 
 En el servidor, ve al directorio del proyecto:
 
@@ -77,11 +99,11 @@ En el servidor, ve al directorio del proyecto:
 cd ~/profevision/omr-service
 ```
 
-Copia la configuración de Nginx:
+Copia la configuración inicial de Nginx (PRE-CERTBOT):
 
 ```bash
-# Copiar archivo de configuración
-sudo cp nginx-omr-service.conf /etc/nginx/sites-available/omr-service.profevision.com
+# Copiar archivo de configuración INICIAL (sin SSL)
+sudo cp nginx-omr-service-precertbot.conf /etc/nginx/sites-available/omr-service.profevision.com
 
 # Crear enlace simbólico para habilitar el sitio
 sudo ln -s /etc/nginx/sites-available/omr-service.profevision.com /etc/nginx/sites-enabled/
@@ -95,6 +117,17 @@ sudo nginx -t
 ```
 nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+
+Si ves este error, es porque usaste el archivo equivocado:
+```
+cannot load certificate "/etc/letsencrypt/live/omr-service.profevision.com/fullchain.pem"
+```
+Solución: Usa `nginx-omr-service-precertbot.conf` en lugar de `nginx-omr-service.conf`.
+
+```bash
+# Recargar Nginx
+sudo systemctl reload nginx
 ```
 
 ## 🔐 Paso 4: Obtener Certificado SSL con Let's Encrypt
@@ -119,6 +152,14 @@ Successfully received certificate.
 Certificate is saved at: /etc/letsencrypt/live/omr-service.profevision.com/fullchain.pem
 Key is saved at:         /etc/letsencrypt/live/omr-service.profevision.com/privkey.pem
 ```
+
+**¿Qué hace Certbot?**
+1. Genera los certificados SSL en `/etc/letsencrypt/live/omr-service.profevision.com/`
+2. **Modifica automáticamente** el archivo de Nginx para agregar las líneas SSL
+3. Agrega la redirección HTTP → HTTPS
+4. Configura renovación automática
+
+**Nota:** Después de que Certbot termine, tu archivo de configuración se verá similar a `nginx-omr-service.conf` (el archivo con SSL completo que está en el repo como referencia).
 
 ## 🔄 Paso 5: Recargar Nginx
 
