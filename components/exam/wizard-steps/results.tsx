@@ -568,8 +568,9 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         // Escalar la imagen si es muy grande
         let width = img.width;
         let height = img.height;
-        const maxSize = 1200; // Tamaño máximo en píxeles
-        
+        // Reducir más el tamaño en Vercel para evitar límite de 4.5MB en request body
+        const maxSize = 800; // Reducido de 1200 a 800px para Vercel
+
         if (width > maxSize || height > maxSize) {
           if (width > height) {
             height = Math.round((height * maxSize) / width);
@@ -579,20 +580,21 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             height = maxSize;
           }
         }
-        
+
         canvas.width = width;
         canvas.height = height;
-        
+
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           reject(new Error('No se pudo obtener el contexto del canvas'));
           return;
         }
-        
+
         // Dibujar la imagen en el canvas con el nuevo tamaño
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // Convertir a Blob con calidad reducida
+        // Reducir calidad a 60% para evitar exceder límite de Vercel (4.5MB)
         canvas.toBlob(
           (result) => {
             if (result) {
@@ -602,7 +604,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             }
           },
           'image/jpeg',
-          0.7 // Calidad del 70%
+          0.6 // Reducido de 0.7 a 0.6 (60%) para Vercel
         );
       };
       
@@ -740,7 +742,22 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
               console.error('Detalles del error:', errorData.details);
             }
           } catch (parseError) {
-            console.error('Error al parsear respuesta de error:', parseError);
+            // Si no es JSON, intentar leer como texto
+            try {
+              const errorText = await response.text();
+              console.error('Error del servidor (texto):', errorText);
+              console.error('Status code:', response.status);
+
+              // Mensajes específicos según status code
+              if (response.status === 413) {
+                errorMessage = 'Imagen demasiado grande. Intenta con una imagen más pequeña.';
+              } else if (errorText) {
+                errorMessage = `Error ${response.status}: ${errorText.substring(0, 100)}`;
+              }
+            } catch {
+              console.error('Error al parsear respuesta de error:', parseError);
+              errorMessage = `Error ${response.status}: ${errorMessage}`;
+            }
           }
           throw new Error(errorMessage);
         }

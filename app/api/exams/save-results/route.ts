@@ -8,6 +8,10 @@ import { getApiTranslator } from '@/i18n/api';
 import TierService from '@/lib/services/tier-service';
 import { createAdminSupabaseClient } from '@/lib/supabase/server';
 
+// Configuración de Vercel
+export const dynamic = "force-dynamic";
+export const maxDuration = 10; // Vercel Free tier limit (10s)
+
 const DEBUG = process.env.NODE_ENV === "development";
 
 // Configuración para el bucket S3
