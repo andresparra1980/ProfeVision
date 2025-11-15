@@ -1,0 +1,57 @@
+services:
+  omr-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: profevision-omr
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"  # Solo accesible desde localhost (Nginx reverse proxy)
+    environment:
+      # Server configuration
+      - PORT=8000
+      - HOST=0.0.0.0
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+
+      # Security
+      - API_KEY=${API_KEY}
+
+      # Image processing
+      - MAX_IMAGE_SIZE_MB=${MAX_IMAGE_SIZE_MB:-10}
+      - ENABLE_DEBUG_IMAGES=${ENABLE_DEBUG_IMAGES:-false}
+
+      # CORS
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+
+    env_file:
+      - .env
+
+    volumes:
+      # Optional: persist logs
+      - ./logs:/app/logs
+      # Optional: mount temp directory
+      - ./temp:/app/temp
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    networks:
+      - profevision-net
+
+    # Resource limits (adjust based on your server capacity)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  profevision-net:
+    driver: bridge
