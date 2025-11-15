@@ -1,0 +1,21 @@
+[Unit]
+Description=ProfeVision OMR Service (Docker Compose)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# IMPORTANTE: Cambiar YOUR_USER por tu usuario del servidor
+WorkingDirectory=/home/YOUR_USER/profevision/omr-service
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
+TimeoutStartSec=0
+
+# Restart on failure
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
