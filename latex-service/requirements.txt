@@ -1,0 +1,16 @@
+# ProfeVision LaTeX Service - Python Dependencies
+
+# Web framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.17
+
+# Async support
+aiofiles==24.1.0
+
+# Validation
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# HTTP client (for health checks, if needed)
+httpx==0.28.1

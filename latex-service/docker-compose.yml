@@ -1,0 +1,56 @@
+services:
+  latex-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: profevision-latex
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8001:8001"  # Solo accesible desde localhost (Nginx reverse proxy)
+    environment:
+      # Server configuration
+      - PORT=8001
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+
+      # Security
+      - API_KEY=${API_KEY}
+
+      # LaTeX compilation limits
+      - MAX_TEX_SIZE_MB=${MAX_TEX_SIZE_MB:-1}
+      - COMPILE_TIMEOUT_SEC=${COMPILE_TIMEOUT_SEC:-60}
+
+      # CORS
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+
+    env_file:
+      - .env
+
+    volumes:
+      # Optional: persist logs
+      - ./logs:/app/logs
+      # Optional: mount temp directory
+      - ./temp:/app/temp
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    networks:
+      - profevision-net
+
+    # Resource limits (adjust based on your server capacity)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  profevision-net:
+    driver: bridge

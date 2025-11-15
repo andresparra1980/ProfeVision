@@ -3,8 +3,14 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { spawn } from "child_process";
+import { compileLatex, LaTeXServiceError } from "@/lib/services/latex-client";
+import logger from "@/lib/utils/logger";
 
 export const dynamic = "force-dynamic";
+
+// Feature flag for LaTeX service migration
+const USE_NEW_LATEX_SERVICE = process.env.LATEX_USE_NEW_SERVICE === 'true';
+const isVercel = process.env.VERCEL === '1';
 
 // Basic guardrails
 const MAX_TEX_SIZE_BYTES = 1_000_000; // 1 MB
@@ -54,12 +60,31 @@ function runTectonic(cwd: string, jobName: string): Promise<{ code: number; stdo
   });
 }
 
+/**
+ * Sanitize filename to only include ASCII-safe characters
+ * HTTP headers cannot contain special characters like ñ, á, etc.
+ */
+function sanitizeFilename(filename: string): string {
+  return filename
+    .normalize("NFD") // Decompose accented characters
+    .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+    .replace(/[^a-zA-Z0-9-_]/g, "-") // Replace non-alphanumeric with dash
+    .replace(/-+/g, "-") // Replace multiple dashes with single dash
+    .replace(/^-|-$/g, "") // Remove leading/trailing dashes
+    .substring(0, 100) // Limit length
+    || "exam"; // Fallback if empty
+}
+
 export async function POST(req: NextRequest) {
   try {
-    // In serverless environments this will likely fail; intended for Ubuntu server/Node runtime
     const body = await req.json();
     const tex: string = body?.tex ?? "";
-    const jobName: string = body?.options?.jobName ?? "exam";
+    const rawJobName: string = body?.options?.jobName ?? "exam";
+
+    // Sanitize filename to prevent header errors with special characters
+    const jobName = sanitizeFilename(rawJobName);
+
+    logger.log(`[LaTeX] Compiling: ${rawJobName} → ${jobName}`);
 
     if (!tex || typeof tex !== "string") {
       return NextResponse.json({ error: "Body.tex requerido" }, { status: 400 });
@@ -70,6 +95,67 @@ export async function POST(req: NextRequest) {
     if (hasDangerousDirectives(tex)) {
       return NextResponse.json({ error: "Directivas LaTeX no permitidas detectadas" }, { status: 400 });
     }
+
+    // In Vercel, MUST use the new service (no Tectonic available)
+    // Otherwise, use new service if feature flag is enabled
+    const useNewService = isVercel || USE_NEW_LATEX_SERVICE;
+
+    if (useNewService) {
+      logger.log(`[LaTeX] Using ${isVercel ? 'NEW (Vercel)' : 'NEW (flag enabled)'} LaTeX service`);
+
+      try {
+        const pdfBuffer = await compileLatex(tex, jobName);
+
+        return new NextResponse(pdfBuffer, {
+          status: 200,
+          headers: {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename="${jobName}.pdf"`,
+            "Cache-Control": "no-store",
+          },
+        });
+      } catch (error) {
+        if (error instanceof LaTeXServiceError) {
+          logger.error("[LaTeX] Service error:", error.message);
+
+          // In Vercel, cannot fallback to local Tectonic
+          if (isVercel) {
+            return NextResponse.json({
+              error: "LaTeX compilation failed",
+              details: error.message,
+              error_code: error.code,
+              log: error.log
+            }, { status: error.statusCode });
+          }
+
+          // On VPS, can fallback to local Tectonic
+          logger.warn("[LaTeX] New service failed, falling back to local Tectonic");
+        } else {
+          logger.error("[LaTeX] Unexpected error:", error);
+
+          if (isVercel) {
+            return NextResponse.json({
+              error: "LaTeX compilation failed",
+              details: String(error)
+            }, { status: 500 });
+          }
+
+          logger.warn("[LaTeX] Falling back to local Tectonic due to unexpected error");
+        }
+
+        // Fall through to use local Tectonic
+      }
+    }
+
+    // Use local Tectonic (legacy/fallback)
+    if (isVercel) {
+      return NextResponse.json({
+        error: "Tectonic not available in Vercel. Set LATEX_USE_NEW_SERVICE=true"
+      }, { status: 500 });
+    }
+
+    logger.log("[LaTeX] Using local Tectonic");
+
 
     // Allow overriding the base work directory in environments where /tmp has noexec/restrictions
     const baseTmp = process.env.TEX_WORK_DIR_BASE && process.env.TEX_WORK_DIR_BASE.trim().length > 0
