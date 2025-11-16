@@ -994,7 +994,7 @@ export * from "./schemas";
 
 ### Tarea 1.12: Implementar API Route con Streaming
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Crear endpoint con soporte de SSE
 
@@ -1126,13 +1126,13 @@ export async function POST(req: NextRequest) {
 ```
 
 **Criterios de Aceptación**:
-- [ ] Endpoint creado en `/api/chat-mastra`
-- [ ] Auth y tier limits integrados
-- [ ] Feature flag verificado
-- [ ] SSE streaming funcional
-- [ ] Progress events enviados
-- [ ] Manejo de errores robusto
-- [ ] Test manual con curl o Postman exitoso
+- [x] Endpoint creado en `/api/chat-mastra`
+- [x] Auth y tier limits integrados
+- [x] Feature flag verificado
+- [x] SSE streaming funcional
+- [x] Progress events enviados con i18n keys
+- [x] Manejo de errores robusto
+- [ ] Test manual con curl o Postman exitoso (Fase 3)
 
 **Tiempo Estimado**: 6 horas
 
