@@ -219,59 +219,45 @@ export const generateQuestionsInBulkTool = createTool({
  * Builds the system prompt for question generation
  */
 function buildSystemPrompt(language: string): string {
-  const isSpanish = language === "es";
+  const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
+  const examplePrompt = language === "es" ? "¿Qué es la fotosíntesis?" : "What is photosynthesis?";
+  const exampleOptions = language === "es"
+    ? '["Proceso de respiración", "Proceso de nutrición autótrofa", "Proceso de reproducción", "Proceso de excreción"]'
+    : '["Respiration process", "Autotrophic nutrition process", "Reproduction process", "Excretion process"]';
+  const exampleAnswer = language === "es" ? "Proceso de nutrición autótrofa" : "Autotrophic nutrition process";
+  const exampleRationale = language === "es"
+    ? "La fotosíntesis es el proceso por el cual las plantas producen su propio alimento usando luz solar."
+    : "Photosynthesis is the process by which plants produce their own food using sunlight.";
+  const exampleTags = language === "es" ? '["biología", "plantas", "fotosíntesis"]' : '["biology", "plants", "photosynthesis"]';
 
-  return isSpanish
-    ? `Eres un experto en creación de exámenes educativos de alta calidad.
+  return `You are an expert in creating high-quality educational exams.
 
-**REGLAS CRÍTICAS:**
-1. Devuelves EXCLUSIVAMENTE JSON válido, sin comentarios ni explicaciones externas
-2. PROHIBIDO usar Markdown o fences de código (no uses \`\`\`json)
-3. Para preguntas multiple_choice: el campo "answer" debe ser el TEXTO COMPLETO de la opción correcta, NUNCA un índice numérico
-4. Las opciones incorrectas deben ser plausibles pero claramente incorrectas
-5. Cada pregunta debe incluir un "rationale" breve que explique la respuesta correcta
-6. Si usas fórmulas o expresiones matemáticas/químicas, represéntalas en LaTeX con $...$ (inline) o \\[...\\] (display)
-7. No agregues barras invertidas extra; el escape JSON se aplica automáticamente
-
-**FORMATO DE SALIDA:**
-Devuelve un array JSON de preguntas. Ejemplo:
-[
-  {
-    "id": "q1",
-    "type": "multiple_choice",
-    "prompt": "¿Qué es la fotosíntesis?",
-    "options": ["Proceso de respiración", "Proceso de nutrición autótrofa", "Proceso de reproducción", "Proceso de excreción"],
-    "answer": "Proceso de nutrición autótrofa",
-    "rationale": "La fotosíntesis es el proceso por el cual las plantas producen su propio alimento usando luz solar.",
-    "difficulty": "easy",
-    "taxonomy": "remember",
-    "tags": ["biología", "plantas", "fotosíntesis"]
-  }
-]`
-    : `You are an expert in creating high-quality educational exams.
+**OUTPUT LANGUAGE: ${languageName} (ISO 639-1: "${language}")**
+ALL question content (prompt, options, answer, rationale, tags) MUST be in ${languageName}.
 
 **CRITICAL RULES:**
 1. Return EXCLUSIVELY valid JSON, without comments or external explanations
 2. FORBIDDEN to use Markdown or code fences (do not use \`\`\`json)
 3. For multiple_choice questions: the "answer" field must be the FULL TEXT of the correct option, NEVER a numeric index
 4. Incorrect options must be plausible but clearly wrong
-5. Each question must include a brief "rationale" explaining the correct answer
-6. If using mathematical/chemical formulas or expressions, represent them in LaTeX with $...$ (inline) or \\[...\\] (display)
-7. Don't add extra backslashes; JSON escaping is applied automatically
+5. Each question must include a brief "rationale" explaining the correct answer (in ${languageName})
+6. Tags must be in ${languageName} (e.g., ${exampleTags})
+7. If using mathematical/chemical formulas or expressions, represent them in LaTeX with $...$ (inline) or \\[...\\] (display)
+8. Don't add extra backslashes; JSON escaping is applied automatically
 
 **OUTPUT FORMAT:**
-Return a JSON array of questions. Example:
+Return a JSON array of questions. Example (in ${languageName}):
 [
   {
     "id": "q1",
     "type": "multiple_choice",
-    "prompt": "What is photosynthesis?",
-    "options": ["Respiration process", "Autotrophic nutrition process", "Reproduction process", "Excretion process"],
-    "answer": "Autotrophic nutrition process",
-    "rationale": "Photosynthesis is the process by which plants produce their own food using sunlight.",
+    "prompt": "${examplePrompt}",
+    "options": ${exampleOptions},
+    "answer": "${exampleAnswer}",
+    "rationale": "${exampleRationale}",
     "difficulty": "easy",
     "taxonomy": "remember",
-    "tags": ["biology", "plants", "photosynthesis"]
+    "tags": ${exampleTags}
   }
 ]`;
 }
@@ -287,25 +273,13 @@ function buildChunkPrompt(
     additionalInstructions?: string;
   }
 ): string {
-  const isSpanish = language === "es";
-  const languageName = isSpanish ? "Español" : "English";
+  const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
 
-  let prompt = isSpanish
-    ? `Genera exactamente ${specs.length} preguntas de examen en ${languageName} (código ISO 639-1: "${language}") basadas en las siguientes especificaciones:\n\n`
-    : `Generate exactly ${specs.length} exam questions in ${languageName} (ISO 639-1 code: "${language}") based on the following specifications:\n\n`;
+  let prompt = `Generate exactly ${specs.length} exam questions in ${languageName} (ISO 639-1: "${language}") based on the following specifications:\n\n`;
 
   // Add specs
   specs.forEach((spec, i) => {
-    prompt += isSpanish
-      ? `**Pregunta ${i + 1} (ID: ${spec.id}):**
-- Tema: ${spec.topic}
-- Guía: ${spec.examplePrompt}
-- Tipo: ${spec.type}
-- Dificultad: ${spec.difficulty}
-${spec.taxonomyLevel ? `- Taxonomía (Bloom): ${spec.taxonomyLevel}` : ""}
-
-`
-      : `**Question ${i + 1} (ID: ${spec.id}):**
+    prompt += `**Question ${i + 1} (ID: ${spec.id}):**
 - Topic: ${spec.topic}
 - Guidance: ${spec.examplePrompt}
 - Type: ${spec.type}
@@ -317,9 +291,7 @@ ${spec.taxonomyLevel ? `- Taxonomy (Bloom): ${spec.taxonomyLevel}` : ""}
 
   // Add document context if available
   if (context?.documentSummaries && context.documentSummaries.length > 0) {
-    prompt += isSpanish
-      ? `\n**Contexto de documentos:**\nUsa este contexto para alinear el contenido, pero NO lo cites literalmente en las preguntas:\n${JSON.stringify(context.documentSummaries)}\n\n`
-      : `\n**Document context:**\nUse this context to align content, but DO NOT cite it literally in questions:\n${JSON.stringify(context.documentSummaries)}\n\n`;
+    prompt += `\n**Document context:**\nUse this context to align content, but DO NOT cite it literally in questions:\n${JSON.stringify(context.documentSummaries)}\n\n`;
   }
 
   // Add additional instructions
@@ -328,9 +300,7 @@ ${spec.taxonomyLevel ? `- Taxonomy (Bloom): ${spec.taxonomyLevel}` : ""}
   }
 
   // Add output format reminder
-  prompt += isSpanish
-    ? `\nDevuelve un array JSON con exactamente ${specs.length} preguntas. Cada pregunta debe tener todos los campos requeridos: id, type, prompt, options (si aplica), answer, rationale, difficulty, taxonomy, tags.`
-    : `\nReturn a JSON array with exactly ${specs.length} questions. Each question must have all required fields: id, type, prompt, options (if applicable), answer, rationale, difficulty, taxonomy, tags.`;
+  prompt += `\nReturn a JSON array with exactly ${specs.length} questions in ${languageName}. Each question must have all required fields: id, type, prompt, options (if applicable), answer, rationale, difficulty, taxonomy, tags.`;
 
   return prompt;
 }

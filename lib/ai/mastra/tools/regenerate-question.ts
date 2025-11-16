@@ -108,7 +108,7 @@ export const regenerateQuestionTool = createTool({
       process.env.OPENAI_MODEL || "google/gemini-2.5-flash-lite"
     );
 
-    const languageName = language === "es" ? "Español" : "English";
+    const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
 
     try {
       const response = await generateText({
@@ -116,13 +116,11 @@ export const regenerateQuestionTool = createTool({
         messages: [
           {
             role: "system",
-            content:
-              language === "es"
-                ? `Eres un experto en creación de exámenes educativos.
-Devuelves EXCLUSIVAMENTE JSON válido, sin comentarios.
-PROHIBIDO usar Markdown o fences de código.
-Para multiple_choice: el campo "answer" debe ser el TEXTO COMPLETO de la opción correcta, NUNCA un índice.`
-                : `You are an expert in creating educational exams.
+            content: `You are an expert in creating educational exams.
+
+**OUTPUT LANGUAGE: ${languageName} (ISO 639-1: "${language}")**
+ALL question content MUST be in ${languageName}.
+
 Return EXCLUSIVELY valid JSON, without comments.
 FORBIDDEN to use Markdown or code fences.
 For multiple_choice: the "answer" field must be the FULL TEXT of the correct option, NEVER an index.`,
@@ -173,44 +171,37 @@ function buildRegeneratePrompt(params: {
   const { questionId, originalQuestion, instruction, overrides, language } =
     params;
 
-  const isSpanish = language === "es";
-  const languageName = isSpanish ? "Español" : "English";
+  const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
 
-  let prompt = isSpanish
-    ? `Regenera la pregunta "${questionId}" en ${languageName} (código ISO 639-1: "${language}") según la siguiente instrucción:\n\n**Instrucción:** ${instruction}\n\n`
-    : `Regenerate question "${questionId}" in ${languageName} (ISO 639-1 code: "${language}") according to the following instruction:\n\n**Instruction:** ${instruction}\n\n`;
+  let prompt = `Regenerate question "${questionId}" in ${languageName} (ISO 639-1: "${language}") according to the following instruction:\n\n**Instruction:** ${instruction}\n\n`;
 
   // Add original question for context
   if (originalQuestion) {
-    prompt += isSpanish
-      ? `**Pregunta original:**\n${JSON.stringify(originalQuestion, null, 2)}\n\n`
-      : `**Original question:**\n${JSON.stringify(originalQuestion, null, 2)}\n\n`;
+    prompt += `**Original question:**\n${JSON.stringify(originalQuestion, null, 2)}\n\n`;
   }
 
   // Add overrides if specified
   if (overrides) {
-    prompt += isSpanish ? `**Requisitos obligatorios:**\n` : `**Mandatory requirements:**\n`;
+    prompt += `**Mandatory requirements:**\n`;
 
     if (overrides.type) {
-      prompt += `- Tipo: ${overrides.type}\n`;
+      prompt += `- Type: ${overrides.type}\n`;
     }
     if (overrides.difficulty) {
-      prompt += `- Dificultad: ${overrides.difficulty}\n`;
+      prompt += `- Difficulty: ${overrides.difficulty}\n`;
     }
     if (overrides.taxonomyLevel) {
-      prompt += `- Taxonomía: ${overrides.taxonomyLevel}\n`;
+      prompt += `- Taxonomy: ${overrides.taxonomyLevel}\n`;
     }
     if (overrides.topic) {
-      prompt += `- Tema: ${overrides.topic}\n`;
+      prompt += `- Topic: ${overrides.topic}\n`;
     }
 
     prompt += "\n";
   }
 
   // Add output format
-  prompt += isSpanish
-    ? `Devuelve un objeto JSON con la pregunta completa (id, type, prompt, options, answer, rationale, difficulty, taxonomy, tags). Mantén el ID como "${questionId}".`
-    : `Return a JSON object with the complete question (id, type, prompt, options, answer, rationale, difficulty, taxonomy, tags). Keep the ID as "${questionId}".`;
+  prompt += `Return a JSON object with the complete question in ${languageName} (id, type, prompt, options, answer, rationale, difficulty, taxonomy, tags). Keep the ID as "${questionId}".`;
 
   return prompt;
 }

@@ -162,34 +162,10 @@ function buildPlanPrompt(params: {
     documentSummaries,
   } = params;
 
-  const isSpanish = language === "es";
+  // Determine output language name
+  const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
 
-  const basePrompt = isSpanish
-    ? `Genera un plan detallado para un examen con las siguientes características:
-
-**Requisitos:**
-- Número total de preguntas: ${numQuestions}
-- Temas principales: ${topics.join(", ")}
-- Dificultad general: ${difficulty}
-- Tipos de pregunta permitidos: ${questionTypes.join(", ")}
-${taxonomyLevels && taxonomyLevels.length > 0 ? `- Niveles de taxonomía (Bloom): ${taxonomyLevels.join(", ")}` : ""}
-- **Idioma del examen**: ${language === "es" ? "Español" : language === "en" ? "Inglés" : language} (código ISO 639-1: "${language}")
-
-**Instrucciones:**
-Para cada pregunta en el plan, especifica:
-1. **id**: Identificador único en formato "q1", "q2", "q3", etc.
-2. **topic**: Tema o subtema específico para esta pregunta
-3. **examplePrompt**: Ejemplo o guía de cómo debería ser la pregunta (NO la pregunta final)
-4. **type**: Tipo de pregunta (uno de: ${questionTypes.join(", ")})
-5. **difficulty**: Nivel de dificultad específico (easy, medium, hard)
-6. **taxonomyLevel**: Nivel de taxonomía de Bloom (opcional)
-
-**Distribución recomendada:**
-- Balancea los temas proporcionalmente
-- Distribuye las dificultades según el nivel general indicado
-- Varía los tipos de pregunta si hay múltiples tipos permitidos
-- Progresa de menor a mayor complejidad cuando sea apropiado`
-    : `Generate a detailed plan for an exam with the following characteristics:
+  const basePrompt = `Generate a detailed plan for an exam with the following characteristics:
 
 **Requirements:**
 - Total number of questions: ${numQuestions}
@@ -197,13 +173,15 @@ Para cada pregunta en el plan, especifica:
 - Overall difficulty: ${difficulty}
 - Allowed question types: ${questionTypes.join(", ")}
 ${taxonomyLevels && taxonomyLevels.length > 0 ? `- Bloom's taxonomy levels: ${taxonomyLevels.join(", ")}` : ""}
-- **Exam language**: ${language === "es" ? "Spanish" : language === "en" ? "English" : language} (ISO 639-1 code: "${language}")
+
+**OUTPUT LANGUAGE: ${languageName} (ISO 639-1: "${language}")**
+IMPORTANT: All generated content (topics, examplePrompt, etc.) MUST be in ${languageName}.
 
 **Instructions:**
 For each question in the plan, specify:
 1. **id**: Unique identifier in format "q1", "q2", "q3", etc.
-2. **topic**: Specific topic or subtopic for this question
-3. **examplePrompt**: Example or guidance of what the question should be like (NOT the final question)
+2. **topic**: Specific topic or subtopic for this question (in ${languageName})
+3. **examplePrompt**: Example or guidance of what the question should be like (in ${languageName}, NOT the final question)
 4. **type**: Question type (one of: ${questionTypes.join(", ")})
 5. **difficulty**: Specific difficulty level (easy, medium, hard)
 6. **taxonomyLevel**: Bloom's taxonomy level (optional)
@@ -217,41 +195,18 @@ For each question in the plan, specify:
   // Add document context if available
   let contextSection = "";
   if (documentSummaries && documentSummaries.length > 0) {
-    contextSection = isSpanish
-      ? `\n\n**Contexto de documentos:**\n${documentSummaries.map((ds: any, i: number) => `Documento ${i + 1}: ${JSON.stringify(ds)}`).join("\n")}\n\nUsa este contexto para alinear los temas del plan, pero no lo cites literalmente.`
-      : `\n\n**Document context:**\n${documentSummaries.map((ds: any, i: number) => `Document ${i + 1}: ${JSON.stringify(ds)}`).join("\n")}\n\nUse this context to align plan topics, but don't cite it literally.`;
+    contextSection = `\n\n**Document context:**\n${documentSummaries.map((ds: any, i: number) => `Document ${i + 1}: ${JSON.stringify(ds)}`).join("\n")}\n\nUse this context to align plan topics, but don't cite it literally.`;
   }
 
-  const jsonFormat = isSpanish
-    ? `\n\n**Formato de respuesta (JSON):**
+  const jsonFormat = `\n\n**Response format (JSON):**
 \`\`\`json
 {
   "totalQuestions": ${numQuestions},
   "questionSpecs": [
     {
       "id": "q1",
-      "topic": "Tema específico",
-      "examplePrompt": "Ejemplo: ¿Qué es...?",
-      "type": "${questionTypes[0]}",
-      "difficulty": "medium",
-      "taxonomyLevel": "understand"
-    }
-  ],
-  "metadata": {
-    "topics": ${JSON.stringify(topics)},
-    "language": "${language}"
-  }
-}
-\`\`\``
-    : `\n\n**Response format (JSON):**
-\`\`\`json
-{
-  "totalQuestions": ${numQuestions},
-  "questionSpecs": [
-    {
-      "id": "q1",
-      "topic": "Specific topic",
-      "examplePrompt": "Example: What is...?",
+      "topic": "Specific topic (in ${languageName})",
+      "examplePrompt": "Example prompt (in ${languageName})",
       "type": "${questionTypes[0]}",
       "difficulty": "medium",
       "taxonomyLevel": "understand"
