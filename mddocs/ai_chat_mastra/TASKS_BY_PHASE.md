@@ -514,7 +514,7 @@ function buildPlanPrompt(params: any): string {
 
 ### Tarea 1.4: Implementar Tool - Generate Questions In Bulk
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Crear tool para generar preguntas en chunks paralelos
 
@@ -866,7 +866,7 @@ export const randomizeOptionsTool = createTool({
 
 ### Tarea 1.7: Implementar Tool - Regenerate Question
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Crear tool para regenerar pregunta específica
 
@@ -886,7 +886,7 @@ export const randomizeOptionsTool = createTool({
 
 ### Tarea 1.8: Implementar Tool - Add Questions
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Crear tool para adicionar preguntas a examen existente
 
@@ -906,7 +906,7 @@ export const randomizeOptionsTool = createTool({
 
 ### Tarea 1.9: Exportar Tools
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Exportar todos los tools desde index
 
@@ -923,8 +923,8 @@ export { addQuestionsTool } from "./add-questions";
 ```
 
 **Criterios de Aceptación**:
-- [ ] Todos los tools exportados
-- [ ] Imports funcionan correctamente
+- [x] Todos los tools exportados
+- [x] Imports funcionan correctamente
 
 **Tiempo Estimado**: 15 minutos
 
