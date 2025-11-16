@@ -6,15 +6,28 @@
  * @see mddocs/ai_chat_mastra/TASKS_BY_PHASE.md - Tarea 1.1
  */
 
-// TODO: Export schemas when implemented (Tarea 1.1)
-
 // Re-export existing schemas for compatibility
 export {
   ExamQuestionSchema,
   ExamSchema,
   type ExamQuestion,
   type Exam,
+  ChatContextSchema,
+  TopicSummarySchema,
+  type ChatContext,
+  type TopicSummary,
 } from "@/lib/ai/chat/schemas";
 
-// export { ExamPlanSchema, QuestionSpecSchema } from "./exam-plan";
-// export type { ExamPlan, QuestionSpec } from "./exam-plan";
+// Export new Mastra-specific schemas
+export {
+  QuestionSpecSchema,
+  ExamPlanSchema,
+  TaxonomyLevelEnum,
+  DifficultyEnum,
+  QuestionTypeEnum,
+  type QuestionSpec,
+  type ExamPlan,
+  type TaxonomyLevel,
+  type Difficulty,
+  type QuestionType,
+} from "./exam-plan";
