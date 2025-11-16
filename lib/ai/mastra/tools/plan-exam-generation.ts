@@ -173,6 +173,7 @@ function buildPlanPrompt(params: {
 - Dificultad general: ${difficulty}
 - Tipos de pregunta permitidos: ${questionTypes.join(", ")}
 ${taxonomyLevels && taxonomyLevels.length > 0 ? `- Niveles de taxonomía (Bloom): ${taxonomyLevels.join(", ")}` : ""}
+- **Idioma del examen**: ${language === "es" ? "Español" : language === "en" ? "Inglés" : language} (código ISO 639-1: "${language}")
 
 **Instrucciones:**
 Para cada pregunta en el plan, especifica:
@@ -196,6 +197,7 @@ Para cada pregunta en el plan, especifica:
 - Overall difficulty: ${difficulty}
 - Allowed question types: ${questionTypes.join(", ")}
 ${taxonomyLevels && taxonomyLevels.length > 0 ? `- Bloom's taxonomy levels: ${taxonomyLevels.join(", ")}` : ""}
+- **Exam language**: ${language === "es" ? "Spanish" : language === "en" ? "English" : language} (ISO 639-1 code: "${language}")
 
 **Instructions:**
 For each question in the plan, specify:

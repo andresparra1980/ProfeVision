@@ -381,9 +381,14 @@ function seedRandom(seed: number): () => number {
 
 ### Tarea 1.3: Implementar Tool - Plan Exam Generation
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Crear tool para generar plan de examen
+
+**Consideraciones i18n:**
+- Usar `locale` del contexto (ISO 639-1: 'es', 'en')
+- Aclarar en prompt: "Idioma: Español (ISO 639-1: 'es')"
+- Prompt bilingüe según locale detectado
 
 **Archivo**: `lib/ai/mastra/tools/plan-exam-generation.ts`
 
@@ -512,6 +517,12 @@ function buildPlanPrompt(params: any): string {
 **Estado**: ⏳ Pendiente
 
 **Descripción**: Crear tool para generar preguntas en chunks paralelos
+
+**Consideraciones i18n:**
+- Usar `locale` del contexto para generar preguntas
+- Tags generados deben estar en el idioma del examen
+- Ejemplo ES: tags: ["fotosíntesis", "biología"]
+- Ejemplo EN: tags: ["photosynthesis", "biology"]
 
 **Archivo**: `lib/ai/mastra/tools/generate-questions-bulk.ts`
 
@@ -987,6 +998,20 @@ export * from "./schemas";
 
 **Descripción**: Crear endpoint con soporte de SSE
 
+**Consideraciones i18n:**
+- Detectar `locale` del usuario autenticado (de sesión/headers)
+- Pasar locale al agente orquestador en runtimeContext
+- Los mensajes de progreso (SSE) deben enviar claves i18n, NO texto hardcodeado
+- Ejemplo correcto:
+  ```typescript
+  {
+    type: "progress",
+    messageKey: "chat.progress.generatingChunk",
+    params: { current: 3, total: 10 }
+  }
+  ```
+- El frontend resolverá la clave según el locale del usuario
+
 **Archivo**: `app/api/chat-mastra/route.ts`
 
 **Código**:
@@ -1284,6 +1309,22 @@ export function useSSEStream() {
 **Estado**: ⏳ Pendiente
 
 **Descripción**: Modificar hook para usar endpoint correcto según feature flag
+
+**Consideraciones i18n:**
+- Detectar locale desde next-intl: `useLocale()` hook
+- Pasar locale en payload al API route
+- Procesar mensajes SSE que contienen claves i18n:
+  ```typescript
+  // Mensaje SSE del backend
+  { type: "progress", messageKey: "chat.progress.generatingChunk", params: { current: 3, total: 10 } }
+
+  // Resolución con next-intl
+  const t = useTranslations('ai_exams_chat');
+  const message = t(data.messageKey, data.params);
+  // → "Generando preguntas 1-3 de 10..." (ES)
+  // → "Generating questions 1-3 of 10..." (EN)
+  ```
+- Mantener retrocompatibilidad con mensajes de texto directo (legacy)
 
 **Archivo**: `app/[locale]/dashboard/exams/ai-exams-creation-chat/hooks/useChatMessages.ts`
 

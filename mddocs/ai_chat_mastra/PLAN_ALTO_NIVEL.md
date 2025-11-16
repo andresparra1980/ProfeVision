@@ -207,6 +207,77 @@ Feedback: "✅ 2 preguntas adicionadas. Total: 12 preguntas."
 
 ---
 
+## 2.4 Internacionalización (i18n)
+
+### Consideraciones de Idioma
+
+**Locale ISO 639-1:**
+- El proyecto usa códigos ISO 639 Set 1 para locales: `es` (Español), `en` (English)
+- **IMPORTANTE**: Al instruir al LLM, SIEMPRE aclarar que el código es ISO 639-1
+- Ejemplo: "Genera el examen en idioma Español (código ISO 639-1: 'es')"
+- **NO** decir solo "genera en 'en'" → el LLM no entiende que 'en' = inglés sin contexto
+
+**Detección de Locale:**
+- Por defecto, usar el `locale` del usuario autenticado (de la sesión)
+- Fallback: `es` (español) si no está disponible
+- El usuario puede especificar explícitamente el idioma en el prompt
+
+**Prompts del LLM:**
+- Los prompts deben ser bilingües (español/inglés) según el locale
+- Incluir aclaración explícita: `"Idioma: Español (ISO 639-1: 'es')"`
+- Ejemplo en prompt:
+  ```
+  **Requisitos:**
+  - Idioma del examen: Español (código ISO 639-1: "es")
+  ```
+
+**Mensajes de Feedback (Frontend):**
+- Los mensajes de progreso mostrados al usuario deben usar el sistema i18n del proyecto
+- Esquema: `i18n/locales/{locale}/ai_exams_chat.json`
+- **NO** enviar texto hardcodeado desde el LLM para mostrar al usuario
+- **SÍ** enviar claves i18n que el frontend resuelva
+
+**Ejemplo de Feedback Internacionalizado:**
+```typescript
+// ❌ MAL - Texto hardcodeado del LLM
+{
+  type: "progress",
+  message: "Generando preguntas 1-3 de 10..."
+}
+
+// ✅ BIEN - Clave i18n + parámetros
+{
+  type: "progress",
+  messageKey: "chat.progress.generatingChunk",
+  params: { current: 3, total: 10 }
+}
+
+// En i18n/locales/es/ai_exams_chat.json:
+{
+  "chat": {
+    "progress": {
+      "generatingChunk": "Generando preguntas 1-{current} de {total}..."
+    }
+  }
+}
+
+// En i18n/locales/en/ai_exams_chat.json:
+{
+  "chat": {
+    "progress": {
+      "generatingChunk": "Generating questions 1-{current} of {total}..."
+    }
+  }
+}
+```
+
+**Tags de Preguntas:**
+- Los tags generados por el LLM pueden estar en cualquier idioma (según el examen)
+- Ejemplo: Examen en español → tags: ["fotosíntesis", "biología", "nivel medio"]
+- Ejemplo: Examen en inglés → tags: ["photosynthesis", "biology", "intermediate level"]
+
+---
+
 ## 3. Componentes Principales
 
 ### 3.1 Agente Orquestador
