@@ -107,7 +107,7 @@ git push -u origin feature/ai-chat-mastra
 
 ### Tarea 0.5: Setup de Dependencias
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Instalar y configurar dependencias de Mastra
 
@@ -128,10 +128,10 @@ npm list @mastra/core @openrouter/ai-sdk-provider
 - `package-lock.json` (auto)
 
 **Criterios de Aceptación**:
-- [ ] `@mastra/core` instalado (v0.14.0+)
-- [ ] `@openrouter/ai-sdk-provider` instalado
-- [ ] No hay conflictos de dependencias
-- [ ] `npm run build` exitoso
+- [x] `@mastra/core` instalado (v0.24.1)
+- [x] `@openrouter/ai-sdk-provider` instalado (v1.2.3)
+- [x] No hay conflictos de dependencias
+- [x] `yarn build` exitoso
 
 **Tiempo Estimado**: 30 minutos
 
@@ -139,7 +139,7 @@ npm list @mastra/core @openrouter/ai-sdk-provider
 
 ### Tarea 0.6: Configurar Variables de Entorno
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Adicionar variable de feature flag
 
@@ -155,9 +155,9 @@ AI_CHAT_MASTRA=false  # Feature flag para nuevo chat
 ```
 
 **Criterios de Aceptación**:
-- [ ] Variable `AI_CHAT_MASTRA` agregada a `.env.example`
-- [ ] Variable configurada en `.env.local` (false por defecto)
-- [ ] Documentación en README actualizada
+- [x] Variable `AI_CHAT_MASTRA` agregada a `.env.example`
+- [x] Variable configurada en `.env.local` (false por defecto)
+- [x] Documentación incluida en `.env.example`
 
 **Tiempo Estimado**: 15 minutos
 
@@ -165,7 +165,7 @@ AI_CHAT_MASTRA=false  # Feature flag para nuevo chat
 
 ### Tarea 0.7: Crear Estructura de Carpetas
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Crear estructura de archivos para implementación Mastra
 
@@ -210,9 +210,9 @@ touch app/api/chat-mastra/route.ts
 ```
 
 **Criterios de Aceptación**:
-- [ ] Estructura de carpetas creada
-- [ ] Archivos placeholder creados
-- [ ] Exports en index.ts configurados
+- [x] Estructura de carpetas creada
+- [x] Archivos placeholder creados con TODOs
+- [x] Exports en index.ts configurados (placeholder)
 
 **Tiempo Estimado**: 15 minutos
 
@@ -1925,9 +1925,14 @@ npm run build
 2. ✅ Tarea 0.2: Análisis de sistema actual - **Completado**
 3. ✅ Tarea 0.3: Investigación de MastraAI - **Completado**
 4. ✅ Tarea 0.4: Crear documentos de planificación - **Completado**
-5. ⏳ **Tarea 0.5: Setup de dependencias** - **SIGUIENTE**
-6. ⏳ Tarea 0.6: Configurar variables de entorno
-7. ⏳ Tarea 0.7: Crear estructura de carpetas
+5. ✅ Tarea 0.5: Setup de dependencias - **Completado**
+6. ✅ Tarea 0.6: Configurar variables de entorno - **Completado**
+7. ✅ Tarea 0.7: Crear estructura de carpetas - **Completado**
+
+**Fase 0 completada al 100%** 🎉
+
+**Siguiente**: Comenzar Fase 1 - Implementación Core
+- ⏳ Tarea 1.1: Implementar Schemas Zod
 
 ---
 
