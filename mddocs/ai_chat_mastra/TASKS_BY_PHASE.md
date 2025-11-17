@@ -1205,7 +1205,7 @@ describe("randomizeOptionsTool", () => {
 ## Fase 2: Frontend Adaptation
 
 **Duración Estimada**: 1-2 semanas
-**Estado**: 🔄 En Progreso (5/6 completadas)
+**Estado**: ✅ Completado (5/6 completadas, 1 omitida)
 
 ### Tarea 2.1: Crear Hook para SSE Streaming
 
@@ -1508,7 +1508,7 @@ export function ChatPanel() {
 
 ### Tarea 2.6: Testing E2E de UI
 
-**Estado**: ⏳ Pendiente
+**Estado**: ⏭️ Omitida
 
 **Descripción**: Tests end-to-end del flujo completo
 
