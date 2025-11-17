@@ -242,12 +242,30 @@ IMPORTANT: When using regenerateQuestion or addQuestions tools, you MUST pass th
 
           // Inject document summaries context if available
           if (context.topicSummaries && context.topicSummaries.length > 0) {
-            const documentContext = `[DOCUMENT_SUMMARIES]
-The user has uploaded ${context.topicSummaries.length} document(s) with the following summaries:
-${JSON.stringify(context.topicSummaries, null, 2)}
+            // Create a compact version of summaries for the message
+            // (Only include essential info to avoid overwhelming the model)
+            const compactSummaries = context.topicSummaries.map(ts => ({
+              documentId: ts.documentId,
+              overview: ts.summary?.generalOverview || "Document uploaded",
+              level: ts.summary?.academicLevel || "Unknown",
+              topicCount: ts.summary?.macroTopics?.length || 0,
+            }));
 
-IMPORTANT: When using planExamGeneration, generateQuestionsInBulk, regenerateQuestion, or addQuestions tools, you MUST pass these summaries as the 'documentSummaries' parameter to ensure questions are based on the provided documents.
-[/DOCUMENT_SUMMARIES]`;
+            const documentContext = `[DOCUMENT_CONTEXT]
+The user has uploaded ${context.topicSummaries.length} document(s):
+${compactSummaries.map((s, i) => `
+Document ${i + 1}:
+- Overview: ${s.overview}
+- Academic Level: ${s.level}
+- Number of topics: ${s.topicCount}
+`).join('\n')}
+
+INSTRUCTIONS:
+- Generate exam questions based on the topics covered in these documents
+- Use the overview and academic level to set appropriate difficulty and context
+- You do NOT need to pass documentSummaries to the tools (it's optional)
+- Focus on creating relevant topics that align with the document content
+[/DOCUMENT_CONTEXT]`;
 
             // Prepend to messages so agent sees it
             mastraMessages.unshift(documentContext);

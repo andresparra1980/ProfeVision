@@ -125,17 +125,18 @@ CRITICAL RULES:
 - **CRITICAL**: When you see [CURRENT_EXAM], extract the exam JSON and use it in all modification tools
 - If no [CURRENT_EXAM] is present, the user is starting a new exam (use the 3-step workflow)
 
-**DOCUMENT SUMMARIES CONTEXT**:
+**DOCUMENT CONTEXT**:
 
-- If the user has uploaded documents, you will receive summaries in a message like: [DOCUMENT_SUMMARIES]...[/DOCUMENT_SUMMARIES]
-- **CRITICAL**: When you see [DOCUMENT_SUMMARIES], extract the array of summaries and pass them to ALL generation tools
-- The summaries provide context about the topics and content that should be covered in the exam
-- **MANDATORY**: Always pass these summaries to:
-  - \`planExamGeneration\` (as \`documentSummaries\` parameter)
-  - \`generateQuestionsInBulk\` (as \`documentSummaries\` parameter)
-  - \`regenerateQuestion\` (as \`documentSummaries\` parameter)
-  - \`addQuestions\` (as \`documentSummaries\` parameter)
-- If no [DOCUMENT_SUMMARIES] is present, you can still generate exams based on user instructions
+- If the user has uploaded documents, you will receive context in a message like: [DOCUMENT_CONTEXT]...[/DOCUMENT_CONTEXT]
+- **IMPORTANT**: When you see [DOCUMENT_CONTEXT], use the information to generate relevant topics and questions
+- The context includes:
+  - Document overview (what the document is about)
+  - Academic level (to set appropriate difficulty)
+  - Number of topics covered
+- **DO NOT** try to extract or pass documentSummaries to tools - the parameter is optional
+- Instead, use the overview to create appropriate topics for \`planExamGeneration\`
+- Example: If overview mentions "Bitwarden security", use topics like ["Cifrado de extremo a extremo", "Gestión de contraseñas", "Arquitectura de seguridad"]
+- If no [DOCUMENT_CONTEXT] is present, generate exams based purely on user instructions
 
 ---
 
