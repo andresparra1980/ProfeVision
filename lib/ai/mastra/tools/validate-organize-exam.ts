@@ -13,7 +13,12 @@
 
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import { ExamSchema, ExamQuestionSchema, type Exam } from "../schemas";
+import {
+  ExamSchema,
+  ExamQuestionSchema,
+  type Exam,
+  type ExamQuestion,
+} from "../schemas";
 import { sanitizeAIExamPayload } from "@/lib/ai/chat/json-parser";
 
 /**
@@ -31,7 +36,7 @@ const CorrectionSchema = z.object({
  */
 const inputSchema = z.object({
   /** Array of questions (raw, potentially invalid) */
-  questions: z.array(z.any()),
+  questions: z.array(z.record(z.string(), z.unknown())),
 
   /** Optional exam metadata */
   metadata: z

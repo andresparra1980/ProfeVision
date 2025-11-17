@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { loadSettings } from "@/lib/persistence/browser";
 import { useAIChat, type AIExamResult } from './AIChatContext';
@@ -51,6 +51,11 @@ export default function ChatPanel() {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const [input, setInput] = useState("");
   const [resultsOpen, setResultsOpen] = useState(false);
+
+  // Memoize setResult callback to prevent infinite re-renders
+  const handleSetResult = useCallback((r: AIExamResult | null) => {
+    setResult(r);
+  }, [setResult]);
   const promptWrapRef = useRef<HTMLDivElement | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [padBottom, setPadBottom] = useState<number>(0);
@@ -103,8 +108,8 @@ export default function ChatPanel() {
   const { messages, isSending, sendMessage, progressMessages } = useChatMessages({
     settings,
     result,
-    setResult: (r) => setResult(r as AIExamResult | null),
-    t,
+    setResult: handleSetResult as (_result: unknown) => void,
+    t: t as (_key: string, _options?: Record<string, unknown> | { fallback?: string } | undefined) => string,
   });
   const summaryDialog = useSummaryDialog({
     documentIds: documentContext.documentIds,

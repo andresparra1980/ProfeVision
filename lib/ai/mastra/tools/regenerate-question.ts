@@ -57,6 +57,26 @@ const inputSchema = z.object({
 
   /** Language for generation */
   language: z.enum(["es", "en"]).default("es"),
+
+  /** Current exam context (for maintaining coherence) */
+  currentExam: z
+    .object({
+      title: z.string().optional(),
+      subject: z.string().optional(),
+      level: z.string().optional(),
+      questions: z.array(ExamQuestionSchema),
+    })
+    .optional(),
+
+  /** Document summaries (for additional context) */
+  documentSummaries: z
+    .array(
+      z.object({
+        documentId: z.string(),
+        summary: z.record(z.string(), z.unknown()),
+      })
+    )
+    .optional(),
 });
 
 /**
@@ -98,15 +118,33 @@ export const regenerateQuestionTool = createTool({
       instruction,
       overrides,
       language,
+      currentExam,
+      documentSummaries,
     } = context;
+
+    // Auto-extract originalQuestion from currentExam if not provided
+    let effectiveOriginalQuestion = originalQuestion;
+    if (!effectiveOriginalQuestion && currentExam) {
+      effectiveOriginalQuestion = currentExam.questions.find(
+        (q: { id: string }) => q.id === questionId
+      );
+
+      if (!effectiveOriginalQuestion) {
+        throw new Error(
+          `Question with ID "${questionId}" not found in current exam`
+        );
+      }
+    }
 
     // Build prompt
     const prompt = buildRegeneratePrompt({
       questionId,
-      originalQuestion,
+      originalQuestion: effectiveOriginalQuestion,
       instruction,
       overrides,
       language,
+      currentExam,
+      documentSummaries,
     });
 
     // Call LLM
@@ -131,9 +169,20 @@ export const regenerateQuestionTool = createTool({
 **OUTPUT LANGUAGE: ${languageName} (ISO 639-1: "${language}")**
 ALL question content MUST be in ${languageName}.
 
+**BLOOM'S TAXONOMY LEVELS (USE EXACT VALUES):**
+The "taxonomy" field must be ONE of these EXACT values:
+- "remember": Recall facts, terms, concepts
+- "understand": Explain ideas, summarize
+- "apply": Use knowledge in new situations
+- "analyze": Break down, compare
+- "evaluate": Judge, critique
+- "create": Design, construct
+
+**CRITICAL RULES:**
 Return EXCLUSIVELY valid JSON, without comments.
 FORBIDDEN to use Markdown or code fences.
-For multiple_choice: the "answer" field must be the FULL TEXT of the correct option, NEVER an index.`,
+For multiple_choice: the "answer" field must be the FULL TEXT of the correct option, NEVER an index.
+The "taxonomy" field is MANDATORY and must use one of the exact values listed above.`,
           },
           {
             role: "user",
@@ -144,7 +193,7 @@ For multiple_choice: the "answer" field must be the FULL TEXT of the correct opt
       });
 
       // Parse response
-      const parsed = parseQuestionResponse(response.text);
+      const parsed = parseQuestionResponse(response.text) as Record<string, unknown>;
 
       // Ensure ID is preserved
       parsed.id = questionId;
@@ -177,13 +226,52 @@ function buildRegeneratePrompt(params: {
   instruction: string;
   overrides?: QuestionOverrides;
   language: string;
+  currentExam?: {
+    title?: string;
+    subject?: string;
+    level?: string;
+    questions: ExamQuestion[];
+  };
+  documentSummaries?: unknown[];
 }): string {
-  const { questionId, originalQuestion, instruction, overrides, language } =
+  const { questionId, originalQuestion, instruction, overrides, language, currentExam, documentSummaries } =
     params;
 
   const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
 
   let prompt = `Regenerate question "${questionId}" in ${languageName} (ISO 639-1: "${language}") according to the following instruction:\n\n**Instruction:** ${instruction}\n\n`;
+
+  // Add exam context for coherence
+  if (currentExam) {
+    prompt += `**EXAM CONTEXT (CRITICAL - Must maintain coherence):**\n`;
+
+    if (currentExam.title) {
+      prompt += `- Exam Title: ${currentExam.title}\n`;
+    }
+    if (currentExam.subject) {
+      prompt += `- Subject/Topic: ${currentExam.subject}\n`;
+    }
+    if (currentExam.level) {
+      prompt += `- Academic Level: ${currentExam.level}\n`;
+    }
+
+    // Show other questions for context
+    if (currentExam.questions && currentExam.questions.length > 0) {
+      prompt += `- Number of questions in exam: ${currentExam.questions.length}\n`;
+      prompt += `- Other question topics: ${currentExam.questions
+        .filter(q => q.id !== questionId)
+        .slice(0, 3)
+        .map(q => q.tags?.join(', ') || 'N/A')
+        .join('; ')}\n`;
+    }
+
+    prompt += `\n**IMPORTANT:** The regenerated question MUST be related to the exam subject (${currentExam.subject || 'the main topic'}) and maintain coherence with other questions. Do NOT change the topic to something unrelated.\n\n`;
+  }
+
+  // Add document summaries if available
+  if (documentSummaries && documentSummaries.length > 0) {
+    prompt += `**Document Context:**\nThis exam is based on ${documentSummaries.length} document(s). Keep the question relevant to the provided materials.\n\n`;
+  }
 
   // Add original question for context
   if (originalQuestion) {

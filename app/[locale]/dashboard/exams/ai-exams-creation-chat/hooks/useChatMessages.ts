@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { loadLastDocumentsContext, loadOutput } from '@/lib/persistence/browser';
 import { useSSEStream, type SSEMessage } from './useSSEStream';
+import { logger } from '@/lib/utils/logger';
 
 interface ChatMessage {
   role: 'user' | 'system' | 'assistant';
@@ -82,7 +83,7 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
     // Handle progress messages
     if (latest.type === 'progress') {
       const text = latest.messageKey
-        ? t(latest.messageKey, latest.params || {})
+        ? t(latest.messageKey, latest.params)
         : latest.text || 'Processing...';
 
       const emoji = getEmojiForMessage(latest);
@@ -101,22 +102,44 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
     // Handle completion
     if (latest.type === 'done') {
       let examGenerated = false;
-      let assistantMessage = latest.result || '';
+      let assistantMessage = '';
 
       // Parse result if available
-      if (latest.result) {
+      if (latest.result && typeof latest.result === 'string') {
         try {
           const parsed = JSON.parse(latest.result);
+
+          // Debug parsed structure
+          logger.log('[useChatMessages] Parsed done result', {
+            hasExam: !!parsed?.exam,
+            hasQuestions: !!parsed?.exam?.questions,
+            isQuestionsArray: Array.isArray(parsed?.exam?.questions),
+            questionCount: Array.isArray(parsed?.exam?.questions) ? parsed.exam.questions.length : 0,
+            parsedKeys: Object.keys(parsed),
+            examKeys: parsed?.exam ? Object.keys(parsed.exam) : [],
+            finishReason: latest.finishReason,
+          });
+
           // Check if it's a valid exam structure
           if (parsed?.exam?.questions && Array.isArray(parsed.exam.questions)) {
+            logger.log('[useChatMessages] Valid exam structure detected, setting result');
             setResult(parsed);
             examGenerated = true;
+
+            // Set friendly message instead of JSON
+            const questionCount = parsed.exam.questions.length;
+            assistantMessage = t('chat.examGenerated', {
+              count: questionCount,
+              fallback: `✨ Examen generado exitosamente con ${questionCount} preguntas. Revisa los resultados en el panel derecho.`
+            });
           } else {
+            logger.log('[useChatMessages] Not an exam structure, treating as regular message');
             // Not an exam, treat as regular message
             assistantMessage = latest.result;
           }
-        } catch {
-          // Not JSON, treat as plain text message
+        } catch (_error) {
+          // Not JSON (agent responded with plain text), this is expected behavior
+          logger.log('[useChatMessages] Agent response is plain text (not JSON exam)');
           assistantMessage = latest.result;
         }
       }
@@ -132,11 +155,13 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
         }
       }
 
-      // Add assistant message to chat
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: assistantMessage },
-      ]);
+      // Add assistant message to chat (only if there's a message to show)
+      if (assistantMessage) {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: assistantMessage },
+        ]);
+      }
 
       setProgressMessages([]);
       clearMessages();
@@ -234,13 +259,12 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
         },
       } as const;
 
-      try {
-        console.debug(`[AIChat] Endpoint: ${endpoint}, useMastra: ${useMastra}`);
-        console.debug('[AIChat] Payload context keys:', Object.keys(payload.context));
-        console.debug('[AIChat] Locale:', locale);
-      } catch (_e) {
-        void _e;
-      }
+      logger.log('[AIChat] Request info', {
+        endpoint,
+        useMastra,
+        contextKeys: Object.keys(payload.context),
+        locale,
+      });
 
       // ========================================================================
       // MASTRA PATH: Use SSE streaming
@@ -251,7 +275,7 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
           // SSE messages are processed by useEffect hook
           // Result is set there, so we just need to wait
         } catch (error) {
-          console.error('[AIChat] Mastra stream error:', error);
+          logger.error('[AIChat] Mastra stream error', { error });
           // Error already handled by useEffect
         } finally {
           setIsSending(false);

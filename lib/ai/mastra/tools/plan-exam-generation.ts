@@ -31,16 +31,16 @@ import { estimateGenerationTime } from "../utils";
  */
 const inputSchema = z.object({
   /** Number of questions to generate */
-  numQuestions: z.number().int().min(1).max(50),
+  numQuestions: z.number().int().min(1).max(40),
 
   /** Topics or subjects to cover */
   topics: z.array(z.string()).min(1),
 
   /** Overall difficulty level */
-  difficulty: z.enum(["easy", "medium", "hard", "mixed"]),
+  difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
 
   /** Allowed question types */
-  questionTypes: z.array(QuestionTypeEnum).min(1),
+  questionTypes: z.array(QuestionTypeEnum).min(1).default(["multiple_choice"]),
 
   /** Optional taxonomy levels */
   taxonomyLevels: z.array(TaxonomyLevelEnum).optional(),
@@ -49,7 +49,14 @@ const inputSchema = z.object({
   language: z.enum(["es", "en"]).default("es"),
 
   /** Optional document summaries for context */
-  documentSummaries: z.array(z.any()).optional(),
+  documentSummaries: z
+    .array(
+      z.object({
+        documentId: z.string(),
+        summary: z.record(z.string(), z.unknown()),
+      })
+    )
+    .optional(),
 });
 
 /**
@@ -176,6 +183,15 @@ ${taxonomyLevels && taxonomyLevels.length > 0 ? `- Bloom's taxonomy levels: ${ta
 **OUTPUT LANGUAGE: ${languageName} (ISO 639-1: "${language}")**
 IMPORTANT: All generated content (topics, examplePrompt, etc.) MUST be in ${languageName}.
 
+**BLOOM'S TAXONOMY LEVELS (USE EXACT VALUES):**
+For the "taxonomyLevel" field, use ONE of these EXACT values:
+- "remember": Recall facts, terms, concepts (e.g., "What is X?")
+- "understand": Explain ideas, summarize (e.g., "Explain why...")
+- "apply": Use knowledge in new situations (e.g., "Calculate...")
+- "analyze": Break down, compare (e.g., "Compare X and Y")
+- "evaluate": Judge, critique (e.g., "Which is better?")
+- "create": Design, construct (e.g., "Design a solution...")
+
 **Instructions:**
 For each question in the plan, specify:
 1. **id**: Unique identifier in format "q1", "q2", "q3", etc.
@@ -183,7 +199,7 @@ For each question in the plan, specify:
 3. **examplePrompt**: Example or guidance of what the question should be like (in ${languageName}, NOT the final question)
 4. **type**: Question type (one of: ${questionTypes.join(", ")})
 5. **difficulty**: Specific difficulty level (easy, medium, hard)
-6. **taxonomyLevel**: Bloom's taxonomy level (optional)
+6. **taxonomyLevel**: Bloom's taxonomy level (optional, must use one of the exact values above)
 
 **Recommended distribution:**
 - Balance topics proportionally

@@ -85,7 +85,7 @@ export const QuestionSpecSchema = z.object({
  */
 export const ExamPlanSchema = z.object({
   /** Total number of questions to generate */
-  totalQuestions: z.number().int().min(1).max(50),
+  totalQuestions: z.number().int().min(1).max(40),
 
   /** Array of question specifications */
   questionSpecs: z.array(QuestionSpecSchema).min(1),

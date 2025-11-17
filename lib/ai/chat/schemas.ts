@@ -93,10 +93,11 @@ export const TopicSummarySchema = z.object({
 export const ChatContextSchema = z.object({
   documentIds: z.array(z.string()).max(5).optional().default([]),
   language: z.string().min(2).default("es"),
-  numQuestions: z.number().int().min(1).max(50).optional(),
+  numQuestions: z.number().int().min(1).max(40).optional(),
   questionTypes: z
     .array(z.enum(["multiple_choice", "true_false", "short_answer", "essay"]))
-    .nonempty(),
+    .nonempty()
+    .default(["multiple_choice"]),
   difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
   taxonomy: z
     .array(

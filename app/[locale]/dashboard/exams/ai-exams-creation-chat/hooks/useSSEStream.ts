@@ -14,6 +14,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * SSE Message structure from backend
@@ -126,7 +127,7 @@ export function useSSEStream(): UseSSEStreamReturn {
           const { done, value } = await reader.read();
 
           if (done) {
-            console.log("[useSSEStream] Stream completed");
+            logger.log("[useSSEStream] Stream completed");
             break;
           }
 
@@ -146,7 +147,20 @@ export function useSSEStream(): UseSSEStreamReturn {
                 if (dataStr.trim()) {
                   const data: SSEMessage = JSON.parse(dataStr);
 
-                  console.log("[useSSEStream] Received message:", data.type, data.messageKey);
+                  logger.log("[useSSEStream] Received message", {
+                    type: data.type,
+                    messageKey: data.messageKey
+                  });
+
+                  // Debug done messages
+                  if (data.type === "done" && data.result) {
+                    logger.log("[useSSEStream] Done message result", {
+                      resultType: typeof data.result,
+                      resultLength: typeof data.result === "string" ? data.result.length : "N/A",
+                      resultPreview: typeof data.result === "string" ? data.result.substring(0, 200) : data.result,
+                      finishReason: data.finishReason,
+                    });
+                  }
 
                   // Add message to state
                   setMessages((prev) => [...prev, data]);
@@ -154,11 +168,11 @@ export function useSSEStream(): UseSSEStreamReturn {
                   // Stop streaming on done/error
                   if (data.type === "done" || data.type === "error") {
                     setIsStreaming(false);
-                    console.log("[useSSEStream] Stream finished:", data.type);
+                    logger.log("[useSSEStream] Stream finished", { type: data.type });
                   }
                 }
               } catch (error) {
-                console.error("[useSSEStream] Failed to parse message:", line, error);
+                logger.error("[useSSEStream] Failed to parse message", { line, error });
               }
             }
           }
@@ -166,7 +180,14 @@ export function useSSEStream(): UseSSEStreamReturn {
 
         setIsStreaming(false);
       } catch (error) {
-        console.error("[useSSEStream] Stream error:", error);
+        // Ignore AbortError - it's expected when stream is intentionally stopped
+        if (error instanceof Error && error.name === "AbortError") {
+          logger.log("[useSSEStream] Stream aborted (intentional)");
+          setIsStreaming(false);
+          return;
+        }
+
+        logger.error("[useSSEStream] Stream error", { error });
 
         // Add error message
         const errorMessage: SSEMessage = {
@@ -177,11 +198,6 @@ export function useSSEStream(): UseSSEStreamReturn {
 
         setMessages((prev) => [...prev, errorMessage]);
         setIsStreaming(false);
-
-        // Re-throw if not aborted
-        if (error instanceof Error && error.name !== "AbortError") {
-          throw error;
-        }
       }
     },
     []
@@ -191,7 +207,7 @@ export function useSSEStream(): UseSSEStreamReturn {
    * Stop current stream
    */
   const stopStream = useCallback(() => {
-    console.log("[useSSEStream] Stopping stream");
+    logger.log("[useSSEStream] Stopping stream");
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();

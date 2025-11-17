@@ -46,7 +46,14 @@ const inputSchema = z.object({
   language: z.enum(["es", "en"]).default("es"),
 
   /** Optional document summaries */
-  documentSummaries: z.array(z.any()).optional(),
+  documentSummaries: z
+    .array(
+      z.object({
+        documentId: z.string(),
+        summary: z.record(z.string(), z.unknown()),
+      })
+    )
+    .optional(),
 
   /** Additional instructions */
   additionalInstructions: z.string().optional(),

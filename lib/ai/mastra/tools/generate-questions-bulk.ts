@@ -35,7 +35,14 @@ const inputSchema = z.object({
   context: z
     .object({
       /** Document summaries for context */
-      documentSummaries: z.array(z.any()).optional(),
+      documentSummaries: z
+        .array(
+          z.object({
+            documentId: z.string(),
+            summary: z.record(z.string(), z.unknown()),
+          })
+        )
+        .optional(),
 
       /** Language for generation (ISO 639-1) */
       language: z.enum(["es", "en"]).default("es"),
@@ -235,6 +242,15 @@ function buildSystemPrompt(language: string): string {
 **OUTPUT LANGUAGE: ${languageName} (ISO 639-1: "${language}")**
 ALL question content (prompt, options, answer, rationale, tags) MUST be in ${languageName}.
 
+**BLOOM'S TAXONOMY LEVELS (MANDATORY - USE EXACT VALUES):**
+The "taxonomy" field must be ONE of these EXACT values:
+- "remember": Recall facts, terms, concepts, definitions (e.g., "What is X?", "Define Y")
+- "understand": Explain ideas, summarize, classify (e.g., "Explain why...", "Summarize...")
+- "apply": Use knowledge in new situations (e.g., "Calculate...", "Apply this formula...")
+- "analyze": Break down, compare, contrast (e.g., "Compare X and Y", "Analyze the cause...")
+- "evaluate": Judge, critique, justify (e.g., "Evaluate the effectiveness...", "Which approach is best?")
+- "create": Design, construct, generate (e.g., "Design a solution...", "Create a plan...")
+
 **CRITICAL RULES:**
 1. Return EXCLUSIVELY valid JSON, without comments or external explanations
 2. FORBIDDEN to use Markdown or code fences (do not use \`\`\`json)
@@ -244,6 +260,7 @@ ALL question content (prompt, options, answer, rationale, tags) MUST be in ${lan
 6. Tags must be in ${languageName} (e.g., ${exampleTags})
 7. If using mathematical/chemical formulas or expressions, represent them in LaTeX with $...$ (inline) or \\[...\\] (display)
 8. Don't add extra backslashes; JSON escaping is applied automatically
+9. The "taxonomy" field is MANDATORY and must use one of the exact values listed above
 
 **OUTPUT FORMAT:**
 Return a JSON array of questions. Example (in ${languageName}):

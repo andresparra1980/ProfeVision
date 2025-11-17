@@ -126,8 +126,15 @@
     "system": "System",
     "progress": {
       "step": "Processing...",
+      "planning": "Planning exam...",
+      "generating": "Generating questions...",
+      "validating": "Validating results...",
+      "randomizing": "Randomizing options...",
+      "regenerating": "Regenerating question...",
+      "adding": "Adding questions...",
       "completed": "Generation completed"
     },
+    "examGenerated": "✨ Exam generated successfully with {count} questions. Review the results in the Results panel.",
     "error": {
       "generation": "Error generating exam",
       "connection": "Connection error"

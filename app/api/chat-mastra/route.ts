@@ -31,15 +31,16 @@ export const runtime = "nodejs";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Mastra agent types
-interface MastraToolCall {
-  toolName: string;
-  args: unknown;
-}
-
+// Mastra agent types - minimal interface for what we use
 interface MastraStepEvent {
   text?: string;
-  toolCalls?: MastraToolCall[];
+  toolCalls?: Array<{
+    type?: string;
+    payload?: {
+      toolName?: string;
+      args?: unknown;
+    };
+  }>;
 }
 
 /**
@@ -215,35 +216,72 @@ export async function POST(req: NextRequest) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
+        // Capture steps in real-time for error recovery
+        const capturedSteps: unknown[] = [];
+
         try {
           logger.api("Starting agent generation", { userId, locale });
 
-          // Convert messages to Mastra format
-          const mastraMessages = messages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          }));
+          // Convert messages to Mastra format (array of content strings)
+          const mastraMessages = messages.map((msg) => msg.content);
+
+          // Inject current exam context if available (local-first: frontend is source of truth)
+          if (context.existingExam) {
+            const examContext = `[CURRENT_EXAM]
+The user currently has an exam with the following structure:
+${JSON.stringify(context.existingExam.exam, null, 2)}
+
+IMPORTANT: When using regenerateQuestion or addQuestions tools, you MUST pass this exam as the 'currentExam' parameter to maintain topic coherence.
+[/CURRENT_EXAM]`;
+
+            // Prepend to messages so agent sees it
+            mastraMessages.unshift(examContext);
+          }
 
           // Generate with agent
           const result = await agent.generate(mastraMessages, {
-            maxSteps: 10,
-            onStepFinish: async (event: MastraStepEvent) => {
+            maxSteps: 15, // Increased to ensure all workflow steps complete
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onStepFinish: async (event: any) => {
+              const stepEvent = event as MastraStepEvent;
+
+              // Capture step for error recovery
+              capturedSteps.push(stepEvent);
+
               // Log step completion
               logger.perf("Agent step completed", {
                 userId,
-                text: event.text?.slice(0, 100),
-                toolCalls: event.toolCalls?.length || 0,
+                text: stepEvent.text?.slice(0, 100),
+                toolCalls: stepEvent.toolCalls?.length || 0,
               });
 
               // Send progress event to client
               // IMPORTANT: Use i18n keys, not hardcoded text
+              // Determine message key based on tool being executed
+              let messageKey = "chat.progress.step";
+              const firstToolCall = stepEvent.toolCalls?.[0];
+
+              if (firstToolCall?.payload?.toolName) {
+                const toolName = firstToolCall.payload.toolName;
+                const toolToMessageKey: Record<string, string> = {
+                  planExamGeneration: "chat.progress.planning",
+                  generateQuestionsInBulk: "chat.progress.generating",
+                  validateAndOrganizeExam: "chat.progress.validating",
+                  randomizeOptions: "chat.progress.randomizing",
+                  regenerateQuestion: "chat.progress.regenerating",
+                  addQuestions: "chat.progress.adding",
+                };
+
+                messageKey = toolToMessageKey[toolName] || "chat.progress.step";
+              }
+
               const progressData = {
                 type: "progress",
-                messageKey: "chat.progress.step",
-                text: event.text,
-                toolCalls: event.toolCalls?.map((tc: MastraToolCall) => ({
-                  name: tc.toolName,
-                  args: tc.args,
+                messageKey,
+                text: stepEvent.text,
+                toolCalls: stepEvent.toolCalls?.map((tc) => ({
+                  name: tc.payload?.toolName,
+                  args: tc.payload?.args,
                 })),
               };
 
@@ -253,13 +291,428 @@ export async function POST(req: NextRequest) {
             },
           });
 
+          // Extract exam result from tool calls
+          // Look for exam output in priority order:
+          // 1. validateAndOrganizeExam (ideal - validated exam)
+          // 2. randomizeOptions (has exam structure)
+          // 3. generateQuestionsInBulk (has questions array)
+          // 4. regenerateQuestion (single question - needs fusion)
+          // 5. addQuestions (new questions - needs fusion)
+          let examResult = null;
+          const toolPriority = [
+            "validateAndOrganizeExam",
+            "randomizeOptions",
+            "generateQuestionsInBulk",
+            "regenerateQuestion",
+            "addQuestions",
+          ];
+
+          // Type-safe access to result properties
+          const steps = (result as { steps?: unknown[] }).steps;
+
+          // Log top-level result structure
+          logger.api("Top-level result keys", {
+            userId,
+            resultKeys: Object.keys(result as object),
+            hasSteps: !!steps,
+            stepsLength: Array.isArray(steps) ? steps.length : 0,
+          });
+
+          // Log raw steps structure for debugging
+          if (steps && Array.isArray(steps)) {
+            logger.api("Raw steps structure", {
+              userId,
+              stepCount: steps.length,
+              stepsDetail: steps.map((s, idx) => {
+                const step = s as Record<string, unknown>;
+                return {
+                  stepIndex: idx,
+                  keys: Object.keys(step),
+                  hasToolCalls: !!step.toolCalls,
+                  toolCallsType: Array.isArray(step.toolCalls) ? 'array' : typeof step.toolCalls,
+                  toolCallsLength: Array.isArray(step.toolCalls) ? step.toolCalls.length : 0,
+                  firstToolCall: Array.isArray(step.toolCalls) && step.toolCalls.length > 0
+                    ? JSON.stringify(step.toolCalls[0]).substring(0, 200)
+                    : null,
+                };
+              }),
+            });
+
+            // Log COMPLETE structure of last step to find where results are
+            if (steps.length > 0) {
+              const lastStep = steps[steps.length - 1] as Record<string, unknown>;
+              logger.api("COMPLETE last step structure", {
+                userId,
+                fullStep: JSON.stringify(lastStep, null, 2),
+              });
+            }
+          }
+
+          // Log all tool calls for debugging
+          let toolCallsExecuted: string[] = [];
+          if (steps && Array.isArray(steps)) {
+            toolCallsExecuted = steps
+              .flatMap((s) => {
+                const step = s as {
+                  toolCalls?: Array<{
+                    payload?: { toolName?: string };
+                  }>;
+                };
+                return step.toolCalls?.map((tc) => tc.payload?.toolName || "") || [];
+              })
+              .filter((tc) => tc !== "");
+
+            logger.api("Tool calls executed", {
+              userId,
+              stepCount: steps.length,
+              toolCalls: toolCallsExecuted,
+            });
+          }
+
+          if (steps && Array.isArray(steps) && steps.length > 0) {
+            // Try each tool in priority order
+            for (const toolName of toolPriority) {
+              // Search from last to first step
+              for (let i = steps.length - 1; i >= 0; i--) {
+                const step = steps[i] as {
+                  text?: string;
+                  toolCalls?: Array<{
+                    type?: string;
+                    payload?: {
+                      toolCallId?: string;
+                      toolName?: string;
+                      args?: unknown;
+                    };
+                  }>;
+                  toolResults?: Array<{
+                    type?: string;
+                    payload?: {
+                      toolCallId?: string;
+                      result?: unknown;
+                    };
+                  }>;
+                };
+
+                logger.api("Checking step for tool result", {
+                  userId,
+                  stepIndex: i,
+                  lookingFor: toolName,
+                  hasToolCalls: !!step.toolCalls,
+                  hasToolResults: !!step.toolResults,
+                  toolCallsCount: step.toolCalls?.length || 0,
+                  toolResultsCount: step.toolResults?.length || 0,
+                });
+
+                // Match toolCalls with toolResults
+                if (step.toolCalls && step.toolResults && step.toolCalls.length > 0) {
+                  for (const toolCall of step.toolCalls) {
+                    const actualToolName = toolCall.payload?.toolName;
+                    const toolCallId = toolCall.payload?.toolCallId;
+
+                    if (actualToolName === toolName) {
+                      // Find matching result
+                      const matchingResult = step.toolResults.find(
+                        (tr) => tr.payload?.toolCallId === toolCallId
+                      );
+
+                      logger.api("Inspecting tool call and result", {
+                        userId,
+                        toolCallName: actualToolName,
+                        toolCallId,
+                        hasMatchingResult: !!matchingResult,
+                        lookingFor: toolName,
+                        matches: actualToolName === toolName,
+                      });
+
+                      if (matchingResult?.payload?.result) {
+                        const result = matchingResult.payload.result;
+
+                        // Handle different tool output formats
+                        if (toolName === "generateQuestionsInBulk") {
+                          // generateQuestionsInBulk returns { questions: [...], metadata: {...} }
+                          // We need to wrap it in exam structure
+                          const bulkResult = result as {
+                            questions?: unknown[];
+                            metadata?: unknown;
+                          };
+                          if (
+                            bulkResult.questions &&
+                            Array.isArray(bulkResult.questions) &&
+                            bulkResult.questions.length > 0
+                          ) {
+                            examResult = {
+                              exam: {
+                                title: "",
+                                subject: "",
+                                level: "",
+                                language: locale,
+                                questions: bulkResult.questions,
+                              },
+                            };
+                          }
+                        } else if (toolName === "regenerateQuestion") {
+                          // regenerateQuestion returns { question: {...}, metadata: { questionId, changes } }
+                          // We need to merge it with existing exam
+                          const regenerateResult = result as {
+                            question?: unknown;
+                            metadata?: { questionId?: string; changes?: string };
+                          };
+
+                          if (regenerateResult.question && regenerateResult.metadata?.questionId && context.existingExam) {
+                            const updatedQuestions = context.existingExam.exam.questions.map((q: { id: string }) =>
+                              q.id === regenerateResult.metadata?.questionId
+                                ? regenerateResult.question
+                                : q
+                            );
+
+                            examResult = {
+                              exam: {
+                                ...context.existingExam.exam,
+                                questions: updatedQuestions,
+                              },
+                            };
+
+                            logger.api("Merged regenerated question with existing exam", {
+                              userId,
+                              questionId: regenerateResult.metadata.questionId,
+                              totalQuestions: updatedQuestions.length,
+                            });
+                          } else {
+                            logger.warn("regenerateQuestion result incomplete or no existing exam", {
+                              userId,
+                              hasQuestion: !!regenerateResult.question,
+                              hasQuestionId: !!regenerateResult.metadata?.questionId,
+                              hasExistingExam: !!context.existingExam,
+                            });
+                          }
+                        } else if (toolName === "addQuestions") {
+                          // addQuestions returns { questions: [...], metadata: {...} }
+                          // We need to append to existing exam
+                          const addResult = result as {
+                            questions?: unknown[];
+                            metadata?: { requested?: number; generated?: number };
+                          };
+
+                          if (addResult.questions && Array.isArray(addResult.questions) && context.existingExam) {
+                            examResult = {
+                              exam: {
+                                ...context.existingExam.exam,
+                                questions: [...context.existingExam.exam.questions, ...addResult.questions],
+                              },
+                            };
+
+                            logger.api("Merged added questions with existing exam", {
+                              userId,
+                              addedCount: addResult.questions.length,
+                              totalQuestions: examResult.exam.questions.length,
+                            });
+                          } else {
+                            logger.warn("addQuestions result incomplete or no existing exam", {
+                              userId,
+                              hasQuestions: !!addResult.questions,
+                              questionsCount: addResult.questions?.length || 0,
+                              hasExistingExam: !!context.existingExam,
+                            });
+                          }
+                        } else if (toolName === "validateAndOrganizeExam") {
+                          // validateAndOrganizeExam returns { exam: ExamSchema, corrections, metadata }
+                          // Extract just the ExamSchema
+                          const validateResult = result as { exam?: unknown };
+                          examResult = validateResult.exam || result;
+                        } else {
+                          // Other tools return exam directly
+                          examResult = result;
+                        }
+
+                        logger.api("Exam result extracted from tool result", {
+                          userId,
+                          toolName,
+                          hasExamStructure: !!examResult,
+                        });
+                        break;
+                      }
+                    }
+                  }
+                  if (examResult) break;
+                }
+              }
+              if (examResult) break;
+            }
+          }
+
+          // Always execute randomization (agent no longer has randomizeOptions tool)
+          // If validation wasn't executed by agent, we'll do it here too
+          const needsValidation = examResult && !toolCallsExecuted.includes("validateAndOrganizeExam");
+          const needsRandomization = examResult && true; // Always randomize
+
+          if (needsValidation || needsRandomization) {
+            logger.api("Manually executing fallback pipeline", {
+              userId,
+              needsValidation,
+              needsRandomization,
+              toolCallsFound: toolCallsExecuted,
+            });
+
+            try {
+              // Get the tools
+              const { validateAndOrganizeExamTool, randomizeOptionsTool } =
+                await import("@/lib/ai/mastra/tools");
+
+              // Extract questions from exam result
+              const examData = examResult as {
+                exam?: { questions?: unknown[]; exam?: unknown };
+                corrections?: unknown[];
+                metadata?: unknown;
+              };
+
+              // Extract ExamSchema from validateAndOrganizeExam result
+              // validateAndOrganizeExam returns { exam: ExamSchema, corrections, metadata }
+              // We need just the ExamSchema for randomization
+              let examToRandomize = examData.exam || examResult;
+
+              // Log extracted exam structure
+              logger.api("Extracted exam structure before pipeline", {
+                userId,
+                examResultKeys: examResult ? Object.keys(examResult) : [],
+                examToRandomizeKeys: examToRandomize ? Object.keys(examToRandomize as object) : [],
+                hasExam: !!(examResult as { exam?: unknown }).exam,
+              });
+
+              // Step 1: Validate if needed
+              if (needsValidation && examData.exam?.questions && validateAndOrganizeExamTool?.execute) {
+                const validateResult = await validateAndOrganizeExamTool.execute({
+                  context: {
+                    questions: examData.exam.questions as Record<string, unknown>[],
+                    metadata: {
+                      title: "",
+                      subject: "",
+                      level: "",
+                      language: locale,
+                    },
+                    normalizeIds: true,
+                    applySanitization: true,
+                  },
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  runtimeContext: null as any,
+                });
+
+                logger.api("Manual validate completed", {
+                  userId,
+                  validQuestions: validateResult.metadata.validQuestions,
+                });
+
+                examToRandomize = validateResult.exam;
+              }
+
+              // Step 2: Always randomize
+              if (examToRandomize && randomizeOptionsTool?.execute) {
+                logger.api("Passing to randomize", {
+                  userId,
+                  examToRandomizeKeys: Object.keys(examToRandomize as object),
+                });
+
+                try {
+                  const randomizeResult = await randomizeOptionsTool.execute({
+                    context: {
+                      exam: examToRandomize, // examToRandomize already has correct structure { exam: { questions } }
+                      multipleChoiceOnly: true,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    } as any,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    runtimeContext: null as any,
+                  });
+
+                  // Log structure for debugging
+                  logger.api("Randomize result structure", {
+                    userId,
+                    resultKeys: Object.keys(randomizeResult),
+                    hasExam: !!randomizeResult.exam,
+                    hasMetadata: !!randomizeResult.metadata,
+                    examKeys: randomizeResult.exam ? Object.keys(randomizeResult.exam as object) : [],
+                  });
+
+                  logger.api("Manual randomize completed", {
+                    userId,
+                    questionsRandomized:
+                      randomizeResult.metadata?.questionsRandomized ?? "unknown",
+                  });
+
+                  // Update exam result with randomized version
+                  // randomizeResult = { exam: ExamSchema, metadata }
+                  // We only need the ExamSchema part: { exam: { title, questions } }
+                  if (randomizeResult.exam) {
+                    examResult = randomizeResult.exam;
+                    logger.api("Exam result updated with randomized version", {
+                      userId,
+                      examResultKeys: Object.keys(examResult as object),
+                    });
+                  } else {
+                    logger.warn("Randomize returned no exam, keeping original examResult", {
+                      userId,
+                      hadExamBefore: !!examResult,
+                    });
+                  }
+                } catch (randomizeError) {
+                  logger.error("Randomization failed, using non-randomized exam", {
+                    userId,
+                    error: randomizeError,
+                    hadExamBefore: !!examResult,
+                  });
+                  // Keep examResult as is (non-randomized but valid)
+                }
+              }
+            } catch (error) {
+              logger.error("Manual pipeline execution failed", {
+                error,
+                userId,
+              });
+              // Continue with original examResult
+            }
+          }
+
+          // If exam result found, send as JSON string, otherwise send agent text
+          const resultText = (result as { text?: string }).text || "";
+          const finishReason = (result as { finishReason?: string }).finishReason;
+
+          // Debug examResult state before sending
+          logger.api("Final examResult state before sending", {
+            userId,
+            hasExamResult: !!examResult,
+            examResultType: typeof examResult,
+            examResultKeys: examResult ? Object.keys(examResult as object) : [],
+            examResultPreview: examResult ? JSON.stringify(examResult).substring(0, 200) : "null",
+          });
+
+          const resultContent = examResult
+            ? JSON.stringify(examResult)
+            : resultText;
+
+          // Debug what we're sending (normal path)
+          if (examResult) {
+            logger.api("Sending exam to frontend (normal path)", {
+              userId,
+              resultLength: resultContent.length,
+              resultPreview: resultContent.substring(0, 200),
+              hasExamKey: resultContent.includes('"exam"'),
+              hasQuestionsKey: resultContent.includes('"questions"'),
+              examResultKeys: Object.keys(examResult),
+            });
+          } else {
+            logger.api("Sending text response to frontend (no exam)", {
+              userId,
+              textLength: resultText.length,
+              textPreview: resultText.substring(0, 200),
+              finishReason,
+            });
+          }
+
           // Send final result
           const finalData = {
             type: "done",
             messageKey: "chat.progress.completed",
-            result: result.text,
-            finishReason: result.finishReason,
-            steps: result.steps?.length || 0,
+            result: resultContent,
+            finishReason,
+            steps: steps?.length || 0,
           };
 
           controller.enqueue(
@@ -268,8 +721,9 @@ export async function POST(req: NextRequest) {
 
           logger.api("Agent generation completed", {
             userId,
-            steps: result.steps?.length || 0,
-            finishReason: result.finishReason,
+            steps: steps?.length || 0,
+            finishReason,
+            examGenerated: !!examResult,
           });
 
           controller.close();
@@ -285,17 +739,186 @@ export async function POST(req: NextRequest) {
         } catch (error) {
           logger.error("Agent generation error", { error, userId });
 
-          // Send error event to client
-          const errorData = {
-            type: "error",
-            messageKey: "chat.error.generation",
-            error: error instanceof Error ? error.message : "Unknown error",
-          };
+          // ================================================================
+          // FALLBACK: Try to salvage partial results from captured steps
+          // ================================================================
+          // If the agent failed during randomization but successfully
+          // completed validation, we can still recover the exam
+          let recoveredExam = null;
 
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`)
-          );
-          controller.close();
+          try {
+            // Use captured steps from onStepFinish
+            if (capturedSteps.length > 0) {
+              logger.api("Attempting to recover from partial results", {
+                userId,
+                stepCount: capturedSteps.length,
+              });
+
+              // Try to extract generated questions from steps (before validation failed)
+              // Look for generateQuestionsInBulk result to recover from
+              for (let i = capturedSteps.length - 1; i >= 0; i--) {
+                const step = capturedSteps[i] as {
+                  toolCalls?: Array<{
+                    payload?: {
+                      toolCallId?: string;
+                      toolName?: string;
+                    };
+                  }>;
+                  toolResults?: Array<{
+                    payload?: {
+                      toolCallId?: string;
+                      result?: unknown;
+                    };
+                  }>;
+                };
+
+                if (step.toolCalls && step.toolResults) {
+                  for (const toolCall of step.toolCalls) {
+                    const actualToolName = toolCall.payload?.toolName;
+                    const toolCallId = toolCall.payload?.toolCallId;
+
+                    // Look for generateQuestionsInBulk result (this completed successfully)
+                    if (actualToolName === "generateQuestionsInBulk") {
+                      const matchingResult = step.toolResults.find(
+                        (tr) => tr.payload?.toolCallId === toolCallId
+                      );
+
+                      if (matchingResult?.payload?.result) {
+                        logger.api("Found generated questions in error steps", {
+                          userId,
+                          toolName: actualToolName,
+                        });
+
+                        // Execute complete pipeline: validate + randomize
+                        const { validateAndOrganizeExamTool, randomizeOptionsTool } =
+                          await import("@/lib/ai/mastra/tools");
+
+                        const bulkResult = matchingResult.payload.result as {
+                          questions?: unknown[];
+                          metadata?: unknown;
+                        };
+
+                        if (bulkResult.questions && validateAndOrganizeExamTool?.execute && randomizeOptionsTool?.execute) {
+                          // Step 1: Validate
+                          logger.api("Manually executing validate (recovery)", { userId });
+
+                          const validateResult = await validateAndOrganizeExamTool.execute({
+                            context: {
+                              questions: bulkResult.questions as Record<string, unknown>[],
+                              metadata: {
+                                title: "",
+                                subject: "",
+                                level: "",
+                                language: locale,
+                              },
+                              normalizeIds: true,
+                              applySanitization: true,
+                            },
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            runtimeContext: null as any,
+                          });
+
+                          logger.api("Manual validate completed (recovery)", {
+                            userId,
+                            validQuestions: validateResult.metadata.validQuestions,
+                          });
+
+                          // Step 2: Randomize
+                          const examToPass = validateResult.exam.exam || validateResult.exam;
+
+                          logger.api("Manually executing randomize (recovery)", { userId });
+
+                          const randomizeResult = await randomizeOptionsTool.execute({
+                            context: {
+                              exam: examToPass,
+                              multipleChoiceOnly: true,
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            } as any,
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            runtimeContext: null as any,
+                          });
+
+                          logger.api("Manual randomize completed (recovery)", {
+                            userId,
+                            questionsRandomized: randomizeResult.metadata?.questionsRandomized ?? "unknown",
+                          });
+
+                          recoveredExam = randomizeResult.exam;
+
+                          // Debug recovered exam structure
+                          logger.api("Successfully recovered exam from error", {
+                            userId,
+                            recoveredExamKeys: recoveredExam ? Object.keys(recoveredExam) : [],
+                            hasExam: !!(recoveredExam as { exam?: unknown })?.exam,
+                            hasQuestions: Array.isArray((recoveredExam as { exam?: { questions?: unknown[] } })?.exam?.questions),
+                            questionCount: ((recoveredExam as { exam?: { questions?: unknown[] } })?.exam?.questions || []).length,
+                          });
+                          break;
+                        }
+                      }
+                    }
+                  }
+                  if (recoveredExam) break;
+                }
+              }
+            }
+          } catch (recoveryError) {
+            logger.error("Failed to recover from error", { error: recoveryError, userId });
+          }
+
+          // If we recovered an exam, send it as success
+          if (recoveredExam) {
+            const resultString = JSON.stringify(recoveredExam);
+
+            // Debug what we're sending
+            logger.api("Sending recovered exam to frontend", {
+              userId,
+              resultLength: resultString.length,
+              resultPreview: resultString.substring(0, 200),
+              hasExamKey: resultString.includes('"exam"'),
+              hasQuestionsKey: resultString.includes('"questions"'),
+            });
+
+            const successData = {
+              type: "done",
+              messageKey: "chat.progress.completed",
+              result: resultString,
+              finishReason: "recovered",
+              steps: 4,
+            };
+
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(successData)}\n\n`)
+            );
+
+            logger.api("Agent generation recovered from error", {
+              userId,
+              examGenerated: true,
+            });
+
+            controller.close();
+
+            // Increment usage counter (async, non-blocking)
+            TierService.incrementUsage(supabase, userId, "ai_generation", 1)
+              .then(() => {
+                logger.api("Usage incremented", { userId });
+              })
+              .catch((err) => {
+                logger.error("Failed to increment usage", { error: err, userId });
+              });
+          } else {
+            // No recovery possible, send error
+            const errorData = {
+              type: "error",
+              messageKey: "chat.error.generation",
+              error: error instanceof Error ? error.message : "Unknown error",
+            };
+
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`)
+            );
+            controller.close();
+          }
         }
       },
     });
