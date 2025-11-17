@@ -37,6 +37,7 @@ import { useChatMessages } from "../hooks/useChatMessages";
 import { DocumentChips } from "./DocumentChips";
 import { SummaryDialog } from "./SummaryDialog";
 import { EmptyState } from "./EmptyState";
+import { ProgressMessages } from "./ProgressMessages";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { LimitReachedModal } from "@/components/shared/limit-reached-modal";
 
@@ -99,7 +100,7 @@ export default function ChatPanel() {
 
   // Custom hooks for managing state
   const documentContext = useDocumentContext();
-  const { messages, isSending, sendMessage } = useChatMessages({
+  const { messages, isSending, sendMessage, progressMessages } = useChatMessages({
     settings,
     result,
     setResult: (r) => setResult(r as AIExamResult | null),
@@ -257,7 +258,11 @@ export default function ChatPanel() {
               {isSending && (
                 <Message from="assistant">
                   <MessageContent>
-                    <ConversationTyping className="pl-2" />
+                    {progressMessages.length > 0 ? (
+                      <ProgressMessages messages={progressMessages} />
+                    ) : (
+                      <ConversationTyping className="pl-2" />
+                    )}
                   </MessageContent>
                 </Message>
               )}
