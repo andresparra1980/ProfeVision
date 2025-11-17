@@ -44,6 +44,8 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
       if (!obj || typeof obj !== 'object') return undefined;
       const cloned = JSON.parse(JSON.stringify(obj));
       if (!cloned.exam || !Array.isArray(cloned.exam.questions)) return undefined;
+      // If questions array is empty, don't send existingExam
+      if (cloned.exam.questions.length === 0) return undefined;
       const allowedDifficulty = new Set(['easy', 'medium', 'hard']);
       for (const q of cloned.exam.questions) {
         if (!allowedDifficulty.has(q.difficulty)) q.difficulty = 'medium';
