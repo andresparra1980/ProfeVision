@@ -1,23 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { loadLastDocumentsContext, loadOutput } from '@/lib/persistence/browser';
+import { useSSEStream, type SSEMessage } from './useSSEStream';
 
 interface ChatMessage {
   role: 'user' | 'system' | 'assistant';
   content: string;
 }
 
+interface ProgressMessage {
+  id: string;
+  text: string;
+  emoji?: string;
+  timestamp: number;
+}
+
 interface UseChatMessagesProps {
   settings: { language?: string };
   result: unknown;
   setResult: (_result: unknown) => void;
-  t: (_key: string, _options?: { fallback?: string }) => string;
+  t: (_key: string, _options?: { fallback?: string } | Record<string, any>) => string;
 }
 
 export function useChatMessages({ settings, result, setResult, t }: UseChatMessagesProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const [progressMessages, setProgressMessages] = useState<ProgressMessage[]>([]);
+
+  // Detect locale with next-intl
+  const locale = useLocale();
+
+  // Use SSE stream for Mastra
+  const { isStreaming, messages: sseMessages, startStream, stopStream, clearMessages } = useSSEStream();
+
+  // Determine which endpoint to use
+  const useMastra = process.env.NEXT_PUBLIC_AI_CHAT_MASTRA === 'true';
+  const endpoint = useMastra ? '/api/chat-mastra' : '/api/chat';
 
   const sanitizeExistingExam = (obj: unknown) => {
     try {
@@ -46,11 +66,118 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
     }
   };
 
+  /**
+   * Process SSE messages for Mastra
+   * - Convert messageKey to translated text using i18n
+   * - Update progress messages
+   * - Handle done/error events
+   */
+  useEffect(() => {
+    if (!useMastra || sseMessages.length === 0) return;
+
+    const latest = sseMessages[sseMessages.length - 1];
+
+    // Handle progress messages
+    if (latest.type === 'progress') {
+      const text = latest.messageKey
+        ? t(latest.messageKey, latest.params || {})
+        : latest.text || 'Processing...';
+
+      const emoji = getEmojiForMessage(latest);
+
+      setProgressMessages((prev) => [
+        ...prev,
+        {
+          id: `progress-${Date.now()}`,
+          text,
+          emoji,
+          timestamp: Date.now(),
+        },
+      ]);
+    }
+
+    // Handle completion
+    if (latest.type === 'done') {
+      const successText = latest.messageKey
+        ? t(latest.messageKey, latest.params || {})
+        : t('chat.toasts.successTitle');
+
+      try {
+        toast.success(t('chat.toasts.successTitle'), {
+          description: t('chat.toasts.successDesc'),
+        });
+      } catch (_e) {
+        void _e;
+      }
+
+      // Parse result if available
+      if (latest.result) {
+        try {
+          setResult(JSON.parse(latest.result));
+        } catch {
+          // Result might already be an object
+          setResult(latest.result);
+        }
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: successText },
+      ]);
+
+      setProgressMessages([]);
+      clearMessages();
+    }
+
+    // Handle errors
+    if (latest.type === 'error') {
+      const errorText = latest.messageKey
+        ? t(latest.messageKey, latest.params || {})
+        : latest.error || t('chat.toasts.errorDesc');
+
+      try {
+        toast.error(t('chat.toasts.errorTitle'), {
+          description: errorText,
+        });
+      } catch (_e) {
+        void _e;
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: `Error: ${errorText}` },
+      ]);
+
+      setProgressMessages([]);
+      clearMessages();
+    }
+  }, [sseMessages, useMastra, t, clearMessages, setResult]);
+
+  /**
+   * Get emoji for progress message based on tool call
+   */
+  const getEmojiForMessage = (msg: SSEMessage): string => {
+    if (!msg.toolCalls || msg.toolCalls.length === 0) return '⚙️';
+
+    const toolName = msg.toolCalls[0].name;
+    const emojiMap: Record<string, string> = {
+      planExamGeneration: '📋',
+      generateQuestionsInBulk: '🔄',
+      validateAndOrganizeExam: '✅',
+      randomizeOptions: '🎲',
+      regenerateQuestion: '🔄',
+      addQuestions: '➕',
+    };
+
+    return emojiMap[toolName] || '⚙️';
+  };
+
   const sendMessage = async (input: string) => {
     if (!input.trim()) return;
     const next = [...messages, { role: 'user', content: input.trim() } as ChatMessage];
     setMessages(next);
     setIsSending(true);
+    setProgressMessages([]);
 
     try {
       const { data } = await supabase.auth.getSession();
@@ -85,7 +212,7 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
         messages: next.map((m) => ({ role: m.role, content: m.content })),
         context: {
           documentIds: Array.isArray(documentIds) ? documentIds : [],
-          language: settings.language ?? 'es',
+          language: locale || settings.language || 'es', // Use locale from next-intl
           questionTypes: ['multiple_choice'],
           difficulty: 'mixed' as const,
           taxonomy: [],
@@ -95,12 +222,34 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
       } as const;
 
       try {
+        console.debug(`[AIChat] Endpoint: ${endpoint}, useMastra: ${useMastra}`);
         console.debug('[AIChat] Payload context keys:', Object.keys(payload.context));
+        console.debug('[AIChat] Locale:', locale);
       } catch (_e) {
         void _e;
       }
 
-      const res = await fetch('/api/chat', {
+      // ========================================================================
+      // MASTRA PATH: Use SSE streaming
+      // ========================================================================
+      if (useMastra) {
+        try {
+          await startStream(endpoint, payload, token);
+          // SSE messages are processed by useEffect hook
+          // Result is set there, so we just need to wait
+        } catch (error) {
+          console.error('[AIChat] Mastra stream error:', error);
+          // Error already handled by useEffect
+        } finally {
+          setIsSending(false);
+        }
+        return;
+      }
+
+      // ========================================================================
+      // LEGACY PATH: Use regular fetch
+      // ========================================================================
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +325,8 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
 
   return {
     messages,
-    isSending,
+    isSending: isSending || isStreaming,
     sendMessage,
+    progressMessages, // New: for showing progress during streaming
   };
 }
