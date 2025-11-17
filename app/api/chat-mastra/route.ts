@@ -870,9 +870,14 @@ INSTRUCTIONS:
                           });
 
                           // Step 2: Randomize
-                          const examToPass = validateResult.exam.exam || validateResult.exam;
+                          // validateResult.exam already has correct structure: { exam: { questions: [] } }
+                          const examToPass = validateResult.exam;
 
-                          logger.api("Manually executing randomize (recovery)", { userId });
+                          logger.api("Manually executing randomize (recovery)", {
+                            userId,
+                            examToPassKeys: examToPass ? Object.keys(examToPass) : [],
+                            hasExamKey: !!(examToPass as { exam?: unknown })?.exam,
+                          });
 
                           const randomizeResult = await randomizeOptionsTool.execute({
                             context: {
@@ -889,6 +894,7 @@ INSTRUCTIONS:
                             questionsRandomized: randomizeResult.metadata?.questionsRandomized ?? "unknown",
                           });
 
+                          // randomizeResult.exam has structure: { exam: { questions: [] } }
                           recoveredExam = randomizeResult.exam;
 
                           // Debug recovered exam structure
@@ -898,6 +904,8 @@ INSTRUCTIONS:
                             hasExam: !!(recoveredExam as { exam?: unknown })?.exam,
                             hasQuestions: Array.isArray((recoveredExam as { exam?: { questions?: unknown[] } })?.exam?.questions),
                             questionCount: ((recoveredExam as { exam?: { questions?: unknown[] } })?.exam?.questions || []).length,
+                            // More detailed logging
+                            examStructure: recoveredExam ? JSON.stringify(recoveredExam).substring(0, 300) : "null",
                           });
                           break;
                         }
@@ -914,16 +922,18 @@ INSTRUCTIONS:
 
           // If we recovered an exam, send it as success
           if (recoveredExam) {
-            const resultString = JSON.stringify(recoveredExam);
+            // Verify structure before sending
+            const hasValidStructure = !!(recoveredExam as { exam?: unknown })?.exam;
+            const questionCount = ((recoveredExam as { exam?: { questions?: unknown[] } })?.exam?.questions || []).length;
 
-            // Debug what we're sending
             logger.api("Sending recovered exam to frontend", {
               userId,
-              resultLength: resultString.length,
-              resultPreview: resultString.substring(0, 200),
-              hasExamKey: resultString.includes('"exam"'),
-              hasQuestionsKey: resultString.includes('"questions"'),
+              hasValidStructure,
+              questionCount,
+              recoveredExamKeys: Object.keys(recoveredExam),
             });
+
+            const resultString = JSON.stringify(recoveredExam);
 
             const successData = {
               type: "done",
