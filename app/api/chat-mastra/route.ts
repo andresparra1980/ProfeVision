@@ -476,7 +476,7 @@ INSTRUCTIONS:
                         // Handle different tool output formats
                         if (toolName === "generateQuestionsInBulk") {
                           // generateQuestionsInBulk returns { questions: [...], metadata: {...} }
-                          // We need to wrap it in exam structure
+                          // Automatically execute validate + randomize to avoid agent having to pass large arrays
                           const bulkResult = result as {
                             questions?: unknown[];
                             metadata?: unknown;
@@ -486,15 +486,74 @@ INSTRUCTIONS:
                             Array.isArray(bulkResult.questions) &&
                             bulkResult.questions.length > 0
                           ) {
-                            examResult = {
-                              exam: {
-                                title: "",
-                                subject: "",
-                                level: "",
-                                language: locale,
-                                questions: bulkResult.questions,
-                              },
-                            };
+                            logger.api("Auto-executing validate + randomize after bulk generation", {
+                              userId,
+                              questionCount: bulkResult.questions.length,
+                            });
+
+                            try {
+                              // Import tools dynamically
+                              const { validateAndOrganizeExamTool, randomizeOptionsTool } =
+                                await import("@/lib/ai/mastra/tools");
+
+                              // Step 1: Validate
+                              const validateResult = await validateAndOrganizeExamTool.execute({
+                                context: {
+                                  questions: bulkResult.questions as Record<string, unknown>[],
+                                  metadata: {
+                                    title: "",
+                                    subject: "",
+                                    level: "",
+                                    language: locale,
+                                  },
+                                  normalizeIds: true,
+                                  applySanitization: true,
+                                },
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                runtimeContext: null as any,
+                              });
+
+                              logger.api("Auto-validate completed", {
+                                userId,
+                                validQuestions: validateResult.metadata.validQuestions,
+                                correctionsApplied: validateResult.metadata.correctionsApplied,
+                              });
+
+                              // Step 2: Randomize
+                              const randomizeResult = await randomizeOptionsTool.execute({
+                                context: {
+                                  exam: validateResult.exam,
+                                  multipleChoiceOnly: true,
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                } as any,
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                runtimeContext: null as any,
+                              });
+
+                              logger.api("Auto-randomize completed", {
+                                userId,
+                                questionsRandomized: randomizeResult.metadata?.questionsRandomized ?? 0,
+                              });
+
+                              // Set final result
+                              examResult = randomizeResult.exam;
+                            } catch (autoError) {
+                              logger.error("Auto validate/randomize failed, using raw questions", {
+                                error: autoError,
+                                userId,
+                              });
+
+                              // Fallback: use raw questions
+                              examResult = {
+                                exam: {
+                                  title: "",
+                                  subject: "",
+                                  level: "",
+                                  language: locale,
+                                  questions: bulkResult.questions,
+                                },
+                              };
+                            }
                           }
                         } else if (toolName === "regenerateQuestion") {
                           // regenerateQuestion returns { question: {...}, metadata: { questionId, changes } }

@@ -99,16 +99,17 @@ You: "¿Cuántas preguntas necesitas?"
 **STEP 2 - GENERATE** 🔄
 → Call \`generateQuestionsInBulk\` using the plan from Step 1
 → Generates all question content in parallel
-→ DO NOT STOP after this step - continue to Step 3
+→ **STOP HERE** - The backend automatically validates and randomizes the questions
 
-**STEP 3 - VALIDATE** ✅
-→ Call \`validateAndOrganizeExam\` with the questions from Step 2
-→ Ensures data quality and fixes errors
-→ After this step completes, you can respond to the user
+**AUTOMATIC POST-PROCESSING** ✅
+→ The system automatically calls \`validateAndOrganizeExam\` after Step 2 completes
+→ The system automatically calls \`randomizeOptions\` to shuffle answer order
+→ You do NOT need to call these tools manually
+→ You do NOT need to pass the questions array to any other tool
 
-**THEN AND ONLY THEN:**
+**AFTER GENERATION COMPLETES:**
 → Inform the user that the exam was created successfully
-→ The system handles option randomization automatically (you don't need to do it)
+→ The questions are already validated and randomized
 
 CRITICAL RULES:
 - Check for required info BEFORE starting workflow
