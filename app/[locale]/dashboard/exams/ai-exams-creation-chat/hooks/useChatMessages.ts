@@ -98,31 +98,42 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
 
     // Handle completion
     if (latest.type === 'done') {
-      const successText = latest.messageKey
-        ? t(latest.messageKey, latest.params || {})
-        : t('chat.toasts.successTitle');
-
-      try {
-        toast.success(t('chat.toasts.successTitle'), {
-          description: t('chat.toasts.successDesc'),
-        });
-      } catch (_e) {
-        void _e;
-      }
+      let examGenerated = false;
+      let assistantMessage = latest.result || '';
 
       // Parse result if available
       if (latest.result) {
         try {
-          setResult(JSON.parse(latest.result));
+          const parsed = JSON.parse(latest.result);
+          // Check if it's a valid exam structure
+          if (parsed?.exam?.questions && Array.isArray(parsed.exam.questions)) {
+            setResult(parsed);
+            examGenerated = true;
+          } else {
+            // Not an exam, treat as regular message
+            assistantMessage = latest.result;
+          }
         } catch {
-          // Result might already be an object
-          setResult(latest.result);
+          // Not JSON, treat as plain text message
+          assistantMessage = latest.result;
         }
       }
 
+      // Only show success toast if an exam was actually generated
+      if (examGenerated) {
+        try {
+          toast.success(t('chat.toasts.successTitle'), {
+            description: t('chat.toasts.successDesc'),
+          });
+        } catch (_e) {
+          void _e;
+        }
+      }
+
+      // Add assistant message to chat
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: successText },
+        { role: 'assistant', content: assistantMessage },
       ]);
 
       setProgressMessages([]);
