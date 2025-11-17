@@ -15,9 +15,7 @@ import { z } from "zod";
 import {
   ExamQuestionSchema,
   QuestionTypeEnum,
-  DifficultyEnum,
   TaxonomyLevelEnum,
-  type ExamQuestion,
 } from "../schemas";
 import { planExamGenerationTool } from "./plan-exam-generation";
 import { generateQuestionsInBulkTool } from "./generate-questions-bulk";

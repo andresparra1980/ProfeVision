@@ -20,7 +20,6 @@ import { generateText } from "ai";
 import {
   ExamPlanSchema,
   QuestionTypeEnum,
-  DifficultyEnum,
   TaxonomyLevelEnum,
   type ExamPlan,
   type TopicSummary,

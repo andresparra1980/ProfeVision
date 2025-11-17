@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -21,7 +21,7 @@ interface UseChatMessagesProps {
   settings: { language?: string };
   result: unknown;
   setResult: (_result: unknown) => void;
-  t: (_key: string, _options?: { fallback?: string } | Record<string, any>) => string;
+  t: (_key: string, _options?: { fallback?: string } | Record<string, unknown>) => string;
 }
 
 export function useChatMessages({ settings, result, setResult, t }: UseChatMessagesProps) {
@@ -33,7 +33,7 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
   const locale = useLocale();
 
   // Use SSE stream for Mastra
-  const { isStreaming, messages: sseMessages, startStream, stopStream, clearMessages } = useSSEStream();
+  const { isStreaming, messages: sseMessages, startStream, clearMessages } = useSSEStream();
 
   // Determine which endpoint to use
   const useMastra = process.env.NEXT_PUBLIC_AI_CHAT_MASTRA === 'true';

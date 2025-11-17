@@ -24,13 +24,13 @@ export interface SSEMessage {
   text?: string;
   toolCalls?: Array<{
     name: string;
-    args?: any;
+    args?: unknown;
   }>;
-  result?: any;
+  result?: unknown;
   error?: string;
   finishReason?: string;
   steps?: number;
-  params?: Record<string, any>; // i18n params
+  params?: Record<string, unknown>; // i18n params
 }
 
 export interface UseSSEStreamReturn {
@@ -41,7 +41,7 @@ export interface UseSSEStreamReturn {
   messages: SSEMessage[];
 
   /** Start streaming from an endpoint */
-  startStream: (endpoint: string, payload: any, authToken?: string) => Promise<void>;
+  startStream: (_endpoint: string, _payload: unknown, _authToken?: string) => Promise<void>;
 
   /** Stop the current stream */
   stopStream: () => void;
@@ -74,7 +74,7 @@ export function useSSEStream(): UseSSEStreamReturn {
    * Start SSE stream
    */
   const startStream = useCallback(
-    async (endpoint: string, payload: any, authToken?: string) => {
+    async (endpoint: string, payload: unknown, authToken?: string) => {
       // Cleanup previous stream if any
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
