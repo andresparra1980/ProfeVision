@@ -131,10 +131,10 @@ CRITICAL RULES:
 - **CRITICAL**: When you see [DOCUMENT_SUMMARIES], extract the array of summaries and pass them to ALL generation tools
 - The summaries provide context about the topics and content that should be covered in the exam
 - **MANDATORY**: Always pass these summaries to:
-  - \\`planExamGeneration\\` (as \\`documentSummaries\\` parameter)
-  - \\`generateQuestionsInBulk\\` (as \\`documentSummaries\\` parameter)
-  - \\`regenerateQuestion\\` (as \\`documentSummaries\\` parameter)
-  - \\`addQuestions\\` (as \\`documentSummaries\\` parameter)
+  - \`planExamGeneration\` (as \`documentSummaries\` parameter)
+  - \`generateQuestionsInBulk\` (as \`documentSummaries\` parameter)
+  - \`regenerateQuestion\` (as \`documentSummaries\` parameter)
+  - \`addQuestions\` (as \`documentSummaries\` parameter)
 - If no [DOCUMENT_SUMMARIES] is present, you can still generate exams based on user instructions
 
 ---
