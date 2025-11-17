@@ -115,7 +115,7 @@ export const validateAndOrganizeExamTool = createTool({
 
     // Normalize question IDs if enabled
     if (normalizeIds && sanitized.exam.questions) {
-      sanitized.exam.questions = sanitized.exam.questions.map((q: any, index: number) => {
+      sanitized.exam.questions = sanitized.exam.questions.map((q: ExamQuestion, index: number) => {
         const oldId = q.id;
         const newId = `q${index + 1}`;
 
@@ -136,7 +136,7 @@ export const validateAndOrganizeExamTool = createTool({
     }
 
     // Validate each question and collect issues
-    const validatedQuestions: any[] = [];
+    const validatedQuestions: ExamQuestion[] = [];
     let validQuestions = 0;
 
     for (const question of sanitized.exam.questions || []) {
@@ -207,8 +207,8 @@ export const validateAndOrganizeExamTool = createTool({
 /**
  * Attempts to repair a malformed question
  */
-function repairQuestion(question: any, questionId: string): any {
-  const repaired = { ...question };
+function repairQuestion(question: unknown, questionId: string): unknown {
+  const repaired = { ...(question as Record<string, unknown>) };
 
   // Ensure required fields exist
   if (!repaired.id) repaired.id = questionId;

@@ -23,6 +23,16 @@ import {
 } from "../schemas";
 
 /**
+ * Question override parameters
+ */
+interface QuestionOverrides {
+  type?: string;
+  difficulty?: string;
+  taxonomyLevel?: string;
+  topic?: string;
+}
+
+/**
  * Input schema for regenerate question tool
  */
 const inputSchema = z.object({
@@ -165,7 +175,7 @@ function buildRegeneratePrompt(params: {
   questionId: string;
   originalQuestion?: ExamQuestion;
   instruction: string;
-  overrides?: any;
+  overrides?: QuestionOverrides;
   language: string;
 }): string {
   const { questionId, originalQuestion, instruction, overrides, language } =
@@ -209,7 +219,7 @@ function buildRegeneratePrompt(params: {
 /**
  * Parses the LLM response into a question object
  */
-function parseQuestionResponse(responseText: string): any {
+function parseQuestionResponse(responseText: string): unknown {
   try {
     // Remove code fences if present
     let cleaned = responseText.trim();

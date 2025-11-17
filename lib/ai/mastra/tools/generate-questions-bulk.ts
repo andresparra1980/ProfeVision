@@ -308,7 +308,7 @@ ${spec.taxonomyLevel ? `- Taxonomy (Bloom): ${spec.taxonomyLevel}` : ""}
 /**
  * Parses the LLM response into questions array
  */
-function parseQuestionsResponse(responseText: string): any[] {
+function parseQuestionsResponse(responseText: string): unknown[] {
   try {
     // Remove code fences if present
     let cleaned = responseText.trim();

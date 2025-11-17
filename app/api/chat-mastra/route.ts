@@ -22,6 +22,7 @@ import { TierService } from "@/lib/services/tier-service";
 import { ChatRequestSchema } from "@/lib/ai/chat/schemas";
 import { mastra } from "@/lib/ai/mastra";
 import logger from "@/lib/utils/logger";
+import { z } from "zod";
 
 // SSE requires Node.js runtime (not Edge)
 export const runtime = "nodejs";
@@ -29,6 +30,17 @@ export const runtime = "nodejs";
 // Supabase configuration
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Mastra agent types
+interface MastraToolCall {
+  toolName: string;
+  args: unknown;
+}
+
+interface MastraStepEvent {
+  text?: string;
+  toolCalls?: MastraToolCall[];
+}
 
 /**
  * POST /api/chat-mastra
@@ -137,8 +149,9 @@ export async function POST(req: NextRequest) {
     // ========================================================================
     // 5. REQUEST VALIDATION
     // ========================================================================
-    let messages: any[];
-    let context: any;
+    type ChatRequest = z.infer<typeof ChatRequestSchema>;
+    let messages: ChatRequest["messages"];
+    let context: ChatRequest["context"];
 
     try {
       const body = await req.json();
@@ -214,7 +227,7 @@ export async function POST(req: NextRequest) {
           // Generate with agent
           const result = await agent.generate(mastraMessages, {
             maxSteps: 10,
-            onStepFinish: async (event: any) => {
+            onStepFinish: async (event: MastraStepEvent) => {
               // Log step completion
               logger.perf("Agent step completed", {
                 userId,
@@ -228,7 +241,7 @@ export async function POST(req: NextRequest) {
                 type: "progress",
                 messageKey: "chat.progress.step",
                 text: event.text,
-                toolCalls: event.toolCalls?.map((tc: any) => ({
+                toolCalls: event.toolCalls?.map((tc: MastraToolCall) => ({
                   name: tc.toolName,
                   args: tc.args,
                 })),

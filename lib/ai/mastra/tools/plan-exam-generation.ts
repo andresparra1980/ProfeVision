@@ -194,7 +194,7 @@ For each question in the plan, specify:
   // Add document context if available
   let contextSection = "";
   if (documentSummaries && documentSummaries.length > 0) {
-    contextSection = `\n\n**Document context:**\n${documentSummaries.map((ds: any, i: number) => `Document ${i + 1}: ${JSON.stringify(ds)}`).join("\n")}\n\nUse this context to align plan topics, but don't cite it literally.`;
+    contextSection = `\n\n**Document context:**\n${documentSummaries.map((ds: TopicSummary, i: number) => `Document ${i + 1}: ${JSON.stringify(ds)}`).join("\n")}\n\nUse this context to align plan topics, but don't cite it literally.`;
   }
 
   const jsonFormat = `\n\n**Response format (JSON):**
