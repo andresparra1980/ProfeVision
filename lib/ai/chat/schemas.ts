@@ -10,7 +10,7 @@ export const ExamQuestionSchema = z.object({
   prompt: z.string(),
   options: z.array(z.string()).optional().default([]),
   answer: z
-    .union([z.string(), z.number(), z.boolean(), z.array(z.any())])
+    .union([z.string(), z.number(), z.boolean(), z.array(z.string())])
     .nullable(),
   rationale: z.string().optional().default(""),
   difficulty: z.enum(["easy", "medium", "hard"]).optional().default("medium"),
