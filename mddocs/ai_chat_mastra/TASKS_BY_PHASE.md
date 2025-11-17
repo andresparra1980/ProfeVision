@@ -1205,7 +1205,7 @@ describe("randomizeOptionsTool", () => {
 ## Fase 2: Frontend Adaptation
 
 **Duración Estimada**: 1-2 semanas
-**Estado**: 🔄 En Progreso (4/6 completadas)
+**Estado**: 🔄 En Progreso (5/6 completadas)
 
 ### Tarea 2.1: Crear Hook para SSE Streaming
 
@@ -1476,7 +1476,7 @@ export function ChatPanel() {
 
 ### Tarea 2.5: Adaptar ResultsView para Resultados Parciales
 
-**Estado**: ⏳ Pendiente
+**Estado**: ✅ Completado
 
 **Descripción**: Mostrar preguntas a medida que se generan
 
@@ -1487,13 +1487,22 @@ export function ChatPanel() {
 - Mostrar preguntas generadas hasta el momento
 - Loading state por pregunta
 
+**Implementación**:
+- ✅ Prop `isSending` agregado a ResultsView
+- ✅ Loading state cuando no hay preguntas y se está generando
+- ✅ Skeletons (3 placeholders) para preguntas en proceso de generación
+- ✅ Contador de preguntas generadas hasta el momento
+- ✅ Botones deshabilitados durante generación (randomize y edit)
+- ✅ Animaciones con pulse para loading states
+
 **Criterios de Aceptación**:
-- [ ] Resultados parciales visibles
-- [ ] Loading per-question
-- [ ] Actualización en tiempo real
-- [ ] Test visual exitoso
+- [x] Resultados parciales visibles
+- [x] Loading per-question (skeletons)
+- [x] Actualización en tiempo real
+- [x] Test visual exitoso
 
 **Tiempo Estimado**: 4 horas
+**Tiempo Real**: 2 horas
 
 ---
 

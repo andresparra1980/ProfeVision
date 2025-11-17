@@ -7,11 +7,15 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Pencil } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
 import QuestionEditorDialog, { type ExamQuestion } from "./QuestionEditorDialog";
 import MathText from "@/components/MathText";
 
-export default function ResultsView() {
+interface ResultsViewProps {
+  isSending?: boolean;
+}
+
+export default function ResultsView({ isSending = false }: ResultsViewProps) {
   const { result, setResult } = useAIChat();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -94,15 +98,37 @@ export default function ResultsView() {
     <div className="rounded-md border p-3 space-y-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between">
-        <div className="font-medium">{t('results.generatedQuestions')}</div>
+        <div className="font-medium">
+          {t('results.generatedQuestions')}
+          {isSending && questions.length > 0 && (
+            <span className="ml-2 text-xs text-muted-foreground">
+              ({questions.length} {t('results.generatedSoFar', { fallback: 'generadas' })})
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={randomizeOptions} disabled={!questions.length}>{t('results.randomizeOptions')}</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={randomizeOptions}
+            disabled={!questions.length || isSending}
+          >
+            {t('results.randomizeOptions')}
+          </Button>
         </div>
       </div>
 
       {/* Empty state */}
-      {!questions.length && (
+      {!questions.length && !isSending && (
         <div className="text-sm text-muted-foreground">{t('results.empty')}</div>
+      )}
+
+      {/* Loading state when generating first questions */}
+      {!questions.length && isSending && (
+        <div className="flex flex-col items-center justify-center py-8 space-y-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="text-sm text-muted-foreground">{t('results.generating', { fallback: 'Generando preguntas...' })}</div>
+        </div>
       )}
 
       {/* Accordion with questions */}
@@ -177,7 +203,12 @@ export default function ResultsView() {
 
                   {/* Moved Edit button inside accordion content, aligned to end */}
                   <div className="mt-4 flex justify-end">
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); openEditor(idx); }}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); openEditor(idx); }}
+                      disabled={isSending}
+                    >
                       <Pencil className="h-4 w-4 mr-1" /> {t('results.edit')}
                     </Button>
                   </div>
@@ -185,6 +216,28 @@ export default function ResultsView() {
               </AccordionItem>
             );
           })}
+
+          {/* Loading skeletons for questions being generated */}
+          {isSending && (
+            <>
+              {[...Array(3)].map((_, idx) => (
+                <div
+                  key={`skeleton-${idx}`}
+                  className="border-2 border-dashed border-muted rounded-md p-4 animate-pulse"
+                >
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    <div className="h-3 bg-muted rounded w-full"></div>
+                    <div className="h-3 bg-muted rounded w-full"></div>
+                    <div className="h-3 bg-muted rounded w-2/3"></div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </Accordion>
       )}
 

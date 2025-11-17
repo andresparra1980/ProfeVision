@@ -439,7 +439,7 @@ export default function ChatPanel() {
             <DialogDescription>{t('results.description')}</DialogDescription>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto">
-            <ResultsView />
+            <ResultsView isSending={isSending} />
           </div>
         </DialogContent>
       </Dialog>
