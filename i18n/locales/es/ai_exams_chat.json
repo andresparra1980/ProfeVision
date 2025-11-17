@@ -25,6 +25,8 @@
     "description": "Revisa el examen generado.",
     "generatedQuestions": "Preguntas generadas",
     "empty": "Los resultados aparecerán aquí después de la generación.",
+    "generating": "Generando preguntas...",
+    "generatedSoFar": "generadas",
     "randomizeOptions": "Aleatorizar opciones",
     "edit": "Editar",
     "selectCorrect": "Selecciona la respuesta correcta:",
@@ -122,6 +124,14 @@
     "you": "Tú",
     "assistant": "Asistente",
     "system": "Sistema",
+    "progress": {
+      "step": "Procesando...",
+      "completed": "Generación completada"
+    },
+    "error": {
+      "generation": "Error al generar el examen",
+      "connection": "Error de conexión"
+    },
     "toasts": {
       "successTitle": "Resultados generados",
       "successDesc": "Revisa el examen generado en el panel de Resultados.",

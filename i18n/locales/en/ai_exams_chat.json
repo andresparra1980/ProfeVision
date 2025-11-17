@@ -25,6 +25,8 @@
     "description": "Review the generated exam.",
     "generatedQuestions": "Generated questions",
     "empty": "Results will appear here after generation.",
+    "generating": "Generating questions...",
+    "generatedSoFar": "generated",
     "randomizeOptions": "Randomize options",
     "edit": "Edit",
     "selectCorrect": "Select the correct answer:",
@@ -122,6 +124,14 @@
     "you": "You",
     "assistant": "Assistant",
     "system": "System",
+    "progress": {
+      "step": "Processing...",
+      "completed": "Generation completed"
+    },
+    "error": {
+      "generation": "Error generating exam",
+      "connection": "Connection error"
+    },
     "toasts": {
       "successTitle": "Results generated",
       "successDesc": "Review the generated exam on the Results panel.",
