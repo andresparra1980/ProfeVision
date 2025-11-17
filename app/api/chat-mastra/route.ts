@@ -165,6 +165,8 @@ export async function POST(req: NextRequest) {
         messageCount: messages.length,
         language: context.language,
         numQuestions: context.numQuestions,
+        documentSummariesCount: context.topicSummaries?.length || 0,
+        hasExistingExam: !!context.existingExam,
       });
     } catch (error) {
       logger.error("Request validation failed", { error, userId });
@@ -237,6 +239,32 @@ IMPORTANT: When using regenerateQuestion or addQuestions tools, you MUST pass th
             // Prepend to messages so agent sees it
             mastraMessages.unshift(examContext);
           }
+
+          // Inject document summaries context if available
+          if (context.topicSummaries && context.topicSummaries.length > 0) {
+            const documentContext = `[DOCUMENT_SUMMARIES]
+The user has uploaded ${context.topicSummaries.length} document(s) with the following summaries:
+${JSON.stringify(context.topicSummaries, null, 2)}
+
+IMPORTANT: When using planExamGeneration, generateQuestionsInBulk, regenerateQuestion, or addQuestions tools, you MUST pass these summaries as the 'documentSummaries' parameter to ensure questions are based on the provided documents.
+[/DOCUMENT_SUMMARIES]`;
+
+            // Prepend to messages so agent sees it
+            mastraMessages.unshift(documentContext);
+
+            logger.api("Document summaries injected", {
+              userId,
+              summariesCount: context.topicSummaries.length,
+              documentIds: context.topicSummaries.map(s => s.documentId),
+            });
+          }
+
+          logger.api("Agent generation starting", {
+            userId,
+            totalMessages: mastraMessages.length,
+            hasExamContext: !!context.existingExam,
+            hasDocumentContext: !!context.topicSummaries && context.topicSummaries.length > 0,
+          });
 
           // Generate with agent
           const result = await agent.generate(mastraMessages, {

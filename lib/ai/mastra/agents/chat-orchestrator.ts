@@ -125,6 +125,18 @@ CRITICAL RULES:
 - **CRITICAL**: When you see [CURRENT_EXAM], extract the exam JSON and use it in all modification tools
 - If no [CURRENT_EXAM] is present, the user is starting a new exam (use the 3-step workflow)
 
+**DOCUMENT SUMMARIES CONTEXT**:
+
+- If the user has uploaded documents, you will receive summaries in a message like: [DOCUMENT_SUMMARIES]...[/DOCUMENT_SUMMARIES]
+- **CRITICAL**: When you see [DOCUMENT_SUMMARIES], extract the array of summaries and pass them to ALL generation tools
+- The summaries provide context about the topics and content that should be covered in the exam
+- **MANDATORY**: Always pass these summaries to:
+  - \\`planExamGeneration\\` (as \\`documentSummaries\\` parameter)
+  - \\`generateQuestionsInBulk\\` (as \\`documentSummaries\\` parameter)
+  - \\`regenerateQuestion\\` (as \\`documentSummaries\\` parameter)
+  - \\`addQuestions\\` (as \\`documentSummaries\\` parameter)
+- If no [DOCUMENT_SUMMARIES] is present, you can still generate exams based on user instructions
+
 ---
 
 **MODIFICATIONS**:
