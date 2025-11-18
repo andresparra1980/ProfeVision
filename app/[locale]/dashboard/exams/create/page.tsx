@@ -98,10 +98,13 @@ export default function CreateExamPage() {
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [gruposFiltrados, setGruposFiltrados] = useState<Grupo[]>([]);
   const [isClient, setIsClient] = useState(false);
-  
+
   // Keep track of all stored questions, regardless of display count
   const [allStoredQuestions, setAllStoredQuestions] = useState<Pregunta[]>([]);
   const initializationDoneRef = useRef(false);
+
+  // Get search params for import handling
+  const searchParams = useSearchParams();
 
   // Mark client-side rendering
   useEffect(() => {
@@ -333,27 +336,34 @@ export default function CreateExamPage() {
   useEffect(() => {
     if (!isClient) return;
 
+    // IMPORTANT: Skip normal initialization if we're importing from URL
+    const importId = searchParams.get('importId');
+    if (importId) {
+      console.log('[CREATE PAGE] Skipping normal initialization - import detected');
+      return;
+    }
+
     if (numeroPreguntas > 0) {
       if (!initializationDoneRef.current) {
         // First time initialization
         const savedQuestions = loadSavedQuestions();
-        
+
         if (savedQuestions.length > 0) {
           setAllStoredQuestions(savedQuestions);
           const puntajePerQuestion = parseFloat((puntajeTotal / numeroPreguntas).toFixed(4));
-          
+
           // Set displayed questions
           setPreguntas(savedQuestions.slice(0, numeroPreguntas).map(q => ({
             ...q,
             puntaje: puntajePerQuestion
           })));
-          
+
           initializationDoneRef.current = true;
         } else {
           // No saved questions, create initial set without using updateDisplayedQuestions
           const puntajePerQuestion = parseFloat((puntajeTotal / numeroPreguntas).toFixed(4));
           const initialQuestions = Array.from(
-            { length: numeroPreguntas }, 
+            { length: numeroPreguntas },
             (_, index) => ({
               id: `pregunta-${index + 1}`,
               texto: '',
@@ -367,7 +377,7 @@ export default function CreateExamPage() {
               ],
             })
           );
-          
+
           setAllStoredQuestions(initialQuestions);
           setPreguntas(initialQuestions);
           initializationDoneRef.current = true;
@@ -377,7 +387,7 @@ export default function CreateExamPage() {
         updateDisplayedQuestions(numeroPreguntas);
       }
     }
-  }, [numeroPreguntas, isClient, loadSavedQuestions, puntajeTotal, updateDisplayedQuestions]);
+  }, [numeroPreguntas, isClient, loadSavedQuestions, puntajeTotal, updateDisplayedQuestions, searchParams]);
 
   // Update questions when puntaje total changes
   useEffect(() => {
@@ -523,19 +533,25 @@ export default function CreateExamPage() {
   };
 
   // Procesar datos importados desde URL params
-  const searchParams = useSearchParams();
-  
   useEffect(() => {
     const importId = searchParams.get('importId');
+    console.log('[CREATE PAGE] Import useEffect triggered', { importId, isClient });
+
     if (importId && isClient) {
       try {
+        console.log('[CREATE PAGE] Looking for import data in localStorage with key:', `examImport_${importId}`);
+
         // Obtener datos del localStorage usando el ID de importación
         const importData = localStorage.getItem(`examImport_${importId}`);
+        console.log('[CREATE PAGE] Import data from localStorage:', importData ? 'Found' : 'Not found');
+
         if (!importData) {
+          console.error('[CREATE PAGE] No import data found in localStorage');
           throw new Error('Datos de importación no encontrados');
         }
-        
+
         const parsedData = JSON.parse(importData);
+        console.log('[CREATE PAGE] Parsed import data:', parsedData);
         
         // Convertir datos importados al formato de preguntas
         const preguntasImportadas: Pregunta[] = parsedData.preguntas.map((p: ImportedQuestion, index: number) => {
@@ -544,7 +560,7 @@ export default function CreateExamPage() {
             texto: value as string,
             esCorrecta: p.respuesta_correcta === key
           }));
-          
+
           return {
             id: `pregunta-${index + 1}`,
             texto: p.pregunta,
@@ -553,8 +569,11 @@ export default function CreateExamPage() {
             opciones
           };
         });
-        
+
+        console.log('[CREATE PAGE] Converted questions:', preguntasImportadas.length, preguntasImportadas);
+
         // Actualizar el formulario con datos importados
+        console.log('[CREATE PAGE] Setting numero_preguntas to:', preguntasImportadas.length);
         form.setValue('numero_preguntas', preguntasImportadas.length);
         // Usar claves existentes bajo createWithAI y asegurar defaultValue para el sustantivo "preguntas"
         form.setValue(
@@ -563,26 +582,34 @@ export default function CreateExamPage() {
         );
         
         // Establecer las preguntas
+        console.log('[CREATE PAGE] Setting allStoredQuestions and preguntas');
         setAllStoredQuestions(preguntasImportadas);
         setPreguntas(preguntasImportadas.slice(0, form.getValues('numero_preguntas')));
-        
+
         // Guardar en localStorage
+        console.log('[CREATE PAGE] Saving to examQuestions in localStorage');
         localStorage.setItem('examQuestions', JSON.stringify(preguntasImportadas));
-        
+
+        // Mark initialization as done to prevent other useEffects from overwriting
+        initializationDoneRef.current = true;
+        console.log('[CREATE PAGE] Marked initialization as done');
+
         // Limpiar URL params y datos del localStorage
+        console.log('[CREATE PAGE] Cleaning up URL params and import data');
         const url = new URL(window.location.href);
         url.searchParams.delete('importId');
         window.history.replaceState({}, '', url.toString());
-        
+
         // Eliminar datos del localStorage después de procesarlos
         localStorage.removeItem(`examImport_${importId}`);
-        
+
+        console.log('[CREATE PAGE] Import completed successfully');
         toast.success(t('exams.createWithAI.importedTitle', { defaultValue: 'Examen importado' }), {
           description: `${t('exams.createWithAI.importedDesc', { defaultValue: 'Se han importado' })} ${preguntasImportadas.length} ${t('exams.createWithAI.questionsImported', { defaultValue: 'preguntas correctamente' })}`,
         });
-        
+
       } catch (error) {
-        console.error('Error al procesar datos importados:', error);
+        console.error('[CREATE PAGE] Error processing import:', error);
         toast.error(t('common.error'), {
           description: t('exams.createWithAI.importError', { defaultValue: 'No se pudieron procesar los datos importados' }),
         });

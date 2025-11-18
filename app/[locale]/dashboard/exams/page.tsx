@@ -293,10 +293,12 @@ export default function ExamsPage() {
         _open={showImportDialog}
         onOpenChange={setShowImportDialog}
         onImportSuccess={(examData: ImportResult & { importId: string }) => {
-          router.push({
-            pathname: '/dashboard/exams/create',
-            query: { importId: examData.importId },
-          });
+          console.log('[EXAMS PAGE] onImportSuccess called with:', examData);
+          // App Router syntax: use string URL with query params
+          // Type assertion needed because typed router doesn't expect query params
+          const targetUrl = `/dashboard/exams/create?importId=${examData.importId}`;
+          console.log('[EXAMS PAGE] Navigating to:', targetUrl);
+          router.push(targetUrl as any);
         }}
       />
 

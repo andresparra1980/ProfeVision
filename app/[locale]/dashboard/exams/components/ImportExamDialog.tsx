@@ -180,15 +180,21 @@ export default function ImportExamDialog({
 
   const handleImport = () => {
     if (!processedData) return;
-    
+
     // Guardar datos en localStorage en lugar de pasar por URL
     const importId = `import_${Date.now()}`;
+    console.log('[IMPORT DIALOG] Saving import data to localStorage', {
+      importId,
+      key: `examImport_${importId}`,
+      data: processedData
+    });
     localStorage.setItem(`examImport_${importId}`, JSON.stringify(processedData));
-    
+
+    console.log('[IMPORT DIALOG] Calling onImportSuccess with importId:', importId);
     // Llamar callback con el ID de importación
-    onImportSuccess({ 
-      ...processedData, 
-      importId 
+    onImportSuccess({
+      ...processedData,
+      importId
     });
 
     // Cerrar el diálogo y restablecer estado
