@@ -82,9 +82,21 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
 
     // Handle progress messages
     if (latest.type === 'progress') {
-      const text = latest.messageKey
-        ? t(latest.messageKey, latest.params)
-        : latest.text || 'Processing...';
+      // Build the display text
+      let text = '';
+
+      // If there's natural language text from the LLM, use it
+      if (latest.text && latest.text.trim()) {
+        text = latest.text.trim();
+      }
+      // Otherwise fall back to i18n key
+      else if (latest.messageKey) {
+        text = t(latest.messageKey, latest.params);
+      }
+      // Last resort fallback
+      else {
+        text = 'Processing...';
+      }
 
       const emoji = getEmojiForMessage(latest);
 
@@ -155,15 +167,40 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
         }
       }
 
-      // Add assistant message to chat (only if there's a message to show)
-      if (assistantMessage) {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: assistantMessage },
-        ]);
-      }
+      // Build complete assistant response including progress messages
+      // Use functional update to access current progressMessages without dependency
+      setProgressMessages((currentProgress) => {
+        const progressText = currentProgress
+          .filter(pm => pm.text && pm.text.trim())
+          .map(pm => pm.text)
+          .join('\n\n');
 
-      setProgressMessages([]);
+        let finalMessage = '';
+
+        // Include progress messages that contain natural language from the LLM
+        if (progressText) {
+          finalMessage = progressText;
+        }
+
+        // Append final result message if different from progress
+        if (assistantMessage && assistantMessage !== progressText) {
+          finalMessage = finalMessage
+            ? `${finalMessage}\n\n${assistantMessage}`
+            : assistantMessage;
+        }
+
+        // Add combined message to chat history if there's content
+        if (finalMessage) {
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: finalMessage },
+          ]);
+        }
+
+        // Clear progress messages
+        return [];
+      });
+
       clearMessages();
     }
 
