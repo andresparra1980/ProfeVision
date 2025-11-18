@@ -14,6 +14,7 @@ import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import { ExamSchema, type Exam } from "../schemas";
 import { fisherYatesShuffle } from "../utils";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Input schema for randomize options tool
@@ -84,7 +85,7 @@ export const randomizeOptionsTool = createTool({
 
       // Skip if answer is not a string (edge case)
       if (typeof question.answer !== "string") {
-        console.warn(
+        logger.warn(
           `Question ${question.id} has non-string answer, skipping randomization`
         );
         return question;
@@ -94,7 +95,7 @@ export const randomizeOptionsTool = createTool({
       const correctAnswerIndex = question.options.indexOf(question.answer);
 
       if (correctAnswerIndex === -1) {
-        console.warn(
+        logger.warn(
           `Question ${question.id}: answer "${question.answer}" not found in options, skipping randomization`
         );
         return question;
@@ -108,7 +109,7 @@ export const randomizeOptionsTool = createTool({
 
       // Verify the answer is still in the shuffled options
       if (!shuffledOptions.includes(newCorrectAnswer)) {
-        console.error(
+        logger.error(
           `Question ${question.id}: lost correct answer during shuffle, returning original`
         );
         return question;

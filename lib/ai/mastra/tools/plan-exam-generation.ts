@@ -26,6 +26,7 @@ import {
   type TopicSummary,
 } from "../schemas";
 import { estimateGenerationTime } from "../utils";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Input schema for plan exam generation tool
@@ -139,7 +140,7 @@ export const planExamGenerationTool = createTool({
 
       return plan;
     } catch (error) {
-      console.error("Error in plan exam generation:", error);
+      logger.error("Error in plan exam generation:", error);
       throw new Error(
         `Failed to generate exam plan: ${error instanceof Error ? error.message : "Unknown error"}`
       );
@@ -260,7 +261,7 @@ function parseAndValidatePlan(responseText: string): ExamPlan {
 
     return validated;
   } catch (error) {
-    console.error("Failed to parse plan response:", responseText);
+    logger.error("Failed to parse plan response:", responseText);
     throw new Error(
       `Invalid plan format: ${error instanceof Error ? error.message : "Unknown error"}`
     );

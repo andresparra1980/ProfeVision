@@ -24,6 +24,7 @@ import {
   type TopicSummary,
 } from "../schemas";
 import { chunkQuestionSpecs, calculateOptimalChunkSize } from "../utils";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Input schema for generate questions in bulk tool
@@ -111,7 +112,7 @@ export const generateQuestionsInBulkTool = createTool({
     // Divide into chunks
     const chunks = chunkQuestionSpecs(questionSpecs, optimalChunkSize);
 
-    console.log(
+    logger.log(
       `Generating ${questionSpecs.length} questions in ${chunks.length} chunks (size: ${optimalChunkSize})`
     );
 
@@ -166,7 +167,7 @@ export const generateQuestionsInBulkTool = createTool({
             errors.push(
               `Question ${questionId}: ${error instanceof Error ? error.message : "Validation failed"}`
             );
-            console.error(`Validation error for ${questionId}:`, error);
+            logger.error(`Validation error for ${questionId}:`, error);
           }
         }
 
@@ -174,7 +175,7 @@ export const generateQuestionsInBulkTool = createTool({
         const chunkTime = (Date.now() - chunkStartTime) / 1000;
         chunkTimes.push(chunkTime);
 
-        console.log(
+        logger.log(
           `Chunk ${chunkIndex + 1}/${chunks.length} completed in ${chunkTime.toFixed(2)}s (${validatedQuestions.length}/${chunk.length} questions)`
         );
 
@@ -183,7 +184,7 @@ export const generateQuestionsInBulkTool = createTool({
         // Log error but don't block other chunks
         const errorMsg = `Chunk ${chunkIndex + 1} failed: ${error instanceof Error ? error.message : "Unknown error"}`;
         errors.push(errorMsg);
-        console.error(errorMsg, error);
+        logger.error(errorMsg, error);
 
         // Return empty array for failed chunk
         return [];
@@ -206,7 +207,7 @@ export const generateQuestionsInBulkTool = createTool({
 
     const totalTime = (Date.now() - startTime) / 1000;
 
-    console.log(
+    logger.log(
       `Bulk generation completed: ${allQuestions.length}/${questionSpecs.length} questions in ${totalTime.toFixed(2)}s`
     );
 
@@ -351,7 +352,7 @@ function parseQuestionsResponse(responseText: string): unknown[] {
       throw new Error("Response is not an array of questions");
     }
   } catch (error) {
-    console.error("Failed to parse questions response:", responseText);
+    logger.error("Failed to parse questions response:", responseText);
     throw new Error(
       `Invalid questions format: ${error instanceof Error ? error.message : "Unknown error"}`
     );

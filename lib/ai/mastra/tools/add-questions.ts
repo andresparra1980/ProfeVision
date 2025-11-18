@@ -20,6 +20,7 @@ import {
 } from "../schemas";
 import { planExamGenerationTool } from "./plan-exam-generation";
 import { generateQuestionsInBulkTool } from "./generate-questions-bulk";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Input schema for add questions tool
@@ -115,7 +116,7 @@ export const addQuestionsTool = createTool({
     const currentNum = parseInt(currentMaxId.replace("q", ""), 10);
     const startNum = currentNum + 1;
 
-    console.log(
+    logger.log(
       `Adding ${numQuestions} questions starting from q${startNum}`
     );
 
@@ -165,7 +166,7 @@ export const addQuestionsTool = createTool({
         },
       };
     } catch (error) {
-      console.error("Error adding questions:", error);
+      logger.error("Error adding questions:", error);
       throw new Error(
         `Failed to add questions: ${error instanceof Error ? error.message : "Unknown error"}`
       );

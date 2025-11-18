@@ -22,6 +22,7 @@ import {
   TopicSummarySchema,
   type ExamQuestion,
 } from "../schemas";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Question override parameters
@@ -210,7 +211,7 @@ The "taxonomy" field is MANDATORY and must use one of the exact values listed ab
         },
       };
     } catch (error) {
-      console.error("Error regenerating question:", error);
+      logger.error("Error regenerating question:", error);
       throw new Error(
         `Failed to regenerate question: ${error instanceof Error ? error.message : "Unknown error"}`
       );
@@ -328,7 +329,7 @@ function parseQuestionResponse(responseText: string): unknown {
       return parsed;
     }
   } catch (error) {
-    console.error("Failed to parse question response:", responseText);
+    logger.error("Failed to parse question response:", responseText);
     throw new Error(
       `Invalid question format: ${error instanceof Error ? error.message : "Unknown error"}`
     );
