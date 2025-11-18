@@ -19,6 +19,7 @@ import {
   QuestionTypeEnum,
   DifficultyEnum,
   TaxonomyLevelEnum,
+  TopicSummarySchema,
   type ExamQuestion,
 } from "../schemas";
 
@@ -73,7 +74,7 @@ const inputSchema = z.object({
     .array(
       z.object({
         documentId: z.string(),
-        summary: z.record(z.string(), z.unknown()),
+        summary: TopicSummarySchema,
       })
     )
     .optional(),

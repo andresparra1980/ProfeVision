@@ -18,6 +18,7 @@ import { generateText } from "ai";
 import {
   ExamQuestionSchema,
   QuestionSpecSchema,
+  TopicSummarySchema,
   type ExamQuestion,
   type QuestionSpec,
   type TopicSummary,
@@ -39,7 +40,7 @@ const inputSchema = z.object({
         .array(
           z.object({
             documentId: z.string(),
-            summary: z.record(z.string(), z.unknown()),
+            summary: TopicSummarySchema,
           })
         )
         .optional(),
@@ -286,7 +287,10 @@ function buildChunkPrompt(
   specs: QuestionSpec[],
   language: string,
   context?: {
-    documentSummaries?: TopicSummary[];
+    documentSummaries?: Array<{
+      documentId: string;
+      summary: TopicSummary;
+    }>;
     additionalInstructions?: string;
   }
 ): string {

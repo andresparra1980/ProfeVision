@@ -27,6 +27,35 @@ import {
 } from "../tools";
 
 /**
+ * Store for capturing LLM calls (used by LangSmith tracing)
+ * This is populated by the wrapLanguageModel wrapper below
+ */
+export const llmCallCapture: {
+  calls: Array<{
+    model: string;
+    messages: Array<{ role: string; content: string }>;
+    response?: string;
+    toolCalls?: Array<{ name: string; arguments: unknown }>;
+    usage?: {
+      promptTokens: number;
+      completionTokens: number;
+      totalTokens: number;
+    };
+    timestamp: number;
+  }>;
+  getLatest: () => typeof llmCallCapture.calls[0] | null;
+  clear: () => void;
+} = {
+  calls: [],
+  getLatest() {
+    return this.calls[this.calls.length - 1] || null;
+  },
+  clear() {
+    this.calls = [];
+  },
+};
+
+/**
  * Configure OpenRouter provider
  */
 const openrouter = createOpenRouter({
@@ -221,7 +250,51 @@ CRITICAL RULES:
 You're ready to help create exceptional exams efficiently!
 `,
 
-  model: openrouter(process.env.OPENAI_MODEL || "google/gemini-2.5-flash-lite"),
+  model: (() => {
+    const baseModel = openrouter(process.env.OPENAI_MODEL || "google/gemini-2.5-flash-lite");
+
+    // Wrap the model to capture calls
+    return new Proxy(baseModel, {
+      get(target, prop) {
+        const original = target[prop as keyof typeof target];
+
+        // Intercept doGenerate and doStream calls
+        if (prop === 'doGenerate' || prop === 'doStream') {
+          return async function(...args: unknown[]) {
+            const startTime = Date.now();
+
+            // Capture input
+            const [params] = args as [{ prompt: Array<{ role: string; content: string }> }];
+            llmCallCapture.calls.push({
+              model: process.env.OPENAI_MODEL || "google/gemini-2.5-flash-lite",
+              messages: params?.prompt || [],
+              timestamp: startTime,
+            });
+
+            // Call original method
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = await (original as (..._args: unknown[]) => Promise<any>).apply(target, args);
+
+            // Capture output
+            const latestCall = llmCallCapture.getLatest();
+            if (latestCall && result) {
+              if ('text' in result) latestCall.response = result.text;
+              if ('toolCalls' in result) latestCall.toolCalls = result.toolCalls;
+              if ('usage' in result) latestCall.usage = {
+                promptTokens: result.usage?.promptTokens || 0,
+                completionTokens: result.usage?.completionTokens || 0,
+                totalTokens: result.usage?.totalTokens || 0,
+              };
+            }
+
+            return result;
+          };
+        }
+
+        return original;
+      },
+    });
+  })(),
 
   tools: {
     planExamGeneration: planExamGenerationTool,

@@ -32,6 +32,9 @@ import { chatOrchestratorAgent } from "./agents/chat-orchestrator";
  * ```
  */
 export const mastra = new Mastra({
+  telemetry: {
+    enabled: false,
+  },
   agents: {
     chatOrchestrator: chatOrchestratorAgent,
   },

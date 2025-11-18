@@ -16,6 +16,7 @@ import {
   ExamQuestionSchema,
   QuestionTypeEnum,
   TaxonomyLevelEnum,
+  TopicSummarySchema,
 } from "../schemas";
 import { planExamGenerationTool } from "./plan-exam-generation";
 import { generateQuestionsInBulkTool } from "./generate-questions-bulk";
@@ -50,7 +51,7 @@ const inputSchema = z.object({
     .array(
       z.object({
         documentId: z.string(),
-        summary: z.record(z.string(), z.unknown()),
+        summary: TopicSummarySchema,
       })
     )
     .optional(),

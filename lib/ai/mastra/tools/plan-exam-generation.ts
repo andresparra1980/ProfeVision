@@ -21,6 +21,7 @@ import {
   ExamPlanSchema,
   QuestionTypeEnum,
   TaxonomyLevelEnum,
+  TopicSummarySchema,
   type ExamPlan,
   type TopicSummary,
 } from "../schemas";
@@ -53,7 +54,7 @@ const inputSchema = z.object({
     .array(
       z.object({
         documentId: z.string(),
-        summary: z.record(z.string(), z.unknown()),
+        summary: TopicSummarySchema,
       })
     )
     .optional(),
@@ -156,7 +157,10 @@ function buildPlanPrompt(params: {
   questionTypes: string[];
   taxonomyLevels?: string[];
   language: string;
-  documentSummaries?: TopicSummary[];
+  documentSummaries?: Array<{
+    documentId: string;
+    summary: TopicSummary;
+  }>;
 }): string {
   const {
     numQuestions,
@@ -210,7 +214,7 @@ For each question in the plan, specify:
   // Add document context if available
   let contextSection = "";
   if (documentSummaries && documentSummaries.length > 0) {
-    contextSection = `\n\n**Document context:**\n${documentSummaries.map((ds: TopicSummary, i: number) => `Document ${i + 1}: ${JSON.stringify(ds)}`).join("\n")}\n\nUse this context to align plan topics, but don't cite it literally.`;
+    contextSection = `\n\n**Document context:**\n${documentSummaries.map((ds, i) => `Document ${i + 1} (ID: ${ds.documentId}): ${JSON.stringify(ds.summary)}`).join("\n")}\n\nUse this context to align plan topics, but don't cite it literally.`;
   }
 
   const jsonFormat = `\n\n**Response format (JSON):**

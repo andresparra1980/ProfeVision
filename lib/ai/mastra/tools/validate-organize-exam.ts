@@ -120,8 +120,8 @@ export const validateAndOrganizeExamTool = createTool({
 
     // Normalize question IDs if enabled
     if (normalizeIds && sanitized.exam.questions) {
-      sanitized.exam.questions = sanitized.exam.questions.map((q: ExamQuestion, index: number) => {
-        const oldId = q.id;
+      sanitized.exam.questions = sanitized.exam.questions.map((q: Record<string, unknown>, index: number) => {
+        const oldId = q.id as string;
         const newId = `q${index + 1}`;
 
         if (oldId !== newId) {
@@ -152,7 +152,7 @@ export const validateAndOrganizeExamTool = createTool({
         validQuestions++;
       } catch (error) {
         // Log validation error but try to include the question anyway
-        const questionId = question?.id || `q${validatedQuestions.length + 1}`;
+        const questionId = ((question as Record<string, unknown>)?.id as string | undefined) || `q${validatedQuestions.length + 1}`;
         corrections.push({
           questionId,
           issue: "Schema validation warning",
