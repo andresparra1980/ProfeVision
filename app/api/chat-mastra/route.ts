@@ -1079,16 +1079,17 @@ INSTRUCTIONS:
             examGenerated: !!examResult,
           });
 
-          controller.close();
+          // Increment usage counter BEFORE closing stream
+          // This ensures the operation completes before serverless function terminates
+          try {
+            await TierService.incrementUsage(supabase, userId, "ai_generation", 1);
+            logger.api("Usage incremented", { userId });
+          } catch (err) {
+            logger.error("Failed to increment usage", { error: err, userId });
+            // Non-critical error - don't fail the request
+          }
 
-          // Increment usage counter (async, non-blocking)
-          TierService.incrementUsage(supabase, userId, "ai_generation", 1)
-            .then(() => {
-              logger.api("Usage incremented", { userId });
-            })
-            .catch((err) => {
-              logger.error("Failed to increment usage", { error: err, userId });
-            });
+          controller.close();
         } catch (error) {
           logger.error("Agent generation error", { error, userId });
 
@@ -1356,19 +1357,20 @@ INSTRUCTIONS:
               examGenerated: true,
             });
 
-            controller.close();
-
-            // Increment usage counter (async, non-blocking)
-            TierService.incrementUsage(supabase, userId, "ai_generation", 1)
-              .then(() => {
-                logger.api("Usage incremented", { userId });
-              })
-              .catch((err) => {
-                logger.error("Failed to increment usage", {
-                  error: err,
-                  userId,
-                });
+            // Increment usage counter BEFORE closing stream
+            // This ensures the operation completes before serverless function terminates
+            try {
+              await TierService.incrementUsage(supabase, userId, "ai_generation", 1);
+              logger.api("Usage incremented", { userId });
+            } catch (err) {
+              logger.error("Failed to increment usage", {
+                error: err,
+                userId,
               });
+              // Non-critical error - don't fail the request
+            }
+
+            controller.close();
           } else {
             // No recovery possible, send error
 
