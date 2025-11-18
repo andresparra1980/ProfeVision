@@ -170,23 +170,29 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
       // Build complete assistant response including progress messages
       // Use functional update to access current progressMessages without dependency
       setProgressMessages((currentProgress) => {
-        const progressText = currentProgress
-          .filter(pm => pm.text && pm.text.trim())
-          .map(pm => pm.text)
-          .join('\n\n');
-
         let finalMessage = '';
 
-        // Include progress messages that contain natural language from the LLM
-        if (progressText) {
-          finalMessage = progressText;
-        }
+        // If an exam was generated, use the short assistantMessage only
+        // Don't include progress messages that contain the full exam text
+        if (examGenerated) {
+          finalMessage = assistantMessage;
+        } else {
+          // For non-exam responses (conversational), include progress messages
+          const progressText = currentProgress
+            .filter(pm => pm.text && pm.text.trim())
+            .map(pm => pm.text)
+            .join('\n\n');
 
-        // Append final result message if different from progress
-        if (assistantMessage && assistantMessage !== progressText) {
-          finalMessage = finalMessage
-            ? `${finalMessage}\n\n${assistantMessage}`
-            : assistantMessage;
+          if (progressText) {
+            finalMessage = progressText;
+          }
+
+          // Append final result message if different from progress
+          if (assistantMessage && assistantMessage !== progressText) {
+            finalMessage = finalMessage
+              ? `${finalMessage}\n\n${assistantMessage}`
+              : assistantMessage;
+          }
         }
 
         // Add combined message to chat history if there's content
