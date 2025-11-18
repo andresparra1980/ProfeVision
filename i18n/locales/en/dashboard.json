@@ -25,7 +25,10 @@
   "ui": {
     "toggleMenu": "Toggle Menu",
     "expandMenu": "Expand menu",
-    "collapseMenu": "Collapse menu"
+    "collapseMenu": "Collapse menu",
+    "language": "Language",
+    "switchToSpanish": "Switch to Spanish",
+    "switchToEnglish": "Switch to English"
   },
   "user": {
     "defaultName": "User",

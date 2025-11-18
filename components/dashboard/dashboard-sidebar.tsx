@@ -25,6 +25,7 @@ import { useSidebar } from '@/lib/contexts/sidebar-context';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTranslations } from 'next-intl';
 import { logoFont } from '@/lib/fonts';
+import { LanguageSwitcherDashboard } from '@/components/shared/language-switcher-dashboard';
 
 // Definir un tipo más específico para el usuario
 interface User {
@@ -253,27 +254,32 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
         <div>
           {(!isCollapsed || isMobile) ? (
             <>
+              {/* Language Switcher */}
+              <div className="px-4 py-3">
+                <LanguageSwitcherDashboard />
+              </div>
+
               <div className="border-t px-4 py-4">
                 <div className="mb-3">
                   <p className="text-sm font-medium text-card-foreground truncate">{userName}</p>
                   <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                 </div>
-                <Link 
-                  href="/dashboard/profile" 
+                <Link
+                  href="/dashboard/profile"
                   className={cn(
                     "flex items-center rounded-md px-2 py-1.5 text-sm font-medium transition-colors mb-2",
-                    pathname === "/dashboard/profile" 
-                      ? "bg-primary/10 text-primary" 
+                    pathname === "/dashboard/profile"
+                      ? "bg-primary/10 text-primary"
                       : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <UserCircle className="mr-2 h-4 w-4" />
                   {t('user.myProfile', { defaultValue: 'Mi perfil' })}
                 </Link>
-                <Button 
+                <Button
                   variant="ghost"
-                  size="sm" 
-                  disabled={isLoggingOut} 
+                  size="sm"
+                  disabled={isLoggingOut}
                   onClick={handleLogout}
                   className="w-full justify-start px-2 hover:bg-destructive/10 text-red-600 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
                 >
@@ -289,42 +295,49 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
               </div>
             </>
           ) : (
-            <div className="border-t py-4 flex flex-col items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="/dashboard/profile"
-                    className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
-                      pathname === "/dashboard/profile"
-                        ? "bg-primary/10 text-primary"
-                        : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
-                    )}
-                  >
-                    <UserCircle className="h-5 w-5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  {t('user.myProfile', { defaultValue: 'Mi perfil' })}
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={isLoggingOut}
-                    onClick={handleLogout}
-                    className="text-destructive hover:bg-destructive/10 text-red-600 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
-                  >
-                    <LogOut className="h-5 w-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  {t('user.logout', { defaultValue: 'Cerrar sesión' })}
-                </TooltipContent>
-              </Tooltip>
-            </div>
+            <>
+              {/* Language Switcher - Collapsed Version */}
+              <div className="py-3 px-2">
+                <LanguageSwitcherDashboard collapsed />
+              </div>
+
+              <div className="border-t py-4 flex flex-col items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href="/dashboard/profile"
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
+                        pathname === "/dashboard/profile"
+                          ? "bg-primary/10 text-primary"
+                          : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                      )}
+                    >
+                      <UserCircle className="h-5 w-5" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {t('user.myProfile', { defaultValue: 'Mi perfil' })}
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={isLoggingOut}
+                      onClick={handleLogout}
+                      className="text-destructive hover:bg-destructive/10 text-red-600 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
+                    >
+                      <LogOut className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {t('user.logout', { defaultValue: 'Cerrar sesión' })}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </>
           )}
         </div>
       </aside>
