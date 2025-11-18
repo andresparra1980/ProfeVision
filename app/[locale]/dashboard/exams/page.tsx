@@ -298,6 +298,7 @@ export default function ExamsPage() {
           // Type assertion needed because typed router doesn't expect query params
           const targetUrl = `/dashboard/exams/create?importId=${examData.importId}`;
           console.log('[EXAMS PAGE] Navigating to:', targetUrl);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           router.push(targetUrl as any);
         }}
       />
