@@ -25,7 +25,10 @@
   "ui": {
     "toggleMenu": "Alternar menú",
     "expandMenu": "Expandir menú",
-    "collapseMenu": "Contraer menú"
+    "collapseMenu": "Contraer menú",
+    "language": "Idioma",
+    "switchToSpanish": "Cambiar a Español",
+    "switchToEnglish": "Cambiar a Inglés"
   },
   "user": {
     "defaultName": "Usuario",
