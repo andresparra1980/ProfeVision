@@ -97,7 +97,7 @@ export async function createMastraRootRun(
       runId,
       startTime,
       resultType: typeof result,
-      resultKeys: result && typeof result === 'object' ? Object.keys(result) : null,
+      resultKeys: result !== undefined && typeof result === 'object' && result !== null ? Object.keys(result) : null,
       userId: metadata.userId,
     });
 
@@ -137,13 +137,15 @@ export function trackAgentStep(
   const stepRunId = uuidv4();
 
   // Fire-and-forget: Don't block on network call
+  // IMPORTANT: Include end_time at creation to auto-close (child runs block parent closure)
+  const now = Date.now();
   trackAsync(
     () => client.createRun({
       id: stepRunId,
       name: `agent_step_${stepData.stepNumber}`,
       run_type: "chain",
-      start_time: Date.now(),
-      end_time: new Date().toISOString(),
+      start_time: now,
+      end_time: now, // Auto-close: set end_time = start_time (completed immediately)
       inputs: {
         stepNumber: stepData.stepNumber,
         toolName: stepData.toolName || "none",
@@ -195,14 +197,15 @@ export function trackLLMCall(
   }
 ): void {
   const llmRunId = uuidv4();
+  const now = Date.now();
 
   trackAsync(
     () => client.createRun({
       id: llmRunId,
       name: llmData.model || "openrouter/model",
       run_type: "llm",
-      start_time: Date.now(),
-      end_time: new Date().toISOString(),
+      start_time: now,
+      end_time: now, // Auto-close
       inputs: {
         messages: llmData.messages || [{ role: "user", content: llmData.prompt || "" }],
         model: llmData.model,
@@ -253,12 +256,14 @@ export function trackToolExecution(
   }
 ): void {
   const toolRunId = uuidv4();
+  const now = Date.now();
 
   const runData: {
     id: string;
     name: string;
     run_type: "tool";
     start_time: number;
+    end_time: number; // Auto-close
     inputs: Record<string, unknown>;
     outputs?: Record<string, unknown>;
     parent_run_id: string;
@@ -266,13 +271,13 @@ export function trackToolExecution(
       metadata: Record<string, unknown>;
     };
     project_name: string;
-    end_time?: string;
     error?: string;
   } = {
     id: toolRunId,
     name: toolData.toolName,
     run_type: "tool",
-    start_time: Date.now(),
+    start_time: now,
+    end_time: now, // Auto-close
     inputs: toolData.inputs,
     parent_run_id: parentRunId,
     extra: {
@@ -291,7 +296,6 @@ export function trackToolExecution(
 
   if (!toolData.success && toolData.error) {
     runData.error = toolData.error;
-    runData.end_time = new Date().toISOString();
   }
 
   trackAsync(
@@ -323,14 +327,15 @@ export function trackAutoProcessing(
   }
 ): void {
   const processingRunId = uuidv4();
+  const now = Date.now();
 
   trackAsync(
     () => client.createRun({
       id: processingRunId,
       name: "auto_processing_validate_randomize",
       run_type: "chain",
-      start_time: Date.now(),
-      end_time: new Date().toISOString(),
+      start_time: now,
+      end_time: now, // Auto-close
       inputs: {
         questionCount: processingData.questionCount,
       },
@@ -374,14 +379,15 @@ export function trackRecovery(
   }
 ): void {
   const recoveryRunId = uuidv4();
+  const now = Date.now();
 
   trackAsync(
     () => client.createRun({
       id: recoveryRunId,
       name: "error_recovery",
       run_type: "chain",
-      start_time: Date.now(),
-      end_time: new Date().toISOString(),
+      start_time: now,
+      end_time: now, // Auto-close
       inputs: {
         originalError: recoveryData.originalError.substring(0, 500),
         stepCount: recoveryData.stepCount,
@@ -478,7 +484,7 @@ export async function finalizeMastraRun(
     logger.api("LangSmith updateRun result", {
       runId,
       resultType: typeof result,
-      resultKeys: result && typeof result === 'object' ? Object.keys(result) : null,
+      resultKeys: result !== undefined && typeof result === 'object' && result !== null ? Object.keys(result) : null,
       userId: finalData.userId,
     });
 
