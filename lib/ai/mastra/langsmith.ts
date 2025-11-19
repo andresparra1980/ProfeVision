@@ -63,12 +63,13 @@ export async function createMastraRootRun(
   });
 
   try {
-    await trackSync(
+    const startTime = Date.now();
+    const result = await trackSync(
       () => client.createRun({
         id: runId,
         name: "mastra_chat_exam_generation",
         run_type: "chain",
-        start_time: Date.now(),
+        start_time: startTime,
         inputs: {
           endpoint: "/api/chat-mastra",
           uiLocale: metadata.uiLocale,
@@ -90,6 +91,15 @@ export async function createMastraRootRun(
       }),
       "createMastraRootRun"
     );
+
+    // Debug: Log what createRun returned
+    logger.api("LangSmith createRun result", {
+      runId,
+      startTime,
+      resultType: typeof result,
+      resultKeys: result && typeof result === 'object' ? Object.keys(result) : null,
+      userId: metadata.userId,
+    });
 
     // If we reach here, creation succeeded
     logger.api("LangSmith root run created", {
@@ -447,12 +457,30 @@ export async function finalizeMastraRun(
     updatePayload.error = finalData.error;
   }
 
+  // Debug: Log payload being sent
+  logger.api("LangSmith finalize payload", {
+    runId,
+    payloadKeys: Object.keys(updatePayload),
+    hasEndTime: !!updatePayload.end_time,
+    endTime: updatePayload.end_time,
+    hasError: !!updatePayload.error,
+    userId: finalData.userId,
+  });
+
   try {
-    await trackSync(
+    const result = await trackSync(
       () => client.updateRun(runId, updatePayload),
       "finalizeMastraRun",
       { throwOnError: true }
     );
+
+    // Debug: Log what updateRun returned
+    logger.api("LangSmith updateRun result", {
+      runId,
+      resultType: typeof result,
+      resultKeys: result && typeof result === 'object' ? Object.keys(result) : null,
+      userId: finalData.userId,
+    });
 
     logger.api("LangSmith run finalized", {
       runId,
@@ -465,6 +493,7 @@ export async function finalizeMastraRun(
       runId,
       userId: finalData.userId,
       error: String(error),
+      errorStack: error instanceof Error ? error.stack : undefined,
     });
   }
 }
