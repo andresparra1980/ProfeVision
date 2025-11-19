@@ -8,6 +8,7 @@
 import { Client } from "langsmith";
 import { v4 as uuidv4 } from "uuid";
 import logger from "@/lib/utils/logger";
+import { trackAsync, trackSync, getProjectName } from "@/lib/ai/langsmith-client";
 
 /**
  * Initialize LangSmith client
@@ -49,24 +50,24 @@ export async function createMastraRootRun(
     hasExamContext: boolean;
   }
 ): Promise<string | null> {
-  try {
-    // Generate a UUID for this run
-    const runId = uuidv4();
+  // CRITICAL: Synchronous - needed for run ID
+  const runId = uuidv4();
 
-    logger.api("Creating LangSmith root run", {
-      runId,
-      userId: metadata.userId,
-      uiLocale: metadata.uiLocale,
-      generationLocale: metadata.generationLocale,
-      project: process.env.LANGSMITH_PROJECT || "ProfeVision-dev",
-      endpoint: process.env.LANGSMITH_ENDPOINT,
-    });
+  logger.api("Creating LangSmith root run", {
+    runId,
+    userId: metadata.userId,
+    uiLocale: metadata.uiLocale,
+    generationLocale: metadata.generationLocale,
+    project: getProjectName(),
+    endpoint: process.env.LANGSMITH_ENDPOINT,
+  });
 
-    await client.createRun({
-      id: runId,  // Provide the ID we generated
+  const result = await trackSync(
+    () => client.createRun({
+      id: runId,
       name: "mastra_chat_exam_generation",
       run_type: "chain",
-      start_time: Date.now(),  // Add start time for accurate timing
+      start_time: Date.now(),
       inputs: {
         endpoint: "/api/chat-mastra",
         uiLocale: metadata.uiLocale,
@@ -84,9 +85,13 @@ export async function createMastraRootRun(
           timestamp: new Date().toISOString(),
         },
       },
-      project_name: process.env.LANGSMITH_PROJECT || "ProfeVision-dev",
-    });
+      project_name: getProjectName(),
+    }),
+    "createMastraRootRun",
+    null
+  );
 
+  if (result) {
     logger.api("LangSmith root run created", {
       runId,
       userId: metadata.userId,
@@ -94,16 +99,16 @@ export async function createMastraRootRun(
       generationLocale: metadata.generationLocale,
     });
     return runId;
-  } catch (error) {
-    logger.error("Failed to create LangSmith root run", { error, userId: metadata.userId });
-    return null;
   }
+
+  return null;
 }
 
 /**
  * Track agent step execution (returns the step run ID for child LLM calls)
+ * NON-CRITICAL: Fire-and-forget to avoid blocking
  */
-export async function trackAgentStep(
+export function trackAgentStep(
   client: Client,
   parentRunId: string,
   stepData: {
@@ -113,16 +118,18 @@ export async function trackAgentStep(
     duration?: number;
     userId: string;
   }
-): Promise<string | null> {
-  try {
-    const stepRunId = uuidv4();
+): string {
+  // Generate ID immediately for potential child runs
+  const stepRunId = uuidv4();
 
-    await client.createRun({
-      id: stepRunId,  // Provide the ID we generated
+  // Fire-and-forget: Don't block on network call
+  trackAsync(
+    () => client.createRun({
+      id: stepRunId,
       name: `agent_step_${stepData.stepNumber}`,
       run_type: "chain",
-      start_time: Date.now(),  // Add start time for accurate timing
-      end_time: new Date().toISOString(),  // Mark as completed
+      start_time: Date.now(),
+      end_time: new Date().toISOString(),
       inputs: {
         stepNumber: stepData.stepNumber,
         toolName: stepData.toolName || "none",
@@ -138,27 +145,26 @@ export async function trackAgentStep(
           duration: stepData.duration,
         },
       },
-      project_name: process.env.LANGSMITH_PROJECT || "ProfeVision-dev",
-    });
+      project_name: getProjectName(),
+    }),
+    `trackAgentStep (step ${stepData.stepNumber})`
+  );
 
-    logger.api("LangSmith agent step tracked", {
-      stepRunId,
-      parentRunId,
-      stepNumber: stepData.stepNumber,
-      toolName: stepData.toolName
-    });
+  logger.api("LangSmith agent step queued", {
+    stepRunId,
+    parentRunId,
+    stepNumber: stepData.stepNumber,
+    toolName: stepData.toolName
+  });
 
-    return stepRunId;
-  } catch (error) {
-    logger.warn("Failed to track agent step", { error, stepNumber: stepData.stepNumber });
-    return null;
-  }
+  return stepRunId;
 }
 
 /**
  * Track LLM call (OpenRouter)
+ * NON-CRITICAL: Fire-and-forget to avoid blocking
  */
-export async function trackLLMCall(
+export function trackLLMCall(
   client: Client,
   parentRunId: string,
   llmData: {
@@ -173,11 +179,11 @@ export async function trackLLMCall(
     duration?: number;
     userId: string;
   }
-): Promise<void> {
-  try {
-    const llmRunId = uuidv4();
+): void {
+  const llmRunId = uuidv4();
 
-    await client.createRun({
+  trackAsync(
+    () => client.createRun({
       id: llmRunId,
       name: llmData.model || "openrouter/model",
       run_type: "llm",
@@ -202,24 +208,24 @@ export async function trackLLMCall(
           model: llmData.model,
         },
       },
-      project_name: process.env.LANGSMITH_PROJECT || "ProfeVision-dev",
-    });
+      project_name: getProjectName(),
+    }),
+    `trackLLMCall (${llmData.model})`
+  );
 
-    logger.api("LangSmith LLM call tracked", {
-      llmRunId,
-      parentRunId,
-      model: llmData.model,
-      hasToolCalls: (llmData.toolCalls?.length || 0) > 0,
-    });
-  } catch (error) {
-    logger.warn("Failed to track LLM call", { error, model: llmData.model });
-  }
+  logger.api("LangSmith LLM call queued", {
+    llmRunId,
+    parentRunId,
+    model: llmData.model,
+    hasToolCalls: (llmData.toolCalls?.length || 0) > 0,
+  });
 }
 
 /**
  * Track tool execution
+ * NON-CRITICAL: Fire-and-forget to avoid blocking
  */
-export async function trackToolExecution(
+export function trackToolExecution(
   client: Client,
   parentRunId: string,
   toolData: {
@@ -231,66 +237,66 @@ export async function trackToolExecution(
     error?: string;
     userId: string;
   }
-): Promise<void> {
-  try {
-    const toolRunId = uuidv4();
+): void {
+  const toolRunId = uuidv4();
 
-    const runData: {
-      id: string;
-      name: string;
-      run_type: "tool";
-      start_time: number;
-      inputs: Record<string, unknown>;
-      outputs?: Record<string, unknown>;
-      parent_run_id: string;
-      extra: {
-        metadata: Record<string, unknown>;
-      };
-      project_name: string;
-      end_time?: string;
-      error?: string;
-    } = {
-      id: toolRunId,  // Provide the ID we generated
-      name: toolData.toolName,
-      run_type: "tool",
-      start_time: Date.now(),  // Add start time for accurate timing
-      inputs: toolData.inputs,
-      parent_run_id: parentRunId,
-      extra: {
-        metadata: {
-          userId: toolData.userId,
-          duration: toolData.duration,
-          success: toolData.success,
-        },
-      },
-      project_name: process.env.LANGSMITH_PROJECT || "ProfeVision-dev",
+  const runData: {
+    id: string;
+    name: string;
+    run_type: "tool";
+    start_time: number;
+    inputs: Record<string, unknown>;
+    outputs?: Record<string, unknown>;
+    parent_run_id: string;
+    extra: {
+      metadata: Record<string, unknown>;
     };
+    project_name: string;
+    end_time?: string;
+    error?: string;
+  } = {
+    id: toolRunId,
+    name: toolData.toolName,
+    run_type: "tool",
+    start_time: Date.now(),
+    inputs: toolData.inputs,
+    parent_run_id: parentRunId,
+    extra: {
+      metadata: {
+        userId: toolData.userId,
+        duration: toolData.duration,
+        success: toolData.success,
+      },
+    },
+    project_name: getProjectName(),
+  };
 
-    if (toolData.outputs) {
-      runData.outputs = toolData.outputs;
-    }
-
-    if (!toolData.success && toolData.error) {
-      runData.error = toolData.error;
-      runData.end_time = new Date().toISOString();
-    }
-
-    await client.createRun(runData);
-
-    logger.api("LangSmith tool tracked", {
-      toolName: toolData.toolName,
-      success: toolData.success,
-      userId: toolData.userId,
-    });
-  } catch (error) {
-    logger.warn("Failed to track tool execution", { error, toolName: toolData.toolName });
+  if (toolData.outputs) {
+    runData.outputs = toolData.outputs;
   }
+
+  if (!toolData.success && toolData.error) {
+    runData.error = toolData.error;
+    runData.end_time = new Date().toISOString();
+  }
+
+  trackAsync(
+    () => client.createRun(runData),
+    `trackToolExecution (${toolData.toolName})`
+  );
+
+  logger.api("LangSmith tool queued", {
+    toolName: toolData.toolName,
+    success: toolData.success,
+    userId: toolData.userId,
+  });
 }
 
 /**
  * Track auto-processing (validate + randomize)
+ * NON-CRITICAL: Fire-and-forget to avoid blocking
  */
-export async function trackAutoProcessing(
+export function trackAutoProcessing(
   client: Client,
   parentRunId: string,
   processingData: {
@@ -301,16 +307,16 @@ export async function trackAutoProcessing(
     duration: number;
     userId: string;
   }
-): Promise<void> {
-  try {
-    const processingRunId = uuidv4();
+): void {
+  const processingRunId = uuidv4();
 
-    await client.createRun({
-      id: processingRunId,  // Provide the ID we generated
+  trackAsync(
+    () => client.createRun({
+      id: processingRunId,
       name: "auto_processing_validate_randomize",
       run_type: "chain",
-      start_time: Date.now(),  // Add start time for accurate timing
-      end_time: new Date().toISOString(),  // Mark as completed
+      start_time: Date.now(),
+      end_time: new Date().toISOString(),
       inputs: {
         questionCount: processingData.questionCount,
       },
@@ -327,22 +333,22 @@ export async function trackAutoProcessing(
           successRate: (processingData.validQuestions / processingData.questionCount) * 100,
         },
       },
-      project_name: process.env.LANGSMITH_PROJECT || "ProfeVision-dev",
-    });
+      project_name: getProjectName(),
+    }),
+    "trackAutoProcessing"
+  );
 
-    logger.api("LangSmith auto-processing tracked", {
-      validQuestions: processingData.validQuestions,
-      userId: processingData.userId,
-    });
-  } catch (error) {
-    logger.warn("Failed to track auto-processing", { error });
-  }
+  logger.api("LangSmith auto-processing queued", {
+    validQuestions: processingData.validQuestions,
+    userId: processingData.userId,
+  });
 }
 
 /**
  * Track recovery from error
+ * NON-CRITICAL: Fire-and-forget to avoid blocking
  */
-export async function trackRecovery(
+export function trackRecovery(
   client: Client,
   parentRunId: string,
   recoveryData: {
@@ -352,16 +358,16 @@ export async function trackRecovery(
     success: boolean;
     userId: string;
   }
-): Promise<void> {
-  try {
-    const recoveryRunId = uuidv4();
+): void {
+  const recoveryRunId = uuidv4();
 
-    await client.createRun({
-      id: recoveryRunId,  // Provide the ID we generated
+  trackAsync(
+    () => client.createRun({
+      id: recoveryRunId,
       name: "error_recovery",
       run_type: "chain",
-      start_time: Date.now(),  // Add start time for accurate timing
-      end_time: new Date().toISOString(),  // Mark as completed
+      start_time: Date.now(),
+      end_time: new Date().toISOString(),
       inputs: {
         originalError: recoveryData.originalError.substring(0, 500),
         stepCount: recoveryData.stepCount,
@@ -378,21 +384,21 @@ export async function trackRecovery(
           recoverySuccess: recoveryData.success,
         },
       },
-      project_name: process.env.LANGSMITH_PROJECT || "ProfeVision-dev",
-    });
+      project_name: getProjectName(),
+    }),
+    "trackRecovery"
+  );
 
-    logger.api("LangSmith recovery tracked", {
-      success: recoveryData.success,
-      recoveredQuestions: recoveryData.recoveredQuestions,
-      userId: recoveryData.userId,
-    });
-  } catch (error) {
-    logger.warn("Failed to track recovery", { error });
-  }
+  logger.api("LangSmith recovery queued", {
+    success: recoveryData.success,
+    recoveredQuestions: recoveryData.recoveredQuestions,
+    userId: recoveryData.userId,
+  });
 }
 
 /**
  * Finalize root run with complete metadata
+ * CRITICAL: Synchronous to ensure trace completion
  */
 export async function finalizeMastraRun(
   client: Client,
@@ -408,45 +414,44 @@ export async function finalizeMastraRun(
     userId: string;
   }
 ): Promise<void> {
-  try {
-    const updatePayload: {
-      outputs: Record<string, unknown>;
-      extra: {
-        metadata: Record<string, unknown>;
-      };
-      end_time: string;
-      error?: string;
-    } = {
-      outputs: {
-        success: finalData.success,
-        questionCount: finalData.questionCount,
-        stepsExecuted: finalData.stepsExecuted,
-      },
-      extra: {
-        metadata: {
-          userId: finalData.userId,
-          toolsUsed: finalData.toolsUsed,
-          totalDuration: finalData.totalDuration,
-          recovered: finalData.recovered || false,
-          timestamp: new Date().toISOString(),
-        },
-      },
-      end_time: new Date().toISOString(),
+  const updatePayload: {
+    outputs: Record<string, unknown>;
+    extra: {
+      metadata: Record<string, unknown>;
     };
-
-    if (!finalData.success && finalData.error) {
-      updatePayload.error = finalData.error;
-    }
-
-    await client.updateRun(runId, updatePayload);
-
-    logger.api("LangSmith run finalized", {
-      runId,
+    end_time: string;
+    error?: string;
+  } = {
+    outputs: {
       success: finalData.success,
       questionCount: finalData.questionCount,
-      userId: finalData.userId,
-    });
-  } catch (error) {
-    logger.warn("Failed to finalize LangSmith run", { error, runId });
+      stepsExecuted: finalData.stepsExecuted,
+    },
+    extra: {
+      metadata: {
+        userId: finalData.userId,
+        toolsUsed: finalData.toolsUsed,
+        totalDuration: finalData.totalDuration,
+        recovered: finalData.recovered || false,
+        timestamp: new Date().toISOString(),
+      },
+    },
+    end_time: new Date().toISOString(),
+  };
+
+  if (!finalData.success && finalData.error) {
+    updatePayload.error = finalData.error;
   }
+
+  await trackSync(
+    () => client.updateRun(runId, updatePayload),
+    "finalizeMastraRun"
+  );
+
+  logger.api("LangSmith run finalized", {
+    runId,
+    success: finalData.success,
+    questionCount: finalData.questionCount,
+    userId: finalData.userId,
+  });
 }

@@ -1,6 +1,7 @@
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { Client } from "langsmith";
 import logger from "@/lib/utils/logger";
+import { trackSync } from "@/lib/ai/langsmith-client";
 
 /**
  * Callback handler to capture the root run ID from LangChain pipeline
@@ -32,6 +33,7 @@ export class RootRunCapture extends BaseCallbackHandler {
 
 /**
  * Initializes LangSmith tracing and returns client, tracer, and rootRunId
+ * CRITICAL: Synchronous - needed for run ID
  */
 export async function initializeLangSmithTracing(): Promise<{
   client: Client | null;
@@ -43,17 +45,21 @@ export async function initializeLangSmithTracing(): Promise<{
   let rootRunId: string | null = null;
 
   if (client) {
-    try {
-      const run = await client.createRun({
+    const run = await trackSync(
+      () => client.createRun({
         name: "chat_exam_generation",
         run_type: "chain",
         inputs: { endpoint: "/api/chat" },
         project_name: process.env.LANGCHAIN_PROJECT || undefined,
-      });
-      // Some SDKs return { id }, others the full run; handle both
-      // @ts-expect-error tolerate unknown shape
-      rootRunId = run?.id ?? null;
+      }),
+      "initializeLangSmithTracing"
+    );
 
+    // Some SDKs return { id }, others the full run; handle both
+    // @ts-expect-error tolerate unknown shape
+    rootRunId = run?.id ?? null;
+
+    if (rootRunId) {
       // Get a tracer so child nodes attach to this project
       try {
         // @ts-expect-error tolerate SDK shape
@@ -63,8 +69,6 @@ export async function initializeLangSmithTracing(): Promise<{
       } catch (e) {
         logger.warn("Could not get LangSmith tracer", { error: String(e) });
       }
-    } catch (e) {
-      logger.warn("Could not create LangSmith root run", { error: String(e) });
     }
   }
 
@@ -73,6 +77,7 @@ export async function initializeLangSmithTracing(): Promise<{
 
 /**
  * Finalizes a LangSmith run with metadata and outputs
+ * CRITICAL: Synchronous to ensure trace completion
  */
 export async function finalizeLangSmithRun(
   client: Client,
@@ -80,40 +85,34 @@ export async function finalizeLangSmithRun(
   metadata: Record<string, string | number | boolean | undefined>,
   outputs?: Record<string, unknown>
 ): Promise<void> {
-  try {
-    const updatePayload = {
-      outputs: outputs || {},
-      extra: { metadata },
-      end_time: new Date().toISOString(),
-      error: undefined,
-      metadata,
-    } as Record<string, unknown>;
-    await client.updateRun(runId, updatePayload);
-  } catch (e) {
-    logger.warn("Failed to finalize LangSmith run", {
-      runId,
-      error: String(e),
-    });
-  }
+  const updatePayload = {
+    outputs: outputs || {},
+    extra: { metadata },
+    end_time: new Date().toISOString(),
+    error: undefined,
+    metadata,
+  } as Record<string, unknown>;
+
+  await trackSync(
+    () => client.updateRun(runId, updatePayload),
+    "finalizeLangSmithRun"
+  );
 }
 
 /**
  * Ends a LangSmith run with error information
+ * CRITICAL: Synchronous to ensure trace completion
  */
 export async function endLangSmithRunWithError(
   client: Client,
   runId: string,
   error: unknown
 ): Promise<void> {
-  try {
-    await client.updateRun(runId, {
+  await trackSync(
+    () => client.updateRun(runId, {
       end_time: new Date().toISOString(),
       error: String(error),
-    });
-  } catch (e) {
-    logger.warn("Failed to end LangSmith run on error", {
-      runId,
-      error: String(e),
-    });
-  }
+    }),
+    "endLangSmithRunWithError"
+  );
 }

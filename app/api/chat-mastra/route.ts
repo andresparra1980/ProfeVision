@@ -510,8 +510,8 @@ INSTRUCTIONS:
                 const stepNumber = capturedSteps.length;
                 const toolName = stepEvent.toolCalls?.[0]?.payload?.toolName;
 
-                // Track the agent step and get its run ID
-                const stepRunId = await trackAgentStep(langsmithClient, langsmithRunId, {
+                // Track the agent step and get its run ID (fire-and-forget)
+                const stepRunId = trackAgentStep(langsmithClient, langsmithRunId, {
                   stepNumber,
                   toolName,
                   text: stepEvent.text,
@@ -523,8 +523,8 @@ INSTRUCTIONS:
                   // Get the latest captured LLM call from the proxy
                   const capturedCall = llmCallCapture.getLatest();
 
-                  // Track the LLM call that generated this response
-                  await trackLLMCall(langsmithClient, stepRunId, {
+                  // Track the LLM call that generated this response (fire-and-forget)
+                  trackLLMCall(langsmithClient, stepRunId, {
                     model: capturedCall?.model || process.env.OPENAI_MODEL || "google/gemini-2.5-flash-lite",
                     messages: capturedCall?.messages || [
                       { role: "system", content: "Agent instructions (see full instructions in agent config)" },
@@ -543,11 +543,11 @@ INSTRUCTIONS:
                   });
                 }
 
-                // If the step has tool calls, track them as well
+                // If the step has tool calls, track them as well (fire-and-forget)
                 if (stepRunId && stepEvent.toolCalls && stepEvent.toolCalls.length > 0) {
                   for (const toolCall of stepEvent.toolCalls) {
                     if (toolCall.payload?.toolName) {
-                      await trackToolExecution(langsmithClient, stepRunId, {
+                      trackToolExecution(langsmithClient, stepRunId, {
                         toolName: toolCall.payload.toolName,
                         inputs: (toolCall.payload.args as Record<string, unknown>) || ({} as Record<string, unknown>),
                         success: true,
@@ -870,11 +870,11 @@ INSTRUCTIONS:
                                     ?.questionsRandomized ?? 0,
                               });
 
-                              // Track auto-processing in LangSmith
+                              // Track auto-processing in LangSmith (fire-and-forget)
                               if (langsmithClient && langsmithRunId) {
                                 const autoProcessingDuration =
                                   Date.now() - autoProcessingStartTime;
-                                await trackAutoProcessing(
+                                trackAutoProcessing(
                                   langsmithClient,
                                   langsmithRunId,
                                   {
@@ -1471,9 +1471,9 @@ INSTRUCTIONS:
                               : "null",
                           });
 
-                          // Track recovery in LangSmith
+                          // Track recovery in LangSmith (fire-and-forget)
                           if (langsmithClient && langsmithRunId) {
-                            await trackRecovery(
+                            trackRecovery(
                               langsmithClient,
                               langsmithRunId,
                               {
