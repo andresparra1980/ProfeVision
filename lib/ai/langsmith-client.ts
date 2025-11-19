@@ -40,14 +40,14 @@ export function trackAsync<T>(
 /**
  * Synchronous wrapper for critical operations with retry logic
  * Retries failed operations to ensure trace completion
+ * Throws error if all retries fail (for critical operations)
  */
 export async function trackSync<T>(
   operation: () => Promise<T>,
   operationName: string,
-  fallbackValue?: T,
-  options: { retries?: number; retryDelay?: number } = {}
-): Promise<T | null> {
-  const { retries = 2, retryDelay = 100 } = options;
+  options: { retries?: number; retryDelay?: number; throwOnError?: boolean } = {}
+): Promise<T> {
+  const { retries = 2, retryDelay = 100, throwOnError = true } = options;
 
   let lastError: unknown;
 
@@ -89,7 +89,13 @@ export async function trackSync<T>(
     attempts: retries + 1,
   });
 
-  return fallbackValue !== undefined ? fallbackValue : null;
+  // Throw error if requested (default for critical operations)
+  if (throwOnError) {
+    throw new Error(`LangSmith ${operationName} failed: ${String(lastError)}`);
+  }
+
+  // If not throwing, return undefined (caller should handle)
+  return undefined as T;
 }
 
 /**

@@ -62,36 +62,36 @@ export async function createMastraRootRun(
     endpoint: process.env.LANGSMITH_ENDPOINT,
   });
 
-  const result = await trackSync(
-    () => client.createRun({
-      id: runId,
-      name: "mastra_chat_exam_generation",
-      run_type: "chain",
-      start_time: Date.now(),
-      inputs: {
-        endpoint: "/api/chat-mastra",
-        uiLocale: metadata.uiLocale,
-        generationLocale: metadata.generationLocale,
-        messageCount: metadata.messageCount,
-      },
-      extra: {
-        metadata: {
-          userId: metadata.userId,
+  try {
+    await trackSync(
+      () => client.createRun({
+        id: runId,
+        name: "mastra_chat_exam_generation",
+        run_type: "chain",
+        start_time: Date.now(),
+        inputs: {
+          endpoint: "/api/chat-mastra",
           uiLocale: metadata.uiLocale,
           generationLocale: metadata.generationLocale,
-          localesMatch: metadata.uiLocale === metadata.generationLocale,
-          hasDocumentContext: metadata.hasDocumentContext,
-          hasExamContext: metadata.hasExamContext,
-          timestamp: new Date().toISOString(),
+          messageCount: metadata.messageCount,
         },
-      },
-      project_name: getProjectName(),
-    }),
-    "createMastraRootRun",
-    null
-  );
+        extra: {
+          metadata: {
+            userId: metadata.userId,
+            uiLocale: metadata.uiLocale,
+            generationLocale: metadata.generationLocale,
+            localesMatch: metadata.uiLocale === metadata.generationLocale,
+            hasDocumentContext: metadata.hasDocumentContext,
+            hasExamContext: metadata.hasExamContext,
+            timestamp: new Date().toISOString(),
+          },
+        },
+        project_name: getProjectName(),
+      }),
+      "createMastraRootRun"
+    );
 
-  if (result) {
+    // If we reach here, creation succeeded
     logger.api("LangSmith root run created", {
       runId,
       userId: metadata.userId,
@@ -99,9 +99,13 @@ export async function createMastraRootRun(
       generationLocale: metadata.generationLocale,
     });
     return runId;
+  } catch (error) {
+    logger.error("Failed to create LangSmith root run", {
+      error,
+      userId: metadata.userId,
+    });
+    return null;
   }
-
-  return null;
 }
 
 /**
@@ -443,23 +447,24 @@ export async function finalizeMastraRun(
     updatePayload.error = finalData.error;
   }
 
-  const result = await trackSync(
-    () => client.updateRun(runId, updatePayload),
-    "finalizeMastraRun"
-  );
+  try {
+    await trackSync(
+      () => client.updateRun(runId, updatePayload),
+      "finalizeMastraRun",
+      { throwOnError: true }
+    );
 
-  if (result === null) {
+    logger.api("LangSmith run finalized", {
+      runId,
+      success: finalData.success,
+      questionCount: finalData.questionCount,
+      userId: finalData.userId,
+    });
+  } catch (error) {
     logger.error("Failed to finalize LangSmith run - run may remain open", {
       runId,
       userId: finalData.userId,
+      error: String(error),
     });
-    return;
   }
-
-  logger.api("LangSmith run finalized", {
-    runId,
-    success: finalData.success,
-    questionCount: finalData.questionCount,
-    userId: finalData.userId,
-  });
 }

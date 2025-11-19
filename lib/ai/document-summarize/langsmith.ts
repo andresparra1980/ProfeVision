@@ -43,28 +43,32 @@ export async function initializeLangSmithTracing(): Promise<{
   let rootRunId: string | null = null;
 
   if (client) {
-    const run = await trackSync(
-      () => client.createRun({
-        name: "document_topic_summarization",
-        run_type: "chain",
-        inputs: { endpoint: "/api/documents/summarize" },
-        project_name: process.env.LANGCHAIN_PROJECT || undefined,
-      }),
-      "initializeLangSmithTracing"
-    );
+    try {
+      const run = await trackSync(
+        () => client.createRun({
+          name: "document_topic_summarization",
+          run_type: "chain",
+          inputs: { endpoint: "/api/documents/summarize" },
+          project_name: process.env.LANGCHAIN_PROJECT || undefined,
+        }),
+        "initializeLangSmithTracing"
+      );
 
-    // @ts-expect-error tolerate unknown shape
-    rootRunId = run?.id ?? null;
+      // @ts-expect-error tolerate unknown shape
+      rootRunId = run?.id ?? null;
 
-    if (rootRunId) {
-      try {
-        // @ts-expect-error tolerate SDK shape
-        tracer = await client.getTracer({
-          projectName: process.env.LANGCHAIN_PROJECT || undefined,
-        });
-      } catch (e) {
-        logger.warn("Could not get LangSmith tracer", { error: String(e) });
+      if (rootRunId) {
+        try {
+          // @ts-expect-error tolerate SDK shape
+          tracer = await client.getTracer({
+            projectName: process.env.LANGCHAIN_PROJECT || undefined,
+          });
+        } catch (e) {
+          logger.warn("Could not get LangSmith tracer", { error: String(e) });
+        }
       }
+    } catch (error) {
+      logger.error("Failed to initialize LangSmith tracing", { error: String(error) });
     }
   }
 
@@ -89,14 +93,16 @@ export async function finalizeLangSmithRun(
     metadata,
   } as Record<string, unknown>;
 
-  const result = await trackSync(
-    () => client.updateRun(runId, updatePayload),
-    "finalizeLangSmithRun"
-  );
-
-  if (result === null) {
+  try {
+    await trackSync(
+      () => client.updateRun(runId, updatePayload),
+      "finalizeLangSmithRun",
+      { throwOnError: true }
+    );
+  } catch (error) {
     logger.error("Failed to finalize LangSmith run - run may remain open", {
       runId,
+      error: String(error),
     });
   }
 }
@@ -110,18 +116,20 @@ export async function endLangSmithRunWithError(
   runId: string,
   error: unknown
 ): Promise<void> {
-  const result = await trackSync(
-    () => client.updateRun(runId, {
-      end_time: new Date().toISOString(),
-      error: String(error),
-    }),
-    "endLangSmithRunWithError"
-  );
-
-  if (result === null) {
+  try {
+    await trackSync(
+      () => client.updateRun(runId, {
+        end_time: new Date().toISOString(),
+        error: String(error),
+      }),
+      "endLangSmithRunWithError",
+      { throwOnError: true }
+    );
+  } catch (updateError) {
     logger.error("Failed to end LangSmith run with error - run may remain open", {
       runId,
       originalError: String(error),
+      updateError: String(updateError),
     });
   }
 }
