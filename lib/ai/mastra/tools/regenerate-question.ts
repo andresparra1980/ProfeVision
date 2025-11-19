@@ -326,6 +326,23 @@ function buildRegeneratePrompt(params: {
 }
 
 /**
+ * Sanitizes JSON string to fix common LLM LaTeX errors
+ */
+function sanitizeJSON(jsonString: string): string {
+  // Fix 1: Double-escaped LaTeX commands (\\\\alpha → \\alpha)
+  let sanitized = jsonString.replace(/\\\\\\\\([a-zA-Z]+)/g, '\\\\$1');
+
+  // Fix 2: LaTeX commands that conflict with JSON escapes
+  // CRITICAL: \f is valid JSON (form feed) BUT also starts LaTeX commands (\frac, \phi)
+  sanitized = sanitized.replace(/\\f([a-zA-Z])/g, '\\\\f$1');
+
+  // Fix 3: Unescaped backslashes (but not already escaped)
+  sanitized = sanitized.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+
+  return sanitized;
+}
+
+/**
  * Parses the LLM response into a question object
  */
 function parseQuestionResponse(responseText: string): unknown {
@@ -335,6 +352,9 @@ function parseQuestionResponse(responseText: string): unknown {
     if (cleaned.startsWith("```")) {
       cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     }
+
+    // Sanitize LaTeX escaping issues
+    cleaned = sanitizeJSON(cleaned);
 
     // Parse JSON
     const parsed = JSON.parse(cleaned);

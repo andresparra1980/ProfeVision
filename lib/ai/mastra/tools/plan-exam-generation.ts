@@ -245,6 +245,25 @@ For each question in the plan, specify:
 /**
  * Parses and validates the LLM response into an ExamPlan
  */
+/**
+ * Sanitizes JSON string to fix common LLM LaTeX errors
+ */
+function sanitizeJSON(jsonString: string): string {
+  // Fix 1: Double-escaped LaTeX commands (\\\\alpha → \\alpha)
+  let sanitized = jsonString.replace(/\\\\\\\\([a-zA-Z]+)/g, '\\\\$1');
+
+  // Fix 2: LaTeX commands that conflict with JSON escapes
+  // CRITICAL: \f is valid JSON (form feed) BUT also starts LaTeX commands (\frac, \phi)
+  // When LLM writes "\frac" without escaping, JSON.parse interprets \f as form feed (\x0C)
+  sanitized = sanitized.replace(/\\f([a-zA-Z])/g, '\\\\f$1');
+
+  // Fix 3: Unescaped backslashes (but not already escaped)
+  // Valid JSON escapes: \" \\ \/ \b \f \n \r \t \uXXXX
+  sanitized = sanitized.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+
+  return sanitized;
+}
+
 function parseAndValidatePlan(responseText: string): ExamPlan {
   try {
     // Remove code fences if present
@@ -252,6 +271,9 @@ function parseAndValidatePlan(responseText: string): ExamPlan {
     if (cleaned.startsWith("```")) {
       cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     }
+
+    // Sanitize LaTeX escaping issues
+    cleaned = sanitizeJSON(cleaned);
 
     // Parse JSON
     const parsed = JSON.parse(cleaned);
