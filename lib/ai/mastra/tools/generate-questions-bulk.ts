@@ -338,7 +338,7 @@ function sanitizeJSON(jsonString: string): string {
   // This is tricky - we only want to fix literal backslashes that aren't escape sequences
   // We'll use a heuristic: if backslash is followed by a character that's not a valid escape, escape it
   // Valid escapes: \" \\ \/ \b \f \n \r \t \uXXXX
-  let sanitized = jsonString.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+  const sanitized = jsonString.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
 
   return sanitized;
 }
