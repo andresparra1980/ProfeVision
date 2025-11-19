@@ -22,6 +22,7 @@ import { TierService } from "@/lib/services/tier-service";
 import { ChatRequestSchema } from "@/lib/ai/chat/schemas";
 import { mastra } from "@/lib/ai/mastra";
 import { llmCallCapture } from "@/lib/ai/mastra/agents/chat-orchestrator";
+import { detectLanguageFromMessage, detectMessageLanguage } from "@/lib/ai/utils/language-detection";
 import logger from "@/lib/utils/logger";
 import { z } from "zod";
 import {
@@ -194,22 +195,87 @@ export async function POST(req: NextRequest) {
     // ========================================================================
     // 6. LOCALE DETECTION
     // ========================================================================
-    // Priority:
-    // 1. context.language (from frontend)
-    // 2. x-locale header
-    // 3. accept-language header
-    // 4. default: "es"
-    const locale =
-      context.language ||
-      req.headers.get("x-locale") ||
-      req.headers
-        .get("accept-language")
-        ?.split(",")[0]
-        ?.split("-")[0]
-        ?.toLowerCase() ||
-      "es";
+    // Priority order (Issue #40):
+    // 1. Existing exam language (if modifying existing exam)
+    // 2. Exam type hints (TOEFL → en, Selectividad → es)
+    // 3. Message text analysis (accents, word frequency)
+    // 4. UI locale (frontend context.language)
+    // 5. Headers (x-locale, accept-language)
+    // 6. Default: "es"
+    const locale = (() => {
+      // Priority 1: Existing exam language (strongest signal for modifications)
+      if (context.existingExam?.exam?.language) {
+        logger.api("Locale from existing exam", {
+          userId,
+          locale: context.existingExam.exam.language,
+          source: "existing_exam"
+        });
+        return context.existingExam.exam.language;
+      }
 
-    logger.api("Locale detected", { userId, locale });
+      // Get last user message for analysis
+      const lastUserMessage = messages[messages.length - 1]?.content || "";
+
+      // Priority 2: Exam type hints (TOEFL, IELTS, Selectividad, etc.)
+      const examHintLang = detectLanguageFromMessage(lastUserMessage);
+      if (examHintLang) {
+        logger.api("Locale from exam type hint", {
+          userId,
+          locale: examHintLang,
+          source: "exam_hint",
+          message: lastUserMessage.substring(0, 100)
+        });
+        return examHintLang;
+      }
+
+      // Priority 3: Message text analysis (accents, word frequency)
+      const messageLang = detectMessageLanguage(lastUserMessage);
+      if (messageLang) {
+        logger.api("Locale from message analysis", {
+          userId,
+          locale: messageLang,
+          source: "message_text",
+          message: lastUserMessage.substring(0, 100)
+        });
+        return messageLang;
+      }
+
+      // Priority 4: UI locale (frontend context.language)
+      if (context.language) {
+        logger.api("Locale from frontend context", {
+          userId,
+          locale: context.language,
+          source: "context"
+        });
+        return context.language;
+      }
+
+      // Priority 5: Headers (x-locale, accept-language)
+      const headerLocale =
+        req.headers.get("x-locale") ||
+        req.headers
+          .get("accept-language")
+          ?.split(",")[0]
+          ?.split("-")[0]
+          ?.toLowerCase();
+
+      if (headerLocale) {
+        logger.api("Locale from headers", {
+          userId,
+          locale: headerLocale,
+          source: "headers"
+        });
+        return headerLocale;
+      }
+
+      // Priority 6: Default
+      logger.api("Locale from default", {
+        userId,
+        locale: "es",
+        source: "default"
+      });
+      return "es";
+    })();
 
     // ========================================================================
     // 7. INITIALIZE LANGSMITH TRACING

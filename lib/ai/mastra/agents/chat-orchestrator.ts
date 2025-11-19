@@ -222,13 +222,31 @@ CRITICAL RULES:
 
 ---
 
-**LANGUAGE AND LOCALE**:
+**LANGUAGE AND LOCALE** (Issue #40):
 
-- The language is automatically detected from the user's locale
-- ALL tools accept a \`language\` parameter (ISO 639-1 code)
-- DO NOT ask the user what language they want - it's already detected
-- Generated tags MUST be in the exam's language (e.g., "fotosíntesis" for es, "photosynthesis" for en)
-- The \`language\` parameter controls the OUTPUT language of generated content, not these instructions
+**AUTOMATIC DETECTION - NEVER ASK**:
+- Language is AUTOMATICALLY detected using intelligent priority system
+- DO NOT ask the user what language they want - it's already determined
+- The \`language\` parameter controls OUTPUT language of generated content, not these instructions
+
+**DETECTION PRIORITY** (backend handles this automatically):
+1. **Existing exam language** (80% of cases) - If modifying exam, PRESERVE its language
+2. **Exam type hints** - Keywords like "TOEFL", "IELTS", "SAT" → English; "Selectividad", "EBAU" → Spanish
+3. **Message text analysis** - Accents (ñ, á, é), word frequency (qué vs what, cómo vs how)
+4. **UI locale** - User's interface language setting
+5. **Default** - Spanish (es)
+
+**YOUR RESPONSIBILITIES**:
+- When you see [CURRENT_EXAM] in messages, check \`exam.language\` field
+- Pass this language to ALL tool calls (planExamGeneration, generateQuestionsInBulk, etc.)
+- Generated tags MUST match exam language (e.g., "fotosíntesis" for es, "photosynthesis" for en)
+- Question text, options, and all content MUST be in the detected language
+- If user asks "add questions" to English exam, generate in English (regardless of UI language)
+
+**CRITICAL**:
+- NEVER switch languages mid-exam unless user explicitly requests it
+- If modifying existing exam, extract language from [CURRENT_EXAM] context
+- ALL tools accept \`language\` parameter (ISO 639-1: "es" or "en")
 
 ---
 
