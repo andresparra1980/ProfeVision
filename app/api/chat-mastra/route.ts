@@ -1262,6 +1262,10 @@ INSTRUCTIONS:
 
           // Finalize LangSmith run
           if (langsmithClient && langsmithRunId) {
+            // IMPORTANT: Wait for fire-and-forget child runs to reach LangSmith server
+            // before finalizing parent (otherwise parent may close before children arrive)
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             const totalDuration = Date.now() - tracingStartTime;
             await finalizeMastraRun(langsmithClient, langsmithRunId, {
               success: true,
@@ -1521,6 +1525,9 @@ INSTRUCTIONS:
 
             // Finalize LangSmith run (recovery success)
             if (langsmithClient && langsmithRunId) {
+              // Wait for child runs to reach server
+              await new Promise(resolve => setTimeout(resolve, 500));
+
               const totalDuration = Date.now() - tracingStartTime;
               const toolsUsed: string[] = [];
               for (const step of capturedSteps) {
@@ -1590,6 +1597,9 @@ INSTRUCTIONS:
 
             // Finalize LangSmith run (error)
             if (langsmithClient && langsmithRunId) {
+              // Wait for child runs to reach server
+              await new Promise(resolve => setTimeout(resolve, 500));
+
               const totalDuration = Date.now() - tracingStartTime;
               const toolsUsed: string[] = [];
               for (const step of capturedSteps) {
