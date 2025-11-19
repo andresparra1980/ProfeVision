@@ -322,6 +322,9 @@ INSTRUCTIONS:
               !!context.topicSummaries && context.topicSummaries.length > 0,
           });
 
+          // Track timing for agent.generate call
+          const agentStartTime = Date.now();
+
           // Generate with agent
           const result = await agent.generate(mastraMessages, {
             maxSteps: 15, // Increased to ensure all workflow steps complete
@@ -331,6 +334,17 @@ INSTRUCTIONS:
 
               // Capture step for error recovery
               capturedSteps.push(stepEvent);
+
+              // Track timing for first step (agent first response)
+              if (capturedSteps.length === 1) {
+                const firstStepLatency = Date.now() - agentStartTime;
+                logger.perf("Agent first step received", {
+                  userId,
+                  latency: firstStepLatency,
+                  latencySeconds: (firstStepLatency / 1000).toFixed(2),
+                  toolName: stepEvent.toolCalls?.[0]?.payload?.toolName,
+                });
+              }
 
               // Track step in LangSmith
               if (langsmithClient && langsmithRunId) {
@@ -435,6 +449,16 @@ INSTRUCTIONS:
           // 3. generateQuestionsInBulk (has questions array)
           // 4. regenerateQuestion (single question - needs fusion)
           // 5. addQuestions (new questions - needs fusion)
+
+          // Log total agent generation time
+          const totalAgentTime = Date.now() - agentStartTime;
+          logger.perf("Agent generation completed", {
+            userId,
+            totalTime: totalAgentTime,
+            totalTimeSeconds: (totalAgentTime / 1000).toFixed(2),
+            stepCount: capturedSteps.length,
+          });
+
           let examResult = null;
           const toolPriority = [
             "validateAndOrganizeExam",
