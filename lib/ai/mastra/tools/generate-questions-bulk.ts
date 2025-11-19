@@ -328,17 +328,33 @@ ${spec.taxonomyLevel ? `- Taxonomy (Bloom): ${spec.taxonomyLevel}` : ""}
 }
 
 /**
+ * Attempts to sanitize common JSON issues from LLM output
+ */
+function sanitizeJSON(jsonString: string): string {
+  // This is a best-effort attempt to fix common LLM JSON errors
+  // Note: This is fragile and may not work for all cases
+
+  // Fix unescaped backslashes in strings (but not already escaped)
+  // This is tricky - we only want to fix literal backslashes that aren't escape sequences
+  // We'll use a heuristic: if backslash is followed by a character that's not a valid escape, escape it
+  // Valid escapes: \" \\ \/ \b \f \n \r \t \uXXXX
+  let sanitized = jsonString.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+
+  return sanitized;
+}
+
+/**
  * Parses the LLM response into questions array
  */
 function parseQuestionsResponse(responseText: string): unknown[] {
-  try {
-    // Remove code fences if present
-    let cleaned = responseText.trim();
-    if (cleaned.startsWith("```")) {
-      cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-    }
+  // Remove code fences if present
+  let cleaned = responseText.trim();
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+  }
 
-    // Parse JSON
+  // Try parsing directly first
+  try {
     const parsed = JSON.parse(cleaned);
 
     // Handle different response formats
@@ -351,10 +367,51 @@ function parseQuestionsResponse(responseText: string): unknown[] {
     } else {
       throw new Error("Response is not an array of questions");
     }
-  } catch (error) {
-    logger.error("Failed to parse questions response:", responseText);
-    throw new Error(
-      `Invalid questions format: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+  } catch (firstError) {
+    // Try sanitizing and parsing again
+    logger.log("First parse failed, attempting sanitization...");
+    try {
+      const sanitized = sanitizeJSON(cleaned);
+      const parsed = JSON.parse(sanitized);
+
+      logger.log("Sanitization successful, JSON parsed after fixing escape issues");
+
+      // Handle different response formats
+      if (Array.isArray(parsed)) {
+        return parsed;
+      } else if (parsed.questions && Array.isArray(parsed.questions)) {
+        return parsed.questions;
+      } else if (parsed.exam?.questions && Array.isArray(parsed.exam.questions)) {
+        return parsed.exam.questions;
+      } else {
+        throw new Error("Response is not an array of questions");
+      }
+    } catch (secondError) {
+      // Both attempts failed - extract error context and fail
+      let errorContext = "";
+      const error = secondError; // Use the most recent error for context
+      if (error instanceof SyntaxError && error.message.includes("position")) {
+        const positionMatch = error.message.match(/position (\d+)/);
+        if (positionMatch) {
+          const position = parseInt(positionMatch[1], 10);
+          const start = Math.max(0, position - 100);
+          const end = Math.min(cleaned.length, position + 100);
+          const snippet = cleaned.substring(start, end);
+          const markerPos = position - start;
+          errorContext = `\nError near position ${position}:\n${snippet.substring(0, markerPos)}<<<ERROR HERE>>>${snippet.substring(markerPos)}`;
+        }
+      }
+
+      logger.error("Failed to parse questions response after sanitization", {
+        firstError: firstError instanceof Error ? firstError.message : "Unknown",
+        secondError: secondError instanceof Error ? secondError.message : "Unknown",
+        responseLength: responseText.length,
+        snippet: errorContext || responseText.substring(0, 500),
+      });
+
+      throw new Error(
+        `Invalid questions format: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
   }
 }

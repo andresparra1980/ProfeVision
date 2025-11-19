@@ -745,8 +745,35 @@ INSTRUCTIONS:
                           // Automatically execute validate + randomize to avoid agent having to pass large arrays
                           const bulkResult = result as {
                             questions?: unknown[];
-                            metadata?: unknown;
+                            metadata?: {
+                              totalRequested?: number;
+                              totalGenerated?: number;
+                              errors?: string[];
+                            };
                           };
+
+                          // Check for generation errors and notify user
+                          if (bulkResult.metadata?.errors && bulkResult.metadata.errors.length > 0) {
+                            logger.warn("Bulk generation had errors", {
+                              userId,
+                              totalRequested: bulkResult.metadata.totalRequested,
+                              totalGenerated: bulkResult.metadata.totalGenerated,
+                              errorCount: bulkResult.metadata.errors.length,
+                              errors: bulkResult.metadata.errors,
+                            });
+
+                            // Send warning to frontend
+                            const warningData = {
+                              type: "warning",
+                              message: `⚠️ Generación parcial: ${bulkResult.metadata.totalGenerated}/${bulkResult.metadata.totalRequested} preguntas completadas. ${bulkResult.metadata.errors.length} chunk(s) fallaron.`,
+                              details: bulkResult.metadata.errors,
+                            };
+
+                            controller.enqueue(
+                              encoder.encode(`data: ${JSON.stringify(warningData)}\n\n`)
+                            );
+                          }
+
                           if (
                             bulkResult.questions &&
                             Array.isArray(bulkResult.questions) &&
@@ -757,6 +784,7 @@ INSTRUCTIONS:
                               {
                                 userId,
                                 questionCount: bulkResult.questions.length,
+                                totalRequested: bulkResult.metadata?.totalRequested,
                               }
                             );
 
