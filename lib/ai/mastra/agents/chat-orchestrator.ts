@@ -27,26 +27,45 @@ import {
 } from "../tools";
 
 /**
+ * Maximum number of LLM calls to keep in memory
+ * Prevents unbounded memory growth in long-running processes
+ */
+const MAX_LLM_CALLS_HISTORY = 100;
+
+/**
+ * Type for LLM call capture entries
+ */
+type LLMCallEntry = {
+  model: string;
+  messages: Array<{ role: string; content: string }>;
+  response?: string;
+  toolCalls?: Array<{ name: string; arguments: unknown }>;
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+  timestamp: number;
+};
+
+/**
  * Store for capturing LLM calls (used by LangSmith tracing)
- * This is populated by the wrapLanguageModel wrapper below
+ * Implements circular buffer with max size to prevent memory leaks
  */
 export const llmCallCapture: {
-  calls: Array<{
-    model: string;
-    messages: Array<{ role: string; content: string }>;
-    response?: string;
-    toolCalls?: Array<{ name: string; arguments: unknown }>;
-    usage?: {
-      promptTokens: number;
-      completionTokens: number;
-      totalTokens: number;
-    };
-    timestamp: number;
-  }>;
-  getLatest: () => typeof llmCallCapture.calls[0] | null;
+  calls: LLMCallEntry[];
+  push: (_call: LLMCallEntry) => void;
+  getLatest: () => LLMCallEntry | null;
   clear: () => void;
 } = {
   calls: [],
+  push(call) {
+    this.calls.push(call);
+    // Circular buffer: remove oldest when exceeding max size
+    if (this.calls.length > MAX_LLM_CALLS_HISTORY) {
+      this.calls.shift();
+    }
+  },
   getLatest() {
     return this.calls[this.calls.length - 1] || null;
   },
@@ -265,7 +284,7 @@ You're ready to help create exceptional exams efficiently!
 
             // Capture input
             const [params] = args as [{ prompt: Array<{ role: string; content: string }> }];
-            llmCallCapture.calls.push({
+            llmCallCapture.push({
               model: process.env.OPENAI_MODEL || "google/gemini-2.5-flash-lite",
               messages: params?.prompt || [],
               timestamp: startTime,
