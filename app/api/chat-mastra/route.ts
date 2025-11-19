@@ -638,15 +638,18 @@ INSTRUCTIONS:
               }),
             });
 
-            // Log COMPLETE structure of last step to find where results are
+            // Log last step summary (removed verbose fullStep to reduce log pollution)
             if (steps.length > 0) {
               const lastStep = steps[steps.length - 1] as Record<
                 string,
                 unknown
               >;
-              logger.api("COMPLETE last step structure", {
+              logger.api("Last step summary", {
                 userId,
-                fullStep: JSON.stringify(lastStep, null, 2),
+                stepType: lastStep.stepType,
+                hasText: !!lastStep.text,
+                hasToolCalls: Array.isArray(lastStep.toolCalls) && lastStep.toolCalls.length > 0,
+                finishReason: lastStep.finishReason,
               });
             }
           }

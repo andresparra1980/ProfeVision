@@ -66,7 +66,8 @@ const inputSchema = z.object({
       title: z.string().optional(),
       subject: z.string().optional(),
       level: z.string().optional(),
-      questions: z.array(ExamQuestionSchema),
+      // Permissive validation - only used for context, not strict validation
+      questions: z.array(z.record(z.unknown())),
     })
     .optional(),
 
@@ -127,15 +128,18 @@ export const regenerateQuestionTool = createTool({
     // Auto-extract originalQuestion from currentExam if not provided
     let effectiveOriginalQuestion = originalQuestion;
     if (!effectiveOriginalQuestion && currentExam) {
-      effectiveOriginalQuestion = currentExam.questions.find(
-        (q: { id: string }) => q.id === questionId
+      const found = currentExam.questions.find(
+        (q) => (q as { id?: string }).id === questionId
       );
 
-      if (!effectiveOriginalQuestion) {
+      if (!found) {
         throw new Error(
           `Question with ID "${questionId}" not found in current exam`
         );
       }
+
+      // Cast to ExamQuestion for use in prompt building
+      effectiveOriginalQuestion = found as unknown as ExamQuestion;
     }
 
     // Build prompt
@@ -232,7 +236,7 @@ function buildRegeneratePrompt(params: {
     title?: string;
     subject?: string;
     level?: string;
-    questions: ExamQuestion[];
+    questions: Record<string, unknown>[];
   };
   documentSummaries?: unknown[];
 }): string {
@@ -261,9 +265,12 @@ function buildRegeneratePrompt(params: {
     if (currentExam.questions && currentExam.questions.length > 0) {
       prompt += `- Number of questions in exam: ${currentExam.questions.length}\n`;
       prompt += `- Other question topics: ${currentExam.questions
-        .filter(q => q.id !== questionId)
+        .filter(q => (q as { id?: string }).id !== questionId)
         .slice(0, 3)
-        .map(q => q.tags?.join(', ') || 'N/A')
+        .map(q => {
+          const tags = (q as { tags?: string[] }).tags;
+          return Array.isArray(tags) ? tags.join(', ') : 'N/A';
+        })
         .join('; ')}\n`;
     }
 
