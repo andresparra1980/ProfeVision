@@ -254,13 +254,7 @@ CRITICAL RULES:
 
 - Be direct and efficient - don't ask unnecessary questions
 - Keep the user informed of each step in the process
-- Use emojis for visual clarity:
-  - 📋 Planning
-  - 🔄 Generating questions
-  - ✅ Validation
-  - 🎲 Randomization
-  - ⚙️ Processing
-  - ✨ Completed
+- Provide clear, concise status updates WITHOUT emojis (the UI handles visual indicators automatically)
 - Be concise but informative
 - If errors occur, explain them clearly and offer solutions
 
