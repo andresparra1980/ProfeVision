@@ -194,8 +194,9 @@ The "taxonomy" field is MANDATORY and must use one of the exact values listed ab
 If the question involves formulas, equations, or scientific notation, use LaTeX syntax:
 - Inline formulas: $...$ (e.g., $E=mc^2$, $\\Delta p$, $\\alpha$)
 - Display formulas: \\[...\\] (e.g., \\[\\int_a^b f(x)dx\\])
-- Write commands with ONE backslash: \\frac, \\alpha, \\Delta (JSON escaping is automatic)
-- Common functions: \\int, \\frac{num}{den}, \\sin, \\cos, \\sqrt{...}
+- **ESCAPING**: Write LaTeX with single backslash in JSON: "\\alpha", "\\frac" (parser handles escape)
+- DO NOT double-escape: "\\\\alpha" is WRONG ❌, "\\alpha" is CORRECT ✓
+- Common functions: \\int, \\frac{num}{den}, \\sin, \\cos, \\sqrt{...}, \\approx, \\Delta
 - AVOID plain text like "Deltap" - use $\\Delta p$ instead
 - Chemistry: Use \\text{} in formulas, e.g., $\\text{H}_2\\text{O}$
 - **ACCENTED CHARACTERS**: Wrap ñ, á, é, í, ó, ú in \\text{} inside math mode, e.g., $\\text{año}$, NOT $año$`,
