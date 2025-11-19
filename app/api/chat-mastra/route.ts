@@ -176,6 +176,7 @@ export async function POST(req: NextRequest) {
         userId,
         messageCount: messages.length,
         language: context.language,
+        languageOverride: context.languageOverride,
         numQuestions: context.numQuestions,
         documentSummariesCount: context.topicSummaries?.length || 0,
         hasExistingExam: !!context.existingExam,
@@ -204,6 +205,15 @@ export async function POST(req: NextRequest) {
     // 5. Headers (x-locale, accept-language)
     // 6. Default: "es"
     const locale = (() => {
+      // Debug log for languageOverride
+      logger.api("Checking languageOverride", {
+        userId,
+        languageOverride: context.languageOverride,
+        type: typeof context.languageOverride,
+        isNotAuto: context.languageOverride !== 'auto',
+        condition: context.languageOverride && context.languageOverride !== 'auto'
+      });
+
       // Priority 0: User explicit override (highest priority)
       if (context.languageOverride && context.languageOverride !== 'auto') {
         logger.api("Locale from user override", {
@@ -336,6 +346,28 @@ export async function POST(req: NextRequest) {
 
           // Convert messages to Mastra format (array of content strings)
           const mastraMessages = messages.map((msg) => msg.content);
+
+          // Inject language context (ALWAYS - highest priority instruction)
+          const languageContext = `[LANGUAGE_SETTING]
+IMPORTANT: Generate ALL exam content in ${locale === 'es' ? 'SPANISH (español)' : 'ENGLISH'}.
+- Question text: ${locale === 'es' ? 'Spanish' : 'English'}
+- Answer options: ${locale === 'es' ? 'Spanish' : 'English'}
+- Rationale: ${locale === 'es' ? 'Spanish' : 'English'}
+- Tags: ${locale === 'es' ? 'Spanish' : 'English'}
+
+This language setting (${locale}) has been determined by:
+${context.languageOverride && context.languageOverride !== 'auto' ? '✅ USER EXPLICIT OVERRIDE - This is the highest priority, respect it absolutely' : 'Context-aware detection (exam context, hints, or UI locale)'}
+
+DO NOT use any other language. All text must be in ${locale === 'es' ? 'SPANISH' : 'ENGLISH'}.
+[/LANGUAGE_SETTING]`;
+
+          mastraMessages.unshift(languageContext);
+
+          logger.api("Language context injected", {
+            userId,
+            locale,
+            isUserOverride: context.languageOverride && context.languageOverride !== 'auto'
+          });
 
           // Inject current exam context if available (local-first: frontend is source of truth)
           if (context.existingExam) {
