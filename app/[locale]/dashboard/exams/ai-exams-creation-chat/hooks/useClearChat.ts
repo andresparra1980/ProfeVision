@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { clearPersistedAIExamDraft } from "../components/AIChatContext";
 import { clearLastDocumentContext } from "@/lib/persistence/browser";
 import { clearIndexedDBStores } from "../utils/indexeddb-helpers";
+import { clearPersistedMessages } from "./useChatMessages";
 
 /**
  * Hook to handle clearing chat and all persisted data
@@ -19,6 +20,8 @@ export function useClearChat() {
       clearPersistedAIExamDraft();
       // Clear last document context (single and multi)
       clearLastDocumentContext();
+      // Clear persisted chat messages
+      clearPersistedMessages();
       // Clear IndexedDB docs and outputs
       await clearIndexedDBStores();
 

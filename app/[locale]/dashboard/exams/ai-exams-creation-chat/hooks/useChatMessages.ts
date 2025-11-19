@@ -11,6 +11,51 @@ interface ChatMessage {
   content: string;
 }
 
+/**
+ * LocalStorage key for persisted chat messages
+ */
+const CHAT_MESSAGES_KEY = 'ai_chat_messages';
+
+/**
+ * Load persisted chat messages from localStorage
+ */
+function loadPersistedMessages(): ChatMessage[] {
+  try {
+    if (typeof window === 'undefined') return [];
+    const stored = localStorage.getItem(CHAT_MESSAGES_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    logger.error('[useChatMessages] Failed to load persisted messages', { error });
+    return [];
+  }
+}
+
+/**
+ * Save chat messages to localStorage
+ */
+function savePersistedMessages(messages: ChatMessage[]): void {
+  try {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(CHAT_MESSAGES_KEY, JSON.stringify(messages));
+  } catch (error) {
+    logger.error('[useChatMessages] Failed to save messages', { error });
+  }
+}
+
+/**
+ * Clear persisted chat messages from localStorage
+ */
+export function clearPersistedMessages(): void {
+  try {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(CHAT_MESSAGES_KEY);
+  } catch (error) {
+    logger.error('[useChatMessages] Failed to clear messages', { error });
+  }
+}
+
 interface ProgressMessage {
   id: string;
   text: string;
@@ -45,7 +90,8 @@ function getEmojiForMessage(msg: SSEMessage): string {
 }
 
 export function useChatMessages({ settings, result, setResult, t }: UseChatMessagesProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Load persisted messages on mount
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadPersistedMessages());
   const [isSending, setIsSending] = useState(false);
   const [progressMessages, setProgressMessages] = useState<ProgressMessage[]>([]);
 
@@ -57,6 +103,11 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
 
   // Use SSE stream for Mastra
   const { isStreaming, messages: sseMessages, startStream, clearMessages } = useSSEStream();
+
+  // Persist messages to localStorage whenever they change
+  useEffect(() => {
+    savePersistedMessages(messages);
+  }, [messages]);
 
   // Determine which endpoint to use
   const useMastra = process.env.NEXT_PUBLIC_AI_CHAT_MASTRA === 'true';

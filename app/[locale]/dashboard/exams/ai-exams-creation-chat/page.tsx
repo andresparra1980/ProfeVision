@@ -33,31 +33,39 @@ export default function AIExamsCreationChatPage() {
   const { clearing, handleClearChat } = useClearChat();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-1 sm:space-y-4">
       {/* Header */}
       <div>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => router.push("/dashboard/exams")}
+          className="hidden sm:inline-flex"
         >
           <ChevronLeft className="mr-1 h-4 w-4" /> {t("header.back")}
         </Button>
       </div>
-      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
+      <div className="flex flex-col gap-2 sm:mt-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-center sm:text-left">
+          <h2 className="text-base font-bold tracking-tight sm:text-3xl">
             {t("header.title")}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="hidden text-muted-foreground sm:block">
             {t("header.description", { locale })}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setShowClearDialog(true)}>
+        <div className="flex items-center justify-center gap-4 px-6 sm:gap-2 sm:px-0 sm:justify-start">
+          <Button
+            variant="destructive"
+            onClick={() => setShowClearDialog(true)}
+            className="flex-1 sm:flex-none"
+          >
             {t("header.clearChat")}
           </Button>
-          <Button onClick={() => setShowSaveDraftDialog(true)}>
+          <Button
+            onClick={() => setShowSaveDraftDialog(true)}
+            className="flex-1 sm:flex-none"
+          >
             {t("header.saveDraft")}
           </Button>
         </div>
