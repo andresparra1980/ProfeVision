@@ -264,9 +264,14 @@ The "taxonomy" field must be ONE of these EXACT values:
    - If prompts or options include formulas, equations, mathematical expressions, or chemical notation, REPRESENT them in LaTeX (NOT Markdown)
    - Use delimiters: $...$ for inline (e.g., $E=mc^2$, $\\Delta p$, $\\alpha$) and \\[...\\] for display (e.g., \\[\\int_0^1 x^2 \\; dx\\])
    - Common functions: \\int, \\frac{numerator}{denominator}, \\sin, \\cos, \\sqrt{...}, superscripts with ^, subscripts with _
-   - **ESCAPING RULE**: In JSON, write LaTeX with single backslash: "\\alpha", "\\Delta", "\\frac" (JSON parser handles the escape)
-   - Example: "$\\Delta p$" in JSON → renders as $Δp$, "$E=mc^2$" → renders as $E=mc²$
-   - DO NOT double-escape: "\\\\alpha" is WRONG ❌, "\\alpha" is CORRECT ✓
+   - **ESCAPING RULE - CRITICAL**: In JSON strings, LaTeX commands MUST be escaped with backslash:
+     * "\\frac{a}{b}" ✓ CORRECT (renders as fraction)
+     * "\\alpha" ✓ CORRECT (renders as α)
+     * "\\Delta" ✓ CORRECT (renders as Δ)
+     * "\frac{a}{b}" ❌ WRONG (corrupts to "␌rac" - JSON interprets \\f as form feed)
+     * "\\\\frac" ❌ WRONG (double-escaped, renders as "\\frac" literally)
+   - **Common LaTeX commands requiring escape**: \\frac, \\int, \\sum, \\sqrt, \\sin, \\cos, \\alpha, \\beta, \\Delta, \\phi, \\pi
+   - Example: "$\\frac{dy}{dx} = 2x$" in JSON → renders correctly as derivative
    - AVOID writing plain text like "Deltap" or "alpha" - always use proper LaTeX syntax: $\\Delta p$, $\\alpha$
    - For chemistry: Use \\text{} for text in formulas, e.g., $\\text{H}_2\\text{O}$, $\\text{C}_6\\text{H}_{12}\\text{O}_6$
    - **ACCENTED CHARACTERS (ñ, á, é, í, ó, ú, etc.)**: ALWAYS wrap in \\text{} when inside math mode, e.g., $\\text{año}$, $v = \\frac{d}{t}$ (use symbols), NOT $año$ or $distancia$ (causes Unicode errors)
@@ -348,10 +353,18 @@ function sanitizeJSON(jsonString: string): string {
   // 4 backslashes + letter → 2 backslashes + letter (correct JSON escape for LaTeX)
   let sanitized = jsonString.replace(/\\\\\\\\([a-zA-Z]+)/g, '\\\\$1');
 
-  // Fix 2: Unescaped backslashes in strings (but not already escaped)
+  // Fix 2: LaTeX commands that conflict with JSON escapes
+  // CRITICAL: \f is valid JSON (form feed) BUT also starts LaTeX commands (\frac, \phi)
+  // When LLM writes "\frac" without escaping, JSON.parse interprets \f as form feed (\x0C)
+  // Result: "\frac{8}{3}" → "␌rac{8}{3}" (corrupted)
+  // Solution: Escape \f when followed by letter (LaTeX command)
+  sanitized = sanitized.replace(/\\f([a-zA-Z])/g, '\\\\f$1');
+
+  // Fix 3: Unescaped backslashes in strings (but not already escaped)
   // This is tricky - we only want to fix literal backslashes that aren't escape sequences
   // We'll use a heuristic: if backslash is followed by a character that's not a valid escape, escape it
-  // Valid escapes: \" \\ \/ \b \f \n \r \t \uXXXX
+  // Valid JSON escapes: \" \\ \/ \b \f \n \r \t \uXXXX
+  // Note: We already handled \f + letter above, this catches other unescaped backslashes
   sanitized = sanitized.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
 
   return sanitized;
