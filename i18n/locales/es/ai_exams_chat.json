@@ -6,6 +6,12 @@
     "clearChat": "Borrar Chat",
     "saveDraft": "Guardar Borrador"
   },
+  "language": {
+    "label": "Generar en:",
+    "auto": "Automático",
+    "spanish": "Español",
+    "english": "English"
+  },
   "context": {
     "title": "Contexto de documento",
     "description": "Sube hasta 5 archivos para ser resumidos por la IA que sirvan de contexto para la generación del examen.",

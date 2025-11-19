@@ -68,6 +68,7 @@ interface UseChatMessagesProps {
   result: unknown;
   setResult: (_result: unknown) => void;
   t: (_key: string, _options?: { fallback?: string } | Record<string, unknown>) => string;
+  languageOverride: 'auto' | 'es' | 'en';
 }
 
 /**
@@ -89,7 +90,7 @@ function getEmojiForMessage(msg: SSEMessage): string {
   return emojiMap[toolName] || '⚙️';
 }
 
-export function useChatMessages({ settings, result, setResult, t }: UseChatMessagesProps) {
+export function useChatMessages({ settings, result, setResult, t, languageOverride }: UseChatMessagesProps) {
   // Load persisted messages on mount
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadPersistedMessages());
   const [isSending, setIsSending] = useState(false);
@@ -367,6 +368,7 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
         context: {
           documentIds: Array.isArray(documentIds) ? documentIds : [],
           language: locale || settings.language || 'es', // Use locale from next-intl
+          languageOverride, // User explicit language override (highest priority)
           questionTypes: ['multiple_choice'],
           difficulty: 'mixed' as const,
           taxonomy: [],

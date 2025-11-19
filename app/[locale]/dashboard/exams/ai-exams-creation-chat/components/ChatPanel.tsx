@@ -47,7 +47,7 @@ export default function ChatPanel() {
   const t = useTranslations('ai_exams_chat');
   const tTiers = useTranslations('tiers');
   const settings = useMemo(() => loadSettings(), []);
-  const { result, setResult } = useAIChat();
+  const { result, setResult, languageOverride } = useAIChat();
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const [input, setInput] = useState("");
   const [resultsOpen, setResultsOpen] = useState(false);
@@ -110,6 +110,7 @@ export default function ChatPanel() {
     result,
     setResult: handleSetResult as (_result: unknown) => void,
     t: t as (_key: string, _options?: Record<string, unknown> | { fallback?: string } | undefined) => string,
+    languageOverride,
   });
   const summaryDialog = useSummaryDialog({
     documentIds: documentContext.documentIds,

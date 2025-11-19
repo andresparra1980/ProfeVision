@@ -6,6 +6,13 @@ import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 
 import ChatPanel from "./components/ChatPanel";
@@ -16,6 +23,8 @@ import { DraftLoader } from "./components/DraftLoader";
 import { useExamDraft } from "./hooks/useExamDraft";
 import { useClearChat } from "./hooks/useClearChat";
 
+const LANGUAGE_OVERRIDE_KEY = 'ai_chat_language_override';
+
 export default function AIExamsCreationChatPage() {
   const router = useRouter();
   const locale = useLocale();
@@ -25,6 +34,30 @@ export default function AIExamsCreationChatPage() {
   const [showClearDialog, setShowClearDialog] = React.useState(false);
   const [showSaveDraftDialog, setShowSaveDraftDialog] = React.useState(false);
   const [_loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
+
+  // Language override state with localStorage persistence
+  const [languageOverride, setLanguageOverride] = React.useState<'auto' | 'es' | 'en'>(() => {
+    try {
+      if (typeof window === 'undefined') return 'auto';
+      const stored = localStorage.getItem(LANGUAGE_OVERRIDE_KEY);
+      if (stored === 'es' || stored === 'en' || stored === 'auto') {
+        return stored;
+      }
+      return 'auto';
+    } catch {
+      return 'auto';
+    }
+  });
+
+  // Persist language override to localStorage
+  React.useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      localStorage.setItem(LANGUAGE_OVERRIDE_KEY, languageOverride);
+    } catch {
+      // ignore
+    }
+  }, [languageOverride]);
 
   // Load materias, grupos, and editing exam state
   const { materias, grupos, editingExam, setEditingExam } = useExamDraft(profesor?.id);
@@ -55,6 +88,33 @@ export default function AIExamsCreationChatPage() {
           </p>
         </div>
         <div className="flex items-center justify-center gap-4 px-6 sm:gap-2 sm:px-0 sm:justify-start">
+          {/* Language Override Selector - Desktop only */}
+          <Select
+            value={languageOverride}
+            onValueChange={(value) => setLanguageOverride(value as 'auto' | 'es' | 'en')}
+          >
+            <SelectTrigger className="hidden sm:flex sm:w-[180px]">
+              <SelectValue placeholder={t('language.label')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">
+                <span className="flex items-center gap-2">
+                  🌐 {t('language.auto')}
+                </span>
+              </SelectItem>
+              <SelectItem value="es">
+                <span className="flex items-center gap-2">
+                  🇪🇸 Español
+                </span>
+              </SelectItem>
+              <SelectItem value="en">
+                <span className="flex items-center gap-2">
+                  🇬🇧 English
+                </span>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
           <Button
             variant="destructive"
             onClick={() => setShowClearDialog(true)}
@@ -73,7 +133,7 @@ export default function AIExamsCreationChatPage() {
       <div className="border-t border-black/50 dark:border-white/50"></div>
 
       {/* Chat and dialogs inside Provider */}
-      <AIChatProvider>
+      <AIChatProvider languageOverride={languageOverride}>
         <ChatPanel />
 
         <SaveDraftDialog

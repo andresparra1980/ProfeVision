@@ -93,6 +93,7 @@ export const TopicSummarySchema = z.object({
 export const ChatContextSchema = z.object({
   documentIds: z.array(z.string()).max(5).optional().default([]),
   language: z.string().min(2).default("es"),
+  languageOverride: z.enum(["auto", "es", "en"]).optional().default("auto"),
   numQuestions: z.number().int().min(1).max(40).optional(),
   questionTypes: z
     .array(z.enum(["multiple_choice", "true_false", "short_answer", "essay"]))

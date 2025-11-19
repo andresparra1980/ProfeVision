@@ -195,7 +195,8 @@ export async function POST(req: NextRequest) {
     // ========================================================================
     // 6. LOCALE DETECTION
     // ========================================================================
-    // Priority order (Issue #40):
+    // Priority order (Issue #40 Phase 3):
+    // 0. User explicit override (languageOverride !== 'auto') - HIGHEST
     // 1. Existing exam language (if modifying existing exam)
     // 2. Exam type hints (TOEFL → en, Selectividad → es)
     // 3. Message text analysis (accents, word frequency)
@@ -203,6 +204,16 @@ export async function POST(req: NextRequest) {
     // 5. Headers (x-locale, accept-language)
     // 6. Default: "es"
     const locale = (() => {
+      // Priority 0: User explicit override (highest priority)
+      if (context.languageOverride && context.languageOverride !== 'auto') {
+        logger.api("Locale from user override", {
+          userId,
+          locale: context.languageOverride,
+          source: "user_override"
+        });
+        return context.languageOverride;
+      }
+
       // Priority 1: Existing exam language (strongest signal for modifications)
       if (context.existingExam?.exam?.language) {
         logger.api("Locale from existing exam", {

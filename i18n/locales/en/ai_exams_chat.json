@@ -6,6 +6,12 @@
     "clearChat": "Clear Chat",
     "saveDraft": "Save Draft"
   },
+  "language": {
+    "label": "Generate in:",
+    "auto": "Automatic",
+    "spanish": "Español",
+    "english": "English"
+  },
   "context": {
     "title": "Document context",
     "description": "Upload up to 5 files to be summarized by AI to serve as context for exam generation.",
