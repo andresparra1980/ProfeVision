@@ -139,13 +139,14 @@ export function trackAgentStep(
   // Fire-and-forget: Don't block on network call
   // IMPORTANT: Include end_time at creation to auto-close (child runs block parent closure)
   const now = Date.now();
+
   trackAsync(
     () => client.createRun({
       id: stepRunId,
       name: `agent_step_${stepData.stepNumber}`,
       run_type: "chain",
       start_time: now,
-      end_time: now, // Auto-close: set end_time = start_time (completed immediately)
+      end_time: now, // Auto-close immediately
       inputs: {
         stepNumber: stepData.stepNumber,
         toolName: stepData.toolName || "none",
@@ -158,7 +159,7 @@ export function trackAgentStep(
         metadata: {
           userId: stepData.userId,
           toolName: stepData.toolName,
-          duration: stepData.duration,
+          durationMs: stepData.duration,
         },
       },
       project_name: getProjectName(),
@@ -198,14 +199,16 @@ export function trackLLMCall(
 ): void {
   const llmRunId = uuidv4();
   const now = Date.now();
+  const durationMs = llmData.duration || 0;
+  const startTime = now - durationMs;
 
   trackAsync(
     () => client.createRun({
       id: llmRunId,
       name: llmData.model || "openrouter/model",
       run_type: "llm",
-      start_time: now,
-      end_time: now, // Auto-close
+      start_time: startTime, // Backdate start to show real duration
+      end_time: now, // Operation just completed
       inputs: {
         messages: llmData.messages || [{ role: "user", content: llmData.prompt || "" }],
         model: llmData.model,
@@ -221,7 +224,7 @@ export function trackLLMCall(
           promptTokens: llmData.promptTokens || 0,
           completionTokens: llmData.completionTokens || 0,
           totalTokens: llmData.totalTokens || 0,
-          duration: llmData.duration,
+          durationMs: durationMs,
           model: llmData.model,
         },
       },
@@ -277,13 +280,13 @@ export function trackToolExecution(
     name: toolData.toolName,
     run_type: "tool",
     start_time: now,
-    end_time: now, // Auto-close
+    end_time: now, // Auto-close immediately
     inputs: toolData.inputs,
     parent_run_id: parentRunId,
     extra: {
       metadata: {
         userId: toolData.userId,
-        duration: toolData.duration,
+        durationMs: toolData.duration,
         success: toolData.success,
       },
     },
@@ -328,14 +331,16 @@ export function trackAutoProcessing(
 ): void {
   const processingRunId = uuidv4();
   const now = Date.now();
+  const durationMs = processingData.duration || 0;
+  const startTime = now - durationMs;
 
   trackAsync(
     () => client.createRun({
       id: processingRunId,
       name: "auto_processing_validate_randomize",
       run_type: "chain",
-      start_time: now,
-      end_time: now, // Auto-close
+      start_time: startTime, // Backdate start to show real duration
+      end_time: now, // Operation just completed
       inputs: {
         questionCount: processingData.questionCount,
       },
@@ -348,7 +353,7 @@ export function trackAutoProcessing(
       extra: {
         metadata: {
           userId: processingData.userId,
-          duration: processingData.duration,
+          durationMs: durationMs,
           successRate: (processingData.validQuestions / processingData.questionCount) * 100,
         },
       },
