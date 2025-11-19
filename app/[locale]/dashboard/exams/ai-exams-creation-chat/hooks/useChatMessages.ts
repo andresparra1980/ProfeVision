@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -25,10 +25,32 @@ interface UseChatMessagesProps {
   t: (_key: string, _options?: { fallback?: string } | Record<string, unknown>) => string;
 }
 
+/**
+ * Get emoji for progress message based on tool call
+ */
+function getEmojiForMessage(msg: SSEMessage): string {
+  if (!msg.toolCalls || msg.toolCalls.length === 0) return '⚙️';
+
+  const toolName = msg.toolCalls[0].name;
+  const emojiMap: Record<string, string> = {
+    planExamGeneration: '📋',
+    generateQuestionsInBulk: '🔄',
+    validateAndOrganizeExam: '✅',
+    randomizeOptions: '🎲',
+    regenerateQuestion: '🔄',
+    addQuestions: '➕',
+  };
+
+  return emojiMap[toolName] || '⚙️';
+}
+
 export function useChatMessages({ settings, result, setResult, t }: UseChatMessagesProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [progressMessages, setProgressMessages] = useState<ProgressMessage[]>([]);
+
+  // Track last processed SSE message index to prevent duplicate processing
+  const lastProcessedIndexRef = useRef<number>(-1);
 
   // Detect locale with next-intl
   const locale = useLocale();
@@ -70,35 +92,29 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
   };
 
   /**
-   * Process SSE messages for Mastra
-   * - Convert messageKey to translated text using i18n
-   * - Update progress messages
-   * - Handle done/error events
+   * Process a single SSE message
+   * Extracted into useCallback to prevent stale closures
    */
-  useEffect(() => {
-    if (!useMastra || sseMessages.length === 0) return;
-
-    const latest = sseMessages[sseMessages.length - 1];
-
+  const processSSEMessage = useCallback((msg: SSEMessage) => {
     // Handle progress messages
-    if (latest.type === 'progress') {
+    if (msg.type === 'progress') {
       // Build the display text
       let text = '';
 
       // If there's natural language text from the LLM, use it
-      if (latest.text && latest.text.trim()) {
-        text = latest.text.trim();
+      if (msg.text && msg.text.trim()) {
+        text = msg.text.trim();
       }
       // Otherwise fall back to i18n key
-      else if (latest.messageKey) {
-        text = t(latest.messageKey, latest.params);
+      else if (msg.messageKey) {
+        text = t(msg.messageKey, msg.params);
       }
       // Last resort fallback
       else {
         text = 'Processing...';
       }
 
-      const emoji = getEmojiForMessage(latest);
+      const emoji = getEmojiForMessage(msg);
 
       setProgressMessages((prev) => [
         ...prev,
@@ -109,17 +125,18 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
           timestamp: Date.now(),
         },
       ]);
+      return;
     }
 
     // Handle completion
-    if (latest.type === 'done') {
+    if (msg.type === 'done') {
       let examGenerated = false;
       let assistantMessage = '';
 
       // Parse result if available
-      if (latest.result && typeof latest.result === 'string') {
+      if (msg.result && typeof msg.result === 'string') {
         try {
-          const parsed = JSON.parse(latest.result);
+          const parsed = JSON.parse(msg.result);
 
           // Debug parsed structure
           logger.log('[useChatMessages] Parsed done result', {
@@ -129,7 +146,7 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
             questionCount: Array.isArray(parsed?.exam?.questions) ? parsed.exam.questions.length : 0,
             parsedKeys: Object.keys(parsed),
             examKeys: parsed?.exam ? Object.keys(parsed.exam) : [],
-            finishReason: latest.finishReason,
+            finishReason: msg.finishReason,
           });
 
           // Check if it's a valid exam structure
@@ -147,12 +164,12 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
           } else {
             logger.log('[useChatMessages] Not an exam structure, treating as regular message');
             // Not an exam, treat as regular message
-            assistantMessage = latest.result;
+            assistantMessage = msg.result;
           }
         } catch (_error) {
           // Not JSON (agent responded with plain text), this is expected behavior
           logger.log('[useChatMessages] Agent response is plain text (not JSON exam)');
-          assistantMessage = latest.result;
+          assistantMessage = msg.result;
         }
       }
 
@@ -208,13 +225,14 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
       });
 
       clearMessages();
+      return;
     }
 
     // Handle errors
-    if (latest.type === 'error') {
-      const errorText = latest.messageKey
-        ? t(latest.messageKey, latest.params || {})
-        : latest.error || t('chat.toasts.errorDesc');
+    if (msg.type === 'error') {
+      const errorText = msg.messageKey
+        ? t(msg.messageKey, msg.params || {})
+        : msg.error || t('chat.toasts.errorDesc');
 
       try {
         toast.error(t('chat.toasts.errorTitle'), {
@@ -232,26 +250,28 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
       setProgressMessages([]);
       clearMessages();
     }
-  }, [sseMessages, useMastra, t, clearMessages, setResult]);
+  }, [t, setResult, clearMessages]);
 
   /**
-   * Get emoji for progress message based on tool call
+   * Process SSE messages for Mastra
+   * Only processes new messages to prevent duplicates and race conditions
    */
-  const getEmojiForMessage = (msg: SSEMessage): string => {
-    if (!msg.toolCalls || msg.toolCalls.length === 0) return '⚙️';
+  useEffect(() => {
+    if (!useMastra || sseMessages.length === 0) return;
 
-    const toolName = msg.toolCalls[0].name;
-    const emojiMap: Record<string, string> = {
-      planExamGeneration: '📋',
-      generateQuestionsInBulk: '🔄',
-      validateAndOrganizeExam: '✅',
-      randomizeOptions: '🎲',
-      regenerateQuestion: '🔄',
-      addQuestions: '➕',
-    };
+    // Process only new messages since last check
+    const newMessages = sseMessages.slice(lastProcessedIndexRef.current + 1);
 
-    return emojiMap[toolName] || '⚙️';
-  };
+    if (newMessages.length === 0) return;
+
+    // Process each new message in order
+    newMessages.forEach((msg) => {
+      processSSEMessage(msg);
+    });
+
+    // Update last processed index
+    lastProcessedIndexRef.current = sseMessages.length - 1;
+  }, [sseMessages, useMastra, processSSEMessage]);
 
   const sendMessage = async (input: string) => {
     if (!input.trim()) return;
@@ -259,6 +279,8 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
     setMessages(next);
     setIsSending(true);
     setProgressMessages([]);
+    // Reset processed index for new generation
+    lastProcessedIndexRef.current = -1;
 
     try {
       const { data } = await supabase.auth.getSession();
