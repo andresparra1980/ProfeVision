@@ -443,10 +443,18 @@ export async function finalizeMastraRun(
     updatePayload.error = finalData.error;
   }
 
-  await trackSync(
+  const result = await trackSync(
     () => client.updateRun(runId, updatePayload),
     "finalizeMastraRun"
   );
+
+  if (result === null) {
+    logger.error("Failed to finalize LangSmith run - run may remain open", {
+      runId,
+      userId: finalData.userId,
+    });
+    return;
+  }
 
   logger.api("LangSmith run finalized", {
     runId,

@@ -38,23 +38,58 @@ export function trackAsync<T>(
 }
 
 /**
- * Synchronous wrapper for critical operations
- * Throws errors for critical failures (e.g., root run creation)
+ * Synchronous wrapper for critical operations with retry logic
+ * Retries failed operations to ensure trace completion
  */
 export async function trackSync<T>(
   operation: () => Promise<T>,
   operationName: string,
-  fallbackValue?: T
+  fallbackValue?: T,
+  options: { retries?: number; retryDelay?: number } = {}
 ): Promise<T | null> {
-  try {
-    return await operation();
-  } catch (error) {
-    logger.error(`LangSmith ${operationName} failed (critical)`, {
-      error: String(error),
-      operationName,
-    });
-    return fallbackValue !== undefined ? fallbackValue : null;
+  const { retries = 2, retryDelay = 100 } = options;
+
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const result = await operation();
+
+      // Log successful retry
+      if (attempt > 0) {
+        logger.api(`LangSmith ${operationName} succeeded on retry ${attempt}`, {
+          operationName,
+          attempt,
+        });
+      }
+
+      return result;
+    } catch (error) {
+      lastError = error;
+
+      // Log retry attempt
+      if (attempt < retries) {
+        logger.warn(`LangSmith ${operationName} failed, retrying (${attempt + 1}/${retries})`, {
+          error: String(error),
+          operationName,
+          attempt: attempt + 1,
+          maxRetries: retries,
+        });
+
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      }
+    }
   }
+
+  // All retries exhausted
+  logger.error(`LangSmith ${operationName} failed after ${retries + 1} attempts (critical)`, {
+    error: String(lastError),
+    operationName,
+    attempts: retries + 1,
+  });
+
+  return fallbackValue !== undefined ? fallbackValue : null;
 }
 
 /**

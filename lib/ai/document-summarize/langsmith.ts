@@ -89,10 +89,16 @@ export async function finalizeLangSmithRun(
     metadata,
   } as Record<string, unknown>;
 
-  await trackSync(
+  const result = await trackSync(
     () => client.updateRun(runId, updatePayload),
     "finalizeLangSmithRun"
   );
+
+  if (result === null) {
+    logger.error("Failed to finalize LangSmith run - run may remain open", {
+      runId,
+    });
+  }
 }
 
 /**
@@ -104,11 +110,18 @@ export async function endLangSmithRunWithError(
   runId: string,
   error: unknown
 ): Promise<void> {
-  await trackSync(
+  const result = await trackSync(
     () => client.updateRun(runId, {
       end_time: new Date().toISOString(),
       error: String(error),
     }),
     "endLangSmithRunWithError"
   );
+
+  if (result === null) {
+    logger.error("Failed to end LangSmith run with error - run may remain open", {
+      runId,
+      originalError: String(error),
+    });
+  }
 }
