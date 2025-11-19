@@ -268,6 +268,7 @@ The "taxonomy" field must be ONE of these EXACT values:
    - Examples in JSON strings: "$\\\\Delta p$" renders as Δp, "$E=mc^2$" renders correctly, "\\[\\int_a^b f(x)dx\\]" for integrals
    - AVOID writing plain text like "Deltap" or "alpha" - always use proper LaTeX syntax: $\\Delta p$, $\\alpha$
    - For chemistry: Use \\text{} for text in formulas, e.g., $\\text{H}_2\\text{O}$, $\\text{C}_6\\text{H}_{12}\\text{O}_6$
+   - **ACCENTED CHARACTERS (ñ, á, é, í, ó, ú, etc.)**: ALWAYS wrap in \\text{} when inside math mode, e.g., $\\text{año}$, $v = \\frac{d}{t}$ (use symbols), NOT $año$ or $distancia$ (causes Unicode errors)
 8. Don't add extra backslashes beyond standard LaTeX syntax; JSON escaping is applied automatically
 9. The "taxonomy" field is MANDATORY and must use one of the exact values listed above
 

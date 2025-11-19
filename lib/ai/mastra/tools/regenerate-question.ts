@@ -197,7 +197,8 @@ If the question involves formulas, equations, or scientific notation, use LaTeX 
 - Write commands with ONE backslash: \\frac, \\alpha, \\Delta (JSON escaping is automatic)
 - Common functions: \\int, \\frac{num}{den}, \\sin, \\cos, \\sqrt{...}
 - AVOID plain text like "Deltap" - use $\\Delta p$ instead
-- Chemistry: Use \\text{} in formulas, e.g., $\\text{H}_2\\text{O}$`,
+- Chemistry: Use \\text{} in formulas, e.g., $\\text{H}_2\\text{O}$
+- **ACCENTED CHARACTERS**: Wrap ñ, á, é, í, ó, ú in \\text{} inside math mode, e.g., $\\text{año}$, NOT $año$`,
           },
           {
             role: "user",

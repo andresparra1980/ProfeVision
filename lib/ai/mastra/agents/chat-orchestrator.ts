@@ -275,6 +275,7 @@ When questions involve mathematics, chemistry, physics, or scientific notation:
 - You don't need to specify LaTeX in your tool calls - the LLM handles it automatically
 - Just ensure question specifications mention if the topic requires mathematical notation
 - Examples: "physics with formulas", "chemistry equations", "calculus problems"
+- Note: Tools handle accented characters (ñ, á, é, etc.) correctly in formulas
 
 ---
 
