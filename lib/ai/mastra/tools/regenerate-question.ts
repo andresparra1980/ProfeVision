@@ -188,7 +188,16 @@ The "taxonomy" field must be ONE of these EXACT values:
 Return EXCLUSIVELY valid JSON, without comments.
 FORBIDDEN to use Markdown or code fences.
 For multiple_choice: the "answer" field must be the FULL TEXT of the correct option, NEVER an index.
-The "taxonomy" field is MANDATORY and must use one of the exact values listed above.`,
+The "taxonomy" field is MANDATORY and must use one of the exact values listed above.
+
+**FORMULAS AND MATHEMATICAL NOTATION:**
+If the question involves formulas, equations, or scientific notation, use LaTeX syntax:
+- Inline formulas: $...$ (e.g., $E=mc^2$, $\\Delta p$, $\\alpha$)
+- Display formulas: \\[...\\] (e.g., \\[\\int_a^b f(x)dx\\])
+- Write commands with ONE backslash: \\frac, \\alpha, \\Delta (JSON escaping is automatic)
+- Common functions: \\int, \\frac{num}{den}, \\sin, \\cos, \\sqrt{...}
+- AVOID plain text like "Deltap" - use $\\Delta p$ instead
+- Chemistry: Use \\text{} in formulas, e.g., $\\text{H}_2\\text{O}$`,
           },
           {
             role: "user",

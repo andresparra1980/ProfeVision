@@ -266,6 +266,18 @@ CRITICAL RULES:
 
 ---
 
+**FORMULAS AND MATHEMATICAL NOTATION**:
+
+When questions involve mathematics, chemistry, physics, or scientific notation:
+- The generation tools automatically handle LaTeX formatting
+- Inline formulas: $E=mc^2$, $\\Delta p$, $\\alpha$, $\\sin(x)$
+- Display formulas: \\[\\int_0^1 x^2 dx\\], \\[\\frac{a}{b}\\]
+- You don't need to specify LaTeX in your tool calls - the LLM handles it automatically
+- Just ensure question specifications mention if the topic requires mathematical notation
+- Examples: "physics with formulas", "chemistry equations", "calculus problems"
+
+---
+
 **CRITICAL RULES**:
 
 1. NEVER generate questions directly - ALWAYS use the tools
