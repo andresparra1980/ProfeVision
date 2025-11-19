@@ -194,19 +194,26 @@ export async function POST(req: NextRequest) {
     }
 
     // ========================================================================
-    // 6. LOCALE DETECTION
+    // 6. LOCALE DETECTION (UI vs Generation)
     // ========================================================================
-    // Priority order (Issue #40 Phase 3):
+    // Two distinct language concerns:
+    // - uiLocale: Language for agent conversational responses (from next-intl)
+    // - generationLocale: Language for exam content (from priority detection)
+
+    // UI Locale: Always from frontend context (next-intl locale)
+    const uiLocale = context.language || 'es';
+
+    // Generation Locale: Priority order (Issue #40 Phase 3)
     // 0. User explicit override (languageOverride !== 'auto') - HIGHEST
     // 1. Existing exam language (if modifying existing exam)
     // 2. Exam type hints (TOEFL → en, Selectividad → es)
     // 3. Message text analysis (accents, word frequency)
-    // 4. UI locale (frontend context.language)
+    // 4. UI locale fallback (frontend context.language)
     // 5. Headers (x-locale, accept-language)
     // 6. Default: "es"
-    const locale = (() => {
+    const generationLocale = (() => {
       // Debug log for languageOverride
-      logger.api("Checking languageOverride", {
+      logger.api("Checking languageOverride for generation", {
         userId,
         languageOverride: context.languageOverride,
         type: typeof context.languageOverride,
@@ -216,9 +223,9 @@ export async function POST(req: NextRequest) {
 
       // Priority 0: User explicit override (highest priority)
       if (context.languageOverride && context.languageOverride !== 'auto') {
-        logger.api("Locale from user override", {
+        logger.api("Generation locale from user override", {
           userId,
-          locale: context.languageOverride,
+          generationLocale: context.languageOverride,
           source: "user_override"
         });
         return context.languageOverride;
@@ -226,9 +233,9 @@ export async function POST(req: NextRequest) {
 
       // Priority 1: Existing exam language (strongest signal for modifications)
       if (context.existingExam?.exam?.language) {
-        logger.api("Locale from existing exam", {
+        logger.api("Generation locale from existing exam", {
           userId,
-          locale: context.existingExam.exam.language,
+          generationLocale: context.existingExam.exam.language,
           source: "existing_exam"
         });
         return context.existingExam.exam.language;
@@ -240,9 +247,9 @@ export async function POST(req: NextRequest) {
       // Priority 2: Exam type hints (TOEFL, IELTS, Selectividad, etc.)
       const examHintLang = detectLanguageFromMessage(lastUserMessage);
       if (examHintLang) {
-        logger.api("Locale from exam type hint", {
+        logger.api("Generation locale from exam type hint", {
           userId,
-          locale: examHintLang,
+          generationLocale: examHintLang,
           source: "exam_hint",
           message: lastUserMessage.substring(0, 100)
         });
@@ -252,20 +259,20 @@ export async function POST(req: NextRequest) {
       // Priority 3: Message text analysis (accents, word frequency)
       const messageLang = detectMessageLanguage(lastUserMessage);
       if (messageLang) {
-        logger.api("Locale from message analysis", {
+        logger.api("Generation locale from message analysis", {
           userId,
-          locale: messageLang,
+          generationLocale: messageLang,
           source: "message_text",
           message: lastUserMessage.substring(0, 100)
         });
         return messageLang;
       }
 
-      // Priority 4: UI locale (frontend context.language)
+      // Priority 4: UI locale fallback (frontend context.language)
       if (context.language) {
-        logger.api("Locale from frontend context", {
+        logger.api("Generation locale from frontend context", {
           userId,
-          locale: context.language,
+          generationLocale: context.language,
           source: "context"
         });
         return context.language;
@@ -281,22 +288,30 @@ export async function POST(req: NextRequest) {
           ?.toLowerCase();
 
       if (headerLocale) {
-        logger.api("Locale from headers", {
+        logger.api("Generation locale from headers", {
           userId,
-          locale: headerLocale,
+          generationLocale: headerLocale,
           source: "headers"
         });
         return headerLocale;
       }
 
       // Priority 6: Default
-      logger.api("Locale from default", {
+      logger.api("Generation locale from default", {
         userId,
-        locale: "es",
+        generationLocale: "es",
         source: "default"
       });
       return "es";
     })();
+
+    // Log both locales for debugging
+    logger.api("Locale detection complete", {
+      userId,
+      uiLocale,
+      generationLocale,
+      localesMatch: uiLocale === generationLocale
+    });
 
     // ========================================================================
     // 7. INITIALIZE LANGSMITH TRACING
@@ -311,7 +326,8 @@ export async function POST(req: NextRequest) {
     if (langsmithClient) {
       langsmithRunId = await createMastraRootRun(langsmithClient, {
         userId,
-        locale,
+        uiLocale,
+        generationLocale,
         messageCount: messages.length,
         hasDocumentContext: !!(
           context.topicSummaries && context.topicSummaries.length > 0
@@ -342,30 +358,39 @@ export async function POST(req: NextRequest) {
         const capturedSteps: unknown[] = [];
 
         try {
-          logger.api("Starting agent generation", { userId, locale });
+          logger.api("Starting agent generation", { userId, uiLocale, generationLocale });
 
           // Convert messages to Mastra format (array of content strings)
           const mastraMessages = messages.map((msg) => msg.content);
 
           // Inject language context (ALWAYS - highest priority instruction)
+          // Two distinct languages: UI for responses, Generation for exam content
           const languageContext = `[LANGUAGE_SETTING]
-IMPORTANT: Generate ALL exam content in ${locale === 'es' ? 'SPANISH (español)' : 'ENGLISH'}.
-- Question text: ${locale === 'es' ? 'Spanish' : 'English'}
-- Answer options: ${locale === 'es' ? 'Spanish' : 'English'}
-- Rationale: ${locale === 'es' ? 'Spanish' : 'English'}
-- Tags: ${locale === 'es' ? 'Spanish' : 'English'}
+UI Language: ${uiLocale} - Use this for ALL conversational responses to the user
+Generation Language: ${generationLocale} - Use this for ALL exam content (questions, options, rationale, tags)
 
-This language setting (${locale}) has been determined by:
-${context.languageOverride && context.languageOverride !== 'auto' ? '✅ USER EXPLICIT OVERRIDE - This is the highest priority, respect it absolutely' : 'Context-aware detection (exam context, hints, or UI locale)'}
+IMPORTANT DISTINCTION:
+1. Your responses/messages to the user MUST be in ${uiLocale === 'es' ? 'SPANISH (español)' : 'ENGLISH'}
+   - Examples: "Generando examen...", "He creado las preguntas...", progress messages, etc.
 
-DO NOT use any other language. All text must be in ${locale === 'es' ? 'SPANISH' : 'ENGLISH'}.
+2. The exam content (questions, answers, rationale) MUST be in ${generationLocale === 'es' ? 'SPANISH (español)' : 'ENGLISH'}
+   - Question text: ${generationLocale === 'es' ? 'Spanish' : 'English'}
+   - Answer options: ${generationLocale === 'es' ? 'Spanish' : 'English'}
+   - Rationale: ${generationLocale === 'es' ? 'Spanish' : 'English'}
+   - Tags: ${generationLocale === 'es' ? 'Spanish' : 'English'}
+
+Generation language (${generationLocale}) has been determined by:
+${context.languageOverride && context.languageOverride !== 'auto' ? '✅ USER EXPLICIT OVERRIDE - This is the highest priority, respect it absolutely' : 'Context-aware detection (exam context, hints, or message analysis)'}
+
+DO NOT mix these languages. Responses in ${uiLocale}, exam content in ${generationLocale}.
 [/LANGUAGE_SETTING]`;
 
           mastraMessages.unshift(languageContext);
 
           logger.api("Language context injected", {
             userId,
-            locale,
+            uiLocale,
+            generationLocale,
             isUserOverride: context.languageOverride && context.languageOverride !== 'auto'
           });
 
@@ -753,7 +778,7 @@ INSTRUCTIONS:
                                       title: "",
                                       subject: "",
                                       level: "",
-                                      language: locale,
+                                      language: generationLocale,
                                     },
                                     normalizeIds: true,
                                     applySanitization: true,
@@ -829,7 +854,7 @@ INSTRUCTIONS:
                                   title: "",
                                   subject: "",
                                   level: "",
-                                  language: locale,
+                                  language: generationLocale,
                                   questions: bulkResult.questions,
                                 },
                               };
@@ -1019,7 +1044,7 @@ INSTRUCTIONS:
                         title: "",
                         subject: "",
                         level: "",
-                        language: locale,
+                        language: generationLocale,
                       },
                       normalizeIds: true,
                       applySanitization: true,
@@ -1308,7 +1333,7 @@ INSTRUCTIONS:
                                   title: "",
                                   subject: "",
                                   level: "",
-                                  language: locale,
+                                  language: generationLocale,
                                 },
                                 normalizeIds: true,
                                 applySanitization: true,

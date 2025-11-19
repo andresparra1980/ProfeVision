@@ -42,7 +42,8 @@ export async function createMastraRootRun(
   client: Client,
   metadata: {
     userId: string;
-    locale: string;
+    uiLocale: string;
+    generationLocale: string;
     messageCount: number;
     hasDocumentContext: boolean;
     hasExamContext: boolean;
@@ -55,6 +56,8 @@ export async function createMastraRootRun(
     logger.api("Creating LangSmith root run", {
       runId,
       userId: metadata.userId,
+      uiLocale: metadata.uiLocale,
+      generationLocale: metadata.generationLocale,
       project: process.env.LANGSMITH_PROJECT || "ProfeVision-dev",
       endpoint: process.env.LANGSMITH_ENDPOINT,
     });
@@ -66,12 +69,16 @@ export async function createMastraRootRun(
       start_time: Date.now(),  // Add start time for accurate timing
       inputs: {
         endpoint: "/api/chat-mastra",
-        locale: metadata.locale,
+        uiLocale: metadata.uiLocale,
+        generationLocale: metadata.generationLocale,
         messageCount: metadata.messageCount,
       },
       extra: {
         metadata: {
           userId: metadata.userId,
+          uiLocale: metadata.uiLocale,
+          generationLocale: metadata.generationLocale,
+          localesMatch: metadata.uiLocale === metadata.generationLocale,
           hasDocumentContext: metadata.hasDocumentContext,
           hasExamContext: metadata.hasExamContext,
           timestamp: new Date().toISOString(),
@@ -80,7 +87,12 @@ export async function createMastraRootRun(
       project_name: process.env.LANGSMITH_PROJECT || "ProfeVision-dev",
     });
 
-    logger.api("LangSmith root run created", { runId, userId: metadata.userId });
+    logger.api("LangSmith root run created", {
+      runId,
+      userId: metadata.userId,
+      uiLocale: metadata.uiLocale,
+      generationLocale: metadata.generationLocale,
+    });
     return runId;
   } catch (error) {
     logger.error("Failed to create LangSmith root run", { error, userId: metadata.userId });
