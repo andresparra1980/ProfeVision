@@ -23,6 +23,7 @@ import { ChatRequestSchema } from "@/lib/ai/chat/schemas";
 import { mastra } from "@/lib/ai/mastra";
 import { llmCallCapture } from "@/lib/ai/mastra/agents/chat-orchestrator";
 import { detectLanguageFromMessage, detectMessageLanguage } from "@/lib/ai/utils/language-detection";
+import { sanitizeDocumentContent } from "@/lib/utils/sanitize-prompt";
 import logger from "@/lib/utils/logger";
 import { z } from "zod";
 import {
@@ -411,12 +412,35 @@ IMPORTANT: When using regenerateQuestion or addQuestions tools, you MUST pass th
           if (context.topicSummaries && context.topicSummaries.length > 0) {
             // Create a compact version of summaries for the message
             // (Only include essential info to avoid overwhelming the model)
-            const compactSummaries = context.topicSummaries.map((ts) => ({
-              documentId: ts.documentId,
-              overview: ts.summary?.generalOverview || "Document uploaded",
-              level: ts.summary?.academicLevel || "Unknown",
-              topicCount: ts.summary?.macroTopics?.length || 0,
-            }));
+            const compactSummaries = context.topicSummaries.map((ts, index) => {
+              const rawOverview = ts.summary?.generalOverview || "Document uploaded";
+
+              // SECURITY: Sanitize document content before LLM injection (Issue #35)
+              const sanitizeResult = sanitizeDocumentContent(rawOverview, {
+                userId,
+                documentId: ts.documentId,
+                maxLength: 5000, // Per-document limit
+              });
+
+              // Log if suspicious content detected
+              if (sanitizeResult.hadSuspiciousContent) {
+                logger.warn("Prompt injection attempt detected in document", {
+                  userId,
+                  documentId: ts.documentId,
+                  documentIndex: index,
+                  patternsDetected: sanitizeResult.patternsDetected,
+                  wasTruncated: sanitizeResult.wasTruncated,
+                });
+              }
+
+              return {
+                documentId: ts.documentId,
+                overview: sanitizeResult.sanitized, // Use sanitized content
+                level: ts.summary?.academicLevel || "Unknown",
+                topicCount: ts.summary?.macroTopics?.length || 0,
+                wasSanitized: sanitizeResult.hadSuspiciousContent,
+              };
+            });
 
             const documentContext = `[DOCUMENT_CONTEXT]
 The user has uploaded ${context.topicSummaries.length} document(s):
@@ -445,6 +469,7 @@ INSTRUCTIONS:
               userId,
               summariesCount: context.topicSummaries.length,
               documentIds: context.topicSummaries.map((s) => s.documentId),
+              sanitizedCount: compactSummaries.filter(s => s.wasSanitized).length,
             });
           }
 
