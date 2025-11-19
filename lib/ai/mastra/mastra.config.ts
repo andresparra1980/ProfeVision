@@ -12,6 +12,30 @@
 
 import { Mastra } from "@mastra/core";
 import { chatOrchestratorAgent } from "./agents/chat-orchestrator";
+import { logger } from "@/lib/utils/logger";
+
+/**
+ * Validate required environment variables
+ */
+function validateEnvironment() {
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error(
+      'OPENROUTER_API_KEY environment variable is required for Mastra AI functionality. ' +
+      'Please add it to your .env.local file.'
+    );
+  }
+
+  // Optional: warn about malformed keys
+  if (!process.env.OPENROUTER_API_KEY.startsWith('sk-')) {
+    logger.warn(
+      'Warning: OPENROUTER_API_KEY may be malformed. ' +
+      'OpenRouter API keys typically start with "sk-".'
+    );
+  }
+}
+
+// Validate environment on module load
+validateEnvironment();
 
 /**
  * Main Mastra Instance
