@@ -266,12 +266,14 @@ The "taxonomy" field must be ONE of these EXACT values:
    - Common functions: \\int, \\frac{numerator}{denominator}, \\sin, \\cos, \\sqrt{...}, superscripts with ^, subscripts with _
    - **ESCAPING RULE - CRITICAL**: In JSON strings, LaTeX commands MUST be escaped with backslash:
      * "\\frac{a}{b}" ✓ CORRECT (renders as fraction)
-     * "\\alpha" ✓ CORRECT (renders as α)
-     * "\\Delta" ✓ CORRECT (renders as Δ)
+     * "\\theta" ✓ CORRECT (renders as θ)
+     * "\\begin{pmatrix}" ✓ CORRECT (renders matrix)
      * "\frac{a}{b}" ❌ WRONG (corrupts to "␌rac" - JSON interprets \\f as form feed)
+     * "\theta" ❌ WRONG (corrupts to "[TAB]heta" - JSON interprets \\t as tab)
+     * "\begin{pmatrix}" ❌ WRONG (corrupts to "pma[TAB]rix")
      * "\\\\frac" ❌ WRONG (double-escaped, renders as "\\frac" literally)
-   - **Common LaTeX commands requiring escape**: \\frac, \\int, \\sum, \\sqrt, \\sin, \\cos, \\alpha, \\beta, \\Delta, \\phi, \\pi
-   - Example: "$\\frac{dy}{dx} = 2x$" in JSON → renders correctly as derivative
+   - **Commands that conflict with JSON escapes**: \\beta, \\bar, \\binom, \\begin (\\b=backspace), \\frac, \\phi (\\f=form feed), \\nabla, \\neq, \\neg (\\n=newline), \\rho, \\rightarrow (\\r=carriage return), \\theta, \\tan, \\tau, pmatrix (\\t=tab)
+   - Example: "$\\frac{dy}{dx} = 2x$", "$\\theta = 45°$", "$\\begin{pmatrix} 1 \\\\ 0 \\end{pmatrix}$" in JSON → render correctly
    - AVOID writing plain text like "Deltap" or "alpha" - always use proper LaTeX syntax: $\\Delta p$, $\\alpha$
    - For chemistry: Use \\text{} for text in formulas, e.g., $\\text{H}_2\\text{O}$, $\\text{C}_6\\text{H}_{12}\\text{O}_6$
    - **ACCENTED CHARACTERS (ñ, á, é, í, ó, ú, etc.)**: ALWAYS wrap in \\text{} when inside math mode, e.g., $\\text{año}$, $v = \\frac{d}{t}$ (use symbols), NOT $año$ or $distancia$ (causes Unicode errors)
@@ -354,11 +356,17 @@ function sanitizeJSON(jsonString: string): string {
   let sanitized = jsonString.replace(/\\\\\\\\([a-zA-Z]+)/g, '\\\\$1');
 
   // Fix 2: LaTeX commands that conflict with JSON escapes
-  // CRITICAL: \f is valid JSON (form feed) BUT also starts LaTeX commands (\frac, \phi)
-  // When LLM writes "\frac" without escaping, JSON.parse interprets \f as form feed (\x0C)
-  // Result: "\frac{8}{3}" → "␌rac{8}{3}" (corrupted)
-  // Solution: Escape \f when followed by letter (LaTeX command)
-  sanitized = sanitized.replace(/\\f([a-zA-Z])/g, '\\\\f$1');
+  // CRITICAL: JSON escapes \b \f \n \r \t are valid BUT also appear in LaTeX commands
+  // Examples:
+  // - \frac, \phi → \f (form feed \x0C)
+  // - \beta, \bar, \binom, \begin → \b (backspace \x08)
+  // - \nabla, \neq, \neg → \n (newline \x0A)
+  // - \rho, \rightarrow → \r (carriage return \x0D)
+  // - \theta, \tan, \tau, pmatrix → \t (tab \x09)
+  // When LLM writes "\theta" without escaping, JSON.parse interprets \t as TAB
+  // Result: "\begin{pmatrix}" → "pma[TAB]rix" (corrupted)
+  // Solution: Escape \b \f \n \r \t when followed by letter (LaTeX command)
+  sanitized = sanitized.replace(/\\([bfnrt])([a-zA-Z])/g, '\\\\$1$2');
 
   // Fix 3: Unescaped backslashes in strings (but not already escaped)
   // This is tricky - we only want to fix literal backslashes that aren't escape sequences

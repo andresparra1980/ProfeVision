@@ -195,9 +195,11 @@ If the question involves formulas, equations, or scientific notation, use LaTeX 
 - Inline formulas: $...$ (e.g., $E=mc^2$, $\\Delta p$, $\\alpha$)
 - Display formulas: \\[...\\] (e.g., \\[\\int_a^b f(x)dx\\])
 - **ESCAPING - CRITICAL**: LaTeX in JSON MUST use backslash escape:
-  * "\\frac{a}{b}" ✓ CORRECT, "\frac{a}{b}" ❌ WRONG (corrupts to "␌rac")
-  * "\\alpha" ✓ CORRECT, "\\\\alpha" ❌ WRONG (double-escaped)
-- Common commands: \\frac, \\int, \\sum, \\sqrt, \\sin, \\cos, \\alpha, \\Delta, \\phi, \\approx
+  * "\\frac{a}{b}" ✓, "\frac" ❌ (corrupts to "␌rac")
+  * "\\theta" ✓, "\theta" ❌ (corrupts to "[TAB]heta")
+  * "\\begin{pmatrix}" ✓, "\begin{pmatrix}" ❌ (corrupts)
+  * "\\\\frac" ❌ (double-escaped)
+- Conflicting commands: \\beta, \\begin (\\b), \\frac, \\phi (\\f), \\nabla, \\neq (\\n), \\rho (\\r), \\theta, \\tan, pmatrix (\\t)
 - AVOID plain text like "Deltap" - use $\\Delta p$ instead
 - Chemistry: Use \\text{} in formulas, e.g., $\\text{H}_2\\text{O}$
 - **ACCENTED CHARACTERS**: Wrap ñ, á, é, í, ó, ú in \\text{} inside math mode, e.g., $\\text{año}$, NOT $año$`,
@@ -333,8 +335,9 @@ function sanitizeJSON(jsonString: string): string {
   let sanitized = jsonString.replace(/\\\\\\\\([a-zA-Z]+)/g, '\\\\$1');
 
   // Fix 2: LaTeX commands that conflict with JSON escapes
-  // CRITICAL: \f is valid JSON (form feed) BUT also starts LaTeX commands (\frac, \phi)
-  sanitized = sanitized.replace(/\\f([a-zA-Z])/g, '\\\\f$1');
+  // CRITICAL: JSON escapes \b \f \n \r \t appear in LaTeX commands
+  // Examples: \frac, \beta, \nabla, \rho, \theta, \begin{pmatrix}
+  sanitized = sanitized.replace(/\\([bfnrt])([a-zA-Z])/g, '\\\\$1$2');
 
   // Fix 3: Unescaped backslashes (but not already escaped)
   sanitized = sanitized.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');

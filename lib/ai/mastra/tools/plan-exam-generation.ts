@@ -253,9 +253,10 @@ function sanitizeJSON(jsonString: string): string {
   let sanitized = jsonString.replace(/\\\\\\\\([a-zA-Z]+)/g, '\\\\$1');
 
   // Fix 2: LaTeX commands that conflict with JSON escapes
-  // CRITICAL: \f is valid JSON (form feed) BUT also starts LaTeX commands (\frac, \phi)
-  // When LLM writes "\frac" without escaping, JSON.parse interprets \f as form feed (\x0C)
-  sanitized = sanitized.replace(/\\f([a-zA-Z])/g, '\\\\f$1');
+  // CRITICAL: JSON escapes \b \f \n \r \t appear in LaTeX commands
+  // Examples: \frac, \beta, \nabla, \rho, \theta, \begin{pmatrix}
+  // When LLM writes "\theta" without escaping, JSON.parse interprets \t as TAB
+  sanitized = sanitized.replace(/\\([bfnrt])([a-zA-Z])/g, '\\\\$1$2');
 
   // Fix 3: Unescaped backslashes (but not already escaped)
   // Valid JSON escapes: \" \\ \/ \b \f \n \r \t \uXXXX
