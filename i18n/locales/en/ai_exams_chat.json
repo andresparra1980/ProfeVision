@@ -2,15 +2,17 @@
   "header": {
     "back": "Back to Exams",
     "title": "Create exams with AI",
-    "description": "Chat experience to generate question banks and summaries. Language: {locale}",
+    "description": "Chat experience to generate question banks and summaries.",
     "clearChat": "Clear Chat",
-    "saveDraft": "Save Draft"
+    "saveDraft": "Save Draft",
+    "examLanguageLabel": "Exam Language:"
   },
   "language": {
     "label": "Generate in:",
     "auto": "Automatic",
     "spanish": "Español",
-    "english": "English"
+    "english": "English",
+    "tooltip": "Automatic: The agent auto-detects\nlanguage based on context, topic,\nand exam type.\nRecommended for best results."
   },
   "context": {
     "title": "Document context",

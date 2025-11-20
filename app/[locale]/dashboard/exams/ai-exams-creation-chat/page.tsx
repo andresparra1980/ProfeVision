@@ -2,17 +2,9 @@
 
 import React from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useProfesor } from "@/lib/hooks/useProfesor";
 
 import ChatPanel from "./components/ChatPanel";
@@ -20,6 +12,7 @@ import { AIChatProvider } from "./components/AIChatContext";
 import { SaveDraftDialog } from "./components/SaveDraftDialog";
 import { ClearChatDialog } from "./components/ClearChatDialog";
 import { DraftLoader } from "./components/DraftLoader";
+import { LanguageSelector } from "./components/LanguageSelector";
 import { useExamDraft } from "./hooks/useExamDraft";
 import { useClearChat } from "./hooks/useClearChat";
 
@@ -27,7 +20,6 @@ const LANGUAGE_OVERRIDE_KEY = 'ai_chat_language_override';
 
 export default function AIExamsCreationChatPage() {
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations("ai_exams_chat");
   const { profesor } = useProfesor();
 
@@ -67,8 +59,8 @@ export default function AIExamsCreationChatPage() {
 
   return (
     <div className="space-y-1 sm:space-y-4">
-      {/* Header */}
-      <div>
+      {/* Header - Top Row with Back Button and Language Controls */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button
           variant="ghost"
           size="sm"
@@ -77,43 +69,12 @@ export default function AIExamsCreationChatPage() {
         >
           <ChevronLeft className="mr-1 h-4 w-4" /> {t("header.back")}
         </Button>
-      </div>
-      <div className="flex flex-col gap-2 sm:mt-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-center sm:text-left">
-          <h2 className="text-base font-bold tracking-tight sm:text-3xl">
-            {t("header.title")}
-          </h2>
-          <p className="hidden text-muted-foreground sm:block">
-            {t("header.description", { locale })}
-          </p>
-        </div>
-        <div className="flex items-center justify-center gap-4 px-6 sm:gap-2 sm:px-0 sm:justify-start">
-          {/* Language Override Selector - Desktop only */}
-          <Select
+
+        <div className="flex items-center justify-center gap-4 px-6 sm:gap-2 sm:px-0 sm:justify-end">
+          <LanguageSelector
             value={languageOverride}
-            onValueChange={(value) => setLanguageOverride(value as 'auto' | 'es' | 'en')}
-          >
-            <SelectTrigger className="hidden sm:flex sm:w-[180px]">
-              <SelectValue placeholder={t('language.label')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="auto">
-                <span className="flex items-center gap-2">
-                  🌐 {t('language.auto')}
-                </span>
-              </SelectItem>
-              <SelectItem value="es">
-                <span className="flex items-center gap-2">
-                  🇪🇸 Español
-                </span>
-              </SelectItem>
-              <SelectItem value="en">
-                <span className="flex items-center gap-2">
-                  🇬🇧 English
-                </span>
-              </SelectItem>
-            </SelectContent>
-          </Select>
+            onValueChange={(value) => setLanguageOverride(value)}
+          />
 
           <Button
             variant="destructive"
@@ -130,6 +91,17 @@ export default function AIExamsCreationChatPage() {
           </Button>
         </div>
       </div>
+
+      {/* Title and Description */}
+      <div className="text-center sm:text-left">
+        <h2 className="text-base font-bold tracking-tight sm:text-3xl">
+          {t("header.title")}
+        </h2>
+        <p className="hidden text-muted-foreground sm:block">
+          {t("header.description")}
+        </p>
+      </div>
+
       <div className="border-t border-black/50 dark:border-white/50"></div>
 
       {/* Chat and dialogs inside Provider */}

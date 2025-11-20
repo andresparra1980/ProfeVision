@@ -2,15 +2,17 @@
   "header": {
     "back": "Volver a Exámenes",
     "title": "Crear exámenes con IA",
-    "description": "Experiencia de chat para generar bancos de preguntas y resúmenes. Idioma: {locale}",
+    "description": "Experiencia de chat para generar bancos de preguntas y resúmenes.",
     "clearChat": "Borrar Chat",
-    "saveDraft": "Guardar Borrador"
+    "saveDraft": "Guardar Borrador",
+    "examLanguageLabel": "Idioma del Examen:"
   },
   "language": {
     "label": "Generar en:",
     "auto": "Automático",
     "spanish": "Español",
-    "english": "English"
+    "english": "English",
+    "tooltip": "Automático: El agente detecta el idioma\nautomáticamente según el contexto,\nel tema y tipo de examen.\nRecomendado para mejores resultados."
   },
   "context": {
     "title": "Contexto de documento",
