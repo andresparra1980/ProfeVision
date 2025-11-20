@@ -580,6 +580,7 @@ INSTRUCTIONS:
                   randomizeOptions: "chat.progress.randomizing",
                   regenerateQuestion: "chat.progress.regenerating",
                   addQuestions: "chat.progress.adding",
+                  modifyMultipleQuestions: "chat.progress.modifying_batch",
                 };
 
                 messageKey = toolToMessageKey[toolName] || "chat.progress.step";
@@ -623,6 +624,7 @@ INSTRUCTIONS:
             "validateAndOrganizeExam",
             "randomizeOptions",
             "generateQuestionsInBulk",
+            "modifyMultipleQuestions",
             "regenerateQuestion",
             "addQuestions",
           ];
@@ -964,6 +966,71 @@ INSTRUCTIONS:
                                 hasQuestion: !!regenerateResult.question,
                                 hasQuestionId:
                                   !!regenerateResult.metadata?.questionId,
+                                hasExistingExam: !!context.existingExam,
+                              }
+                            );
+                          }
+                        } else if (toolName === "modifyMultipleQuestions") {
+                          // modifyMultipleQuestions returns { exam: {...}, metadata: { modifiedIds, ... } }
+                          // We need to merge modified questions with existing exam
+                          const batchResult = result as {
+                            exam?: {
+                              exam?: {
+                                questions?: unknown[];
+                              };
+                            };
+                            metadata?: {
+                              modifiedIds?: string[];
+                              failedIds?: string[];
+                            };
+                          };
+
+                          if (
+                            batchResult.exam?.exam?.questions &&
+                            Array.isArray(batchResult.exam.exam.questions) &&
+                            context.existingExam
+                          ) {
+                            // Merge modified questions back into existing exam
+                            const modifiedQuestionsMap = new Map(
+                              batchResult.exam.exam.questions.map((q) => [
+                                (q as { id: string }).id,
+                                q,
+                              ])
+                            );
+
+                            const updatedQuestions =
+                              context.existingExam.exam.questions.map(
+                                (q: { id: string }) => {
+                                  const modifiedVersion = modifiedQuestionsMap.get(
+                                    q.id
+                                  );
+                                  return modifiedVersion || q;
+                                }
+                              );
+
+                            examResult = {
+                              exam: {
+                                ...context.existingExam.exam,
+                                questions: updatedQuestions,
+                              },
+                            };
+
+                            logger.api(
+                              "Merged batch modified questions with existing exam",
+                              {
+                                userId,
+                                modifiedIds: batchResult.metadata?.modifiedIds,
+                                failedIds: batchResult.metadata?.failedIds,
+                                totalQuestions: updatedQuestions.length,
+                              }
+                            );
+                          } else {
+                            logger.warn(
+                              "modifyMultipleQuestions result incomplete or no existing exam",
+                              {
+                                userId,
+                                hasExam: !!batchResult.exam?.exam,
+                                hasQuestions: !!batchResult.exam?.exam?.questions,
                                 hasExistingExam: !!context.existingExam,
                               }
                             );

@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { logger } from '@/lib/utils/logger';
 
 export function LanguageSwitcher() {
   const router = useRouter();
@@ -51,7 +52,7 @@ export function LanguageSwitcher() {
   }, {} as Record<string, string>);
 
   const handleLocaleChange = (newLocale: string) => {
-    console.log('🔄 Language Switch START:', { pathname, locale, newLocale });
+    logger.log('🔄 Language Switch START:', { pathname, locale, newLocale });
 
     let currentPath = pathname;
 
@@ -64,7 +65,7 @@ export function LanguageSwitcher() {
       currentPath = pathname.replace(/^\/es/, '');
     }
 
-    console.log('🔄 Current path (no prefix):', currentPath);
+    logger.log('🔄 Current path (no prefix):', currentPath);
 
     // 2) Extraer parámetros dinámicos (IDs, slugs, etc.) y segmentos estáticos
     // Ej: /dashboard/exams/123/edit -> base: /dashboard/exams/[id]/edit, params: {id: 123}
@@ -86,7 +87,7 @@ export function LanguageSwitcher() {
     });
 
     const staticPath = '/' + staticSegments.join('/');
-    console.log('🔄 Static path:', staticPath, 'Dynamic params:', dynamicParams);
+    logger.log('🔄 Static path:', staticPath, 'Dynamic params:', dynamicParams);
 
     // 3) Mapear solo la parte estática al idioma de destino
     let targetStaticPath = staticPath;
@@ -106,7 +107,7 @@ export function LanguageSwitcher() {
       return dynamicParams[paramIdx++] || '';
     });
 
-    console.log('🔄 Target path:', targetPath);
+    logger.log('🔄 Target path:', targetPath);
 
     // 5) Preservar query params si existen
     const queryString = searchParams.toString();
@@ -115,7 +116,7 @@ export function LanguageSwitcher() {
     // 6) Construir URL final con prefijo SIEMPRE (localePrefix: 'always')
     const finalPath = targetPathWithQuery === '/' ? `/${newLocale}` : `/${newLocale}${targetPathWithQuery}`;
 
-    console.log('🔄 Final path:', finalPath);
+    logger.log('🔄 Final path:', finalPath);
 
     // 7. Navegar a la nueva ruta
     router.push(finalPath);

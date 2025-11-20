@@ -24,6 +24,7 @@ import {
   // randomizeOptionsTool is handled by API route to prevent LLM errors
   regenerateQuestionTool,
   addQuestionsTool,
+  modifyMultipleQuestionsTool,
 } from "../tools";
 
 /**
@@ -191,18 +192,90 @@ CRITICAL RULES:
 
 **MODIFICATIONS**:
 
-- **Regenerate Specific Question**:
-  - User asks: "change question 5" or "make question 3 harder"
-  - **STEP 1**: Extract the current exam from [CURRENT_EXAM]...[/CURRENT_EXAM] in the messages
-  - **STEP 2**: Use \`regenerateQuestion\` with:
-    - \`questionId\`: The question to regenerate (e.g., "q5")
-    - \`instruction\`: User's specific request (e.g., "make it harder")
-    - \`originalQuestion\`: Extract from the current exam by matching questionId
-    - \`currentExam\`: **MANDATORY** - Pass the exam object from [CURRENT_EXAM] with { title, subject, level, questions }
-    - \`documentSummaries\`: Pass if available (usually not present in modifications)
-    - \`language\`: Detected language (es/en)
-  - **CRITICAL**: The regenerated question MUST remain on the same topic as the exam. Do NOT change to unrelated topics (e.g., if exam is about "Apple Inc", don't generate physics questions)
-  - Preserves the question ID while applying requested changes
+**CRITICAL - Parse Question References:**
+Before modifying questions, you must identify which questions the user is referring to:
+
+**Supported Reference Formats:**
+1. **Direct numbers**: "5", "pregunta 5", "question 5" → q5
+2. **Written numbers**: "cinco", "five", "la quinta pregunta" → q5
+3. **Ranges**: "3 al 7", "3 to 7", "3-7", "de la 2 a la 5" → q3, q4, q5, q6, q7
+4. **Relative positions**: "última", "last", "primera", "first" → first/last question ID
+
+**Tool Selection Logic:**
+- **1 question** referenced → Use \`regenerateQuestion\`
+- **2+ questions** referenced → Use \`modifyMultipleQuestions\`
+
+---
+
+**Single Question Modification** (use \`regenerateQuestion\`):
+- User asks: "change question 5", "make question 3 harder", "haz la pregunta cinco más fácil"
+- **STEP 1**: Extract current exam from [CURRENT_EXAM]...[/CURRENT_EXAM]
+- **STEP 2**: Parse question reference:
+  - "pregunta 5" → questionId: "q5"
+  - "question five" → questionId: "q5"
+  - "la última" → questionId: (last question in exam)
+  - "the first one" → questionId: "q1"
+- **STEP 3**: Use \`regenerateQuestion\` with:
+  - \`questionId\`: Parsed ID (e.g., "q5")
+  - \`instruction\`: User's request (e.g., "make it harder")
+  - \`currentExam\`: **MANDATORY** - Exam from [CURRENT_EXAM] { title, subject, level, questions }
+  - \`language\`: Exam language from [CURRENT_EXAM]
+- **CRITICAL**: Question MUST remain on exam topic. Do NOT change unrelated topics
+- Preserves question ID while applying changes
+
+**Examples:**
+- "haz la pregunta 5 más difícil" → regenerateQuestion(questionId: "q5", instruction: "make it harder")
+- "change the last question" → regenerateQuestion(questionId: (last ID), instruction: "change it")
+- "pregunta cinco sobre otro tema" → regenerateQuestion(questionId: "q5", instruction: "about another topic")
+
+---
+
+**Multiple Questions Modification** (use \`modifyMultipleQuestions\`):
+- User asks: "make questions 3, 7, and 12 harder", "improve questions 5 to 10", "modifica de la 2 a la 5"
+- **STEP 1**: Extract current exam from [CURRENT_EXAM]...[/CURRENT_EXAM]
+- **STEP 2**: Parse question references:
+  - "3, 7 y 12" → ["q3", "q7", "q12"]
+  - "5 to 10" → ["q5", "q6", "q7", "q8", "q9", "q10"]
+  - "de la 2 a la 5" → ["q2", "q3", "q4", "q5"]
+  - "preguntas cinco, siete y doce" → ["q5", "q7", "q12"]
+- **STEP 3**: Use \`modifyMultipleQuestions\` with:
+  - \`modifications\`: Array of { questionId, instruction, overrides? }
+  - \`currentExam\`: **MANDATORY** - Exam from [CURRENT_EXAM]
+  - \`language\`: Exam language from [CURRENT_EXAM]
+- **CRITICAL**: All questions MUST remain on exam topic
+- More efficient than calling \`regenerateQuestion\` multiple times
+
+**Examples:**
+- "haz las preguntas 3, 7 y 12 más difíciles" →
+  \`\`\`
+  modifyMultipleQuestions({
+    modifications: [
+      { questionId: "q3", instruction: "make it harder" },
+      { questionId: "q7", instruction: "make it harder" },
+      { questionId: "q12", instruction: "make it harder" }
+    ],
+    currentExam: { ... },
+    language: "es"
+  })
+  \`\`\`
+
+- "improve questions 5 through 10" →
+  \`\`\`
+  modifyMultipleQuestions({
+    modifications: [
+      { questionId: "q5", instruction: "improve it" },
+      { questionId: "q6", instruction: "improve it" },
+      { questionId: "q7", instruction: "improve it" },
+      { questionId: "q8", instruction: "improve it" },
+      { questionId: "q9", instruction: "improve it" },
+      { questionId: "q10", instruction: "improve it" }
+    ],
+    currentExam: { ... },
+    language: "en"
+  })
+  \`\`\`
+
+---
 
 - **Add Questions**:
   - User asks: "add 5 more questions about X"
@@ -356,6 +429,7 @@ You're ready to help create exceptional exams efficiently!
     // randomizeOptions: randomizeOptionsTool, // Handled automatically by API route
     regenerateQuestion: regenerateQuestionTool,
     addQuestions: addQuestionsTool,
+    modifyMultipleQuestions: modifyMultipleQuestionsTool,
   },
 
   // Note: maxSteps is configured at runtime when calling agent.generate()

@@ -125,7 +125,25 @@ export const regenerateQuestionTool = createTool({
       documentSummaries,
     } = context;
 
-    // Auto-extract originalQuestion from currentExam if not provided
+    // Step 1: Pre-validate question ID exists in current exam (if exam provided)
+    if (currentExam) {
+      const availableIds = currentExam.questions.map(
+        (q) => (q as { id?: string }).id || ""
+      );
+
+      if (!availableIds.includes(questionId)) {
+        const availableIdsStr = availableIds.join(", ");
+        throw new Error(
+          `Question ${questionId} not found in exam. Available IDs: ${availableIdsStr}`
+        );
+      }
+
+      logger.log(
+        `[regenerateQuestion] Validated ${questionId} exists in exam (${availableIds.length} questions)`
+      );
+    }
+
+    // Step 2: Auto-extract originalQuestion from currentExam if not provided
     let effectiveOriginalQuestion = originalQuestion;
     if (!effectiveOriginalQuestion && currentExam) {
       const found = currentExam.questions.find(
@@ -133,6 +151,7 @@ export const regenerateQuestionTool = createTool({
       );
 
       if (!found) {
+        // This should never happen due to pre-validation above, but keep as safety net
         throw new Error(
           `Question with ID "${questionId}" not found in current exam`
         );
@@ -140,6 +159,9 @@ export const regenerateQuestionTool = createTool({
 
       // Cast to ExamQuestion for use in prompt building
       effectiveOriginalQuestion = found as unknown as ExamQuestion;
+      logger.log(
+        `[regenerateQuestion] Extracted original question for ${questionId}`
+      );
     }
 
     // Build prompt
@@ -162,7 +184,8 @@ export const regenerateQuestionTool = createTool({
       process.env.OPENAI_MODEL || "google/gemini-2.5-flash-lite"
     );
 
-    const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
+    const languageName =
+      language === "es" ? "Spanish" : language === "en" ? "English" : language;
 
     try {
       const response = await generateText({
@@ -213,7 +236,10 @@ If the question involves formulas, equations, or scientific notation, use LaTeX 
       });
 
       // Parse response
-      const parsed = parseQuestionResponse(response.text) as Record<string, unknown>;
+      const parsed = parseQuestionResponse(response.text) as Record<
+        string,
+        unknown
+      >;
 
       // Ensure ID is preserved
       parsed.id = questionId;
@@ -231,7 +257,9 @@ If the question involves formulas, equations, or scientific notation, use LaTeX 
     } catch (error) {
       logger.error("Error regenerating question:", error);
       throw new Error(
-        `Failed to regenerate question: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to regenerate question: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
     }
   },
@@ -254,10 +282,18 @@ function buildRegeneratePrompt(params: {
   };
   documentSummaries?: unknown[];
 }): string {
-  const { questionId, originalQuestion, instruction, overrides, language, currentExam, documentSummaries } =
-    params;
+  const {
+    questionId,
+    originalQuestion,
+    instruction,
+    overrides,
+    language,
+    currentExam,
+    documentSummaries,
+  } = params;
 
-  const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
+  const languageName =
+    language === "es" ? "Spanish" : language === "en" ? "English" : language;
 
   let prompt = `Regenerate question "${questionId}" in ${languageName} (ISO 639-1: "${language}") according to the following instruction:\n\n**Instruction:** ${instruction}\n\n`;
 
@@ -279,16 +315,18 @@ function buildRegeneratePrompt(params: {
     if (currentExam.questions && currentExam.questions.length > 0) {
       prompt += `- Number of questions in exam: ${currentExam.questions.length}\n`;
       prompt += `- Other question topics: ${currentExam.questions
-        .filter(q => (q as { id?: string }).id !== questionId)
+        .filter((q) => (q as { id?: string }).id !== questionId)
         .slice(0, 3)
-        .map(q => {
+        .map((q) => {
           const tags = (q as { tags?: string[] }).tags;
-          return Array.isArray(tags) ? tags.join(', ') : 'N/A';
+          return Array.isArray(tags) ? tags.join(", ") : "N/A";
         })
-        .join('; ')}\n`;
+        .join("; ")}\n`;
     }
 
-    prompt += `\n**IMPORTANT:** The regenerated question MUST be related to the exam subject (${currentExam.subject || 'the main topic'}) and maintain coherence with other questions. Do NOT change the topic to something unrelated.\n\n`;
+    prompt += `\n**IMPORTANT:** The regenerated question MUST be related to the exam subject (${
+      currentExam.subject || "the main topic"
+    }) and maintain coherence with other questions. Do NOT change the topic to something unrelated.\n\n`;
   }
 
   // Add document summaries if available
@@ -298,7 +336,11 @@ function buildRegeneratePrompt(params: {
 
   // Add original question for context
   if (originalQuestion) {
-    prompt += `**Original question:**\n${JSON.stringify(originalQuestion, null, 2)}\n\n`;
+    prompt += `**Original question:**\n${JSON.stringify(
+      originalQuestion,
+      null,
+      2
+    )}\n\n`;
   }
 
   // Add overrides if specified
@@ -332,15 +374,15 @@ function buildRegeneratePrompt(params: {
  */
 function sanitizeJSON(jsonString: string): string {
   // Fix 1: Double-escaped LaTeX commands (\\\\alpha → \\alpha)
-  let sanitized = jsonString.replace(/\\\\\\\\([a-zA-Z]+)/g, '\\\\$1');
+  let sanitized = jsonString.replace(/\\\\\\\\([a-zA-Z]+)/g, "\\\\$1");
 
   // Fix 2: LaTeX commands that conflict with JSON escapes
   // CRITICAL: JSON escapes \b \f \n \r \t appear in LaTeX commands
   // Examples: \frac, \beta, \nabla, \rho, \theta, \begin{pmatrix}
-  sanitized = sanitized.replace(/\\([bfnrt])([a-zA-Z])/g, '\\\\$1$2');
+  sanitized = sanitized.replace(/\\([bfnrt])([a-zA-Z])/g, "\\\\$1$2");
 
   // Fix 3: Unescaped backslashes (but not already escaped)
-  sanitized = sanitized.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+  sanitized = sanitized.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
 
   return sanitized;
 }
@@ -373,7 +415,9 @@ function parseQuestionResponse(responseText: string): unknown {
   } catch (error) {
     logger.error("Failed to parse question response:", responseText);
     throw new Error(
-      `Invalid question format: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Invalid question format: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
     );
   }
 }

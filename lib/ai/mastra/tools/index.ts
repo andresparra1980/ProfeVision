@@ -12,3 +12,4 @@ export { validateAndOrganizeExamTool } from "./validate-organize-exam";
 export { randomizeOptionsTool } from "./randomize-options";
 export { regenerateQuestionTool } from "./regenerate-question";
 export { addQuestionsTool } from "./add-questions";
+export { modifyMultipleQuestionsTool } from "./modify-multiple-questions";

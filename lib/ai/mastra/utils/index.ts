@@ -17,3 +17,9 @@ export {
   hasSameElements,
   shuffleInSync,
 } from "./fisher-yates";
+
+export {
+  parseQuestionReferences,
+  validateQuestionId,
+  type ParseResult,
+} from "./parse-question-references";

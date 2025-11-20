@@ -156,6 +156,7 @@
       "randomizing": "Randomizing options...",
       "regenerating": "Regenerating question...",
       "adding": "Adding questions...",
+      "modifying_batch": "Modifying multiple questions...",
       "completed": "Generation completed"
     },
     "examGenerated": "✨ Exam generated successfully with {count} questions. Review the results in the Results panel.",
