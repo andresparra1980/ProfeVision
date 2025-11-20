@@ -70,7 +70,14 @@
       "hard": "Hard"
     },
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "discardDialog": {
+      "title": "Discard changes?",
+      "description": "You have unsaved changes. If you close the editor, these changes will be lost.",
+      "cancel": "Continue editing",
+      "discard": "Discard changes",
+      "save": "Save changes"
+    }
   },
   "clearDialog": {
     "title": "Clear chat data?",

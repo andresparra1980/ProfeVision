@@ -2,6 +2,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -42,12 +51,23 @@ interface Props {
 export default function QuestionEditorDialog({ open, onOpenChange, question, onSave }: Props) {
   const t = useTranslations('ai_exams_chat');
   const [local, setLocal] = useState<ExamQuestion | null>(null);
+  const [original, setOriginal] = useState<ExamQuestion | null>(null);
+  const [showDiscardAlert, setShowDiscardAlert] = useState(false);
 
   useEffect(() => {
-    if (open) setLocal(question ? JSON.parse(JSON.stringify(question)) : { type: "multiple_choice" });
+    if (open) {
+      const initialData = question ? JSON.parse(JSON.stringify(question)) : { type: "multiple_choice" };
+      setLocal(initialData);
+      setOriginal(JSON.parse(JSON.stringify(initialData)));
+    }
   }, [open, question]);
 
   const isMC = useMemo(() => local?.type === "multiple_choice", [local]);
+
+  const hasChanges = useMemo(() => {
+    if (!local || !original) return false;
+    return JSON.stringify(local) !== JSON.stringify(original);
+  }, [local, original]);
 
   function update<K extends keyof ExamQuestion>(key: K, val: ExamQuestion[K]) {
     setLocal((prev) => (prev ? { ...prev, [key]: val } : prev));
@@ -103,11 +123,36 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
     onOpenChange(false);
   }
 
+  function handleOpenChange(newOpen: boolean) {
+    if (!newOpen && hasChanges) {
+      // Trying to close with unsaved changes
+      setShowDiscardAlert(true);
+    } else {
+      // No changes or opening dialog
+      onOpenChange(newOpen);
+    }
+  }
+
+  function handleDiscard() {
+    setShowDiscardAlert(false);
+    onOpenChange(false);
+  }
+
+  function handleCancelDiscard() {
+    setShowDiscardAlert(false);
+  }
+
+  function handleSaveFromAlert() {
+    setShowDiscardAlert(false);
+    handleSave();
+  }
+
   if (!local) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto w-[98vw] max-w-[98vw] sm:w-auto sm:max-w-2xl">
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto w-[98vw] max-w-[98vw] sm:w-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t('editor.title')}</DialogTitle>
           <DialogDescription>{t('editor.description')}</DialogDescription>
@@ -227,10 +272,42 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('editor.cancel')}</Button>
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>{t('editor.cancel')}</Button>
           <Button onClick={handleSave}>{t('editor.save')}</Button>
         </div>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={showDiscardAlert} onOpenChange={setShowDiscardAlert}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t('editor.discardDialog.title')}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('editor.discardDialog.description')}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+          <AlertDialogCancel onClick={handleCancelDiscard} className="mt-0">
+            {t('editor.discardDialog.cancel')}
+          </AlertDialogCancel>
+          <div className="flex gap-2 flex-1 sm:flex-none">
+            <Button
+              variant="destructive"
+              onClick={handleDiscard}
+              className="flex-1 sm:flex-none"
+            >
+              {t('editor.discardDialog.discard')}
+            </Button>
+            <Button
+              onClick={handleSaveFromAlert}
+              className="flex-1 sm:flex-none"
+            >
+              {t('editor.discardDialog.save')}
+            </Button>
+          </div>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

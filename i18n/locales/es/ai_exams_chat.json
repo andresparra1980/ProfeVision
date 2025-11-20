@@ -70,7 +70,14 @@
       "hard": "Difícil"
     },
     "cancel": "Cancelar",
-    "save": "Guardar"
+    "save": "Guardar",
+    "discardDialog": {
+      "title": "¿Descartar cambios?",
+      "description": "Tienes cambios sin guardar. Si cierras el editor, estos cambios se perderán.",
+      "cancel": "Continuar editando",
+      "discard": "Descartar cambios",
+      "save": "Guardar cambios"
+    }
   },
   "clearDialog": {
     "title": "¿Borrar datos del chat?",
