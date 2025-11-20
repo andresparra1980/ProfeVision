@@ -265,14 +265,14 @@ export default function ResultsView({ isSending = false }: ResultsViewProps) {
                         size="icon"
                         onClick={(e) => { e.stopPropagation(); openDeleteDialog(idx); }}
                         disabled={isSending}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10 mt-3"
+                        className="text-destructive dark:text-red-500 hover:text-destructive dark:hover:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-500/10 mt-3"
                       >
                         <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">{t('results.delete')}</span>
+                        <span className="sr-only">{t('results.delete')} {idx + 1}</span>
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{t('results.delete')}</p>
+                      <p>{t('results.delete')} {idx + 1}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
