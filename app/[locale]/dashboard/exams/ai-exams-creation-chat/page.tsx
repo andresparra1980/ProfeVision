@@ -12,6 +12,7 @@ import { AIChatProvider } from "./components/AIChatContext";
 import { SaveDraftDialog } from "./components/SaveDraftDialog";
 import { ClearChatDialog } from "./components/ClearChatDialog";
 import { DraftLoader } from "./components/DraftLoader";
+import { NewExamCleaner } from "./components/NewExamCleaner";
 import { LanguageSelector } from "./components/LanguageSelector";
 import { useExamDraft } from "./hooks/useExamDraft";
 import { useClearChat } from "./hooks/useClearChat";
@@ -106,6 +107,7 @@ export default function AIExamsCreationChatPage() {
 
       {/* Chat and dialogs inside Provider */}
       <AIChatProvider languageOverride={languageOverride}>
+        <NewExamCleaner />
         <ChatPanel />
 
         <SaveDraftDialog

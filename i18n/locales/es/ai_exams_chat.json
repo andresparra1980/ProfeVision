@@ -39,12 +39,19 @@
     "generatedSoFar": "generadas",
     "randomizeOptions": "Aleatorizar opciones",
     "edit": "Editar",
+    "delete": "Eliminar pregunta",
     "selectCorrect": "Selecciona la respuesta correcta:",
     "true": "Verdadero",
     "false": "Falso",
     "rationale": "Rationale",
     "hint": "Haz clic para ver las preguntas generadas.",
-    "hintTooltip": "Haz clic en el botón para ver las preguntas generadas."
+    "hintTooltip": "Haz clic en el botón para ver las preguntas generadas.",
+    "deleteDialog": {
+      "title": "¿Eliminar pregunta?",
+      "description": "Esta pregunta se eliminará del examen generado. Esta acción no se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    }
   },
   "editor": {
     "title": "Editar pregunta",

@@ -7,7 +7,22 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Pencil, Loader2 } from "lucide-react";
+import { Pencil, Loader2, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import QuestionEditorDialog, { type ExamQuestion } from "./QuestionEditorDialog";
 import MathText from "@/components/MathText";
 
@@ -19,6 +34,8 @@ export default function ResultsView({ isSending = false }: ResultsViewProps) {
   const { result, setResult } = useAIChat();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const t = useTranslations('ai_exams_chat');
 
   const questions = useMemo(() => {
@@ -94,6 +111,30 @@ export default function ResultsView({ isSending = false }: ResultsViewProps) {
     });
   }
 
+  function openDeleteDialog(idx: number) {
+    setDeleteIndex(idx);
+    setShowDeleteAlert(true);
+  }
+
+  function handleDeleteConfirm() {
+    if (deleteIndex === null) return;
+    setResult((prev) => {
+      if (!prev) return prev;
+      const cloned = JSON.parse(JSON.stringify(prev));
+      const qs: ExamQuestion[] = cloned?.exam?.questions ?? [];
+      if (!Array.isArray(qs)) return prev;
+      qs.splice(deleteIndex, 1);
+      return cloned;
+    });
+    setShowDeleteAlert(false);
+    setDeleteIndex(null);
+  }
+
+  function handleDeleteCancel() {
+    setShowDeleteAlert(false);
+    setDeleteIndex(null);
+  }
+
   return (
     <div className="rounded-md border p-3 space-y-4">
       {/* Toolbar */}
@@ -142,20 +183,21 @@ export default function ResultsView({ isSending = false }: ResultsViewProps) {
             const correctIdx = typeof q?.answer === "number" ? q.answer : (typeof q?.answer === "string" ? options.indexOf(q.answer) : -1);
             const isTF = q?.type === "true_false";
             return (
-              <AccordionItem key={idx} value={`q-${idx}`} className="border-2 border-purple-400/50 rounded-md bg-card">
-                <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                  <div className="flex flex-col items-start text-left w-full gap-1">
-                    <div className="flex items-center gap-2 w-full">
-                      <span className="font-bold">{idx + 1}.</span>
-                      <div className="flex-1 prose prose-sm dark:prose-invert max-w-none font-bold">
-                        <MathText text={title} />
+              <div key={idx} className="flex items-start gap-2">
+                <AccordionItem value={`q-${idx}`} className="border-2 border-purple-400/50 rounded-md bg-card flex-1">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                    <div className="flex flex-col items-start text-left w-full gap-1">
+                      <div className="flex items-center gap-2 w-full">
+                        <span className="font-bold">{idx + 1}.</span>
+                        <div className="flex-1 prose prose-sm dark:prose-invert max-w-none font-bold">
+                          <MathText text={title} />
+                        </div>
+                        {/* difficulty pill removed to give more space to accordion icon */}
                       </div>
-                      {/* difficulty pill removed to give more space to accordion icon */}
+                      {/* Removed options and answer preview from header; these are visible in content when expanded */}
                     </div>
-                    {/* Removed options and answer preview from header; these are visible in content when expanded */}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4 pt-2 border-t bg-muted/20">
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4 pt-2 border-t bg-muted/20">
                   {/* Body: options and controls */}
                   {isMC && (
                     <div className="space-y-3">
@@ -201,19 +243,40 @@ export default function ResultsView({ isSending = false }: ResultsViewProps) {
                     </div>
                   )}
 
-                  {/* Moved Edit button inside accordion content, aligned to end */}
-                  <div className="mt-4 flex justify-end">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => { e.stopPropagation(); openEditor(idx); }}
-                      disabled={isSending}
-                    >
-                      <Pencil className="h-4 w-4 mr-1" /> {t('results.edit')}
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+                    {/* Edit button inside accordion content, aligned to end */}
+                    <div className="mt-4 flex justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); openEditor(idx); }}
+                        disabled={isSending}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" /> {t('results.edit')}
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                {/* Delete button completely outside AccordionItem */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => { e.stopPropagation(); openDeleteDialog(idx); }}
+                        disabled={isSending}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 mt-3"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">{t('results.delete')}</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t('results.delete')}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             );
           })}
 
@@ -248,6 +311,29 @@ export default function ResultsView({ isSending = false }: ResultsViewProps) {
         question={editingIndex != null ? (questions[editingIndex] as unknown as ExamQuestion) : null}
         onSave={saveEdited}
       />
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('results.deleteDialog.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('results.deleteDialog.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeleteCancel}>
+              {t('results.deleteDialog.cancel')}
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+            >
+              {t('results.deleteDialog.confirm')}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

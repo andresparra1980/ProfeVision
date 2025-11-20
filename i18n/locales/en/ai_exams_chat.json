@@ -39,12 +39,19 @@
     "generatedSoFar": "generated",
     "randomizeOptions": "Randomize options",
     "edit": "Edit",
+    "delete": "Delete question",
     "selectCorrect": "Select the correct answer:",
     "true": "True",
     "false": "False",
     "rationale": "Rationale",
     "hint": "Click to view generated questions.",
-    "hintTooltip": "Click the button to view generated questions."
+    "hintTooltip": "Click the button to view generated questions.",
+    "deleteDialog": {
+      "title": "Delete question?",
+      "description": "This question will be removed from the generated exam. This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    }
   },
   "editor": {
     "title": "Edit question",
