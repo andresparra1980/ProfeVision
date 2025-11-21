@@ -481,12 +481,29 @@ INSTRUCTIONS:
               !!context.topicSummaries && context.topicSummaries.length > 0,
           });
 
+          // Calculate dynamic maxSteps based on question count
+          // Formula: Math.ceil(numQuestions / 5) + 3
+          // - /5: Chunk size for parallel generation
+          // - +3: Fixed steps (plan, validate, randomize)
+          // - Min: 5, Max: 30 (safety cap)
+          const requestedQuestions = context.numQuestions || 10; // Default 10 if not specified
+          const calculatedSteps = Math.ceil(requestedQuestions / 5) + 3;
+          const maxSteps = Math.max(5, Math.min(30, calculatedSteps));
+
+          logger.api("Dynamic maxSteps calculated", {
+            userId,
+            requestedQuestions,
+            calculatedSteps,
+            maxSteps,
+            hasExistingExam: !!context.existingExam,
+          });
+
           // Track timing for agent.generate call
           const agentStartTime = Date.now();
 
           // Generate with agent
           const result = await agent.generate(mastraMessages, {
-            maxSteps: 15, // Increased to ensure all workflow steps complete
+            maxSteps, // Dynamic based on question count (5-30)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onStepFinish: async (event: any) => {
               const stepEvent = event as MastraStepEvent;
