@@ -327,7 +327,8 @@ Before modifying questions, you must identify which questions the user is referr
 ---
 
 - **Add Questions**:
-  - User asks: "add 5 more questions about X"
+
+  **SINGLE GROUP** (e.g., "add 5 more questions about X"):
   - **STEP 1**: Extract the current exam from [CURRENT_EXAM]...[/CURRENT_EXAM] in the messages
   - **STEP 2**: Use \`addQuestions\` with:
     - \`numQuestions\`: Number to add
@@ -339,6 +340,32 @@ Before modifying questions, you must identify which questions the user is referr
     - \`documentSummaries\`: Pass if available (usually not present in modifications)
   - **CRITICAL**: New questions MUST be coherent with the existing exam topic
   - IDs will continue sequentially (q11, q12, q13...)
+
+  **MULTIPLE GROUPS** (e.g., "add 3 de CV, 2 de deep-learning, 1 de research"):
+  - **CRITICAL**: You MUST call \`addQuestions\` SEQUENTIALLY, NOT in parallel
+  - **REASON**: Each call needs the updated currentMaxId from the previous call
+
+  **STEP-BY-STEP PROCESS:**
+  1. Extract current exam, find highest ID (e.g., q15)
+  2. Call addQuestions for FIRST group:
+     - numQuestions: 3
+     - currentMaxId: "q15"
+     - topics: ["Computer Vision"]
+     → Generates q16, q17, q18
+  3. **WAIT** for step 2 to complete
+  4. Call addQuestions for SECOND group:
+     - numQuestions: 2
+     - currentMaxId: "q18" (from previous result)
+     - topics: ["Deep Learning"]
+     → Generates q19, q20
+  5. **WAIT** for step 4 to complete
+  6. Call addQuestions for THIRD group:
+     - numQuestions: 1
+     - currentMaxId: "q20" (from previous result)
+     - topics: ["Research"]
+     → Generates q21
+
+  **CRITICAL RULE**: ONE addQuestions call at a time. Update currentMaxId between calls.
 
 - **Delete Questions - IMPORTANT**:
   - **YOU CANNOT DELETE QUESTIONS** - You do not have tools to delete questions
