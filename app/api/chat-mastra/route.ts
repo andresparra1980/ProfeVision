@@ -1037,47 +1037,90 @@ INSTRUCTIONS:
                           }
                         } else if (toolName === "addQuestions") {
                           // addQuestions returns { questions: [...], metadata: {...} }
-                          // We need to append to existing exam
-                          const addResult = result as {
-                            questions?: unknown[];
-                            metadata?: {
-                              requested?: number;
-                              generated?: number;
-                            };
-                          };
+                          // IMPORTANT: When there are MULTIPLE addQuestions calls (sequential),
+                          // we need to accumulate ALL of them, not just the last one.
 
-                          if (
-                            addResult.questions &&
-                            Array.isArray(addResult.questions) &&
-                            context.existingExam
-                          ) {
+                          // Collect ALL addQuestions results in chronological order
+                          const allAddResults: Array<{
+                            questions: unknown[];
+                            metadata?: { requested?: number; generated?: number };
+                          }> = [];
+
+                          // Search ALL steps in FORWARD order (chronological)
+                          for (let stepIdx = 0; stepIdx < steps.length; stepIdx++) {
+                            const currentStep = steps[stepIdx] as {
+                              toolCalls?: Array<{
+                                type?: string;
+                                payload?: {
+                                  toolCallId?: string;
+                                  toolName?: string;
+                                  args?: unknown;
+                                };
+                              }>;
+                              toolResults?: Array<{
+                                type?: string;
+                                payload?: {
+                                  toolCallId?: string;
+                                  result?: unknown;
+                                };
+                              }>;
+                            };
+
+                            if (currentStep.toolCalls && currentStep.toolResults) {
+                              for (const tc of currentStep.toolCalls) {
+                                if (tc.payload?.toolName === "addQuestions") {
+                                  const matchingResult = currentStep.toolResults.find(
+                                    (tr) => tr.payload?.toolCallId === tc.payload?.toolCallId
+                                  );
+
+                                  if (matchingResult?.payload?.result) {
+                                    const addResult = matchingResult.payload.result as {
+                                      questions?: unknown[];
+                                      metadata?: { requested?: number; generated?: number };
+                                    };
+
+                                    if (addResult.questions && Array.isArray(addResult.questions)) {
+                                      allAddResults.push({
+                                        questions: addResult.questions,
+                                        metadata: addResult.metadata,
+                                      });
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+
+                          // Merge ALL accumulated results
+                          if (allAddResults.length > 0 && context.existingExam) {
+                            const allNewQuestions = allAddResults.flatMap((r) => r.questions);
+
                             examResult = {
                               exam: {
                                 ...context.existingExam.exam,
                                 questions: [
                                   ...context.existingExam.exam.questions,
-                                  ...addResult.questions,
+                                  ...allNewQuestions,
                                 ],
                               },
                             };
 
                             logger.api(
-                              "Merged added questions with existing exam",
+                              "Merged ALL addQuestions results with existing exam",
                               {
                                 userId,
-                                addedCount: addResult.questions.length,
-                                totalQuestions:
-                                  examResult.exam.questions.length,
+                                addQuestionsCalls: allAddResults.length,
+                                questionsPerCall: allAddResults.map((r) => r.questions.length),
+                                totalAdded: allNewQuestions.length,
+                                finalTotalQuestions: examResult.exam.questions.length,
                               }
                             );
                           } else {
                             logger.warn(
-                              "addQuestions result incomplete or no existing exam",
+                              "No addQuestions results found or no existing exam",
                               {
                                 userId,
-                                hasQuestions: !!addResult.questions,
-                                questionsCount:
-                                  addResult.questions?.length || 0,
+                                addResultsCount: allAddResults.length,
                                 hasExistingExam: !!context.existingExam,
                               }
                             );
