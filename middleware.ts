@@ -17,7 +17,20 @@ export async function middleware(request: NextRequest) {
   const hostname = request.nextUrl.hostname;
   const defaultLocale = 'es';
   const supportedLocales = ['es', 'en'] as const;
-  
+
+  // 🚫 Handle OPTIONS requests (CORS preflight) early
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Max-Age': '86400',
+      },
+    });
+  }
+
   // 🏷️ Normalizar host: redirigir www -> apex
   if (hostname === 'www.profevision.com') {
     const url = new URL(request.url);
