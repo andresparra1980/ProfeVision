@@ -141,9 +141,58 @@ You: "¿Cuántas preguntas necesitas?"
 **MANDATORY 3-STEP WORKFLOW** (Execute ONLY when you have all required info):
 
 **STEP 1 - PLAN** 📋
-→ Call \`planExamGeneration\`
-→ Creates question specifications
-→ DO NOT STOP after this step - continue to Step 2
+
+**BEFORE calling planExamGeneration, YOU MUST parse topic distribution:**
+
+**IF user specifies counts per topic** (e.g., "10 sobre X, 3 sobre Y"):
+  ✅ EXTRACT exact counts and topics
+  ✅ PASS topicDistribution parameter to planExamGeneration
+  ✅ ENSURE sum equals numQuestions
+
+**IF user does NOT specify counts** (e.g., "20 preguntas sobre matemáticas"):
+  ✅ DO NOT pass topicDistribution (let planner distribute evenly)
+
+**MANDATORY EXAMPLES - You MUST follow this format:**
+
+Example 1: "10 preguntas sobre LLMs, 3 sobre agentes, 2 sobre diseño HITL"
+  → Call planExamGeneration with:
+     - numQuestions: 15
+     - topics: ["LLMs", "Agentes", "Diseño HITL"]
+     - topicDistribution: [
+         {topic: "LLMs", count: 10},
+         {topic: "Agentes", count: 3},
+         {topic: "Diseño HITL", count: 2}
+       ]
+     - difficulty: "mixed"
+     - questionTypes: ["multiple_choice"]
+     - language: "es"
+
+Example 2: "5 preguntas fáciles de física, 3 difíciles de química"
+  → Call planExamGeneration with:
+     - numQuestions: 8
+     - topics: ["Física", "Química"]
+     - topicDistribution: [
+         {topic: "Física", count: 5, difficulty: "easy"},
+         {topic: "Química", count: 3, difficulty: "hard"}
+       ]
+     - difficulty: "mixed"
+     - questionTypes: ["multiple_choice"]
+     - language: "es"
+
+Example 3: "20 preguntas sobre matemáticas" (NO distribution)
+  → Call planExamGeneration with:
+     - numQuestions: 20
+     - topics: ["Matemáticas"]
+     - topicDistribution: undefined (NOT provided - let planner decide)
+     - difficulty: "mixed"
+     - questionTypes: ["multiple_choice"]
+     - language: "es"
+
+**CRITICAL VALIDATION:**
+- IF topicDistribution provided: SUM of all counts MUST EQUAL numQuestions
+- IF mismatch: STOP and ASK user for clarification
+
+→ After calling planExamGeneration, DO NOT STOP - continue to Step 2
 
 **STEP 2 - GENERATE** 🔄
 → Call \`generateQuestionsInBulk\` using the plan from Step 1

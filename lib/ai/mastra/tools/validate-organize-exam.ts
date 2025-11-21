@@ -20,6 +20,7 @@ import {
   type ExamQuestion,
 } from "../schemas";
 import { sanitizeAIExamPayload } from "@/lib/ai/chat/json-parser";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Correction type for tracking fixes applied
@@ -118,6 +119,22 @@ export const validateAndOrganizeExamTool = createTool({
       sanitized = sanitizeAIExamPayload(examPayload) as typeof examPayload;
     }
 
+    // Deduplicate questions by prompt similarity
+    const deduplicationResult = deduplicateQuestions(sanitized.exam.questions || []);
+    if (deduplicationResult.duplicatesRemoved > 0) {
+      logger.warn(
+        `[validateAndOrganizeExam] Removed ${deduplicationResult.duplicatesRemoved} duplicate questions`,
+        { duplicateIds: deduplicationResult.duplicateIds }
+      );
+      corrections.push({
+        questionId: "deduplication",
+        issue: `${deduplicationResult.duplicatesRemoved} duplicate questions found`,
+        correction: `Removed ${deduplicationResult.duplicatesRemoved} duplicates based on prompt similarity. Original total: ${sanitized.exam.questions.length}, Final total: ${deduplicationResult.questions.length}`,
+        severity: "warning",
+      });
+      sanitized.exam.questions = deduplicationResult.questions;
+    }
+
     // Normalize question IDs if enabled
     if (normalizeIds && sanitized.exam.questions) {
       sanitized.exam.questions = sanitized.exam.questions.map((q: Record<string, unknown>, index: number) => {
@@ -208,6 +225,51 @@ export const validateAndOrganizeExamTool = createTool({
     };
   },
 });
+
+/**
+ * Deduplicate questions by prompt similarity
+ *
+ * Removes duplicate questions based on normalized prompt text.
+ * Keeps the first occurrence of each unique question.
+ */
+function deduplicateQuestions(questions: Record<string, unknown>[]): {
+  questions: Record<string, unknown>[];
+  duplicatesRemoved: number;
+  duplicateIds: string[];
+} {
+  const seen = new Map<string, Record<string, unknown>>();
+  const duplicateIds: string[] = [];
+
+  for (const q of questions) {
+    const prompt = ((q.prompt as string) || "").toLowerCase().trim();
+
+    // Normalize: remove extra whitespace, punctuation, and LaTeX markup
+    const normalized = prompt
+      .replace(/\s+/g, " ") // Multiple spaces → single space
+      .replace(/[.,!?;:]/g, "") // Remove punctuation
+      .replace(/\$.*?\$/g, "") // Remove inline LaTeX ($...$)
+      .replace(/\\\[.*?\\\]/g, "") // Remove display LaTeX (\[...\])
+      .replace(/\\text\{(.*?)\}/g, "$1") // Unwrap \text{}
+      .trim();
+
+    if (seen.has(normalized)) {
+      const duplicateId = (q.id as string) || "unknown";
+      duplicateIds.push(duplicateId);
+      logger.log(
+        `[deduplicateQuestions] Duplicate detected: ${duplicateId}`,
+        { normalizedPrompt: normalized.substring(0, 100) }
+      );
+    } else {
+      seen.set(normalized, q);
+    }
+  }
+
+  return {
+    questions: Array.from(seen.values()),
+    duplicatesRemoved: duplicateIds.length,
+    duplicateIds,
+  };
+}
 
 /**
  * Attempts to repair a malformed question

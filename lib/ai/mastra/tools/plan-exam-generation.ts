@@ -38,6 +38,20 @@ const inputSchema = z.object({
   /** Topics or subjects to cover */
   topics: z.array(z.string()).min(1),
 
+  /** Optional explicit distribution by topic */
+  topicDistribution: z
+    .array(
+      z.object({
+        /** Topic name (must match one in topics array) */
+        topic: z.string(),
+        /** Exact number of questions for this topic */
+        count: z.number().int().min(1),
+        /** Optional difficulty override for this topic */
+        difficulty: z.enum(["easy", "medium", "hard"]).optional(),
+      })
+    )
+    .optional(),
+
   /** Overall difficulty level */
   difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
 
@@ -86,6 +100,7 @@ export const planExamGenerationTool = createTool({
     const {
       numQuestions,
       topics,
+      topicDistribution,
       difficulty,
       questionTypes,
       taxonomyLevels,
@@ -97,6 +112,7 @@ export const planExamGenerationTool = createTool({
     const prompt = buildPlanPrompt({
       numQuestions,
       topics,
+      topicDistribution,
       difficulty,
       questionTypes,
       taxonomyLevels,
@@ -154,6 +170,11 @@ export const planExamGenerationTool = createTool({
 function buildPlanPrompt(params: {
   numQuestions: number;
   topics: string[];
+  topicDistribution?: Array<{
+    topic: string;
+    count: number;
+    difficulty?: string;
+  }>;
   difficulty: string;
   questionTypes: string[];
   taxonomyLevels?: string[];
@@ -166,6 +187,7 @@ function buildPlanPrompt(params: {
   const {
     numQuestions,
     topics,
+    topicDistribution,
     difficulty,
     questionTypes,
     taxonomyLevels,
@@ -176,6 +198,24 @@ function buildPlanPrompt(params: {
   // Determine output language name
   const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
 
+  // Build topic distribution section if provided
+  let topicDistributionSection = "";
+  if (topicDistribution && topicDistribution.length > 0) {
+    // Validate distribution sums to numQuestions
+    const totalDistributed = topicDistribution.reduce((sum, td) => sum + td.count, 0);
+
+    topicDistributionSection = `
+**CRITICAL - TOPIC DISTRIBUTION (MUST FOLLOW EXACTLY):**
+${topicDistribution.map((td) => {
+  const difficultyNote = td.difficulty ? ` (difficulty: ${td.difficulty})` : "";
+  return `- ${td.topic}: EXACTLY ${td.count} questions${difficultyNote}`;
+}).join("\n")}
+
+TOTAL MUST BE EXACTLY ${numQuestions} questions (current distribution: ${totalDistributed}).
+${totalDistributed !== numQuestions ? `⚠️  WARNING: Distribution total (${totalDistributed}) does not match required total (${numQuestions}). Adjust proportionally.` : ""}
+`;
+  }
+
   const basePrompt = `Generate a detailed plan for an exam with the following characteristics:
 
 **Requirements:**
@@ -184,7 +224,7 @@ function buildPlanPrompt(params: {
 - Overall difficulty: ${difficulty}
 - Allowed question types: ${questionTypes.join(", ")}
 ${taxonomyLevels && taxonomyLevels.length > 0 ? `- Bloom's taxonomy levels: ${taxonomyLevels.join(", ")}` : ""}
-
+${topicDistributionSection}
 **OUTPUT LANGUAGE: ${languageName} (ISO 639-1: "${language}")**
 IMPORTANT: All generated content (topics, examplePrompt, etc.) MUST be in ${languageName}.
 
