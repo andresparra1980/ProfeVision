@@ -481,18 +481,47 @@ INSTRUCTIONS:
               !!context.topicSummaries && context.topicSummaries.length > 0,
           });
 
+          // Extract numQuestions from user message if not provided in context
+          const extractNumQuestions = (message: string): number | undefined => {
+            // Match patterns like: "5 preguntas", "20 questions", "genera 15", "create 40", etc.
+            const patterns = [
+              /(\d+)\s*preguntas?/i,
+              /(\d+)\s*questions?/i,
+              /genera(?:r)?\s*(\d+)/i,
+              /crea(?:r)?\s*(\d+)/i,
+              /create?\s*(\d+)/i,
+              /make?\s*(\d+)/i,
+            ];
+
+            for (const pattern of patterns) {
+              const match = message.match(pattern);
+              if (match) {
+                const num = parseInt(match[1], 10);
+                if (num >= 1 && num <= 100) return num;
+              }
+            }
+
+            return undefined;
+          };
+
+          // Try to get numQuestions from: 1) context, 2) user message, 3) default 10
+          const lastUserMessage = messages[messages.length - 1]?.content || '';
+          const parsedFromMessage = extractNumQuestions(lastUserMessage);
+          const requestedQuestions = context.numQuestions || parsedFromMessage || 10;
+
           // Calculate dynamic maxSteps based on question count
           // Formula: Math.ceil(numQuestions / 5) + 3
           // - /5: Chunk size for parallel generation
           // - +3: Fixed steps (plan, validate, randomize)
           // - Min: 5, Max: 30 (safety cap)
-          const requestedQuestions = context.numQuestions || 10; // Default 10 if not specified
           const calculatedSteps = Math.ceil(requestedQuestions / 5) + 3;
           const maxSteps = Math.max(5, Math.min(30, calculatedSteps));
 
           logger.api("Dynamic maxSteps calculated", {
             userId,
             requestedQuestions,
+            parsedFromMessage,
+            source: context.numQuestions ? 'context' : parsedFromMessage ? 'message' : 'default',
             calculatedSteps,
             maxSteps,
             hasExistingExam: !!context.existingExam,
