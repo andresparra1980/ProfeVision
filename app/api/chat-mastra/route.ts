@@ -504,10 +504,15 @@ INSTRUCTIONS:
             return undefined;
           };
 
-          // Try to get numQuestions from: 1) context, 2) user message, 3) default 10
+          // Try to get numQuestions from: 1) context, 2) user message, 3) existing exam, 4) default 10
           const lastUserMessage = messages[messages.length - 1]?.content || '';
           const parsedFromMessage = extractNumQuestions(lastUserMessage);
-          const requestedQuestions = context.numQuestions || parsedFromMessage || 10;
+          const existingQuestionsCount = context.existingExam?.exam?.questions?.length || 0;
+
+          // Priority: explicit context > parsed from message > existing exam count > default 10
+          const requestedQuestions = context.numQuestions
+            || parsedFromMessage
+            || (existingQuestionsCount > 0 ? existingQuestionsCount : 10);
 
           // Calculate dynamic maxSteps based on question count
           // Formula: Math.ceil(numQuestions / 5) + 3
@@ -521,7 +526,11 @@ INSTRUCTIONS:
             userId,
             requestedQuestions,
             parsedFromMessage,
-            source: context.numQuestions ? 'context' : parsedFromMessage ? 'message' : 'default',
+            existingQuestionsCount,
+            source: context.numQuestions ? 'context'
+              : parsedFromMessage ? 'message'
+              : existingQuestionsCount > 0 ? 'existing_exam'
+              : 'default',
             calculatedSteps,
             maxSteps,
             hasExistingExam: !!context.existingExam,
