@@ -1,29 +1,150 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { loadLastDocumentsContext, loadOutput } from '@/lib/persistence/browser';
+import { useSSEStream, type SSEMessage } from './useSSEStream';
+import { logger } from '@/lib/utils/logger';
+import { validateUserInput } from '@/lib/ai/chat/input-validator';
 
 interface ChatMessage {
   role: 'user' | 'system' | 'assistant';
   content: string;
 }
 
+/**
+ * LocalStorage key for persisted chat messages
+ */
+const CHAT_MESSAGES_KEY = 'ai_chat_messages';
+
+/**
+ * Load persisted chat messages from localStorage
+ */
+function loadPersistedMessages(): ChatMessage[] {
+  try {
+    if (typeof window === 'undefined') return [];
+    const stored = localStorage.getItem(CHAT_MESSAGES_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    logger.error('[useChatMessages] Failed to load persisted messages', { error });
+    return [];
+  }
+}
+
+/**
+ * Save chat messages to localStorage
+ */
+function savePersistedMessages(messages: ChatMessage[]): void {
+  try {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(CHAT_MESSAGES_KEY, JSON.stringify(messages));
+  } catch (error) {
+    logger.error('[useChatMessages] Failed to save messages', { error });
+  }
+}
+
+/**
+ * Clear persisted chat messages from localStorage
+ */
+export function clearPersistedMessages(): void {
+  try {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(CHAT_MESSAGES_KEY);
+  } catch (error) {
+    logger.error('[useChatMessages] Failed to clear messages', { error });
+  }
+}
+
+interface ProgressMessage {
+  id: string;
+  text: string;
+  emoji?: string;
+  timestamp: number;
+}
+
+// New step-based progress tracking
+export type StepStatus = 'pending' | 'in_progress' | 'completed';
+
+export interface ProgressStep {
+  id: string;
+  label: string;
+  status: StepStatus;
+  timestamp: number;
+}
+
+export interface ProgressState {
+  steps: ProgressStep[];
+  llmResponse?: string;
+  successMessage?: string;
+}
+
 interface UseChatMessagesProps {
   settings: { language?: string };
   result: unknown;
   setResult: (_result: unknown) => void;
-  t: (_key: string, _options?: { fallback?: string }) => string;
+  t: (_key: string, _options?: { fallback?: string } | Record<string, unknown>) => string;
+  languageOverride: 'auto' | 'es' | 'en';
 }
 
-export function useChatMessages({ settings, result, setResult, t }: UseChatMessagesProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+/**
+ * Get emoji for progress message based on tool call
+ */
+function getEmojiForMessage(msg: SSEMessage): string {
+  if (!msg.toolCalls || msg.toolCalls.length === 0) return '⚙️';
+
+  const toolName = msg.toolCalls[0].name;
+  const emojiMap: Record<string, string> = {
+    planExamGeneration: '📋',
+    generateQuestionsInBulk: '🔄',
+    validateAndOrganizeExam: '✅',
+    randomizeOptions: '🎲',
+    regenerateQuestion: '🔄',
+    addQuestions: '➕',
+  };
+
+  return emojiMap[toolName] || '⚙️';
+}
+
+export function useChatMessages({ settings, result, setResult, t, languageOverride }: UseChatMessagesProps) {
+  // Load persisted messages on mount
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadPersistedMessages());
   const [isSending, setIsSending] = useState(false);
+  const [progressMessages, setProgressMessages] = useState<ProgressMessage[]>([]);
+
+  // New step-based progress state
+  const [progressState, setProgressState] = useState<ProgressState>({
+    steps: [],
+    llmResponse: undefined,
+    successMessage: undefined,
+  });
+
+  // Track last processed SSE message index to prevent duplicate processing
+  const lastProcessedIndexRef = useRef<number>(-1);
+
+  // Detect locale with next-intl
+  const locale = useLocale();
+
+  // Use SSE stream for Mastra
+  const { isStreaming, messages: sseMessages, startStream, clearMessages } = useSSEStream();
+
+  // Persist messages to localStorage whenever they change
+  useEffect(() => {
+    savePersistedMessages(messages);
+  }, [messages]);
+
+  // Determine which endpoint to use
+  const useMastra = process.env.NEXT_PUBLIC_AI_CHAT_MASTRA === 'true';
+  const endpoint = useMastra ? '/api/chat-mastra' : '/api/chat';
 
   const sanitizeExistingExam = (obj: unknown) => {
     try {
       if (!obj || typeof obj !== 'object') return undefined;
       const cloned = JSON.parse(JSON.stringify(obj));
       if (!cloned.exam || !Array.isArray(cloned.exam.questions)) return undefined;
+      // If questions array is empty, don't send existingExam
+      if (cloned.exam.questions.length === 0) return undefined;
       const allowedDifficulty = new Set(['easy', 'medium', 'hard']);
       for (const q of cloned.exam.questions) {
         if (!allowedDifficulty.has(q.difficulty)) q.difficulty = 'medium';
@@ -46,11 +167,303 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
     }
   };
 
+  /**
+   * Map tool name to step ID and label
+   */
+  const getStepInfo = useCallback((toolName: string): { id: string; label: string } => {
+    const stepMap: Record<string, { id: string; labelKey: string }> = {
+      planExamGeneration: { id: 'plan', labelKey: 'chat.progress.planning' },
+      generateQuestionsInBulk: { id: 'generate', labelKey: 'chat.progress.generating' },
+      validateAndOrganizeExam: { id: 'validate', labelKey: 'chat.progress.validating' },
+      randomizeOptions: { id: 'randomize', labelKey: 'chat.progress.randomizing' },
+      regenerateQuestion: { id: 'regenerate', labelKey: 'chat.progress.regenerating' },
+      addQuestions: { id: 'add', labelKey: 'chat.progress.adding' },
+      modifyMultipleQuestions: { id: 'modify', labelKey: 'chat.progress.modifying' },
+    };
+
+    const info = stepMap[toolName] || { id: toolName, labelKey: 'chat.progress.step' };
+    return {
+      id: info.id,
+      label: t(info.labelKey, { fallback: toolName }),
+    };
+  }, [t]);
+
+  /**
+   * Process a single SSE message
+   * Extracted into useCallback to prevent stale closures
+   */
+  const processSSEMessage = useCallback((msg: SSEMessage) => {
+    // Handle progress messages
+    if (msg.type === 'progress') {
+      // Identify the tool being called
+      const toolName = msg.toolCalls?.[0]?.name;
+
+      if (toolName) {
+        const stepInfo = getStepInfo(toolName);
+
+        setProgressState((prev) => {
+          // When we receive a progress message with a tool, it means:
+          // - That tool just finished executing
+          // - Backend is moving to the next step
+
+          // Mark ALL in_progress steps as completed first
+          const completedSteps = prev.steps.map(s =>
+            s.status === 'in_progress' ? { ...s, status: 'completed' as StepStatus } : s
+          );
+
+          // Check if this step already exists
+          const existingStepIndex = completedSteps.findIndex(s => s.id === stepInfo.id);
+
+          if (existingStepIndex >= 0) {
+            // Step already exists, just ensure it's completed
+            const updatedSteps = [...completedSteps];
+            updatedSteps[existingStepIndex] = {
+              ...updatedSteps[existingStepIndex],
+              status: 'completed' as StepStatus,
+              timestamp: Date.now(),
+            };
+            return { ...prev, steps: updatedSteps };
+          } else {
+            // Add new step as completed (tool already executed when we receive SSE)
+            return {
+              ...prev,
+              steps: [
+                ...completedSteps,
+                {
+                  id: stepInfo.id,
+                  label: stepInfo.label,
+                  status: 'completed' as StepStatus,
+                  timestamp: Date.now(),
+                },
+              ],
+            };
+          }
+        });
+      } else if (msg.text && msg.text.trim()) {
+        // LLM response text without tool call (Step 3 final response)
+        // Mark all in_progress steps as completed and store LLM response
+        setProgressState((prev) => {
+          const completedSteps = prev.steps.map(s =>
+            s.status === 'in_progress' ? { ...s, status: 'completed' as StepStatus } : s
+          );
+          return {
+            ...prev,
+            steps: completedSteps,
+            llmResponse: msg.text!.trim(),
+          };
+        });
+      }
+
+      // Keep old progressMessages for backwards compatibility
+      const emoji = getEmojiForMessage(msg);
+      let text = '';
+      if (msg.text && msg.text.trim()) {
+        text = msg.text.trim();
+      } else if (msg.messageKey) {
+        text = t(msg.messageKey, msg.params);
+      } else {
+        text = 'Processing...';
+      }
+
+      setProgressMessages((prev) => [
+        ...prev,
+        {
+          id: `progress-${Date.now()}`,
+          text,
+          emoji,
+          timestamp: Date.now(),
+        },
+      ]);
+      return;
+    }
+
+    // Handle completion
+    if (msg.type === 'done') {
+      let examGenerated = false;
+      let assistantMessage = '';
+
+      // Parse result if available
+      if (msg.result && typeof msg.result === 'string') {
+        try {
+          const parsed = JSON.parse(msg.result);
+
+          // Debug parsed structure
+          logger.log('[useChatMessages] Parsed done result', {
+            hasExam: !!parsed?.exam,
+            hasQuestions: !!parsed?.exam?.questions,
+            isQuestionsArray: Array.isArray(parsed?.exam?.questions),
+            questionCount: Array.isArray(parsed?.exam?.questions) ? parsed.exam.questions.length : 0,
+            parsedKeys: Object.keys(parsed),
+            examKeys: parsed?.exam ? Object.keys(parsed.exam) : [],
+            finishReason: msg.finishReason,
+          });
+
+          // Check if it's a valid exam structure
+          if (parsed?.exam?.questions && Array.isArray(parsed.exam.questions)) {
+            logger.log('[useChatMessages] Valid exam structure detected, setting result');
+            setResult(parsed);
+            examGenerated = true;
+
+            // Set friendly message instead of JSON
+            const questionCount = parsed.exam.questions.length;
+            assistantMessage = t('chat.examGenerated', {
+              count: questionCount,
+              fallback: `✨ Examen generado exitosamente con ${questionCount} preguntas. Revisa los resultados en el panel derecho.`
+            });
+          } else {
+            logger.log('[useChatMessages] Not an exam structure, treating as regular message');
+            // Not an exam, treat as regular message
+            assistantMessage = msg.result;
+          }
+        } catch (_error) {
+          // Not JSON (agent responded with plain text), this is expected behavior
+          logger.log('[useChatMessages] Agent response is plain text (not JSON exam)');
+          assistantMessage = msg.result;
+        }
+      }
+
+      // Only show success toast if an exam was actually generated
+      if (examGenerated) {
+        try {
+          toast.success(t('chat.toasts.successTitle'), {
+            description: t('chat.toasts.successDesc'),
+          });
+        } catch (_e) {
+          void _e;
+        }
+      }
+
+      // Update progress state with final success message
+      setProgressState((prev) => {
+        // Mark all in_progress steps as completed
+        const completedSteps = prev.steps.map(s =>
+          s.status === 'in_progress' ? { ...s, status: 'completed' as StepStatus } : s
+        );
+
+        // Keep existing llmResponse if already set (from progress message)
+        // Only override if there's new text and it's not an exam
+        let llmResponseText = prev.llmResponse;
+        if (!llmResponseText && msg.text && msg.text.trim() && !examGenerated) {
+          llmResponseText = msg.text.trim();
+        }
+
+        return {
+          steps: completedSteps,
+          llmResponse: llmResponseText,
+          successMessage: examGenerated ? assistantMessage : undefined,
+        };
+      });
+
+      // Add progress visualization to chat history
+      // Create a special message that will render StepProgressList
+      setProgressState((prev) => {
+        // Build a text summary of steps + LLM response + success for chat history
+        const stepsSummary = prev.steps
+          .map(s => `${s.status === 'completed' ? '✓' : '⏳'} ${s.label}`)
+          .join('\n');
+
+        let chatMessage = stepsSummary;
+        if (prev.llmResponse) {
+          chatMessage += `\n\n${prev.llmResponse}`;
+        }
+        if (prev.successMessage) {
+          chatMessage += `\n\n✓ ${prev.successMessage}`;
+        }
+
+        // Add to messages array for persistent chat history
+        if (chatMessage) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { role: 'assistant', content: chatMessage },
+          ]);
+        }
+
+        return prev; // Don't modify progressState
+      });
+
+      // Clear old progress messages (backwards compat)
+      // Note: Chat history is now handled by progressState above
+      setProgressMessages([]);
+
+      clearMessages();
+      return;
+    }
+
+    // Handle errors
+    if (msg.type === 'error') {
+      const errorText = msg.messageKey
+        ? t(msg.messageKey, msg.params || {})
+        : msg.error || t('chat.toasts.errorDesc');
+
+      try {
+        toast.error(t('chat.toasts.errorTitle'), {
+          description: errorText,
+        });
+      } catch (_e) {
+        void _e;
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: `Error: ${errorText}` },
+      ]);
+
+      setProgressMessages([]);
+      clearMessages();
+    }
+  }, [t, setResult, clearMessages, getStepInfo]);
+
+  /**
+   * Process SSE messages for Mastra
+   * Only processes new messages to prevent duplicates and race conditions
+   */
+  useEffect(() => {
+    if (!useMastra || sseMessages.length === 0) return;
+
+    // Process only new messages since last check
+    const newMessages = sseMessages.slice(lastProcessedIndexRef.current + 1);
+
+    if (newMessages.length === 0) return;
+
+    // Process each new message in order
+    newMessages.forEach((msg) => {
+      processSSEMessage(msg);
+    });
+
+    // Update last processed index
+    lastProcessedIndexRef.current = sseMessages.length - 1;
+  }, [sseMessages, useMastra, processSSEMessage]);
+
   const sendMessage = async (input: string) => {
     if (!input.trim()) return;
-    const next = [...messages, { role: 'user', content: input.trim() } as ChatMessage];
+
+    // Validate user input before processing
+    const userMessage = { role: 'user' as const, content: input.trim() };
+    const validation = validateUserInput([...messages, userMessage], locale || 'es');
+
+    if (!validation.valid) {
+      // Add user message and rejection response
+      const rejectionMessage: ChatMessage = {
+        role: 'assistant',
+        content: validation.error || 'Invalid input',
+      };
+      setMessages((prev) => [...prev, userMessage, rejectionMessage]);
+      toast.info(validation.error || 'Invalid input');
+      return;
+    }
+
+    const next = [...messages, userMessage];
     setMessages(next);
     setIsSending(true);
+    setProgressMessages([]);
+    // Reset progress state for new generation
+    setProgressState({
+      steps: [],
+      llmResponse: undefined,
+      successMessage: undefined,
+    });
+    // Reset processed index for new generation
+    lastProcessedIndexRef.current = -1;
 
     try {
       const { data } = await supabase.auth.getSession();
@@ -85,7 +498,8 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
         messages: next.map((m) => ({ role: m.role, content: m.content })),
         context: {
           documentIds: Array.isArray(documentIds) ? documentIds : [],
-          language: settings.language ?? 'es',
+          language: locale || settings.language || 'es', // Use locale from next-intl
+          languageOverride, // User explicit language override (highest priority)
           questionTypes: ['multiple_choice'],
           difficulty: 'mixed' as const,
           taxonomy: [],
@@ -94,13 +508,34 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
         },
       } as const;
 
-      try {
-        console.debug('[AIChat] Payload context keys:', Object.keys(payload.context));
-      } catch (_e) {
-        void _e;
+      logger.log('[AIChat] Request info', {
+        endpoint,
+        useMastra,
+        contextKeys: Object.keys(payload.context),
+        locale,
+      });
+
+      // ========================================================================
+      // MASTRA PATH: Use SSE streaming
+      // ========================================================================
+      if (useMastra) {
+        try {
+          await startStream(endpoint, payload, token);
+          // SSE messages are processed by useEffect hook
+          // Result is set there, so we just need to wait
+        } catch (error) {
+          logger.error('[AIChat] Mastra stream error', { error });
+          // Error already handled by useEffect
+        } finally {
+          setIsSending(false);
+        }
+        return;
       }
 
-      const res = await fetch('/api/chat', {
+      // ========================================================================
+      // LEGACY PATH: Use regular fetch
+      // ========================================================================
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +611,9 @@ export function useChatMessages({ settings, result, setResult, t }: UseChatMessa
 
   return {
     messages,
-    isSending,
+    isSending: isSending || isStreaming,
     sendMessage,
+    progressMessages, // Deprecated: kept for backwards compatibility
+    progressState, // New: step-based progress with persistent states
   };
 }

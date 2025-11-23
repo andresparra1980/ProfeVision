@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { loadSettings } from "@/lib/persistence/browser";
 import { useAIChat, type AIExamResult } from './AIChatContext';
@@ -37,6 +37,8 @@ import { useChatMessages } from "../hooks/useChatMessages";
 import { DocumentChips } from "./DocumentChips";
 import { SummaryDialog } from "./SummaryDialog";
 import { EmptyState } from "./EmptyState";
+import { ProgressMessages } from "./ProgressMessages";
+import { StepProgressList } from "./StepProgressList";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { LimitReachedModal } from "@/components/shared/limit-reached-modal";
 
@@ -46,10 +48,15 @@ export default function ChatPanel() {
   const t = useTranslations('ai_exams_chat');
   const tTiers = useTranslations('tiers');
   const settings = useMemo(() => loadSettings(), []);
-  const { result, setResult } = useAIChat();
+  const { result, setResult, languageOverride } = useAIChat();
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const [input, setInput] = useState("");
   const [resultsOpen, setResultsOpen] = useState(false);
+
+  // Memoize setResult callback to prevent infinite re-renders
+  const handleSetResult = useCallback((r: AIExamResult | null) => {
+    setResult(r);
+  }, [setResult]);
   const promptWrapRef = useRef<HTMLDivElement | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [padBottom, setPadBottom] = useState<number>(0);
@@ -99,11 +106,12 @@ export default function ChatPanel() {
 
   // Custom hooks for managing state
   const documentContext = useDocumentContext();
-  const { messages, isSending, sendMessage } = useChatMessages({
+  const { messages, isSending, sendMessage, progressMessages, progressState } = useChatMessages({
     settings,
     result,
-    setResult: (r) => setResult(r as AIExamResult | null),
-    t,
+    setResult: handleSetResult as (_result: unknown) => void,
+    t: t as (_key: string, _options?: Record<string, unknown> | { fallback?: string } | undefined) => string,
+    languageOverride,
   });
   const summaryDialog = useSummaryDialog({
     documentIds: documentContext.documentIds,
@@ -250,14 +258,24 @@ export default function ChatPanel() {
               ) : (
                 messages.map((m, i) => (
                   <Message key={i} from={m.role}>
-                    <MessageContent>{m.content}</MessageContent>
+                    <MessageContent className="whitespace-pre-line">{m.content}</MessageContent>
                   </Message>
                 ))
               )}
               {isSending && (
                 <Message from="assistant">
                   <MessageContent>
-                    <ConversationTyping className="pl-2" />
+                    {progressState.steps.length > 0 || progressState.llmResponse || progressState.successMessage ? (
+                      <StepProgressList
+                        steps={progressState.steps}
+                        llmResponse={progressState.llmResponse}
+                        successMessage={progressState.successMessage}
+                      />
+                    ) : progressMessages.length > 0 ? (
+                      <ProgressMessages messages={progressMessages} />
+                    ) : (
+                      <ConversationTyping className="pl-2" />
+                    )}
                   </MessageContent>
                 </Message>
               )}
@@ -434,7 +452,7 @@ export default function ChatPanel() {
             <DialogDescription>{t('results.description')}</DialogDescription>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto">
-            <ResultsView />
+            <ResultsView isSending={isSending} />
           </div>
         </DialogContent>
       </Dialog>

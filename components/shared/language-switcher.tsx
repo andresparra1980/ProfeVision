@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { locales } from '@/i18n/config';
 import {
@@ -10,10 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { logger } from '@/lib/utils/logger';
 
 export function LanguageSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const locale = useLocale();
 
   // Mapa bidireccional de rutas
@@ -50,10 +52,10 @@ export function LanguageSwitcher() {
   }, {} as Record<string, string>);
 
   const handleLocaleChange = (newLocale: string) => {
-    console.log('🔄 Language Switch START:', { pathname, locale, newLocale });
-    
+    logger.log('🔄 Language Switch START:', { pathname, locale, newLocale });
+
     let currentPath = pathname;
-    
+
     // 1) Normalizar: quitar prefijo de idioma actual (/es o /en)
     if (pathname === '/en' || pathname === '/es') {
       currentPath = '/';
@@ -62,28 +64,61 @@ export function LanguageSwitcher() {
     } else if (pathname.startsWith('/es/')) {
       currentPath = pathname.replace(/^\/es/, '');
     }
-    
-    console.log('🔄 Current path (no prefix):', currentPath);
-    
-    // 2) Mapear la ruta al idioma de destino usando slugs canónicos
-    let targetPath = currentPath;
-    
+
+    logger.log('🔄 Current path (no prefix):', currentPath);
+
+    // 2) Extraer parámetros dinámicos (IDs, slugs, etc.) y segmentos estáticos
+    // Ej: /dashboard/exams/123/edit -> base: /dashboard/exams/[id]/edit, params: {id: 123}
+    const segments = currentPath.split('/').filter(Boolean);
+    const dynamicParams: string[] = [];
+    const staticSegments: string[] = [];
+
+    segments.forEach((segment, idx) => {
+      // Detectar si es un segmento dinámico (número, UUID, etc.)
+      const isNumeric = /^\d+$/.test(segment);
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment);
+
+      if (isNumeric || isUUID) {
+        dynamicParams.push(segment);
+        staticSegments.push(`__DYNAMIC_${idx}__`);
+      } else {
+        staticSegments.push(segment);
+      }
+    });
+
+    const staticPath = '/' + staticSegments.join('/');
+    logger.log('🔄 Static path:', staticPath, 'Dynamic params:', dynamicParams);
+
+    // 3) Mapear solo la parte estática al idioma de destino
+    let targetStaticPath = staticPath;
+
     if (newLocale === 'es') {
       // EN -> ES
-      targetPath = routeMap[currentPath] || currentPath;
+      targetStaticPath = routeMap[staticPath] || staticPath;
     } else if (newLocale === 'en') {
       // ES -> EN
-      targetPath = reverseRouteMap[currentPath] || currentPath;
+      targetStaticPath = reverseRouteMap[staticPath] || staticPath;
     }
-    
-    console.log('🔄 Target path:', targetPath);
-    
-    // 3) Construir URL final con prefijo SIEMPRE (localePrefix: 'always')
-    const finalPath = targetPath === '/' ? `/${newLocale}` : `/${newLocale}${targetPath}`;
-    
-    console.log('🔄 Final path:', finalPath);
-    
-    // 4. Navegar a la nueva ruta
+
+    // 4) Reconstruir ruta con parámetros dinámicos
+    let targetPath = targetStaticPath;
+    let paramIdx = 0;
+    targetPath = targetPath.replace(/__DYNAMIC_\d+__/g, () => {
+      return dynamicParams[paramIdx++] || '';
+    });
+
+    logger.log('🔄 Target path:', targetPath);
+
+    // 5) Preservar query params si existen
+    const queryString = searchParams.toString();
+    const targetPathWithQuery = queryString ? `${targetPath}?${queryString}` : targetPath;
+
+    // 6) Construir URL final con prefijo SIEMPRE (localePrefix: 'always')
+    const finalPath = targetPathWithQuery === '/' ? `/${newLocale}` : `/${newLocale}${targetPathWithQuery}`;
+
+    logger.log('🔄 Final path:', finalPath);
+
+    // 7. Navegar a la nueva ruta
     router.push(finalPath);
   };
 

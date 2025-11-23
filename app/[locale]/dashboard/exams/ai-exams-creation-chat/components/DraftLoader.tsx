@@ -10,6 +10,7 @@ import type { ExamQuestion } from "./QuestionEditorDialog";
 import { clearPersistedAIExamDraft } from "./AIChatContext";
 import { clearLastDocumentContext } from "@/lib/persistence/browser";
 import { clearIndexedDBStores } from "../utils/indexeddb-helpers";
+import { clearPersistedMessages } from "../hooks/useChatMessages";
 import type { EditingExam } from "../hooks/useExamDraft";
 
 // In-memory guards to prevent duplicate loads
@@ -92,6 +93,12 @@ export function DraftLoader({ setEditingExam, setLoadedExamId }: DraftLoaderProp
         }
         try {
           clearLastDocumentContext();
+        } catch (_e) {
+          void _e;
+        }
+        try {
+          // Clear chat messages - not relevant when loading existing exam
+          clearPersistedMessages();
         } catch (_e) {
           void _e;
         }

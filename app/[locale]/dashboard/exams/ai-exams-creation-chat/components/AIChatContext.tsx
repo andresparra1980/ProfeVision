@@ -15,11 +15,18 @@ export interface AIExamResult {
 interface Ctx {
   result: AIExamResult | null;
   setResult: Dispatch<SetStateAction<AIExamResult | null>>;
+  languageOverride: 'auto' | 'es' | 'en';
 }
 
 const AIChatContext = createContext<Ctx | undefined>(undefined);
 
-export function AIChatProvider({ children }: { children: React.ReactNode }) {
+export function AIChatProvider({
+  children,
+  languageOverride = 'auto'
+}: {
+  children: React.ReactNode;
+  languageOverride?: 'auto' | 'es' | 'en';
+}) {
   const [result, setResult] = useState<AIExamResult | null>(null);
 
   // Simple local-first persistence
@@ -107,7 +114,7 @@ export function AIChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [result]);
 
-  const value = useMemo(() => ({ result, setResult }), [result]);
+  const value = useMemo(() => ({ result, setResult, languageOverride }), [result, languageOverride]);
   return <AIChatContext.Provider value={value}>{children}</AIChatContext.Provider>;
 }
 

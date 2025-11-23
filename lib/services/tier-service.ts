@@ -108,14 +108,36 @@ export class TierService {
       });
 
       if (error) {
+        // Check if this is the expected "function does not exist" error
+        if (error.message?.includes('function') || error.code === '42883') {
+          logger.warn('Usage tracking not yet implemented (RPC function missing)', {
+            feature,
+            profesorId,
+            hint: 'See mddocs/archive/TIER_SYSTEM_IMPLEMENTATION_PLAN.md'
+          });
+          return { success: false };
+        }
+
         logger.error('Error incrementing usage:', error);
-        throw new Error(`Failed to increment usage: ${error.message}`);
+        return { success: false };
       }
 
-      return { success: data.success };
+      return { success: data?.success ?? false };
     } catch (error) {
-      logger.error('Error in incrementUsage:', error);
-      throw error;
+      // Handle network errors gracefully (non-blocking operation)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      if (errorMessage.includes('fetch failed') || errorMessage.includes('function')) {
+        logger.warn('Usage tracking skipped (system not ready)', {
+          feature,
+          profesorId,
+          error: errorMessage
+        });
+      } else {
+        logger.error('Error in incrementUsage:', error);
+      }
+
+      return { success: false };
     }
   }
 

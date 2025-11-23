@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 export const runtime = "nodejs"; // required for fs/buffer and pdf/mammoth libs
 export const dynamic = "force-dynamic"; // no caching
@@ -21,6 +22,9 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(arrayBuffer);
     const name = file.name || "document";
     const mime = file.type || "";
+
+    // Debug logging
+    logger.api("/api/documents/extract - File received", { name, mime, size: file.size });
 
     let text = "";
     let pageCount: number | undefined = undefined;
@@ -52,6 +56,9 @@ export async function POST(req: Request) {
       lowerName.endsWith(".webp") ||
       lowerMime.startsWith("image/");
 
+    // Debug logging for file type detection
+    logger.api("/api/documents/extract - File type detection", { isPdf, isDocx, isDoc, isPptx, isImage });
+
     if (isPdf) {
       // Use unpdf (serverless-friendly wrapper over pdf.js)
       const { getDocumentProxy, extractText } = await import("unpdf");
@@ -76,13 +83,13 @@ export async function POST(req: Request) {
         const result = await extractRawTextFn({ buffer });
         text = (result?.value || "").trim();
       } catch (e: unknown) {
-        console.error("/api/documents/extract mammoth error (buffer)", e);
+        logger.error("/api/documents/extract - Mammoth error (buffer)", e);
         try {
           // Fallback: ArrayBuffer (some environments prefer this)
           const result2 = await extractRawTextFn({ arrayBuffer });
           text = (result2?.value || "").trim();
         } catch (e2: unknown) {
-          console.error("/api/documents/extract mammoth error (arrayBuffer)", e2);
+          logger.error("/api/documents/extract - Mammoth error (arrayBuffer)", e2);
           return NextResponse.json({ error: "Failed to extract DOCX content" }, { status: 422 });
         }
       }
@@ -115,7 +122,7 @@ export async function POST(req: Request) {
         }
         text = chunks.join("\n").trim();
       } catch (e: unknown) {
-        console.error("/api/documents/extract pptx error", e);
+        logger.error("/api/documents/extract - PPTX error", e);
         return NextResponse.json({ error: "Failed to extract PPTX text" }, { status: 500 });
       }
     } else if (isImage) {
@@ -139,7 +146,7 @@ export async function POST(req: Request) {
       meta: { mime: mime || "application/octet-stream", fileName: name, length: text.length, pageCount },
     });
   } catch (err) {
-    console.error("/api/documents/extract error", err);
+    logger.error("/api/documents/extract - Unexpected error", err);
     return NextResponse.json({ error: "Failed to extract text" }, { status: 500 });
   }
 }

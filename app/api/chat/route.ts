@@ -28,6 +28,7 @@ import {
   finalizeLangSmithRun,
   endLangSmithRunWithError,
 } from "@/lib/ai/chat/langsmith";
+import { validateUserInput } from "@/lib/ai/chat/input-validator";
 import { verifyTeacherAuth } from "@/lib/auth/verify-teacher";
 import TierService from "@/lib/services/tier-service";
 import { createClient } from "@/lib/supabase/server";
@@ -119,6 +120,22 @@ async function handleChatRequest(req: NextRequest, t0: number) {
       );
     }
     const { messages, context } = parsed.data;
+
+    // 2.5) Validate user input is exam-related
+    const inputValidation = validateUserInput(messages, context.language);
+    if (!inputValidation.valid) {
+      logger.warn("Input fuera de alcance", {
+        errorCode: inputValidation.errorCode,
+        lastMessage: messages[messages.length - 1]?.content.slice(0, 100),
+      });
+      return NextResponse.json(
+        {
+          error: inputValidation.error,
+          errorCode: inputValidation.errorCode,
+        },
+        { status: 400 }
+      );
+    }
 
     // 3) Build trace metadata for LangSmith
     traceMetadata = {

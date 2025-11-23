@@ -1,6 +1,7 @@
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { Client } from "langsmith";
 import logger from "@/lib/utils/logger";
+import { trackSync } from "@/lib/ai/langsmith-client";
 
 /**
  * Callback handler to capture the root run ID from LangChain pipeline
@@ -30,6 +31,7 @@ export class RootRunCapture extends BaseCallbackHandler {
 
 /**
  * Initializes LangSmith tracing for document summarization
+ * CRITICAL: Synchronous - needed for run ID
  */
 export async function initializeLangSmithTracing(): Promise<{
   client: Client | null;
@@ -42,25 +44,31 @@ export async function initializeLangSmithTracing(): Promise<{
 
   if (client) {
     try {
-      const run = await client.createRun({
-        name: "document_topic_summarization",
-        run_type: "chain",
-        inputs: { endpoint: "/api/documents/summarize" },
-        project_name: process.env.LANGCHAIN_PROJECT || undefined,
-      });
+      const run = await trackSync(
+        () => client.createRun({
+          name: "document_topic_summarization",
+          run_type: "chain",
+          inputs: { endpoint: "/api/documents/summarize" },
+          project_name: process.env.LANGCHAIN_PROJECT || undefined,
+        }),
+        "initializeLangSmithTracing"
+      );
+
       // @ts-expect-error tolerate unknown shape
       rootRunId = run?.id ?? null;
 
-      try {
-        // @ts-expect-error tolerate SDK shape
-        tracer = await client.getTracer({
-          projectName: process.env.LANGCHAIN_PROJECT || undefined,
-        });
-      } catch (e) {
-        logger.warn("Could not get LangSmith tracer", { error: String(e) });
+      if (rootRunId) {
+        try {
+          // @ts-expect-error tolerate SDK shape
+          tracer = await client.getTracer({
+            projectName: process.env.LANGCHAIN_PROJECT || undefined,
+          });
+        } catch (e) {
+          logger.warn("Could not get LangSmith tracer", { error: String(e) });
+        }
       }
-    } catch (e) {
-      logger.warn("Could not create LangSmith root run", { error: String(e) });
+    } catch (error) {
+      logger.error("Failed to initialize LangSmith tracing", { error: String(error) });
     }
   }
 
@@ -69,6 +77,7 @@ export async function initializeLangSmithTracing(): Promise<{
 
 /**
  * Finalizes a LangSmith run with metadata and outputs
+ * CRITICAL: Synchronous to ensure trace completion
  */
 export async function finalizeLangSmithRun(
   client: Client,
@@ -76,25 +85,31 @@ export async function finalizeLangSmithRun(
   metadata: Record<string, string | number | boolean | undefined>,
   outputs?: Record<string, unknown>
 ): Promise<void> {
+  const updatePayload = {
+    outputs: outputs || {},
+    extra: { metadata },
+    end_time: new Date().toISOString(),
+    error: undefined,
+    metadata,
+  } as Record<string, unknown>;
+
   try {
-    const updatePayload = {
-      outputs: outputs || {},
-      extra: { metadata },
-      end_time: new Date().toISOString(),
-      error: undefined,
-      metadata,
-    } as Record<string, unknown>;
-    await client.updateRun(runId, updatePayload);
-  } catch (e) {
-    logger.warn("Failed to finalize LangSmith run", {
+    await trackSync(
+      () => client.updateRun(runId, updatePayload),
+      "finalizeLangSmithRun",
+      { throwOnError: true }
+    );
+  } catch (error) {
+    logger.error("Failed to finalize LangSmith run - run may remain open", {
       runId,
-      error: String(e),
+      error: String(error),
     });
   }
 }
 
 /**
  * Ends a LangSmith run with error information
+ * CRITICAL: Synchronous to ensure trace completion
  */
 export async function endLangSmithRunWithError(
   client: Client,
@@ -102,14 +117,19 @@ export async function endLangSmithRunWithError(
   error: unknown
 ): Promise<void> {
   try {
-    await client.updateRun(runId, {
-      end_time: new Date().toISOString(),
-      error: String(error),
-    });
-  } catch (e) {
-    logger.warn("Failed to end LangSmith run on error", {
+    await trackSync(
+      () => client.updateRun(runId, {
+        end_time: new Date().toISOString(),
+        error: String(error),
+      }),
+      "endLangSmithRunWithError",
+      { throwOnError: true }
+    );
+  } catch (updateError) {
+    logger.error("Failed to end LangSmith run with error - run may remain open", {
       runId,
-      error: String(e),
+      originalError: String(error),
+      updateError: String(updateError),
     });
   }
 }

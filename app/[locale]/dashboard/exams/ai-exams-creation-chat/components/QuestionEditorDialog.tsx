@@ -2,18 +2,27 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { X } from "lucide-react";
 
 export type QuestionType = "multiple_choice" | "true_false" | "short_answer" | "essay" | string;
 
@@ -42,12 +51,47 @@ interface Props {
 export default function QuestionEditorDialog({ open, onOpenChange, question, onSave }: Props) {
   const t = useTranslations('ai_exams_chat');
   const [local, setLocal] = useState<ExamQuestion | null>(null);
+  const [original, setOriginal] = useState<ExamQuestion | null>(null);
+  const [showDiscardAlert, setShowDiscardAlert] = useState(false);
 
   useEffect(() => {
-    if (open) setLocal(question ? JSON.parse(JSON.stringify(question)) : { type: "multiple_choice" });
+    if (open) {
+      const initialData = question ? JSON.parse(JSON.stringify(question)) : { type: "multiple_choice" };
+      setLocal(initialData);
+      setOriginal(JSON.parse(JSON.stringify(initialData)));
+    }
   }, [open, question]);
 
   const isMC = useMemo(() => local?.type === "multiple_choice", [local]);
+
+  const hasChanges = useMemo(() => {
+    if (!local || !original) return false;
+    return JSON.stringify(local) !== JSON.stringify(original);
+  }, [local, original]);
+
+  const hasValidAnswer = useMemo(() => {
+    if (!local) return false;
+
+    // For multiple choice, must have a valid answer selected
+    if (local.type === "multiple_choice") {
+      const options = Array.isArray(local.options) ? local.options : [];
+      if (typeof local.answer === "number") {
+        return local.answer >= 0 && local.answer < options.length;
+      }
+      if (typeof local.answer === "string") {
+        return options.includes(local.answer);
+      }
+      return false;
+    }
+
+    // For true/false, must have boolean answer
+    if (local.type === "true_false") {
+      return typeof local.answer === "boolean";
+    }
+
+    // Other types don't require validation for now
+    return true;
+  }, [local]);
 
   function update<K extends keyof ExamQuestion>(key: K, val: ExamQuestion[K]) {
     setLocal((prev) => (prev ? { ...prev, [key]: val } : prev));
@@ -57,8 +101,16 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
     setLocal((prev) => {
       if (!prev) return prev;
       const options = Array.isArray(prev.options) ? [...prev.options] : [];
+      const oldText = options[idx];
       options[idx] = text;
-      return { ...prev, options };
+
+      // If the current answer is the old text, update it to the new text
+      let answer = prev.answer;
+      if (typeof answer === "string" && answer === oldText) {
+        answer = text;
+      }
+
+      return { ...prev, options, answer };
     });
   }
 
@@ -103,33 +155,54 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
     onOpenChange(false);
   }
 
+  function handleOpenChange(newOpen: boolean) {
+    if (!newOpen) {
+      // Trying to close
+      if (!hasValidAnswer) {
+        // No valid answer selected, prevent closing
+        return;
+      }
+      if (hasChanges) {
+        // Unsaved changes
+        setShowDiscardAlert(true);
+        return;
+      }
+    }
+    // No issues, allow state change
+    onOpenChange(newOpen);
+  }
+
+  function handleCancel() {
+    // Cancel bypasses all validation - just close without saving
+    onOpenChange(false);
+  }
+
+  function handleDiscard() {
+    setShowDiscardAlert(false);
+    onOpenChange(false);
+  }
+
+  function handleCancelDiscard() {
+    setShowDiscardAlert(false);
+  }
+
+  function handleSaveFromAlert() {
+    setShowDiscardAlert(false);
+    handleSave();
+  }
+
   if (!local) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto w-[98vw] max-w-[98vw] sm:w-auto sm:max-w-2xl">
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto w-[98vw] max-w-[98vw] sm:max-w-auto sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{t('editor.title')}</DialogTitle>
           <DialogDescription>{t('editor.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Tipo */}
-          <div className="grid gap-2">
-            <Label>{t('editor.type')}</Label>
-            <Select value={local.type || "multiple_choice"} onValueChange={(v) => update("type", v)}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('editor.selectType')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="multiple_choice">{t('editor.types.multiple_choice')}</SelectItem>
-                <SelectItem value="true_false">{t('editor.types.true_false')}</SelectItem>
-                <SelectItem value="short_answer">{t('editor.types.short_answer')}</SelectItem>
-                <SelectItem value="essay">{t('editor.types.essay')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Enunciado */}
           <div className="grid gap-2">
             <Label>{t('editor.prompt')}</Label>
@@ -141,17 +214,43 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>{t('editor.options')}</Label>
-                <Button variant="outline" size="sm" onClick={addOption}>{t('editor.addOption')}</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addOption}
+                  disabled={(local.options || []).length >= 4}
+                >
+                  {t('editor.addOption')}
+                </Button>
               </div>
-              <div className="space-y-2">
+              <RadioGroup
+                value={typeof local.answer === "number" ? String(local.answer) : typeof local.answer === "string" ? String((local.options || []).indexOf(local.answer)) : "-1"}
+                onValueChange={(v) => update("answer", Number(v))}
+                className="space-y-2"
+              >
                 {(local.options || []).map((opt, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <Input value={opt} onChange={(e) => updateOption(idx, e.target.value)} className="flex-1" />
+                    <RadioGroupItem
+                      id={`opt-${idx}`}
+                      value={String(idx)}
+                    />
+                    <Input
+                      value={opt}
+                      onChange={(e) => updateOption(idx, e.target.value)}
+                      className="flex-1"
+                      placeholder={`Opción ${idx + 1}`}
+                    />
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="secondary" size="icon" onClick={() => removeOption(idx)}>
-                            ×
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeOption(idx)}
+                            disabled={(local.options || []).length <= 2}
+                            className="text-destructive dark:text-red-500 hover:text-destructive dark:hover:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-500/10"
+                          >
+                            <X className="h-4 w-4" />
                             <span className="sr-only">{t('editor.delete')}</span>
                           </Button>
                         </TooltipTrigger>
@@ -162,24 +261,12 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
                     </TooltipProvider>
                   </div>
                 ))}
-              </div>
-
-              {/* Selección de respuesta correcta */}
-              <div className="grid gap-2">
-                <Label>{t('editor.correctAnswer')}</Label>
-                <RadioGroup
-                  value={typeof local.answer === "number" ? String(local.answer) : typeof local.answer === "string" ? String((local.options || []).indexOf(local.answer)) : "-1"}
-                  onValueChange={(v) => update("answer", Number(v))}
-                  className="grid gap-2"
-                >
-                  {(local.options || []).map((opt, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <RadioGroupItem id={`opt-${idx}`} value={String(idx)} />
-                      <Label htmlFor={`opt-${idx}`} className="font-normal">{opt || `Opción ${idx + 1}`}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
+              </RadioGroup>
+              {!hasValidAnswer && (
+                <p className="text-sm text-destructive dark:text-red-500 mt-2">
+                  {t('editor.mustSelectCorrectAnswer')}
+                </p>
+              )}
             </div>
           )}
 
@@ -209,28 +296,45 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
             <Label>{t('editor.rationale')}</Label>
             <Textarea value={local.rationale || ""} onChange={(e) => update("rationale", e.target.value)} rows={3} />
           </div>
-
-          {/* Dificultad */}
-          <div className="grid gap-2">
-            <Label>{t('editor.difficulty')}</Label>
-            <Select value={(local.difficulty as string) || "medium"} onValueChange={(v) => update("difficulty", v)}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('editor.difficulty')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="easy">{t('editor.difficulties.easy')}</SelectItem>
-                <SelectItem value="medium">{t('editor.difficulties.medium')}</SelectItem>
-                <SelectItem value="hard">{t('editor.difficulties.hard')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('editor.cancel')}</Button>
-          <Button onClick={handleSave}>{t('editor.save')}</Button>
+          <Button variant="outline" onClick={handleCancel}>{t('editor.cancel')}</Button>
+          <Button onClick={handleSave} disabled={!hasValidAnswer}>{t('editor.save')}</Button>
         </div>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={showDiscardAlert} onOpenChange={setShowDiscardAlert}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t('editor.discardDialog.title')}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('editor.discardDialog.description')}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+          <AlertDialogCancel onClick={handleCancelDiscard} className="mt-0">
+            {t('editor.discardDialog.cancel')}
+          </AlertDialogCancel>
+          <div className="flex gap-2 flex-1 sm:flex-none">
+            <Button
+              variant="destructive"
+              onClick={handleDiscard}
+              className="flex-1 sm:flex-none"
+            >
+              {t('editor.discardDialog.discard')}
+            </Button>
+            <Button
+              onClick={handleSaveFromAlert}
+              className="flex-1 sm:flex-none"
+            >
+              {t('editor.discardDialog.save')}
+            </Button>
+          </div>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

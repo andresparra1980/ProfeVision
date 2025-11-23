@@ -10,7 +10,7 @@ export const ExamQuestionSchema = z.object({
   prompt: z.string(),
   options: z.array(z.string()).optional().default([]),
   answer: z
-    .union([z.string(), z.number(), z.boolean(), z.array(z.any())])
+    .union([z.string(), z.number(), z.boolean(), z.array(z.string())])
     .nullable(),
   rationale: z.string().optional().default(""),
   difficulty: z.enum(["easy", "medium", "hard"]).optional().default("medium"),
@@ -93,10 +93,12 @@ export const TopicSummarySchema = z.object({
 export const ChatContextSchema = z.object({
   documentIds: z.array(z.string()).max(5).optional().default([]),
   language: z.string().min(2).default("es"),
-  numQuestions: z.number().int().min(1).max(50).optional(),
+  languageOverride: z.enum(["auto", "es", "en"]).optional().default("auto"),
+  numQuestions: z.number().int().min(1).max(40).optional(),
   questionTypes: z
     .array(z.enum(["multiple_choice", "true_false", "short_answer", "essay"]))
-    .nonempty(),
+    .nonempty()
+    .default(["multiple_choice"]),
   difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
   taxonomy: z
     .array(

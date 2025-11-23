@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,18 +12,45 @@ import { AIChatProvider } from "./components/AIChatContext";
 import { SaveDraftDialog } from "./components/SaveDraftDialog";
 import { ClearChatDialog } from "./components/ClearChatDialog";
 import { DraftLoader } from "./components/DraftLoader";
+import { NewExamCleaner } from "./components/NewExamCleaner";
+import { LanguageSelector } from "./components/LanguageSelector";
 import { useExamDraft } from "./hooks/useExamDraft";
 import { useClearChat } from "./hooks/useClearChat";
 
+const LANGUAGE_OVERRIDE_KEY = 'ai_chat_language_override';
+
 export default function AIExamsCreationChatPage() {
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations("ai_exams_chat");
   const { profesor } = useProfesor();
 
   const [showClearDialog, setShowClearDialog] = React.useState(false);
   const [showSaveDraftDialog, setShowSaveDraftDialog] = React.useState(false);
   const [_loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
+
+  // Language override state with localStorage persistence
+  const [languageOverride, setLanguageOverride] = React.useState<'auto' | 'es' | 'en'>(() => {
+    try {
+      if (typeof window === 'undefined') return 'auto';
+      const stored = localStorage.getItem(LANGUAGE_OVERRIDE_KEY);
+      if (stored === 'es' || stored === 'en' || stored === 'auto') {
+        return stored;
+      }
+      return 'auto';
+    } catch {
+      return 'auto';
+    }
+  });
+
+  // Persist language override to localStorage
+  React.useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      localStorage.setItem(LANGUAGE_OVERRIDE_KEY, languageOverride);
+    } catch {
+      // ignore
+    }
+  }, [languageOverride]);
 
   // Load materias, grupos, and editing exam state
   const { materias, grupos, editingExam, setEditingExam } = useExamDraft(profesor?.id);
@@ -33,39 +59,55 @@ export default function AIExamsCreationChatPage() {
   const { clearing, handleClearChat } = useClearChat();
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div>
+    <div className="space-y-1 sm:space-y-4">
+      {/* Header - Top Row with Back Button and Language Controls */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => router.push("/dashboard/exams")}
+          className="hidden sm:inline-flex"
         >
           <ChevronLeft className="mr-1 h-4 w-4" /> {t("header.back")}
         </Button>
-      </div>
-      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {t("header.title")}
-          </h2>
-          <p className="text-muted-foreground">
-            {t("header.description", { locale })}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setShowClearDialog(true)}>
+
+        <div className="flex items-center justify-center gap-4 px-6 sm:gap-2 sm:px-0 sm:justify-end">
+          <LanguageSelector
+            value={languageOverride}
+            onValueChange={(value) => setLanguageOverride(value)}
+          />
+
+          <Button
+            variant="destructive"
+            onClick={() => setShowClearDialog(true)}
+            className="flex-1 sm:flex-none"
+          >
             {t("header.clearChat")}
           </Button>
-          <Button onClick={() => setShowSaveDraftDialog(true)}>
+          <Button
+            onClick={() => setShowSaveDraftDialog(true)}
+            className="flex-1 sm:flex-none"
+          >
             {t("header.saveDraft")}
           </Button>
         </div>
       </div>
+
+      {/* Title and Description */}
+      <div className="text-center sm:text-left">
+        <h2 className="text-base font-bold tracking-tight sm:text-3xl">
+          {t("header.title")}
+        </h2>
+        <p className="hidden text-muted-foreground sm:block">
+          {t("header.description")}
+        </p>
+      </div>
+
       <div className="border-t border-black/50 dark:border-white/50"></div>
 
       {/* Chat and dialogs inside Provider */}
-      <AIChatProvider>
+      <AIChatProvider languageOverride={languageOverride}>
+        <NewExamCleaner />
         <ChatPanel />
 
         <SaveDraftDialog

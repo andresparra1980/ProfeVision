@@ -2,9 +2,17 @@
   "header": {
     "back": "Volver a Exámenes",
     "title": "Crear exámenes con IA",
-    "description": "Experiencia de chat para generar bancos de preguntas y resúmenes. Idioma: {locale}",
+    "description": "Experiencia de chat para generar bancos de preguntas y resúmenes.",
     "clearChat": "Borrar Chat",
-    "saveDraft": "Guardar Borrador"
+    "saveDraft": "Guardar Borrador",
+    "examLanguageLabel": "Idioma del Examen:"
+  },
+  "language": {
+    "label": "Generar en:",
+    "auto": "Automático",
+    "spanish": "Español",
+    "english": "English",
+    "tooltip": "Automático: El agente detecta el idioma\nautomáticamente según el contexto,\nel tema y tipo de examen.\nRecomendado para mejores resultados."
   },
   "context": {
     "title": "Contexto de documento",
@@ -18,21 +26,32 @@
     "summaryDesc": "Vista previa del resumen generado por IA.",
     "loadingSummary": "Cargando resumen...",
     "document": "Documento",
-    "limitDesc": "Solo se permiten 5 documentos."
+    "limitDesc": "Solo se permiten 5 documentos.",
+    "uploadErrorTitle": "Error al cargar documento",
+    "uploadError": "No se pudo cargar el documento. Verifica que el archivo sea válido y que tenga un formato soportado (PDF, DOCX, PPTX, imágenes)."
   },
   "results": {
     "title": "Resultados",
     "description": "Revisa el examen generado.",
     "generatedQuestions": "Preguntas generadas",
     "empty": "Los resultados aparecerán aquí después de la generación.",
+    "generating": "Generando preguntas...",
+    "generatedSoFar": "generadas",
     "randomizeOptions": "Aleatorizar opciones",
     "edit": "Editar",
+    "delete": "Eliminar pregunta",
     "selectCorrect": "Selecciona la respuesta correcta:",
     "true": "Verdadero",
     "false": "Falso",
     "rationale": "Rationale",
     "hint": "Haz clic para ver las preguntas generadas.",
-    "hintTooltip": "Haz clic en el botón para ver las preguntas generadas."
+    "hintTooltip": "Haz clic en el botón para ver las preguntas generadas.",
+    "deleteDialog": {
+      "title": "¿Eliminar pregunta?",
+      "description": "Esta pregunta se eliminará del examen generado. Esta acción no se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    }
   },
   "editor": {
     "title": "Editar pregunta",
@@ -50,6 +69,7 @@
     "addOption": "Agregar opción",
     "delete": "Eliminar",
     "correctAnswer": "Respuesta correcta",
+    "mustSelectCorrectAnswer": "* Debe seleccionar una opción correcta",
     "rationale": "Rationale (opcional)",
     "difficulty": "Dificultad",
     "difficulties": {
@@ -58,7 +78,14 @@
       "hard": "Difícil"
     },
     "cancel": "Cancelar",
-    "save": "Guardar"
+    "save": "Guardar",
+    "discardDialog": {
+      "title": "¿Descartar cambios?",
+      "description": "Tienes cambios sin guardar. Si cierras el editor, estos cambios se perderán.",
+      "cancel": "Continuar editando",
+      "discard": "Descartar cambios",
+      "save": "Guardar cambios"
+    }
   },
   "clearDialog": {
     "title": "¿Borrar datos del chat?",
@@ -122,6 +149,23 @@
     "you": "Tú",
     "assistant": "Asistente",
     "system": "Sistema",
+    "progress": {
+      "step": "Procesando...",
+      "planning": "Planificando examen",
+      "generating": "Generando preguntas",
+      "validating": "Validando resultados",
+      "randomizing": "Aleatorizando opciones",
+      "regenerating": "Regenerando pregunta",
+      "adding": "Añadiendo preguntas",
+      "modifying": "Modificando preguntas",
+      "modifying_batch": "Modificando múltiples preguntas",
+      "completed": "Generación completada"
+    },
+    "examGenerated": "✨ Examen generado exitosamente con {count} preguntas. Revisa los resultados en el panel de Resultados.",
+    "error": {
+      "generation": "Error al generar el examen",
+      "connection": "Error de conexión"
+    },
     "toasts": {
       "successTitle": "Resultados generados",
       "successDesc": "Revisa el examen generado en el panel de Resultados.",
