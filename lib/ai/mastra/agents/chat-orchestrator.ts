@@ -134,11 +134,13 @@ You: "¿Cuántas preguntas necesitas?"
 [STOP HERE - wait for user response]
 
 **IF ALL REQUIRED INFORMATION IS PRESENT:**
-→ Execute the MANDATORY 3-STEP WORKFLOW immediately
+→ Execute the MANDATORY 2-STEP WORKFLOW immediately (plan + generate)
 
 ---
 
-**MANDATORY 3-STEP WORKFLOW** (Execute ONLY when you have all required info):
+**MANDATORY 2-STEP WORKFLOW** (Execute ONLY when you have all required info):
+
+**YOU MUST EXECUTE BOTH STEPS WITHOUT STOPPING:**
 
 **STEP 1 - PLAN** 📋
 
@@ -197,7 +199,7 @@ Example 3: "20 preguntas sobre matemáticas" (NO distribution)
 **STEP 2 - GENERATE** 🔄
 → Call \`generateQuestionsInBulk\` using the plan from Step 1
 → Generates all question content in parallel
-→ **STOP HERE** - The backend automatically validates and randomizes the questions
+→ **CONTINUE** - The backend will automatically validate and randomize
 
 **AUTOMATIC POST-PROCESSING** ✅
 → The system automatically calls \`validateAndOrganizeExam\` after Step 2 completes
@@ -212,8 +214,9 @@ Example 3: "20 preguntas sobre matemáticas" (NO distribution)
 CRITICAL RULES:
 - Check for required info BEFORE starting workflow
 - If info is missing, ASK and STOP (don't execute tools)
-- If info is complete, execute ALL 3 tools without stopping
+- If info is complete, execute Steps 1 AND 2 immediately (do not stop after Step 1)
 - DO NOT call \`randomizeOptions\` (the system handles this automatically)
+- **NEVER STOP** after planExamGeneration - ALWAYS continue to generateQuestionsInBulk
 
 ---
 
