@@ -375,40 +375,9 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
         return prev; // Don't modify progressState
       });
 
-      // Build complete assistant response including progress messages (backwards compat)
-      // Use functional update to access current progressMessages without dependency
-      setProgressMessages((currentProgress) => {
-        let finalMessage = '';
-
-        // If an exam was generated, use the short assistantMessage only
-        // Don't include progress messages that contain the full exam text
-        if (examGenerated) {
-          finalMessage = assistantMessage;
-        } else {
-          // For non-exam responses (conversational), include progress messages
-          const progressText = currentProgress
-            .filter(pm => pm.text && pm.text.trim())
-            .map(pm => pm.text)
-            .join('\n\n');
-
-          if (progressText) {
-            finalMessage = progressText;
-          }
-
-          // Append final result message if different from progress
-          if (assistantMessage && assistantMessage !== progressText) {
-            finalMessage = finalMessage
-              ? `${finalMessage}\n\n${assistantMessage}`
-              : assistantMessage;
-          }
-        }
-
-        // Note: We already added the message to chat history above
-        // This is just for backwards compat with old progress system
-
-        // Clear progress messages
-        return [];
-      });
+      // Clear old progress messages (backwards compat)
+      // Note: Chat history is now handled by progressState above
+      setProgressMessages([]);
 
       clearMessages();
       return;
