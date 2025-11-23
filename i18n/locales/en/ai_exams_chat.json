@@ -69,6 +69,7 @@
     "addOption": "Add option",
     "delete": "Delete",
     "correctAnswer": "Correct answer",
+    "mustSelectCorrectAnswer": "* You must select a correct answer",
     "rationale": "Rationale (optional)",
     "difficulty": "Difficulty",
     "difficulties": {

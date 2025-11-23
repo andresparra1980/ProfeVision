@@ -22,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { X } from "lucide-react";
 
 export type QuestionType = "multiple_choice" | "true_false" | "short_answer" | "essay" | string;
 
@@ -67,6 +68,30 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
     if (!local || !original) return false;
     return JSON.stringify(local) !== JSON.stringify(original);
   }, [local, original]);
+
+  const hasValidAnswer = useMemo(() => {
+    if (!local) return false;
+
+    // For multiple choice, must have a valid answer selected
+    if (local.type === "multiple_choice") {
+      const options = Array.isArray(local.options) ? local.options : [];
+      if (typeof local.answer === "number") {
+        return local.answer >= 0 && local.answer < options.length;
+      }
+      if (typeof local.answer === "string") {
+        return options.includes(local.answer);
+      }
+      return false;
+    }
+
+    // For true/false, must have boolean answer
+    if (local.type === "true_false") {
+      return typeof local.answer === "boolean";
+    }
+
+    // Other types don't require validation for now
+    return true;
+  }, [local]);
 
   function update<K extends keyof ExamQuestion>(key: K, val: ExamQuestion[K]) {
     setLocal((prev) => (prev ? { ...prev, [key]: val } : prev));
@@ -131,13 +156,25 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
   }
 
   function handleOpenChange(newOpen: boolean) {
-    if (!newOpen && hasChanges) {
-      // Trying to close with unsaved changes
-      setShowDiscardAlert(true);
-    } else {
-      // No changes or opening dialog
-      onOpenChange(newOpen);
+    if (!newOpen) {
+      // Trying to close
+      if (!hasValidAnswer) {
+        // No valid answer selected, prevent closing
+        return;
+      }
+      if (hasChanges) {
+        // Unsaved changes
+        setShowDiscardAlert(true);
+        return;
+      }
     }
+    // No issues, allow state change
+    onOpenChange(newOpen);
+  }
+
+  function handleCancel() {
+    // Cancel bypasses all validation - just close without saving
+    onOpenChange(false);
   }
 
   function handleDiscard() {
@@ -159,7 +196,7 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto w-[98vw] max-w-[98vw] sm:w-auto sm:max-w-3xl">
+        <DialogContent className="max-h-[85vh] overflow-y-auto w-[98vw] max-w-[98vw] sm:max-w-auto sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{t('editor.title')}</DialogTitle>
           <DialogDescription>{t('editor.description')}</DialogDescription>
@@ -177,7 +214,14 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>{t('editor.options')}</Label>
-                <Button variant="outline" size="sm" onClick={addOption}>{t('editor.addOption')}</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addOption}
+                  disabled={(local.options || []).length >= 4}
+                >
+                  {t('editor.addOption')}
+                </Button>
               </div>
               <RadioGroup
                 value={typeof local.answer === "number" ? String(local.answer) : typeof local.answer === "string" ? String((local.options || []).indexOf(local.answer)) : "-1"}
@@ -199,8 +243,14 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="secondary" size="icon" onClick={() => removeOption(idx)}>
-                            ×
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeOption(idx)}
+                            disabled={(local.options || []).length <= 2}
+                            className="text-destructive dark:text-red-500 hover:text-destructive dark:hover:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-500/10"
+                          >
+                            <X className="h-4 w-4" />
                             <span className="sr-only">{t('editor.delete')}</span>
                           </Button>
                         </TooltipTrigger>
@@ -212,6 +262,11 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
                   </div>
                 ))}
               </RadioGroup>
+              {!hasValidAnswer && (
+                <p className="text-sm text-destructive dark:text-red-500 mt-2">
+                  {t('editor.mustSelectCorrectAnswer')}
+                </p>
+              )}
             </div>
           )}
 
@@ -244,8 +299,8 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>{t('editor.cancel')}</Button>
-          <Button onClick={handleSave}>{t('editor.save')}</Button>
+          <Button variant="outline" onClick={handleCancel}>{t('editor.cancel')}</Button>
+          <Button onClick={handleSave} disabled={!hasValidAnswer}>{t('editor.save')}</Button>
         </div>
       </DialogContent>
     </Dialog>
