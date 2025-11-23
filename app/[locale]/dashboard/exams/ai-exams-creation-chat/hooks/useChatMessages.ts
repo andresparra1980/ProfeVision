@@ -448,7 +448,7 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
         content: validation.error || 'Invalid input',
       };
       setMessages((prev) => [...prev, userMessage, rejectionMessage]);
-      toast.error(validation.error || 'Invalid input');
+      toast.info(validation.error || 'Invalid input');
       return;
     }
 
