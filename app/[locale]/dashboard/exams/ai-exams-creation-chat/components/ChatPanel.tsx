@@ -258,7 +258,7 @@ export default function ChatPanel() {
               ) : (
                 messages.map((m, i) => (
                   <Message key={i} from={m.role}>
-                    <MessageContent>{m.content}</MessageContent>
+                    <MessageContent className="whitespace-pre-line">{m.content}</MessageContent>
                   </Message>
                 ))
               )}
