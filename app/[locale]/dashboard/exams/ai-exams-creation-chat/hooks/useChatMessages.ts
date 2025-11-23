@@ -233,6 +233,19 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
             };
           }
         });
+      } else if (msg.text && msg.text.trim()) {
+        // LLM response text without tool call (Step 3 final response)
+        // Mark all in_progress steps as completed and store LLM response
+        setProgressState((prev) => {
+          const completedSteps = prev.steps.map(s =>
+            s.status === 'in_progress' ? { ...s, status: 'completed' as StepStatus } : s
+          );
+          return {
+            ...prev,
+            steps: completedSteps,
+            llmResponse: msg.text!.trim(),
+          };
+        });
       }
 
       // Keep old progressMessages for backwards compatibility
@@ -314,16 +327,17 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
         }
       }
 
-      // Update progress state with final LLM response and success message
+      // Update progress state with final success message
       setProgressState((prev) => {
         // Mark all in_progress steps as completed
         const completedSteps = prev.steps.map(s =>
           s.status === 'in_progress' ? { ...s, status: 'completed' as StepStatus } : s
         );
 
-        // Extract LLM response text (if not JSON exam)
-        let llmResponseText: string | undefined;
-        if (msg.text && msg.text.trim() && !examGenerated) {
+        // Keep existing llmResponse if already set (from progress message)
+        // Only override if there's new text and it's not an exam
+        let llmResponseText = prev.llmResponse;
+        if (!llmResponseText && msg.text && msg.text.trim() && !examGenerated) {
           llmResponseText = msg.text.trim();
         }
 
