@@ -299,8 +299,9 @@ async def process_omr(
 
         logger.info(f"Processing image: {file.filename} ({len(file_content)} bytes)")
 
-        # Initialize OMR processor (always with debug mode to get processed image)
-        processor = StandaloneOMRProcessor(debug_mode=True)
+        # Initialize OMR processor (debug_mode=False for production performance)
+        # The processed image with annotations is still generated
+        processor = StandaloneOMRProcessor(debug_mode=False)
 
         # Process image
         result = processor.process_image(temp_file_path)
@@ -348,7 +349,7 @@ async def process_omr(
         processed_compressed = None
         if os.path.exists(debug_image_path):
             processed_compressed = compress_to_webp(debug_image_path)
-            # Clean up debug image after compression
+            # Clean up processed image after compression
             os.unlink(debug_image_path)
         else:
             logger.warning(f"Processed image not found at: {debug_image_path}")
