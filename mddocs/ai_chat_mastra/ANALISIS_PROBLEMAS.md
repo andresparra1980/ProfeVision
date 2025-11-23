@@ -1,13 +1,13 @@
 # Análisis de Problemas - Testbench Chat AI Mastra
 
-**Fecha**: 2025-11-21 (Actualizado)
+**Fecha**: 2025-11-23 (Actualizado)
 **Branch**: `feature/ai-chat-mastra`
 
 ---
 
 ## Resumen Ejecutivo
 
-De **13 casos probados**, **12 exitosos** (92%) y **1 con problemas** (8%).
+De **13 casos probados**, **13 exitosos** (100%) ✅
 
 ### Casos Exitosos ✅
 - Caso 1.1: Generación 5 preguntas ✅
@@ -50,12 +50,17 @@ De **13 casos probados**, **12 exitosos** (92%) y **1 con problemas** (8%).
 1. **maxSteps estático**: Fijo en 15, insuficiente para workflows grandes
 2. **numQuestions no parseado**: Backend no extraía número del mensaje del usuario
 3. **Cálculo incorrecto**: Siempre usaba default (10) en vez del número real solicitado
+4. **Model capability**: `google/gemini-2.5-flash-lite` no seguía multi-step workflow
+5. **Instructions contradictorias**: "STOP HERE" después de Step 2 confundía al LLM
 
 ### Solución Implementada
 
 **Commits:**
 - `bc9f4c2`: maxSteps dinámico según número de preguntas
 - `932a1ba`: Parseo automático de numQuestions del mensaje
+- `8666d1a`: Removido "STOP HERE" en instructions, cambiado modelo a `gemini-2.5-flash`
+
+**Parte 1 - maxSteps Dinámico**
 
 **Fórmula**: `Math.ceil(numQuestions / 5) + 3`
 - `/5`: Tamaño de chunk para generación paralela
@@ -75,6 +80,25 @@ De **13 casos probados**, **12 exitosos** (92%) y **1 con problemas** (8%).
 - Validación 1-100 preguntas
 - Prioridad: context → mensaje → default
 
+**Parte 2 - Agent Instructions Fix**
+
+**Problema**: Instructions decían "STOP HERE" después de Step 2 (generateQuestionsInBulk)
+
+**Cambios en `lib/ai/mastra/agents/chat-orchestrator.ts`**:
+- ❌ Removido: "**STOP HERE** - The backend automatically validates"
+- ✅ Cambiado a: "**CONTINUE** - The backend will automatically validate"
+- ✅ Actualizado: "3-STEP WORKFLOW" → "2-STEP WORKFLOW"
+- ✅ Agregado: "**NEVER STOP** after planExamGeneration - ALWAYS continue to generateQuestionsInBulk"
+- ✅ Clarificado: "execute Steps 1 AND 2 immediately (do not stop after Step 1)"
+
+**Parte 3 - Model Upgrade**
+
+**Cambio**: `google/gemini-2.5-flash-lite` → `google/gemini-2.5-flash`
+
+**Razón**:
+- **flash-lite**: Más rápido, barato, pero menos "reasoning" → se detenía después del plan
+- **flash**: Mejor seguimiento de multi-step workflows, entiende instrucciones complejas
+
 ### Logs Después del Fix
 ```log
 [API] Dynamic maxSteps calculated {
@@ -84,13 +108,23 @@ De **13 casos probados**, **12 exitosos** (92%) y **1 con problemas** (8%).
   calculatedSteps: 11,
   maxSteps: 11
 }
-[INFO] Bulk generation completed: 40/40 questions in 11.35s
+[PERF] Agent generation completed { stepCount: 3, finishReason: 'stop' }
+[API] Tool calls executed { toolCalls: ['planExamGeneration', 'generateQuestionsInBulk'] }
+[INFO] Bulk generation completed: 40/40 questions in 9.07s
+[API] Auto-validate completed { validQuestions: 33 } (7 duplicados removidos)
+[API] Sending exam to frontend (normal path)
 ```
 
-### Testing Confirmado
+### Testing Confirmado (2025-11-23)
 - Caso 1.3 (20 preguntas): ✅ Genera correctamente con maxSteps=7
 - Caso 2.3 (adición): ✅ Funciona en primer intento
 - Caso 11.1 (40 preguntas): ✅ Genera 40/40 con maxSteps=11
+  - Total time: 27.7s
+  - Plan: 8.7s
+  - Generate: 9.1s (8 chunks paralelos, 5 preguntas c/u)
+  - Validate + Randomize: Auto
+  - Generadas: 40, Duplicados: 7, Válidas: 33 ✅
+- Caso 7.x (múltiples temas): ✅ Distribución correcta
 
 **Estado**: ✅ RESUELTO COMPLETAMENTE
 
@@ -240,8 +274,17 @@ maxSteps: 7  ← Math.ceil(15/5) + 3
 
 ---
 
-**Última Actualización**: 2025-11-21 PM (FINAL)
+**Última Actualización**: 2025-11-23 (FINAL)
 **Estado**: ✅ COMPLETO - 100% casos exitosos
+
+### Deduplicación Automática
+
+Durante testing de 40 preguntas (Caso 11.1), se verificó que el sistema detecta y elimina duplicados:
+- Generadas: 40 preguntas
+- Duplicados detectados: 7 (peste negra, monasterios, reconquista)
+- Válidas entregadas: 33 ✅
+
+El backend aplica `deduplicateQuestions()` automáticamente en `validateAndOrganizeExam`.
 
 ---
 
@@ -251,9 +294,11 @@ maxSteps: 7  ← Math.ceil(15/5) + 3
 1. `bc9f4c2` - maxSteps dinámico según número de preguntas
 2. `932a1ba` - Parseo numQuestions del mensaje del usuario
 3. `fc92dfd` - maxSteps cuenta preguntas de examen existente
+4. `8666d1a` - Removido "STOP HERE", upgrade a `gemini-2.5-flash`
 
 ### Archivos Modificados
 - `app/api/chat-mastra/route.ts`: Cálculo dinámico de maxSteps
+- `lib/ai/mastra/agents/chat-orchestrator.ts`: Instructions fix, model upgrade
 - `lib/ai/chat/schemas.ts`: Schema source ya era opcional (verificado)
 
 ### Resultado Final
