@@ -201,32 +201,37 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
         const stepInfo = getStepInfo(toolName);
 
         setProgressState((prev) => {
-          const existingStepIndex = prev.steps.findIndex(s => s.id === stepInfo.id);
+          // When we receive a progress message with a tool, it means:
+          // - That tool just finished executing
+          // - Backend is moving to the next step
+
+          // Mark ALL in_progress steps as completed first
+          const completedSteps = prev.steps.map(s =>
+            s.status === 'in_progress' ? { ...s, status: 'completed' as StepStatus } : s
+          );
+
+          // Check if this step already exists
+          const existingStepIndex = completedSteps.findIndex(s => s.id === stepInfo.id);
 
           if (existingStepIndex >= 0) {
-            // Update existing step to in_progress
-            const updatedSteps = [...prev.steps];
+            // Step already exists, just ensure it's completed
+            const updatedSteps = [...completedSteps];
             updatedSteps[existingStepIndex] = {
               ...updatedSteps[existingStepIndex],
-              status: 'in_progress' as StepStatus,
+              status: 'completed' as StepStatus,
               timestamp: Date.now(),
             };
             return { ...prev, steps: updatedSteps };
           } else {
-            // Mark previous step as completed
-            const updatedSteps = prev.steps.map(s =>
-              s.status === 'in_progress' ? { ...s, status: 'completed' as StepStatus } : s
-            );
-
-            // Add new step as in_progress
+            // Add new step as completed (tool already executed when we receive SSE)
             return {
               ...prev,
               steps: [
-                ...updatedSteps,
+                ...completedSteps,
                 {
                   id: stepInfo.id,
                   label: stepInfo.label,
-                  status: 'in_progress' as StepStatus,
+                  status: 'completed' as StepStatus,
                   timestamp: Date.now(),
                 },
               ],
