@@ -63,6 +63,22 @@ interface ProgressMessage {
   timestamp: number;
 }
 
+// New step-based progress tracking
+export type StepStatus = 'pending' | 'in_progress' | 'completed';
+
+export interface ProgressStep {
+  id: string;
+  label: string;
+  status: StepStatus;
+  timestamp: number;
+}
+
+export interface ProgressState {
+  steps: ProgressStep[];
+  llmResponse?: string;
+  successMessage?: string;
+}
+
 interface UseChatMessagesProps {
   settings: { language?: string };
   result: unknown;
@@ -95,6 +111,13 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadPersistedMessages());
   const [isSending, setIsSending] = useState(false);
   const [progressMessages, setProgressMessages] = useState<ProgressMessage[]>([]);
+
+  // New step-based progress state
+  const [progressState, setProgressState] = useState<ProgressState>({
+    steps: [],
+    llmResponse: undefined,
+    successMessage: undefined,
+  });
 
   // Track last processed SSE message index to prevent duplicate processing
   const lastProcessedIndexRef = useRef<number>(-1);
@@ -144,29 +167,84 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
   };
 
   /**
+   * Map tool name to step ID and label
+   */
+  const getStepInfo = useCallback((toolName: string): { id: string; label: string } => {
+    const stepMap: Record<string, { id: string; labelKey: string }> = {
+      planExamGeneration: { id: 'plan', labelKey: 'chat.progress.planning' },
+      generateQuestionsInBulk: { id: 'generate', labelKey: 'chat.progress.generating' },
+      validateAndOrganizeExam: { id: 'validate', labelKey: 'chat.progress.validating' },
+      randomizeOptions: { id: 'randomize', labelKey: 'chat.progress.randomizing' },
+      regenerateQuestion: { id: 'regenerate', labelKey: 'chat.progress.regenerating' },
+      addQuestions: { id: 'add', labelKey: 'chat.progress.adding' },
+      modifyMultipleQuestions: { id: 'modify', labelKey: 'chat.progress.modifying' },
+    };
+
+    const info = stepMap[toolName] || { id: toolName, labelKey: 'chat.progress.step' };
+    return {
+      id: info.id,
+      label: t(info.labelKey, { fallback: toolName }),
+    };
+  }, [t]);
+
+  /**
    * Process a single SSE message
    * Extracted into useCallback to prevent stale closures
    */
   const processSSEMessage = useCallback((msg: SSEMessage) => {
     // Handle progress messages
     if (msg.type === 'progress') {
-      // Build the display text
-      let text = '';
+      // Identify the tool being called
+      const toolName = msg.toolCalls?.[0]?.name;
 
-      // If there's natural language text from the LLM, use it
+      if (toolName) {
+        const stepInfo = getStepInfo(toolName);
+
+        setProgressState((prev) => {
+          const existingStepIndex = prev.steps.findIndex(s => s.id === stepInfo.id);
+
+          if (existingStepIndex >= 0) {
+            // Update existing step to in_progress
+            const updatedSteps = [...prev.steps];
+            updatedSteps[existingStepIndex] = {
+              ...updatedSteps[existingStepIndex],
+              status: 'in_progress',
+              timestamp: Date.now(),
+            };
+            return { ...prev, steps: updatedSteps };
+          } else {
+            // Mark previous step as completed
+            const updatedSteps = prev.steps.map(s =>
+              s.status === 'in_progress' ? { ...s, status: 'completed' } : s
+            );
+
+            // Add new step as in_progress
+            return {
+              ...prev,
+              steps: [
+                ...updatedSteps,
+                {
+                  id: stepInfo.id,
+                  label: stepInfo.label,
+                  status: 'in_progress',
+                  timestamp: Date.now(),
+                },
+              ],
+            };
+          }
+        });
+      }
+
+      // Keep old progressMessages for backwards compatibility
+      const emoji = getEmojiForMessage(msg);
+      let text = '';
       if (msg.text && msg.text.trim()) {
         text = msg.text.trim();
-      }
-      // Otherwise fall back to i18n key
-      else if (msg.messageKey) {
+      } else if (msg.messageKey) {
         text = t(msg.messageKey, msg.params);
-      }
-      // Last resort fallback
-      else {
+      } else {
         text = 'Processing...';
       }
-
-      const emoji = getEmojiForMessage(msg);
 
       setProgressMessages((prev) => [
         ...prev,
@@ -236,7 +314,27 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
         }
       }
 
-      // Build complete assistant response including progress messages
+      // Update progress state with final LLM response and success message
+      setProgressState((prev) => {
+        // Mark all in_progress steps as completed
+        const completedSteps = prev.steps.map(s =>
+          s.status === 'in_progress' ? { ...s, status: 'completed' } : s
+        );
+
+        // Extract LLM response text (if not JSON exam)
+        let llmResponseText: string | undefined;
+        if (msg.text && msg.text.trim() && !examGenerated) {
+          llmResponseText = msg.text.trim();
+        }
+
+        return {
+          steps: completedSteps,
+          llmResponse: llmResponseText,
+          successMessage: examGenerated ? assistantMessage : undefined,
+        };
+      });
+
+      // Build complete assistant response including progress messages (backwards compat)
       // Use functional update to access current progressMessages without dependency
       setProgressMessages((currentProgress) => {
         let finalMessage = '';
@@ -331,6 +429,12 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
     setMessages(next);
     setIsSending(true);
     setProgressMessages([]);
+    // Reset progress state for new generation
+    setProgressState({
+      steps: [],
+      llmResponse: undefined,
+      successMessage: undefined,
+    });
     // Reset processed index for new generation
     lastProcessedIndexRef.current = -1;
 
@@ -482,6 +586,7 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
     messages,
     isSending: isSending || isStreaming,
     sendMessage,
-    progressMessages, // New: for showing progress during streaming
+    progressMessages, // Deprecated: kept for backwards compatibility
+    progressState, // New: step-based progress with persistent states
   };
 }

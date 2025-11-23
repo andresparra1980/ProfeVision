@@ -38,6 +38,7 @@ import { DocumentChips } from "./DocumentChips";
 import { SummaryDialog } from "./SummaryDialog";
 import { EmptyState } from "./EmptyState";
 import { ProgressMessages } from "./ProgressMessages";
+import { StepProgressList } from "./StepProgressList";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { LimitReachedModal } from "@/components/shared/limit-reached-modal";
 
@@ -105,7 +106,7 @@ export default function ChatPanel() {
 
   // Custom hooks for managing state
   const documentContext = useDocumentContext();
-  const { messages, isSending, sendMessage, progressMessages } = useChatMessages({
+  const { messages, isSending, sendMessage, progressMessages, progressState } = useChatMessages({
     settings,
     result,
     setResult: handleSetResult as (_result: unknown) => void,
@@ -264,7 +265,13 @@ export default function ChatPanel() {
               {isSending && (
                 <Message from="assistant">
                   <MessageContent>
-                    {progressMessages.length > 0 ? (
+                    {progressState.steps.length > 0 || progressState.llmResponse || progressState.successMessage ? (
+                      <StepProgressList
+                        steps={progressState.steps}
+                        llmResponse={progressState.llmResponse}
+                        successMessage={progressState.successMessage}
+                      />
+                    ) : progressMessages.length > 0 ? (
                       <ProgressMessages messages={progressMessages} />
                     ) : (
                       <ConversationTyping className="pl-2" />
