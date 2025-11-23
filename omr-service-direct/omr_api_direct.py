@@ -205,16 +205,16 @@ def compress_to_webp(
         # Convert to WebP
         buffer = io.BytesIO()
         img.save(buffer, format='WEBP', quality=quality, method=6)
-        buffer.seek(0)
 
         # Calculate compression ratio
         original_size = os.path.getsize(image_path)
-        compressed_size = buffer.tell()
+        compressed_size = buffer.tell()  # Get size before seek
         ratio = original_size / compressed_size if compressed_size > 0 else 0
 
         logger.info(f"Compressed image: {original_size / 1024:.1f}KB → {compressed_size / 1024:.1f}KB (ratio: {ratio:.1f}x)")
 
         # Return base64 data URL
+        buffer.seek(0)
         img_b64 = base64.b64encode(buffer.read()).decode()
         return f"data:image/webp;base64,{img_b64}"
 
