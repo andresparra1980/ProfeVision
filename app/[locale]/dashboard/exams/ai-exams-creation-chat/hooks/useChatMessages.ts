@@ -208,14 +208,14 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
             const updatedSteps = [...prev.steps];
             updatedSteps[existingStepIndex] = {
               ...updatedSteps[existingStepIndex],
-              status: 'in_progress',
+              status: 'in_progress' as StepStatus,
               timestamp: Date.now(),
             };
             return { ...prev, steps: updatedSteps };
           } else {
             // Mark previous step as completed
             const updatedSteps = prev.steps.map(s =>
-              s.status === 'in_progress' ? { ...s, status: 'completed' } : s
+              s.status === 'in_progress' ? { ...s, status: 'completed' as StepStatus } : s
             );
 
             // Add new step as in_progress
@@ -226,7 +226,7 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
                 {
                   id: stepInfo.id,
                   label: stepInfo.label,
-                  status: 'in_progress',
+                  status: 'in_progress' as StepStatus,
                   timestamp: Date.now(),
                 },
               ],
@@ -318,7 +318,7 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
       setProgressState((prev) => {
         // Mark all in_progress steps as completed
         const completedSteps = prev.steps.map(s =>
-          s.status === 'in_progress' ? { ...s, status: 'completed' } : s
+          s.status === 'in_progress' ? { ...s, status: 'completed' as StepStatus } : s
         );
 
         // Extract LLM response text (if not JSON exam)
@@ -400,7 +400,7 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
       setProgressMessages([]);
       clearMessages();
     }
-  }, [t, setResult, clearMessages]);
+  }, [t, setResult, clearMessages, getStepInfo]);
 
   /**
    * Process SSE messages for Mastra
