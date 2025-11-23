@@ -348,6 +348,33 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
         };
       });
 
+      // Add progress visualization to chat history
+      // Create a special message that will render StepProgressList
+      setProgressState((prev) => {
+        // Build a text summary of steps + LLM response + success for chat history
+        const stepsSummary = prev.steps
+          .map(s => `${s.status === 'completed' ? '✓' : '⏳'} ${s.label}`)
+          .join('\n');
+
+        let chatMessage = stepsSummary;
+        if (prev.llmResponse) {
+          chatMessage += `\n\n${prev.llmResponse}`;
+        }
+        if (prev.successMessage) {
+          chatMessage += `\n\n✓ ${prev.successMessage}`;
+        }
+
+        // Add to messages array for persistent chat history
+        if (chatMessage) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { role: 'assistant', content: chatMessage },
+          ]);
+        }
+
+        return prev; // Don't modify progressState
+      });
+
       // Build complete assistant response including progress messages (backwards compat)
       // Use functional update to access current progressMessages without dependency
       setProgressMessages((currentProgress) => {
@@ -376,13 +403,8 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
           }
         }
 
-        // Add combined message to chat history if there's content
-        if (finalMessage) {
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: finalMessage },
-          ]);
-        }
+        // Note: We already added the message to chat history above
+        // This is just for backwards compat with old progress system
 
         // Clear progress messages
         return [];
