@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { loadLastDocumentsContext, loadOutput } from '@/lib/persistence/browser';
 import { useSSEStream, type SSEMessage } from './useSSEStream';
 import { logger } from '@/lib/utils/logger';
+import { validateUserInput } from '@/lib/ai/chat/input-validator';
 
 interface ChatMessage {
   role: 'user' | 'system' | 'assistant';
@@ -435,7 +436,23 @@ export function useChatMessages({ settings, result, setResult, t, languageOverri
 
   const sendMessage = async (input: string) => {
     if (!input.trim()) return;
-    const next = [...messages, { role: 'user', content: input.trim() } as ChatMessage];
+
+    // Validate user input before processing
+    const userMessage = { role: 'user' as const, content: input.trim() };
+    const validation = validateUserInput([...messages, userMessage], locale || 'es');
+
+    if (!validation.valid) {
+      // Add user message and rejection response
+      const rejectionMessage: ChatMessage = {
+        role: 'assistant',
+        content: validation.error || 'Invalid input',
+      };
+      setMessages((prev) => [...prev, userMessage, rejectionMessage]);
+      toast.error(validation.error || 'Invalid input');
+      return;
+    }
+
+    const next = [...messages, userMessage];
     setMessages(next);
     setIsSending(true);
     setProgressMessages([]);
