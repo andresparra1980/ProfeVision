@@ -16,7 +16,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
@@ -77,8 +76,16 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
     setLocal((prev) => {
       if (!prev) return prev;
       const options = Array.isArray(prev.options) ? [...prev.options] : [];
+      const oldText = options[idx];
       options[idx] = text;
-      return { ...prev, options };
+
+      // If the current answer is the old text, update it to the new text
+      let answer = prev.answer;
+      if (typeof answer === "string" && answer === oldText) {
+        answer = text;
+      }
+
+      return { ...prev, options, answer };
     });
   }
 
@@ -152,29 +159,13 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto w-[98vw] max-w-[98vw] sm:w-auto sm:max-w-2xl">
+        <DialogContent className="max-h-[85vh] overflow-y-auto w-[98vw] max-w-[98vw] sm:w-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{t('editor.title')}</DialogTitle>
           <DialogDescription>{t('editor.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Tipo */}
-          <div className="grid gap-2">
-            <Label>{t('editor.type')}</Label>
-            <Select value={local.type || "multiple_choice"} onValueChange={(v) => update("type", v)}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('editor.selectType')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="multiple_choice">{t('editor.types.multiple_choice')}</SelectItem>
-                <SelectItem value="true_false">{t('editor.types.true_false')}</SelectItem>
-                <SelectItem value="short_answer">{t('editor.types.short_answer')}</SelectItem>
-                <SelectItem value="essay">{t('editor.types.essay')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Enunciado */}
           <div className="grid gap-2">
             <Label>{t('editor.prompt')}</Label>
@@ -188,10 +179,23 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
                 <Label>{t('editor.options')}</Label>
                 <Button variant="outline" size="sm" onClick={addOption}>{t('editor.addOption')}</Button>
               </div>
-              <div className="space-y-2">
+              <RadioGroup
+                value={typeof local.answer === "number" ? String(local.answer) : typeof local.answer === "string" ? String((local.options || []).indexOf(local.answer)) : "-1"}
+                onValueChange={(v) => update("answer", Number(v))}
+                className="space-y-2"
+              >
                 {(local.options || []).map((opt, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <Input value={opt} onChange={(e) => updateOption(idx, e.target.value)} className="flex-1" />
+                    <RadioGroupItem
+                      id={`opt-${idx}`}
+                      value={String(idx)}
+                    />
+                    <Input
+                      value={opt}
+                      onChange={(e) => updateOption(idx, e.target.value)}
+                      className="flex-1"
+                      placeholder={`Opción ${idx + 1}`}
+                    />
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -207,24 +211,7 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
                     </TooltipProvider>
                   </div>
                 ))}
-              </div>
-
-              {/* Selección de respuesta correcta */}
-              <div className="grid gap-2">
-                <Label>{t('editor.correctAnswer')}</Label>
-                <RadioGroup
-                  value={typeof local.answer === "number" ? String(local.answer) : typeof local.answer === "string" ? String((local.options || []).indexOf(local.answer)) : "-1"}
-                  onValueChange={(v) => update("answer", Number(v))}
-                  className="grid gap-2"
-                >
-                  {(local.options || []).map((opt, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <RadioGroupItem id={`opt-${idx}`} value={String(idx)} />
-                      <Label htmlFor={`opt-${idx}`} className="font-normal">{opt || `Opción ${idx + 1}`}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
+              </RadioGroup>
             </div>
           )}
 
@@ -253,21 +240,6 @@ export default function QuestionEditorDialog({ open, onOpenChange, question, onS
           <div className="grid gap-2">
             <Label>{t('editor.rationale')}</Label>
             <Textarea value={local.rationale || ""} onChange={(e) => update("rationale", e.target.value)} rows={3} />
-          </div>
-
-          {/* Dificultad */}
-          <div className="grid gap-2">
-            <Label>{t('editor.difficulty')}</Label>
-            <Select value={(local.difficulty as string) || "medium"} onValueChange={(v) => update("difficulty", v)}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('editor.difficulty')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="easy">{t('editor.difficulties.easy')}</SelectItem>
-                <SelectItem value="medium">{t('editor.difficulties.medium')}</SelectItem>
-                <SelectItem value="hard">{t('editor.difficulties.hard')}</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 

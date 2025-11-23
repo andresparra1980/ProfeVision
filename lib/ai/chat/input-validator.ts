@@ -14,10 +14,10 @@ export interface ValidationResult {
  */
 const OFF_TOPIC_PATTERNS = [
   // Mathematical operations (not about creating exam questions)
-  /\bcuanto es\b.*\d+.*[\+\-\*\/].*\d+/i,
-  /\bwhat is\b.*\d+.*[\+\-\*\/].*\d+/i,
-  /\bsolve\b.*\d+.*[\+\-\*\/].*\d+/i,
-  /\bresuelve\b.*\d+.*[\+\-\*\/].*\d+/i,
+  /\bcuanto es\b.*\d+.*[+\-*/].*\d+/i,
+  /\bwhat is\b.*\d+.*[+\-*/].*\d+/i,
+  /\bsolve\b.*\d+.*[+\-*/].*\d+/i,
+  /\bresuelve\b.*\d+.*[+\-*/].*\d+/i,
 
   // General knowledge questions (not about exam creation)
   /\b(cual|cuál|what).*(es|is).*(capital|capitales|presidente|president|pa[ií]s|country|countries)/i,
