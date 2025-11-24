@@ -125,7 +125,106 @@ Ver `.env.example` para todas las variables disponibles.
 
 ## Deployment
 
-Ver documentación completa en `/mddocs/omr-direct-api/PLAN.md`
+### 1. Setup Environment
+
+```bash
+# Copy and configure environment variables
+cp .env.example .env
+vim .env
+
+# Required variables:
+# - SUPABASE_JWT_SECRET (from Supabase project settings)
+# - ALLOWED_ORIGINS (comma-separated: https://profevision.com,https://testing.profevision.com)
+```
+
+### 2. Build and Run Docker Container
+
+```bash
+# Build and start
+docker-compose up -d
+
+# Check logs
+docker-compose logs -f
+
+# Verify health
+curl http://localhost:8082/health
+```
+
+**Important**: Docker container binds to `127.0.0.1:8082` (localhost only).
+External access is handled by nginx reverse proxy.
+
+### 3. Configure Nginx Reverse Proxy
+
+```bash
+# Copy nginx configuration
+sudo cp nginx-site.conf /etc/nginx/sites-available/omr-direct
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/omr-direct /etc/nginx/sites-enabled/
+
+# Test configuration
+sudo nginx -t
+
+# Reload nginx
+sudo systemctl reload nginx
+```
+
+### 4. Setup SSL with Certbot
+
+```bash
+# Install certbot if not already installed
+sudo apt install certbot python3-certbot-nginx
+
+# Generate SSL certificate
+sudo certbot --nginx -d omr-direct.profevision.com
+
+# Certbot will automatically update nginx config with SSL settings
+```
+
+### 5. Verify Deployment
+
+```bash
+# Test health endpoint
+curl https://omr-direct.profevision.com/health
+
+# Should return:
+# {"status":"healthy","service":"omr-direct","version":"1.0.0","uptime_seconds":123.45}
+```
+
+### 6. Monitor Logs
+
+```bash
+# Application logs
+docker-compose logs -f
+
+# Nginx access logs
+sudo tail -f /var/log/nginx/omr-direct-access.log
+
+# Nginx error logs
+sudo tail -f /var/log/nginx/omr-direct-error.log
+```
+
+### Restart Service
+
+```bash
+# Restart container
+docker-compose restart
+
+# Restart nginx
+sudo systemctl restart nginx
+```
+
+### Stop Service
+
+```bash
+# Stop container
+docker-compose down
+
+# Remove container and volumes
+docker-compose down -v
+```
+
+Ver documentación completa en `/mddocs/omr-direct-api/PLAN.md` y `/mddocs/omr-direct-api/VERCEL_DEPLOYMENT.md`
 
 ## Testing
 

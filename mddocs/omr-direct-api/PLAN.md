@@ -368,7 +368,7 @@ services:
     build: .
     container_name: profevision-omr-direct
     ports:
-      - "8082:8082"
+      - "127.0.0.1:8082:8082"  # Only localhost, nginx reverse proxy
     environment:
       - PORT=8082
       - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
