@@ -1,0 +1,25 @@
+# ProfeVision OMR Direct API - Python Dependencies
+# Python 3.11+
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.9
+
+# JWT Authentication
+pyjwt==2.8.0
+
+# Computer Vision & Image Processing
+opencv-python-headless==4.10.0.84  # Headless version for Docker
+numpy==1.26.4
+pillow==10.0.0
+
+# QR Code Detection
+pyzbar==0.1.9
+
+# Data Validation
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Utilities
+python-dotenv==1.0.1

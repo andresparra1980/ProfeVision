@@ -2,10 +2,12 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { QRData, ProcessingResult, DuplicateInfo } from '../types';
+import { QRData, ProcessingResult, DuplicateInfo, OMRDirectResponse, OMRLegacyResponse } from '../types';
 import { useImageContext } from '../contexts';
 import logger from '@/lib/utils/logger';
 import Image from 'next/image';
+import { useOMREndpoint } from '@/lib/hooks/useOMREndpoint';
+import { getSupabaseJWT } from '@/lib/utils/jwt';
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -26,20 +28,22 @@ interface DuplicateCheckResponse {
 
 export function Processing() {
   const t = useTranslations('wizard-step-processing');
-  const { 
-    processedImageData, 
-    qrValidation: _qrValidation, 
-    clearImageData, 
-    setQrValidation, 
+  const {
+    processedImageData,
+    qrValidation: _qrValidation,
+    clearImageData,
+    setQrValidation,
     setFinalOutput,
     setProcessedImageData: _setProcessedImageData,
     onProcessingComplete
   } = useImageContext();
-  
+
+  const { endpointUrl, shouldUseDirect, fallbackToLegacy } = useOMREndpoint();
+
   const [status, setStatus] = useState<StatusType>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [duplicateData, setDuplicateData] = useState<DuplicateInfo | null>(null);
-  
+
   const processingCompleted = useRef(false);
   const processingInProgress = useRef(false);
 
@@ -83,58 +87,157 @@ export function Processing() {
   // Memoizamos la función processImage para evitar recreaciones en cada renderizado
   const processImage = useCallback(async () => {
     if (!processedImageData || processingInProgress.current || processingCompleted.current) return;
-  
+
     processingInProgress.current = true;
     setStatus('processing');
     setErrorMessage(null);
-    
+
     try {
       // Prepare form data with the image
       const formData = new FormData();
       // Convert the data URL to a blob
       const blob = await fetch(processedImageData).then(r => r.blob());
-      // Important: The field must be named 'scan' as expected by the API
-      formData.append('scan', blob, 'scan.jpg');
 
-      if (DEBUG) {
-        logger.log('Submitting image for processing, size:', blob.size, 'bytes');
+      let data: OMRLegacyResponse;
+
+      if (shouldUseDirect) {
+        // ========== DIRECT API (New) ==========
+        try {
+          // Get JWT from Supabase session
+          const jwt = await getSupabaseJWT();
+          if (!jwt) {
+            throw new Error('No authentication token available');
+          }
+
+          // Direct API expects field named 'file'
+          formData.append('file', blob, 'scan.jpg');
+
+          if (DEBUG) {
+            logger.log('Using OMR Direct API:', endpointUrl);
+            logger.log('Image size:', blob.size, 'bytes');
+          }
+
+          // Call direct API with JWT auth
+          const response = await fetch(endpointUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${jwt}`,
+            },
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const _errorText = await response.text();
+            const statusCode = response.status;
+
+            // If direct API fails, fallback to legacy
+            if (DEBUG) {
+              logger.warn(`Direct API failed (${statusCode}), falling back to legacy`);
+            }
+            fallbackToLegacy();
+
+            // Retry with legacy API
+            throw new Error('FALLBACK_TO_LEGACY');
+          }
+
+          const directData: OMRDirectResponse = await response.json();
+
+          // Direct API response format is different - transform to legacy format
+          if (directData.success) {
+            data = {
+              success: true,
+              result: {
+                qr_data: directData.qr_data || undefined,
+                answers: directData.answers,
+              },
+              // Direct API returns both images as base64
+              processedImage: directData.processed_image,
+              publicUrl: directData.original_image || undefined,
+            };
+
+            if (DEBUG) {
+              logger.log('Direct API response:', {
+                qr_data: directData.qr_data,
+                answers_count: directData.answers?.length || 0,
+                original_image_size: directData.original_image?.length || 0,
+                processed_image_size: directData.processed_image?.length || 0,
+              });
+            }
+          } else {
+            data = {
+              success: false,
+              error: directData.error,
+            };
+          }
+        } catch (error) {
+          if (error instanceof Error && error.message === 'FALLBACK_TO_LEGACY') {
+            // Fallback to legacy API
+            const legacyFormData = new FormData();
+            legacyFormData.append('scan', blob, 'scan.jpg');
+
+            const response = await fetch('/api/exams/process-scan', {
+              method: 'POST',
+              body: legacyFormData,
+            });
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              const statusCode = response.status;
+              throw new Error(`API error (${statusCode}): ${errorText}`);
+            }
+
+            data = await response.json() as OMRLegacyResponse;
+          } else {
+            throw error;
+          }
+        }
+      } else {
+        // ========== LEGACY API (Via Vercel) ==========
+        // Important: The field must be named 'scan' as expected by the legacy API
+        formData.append('scan', blob, 'scan.jpg');
+
+        if (DEBUG) {
+          logger.log('Using legacy API via Vercel');
+          logger.log('Submitting image for processing, size:', blob.size, 'bytes');
+        }
+
+        // Call the legacy API to process the image
+        const response = await fetch('/api/exams/process-scan', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          const statusCode = response.status;
+          throw new Error(`API error (${statusCode}): ${errorText}`);
+        }
+
+        data = await response.json() as OMRLegacyResponse;
       }
-
-      // Call the API to process the image
-      const response = await fetch('/api/exams/process-scan', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        const statusCode = response.status;
-        throw new Error(`API error (${statusCode}): ${errorText}`);
-      }
-
-      const data = await response.json();
 
       if (data.success) {
         setStatus('complete');
         processingCompleted.current = true;
         
         // Properly prepare QR data in standardized format
-        let parsedQrData = data.result?.qr_data || null;
-        
+        let parsedQrData: string | QRData | null = data.result?.qr_data || null;
+
         // Debug the QR data from the API
         if (DEBUG) {
           logger.log('QR data received from API:', parsedQrData);
         }
-        
+
         // If QR data is a string, try to parse it
         if (typeof parsedQrData === 'string') {
+          const qrString = parsedQrData; // Create const for type narrowing
           try {
             // See if it's JSON
-            parsedQrData = JSON.parse(parsedQrData);
+            parsedQrData = JSON.parse(qrString) as QRData;
           } catch (_e) {
             // Not JSON, but could be a colon-separated format
-            if (parsedQrData.includes(':') && parsedQrData.includes('-')) {
-              const parts = parsedQrData.split(':');
+            if (qrString.includes(':') && qrString.includes('-')) {
+              const parts = qrString.split(':');
               if (parts.length >= 3) {
                 // Format is examId:studentId:groupId[:hash]
                 parsedQrData = {
@@ -147,13 +250,13 @@ export function Processing() {
             }
           }
         }
-        
+
         // Ensure QR data has the right structure with explicit properties
-        const normalizedQrData = {
-          examId: parsedQrData?.examId || null,
-          studentId: parsedQrData?.studentId || null,
-          groupId: parsedQrData?.groupId || null,
-          version: parsedQrData?.version || '1'
+        const normalizedQrData: QRData = {
+          examId: (typeof parsedQrData === 'object' && parsedQrData?.examId) || '',
+          studentId: (typeof parsedQrData === 'object' && parsedQrData?.studentId) || '',
+          groupId: (typeof parsedQrData === 'object' && parsedQrData?.groupId) || undefined,
+          version: (typeof parsedQrData === 'object' && parsedQrData?.version) || '1'
         };
         
         // --> Add check for invalid scan result <--
@@ -190,16 +293,27 @@ export function Processing() {
             resultKeys: data.result ? Object.keys(data.result) : [],
             processedImage: data.processedImage ? 'base64 present' : null,
             processedImageUrl: data.processedImageUrl,
-            originalImagePath: data.result?.original_image_path || data.publicUrl
+            originalImagePath: data.publicUrl
           };
           logger.log('API Response debug info:', debugInfo);
         }
 
         const _result: ProcessingResult = {
-          ...data,
+          success: data.success,
+          processedImage: data.processedImage,
+          processedImageUrl: data.processedImageUrl,
+          publicUrl: data.publicUrl,
+          qrData: normalizedQrData,
+          result: data.result ? {
+            processed_image_path: data.result.processed_image_path,
+            answers: data.result.answers,
+            qr_data: normalizedQrData,
+          } : undefined,
+          answers: data.answers,
           isManualScan: isManualScan || false,
           isDuplicate: duplicateData?.exists || false,
           duplicateInfo: duplicateData?.duplicateInfo || undefined,
+          error_details: data.error_details,
         };
 
         // Set QR validation with the normalized data
@@ -270,7 +384,7 @@ export function Processing() {
       processingInProgress.current = false;
       processingCompleted.current = false; // Ensure it's not marked as completed
     }
-  }, [processedImageData, setQrValidation, setFinalOutput, onProcessingComplete, NO_EXAM_DETECTED_MSG, t]);
+  }, [processedImageData, setQrValidation, setFinalOutput, onProcessingComplete, NO_EXAM_DETECTED_MSG, t, shouldUseDirect, endpointUrl, fallbackToLegacy]);
 
   // Set processedImageData when component mounts
   useEffect(() => {

@@ -72,7 +72,40 @@ export interface ErrorDetails {
 }
 
 /**
- * Result data from processing a scanned exam
+ * Response from OMR Direct API
+ */
+export interface OMRDirectResponse {
+  success: boolean;
+  qr_data: string | null;
+  total_questions: number;
+  answered_questions: number;
+  answers: Answer[];
+  original_image: string | null;
+  processed_image: string | null;
+  error?: string;
+  error_code?: string;
+}
+
+/**
+ * Response from Legacy API (via Vercel)
+ */
+export interface OMRLegacyResponse {
+  success: boolean;
+  result?: {
+    processed_image_path?: string;
+    answers?: Answer[];
+    qr_data?: string | QRData;
+  };
+  processedImage?: string | null;
+  processedImageUrl?: string;
+  publicUrl?: string;
+  answers?: Answer[];
+  error?: string;
+  error_details?: ErrorDetails;
+}
+
+/**
+ * Result data from processing a scanned exam (unified format)
  */
 export interface ProcessingResult {
   success?: boolean;
