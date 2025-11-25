@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { OnboardingStatus } from "@/lib/types/database";
 import { supabase } from "@/lib/supabase/client";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 type ChecklistItem = 'exam_created' | 'exam_published' | 'pdf_exported' | 'first_scan';
 
@@ -41,6 +42,7 @@ const initialState: OnboardingState = {
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<OnboardingState>(initialState);
   const [wizardDismissed, setWizardDismissed] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
 
   const getAuthHeaders = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -92,9 +94,28 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }
   }, [wizardDismissed, getAuthHeaders]);
 
+  // Wait for auth state to be ready before fetching
   useEffect(() => {
-    fetchStatus();
-  }, [fetchStatus]);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+        if (session) {
+          setSessionReady(true);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setSessionReady(false);
+        setState({ ...initialState, isLoading: false });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch status only when session is ready
+  useEffect(() => {
+    if (sessionReady) {
+      fetchStatus();
+    }
+  }, [sessionReady, fetchStatus]);
 
   const updateStatus = useCallback(async (status: Partial<OnboardingStatus>): Promise<boolean> => {
     try {

@@ -4,21 +4,25 @@
 
 ### Via SQL (Supabase)
 
+
+USER_ID: e037a348-152d-436a-9d6d-2b7650888e0e
+EMAIL: profevision.pruebas@gmail.com
+
 ```sql
 -- Obtener tu user_id
 SELECT id, nombres, apellidos, onboarding_status, first_login_completed
 FROM profesores 
-WHERE id = (SELECT id FROM auth.users WHERE email = 'tu@email.com');
+WHERE id = (SELECT id FROM auth.users WHERE email = 'profevision.pruebas@gmail.com');
 
 -- Resetear a estado "usuario nuevo post-migración" (verá wizard)
 UPDATE profesores 
 SET onboarding_status = '{"wizard_completed": false, "wizard_step": 0}'::jsonb
-WHERE id = 'TU_USER_ID';
+WHERE id = 'e037a348-152d-436a-9d6d-2b7650888e0e';
 
 -- Resetear completamente (NULL = usuario legacy, NO verá wizard)
 UPDATE profesores 
 SET onboarding_status = NULL 
-WHERE id = 'TU_USER_ID';
+WHERE id = 'e037a348-152d-436a-9d6d-2b7650888e0e';
 
 -- Simular wizard completado pero checklist pendiente
 UPDATE profesores 
@@ -33,7 +37,7 @@ SET onboarding_status = '{
     "first_scan": false
   }
 }'::jsonb
-WHERE id = 'TU_USER_ID';
+WHERE id = 'e037a348-152d-436a-9d6d-2b7650888e0e';
 ```
 
 ### Via localStorage (browser console)
