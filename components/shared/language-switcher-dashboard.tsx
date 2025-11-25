@@ -1,57 +1,91 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { locales } from '@/i18n/config';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { logger } from '@/lib/utils/logger';
-import { pathnames } from '@/i18n/routing';
 
 interface LanguageSwitcherDashboardProps {
   collapsed?: boolean;
 }
 
-// Función para encontrar la ruta canónica desde una ruta localizada
-function getCanonicalPath(localizedPath: string, fromLocale: string): string {
-  for (const [canonical, localized] of Object.entries(pathnames)) {
-    if (typeof localized === 'string') {
-      if (localized === localizedPath) return canonical;
-    } else {
-      const localePath = localized[fromLocale as 'es' | 'en'];
-      if (localePath === localizedPath) return canonical;
-    }
-  }
-  return localizedPath; // fallback
-}
-
-// Función para obtener la ruta localizada desde la canónica
-function getLocalizedPath(canonicalPath: string, toLocale: string): string {
-  const localized = pathnames[canonicalPath as keyof typeof pathnames];
-  if (!localized) return canonicalPath;
-  if (typeof localized === 'string') return localized;
-  return localized[toLocale as 'es' | 'en'] || canonicalPath;
-}
-
 export function LanguageSwitcherDashboard({ collapsed = false }: LanguageSwitcherDashboardProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations('dashboard');
 
+  // Mapa bidireccional de rutas
+  const routeMap: Record<string, string> = {
+    '/': '/',
+    '/how-it-works': '/como-funciona',
+    '/pricing': '/precios',
+    '/contact': '/contacto',
+    '/blog': '/blog',
+    '/exams': '/examenes',
+    '/paper-exams': '/examenes-papel',
+    '/mobile-app': '/aplicacion-movil',
+    '/privacy': '/privacidad',
+    '/terms': '/terminos',
+    '/cookies': '/cookies',
+    '/reports': '/reportes',
+    '/institutions-management': '/gestion-instituciones',
+    '/subjects-management': '/gestion-materias',
+    '/groups-management': '/gestion-grupos',
+    '/students-management': '/gestion-estudiantes',
+    '/auth/login': '/auth/iniciar-sesion',
+    '/auth/register': '/auth/registro',
+    '/auth/reset-password': '/auth/restablecer-contrasena',
+    '/auth/update-password': '/auth/actualizar-contrasena',
+    '/auth/verify-email': '/auth/verificar-email',
+    '/auth/email-confirmed': '/auth/email-confirmado',
+    '/dashboard': '/dashboard',
+    '/dashboard/admin': '/dashboard/admin',
+    '/dashboard/admin/users': '/dashboard/admin/usuarios'
+  };
+
+  // Crear mapa inverso
+  const reverseRouteMap = Object.entries(routeMap).reduce((acc, [en, es]) => {
+    acc[es] = en;
+    return acc;
+  }, {} as Record<string, string>);
+
   const handleLocaleChange = (newLocale: string) => {
-    // Obtener pathname actual sin prefijo de locale
-    const currentPath = window.location.pathname;
-    const pathWithoutLocale = currentPath.replace(/^\/(es|en)/, '') || '/';
+    console.log('🔄 Language Switch START:', { pathname, locale, newLocale });
 
-    logger.log('🔄 Language Switch:', { currentPath, pathWithoutLocale, locale, newLocale });
+    let currentPath = pathname;
 
-    // Encontrar la ruta canónica y luego la localizada para el nuevo locale
-    const canonicalPath = getCanonicalPath(pathWithoutLocale, locale);
-    const newLocalizedPath = getLocalizedPath(canonicalPath, newLocale);
-    const finalPath = `/${newLocale}${newLocalizedPath === '/' ? '' : newLocalizedPath}`;
+    // 1) Normalizar: quitar prefijo de idioma actual (/es o /en)
+    if (pathname === '/en' || pathname === '/es') {
+      currentPath = '/';
+    } else if (pathname.startsWith('/en/')) {
+      currentPath = pathname.replace(/^\/en/, '');
+    } else if (pathname.startsWith('/es/')) {
+      currentPath = pathname.replace(/^\/es/, '');
+    }
 
-    logger.log('🔄 Navigating to:', { canonicalPath, newLocalizedPath, finalPath });
+    console.log('🔄 Current path (no prefix):', currentPath);
 
+    // 2) Mapear la ruta al idioma de destino usando slugs canónicos
+    let targetPath = currentPath;
+
+    if (newLocale === 'es') {
+      // EN -> ES
+      targetPath = routeMap[currentPath] || currentPath;
+    } else if (newLocale === 'en') {
+      // ES -> EN
+      targetPath = reverseRouteMap[currentPath] || currentPath;
+    }
+
+    console.log('🔄 Target path:', targetPath);
+
+    // 3) Construir URL final con prefijo SIEMPRE (localePrefix: 'always')
+    const finalPath = targetPath === '/' ? `/${newLocale}` : `/${newLocale}${targetPath}`;
+
+    console.log('🔄 Final path:', finalPath);
+
+    // 4. Navegar a la nueva ruta
     router.push(finalPath);
   };
 
