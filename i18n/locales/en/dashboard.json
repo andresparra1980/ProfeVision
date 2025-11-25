@@ -1354,5 +1354,66 @@
     "cycleReset": "Resets in",
     "day": "day",
     "days": "days"
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "description": "Global platform observability",
+    "loading": "Loading statistics...",
+    "errorLoading": "Error loading data",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "viewUsers": "View users",
+    "trends": {
+      "title": "Trends (Last 6 months)",
+      "users": "Users",
+      "exams": "Exams",
+      "scans": "Scans"
+    },
+    "stats": {
+      "totalUsers": "Total Users",
+      "newThisMonth": "New this month",
+      "totalExams": "Total Exams",
+      "createdThisMonth": "Created this month",
+      "withResults": "With results",
+      "totalScans": "Total Scans",
+      "scansThisMonth": "This month",
+      "institutions": "Institutions",
+      "groups": "Groups",
+      "active": "active",
+      "archived": "archived",
+      "students": "Students"
+    },
+    "tiers": {
+      "title": "Distribution by Tier",
+      "free": "Free",
+      "plus": "Plus",
+      "admin": "Admin",
+      "grandfathered": "Grandfathered"
+    },
+    "users": {
+      "title": "Users",
+      "description": "List of all registered users",
+      "back": "Back",
+      "searchPlaceholder": "Search by name...",
+      "filterByTier": "Filter by tier",
+      "allTiers": "All tiers",
+      "table": {
+        "user": "User",
+        "email": "Email",
+        "tier": "Tier",
+        "entities": "Entities",
+        "subjects": "Subjects",
+        "groups": "Groups",
+        "exams": "Exams",
+        "scans": "Scans",
+        "activity": "Activity",
+        "registered": "Registered"
+      },
+      "noUsers": "No users found",
+      "showing": "Showing",
+      "of": "of",
+      "previous": "Previous",
+      "next": "Next"
+    }
   }
 }

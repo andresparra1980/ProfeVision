@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useAdminStats } from '@/lib/hooks/use-admin-stats';
 import { AdminStatsOverview } from '@/components/admin/admin-stats-overview';
 import { AdminTierDistribution } from '@/components/admin/admin-tier-distribution';
@@ -12,14 +13,15 @@ import { Shield, RefreshCw, Users, AlertCircle } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 
 export default function AdminDashboardPage() {
+  const t = useTranslations('dashboard.admin');
   const { stats, loading, error, refetch } = useAdminStats();
 
   if (loading) {
     return (
       <div className="space-y-6">
         <TitleCardWithDepth
-          title="Admin Dashboard"
-          description="Cargando estadísticas..."
+          title={t('title')}
+          description={t('loading')}
           icon={<Shield className="h-6 w-6 text-purple-600" />}
         />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -40,8 +42,8 @@ export default function AdminDashboardPage() {
     return (
       <div className="space-y-6">
         <TitleCardWithDepth
-          title="Admin Dashboard"
-          description="Error al cargar datos"
+          title={t('title')}
+          description={t('errorLoading')}
           icon={<Shield className="h-6 w-6 text-purple-600" />}
         />
         <Card>
@@ -50,7 +52,7 @@ export default function AdminDashboardPage() {
             <p className="text-muted-foreground">{error}</p>
             <Button onClick={refetch} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
-              Reintentar
+              {t('retry')}
             </Button>
           </CardContent>
         </Card>
@@ -64,19 +66,19 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <TitleCardWithDepth
-          title="Admin Dashboard"
-          description="Observabilidad global de la plataforma"
+          title={t('title')}
+          description={t('description')}
           icon={<Shield className="h-6 w-6 text-purple-600" />}
         />
         <div className="flex gap-2">
           <Button onClick={refetch} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
-            Actualizar
+            {t('refresh')}
           </Button>
           <Link href="/dashboard/admin/users">
             <Button size="sm">
               <Users className="h-4 w-4 mr-2" />
-              Ver usuarios
+              {t('viewUsers')}
             </Button>
           </Link>
         </div>
