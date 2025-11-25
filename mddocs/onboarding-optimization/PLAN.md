@@ -52,9 +52,19 @@ Implementar sistema de onboarding híbrido: wizard obligatorio para setup inicia
 
 > **IMPORTANTE**: Migraciones via **MCP Supabase** únicamente.
 
+**Estado actual de `profesores`**:
+- Ya existe `first_login_completed` (boolean, default false) - usar para detección simple
+- 52 registros existentes
+
+**Cambios requeridos**:
 - Agregar columna `onboarding_status` a tabla `profesores` (JSONB, nullable)
-- NULL = usuario legacy (no mostrar wizard)
+- NULL = usuario legacy (no mostrar wizard, `first_login_completed` ya maneja esto)
 - Posible tabla `onboarding_events` para analytics (fase 5)
+
+**Estrategia de usuarios legacy**:
+- `first_login_completed = true` + `onboarding_status = NULL` → Usuario legacy, no mostrar wizard
+- `first_login_completed = false` + `onboarding_status = NULL` → Usuario nuevo pre-migración, evaluar si mostrar wizard
+- `onboarding_status != NULL` → Usuario post-migración, usar estado del JSON
 
 ### Componentes UI
 - Modal multi-step (basado en Dialog de shadcn)
@@ -103,6 +113,11 @@ Implementar sistema de onboarding híbrido: wizard obligatorio para setup inicia
 - Tracking de eventos
 - A/B testing setup
 - Documentación
+
+### Fase 6: Re-engagement (Opcional/Futuro)
+- Sistema de correos para usuarios inactivos
+- Segmentación por estado de onboarding
+- Campañas automatizadas
 
 ---
 

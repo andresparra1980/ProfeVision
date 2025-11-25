@@ -186,9 +186,37 @@ Cada item tiene:
 ## Consideraciones Técnicas
 
 ### Estado de Onboarding
-- Nuevo campo en `profesores`: `onboarding_status` (JSON)
+
+**Hallazgo**: Ya existe campo `first_login_completed` (boolean) en `profesores`. Podemos:
+1. **Opción A**: Reusar `first_login_completed` + agregar `onboarding_status` (JSONB) para tracking detallado
+2. **Opción B**: Solo agregar `onboarding_status` que incluya el flag de first_login
+
+**Recomendación**: Opción A - mantener `first_login_completed` para queries simples, agregar `onboarding_status` para estado detallado del wizard/checklist.
+
+- `first_login_completed`: boolean simple para filtrar usuarios que nunca completaron
+- `onboarding_status`: JSONB con estado detallado del wizard y checklist
 - Track de pasos completados
 - Persistencia entre sesiones
+
+### Re-engagement de Usuarios Inactivos
+
+**Oportunidad identificada**: Podemos usar datos existentes para campañas de re-engagement:
+
+1. **Usuarios que nunca confirmaron email**: 
+   - Query: usuarios en `auth.users` sin `email_confirmed_at`
+   - Acción: Correo de recordatorio de confirmación
+
+2. **Usuarios que confirmaron pero nunca hicieron login**:
+   - Query: `first_login_completed = false` o `NULL`
+   - Acción: Correo de bienvenida con beneficios
+
+3. **Usuarios que hicieron login pero no completaron onboarding**:
+   - Query: `onboarding_status.wizard_completed = false`
+   - Acción: Correo con tips para completar setup
+
+4. **Usuarios que completaron wizard pero nunca escanearon**:
+   - Query: `onboarding_status.checklist_items.first_scan = false`
+   - Acción: Correo con video tutorial de escaneo
 
 ### Componentes Necesarios
 - `OnboardingWizard` (modal multi-step)
@@ -209,3 +237,4 @@ Cada item tiene:
 3. ¿Examen de demo pre-creado o generado con IA al momento?
 4. ¿Guardar progreso parcial del wizard si el usuario cierra el navegador?
 5. ¿El wizard debe aparecer también para usuarios existentes que no han completado setup?
+6. ¿Implementar sistema de correos de re-engagement en Fase 5 o como feature separado?

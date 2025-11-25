@@ -8,14 +8,47 @@
 
 > **IMPORTANTE**: Todas las migraciones deben ejecutarse via **MCP Supabase** (no manualmente ni con Supabase CLI local). Esto asegura sincronización con producción y evita conflictos.
 
+**Estado actual descubierto**:
+- Ya existe `first_login_completed` (boolean, default false) en `profesores`
+- 52 usuarios existentes en la tabla
+- Podemos usar `first_login_completed` para detectar usuarios legacy
+
+**Tareas**:
 - [ ] Crear migración via MCP Supabase para agregar `onboarding_status` (JSONB, nullable, default NULL) a `profesores`
 - [ ] La migración debe incluir:
   - Columna nullable para no afectar usuarios existentes
   - Comentario SQL documentando estructura esperada del JSON
-  - NO aplicar default a registros existentes (NULL = usuario legacy, no mostrar wizard)
-- [ ] Estructura del JSON: `{ wizard_completed: boolean, wizard_step: number, checklist_items: {}, started_at: timestamp, completed_at: timestamp }`
+  - NO aplicar default a registros existentes (NULL = usuario legacy)
+- [ ] Estructura del JSON:
+  ```json
+  {
+    "wizard_completed": boolean,
+    "wizard_step": number,
+    "wizard_started_at": timestamp,
+    "wizard_completed_at": timestamp,
+    "checklist_items": {
+      "exam_created": boolean,
+      "exam_published": boolean,
+      "pdf_exported": boolean,
+      "first_scan": boolean
+    },
+    "skipped": boolean,
+    "skip_reason": string
+  }
+  ```
 - [ ] Crear función SQL `update_onboarding_status(user_id, status_json)` via MCP
-- [ ] Actualizar tipos TypeScript (`database.ts`) después de migración
+- [ ] Regenerar tipos TypeScript via `supabase gen types` después de migración
+
+**Lógica de detección de usuario nuevo**:
+```
+IF onboarding_status IS NOT NULL THEN
+  -- Usuario post-migración: usar onboarding_status
+ELSIF first_login_completed = true THEN
+  -- Usuario legacy que ya usó el sistema: NO mostrar wizard
+ELSE
+  -- Usuario legacy que nunca completó login: evaluar mostrar wizard
+END IF
+```
 
 ### 1.2 API Endpoints
 - [ ] `GET /api/onboarding/status` - obtener estado actual
@@ -216,3 +249,32 @@
 - [ ] Personalización del wizard según rol/institución
 - [ ] Skip wizard para usuarios invitados por otro profesor
 - [ ] Exportar datos del onboarding para análisis
+
+---
+
+## Fase 6: Re-engagement de Usuarios (Futuro)
+
+> Esta fase es opcional y puede implementarse como feature separado después del onboarding.
+
+### 6.1 Infraestructura de Correos
+- [ ] Integrar servicio de email (Resend, SendGrid, etc.)
+- [ ] Templates de correo con branding ProfeVision
+- [ ] Sistema de tracking de correos enviados
+
+### 6.2 Segmentación de Usuarios
+- [ ] Query: usuarios sin email confirmado (`auth.users.email_confirmed_at IS NULL`)
+- [ ] Query: usuarios con email confirmado pero `first_login_completed = false`
+- [ ] Query: usuarios con `onboarding_status.wizard_completed = false`
+- [ ] Query: usuarios con wizard completo pero sin primer escaneo
+
+### 6.3 Campañas de Re-engagement
+- [ ] Correo: "Confirma tu email para empezar" (día 1, 3, 7)
+- [ ] Correo: "Te esperamos - completa tu registro" (día 2, 5)
+- [ ] Correo: "Solo te faltan 2 pasos para tu primer examen" (día 3)
+- [ ] Correo: "¿Necesitas ayuda? Tutorial de escaneo" (día 7)
+
+### 6.4 Analytics de Campañas
+- [ ] Tracking de apertura de correos
+- [ ] Tracking de clicks en CTAs
+- [ ] Dashboard de conversión por campaña
+- [ ] Unsubscribe handling
