@@ -14,6 +14,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -49,7 +50,7 @@ export function ExamCreationDrawer({ open, onOpenChange }: ExamCreationDrawerPro
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[85vh] max-w-4xl mx-auto">
+        <DrawerContent className="max-h-[85vh] max-w-4xl mx-auto bg-card">
           <DrawerHeader className="text-center pb-2">
             <DrawerTitle className="text-xl">{t("title")}</DrawerTitle>
             <DrawerDescription>{t("subtitle")}</DrawerDescription>
@@ -61,7 +62,7 @@ export function ExamCreationDrawer({ open, onOpenChange }: ExamCreationDrawerPro
               <div className="relative">
                 <button
                   onClick={handleImportClick}
-                  className="group relative flex flex-col items-center p-6 rounded-xl border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 w-full"
+                  className="group relative flex flex-col items-center p-6 rounded-xl border bg-background hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 w-full"
                 >
                   <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4 group-hover:scale-110 transition-transform">
                     <Upload className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -91,7 +92,7 @@ export function ExamCreationDrawer({ open, onOpenChange }: ExamCreationDrawerPro
               {/* AI Generation Option */}
               <button
                 onClick={handleAIClick}
-                className="group relative flex flex-col items-center p-6 rounded-xl border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
+                className="group relative flex flex-col items-center p-6 rounded-xl border bg-background hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
               >
                 <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-primary text-primary-foreground text-xs font-medium rounded-full">
                   {t("ai.badge")}
@@ -124,6 +125,7 @@ export function ExamCreationDrawer({ open, onOpenChange }: ExamCreationDrawerPro
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{t("import.exampleTitle")}</DialogTitle>
+            <DialogDescription>{t("import.exampleCaption")}</DialogDescription>
           </DialogHeader>
           <div className="relative w-full">
             <Image
@@ -134,9 +136,6 @@ export function ExamCreationDrawer({ open, onOpenChange }: ExamCreationDrawerPro
               className="rounded-lg border w-full h-auto"
             />
           </div>
-          <p className="text-sm text-muted-foreground text-center">
-            {t("import.exampleCaption")}
-          </p>
         </DialogContent>
       </Dialog>
     </>

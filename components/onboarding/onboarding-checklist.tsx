@@ -205,6 +205,7 @@ export function OnboardingChecklist() {
   }
 
   return (
+    <>
     <Card className="fixed bottom-4 right-4 z-40 w-80 shadow-lg border-primary/20 bg-card/95 backdrop-blur">
       {/* Header */}
       <div className="p-4 border-b">
@@ -300,11 +301,12 @@ export function OnboardingChecklist() {
           );
         })}
       </div>
-      
-      <ExamCreationDrawer
-        open={showExamDrawer}
-        onOpenChange={setShowExamDrawer}
-      />
     </Card>
+
+    <ExamCreationDrawer
+      open={showExamDrawer}
+      onOpenChange={setShowExamDrawer}
+    />
+  </>
   );
 }

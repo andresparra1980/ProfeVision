@@ -16,7 +16,6 @@ import {
   FileOutput,
   Users,
   Eye,
-  Upload,
   Plus,
   FileText, // Kept for empty state
   Link,
@@ -336,8 +335,8 @@ export default function ExamsTableMobile({
   filteredExams,
   loading,
   onOpenDeleteDialog,
-  setShowImportDialog,
-  handleCreateExam,
+  setShowImportDialog: _setShowImportDialog,
+  handleCreateExam: _handleCreateExam,
   searchQuery,
   setSearchQuery,
 }: ExamsTableMobileProps) {
@@ -438,20 +437,6 @@ export default function ExamsTableMobile({
               <p className="text-sm text-muted-foreground">
                 {t('messages.noExamsDescription')}
               </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-2 pt-4">
-                <Button
-                  onClick={() => setShowImportDialog(true)}
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  {t('import')}
-                </Button>
-                <Button onClick={handleCreateExam} className="w-full sm:w-auto">
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t('create')}
-                </Button>
-              </div>
             </div>
           )}
         </div>
