@@ -1,0 +1,107 @@
+{
+  "wizard": {
+    "title": "Configura tu cuenta",
+    "subtitle": "Te guiaremos paso a paso",
+    "skip": "Omitir",
+    "skipConfirm": "Puedes completar esto despues desde el panel",
+    "back": "Atras",
+    "next": "Siguiente",
+    "finish": "Finalizar",
+    "step": "Paso {current} de {total}",
+    "progress": "{percent}% completado"
+  },
+  "welcome": {
+    "title": "Bienvenido a ProfeVision",
+    "greeting": "Hola{name}",
+    "description": "Vamos a configurar tu cuenta en unos minutos. Crearemos tu primera institucion, materia, grupo y estudiantes.",
+    "duration": "Aproximadamente 3 minutos",
+    "steps": "5 pasos sencillos",
+    "start": "Comenzar"
+  },
+  "institution": {
+    "title": "Tu institucion",
+    "description": "Donde enseñas?",
+    "nameLabel": "Nombre de la institucion",
+    "namePlaceholder": "Ej: Colegio San Jose",
+    "typeLabel": "Tipo de institucion",
+    "typePlaceholder": "Selecciona el tipo",
+    "types": {
+      "school": "Colegio",
+      "university": "Universidad",
+      "institute": "Instituto",
+      "academy": "Academia",
+      "other": "Otro"
+    },
+    "logoLabel": "Logo (opcional)",
+    "logoHint": "Arrastra o haz clic para subir",
+    "skipLogo": "Agregar despues"
+  },
+  "subject": {
+    "title": "Tu materia",
+    "description": "Que enseñas?",
+    "nameLabel": "Nombre de la materia",
+    "namePlaceholder": "Ej: Matematicas",
+    "institutionLabel": "Institucion",
+    "levelLabel": "Nivel educativo (opcional)",
+    "levelPlaceholder": "Ej: Secundaria, Preparatoria",
+    "descriptionLabel": "Descripcion (opcional)",
+    "descriptionPlaceholder": "Breve descripcion de la materia"
+  },
+  "group": {
+    "title": "Tu grupo",
+    "description": "A quienes enseñas?",
+    "nameLabel": "Nombre del grupo",
+    "namePlaceholder": "Ej: 3ro A, Seccion 101",
+    "subjectLabel": "Materia",
+    "yearLabel": "Año escolar (opcional)",
+    "yearPlaceholder": "Ej: 2024-2025",
+    "periodLabel": "Periodo (opcional)",
+    "periodPlaceholder": "Ej: Primer semestre"
+  },
+  "students": {
+    "title": "Tus estudiantes",
+    "description": "Agrega estudiantes a tu grupo",
+    "importTab": "Importar Excel",
+    "manualTab": "Agregar manual",
+    "importHint": "Sube un archivo Excel con tus estudiantes",
+    "importButton": "Seleccionar archivo",
+    "firstNameLabel": "Nombres",
+    "firstNamePlaceholder": "Nombres del estudiante",
+    "lastNameLabel": "Apellidos",
+    "lastNamePlaceholder": "Apellidos del estudiante",
+    "idLabel": "Identificacion",
+    "idPlaceholder": "Codigo o documento",
+    "addStudent": "Agregar estudiante",
+    "studentCount": "{count} estudiante(s) agregado(s)",
+    "noStudents": "Aun no has agregado estudiantes",
+    "skipStudents": "Agregar despues",
+    "skipWarning": "Podras agregar estudiantes despues, pero necesitaras al menos uno para crear examenes",
+    "removeStudent": "Eliminar"
+  },
+  "examOptions": {
+    "title": "Crea tu primer examen",
+    "description": "Como quieres empezar?",
+    "aiOption": {
+      "title": "Crear con IA",
+      "description": "Genera preguntas automaticamente con inteligencia artificial",
+      "badge": "Recomendado"
+    },
+    "importOption": {
+      "title": "Importar existente",
+      "description": "Sube un documento PDF o Word con tus preguntas"
+    },
+    "manualOption": {
+      "title": "Crear manualmente",
+      "description": "Escribe tus propias preguntas desde cero"
+    },
+    "exploreOption": {
+      "title": "Explorar primero",
+      "description": "Ver el panel y crear examen despues"
+    }
+  },
+  "complete": {
+    "title": "Todo listo!",
+    "description": "Tu cuenta esta configurada y lista para usar",
+    "goToDashboard": "Ir al panel"
+  }
+}

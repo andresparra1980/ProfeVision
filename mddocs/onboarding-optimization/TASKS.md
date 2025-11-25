@@ -71,66 +71,66 @@ END IF
 ## Fase 2: Wizard Modal
 
 ### 2.1 Componente Base
-- [ ] Crear `OnboardingWizard.tsx` (modal multi-step)
-- [ ] Implementar navegación entre pasos (next/back)
-- [ ] Progress indicator (stepper visual)
-- [ ] Animaciones de transición entre pasos
-- [ ] Manejo de estado local del wizard
+- [x] Crear `OnboardingWizard.tsx` (modal multi-step)
+- [x] Implementar navegación entre pasos (next/back)
+- [x] Progress indicator (stepper visual)
+- [x] Animaciones de transición entre pasos
+- [x] Manejo de estado local del wizard
 
 ### 2.2 Paso: Bienvenida
-- [ ] Crear `WelcomeStep.tsx`
-- [ ] Mensaje de bienvenida personalizado (nombre del usuario si disponible)
-- [ ] Explicación del proceso (3 minutos, 5 pasos)
-- [ ] Ilustración/animación atractiva
-- [ ] Botón "Comenzar"
+- [x] Crear `WelcomeStep.tsx`
+- [x] Mensaje de bienvenida personalizado (nombre del usuario si disponible)
+- [x] Explicación del proceso (3 minutos, 5 pasos)
+- [x] Ilustración/animación atractiva
+- [x] Botón "Comenzar"
 
 ### 2.3 Paso: Institución
-- [ ] Crear `InstitutionStep.tsx`
-- [ ] Form con nombre (requerido)
-- [ ] Select de tipo (opcional): Colegio, Universidad, Instituto, Otro
-- [ ] Upload de logo (opcional, con skip)
-- [ ] Validación
-- [ ] Crear institución en DB al completar
+- [x] Crear `InstitutionStep.tsx`
+- [x] Form con nombre (requerido)
+- [x] Select de tipo (opcional): Colegio, Universidad, Instituto, Otro
+- [ ] Upload de logo (opcional, con skip) - pendiente
+- [x] Validación
+- [x] Crear institución en DB al completar
 
 ### 2.4 Paso: Materia
-- [ ] Crear `SubjectStep.tsx`
-- [ ] Form con nombre (requerido)
-- [ ] Mostrar institución seleccionada (readonly)
-- [ ] Nivel educativo (opcional)
-- [ ] Validación
-- [ ] Crear materia asociada a institución
+- [x] Crear `SubjectStep.tsx`
+- [x] Form con nombre (requerido)
+- [x] Mostrar institución seleccionada (readonly)
+- [ ] Nivel educativo (opcional) - pendiente
+- [x] Validación
+- [x] Crear materia asociada a institución
 
 ### 2.5 Paso: Grupo
-- [ ] Crear `GroupStep.tsx`
-- [ ] Form con nombre (requerido)
-- [ ] Mostrar materia seleccionada (readonly)
-- [ ] Campo de año/periodo (opcional)
-- [ ] Validación
-- [ ] Crear grupo asociado a materia
+- [x] Crear `GroupStep.tsx`
+- [x] Form con nombre (requerido)
+- [x] Mostrar materia seleccionada (readonly)
+- [x] Campo de año/periodo (opcional)
+- [x] Validación
+- [x] Crear grupo asociado a materia
 
 ### 2.6 Paso: Estudiantes
-- [ ] Crear `StudentsStep.tsx`
-- [ ] Tabs o toggle: "Importar Excel" / "Agregar manual"
-- [ ] Importador Excel simplificado (reusar `excel-import.tsx`)
-- [ ] Form para agregar estudiante individual
-- [ ] Lista de estudiantes agregados (con opción de eliminar)
-- [ ] Mínimo 1 estudiante para continuar (o crear ficticios)
-- [ ] Botón "Agregar después" con advertencia
+- [x] Crear `StudentsStep.tsx`
+- [x] Tabs o toggle: "Importar Excel" / "Agregar manual"
+- [ ] Importador Excel simplificado (reusar `excel-import.tsx`) - placeholder
+- [x] Form para agregar estudiante individual
+- [x] Lista de estudiantes agregados (con opción de eliminar)
+- [x] Mínimo 1 estudiante para continuar (o crear ficticios)
+- [x] Botón "Agregar después" con advertencia
 
 ### 2.7 Paso: Opciones de Examen
-- [ ] Crear `ExamOptionsStep.tsx`
-- [ ] Card/botones para cada opción:
+- [x] Crear `ExamOptionsStep.tsx`
+- [x] Card/botones para cada opción:
   - Crear con IA → redirect a chat
   - Importar existente → abrir ImportExamDialog
   - Crear manualmente → redirect a create
   - Explorar primero → cerrar wizard, ir a dashboard
-- [ ] Marcar wizard como completado
-- [ ] Tooltip explicando cada opción
+- [x] Marcar wizard como completado
+- [x] Tooltip explicando cada opción
 
 ### 2.8 Traducciones
-- [ ] Crear `i18n/locales/es/onboarding.json`
-- [ ] Crear `i18n/locales/en/onboarding.json`
-- [ ] Todos los textos del wizard traducidos
+- [x] Crear `i18n/locales/es/onboarding.json`
+- [x] Crear `i18n/locales/en/onboarding.json`
+- [x] Todos los textos del wizard traducidos
 
 ---
 

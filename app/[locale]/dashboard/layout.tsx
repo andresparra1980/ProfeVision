@@ -15,6 +15,7 @@ import logger from "@/lib/utils/logger";
 import { useTranslations, useLocale } from 'next-intl';
 import { useWelcomeModal } from "@/lib/hooks/useWelcomeModal";
 import { WelcomeTierModal } from "@/components/shared/welcome-tier-modal";
+import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
 
 // Helper function to delete cookies by name prefix
 function deleteSupabaseCookies() {
@@ -180,6 +181,9 @@ export default function DashboardLayout({
             });
           }}
         />
+
+        {/* Onboarding Wizard para nuevos usuarios */}
+        <OnboardingWizard />
       </div>
       </OnboardingProvider>
     </SidebarProvider>
