@@ -103,5 +103,37 @@
     "title": "All set!",
     "description": "Your account is configured and ready to use",
     "goToDashboard": "Go to dashboard"
+  },
+  "checklist": {
+    "title": "Getting Started",
+    "subtitle": "Complete these steps to get the most out of ProfeVision",
+    "progress": "{completed} of {total} completed",
+    "minimize": "Minimize",
+    "expand": "Expand",
+    "dismiss": "Don't show again",
+    "dismissConfirm": "You can access this guide from your profile",
+    "allComplete": "You've completed all steps!",
+    "items": {
+      "createExam": {
+        "title": "Create your first exam",
+        "description": "Use AI, import or create manually",
+        "cta": "Create exam"
+      },
+      "publishExam": {
+        "title": "Publish the exam",
+        "description": "Assign the exam to a group",
+        "cta": "Publish"
+      },
+      "exportPdf": {
+        "title": "Export answer sheets",
+        "description": "Download PDFs to print",
+        "cta": "Export PDF"
+      },
+      "scanExam": {
+        "title": "Scan your first exam",
+        "description": "Use camera to grade automatically",
+        "cta": "Scan"
+      }
+    }
   }
 }

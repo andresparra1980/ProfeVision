@@ -103,5 +103,37 @@
     "title": "Todo listo!",
     "description": "Tu cuenta esta configurada y lista para usar",
     "goToDashboard": "Ir al panel"
+  },
+  "checklist": {
+    "title": "Primeros pasos",
+    "subtitle": "Completa estos pasos para aprovechar ProfeVision al maximo",
+    "progress": "{completed} de {total} completados",
+    "minimize": "Minimizar",
+    "expand": "Expandir",
+    "dismiss": "No mostrar mas",
+    "dismissConfirm": "Puedes acceder a esta guia desde tu perfil",
+    "allComplete": "Has completado todos los pasos!",
+    "items": {
+      "createExam": {
+        "title": "Crea tu primer examen",
+        "description": "Usa IA, importa o crea manualmente",
+        "cta": "Crear examen"
+      },
+      "publishExam": {
+        "title": "Publica el examen",
+        "description": "Asigna el examen a un grupo",
+        "cta": "Publicar"
+      },
+      "exportPdf": {
+        "title": "Exporta las hojas de respuestas",
+        "description": "Descarga los PDFs para imprimir",
+        "cta": "Exportar PDF"
+      },
+      "scanExam": {
+        "title": "Escanea tu primer examen",
+        "description": "Usa la camara para calificar automaticamente",
+        "cta": "Escanear"
+      }
+    }
   }
 }

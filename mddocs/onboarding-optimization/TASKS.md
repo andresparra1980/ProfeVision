@@ -137,40 +137,40 @@ END IF
 ## Fase 3: Checklist Dashboard
 
 ### 3.1 Componente Checklist
-- [ ] Crear `OnboardingChecklist.tsx`
-- [ ] Diseño: sidebar sticky o banner colapsable
-- [ ] Lista de items con estado (pendiente/completado/en progreso)
-- [ ] Icono y descripción por item
-- [ ] Botón de acción directa por item
-- [ ] Progress bar general
-- [ ] Botón minimizar/expandir
-- [ ] Botón "No mostrar más" (con confirmación)
+- [x] Crear `OnboardingChecklist.tsx`
+- [x] Diseño: sidebar sticky o banner colapsable
+- [x] Lista de items con estado (pendiente/completado/en progreso)
+- [x] Icono y descripción por item
+- [x] Botón de acción directa por item
+- [x] Progress bar general
+- [x] Botón minimizar/expandir
+- [x] Botón "No mostrar más" (con confirmación)
 
 ### 3.2 Items del Checklist
-- [ ] Item: Crear/importar examen
+- [x] Item: Crear/importar examen
   - Detectar si existe al menos 1 examen
   - CTA: "Crear examen" o "Importar"
-- [ ] Item: Publicar examen
+- [x] Item: Publicar examen
   - Detectar si existe aplicación de examen
   - CTA: "Publicar en grupo"
-- [ ] Item: Descargar hojas de respuestas
+- [x] Item: Descargar hojas de respuestas
   - Detectar si usuario ha exportado PDF
   - CTA: "Exportar PDFs"
-- [ ] Item: Escanear primer examen
+- [x] Item: Escanear primer examen
   - Detectar si existe al menos 1 respuesta escaneada
   - CTA: "Escanear examen"
 
 ### 3.3 Integración en Dashboard
-- [ ] Modificar `dashboard/layout.tsx` para incluir checklist
-- [ ] Lógica condicional: mostrar solo si onboarding incompleto
-- [ ] Posicionamiento responsive (sidebar en desktop, banner en mobile)
-- [ ] Z-index y layering correcto
+- [x] Modificar `dashboard/layout.tsx` para incluir checklist
+- [x] Lógica condicional: mostrar solo si onboarding incompleto
+- [x] Posicionamiento responsive (fixed bottom-right)
+- [x] Z-index y layering correcto
 
 ### 3.4 Tracking de Progreso
-- [ ] Hook para calcular progreso checklist
-- [ ] Listeners para detectar completación de items
-- [ ] Actualizar DB cuando item se completa
-- [ ] Celebración/confetti al completar todo
+- [x] Hook para calcular progreso checklist (integrado en componente)
+- [x] Listeners para detectar completación de items (queries a DB)
+- [x] Actualizar DB cuando item se completa
+- [ ] Celebración/confetti al completar todo - pendiente
 
 ---
 
