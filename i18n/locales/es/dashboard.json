@@ -1408,7 +1408,8 @@
         "exams": "Exámenes",
         "scans": "Escaneos",
         "activity": "Actividad",
-        "registered": "Registrado"
+        "registered": "Registrado",
+        "noUsers": "No se encontraron usuarios"
       },
       "noUsers": "No se encontraron usuarios",
       "showing": "Mostrando",

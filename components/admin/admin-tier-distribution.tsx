@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Crown } from 'lucide-react';
 import type { AdminStats } from '@/lib/hooks/use-admin-stats';
@@ -15,14 +16,17 @@ const tierColors: Record<string, string> = {
   grandfathered: 'bg-amber-500',
 };
 
-const tierLabels: Record<string, string> = {
-  free: 'Free',
-  plus: 'Plus',
-  admin: 'Admin',
-  grandfathered: 'Grandfathered',
-};
-
 export function AdminTierDistribution({ stats }: AdminTierDistributionProps) {
+  const t = useTranslations('dashboard.admin.tiers');
+  const tStats = useTranslations('dashboard.admin.stats');
+
+  const tierLabels: Record<string, string> = {
+    free: t('free'),
+    plus: t('plus'),
+    admin: t('admin'),
+    grandfathered: t('grandfathered'),
+  };
+
   const tiers = Object.entries(stats.users.by_tier).map(([tier, count]) => ({
     tier,
     count,
@@ -36,7 +40,7 @@ export function AdminTierDistribution({ stats }: AdminTierDistributionProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Crown className="h-5 w-5 text-amber-500" />
-          Distribución por Tier
+          {t('title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -58,7 +62,7 @@ export function AdminTierDistribution({ stats }: AdminTierDistributionProps) {
         ))}
         <div className="pt-4 border-t">
           <div className="flex items-center justify-between text-sm font-medium">
-            <span>Total usuarios</span>
+            <span>{tStats('totalUsers')}</span>
             <span>{total}</span>
           </div>
         </div>

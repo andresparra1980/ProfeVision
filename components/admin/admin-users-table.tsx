@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import {
   Table,
   TableBody,
@@ -47,6 +49,18 @@ function SortIcon({ field, currentField, order }: { field: SortField; currentFie
 }
 
 export function AdminUsersTable({ users, loading, sortField, sortOrder, onSort }: AdminUsersTableProps) {
+  const t = useTranslations('dashboard.admin.users.table');
+  const locale = useLocale();
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
   if (loading) {
     return (
       <Card className="p-4">
@@ -62,7 +76,7 @@ export function AdminUsersTable({ users, loading, sortField, sortOrder, onSort }
   if (users.length === 0) {
     return (
       <Card className="p-8 text-center text-muted-foreground">
-        No se encontraron usuarios
+        {t('noUsers')}
       </Card>
     );
   }
@@ -84,16 +98,16 @@ export function AdminUsersTable({ users, loading, sortField, sortOrder, onSort }
       <Table>
         <TableHeader>
           <TableRow>
-            {sortableHeader('name', 'Usuario')}
-            <TableHead>Email</TableHead>
-            <TableHead>Tier</TableHead>
-            <TableHead className="text-center">Entidades</TableHead>
-            <TableHead className="text-center">Materias</TableHead>
-            <TableHead className="text-center">Grupos</TableHead>
-            <TableHead className="text-center">Exámenes</TableHead>
-            <TableHead className="text-center">Escaneos</TableHead>
-            {sortableHeader('activity', 'Actividad', 'text-center')}
-            {sortableHeader('created_at', 'Registrado')}
+            {sortableHeader('name', t('user'))}
+            <TableHead>{t('email')}</TableHead>
+            <TableHead>{t('tier')}</TableHead>
+            <TableHead className="text-center">{t('entities')}</TableHead>
+            <TableHead className="text-center">{t('subjects')}</TableHead>
+            <TableHead className="text-center">{t('groups')}</TableHead>
+            <TableHead className="text-center">{t('exams')}</TableHead>
+            <TableHead className="text-center">{t('scans')}</TableHead>
+            {sortableHeader('activity', t('activity'), 'text-center')}
+            {sortableHeader('created_at', t('registered'))}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -130,13 +144,4 @@ export function AdminUsersTable({ users, loading, sortField, sortOrder, onSort }
       </Table>
     </Card>
   );
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
 }

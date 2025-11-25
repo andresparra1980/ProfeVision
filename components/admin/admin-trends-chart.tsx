@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp } from 'lucide-react';
 import type { AdminStats } from '@/lib/hooks/use-admin-stats';
@@ -19,12 +21,23 @@ interface AdminTrendsChartProps {
 }
 
 export function AdminTrendsChart({ stats }: AdminTrendsChartProps) {
-  // Combine trends data for the chart
+  const t = useTranslations('dashboard.admin.trends');
+  const locale = useLocale();
+
+  const monthsES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const months = locale === 'es' ? monthsES : monthsEN;
+
+  const formatMonth = (month: string): string => {
+    const [year, monthNum] = month.split('-');
+    return `${months[parseInt(monthNum) - 1]} ${year.slice(2)}`;
+  };
+
   const chartData = stats.trends.users_by_month.map((item, index) => ({
     month: formatMonth(item.month),
-    usuarios: item.count,
-    examenes: stats.trends.exams_by_month[index]?.count ?? 0,
-    escaneos: stats.trends.scans_by_month[index]?.count ?? 0,
+    users: item.count,
+    exams: stats.trends.exams_by_month[index]?.count ?? 0,
+    scans: stats.trends.scans_by_month[index]?.count ?? 0,
   }));
 
   return (
@@ -32,7 +45,7 @@ export function AdminTrendsChart({ stats }: AdminTrendsChartProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-green-500" />
-          Tendencias (Últimos 6 meses)
+          {t('title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -57,27 +70,27 @@ export function AdminTrendsChart({ stats }: AdminTrendsChartProps) {
               <Legend />
               <Line
                 type="monotone"
-                dataKey="usuarios"
+                dataKey="users"
                 stroke="#3b82f6"
                 strokeWidth={2}
                 dot={{ r: 4 }}
-                name="Usuarios"
+                name={t('users')}
               />
               <Line
                 type="monotone"
-                dataKey="examenes"
+                dataKey="exams"
                 stroke="#22c55e"
                 strokeWidth={2}
                 dot={{ r: 4 }}
-                name="Exámenes"
+                name={t('exams')}
               />
               <Line
                 type="monotone"
-                dataKey="escaneos"
+                dataKey="scans"
                 stroke="#a855f7"
                 strokeWidth={2}
                 dot={{ r: 4 }}
-                name="Escaneos"
+                name={t('scans')}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -85,10 +98,4 @@ export function AdminTrendsChart({ stats }: AdminTrendsChartProps) {
       </CardContent>
     </Card>
   );
-}
-
-function formatMonth(month: string): string {
-  const [year, monthNum] = month.split('-');
-  const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-  return `${months[parseInt(monthNum) - 1]} ${year.slice(2)}`;
 }

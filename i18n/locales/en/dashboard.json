@@ -1407,7 +1407,8 @@
         "exams": "Exams",
         "scans": "Scans",
         "activity": "Activity",
-        "registered": "Registered"
+        "registered": "Registered",
+        "noUsers": "No users found"
       },
       "noUsers": "No users found",
       "showing": "Showing",

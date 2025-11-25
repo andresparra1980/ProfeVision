@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, ScanLine, Building2, Folders, GraduationCap, Bot } from 'lucide-react';
 import type { AdminStats } from '@/lib/hooks/use-admin-stats';
@@ -9,44 +10,46 @@ interface AdminStatsOverviewProps {
 }
 
 export function AdminStatsOverview({ stats }: AdminStatsOverviewProps) {
+  const t = useTranslations('dashboard.admin.stats');
+
   const cards = [
     {
-      title: 'Usuarios',
+      title: t('totalUsers'),
       value: stats.users.total,
-      subtext: `+${stats.users.new_this_month} este mes`,
+      subtext: `+${stats.users.new_this_month} ${t('newThisMonth')}`,
       icon: Users,
       color: 'text-blue-600',
     },
     {
-      title: 'Exámenes',
+      title: t('totalExams'),
       value: stats.exams.total,
-      subtext: `${stats.exams.with_results} calificados`,
+      subtext: `${stats.exams.with_results} ${t('withResults')}`,
       icon: FileText,
       color: 'text-green-600',
     },
     {
-      title: 'Escaneos',
+      title: t('totalScans'),
       value: stats.scans.total,
-      subtext: `+${stats.scans.this_month} este mes`,
+      subtext: `+${stats.scans.this_month} ${t('scansThisMonth')}`,
       icon: ScanLine,
       color: 'text-purple-600',
     },
     {
-      title: 'Instituciones',
+      title: t('institutions'),
       value: stats.institutions.total,
       subtext: '',
       icon: Building2,
       color: 'text-orange-600',
     },
     {
-      title: 'Grupos',
+      title: t('groups'),
       value: stats.groups.total,
-      subtext: `${stats.groups.active} activos`,
+      subtext: `${stats.groups.active} ${t('active')}`,
       icon: Folders,
       color: 'text-cyan-600',
     },
     {
-      title: 'Estudiantes',
+      title: t('students'),
       value: stats.students.total,
       subtext: '',
       icon: GraduationCap,
@@ -55,7 +58,7 @@ export function AdminStatsOverview({ stats }: AdminStatsOverviewProps) {
     {
       title: 'Jobs IA',
       value: stats.ai_jobs.total,
-      subtext: `${stats.ai_jobs.completed} exitosos`,
+      subtext: `${stats.ai_jobs.completed} OK`,
       icon: Bot,
       color: 'text-amber-600',
     },
