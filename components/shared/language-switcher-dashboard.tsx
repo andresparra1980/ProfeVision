@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { locales } from '@/i18n/config';
+import logger from '@/lib/utils/logger';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -52,7 +53,7 @@ export function LanguageSwitcherDashboard({ collapsed = false }: LanguageSwitche
   }, {} as Record<string, string>);
 
   const handleLocaleChange = (newLocale: string) => {
-    console.log('🔄 Language Switch START:', { pathname, locale, newLocale });
+    logger.log('🔄 Language Switch START:', { pathname, locale, newLocale });
 
     let currentPath = pathname;
 
@@ -65,7 +66,7 @@ export function LanguageSwitcherDashboard({ collapsed = false }: LanguageSwitche
       currentPath = pathname.replace(/^\/es/, '');
     }
 
-    console.log('🔄 Current path (no prefix):', currentPath);
+    logger.log('🔄 Current path (no prefix):', currentPath);
 
     // 2) Mapear la ruta al idioma de destino usando slugs canónicos
     let targetPath = currentPath;
@@ -78,12 +79,12 @@ export function LanguageSwitcherDashboard({ collapsed = false }: LanguageSwitche
       targetPath = reverseRouteMap[currentPath] || currentPath;
     }
 
-    console.log('🔄 Target path:', targetPath);
+    logger.log('🔄 Target path:', targetPath);
 
     // 3) Construir URL final con prefijo SIEMPRE (localePrefix: 'always')
     const finalPath = targetPath === '/' ? `/${newLocale}` : `/${newLocale}${targetPath}`;
 
-    console.log('🔄 Final path:', finalPath);
+    logger.log('🔄 Final path:', finalPath);
 
     // 4. Navegar a la nueva ruta
     router.push(finalPath);
