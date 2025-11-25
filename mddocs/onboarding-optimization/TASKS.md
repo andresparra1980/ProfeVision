@@ -14,12 +14,12 @@
 - Podemos usar `first_login_completed` para detectar usuarios legacy
 
 **Tareas**:
-- [ ] Crear migración via MCP Supabase para agregar `onboarding_status` (JSONB, nullable, default NULL) a `profesores`
-- [ ] La migración debe incluir:
+- [x] Crear migración via MCP Supabase para agregar `onboarding_status` (JSONB, nullable, default NULL) a `profesores`
+- [x] La migración debe incluir:
   - Columna nullable para no afectar usuarios existentes
   - Comentario SQL documentando estructura esperada del JSON
   - NO aplicar default a registros existentes (NULL = usuario legacy)
-- [ ] Estructura del JSON:
+- [x] Estructura del JSON:
   ```json
   {
     "wizard_completed": boolean,
@@ -36,8 +36,8 @@
     "skip_reason": string
   }
   ```
-- [ ] Crear función SQL `update_onboarding_status(user_id, status_json)` via MCP
-- [ ] Regenerar tipos TypeScript via `supabase gen types` después de migración
+- [x] Crear función SQL `update_onboarding_status(user_id, status_json)` via MCP
+- [x] Regenerar tipos TypeScript via `supabase gen types` después de migración
 
 **Lógica de detección de usuario nuevo**:
 ```
