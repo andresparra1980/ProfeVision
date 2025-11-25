@@ -42,7 +42,7 @@ const initialState: OnboardingState = {
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<OnboardingState>(initialState);
   const [wizardDismissed, setWizardDismissed] = useState(false);
-  const [sessionReady, setSessionReady] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const getAuthHeaders = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -59,7 +59,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       
       const headers = await getAuthHeaders();
       if (!headers) {
-        // Not authenticated, just reset state
         setState({ ...initialState, isLoading: false });
         return;
       }
@@ -81,7 +80,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         isLegacyUser: data.is_legacy_user,
         firstLoginCompleted: data.first_login_completed,
         onboardingStatus: data.onboarding_status,
-        shouldShowWizard: data.should_show_wizard && !wizardDismissed,
+        shouldShowWizard: data.should_show_wizard,
         checklistComplete: data.checklist_complete,
         error: null,
       });
@@ -92,30 +91,22 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         error: error instanceof Error ? error.message : 'Error desconocido',
       }));
     }
-  }, [wizardDismissed, getAuthHeaders]);
+  }, [getAuthHeaders]);
 
-  // Wait for auth state to be ready before fetching
+  // Wait for auth state to be ready before fetching (only once)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
-        if (session) {
-          setSessionReady(true);
-        }
+      if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session && !hasFetched) {
+        setHasFetched(true);
+        fetchStatus();
       } else if (event === 'SIGNED_OUT') {
-        setSessionReady(false);
+        setHasFetched(false);
         setState({ ...initialState, isLoading: false });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  // Fetch status only when session is ready
-  useEffect(() => {
-    if (sessionReady) {
-      fetchStatus();
-    }
-  }, [sessionReady, fetchStatus]);
+  }, [fetchStatus, hasFetched]);
 
   const updateStatus = useCallback(async (status: Partial<OnboardingStatus>): Promise<boolean> => {
     try {
