@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ import {
   HelpCircle,
   PanelLeftClose,
   PanelLeftOpen,
+  Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/sidebar-context';
@@ -26,9 +28,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useTranslations } from 'next-intl';
 import { logoFont } from '@/lib/fonts';
 import { LanguageSwitcherDashboard } from '@/components/shared/language-switcher-dashboard';
+import { supabase } from '@/lib/supabase/client';
 
 // Definir un tipo más específico para el usuario
 interface User {
+  id?: string;
   email?: string;
   user_metadata?: {
     full_name?: string;
@@ -46,6 +50,28 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
   const pathname = usePathname();
   const { isCollapsed, toggleCollapse, isMobile, isOpen, setIsOpen } = useSidebar();
   const t = useTranslations('dashboard');
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { data } = await supabase
+          .from('profesores')
+          .select('subscription_tier')
+          .eq('id', user.id)
+          .single();
+
+        setIsAdmin(data?.subscription_tier === 'admin');
+      } catch {
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user?.id]);
 
   const navItems = [
     {
@@ -83,6 +109,12 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
       href: '/dashboard/subscription',
       icon: Crown,
     },
+    // Admin item - only shown if isAdmin
+    ...(isAdmin ? [{
+      title: t('navigation.admin', { defaultValue: 'Admin' }),
+      href: '/dashboard/admin',
+      icon: Shield,
+    }] : []),
     {
       title: t('navigation.settings'),
       href: '/dashboard/settings',

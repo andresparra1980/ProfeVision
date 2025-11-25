@@ -1,0 +1,61 @@
+{
+  "title": "Admin Dashboard",
+  "description": "Global platform observability",
+  "loading": "Loading statistics...",
+  "error": "Error loading data",
+  "retry": "Retry",
+  "refresh": "Refresh",
+  "viewUsers": "View users",
+  "stats": {
+    "users": "Users",
+    "usersNew": "+{count} this month",
+    "exams": "Exams",
+    "examsGraded": "{count} graded",
+    "scans": "Scans",
+    "scansNew": "+{count} this month",
+    "institutions": "Institutions",
+    "groups": "Groups",
+    "groupsActive": "{count} active",
+    "students": "Students",
+    "aiJobs": "AI Jobs",
+    "aiJobsSuccess": "{count} successful"
+  },
+  "tiers": {
+    "title": "Tier Distribution",
+    "free": "Free",
+    "plus": "Plus",
+    "admin": "Admin",
+    "grandfathered": "Grandfathered",
+    "total": "Total users"
+  },
+  "trends": {
+    "title": "Trends (Last 6 months)",
+    "users": "Users",
+    "exams": "Exams",
+    "scans": "Scans"
+  },
+  "users": {
+    "title": "Users",
+    "description": "List of all registered users",
+    "search": "Search by name...",
+    "filterTier": "Filter by tier",
+    "allTiers": "All tiers",
+    "table": {
+      "user": "User",
+      "email": "Email",
+      "tier": "Tier",
+      "entities": "Entities",
+      "subjects": "Subjects",
+      "groups": "Groups",
+      "exams": "Exams",
+      "scans": "Scans",
+      "created": "Registered"
+    },
+    "pagination": {
+      "showing": "Showing {from}-{to} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "empty": "No users found"
+  }
+}

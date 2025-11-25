@@ -82,6 +82,7 @@
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.51.2",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.5.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "sharp": "^0.33.5",
