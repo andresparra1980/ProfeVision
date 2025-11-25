@@ -51,20 +51,20 @@ END IF
 ```
 
 ### 1.2 API Endpoints
-- [ ] `GET /api/onboarding/status` - obtener estado actual
-- [ ] `PATCH /api/onboarding/status` - actualizar estado
-- [ ] `POST /api/onboarding/complete-step` - marcar paso como completado
+- [x] `GET /api/onboarding/status` - obtener estado actual
+- [x] `PATCH /api/onboarding/status` - actualizar estado
+- [x] `POST /api/onboarding/complete-step` - marcar paso como completado
 
 ### 1.3 Context y Hooks
-- [ ] Crear `OnboardingContext` con estado global
-- [ ] Crear `useOnboarding` hook
-- [ ] Crear `useOnboardingStep` hook para pasos individuales
-- [ ] Implementar persistencia con Supabase
+- [x] Crear `OnboardingContext` con estado global
+- [x] Crear `useOnboarding` hook
+- [x] Crear `useOnboardingStep` hook para pasos individuales
+- [x] Implementar persistencia con Supabase
 
 ### 1.4 Detección de Usuario Nuevo
-- [ ] Modificar `middleware.ts` para detectar onboarding pendiente
-- [ ] Lógica para determinar si mostrar wizard
-- [ ] Flag para usuarios existentes (no mostrar wizard)
+- [x] Modificar `middleware.ts` para detectar onboarding pendiente (via Context client-side)
+- [x] Lógica para determinar si mostrar wizard
+- [x] Flag para usuarios existentes (no mostrar wizard)
 
 ---
 

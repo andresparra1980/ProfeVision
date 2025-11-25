@@ -10,6 +10,7 @@ import { ScanExamFeature } from "@/components/exam/scan-exam-feature";
 import { toast } from "sonner";
 import type { User, Session } from '@supabase/supabase-js';
 import { SidebarProvider } from "@/lib/contexts/sidebar-context";
+import { OnboardingProvider } from "@/lib/contexts/onboarding-context";
 import logger from "@/lib/utils/logger";
 import { useTranslations, useLocale } from 'next-intl';
 import { useWelcomeModal } from "@/lib/hooks/useWelcomeModal";
@@ -149,6 +150,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
+      <OnboardingProvider>
       <div className="flex h-screen overflow-hidden relative">
         {user ? (
           <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
@@ -179,6 +181,7 @@ export default function DashboardLayout({
           }}
         />
       </div>
+      </OnboardingProvider>
     </SidebarProvider>
   );
 } 
