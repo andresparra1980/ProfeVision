@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useAdminUsers } from '@/lib/hooks/use-admin-users';
-import { AdminUsersTable } from '@/components/admin/admin-users-table';
+import { useState, useMemo } from 'react';
+import { useAdminUsers, type AdminUser } from '@/lib/hooks/use-admin-users';
+import { AdminUsersTable, type SortField, type SortOrder } from '@/components/admin/admin-users-table';
 import { TitleCardWithDepth } from '@/components/shared/title-card-with-depth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,11 +17,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Users, Search, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 
+function calculateActivity(user: AdminUser): number {
+  return user.stats.subjects + user.stats.groups + user.stats.exams + user.stats.scans;
+}
+
 export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [tier, setTier] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [sortField, setSortField] = useState<SortField>('activity');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const { users, pagination, loading, error } = useAdminUsers({
     page,
@@ -29,6 +35,38 @@ export default function AdminUsersPage() {
     search,
     tier: tier === 'all' ? '' : tier,
   });
+
+  // Sort users client-side
+  const sortedUsers = useMemo(() => {
+    if (!users.length) return users;
+
+    return [...users].sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortField) {
+        case 'activity':
+          comparison = calculateActivity(a) - calculateActivity(b);
+          break;
+        case 'created_at':
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        case 'name':
+          comparison = `${a.nombres} ${a.apellidos}`.localeCompare(`${b.nombres} ${b.apellidos}`);
+          break;
+      }
+
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+  }, [users, sortField, sortOrder]);
+
+  const handleSort = (field: SortField) => {
+    if (field === sortField) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
+    }
+  };
 
   const handleSearch = () => {
     setSearch(searchInput);
@@ -99,7 +137,13 @@ export default function AdminUsersPage() {
       )}
 
       {/* Table */}
-      <AdminUsersTable users={users} loading={loading} />
+      <AdminUsersTable
+        users={sortedUsers}
+        loading={loading}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        onSort={handleSort}
+      />
 
       {/* Pagination */}
       {pagination.pages > 1 && (

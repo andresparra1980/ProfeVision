@@ -42,7 +42,9 @@ export function LanguageSwitcherDashboard({ collapsed = false }: LanguageSwitche
     '/auth/update-password': '/auth/actualizar-contrasena',
     '/auth/verify-email': '/auth/verificar-email',
     '/auth/email-confirmed': '/auth/email-confirmado',
-    '/dashboard': '/dashboard'
+    '/dashboard': '/dashboard',
+    '/dashboard/admin': '/dashboard/admin',
+    '/dashboard/admin/users': '/dashboard/admin/usuarios'
   };
 
   // Crear mapa inverso
