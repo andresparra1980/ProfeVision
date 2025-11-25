@@ -59,19 +59,17 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <TitleCardWithDepth
-          title={t('title')}
-          description={t('description')}
-          icon={<Users className="h-6 w-6 text-blue-600" />}
-        />
-        <Link href="/dashboard/admin">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {t('back')}
-          </Button>
-        </Link>
-      </div>
+      <Link href="/dashboard/admin">
+        <Button variant="ghost" size="sm" className="mb-2">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          {t('back')}
+        </Button>
+      </Link>
+      <TitleCardWithDepth
+        title={t('title')}
+        description={t('description')}
+        icon={<Users className="h-6 w-6 text-blue-600" />}
+      />
 
       {/* Filters */}
       <Card>

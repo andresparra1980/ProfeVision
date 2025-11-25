@@ -64,25 +64,25 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <TitleCardWithDepth
-          title={t('title')}
-          description={t('description')}
-          icon={<Shield className="h-6 w-6 text-purple-600" />}
-        />
-        <div className="flex gap-2">
-          <Button onClick={refetch} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            {t('refresh')}
-          </Button>
-          <Link href="/dashboard/admin/users">
-            <Button size="sm">
-              <Users className="h-4 w-4 mr-2" />
-              {t('viewUsers')}
+      <TitleCardWithDepth
+        title={t('title')}
+        description={t('description')}
+        icon={<Shield className="h-6 w-6 text-purple-600" />}
+        actions={
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <Button onClick={refetch} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {t('refresh')}
             </Button>
-          </Link>
-        </div>
-      </div>
+            <Link href="/dashboard/admin/users">
+              <Button size="sm" className="w-full sm:w-auto">
+                <Users className="h-4 w-4 mr-2" />
+                {t('viewUsers')}
+              </Button>
+            </Link>
+          </div>
+        }
+      />
 
       <AdminStatsOverview stats={stats} />
 
