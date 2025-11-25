@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { OnboardingStatus } from "@/lib/types/database";
+import { supabase } from "@/lib/supabase/client";
 
 type ChecklistItem = 'exam_created' | 'exam_published' | 'pdf_exported' | 'first_scan';
 
@@ -18,10 +19,10 @@ interface OnboardingState {
 interface OnboardingContextType extends OnboardingState {
   // Actions
   refetch: () => Promise<void>;
-  updateStatus: (status: Partial<OnboardingStatus>) => Promise<boolean>;
-  completeWizardStep: (step: number) => Promise<boolean>;
-  skipWizard: (reason?: string) => Promise<boolean>;
-  completeChecklistItem: (item: ChecklistItem) => Promise<boolean>;
+  updateStatus: (_status: Partial<OnboardingStatus>) => Promise<boolean>;
+  completeWizardStep: (_step: number) => Promise<boolean>;
+  skipWizard: (_reason?: string) => Promise<boolean>;
+  completeChecklistItem: (_item: ChecklistItem) => Promise<boolean>;
   dismissWizard: () => void;
 }
 
@@ -41,15 +42,30 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<OnboardingState>(initialState);
   const [wizardDismissed, setWizardDismissed] = useState(false);
 
+  const getAuthHeaders = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
+    return {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    };
+  }, []);
+
   const fetchStatus = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
-      const response = await fetch('/api/onboarding/status');
+      const headers = await getAuthHeaders();
+      if (!headers) {
+        // Not authenticated, just reset state
+        setState({ ...initialState, isLoading: false });
+        return;
+      }
+      
+      const response = await fetch('/api/onboarding/status', { headers });
       
       if (!response.ok) {
         if (response.status === 401) {
-          // Not authenticated, just reset state
           setState({ ...initialState, isLoading: false });
           return;
         }
@@ -74,7 +90,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         error: error instanceof Error ? error.message : 'Error desconocido',
       }));
     }
-  }, [wizardDismissed]);
+  }, [wizardDismissed, getAuthHeaders]);
 
   useEffect(() => {
     fetchStatus();
@@ -82,9 +98,12 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
   const updateStatus = useCallback(async (status: Partial<OnboardingStatus>): Promise<boolean> => {
     try {
+      const headers = await getAuthHeaders();
+      if (!headers) return false;
+
       const response = await fetch('/api/onboarding/status', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(status),
       });
 
@@ -103,13 +122,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       console.error('Error updating onboarding status:', error);
       return false;
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   const completeWizardStep = useCallback(async (step: number): Promise<boolean> => {
     try {
+      const headers = await getAuthHeaders();
+      if (!headers) return false;
+
       const response = await fetch('/api/onboarding/complete-step', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ step: 'wizard', wizard_step: step }),
       });
 
@@ -131,13 +153,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       console.error('Error completing wizard step:', error);
       return false;
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   const skipWizard = useCallback(async (reason?: string): Promise<boolean> => {
     try {
+      const headers = await getAuthHeaders();
+      if (!headers) return false;
+
       const response = await fetch('/api/onboarding/complete-step', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ step: 'wizard', skip: true, skip_reason: reason }),
       });
 
@@ -158,13 +183,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       console.error('Error skipping wizard:', error);
       return false;
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   const completeChecklistItem = useCallback(async (item: ChecklistItem): Promise<boolean> => {
     try {
+      const headers = await getAuthHeaders();
+      if (!headers) return false;
+
       const response = await fetch('/api/onboarding/complete-step', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ step: 'checklist_item', checklist_item: item }),
       });
 
@@ -188,7 +216,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       console.error('Error completing checklist item:', error);
       return false;
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   const dismissWizard = useCallback(() => {
     setWizardDismissed(true);
