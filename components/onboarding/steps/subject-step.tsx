@@ -20,15 +20,15 @@ interface SubjectStepProps {
   institutionName?: string;
   institutionId?: string;
   data?: SubjectData;
-  onUpdate: (data: SubjectData) => void;
+  onUpdate: (_data: SubjectData) => void;
   onNext: () => void;
   isSubmitting: boolean;
 }
 
-export function SubjectStep({ institutionName, institutionId, data, onUpdate, onNext, isSubmitting }: SubjectStepProps) {
+export function SubjectStep({ institutionName, institutionId, data: initialData, onUpdate, onNext, isSubmitting }: SubjectStepProps) {
   const t = useTranslations("onboarding.subject");
-  const [name, setName] = useState(data?.name || "");
-  const [description, setDescription] = useState(data?.description || "");
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(initialData?.description || "");
   const [saving, setSaving] = useState(false);
 
   const isValid = name.trim().length > 0 && institutionId;
@@ -124,7 +124,7 @@ export function SubjectStep({ institutionName, institutionId, data, onUpdate, on
           onClick={handleSubmit}
           disabled={!isValid || saving || isSubmitting}
         >
-          {saving ? "Guardando..." : t("title")}
+          {saving ? "Guardando..." : "Continuar"}
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

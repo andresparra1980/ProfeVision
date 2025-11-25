@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import {
   X,
   Sparkles,
 } from "lucide-react";
+import { ExamCreationDrawer } from "./exam-creation-drawer";
 
 type ChecklistItemKey = "exam_created" | "exam_published" | "pdf_exported" | "first_scan";
 
@@ -44,18 +45,28 @@ export function OnboardingChecklist() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [checkingProgress, setCheckingProgress] = useState(true);
+  const [showExamDrawer, setShowExamDrawer] = useState(false);
   const [itemsStatus, setItemsStatus] = useState<Record<ChecklistItemKey, boolean>>({
     exam_created: false,
     exam_published: false,
     pdf_exported: false,
     first_scan: false,
   });
+  
+  // Prevent multiple checks
+  const hasChecked = useRef(false);
 
-  // Check actual progress from database
+  // Check actual progress from database (only once)
   const checkProgress = useCallback(async () => {
+    if (hasChecked.current) return;
+    hasChecked.current = true;
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setCheckingProgress(false);
+        return;
+      }
 
       // Check if user has created any exam
       const { count: examCount } = await supabase
@@ -84,11 +95,11 @@ export function OnboardingChecklist() {
 
       setItemsStatus(newStatus);
 
-      // Update checklist items in DB if they changed
+      // Update checklist items in DB if they changed (don't await, fire and forget)
       for (const [key, value] of Object.entries(newStatus)) {
         const savedValue = onboardingStatus?.checklist_items?.[key as ChecklistItemKey];
         if (value && !savedValue) {
-          await completeChecklistItem(key as ChecklistItemKey);
+          completeChecklistItem(key as ChecklistItemKey);
         }
       }
     } catch (error) {
@@ -96,12 +107,12 @@ export function OnboardingChecklist() {
     } finally {
       setCheckingProgress(false);
     }
-  }, [onboardingStatus, completeChecklistItem]);
+  }, [onboardingStatus?.checklist_items, completeChecklistItem]);
 
   useEffect(() => {
-    if (!isLoading && !isLegacyUser) {
+    if (!isLoading && !isLegacyUser && !hasChecked.current) {
       checkProgress();
-    } else {
+    } else if (isLoading || isLegacyUser) {
       setCheckingProgress(false);
     }
   }, [isLoading, isLegacyUser, checkProgress]);
@@ -151,8 +162,13 @@ export function OnboardingChecklist() {
   const progressPercent = (completedCount / items.length) * 100;
 
   const handleItemClick = (item: ChecklistItemData) => {
+    // Special handling for exam creation - open drawer instead of navigating
+    if (item.key === "exam_created") {
+      setShowExamDrawer(true);
+      return;
+    }
     if (item.route) {
-      router.push({ pathname: item.route as "/dashboard/exams/create" | "/dashboard/exams" });
+      router.push(item.route as "/dashboard/exams/create" | "/dashboard/exams");
     }
   };
 
@@ -230,7 +246,7 @@ export function OnboardingChecklist() {
 
       {/* Items */}
       <div className="p-2">
-        {items.map((item) => {
+        {items.map((item, index) => {
           const translationKey = {
             exam_created: "createExam",
             exam_published: "publishExam",
@@ -238,30 +254,41 @@ export function OnboardingChecklist() {
             first_scan: "scanExam",
           }[item.key] as "createExam" | "publishExam" | "exportPdf" | "scanExam";
           
+          // Find index of first incomplete item
+          const firstIncompleteIndex = items.findIndex(i => !i.completed);
+          // Item is clickable only if it's the first incomplete one (or completed)
+          const isNextStep = index === firstIncompleteIndex;
+          const isDisabled = !item.completed && !isNextStep;
+          
           return (
             <button
               key={item.key}
-              onClick={() => handleItemClick(item)}
-              disabled={item.completed}
+              onClick={() => !isDisabled && handleItemClick(item)}
+              disabled={item.completed || isDisabled}
               className={cn(
                 "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors",
                 item.completed 
                   ? "bg-muted/50 opacity-60" 
-                  : "hover:bg-muted cursor-pointer"
+                  : isNextStep
+                    ? "hover:bg-muted cursor-pointer"
+                    : "opacity-40 cursor-not-allowed"
               )}
             >
               <div className={cn(
                 "flex items-center justify-center h-8 w-8 rounded-full flex-shrink-0",
                 item.completed 
                   ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                  : "bg-primary/10 text-primary"
+                  : isNextStep
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted text-muted-foreground"
               )}>
                 {item.completed ? <Check className="h-4 w-4" /> : item.icon}
               </div>
               <div className="flex-1 min-w-0">
                 <p className={cn(
                   "text-sm font-medium",
-                  item.completed && "line-through text-muted-foreground"
+                  item.completed && "line-through text-muted-foreground",
+                  isDisabled && "text-muted-foreground"
                 )}>
                   {t(`items.${translationKey}.title`)}
                 </p>
@@ -273,6 +300,11 @@ export function OnboardingChecklist() {
           );
         })}
       </div>
+      
+      <ExamCreationDrawer
+        open={showExamDrawer}
+        onOpenChange={setShowExamDrawer}
+      />
     </Card>
   );
 }

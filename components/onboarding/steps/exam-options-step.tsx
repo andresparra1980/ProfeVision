@@ -56,31 +56,32 @@ export function ExamOptionsStep({ subjectId, onComplete, isSubmitting }: ExamOpt
   const handleAICreate = async () => {
     await onComplete();
     // Navigate to AI chat for exam creation
-    router.push({
-      pathname: "/dashboard/exams/create",
-      query: subjectId ? { materia: subjectId, mode: "ai" } : { mode: "ai" },
-    });
+    const params = new URLSearchParams();
+    params.set("mode", "ai");
+    if (subjectId) params.set("materia", subjectId);
+    router.push(`/dashboard/exams/create?${params.toString()}` as "/dashboard/exams/create");
   };
 
   const handleImport = async () => {
     await onComplete();
-    router.push({
-      pathname: "/dashboard/exams/create",
-      query: subjectId ? { materia: subjectId, mode: "import" } : { mode: "import" },
-    });
+    const params = new URLSearchParams();
+    params.set("mode", "import");
+    if (subjectId) params.set("materia", subjectId);
+    router.push(`/dashboard/exams/create?${params.toString()}` as "/dashboard/exams/create");
   };
 
   const handleManual = async () => {
     await onComplete();
-    router.push({
-      pathname: "/dashboard/exams/create",
-      query: subjectId ? { materia: subjectId } : {},
-    });
+    if (subjectId) {
+      router.push(`/dashboard/exams/create?materia=${subjectId}` as "/dashboard/exams/create");
+    } else {
+      router.push("/dashboard/exams/create");
+    }
   };
 
   const handleExplore = async () => {
     await onComplete();
-    router.push({ pathname: "/dashboard" });
+    router.push("/dashboard");
   };
 
   return (

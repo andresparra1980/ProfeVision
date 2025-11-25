@@ -104,6 +104,24 @@
     "description": "Your account is configured and ready to use",
     "goToDashboard": "Go to dashboard"
   },
+  "examCreationDrawer": {
+    "title": "Create your first exam",
+    "subtitle": "Choose how you want to start",
+    "import": {
+      "title": "Import exam",
+      "description": "Upload a PDF or Word with your questions. AI will automatically extract questions and options. Mark the correct answer with an asterisk (*) at the end.",
+      "showExample": "See format example",
+      "exampleTitle": "Import format example",
+      "exampleAlt": "Example document with formatted questions",
+      "exampleCaption": "Mark the correct answer by adding an asterisk (*) at the end of the option."
+    },
+    "ai": {
+      "title": "Generate with AI",
+      "description": "Describe the topic and AI will generate multiple choice questions. You can upload reference documents for better accuracy.",
+      "badge": "Recommended",
+      "chatHint": "Interactive chat"
+    }
+  },
   "checklist": {
     "title": "Getting Started",
     "subtitle": "Complete these steps to get the most out of ProfeVision",

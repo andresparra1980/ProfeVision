@@ -24,17 +24,17 @@ interface InstitutionData {
 
 interface InstitutionStepProps {
   data?: InstitutionData;
-  onUpdate: (data: InstitutionData) => void;
+  onUpdate: (_data: InstitutionData) => void;
   onNext: () => void;
   isSubmitting: boolean;
 }
 
 const INSTITUTION_TYPES = ["school", "university", "institute", "academy", "other"] as const;
 
-export function InstitutionStep({ data, onUpdate, onNext, isSubmitting }: InstitutionStepProps) {
+export function InstitutionStep({ data: initialData, onUpdate, onNext, isSubmitting }: InstitutionStepProps) {
   const t = useTranslations("onboarding.institution");
-  const [name, setName] = useState(data?.name || "");
-  const [type, setType] = useState(data?.type || "school");
+  const [name, setName] = useState(initialData?.name || "");
+  const [type, setType] = useState(initialData?.type || "school");
   const [saving, setSaving] = useState(false);
 
   const isValid = name.trim().length > 0;
@@ -60,6 +60,18 @@ export function InstitutionStep({ data, onUpdate, onNext, isSubmitting }: Instit
         .single();
 
       if (error) throw error;
+
+      // Create profesor_entidad relation using RPC (bypasses RLS)
+      const { error: relationError } = await supabase.rpc("crear_relacion_profesor_entidad", {
+        p_profesor_id: user.id,
+        p_entidad_id: institution.id,
+        p_es_admin: true,
+      });
+
+      if (relationError) {
+        console.error("Error creating profesor_entidad relation:", relationError);
+        // Don't fail the whole flow, institution was created
+      }
 
       onUpdate({
         id: institution.id,
@@ -125,7 +137,7 @@ export function InstitutionStep({ data, onUpdate, onNext, isSubmitting }: Instit
           onClick={handleSubmit}
           disabled={!isValid || saving || isSubmitting}
         >
-          {saving ? "Guardando..." : t("title")}
+          {saving ? "Guardando..." : "Continuar"}
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

@@ -20,14 +20,14 @@ interface StudentData {
 interface StudentsStepProps {
   groupId?: string;
   data?: StudentData[];
-  onUpdate: (data: StudentData[]) => void;
+  onUpdate: (_data: StudentData[]) => void;
   onNext: () => void;
   isSubmitting: boolean;
 }
 
-export function StudentsStep({ groupId, data, onUpdate, onNext, isSubmitting }: StudentsStepProps) {
+export function StudentsStep({ groupId, data: initialData, onUpdate, onNext, isSubmitting }: StudentsStepProps) {
   const t = useTranslations("onboarding.students");
-  const [students, setStudents] = useState<StudentData[]>(data || []);
+  const [students, setStudents] = useState<StudentData[]>(initialData || []);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [identification, setIdentification] = useState("");
@@ -59,36 +59,25 @@ export function StudentsStep({ groupId, data, onUpdate, onNext, isSubmitting }: 
 
     setSaving(true);
     try {
-      // Insert students one by one and link to group
+      // Insert students using RPC function (bypasses RLS with SECURITY DEFINER)
       const insertedStudents: StudentData[] = [];
       
       for (const student of students) {
-        // Create student
-        const { data: newStudent, error: studentError } = await supabase
-          .from("estudiantes")
-          .insert({
-            nombres: student.firstName,
-            apellidos: student.lastName,
-            identificacion: student.identification,
-          })
-          .select("id")
-          .single();
-
-        if (studentError) throw studentError;
-
-        // Link to group
-        const { error: linkError } = await supabase
-          .from("estudiante_grupo")
-          .insert({
-            estudiante_id: newStudent.id,
-            grupo_id: groupId,
+        // Use crear_estudiante_en_grupo RPC which creates student AND links to group
+        const { data: newStudentId, error } = await supabase
+          .rpc("crear_estudiante_en_grupo", {
+            p_nombres: student.firstName,
+            p_apellidos: student.lastName,
+            p_identificacion: student.identification,
+            p_email: null,
+            p_grupo_id: groupId,
           });
 
-        if (linkError) throw linkError;
+        if (error) throw error;
 
         insertedStudents.push({
           ...student,
-          id: newStudent.id,
+          id: newStudentId,
         });
       }
 
@@ -239,7 +228,7 @@ export function StudentsStep({ groupId, data, onUpdate, onNext, isSubmitting }: 
           onClick={handleSubmit}
           disabled={students.length === 0 || saving || isSubmitting}
         >
-          {saving ? "Guardando..." : t("title")}
+          {saving ? "Guardando..." : "Continuar"}
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

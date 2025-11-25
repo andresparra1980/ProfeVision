@@ -7,6 +7,7 @@
 
 USER_ID: e037a348-152d-436a-9d6d-2b7650888e0e
 EMAIL: profevision.pruebas@gmail.com
+PASS: qwerty123
 
 ```sql
 -- Obtener tu user_id

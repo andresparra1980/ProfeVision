@@ -700,6 +700,14 @@
       "actions": {
         "cancel": "Cancel",
         "import": "Import Exam"
+      },
+      "formatExample": {
+        "button": "See example",
+        "toggle": "See format example",
+        "title": "Correct format example",
+        "close": "Close",
+        "imageAlt": "Example document with correctly formatted questions",
+        "caption": "Mark the correct answer by adding an asterisk (*) at the end of the option. Example: 'b. Lorem ipsum dolor *'"
       }
     }
   },

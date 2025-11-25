@@ -104,6 +104,24 @@
     "description": "Tu cuenta esta configurada y lista para usar",
     "goToDashboard": "Ir al panel"
   },
+  "examCreationDrawer": {
+    "title": "Crea tu primer examen",
+    "subtitle": "Elige como quieres empezar",
+    "import": {
+      "title": "Importar examen",
+      "description": "Sube un PDF o Word con tus preguntas. La IA extraera automaticamente las preguntas y opciones. Marca la respuesta correcta con un asterisco (*) al final.",
+      "showExample": "Ver ejemplo de formato",
+      "exampleTitle": "Ejemplo de formato para importar",
+      "exampleAlt": "Ejemplo de documento con preguntas formateadas",
+      "exampleCaption": "Marca la respuesta correcta agregando un asterisco (*) al final de la opcion."
+    },
+    "ai": {
+      "title": "Generar con IA",
+      "description": "Describe el tema y la IA generara preguntas de opcion multiple. Puedes subir documentos de referencia para mayor precision.",
+      "badge": "Recomendado",
+      "chatHint": "Chat interactivo"
+    }
+  },
   "checklist": {
     "title": "Primeros pasos",
     "subtitle": "Completa estos pasos para aprovechar ProfeVision al maximo",

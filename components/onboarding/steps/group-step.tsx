@@ -20,16 +20,16 @@ interface GroupStepProps {
   subjectName?: string;
   subjectId?: string;
   data?: GroupData;
-  onUpdate: (data: GroupData) => void;
+  onUpdate: (_data: GroupData) => void;
   onNext: () => void;
   isSubmitting: boolean;
 }
 
-export function GroupStep({ subjectName, subjectId, data, onUpdate, onNext, isSubmitting }: GroupStepProps) {
+export function GroupStep({ subjectName, subjectId, data: initialData, onUpdate, onNext, isSubmitting }: GroupStepProps) {
   const t = useTranslations("onboarding.group");
-  const [name, setName] = useState(data?.name || "");
-  const [year, setYear] = useState(data?.year || "");
-  const [period, setPeriod] = useState(data?.period || "");
+  const [name, setName] = useState(initialData?.name || "");
+  const [year, setYear] = useState(initialData?.year || "");
+  const [period, setPeriod] = useState(initialData?.period || "");
   const [saving, setSaving] = useState(false);
 
   const isValid = name.trim().length > 0 && subjectId;
@@ -137,7 +137,7 @@ export function GroupStep({ subjectName, subjectId, data, onUpdate, onNext, isSu
           onClick={handleSubmit}
           disabled={!isValid || saving || isSubmitting}
         >
-          {saving ? "Guardando..." : t("title")}
+          {saving ? "Guardando..." : "Continuar"}
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

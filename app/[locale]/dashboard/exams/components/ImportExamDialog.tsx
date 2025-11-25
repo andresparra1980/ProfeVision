@@ -3,7 +3,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useDropzone } from "react-dropzone";
-import { Upload, FileText, AlertCircle, CheckCircle } from "lucide-react";
+import { Upload, FileText, AlertCircle, CheckCircle, HelpCircle } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -55,6 +56,7 @@ export default function ImportExamDialog({
   const [processingStage, setProcessingStage] = useState(0);
   const [tipIndex, setTipIndex] = useState(0);
   const [estimatedSeconds, setEstimatedSeconds] = useState(0);
+  const [showFormatExample, setShowFormatExample] = useState(false);
   
   // Mensajes para cada etapa del procesamiento
   const stageMessages = [
@@ -217,14 +219,51 @@ export default function ImportExamDialog({
     <Dialog open={_open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            {t('title')}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {t('title')}
+            </DialogTitle>
+            <button
+              onClick={() => setShowFormatExample(!showFormatExample)}
+              className="flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+              title={t('formatExample.toggle')}
+            >
+              <HelpCircle className="h-4 w-4" />
+              <span>{t('formatExample.button')}</span>
+            </button>
+          </div>
           <DialogDescription>
             {t('description')}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Format Example Panel */}
+        {showFormatExample && (
+          <div className="border rounded-lg p-4 bg-muted/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium">{t('formatExample.title')}</h4>
+              <button
+                onClick={() => setShowFormatExample(false)}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                {t('formatExample.close')}
+              </button>
+            </div>
+            <div className="relative w-full max-h-64 overflow-auto rounded border bg-white">
+              <Image
+                src="/images/onboarding/import-example.png"
+                alt={t('formatExample.imageAlt')}
+                width={600}
+                height={400}
+                className="w-full h-auto"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t('formatExample.caption')}
+            </p>
+          </div>
+        )}
 
         <div className="space-y-4">
           {!processedData && !isUploading && (

@@ -701,6 +701,14 @@
       "actions": {
         "cancel": "Cancelar",
         "import": "Importar Examen"
+      },
+      "formatExample": {
+        "button": "Ver ejemplo",
+        "toggle": "Ver ejemplo de formato",
+        "title": "Ejemplo de formato correcto",
+        "close": "Cerrar",
+        "imageAlt": "Ejemplo de documento con preguntas formateadas correctamente",
+        "caption": "Marca la respuesta correcta agregando un asterisco (*) al final de la opcion. Ejemplo: 'b. Lorem ipsum dolor *'"
       }
     }
   },
