@@ -1,0 +1,61 @@
+{
+  "title": "Admin Dashboard",
+  "description": "Observabilidad global de la plataforma",
+  "loading": "Cargando estadísticas...",
+  "error": "Error al cargar datos",
+  "retry": "Reintentar",
+  "refresh": "Actualizar",
+  "viewUsers": "Ver usuarios",
+  "stats": {
+    "users": "Usuarios",
+    "usersNew": "+{count} este mes",
+    "exams": "Exámenes",
+    "examsGraded": "{count} calificados",
+    "scans": "Escaneos",
+    "scansNew": "+{count} este mes",
+    "institutions": "Instituciones",
+    "groups": "Grupos",
+    "groupsActive": "{count} activos",
+    "students": "Estudiantes",
+    "aiJobs": "Jobs IA",
+    "aiJobsSuccess": "{count} exitosos"
+  },
+  "tiers": {
+    "title": "Distribución por Tier",
+    "free": "Free",
+    "plus": "Plus",
+    "admin": "Admin",
+    "grandfathered": "Grandfathered",
+    "total": "Total usuarios"
+  },
+  "trends": {
+    "title": "Tendencias (Últimos 6 meses)",
+    "users": "Usuarios",
+    "exams": "Exámenes",
+    "scans": "Escaneos"
+  },
+  "users": {
+    "title": "Usuarios",
+    "description": "Lista de todos los usuarios registrados",
+    "search": "Buscar por nombre...",
+    "filterTier": "Filtrar por tier",
+    "allTiers": "Todos los tiers",
+    "table": {
+      "user": "Usuario",
+      "email": "Email",
+      "tier": "Tier",
+      "entities": "Entidades",
+      "subjects": "Materias",
+      "groups": "Grupos",
+      "exams": "Exámenes",
+      "scans": "Escaneos",
+      "created": "Registrado"
+    },
+    "pagination": {
+      "showing": "Mostrando {from}-{to} de {total}",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
+    "empty": "No se encontraron usuarios"
+  }
+}

@@ -182,6 +182,15 @@ export const pathnames = {
   '/dashboard/entities': {
     es: '/panel/entidades',
     en: '/dashboard/entities'
+  },
+  // Admin dashboard
+  '/dashboard/admin': {
+    es: '/dashboard/admin',
+    en: '/dashboard/admin'
+  },
+  '/dashboard/admin/users': {
+    es: '/dashboard/admin/usuarios',
+    en: '/dashboard/admin/users'
   }
 } satisfies Pathnames<['es', 'en']>;
 

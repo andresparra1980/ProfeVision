@@ -16,6 +16,12 @@
       "title": "Plan Plus",
       "description": "Plan premium con acceso ilimitado a todas las funciones de ProfeVision."
     },
+
+    "admin": {
+      "title": "Plan Admin",
+      "description": "Plan de acceso completo para administradores y usuarios avanzados."
+    },
+
     "free": {
       "title": "Plan Free",
       "description": "Plan gratuito con funcionalidades básicas."

@@ -317,6 +317,22 @@ export class TierService {
       throw error;
     }
   }
+
+  /**
+   * Check if a professor has admin privileges
+   * @param supabase - Supabase client instance
+   * @param profesorId - The professor's UUID
+   * @returns Promise<boolean>
+   */
+  static async isAdmin(supabase: SupabaseClient, profesorId: string): Promise<boolean> {
+    try {
+      const tier = await this.getCurrentTier(supabase, profesorId);
+      return tier === 'admin';
+    } catch (error) {
+      logger.error('Error in isAdmin:', error);
+      return false;
+    }
+  }
 }
 
 export default TierService;
