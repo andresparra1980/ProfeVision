@@ -4,6 +4,41 @@ import { TierService } from '@/lib/services/tier-service';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
+// Helper to get ISO date string for N months ago
+function getMonthsAgoDate(months: number): string {
+  const date = new Date();
+  date.setMonth(date.getMonth() - months);
+  date.setDate(1);
+  date.setHours(0, 0, 0, 0);
+  return date.toISOString();
+}
+
+// Helper to count records by month
+function countByMonth(records: { date: string }[], months: number): { month: string; count: number }[] {
+  const counts: Record<string, number> = {};
+
+  // Initialize all months with 0
+  for (let i = months - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    const key = date.toISOString().slice(0, 7); // YYYY-MM
+    counts[key] = 0;
+  }
+
+  // Count records
+  records.forEach((r) => {
+    const key = r.date.slice(0, 7);
+    if (key in counts) {
+      counts[key]++;
+    }
+  });
+
+  // Convert to array sorted by month
+  return Object.entries(counts)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, count]) => ({ month, count }));
+}
+
 export async function GET(request: Request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -101,26 +136,23 @@ export async function GET(request: Request) {
       // AI jobs
       supabase.from('procesos_examen_similar').select('status'),
 
-      // Trends: Users by month (last 6 months)
-      supabase.rpc('get_monthly_counts', {
-        p_table_name: 'profesores',
-        p_date_column: 'created_at',
-        p_months: 6,
-      }),
+      // Trends: Users (last 6 months)
+      supabase
+        .from('profesores')
+        .select('created_at')
+        .gte('created_at', getMonthsAgoDate(6)),
 
-      // Trends: Exams by month
-      supabase.rpc('get_monthly_counts', {
-        p_table_name: 'examenes',
-        p_date_column: 'created_at',
-        p_months: 6,
-      }),
+      // Trends: Exams (last 6 months)
+      supabase
+        .from('examenes')
+        .select('created_at')
+        .gte('created_at', getMonthsAgoDate(6)),
 
-      // Trends: Scans by month
-      supabase.rpc('get_monthly_counts', {
-        p_table_name: 'examenes_escaneados',
-        p_date_column: 'fecha_escaneo',
-        p_months: 6,
-      }),
+      // Trends: Scans (last 6 months)
+      supabase
+        .from('examenes_escaneados')
+        .select('fecha_escaneo')
+        .gte('fecha_escaneo', getMonthsAgoDate(6)),
     ]);
 
     // Process tier distribution
@@ -145,19 +177,19 @@ export async function GET(request: Request) {
     // Process exams with results (unique)
     const examsWithResultsCount = new Set(examsWithResults.data?.map((r) => r.examen_id) || []).size;
 
-    // Generate fallback trends if RPC doesn't exist
-    const generateFallbackTrends = () => {
-      const months = [];
-      for (let i = 5; i >= 0; i--) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        months.push({
-          month: date.toISOString().slice(0, 7),
-          count: 0,
-        });
-      }
-      return months;
-    };
+    // Process trends
+    const usersTrendData = countByMonth(
+      (usersTrend.data || []).map((r: { created_at: string }) => ({ date: r.created_at })),
+      6
+    );
+    const examsTrendData = countByMonth(
+      (examsTrend.data || []).map((r: { created_at: string }) => ({ date: r.created_at })),
+      6
+    );
+    const scansTrendData = countByMonth(
+      (scansTrend.data || []).map((r: { fecha_escaneo: string }) => ({ date: r.fecha_escaneo })),
+      6
+    );
 
     return NextResponse.json({
       users: {
@@ -187,9 +219,9 @@ export async function GET(request: Request) {
       },
       ai_jobs: aiJobsCounts,
       trends: {
-        users_by_month: usersTrend.data ?? generateFallbackTrends(),
-        exams_by_month: examsTrend.data ?? generateFallbackTrends(),
-        scans_by_month: scansTrend.data ?? generateFallbackTrends(),
+        users_by_month: usersTrendData,
+        exams_by_month: examsTrendData,
+        scans_by_month: scansTrendData,
       },
     });
   } catch (error) {
