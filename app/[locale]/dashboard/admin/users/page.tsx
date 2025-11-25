@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useAdminUsers, type AdminUser } from '@/lib/hooks/use-admin-users';
-import { AdminUsersTable, type SortField, type SortOrder } from '@/components/admin/admin-users-table';
+import { useState } from 'react';
+import { useAdminUsers, type SortField, type SortOrder } from '@/lib/hooks/use-admin-users';
+import { AdminUsersTable } from '@/components/admin/admin-users-table';
 import { TitleCardWithDepth } from '@/components/shared/title-card-with-depth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,10 +17,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Users, Search, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 
-function calculateActivity(user: AdminUser): number {
-  return user.stats.subjects + user.stats.groups + user.stats.exams + user.stats.scans;
-}
-
 export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -34,30 +30,9 @@ export default function AdminUsersPage() {
     limit: 20,
     search,
     tier: tier === 'all' ? '' : tier,
+    sort: sortField,
+    order: sortOrder,
   });
-
-  // Sort users client-side
-  const sortedUsers = useMemo(() => {
-    if (!users.length) return users;
-
-    return [...users].sort((a, b) => {
-      let comparison = 0;
-
-      switch (sortField) {
-        case 'activity':
-          comparison = calculateActivity(a) - calculateActivity(b);
-          break;
-        case 'created_at':
-          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
-        case 'name':
-          comparison = `${a.nombres} ${a.apellidos}`.localeCompare(`${b.nombres} ${b.apellidos}`);
-          break;
-      }
-
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-  }, [users, sortField, sortOrder]);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -66,6 +41,7 @@ export default function AdminUsersPage() {
       setSortField(field);
       setSortOrder('desc');
     }
+    setPage(1); // Reset to first page when sorting changes
   };
 
   const handleSearch = () => {
@@ -138,7 +114,7 @@ export default function AdminUsersPage() {
 
       {/* Table */}
       <AdminUsersTable
-        users={sortedUsers}
+        users={users}
         loading={loading}
         sortField={sortField}
         sortOrder={sortOrder}

@@ -23,7 +23,7 @@ interface AdminUsersTableProps {
   loading?: boolean;
   sortField?: SortField;
   sortOrder?: SortOrder;
-  onSort?: (field: SortField) => void;
+  onSort?: (_field: SortField) => void;
 }
 
 const tierColors: Record<string, string> = {

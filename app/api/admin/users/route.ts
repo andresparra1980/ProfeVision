@@ -4,6 +4,24 @@ import { TierService } from '@/lib/services/tier-service';
 
 const DEBUG = process.env.NODE_ENV === 'development';
 
+interface UserWithStats {
+  id: string;
+  email: string;
+  nombres: string;
+  apellidos: string;
+  subscription_tier: string;
+  subscription_status: string;
+  created_at: string;
+  stats: {
+    entities: number;
+    subjects: number;
+    groups: number;
+    exams: number;
+    scans: number;
+  };
+  activity: number;
+}
+
 export async function GET(request: Request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -43,45 +61,48 @@ export async function GET(request: Request) {
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 100);
     const search = url.searchParams.get('search') || '';
     const tier = url.searchParams.get('tier') || '';
-    const offset = (page - 1) * limit;
+    const sortField = url.searchParams.get('sort') || 'activity';
+    const sortOrder = url.searchParams.get('order') || 'desc';
 
-    // Build query for users with auth email
+    // Get ALL profesores first (for activity sorting we need all data)
     let query = supabase
       .from('profesores')
-      .select('id, nombres, apellidos, subscription_tier, subscription_status, created_at', { count: 'exact' });
+      .select('id, nombres, apellidos, subscription_tier, subscription_status, created_at');
 
     // Apply tier filter
     if (tier && ['free', 'plus', 'admin', 'grandfathered'].includes(tier)) {
       query = query.eq('subscription_tier', tier);
     }
 
-    // Apply search filter (on nombres or apellidos)
+    // Apply search filter
     if (search) {
       query = query.or(`nombres.ilike.%${search}%,apellidos.ilike.%${search}%`);
     }
 
-    // Apply pagination
-    query = query.order('created_at', { ascending: false }).range(offset, offset + limit - 1);
-
-    const { data: profesores, count, error: queryError } = await query;
+    const { data: profesores, error: queryError } = await query;
 
     if (queryError) {
       if (DEBUG) console.error('Error fetching users:', queryError);
       return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
     }
 
-    // Get auth emails for each user
-    const { data: authUsers } = await supabase.auth.admin.listUsers();
+    if (!profesores || profesores.length === 0) {
+      return NextResponse.json({
+        users: [],
+        pagination: { page, limit, total: 0, pages: 0 },
+      });
+    }
 
-    // Create a map of user id to email
+    // Get auth emails
+    const { data: authUsers } = await supabase.auth.admin.listUsers();
     const emailMap = new Map<string, string>();
     authUsers?.users?.forEach((u) => {
       emailMap.set(u.id, u.email || '');
     });
 
-    // Get stats for each user (in parallel)
-    const usersWithStats = await Promise.all(
-      (profesores || []).map(async (profesor) => {
+    // Get stats for ALL users in parallel
+    const usersWithStats: UserWithStats[] = await Promise.all(
+      profesores.map(async (profesor) => {
         const [entities, subjects, groups, exams, scans] = await Promise.all([
           supabase
             .from('entidades_educativas')
@@ -105,6 +126,14 @@ export async function GET(request: Request) {
             .eq('profesor_id', profesor.id),
         ]);
 
+        const stats = {
+          entities: entities.count ?? 0,
+          subjects: subjects.count ?? 0,
+          groups: groups.count ?? 0,
+          exams: exams.count ?? 0,
+          scans: scans.count ?? 0,
+        };
+
         return {
           id: profesor.id,
           email: emailMap.get(profesor.id) || '',
@@ -113,22 +142,41 @@ export async function GET(request: Request) {
           subscription_tier: profesor.subscription_tier,
           subscription_status: profesor.subscription_status,
           created_at: profesor.created_at,
-          stats: {
-            entities: entities.count ?? 0,
-            subjects: subjects.count ?? 0,
-            groups: groups.count ?? 0,
-            exams: exams.count ?? 0,
-            scans: scans.count ?? 0,
-          },
+          stats,
+          activity: stats.subjects + stats.groups + stats.exams + stats.scans,
         };
       })
     );
 
-    const total = count ?? 0;
+    // Sort ALL users
+    usersWithStats.sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortField) {
+        case 'activity':
+          comparison = a.activity - b.activity;
+          break;
+        case 'created_at':
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        case 'name':
+          comparison = `${a.nombres} ${a.apellidos}`.localeCompare(`${b.nombres} ${b.apellidos}`);
+          break;
+        default:
+          comparison = a.activity - b.activity;
+      }
+
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    // Apply pagination AFTER sorting
+    const total = usersWithStats.length;
     const pages = Math.ceil(total / limit);
+    const offset = (page - 1) * limit;
+    const paginatedUsers = usersWithStats.slice(offset, offset + limit);
 
     return NextResponse.json({
-      users: usersWithStats,
+      users: paginatedUsers,
       pagination: {
         page,
         limit,

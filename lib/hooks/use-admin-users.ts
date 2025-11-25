@@ -27,15 +27,20 @@ export interface AdminUsersPagination {
   pages: number;
 }
 
+export type SortField = 'activity' | 'created_at' | 'name';
+export type SortOrder = 'asc' | 'desc';
+
 export interface UseAdminUsersParams {
   page?: number;
   limit?: number;
   search?: string;
   tier?: string;
+  sort?: SortField;
+  order?: SortOrder;
 }
 
 export function useAdminUsers(params: UseAdminUsersParams = {}) {
-  const { page = 1, limit = 20, search = '', tier = '' } = params;
+  const { page = 1, limit = 20, search = '', tier = '', sort = 'activity', order = 'desc' } = params;
 
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [pagination, setPagination] = useState<AdminUsersPagination>({
@@ -61,6 +66,8 @@ export function useAdminUsers(params: UseAdminUsersParams = {}) {
       const queryParams = new URLSearchParams({
         page: String(page),
         limit: String(limit),
+        sort,
+        order,
         ...(search && { search }),
         ...(tier && { tier }),
       });
@@ -84,7 +91,7 @@ export function useAdminUsers(params: UseAdminUsersParams = {}) {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search, tier]);
+  }, [page, limit, search, tier, sort, order]);
 
   useEffect(() => {
     fetchUsers();
