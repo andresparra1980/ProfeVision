@@ -41,6 +41,17 @@ function escapeLatexOutsideMath(input: string): string {
     // unify Windows newlines
     .replace(/\r\n/g, '\n');
 
+  // Strip HTML tags (e.g. <p>, </p>) that may leak from rich text
+  s = s.replace(/<[^>]+>/g, '');
+
+  // Decode common HTML entities
+  s = s
+    .replace(/&gt;/g, '>')
+    .replace(/&lt;/g, '<')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&quot;/g, '"');
+
   // Normalize common double-backslash escaping that comes from DB or JSON encoding
   // Example: `$\\Delta p$` -> `$\Delta p$` so LaTeX renders Greek Delta instead of the word "Delta"
   // Only normalize when the double backslash is followed by a letter, to keep constructs like `\\[` intact
