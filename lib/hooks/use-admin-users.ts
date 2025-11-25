@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 export interface AdminUser {
   id: string;
   email: string;
+  email_confirmed: boolean;
   nombres: string;
   apellidos: string;
   subscription_tier: string;

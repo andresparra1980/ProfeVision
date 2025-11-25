@@ -1408,7 +1408,11 @@
         "scans": "Scans",
         "activity": "Activity",
         "registered": "Registered",
-        "noUsers": "No users found"
+        "noUsers": "No users found",
+        "copyEmail": "Copy email",
+        "emailCopied": "Email copied",
+        "emailConfirmed": "Email confirmed",
+        "emailNotConfirmed": "Email not confirmed"
       },
       "noUsers": "No users found",
       "showing": "Showing",

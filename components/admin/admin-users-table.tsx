@@ -3,14 +3,7 @@
 import { useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
@@ -30,8 +23,12 @@ import {
   FileText,
   ScanLine,
   Activity,
+  CheckCircle2,
+  XCircle,
+  Mail,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import type { AdminUser } from '@/lib/hooks/use-admin-users';
 
 export type SortField = 'activity' | 'created_at' | 'name';
@@ -87,6 +84,11 @@ export function AdminUsersTable({ users, loading, sortField, sortOrder, onSort }
     });
   }, [locale]);
 
+  const copyEmail = useCallback((email: string) => {
+    navigator.clipboard.writeText(email);
+    toast.success(t('emailCopied'));
+  }, [t]);
+
   // User card for mobile view
   const UserCard = useCallback(({ user, index }: { user: AdminUser; index: number }) => {
     const activity = calculateActivity(user);
@@ -102,12 +104,35 @@ export function AdminUsersTable({ users, loading, sortField, sortOrder, onSort }
         {/* Header: Name + Tier */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <div className="font-medium text-sm truncate">
-              {user.nombres} {user.apellidos}
+            <div className="flex items-center gap-1">
+              <span className="font-medium text-sm truncate">
+                {user.nombres} {user.apellidos}
+              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {user.email_confirmed ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />
+                  )}
+                </TooltipTrigger>
+                <TooltipContent>
+                  {user.email_confirmed ? t('emailConfirmed') : t('emailNotConfirmed')}
+                </TooltipContent>
+              </Tooltip>
             </div>
-            <div className="text-xs text-muted-foreground truncate">
-              {user.email}
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => copyEmail(user.email)}
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Mail className="h-3 w-3" />
+                  <span>{t('copyEmail')}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{user.email}</TooltipContent>
+            </Tooltip>
           </div>
           <Badge className={cn('text-xs shrink-0', tierColors[user.subscription_tier] || tierColors.free)}>
             {user.subscription_tier}
@@ -166,7 +191,7 @@ export function AdminUsersTable({ users, loading, sortField, sortOrder, onSort }
         </div>
       </div>
     );
-  }, [t, formatDate]);
+  }, [t, formatDate, copyEmail]);
 
   if (loading) {
     return (
@@ -188,96 +213,117 @@ export function AdminUsersTable({ users, loading, sortField, sortOrder, onSort }
     );
   }
 
-  const sortableHeader = (field: SortField, label: React.ReactNode, className?: string) => (
-    <TableHead
-      className={cn("cursor-pointer hover:bg-muted/50 select-none", className)}
-      onClick={() => onSort?.(field)}
-    >
-      <div className="flex items-center">
-        {label}
-        <SortIcon field={field} currentField={sortField} order={sortOrder} />
-      </div>
-    </TableHead>
-  );
-
   return (
     <TooltipProvider>
-      {/* Desktop Table View */}
-      <Card className="overflow-hidden hidden lg:block">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {sortableHeader('name', t('user'), 'min-w-[150px]')}
-              <TableHead className="min-w-[180px]">{t('email')}</TableHead>
-              <TableHead>{t('tier')}</TableHead>
-              {/* Stats columns with icons */}
-              {statsIcons.map(({ key, icon: Icon, color }) => (
-                <TableHead key={key} className="text-center w-12 px-2">
+      {/* Desktop View */}
+      <Card className="hidden lg:block p-3">
+        {/* Header */}
+        <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground mb-2">
+          <div
+            className="flex-1 min-w-[200px] flex items-center cursor-pointer hover:text-foreground"
+            onClick={() => onSort?.('name')}
+          >
+            {t('user')}
+            <SortIcon field="name" currentField={sortField} order={sortOrder} />
+          </div>
+          <div className="w-24 text-center">{t('tier')}</div>
+          {statsIcons.map(({ key, icon: Icon, color }) => (
+            <Tooltip key={key}>
+              <TooltipTrigger asChild>
+                <div className="w-12 flex justify-center">
+                  <Icon className={cn('h-4 w-4', color)} />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>{t(key)}</TooltipContent>
+            </Tooltip>
+          ))}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className="w-12 flex justify-center cursor-pointer"
+                onClick={() => onSort?.('activity')}
+              >
+                <Activity className="h-4 w-4 text-emerald-500" />
+                <SortIcon field="activity" currentField={sortField} order={sortOrder} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{t('activity')}</TooltipContent>
+          </Tooltip>
+          <div
+            className="w-24 flex items-center cursor-pointer hover:text-foreground"
+            onClick={() => onSort?.('created_at')}
+          >
+            {t('registered')}
+            <SortIcon field="created_at" currentField={sortField} order={sortOrder} />
+          </div>
+        </div>
+
+        {/* Rows */}
+        <div className="space-y-1">
+          {users.map((user, index) => {
+            const activity = calculateActivity(user);
+            const isEven = index % 2 === 0;
+            return (
+              <div
+                key={user.id}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2 rounded-lg border',
+                  isEven ? 'bg-muted/30' : 'bg-background'
+                )}
+              >
+                {/* User name + email icon */}
+                <div className="flex-1 min-w-[200px] flex items-center gap-1.5">
+                  <span className="font-medium truncate">
+                    {user.nombres} {user.apellidos}
+                  </span>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex justify-center">
-                        <Icon className={cn('h-4 w-4', color)} />
-                      </div>
+                      {user.email_confirmed ? (
+                        <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />
+                      )}
                     </TooltipTrigger>
                     <TooltipContent>
-                      {t(key)}
+                      {user.email_confirmed ? t('emailConfirmed') : t('emailNotConfirmed')}
                     </TooltipContent>
                   </Tooltip>
-                </TableHead>
-              ))}
-              {sortableHeader(
-                'activity',
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex justify-center">
-                      <Activity className="h-4 w-4 text-emerald-500" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {t('activity')}
-                  </TooltipContent>
-                </Tooltip>,
-                'text-center w-12 px-2'
-              )}
-              {sortableHeader('created_at', t('registered'), 'min-w-[100px]')}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user, index) => {
-              const activity = calculateActivity(user);
-              return (
-                <TableRow key={user.id} className={index % 2 === 0 ? 'bg-muted/30' : ''}>
-                  <TableCell className="font-medium">
-                    <span className="truncate block max-w-[200px]">
-                      {user.nombres} {user.apellidos}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    <span className="truncate block max-w-[200px]">
-                      {user.email}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={cn('text-xs', tierColors[user.subscription_tier] || tierColors.free)}>
-                      {user.subscription_tier}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center text-sm">{user.stats.entities}</TableCell>
-                  <TableCell className="text-center text-sm">{user.stats.subjects}</TableCell>
-                  <TableCell className="text-center text-sm">{user.stats.groups}</TableCell>
-                  <TableCell className="text-center text-sm">{user.stats.exams}</TableCell>
-                  <TableCell className="text-center text-sm">{user.stats.scans}</TableCell>
-                  <TableCell className="text-center font-semibold text-sm">
-                    {activity}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-xs">
-                    {formatDate(user.created_at)}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => copyEmail(user.email)}
+                        className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{user.email}</TooltipContent>
+                  </Tooltip>
+                </div>
+
+                {/* Tier */}
+                <div className="w-24 flex justify-center">
+                  <Badge className={cn('text-xs', tierColors[user.subscription_tier] || tierColors.free)}>
+                    {user.subscription_tier}
+                  </Badge>
+                </div>
+
+                {/* Stats */}
+                <div className="w-12 text-center text-sm">{user.stats.entities}</div>
+                <div className="w-12 text-center text-sm">{user.stats.subjects}</div>
+                <div className="w-12 text-center text-sm">{user.stats.groups}</div>
+                <div className="w-12 text-center text-sm">{user.stats.exams}</div>
+                <div className="w-12 text-center text-sm">{user.stats.scans}</div>
+                <div className="w-12 text-center text-sm font-semibold">{activity}</div>
+
+                {/* Date */}
+                <div className="w-24 text-xs text-muted-foreground">
+                  {formatDate(user.created_at)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </Card>
 
       {/* Mobile Card View */}

@@ -7,6 +7,7 @@ const DEBUG = process.env.NODE_ENV === 'development';
 interface UserWithStats {
   id: string;
   email: string;
+  email_confirmed: boolean;
   nombres: string;
   apellidos: string;
   subscription_tier: string;
@@ -93,11 +94,14 @@ export async function GET(request: Request) {
       });
     }
 
-    // Get auth emails
+    // Get auth emails and confirmation status
     const { data: authUsers } = await supabase.auth.admin.listUsers();
-    const emailMap = new Map<string, string>();
+    const emailMap = new Map<string, { email: string; confirmed: boolean }>();
     authUsers?.users?.forEach((u) => {
-      emailMap.set(u.id, u.email || '');
+      emailMap.set(u.id, {
+        email: u.email || '',
+        confirmed: !!u.email_confirmed_at,
+      });
     });
 
     // Get stats for ALL users in parallel
@@ -134,9 +138,11 @@ export async function GET(request: Request) {
           scans: scans.count ?? 0,
         };
 
+        const authInfo = emailMap.get(profesor.id);
         return {
           id: profesor.id,
-          email: emailMap.get(profesor.id) || '',
+          email: authInfo?.email || '',
+          email_confirmed: authInfo?.confirmed ?? false,
           nombres: profesor.nombres,
           apellidos: profesor.apellidos,
           subscription_tier: profesor.subscription_tier,

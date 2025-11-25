@@ -1409,7 +1409,11 @@
         "scans": "Escaneos",
         "activity": "Actividad",
         "registered": "Registrado",
-        "noUsers": "No se encontraron usuarios"
+        "noUsers": "No se encontraron usuarios",
+        "copyEmail": "Copiar email",
+        "emailCopied": "Email copiado",
+        "emailConfirmed": "Email confirmado",
+        "emailNotConfirmed": "Email no confirmado"
       },
       "noUsers": "No se encontraron usuarios",
       "showing": "Mostrando",
