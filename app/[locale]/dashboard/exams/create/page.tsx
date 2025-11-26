@@ -23,6 +23,7 @@ import { useProfesor } from "@/lib/hooks/useProfesor";
 import { Trash2, Info } from "lucide-react";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { useTranslations } from "next-intl";
+import { useChecklistItem } from "@/lib/contexts/onboarding-context";
 
 // Tipos
 type Materia = {
@@ -97,6 +98,7 @@ export default function CreateExamPage() {
   const { profesor } = useProfesor();
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [gruposFiltrados, setGruposFiltrados] = useState<Grupo[]>([]);
+  const { complete: completeExamCreated } = useChecklistItem('exam_created');
   const [isClient, setIsClient] = useState(false);
 
   // Keep track of all stored questions, regardless of display count
@@ -460,6 +462,9 @@ export default function CreateExamPage() {
 
       // Clear localStorage after successful creation
       localStorage.removeItem('examQuestions');
+
+      // Mark checklist item as complete for onboarding
+      await completeExamCreated();
 
       toast.success(t('common.success'), {
         description: t('exams.messages.createSuccess'),
