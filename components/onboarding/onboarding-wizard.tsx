@@ -60,7 +60,7 @@ const TOTAL_STEPS = 6;
 
 export function OnboardingWizard() {
   const t = useTranslations("onboarding");
-  const { shouldShowWizard, skipWizard, completeWizardStep, dismissWizard } = useOnboarding();
+  const { shouldShowWizard, completeWizardStep } = useOnboarding();
   
   const [currentStep, setCurrentStep] = useState(0);
   const [wizardData, setWizardData] = useState<WizardData>({});
@@ -87,10 +87,6 @@ export function OnboardingWizard() {
       setCurrentStep(prev => prev - 1);
     }
   }, [currentStep]);
-
-  const handleSkip = useCallback(async () => {
-    await skipWizard("user_skipped");
-  }, [skipWizard]);
 
   const handleComplete = useCallback(async () => {
     setIsSubmitting(true);
@@ -214,15 +210,7 @@ export function OnboardingWizard() {
               {t("wizard.back")}
             </Button>
             
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                onClick={handleSkip}
-                className="text-muted-foreground"
-              >
-                {t("wizard.skip")}
-              </Button>
-            </div>
+
           </div>
         )}
       </DialogContent>

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
-import { GraduationCap, ChevronRight, Plus, Trash2, Upload, AlertCircle } from "lucide-react";
+import { GraduationCap, ChevronRight, Plus, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
@@ -89,11 +89,6 @@ export function StudentsStep({ groupId, data: initialData, onUpdate, onNext, isS
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleSkip = () => {
-    onUpdate([]);
-    onNext();
   };
 
   return (
@@ -206,24 +201,8 @@ export function StudentsStep({ groupId, data: initialData, onUpdate, onNext, isS
         </TabsContent>
       </Tabs>
 
-      {/* Skip warning */}
-      {students.length === 0 && (
-        <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg text-amber-800 dark:text-amber-200">
-          <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-          <p className="text-sm">{t("skipWarning")}</p>
-        </div>
-      )}
-
       {/* Actions */}
-      <div className="flex justify-between pt-4">
-        <Button
-          variant="ghost"
-          onClick={handleSkip}
-          disabled={saving || isSubmitting}
-        >
-          {t("skipStudents")}
-        </Button>
-        
+      <div className="flex justify-end pt-4">
         <Button
           onClick={handleSubmit}
           disabled={students.length === 0 || saving || isSubmitting}
