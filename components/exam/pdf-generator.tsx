@@ -6,6 +6,7 @@ import { Document, Page, Text, View, StyleSheet, Circle, Svg, Path, Image, BlobP
 import { useTranslations } from 'next-intl';
 import { generateLMarkerPath, calculateMarkerDimensions, generateMarkerContainerStyle } from '@/lib/utils/corner-markers';
 import { generateOptimizedQRCode, generateOptimizedQRData } from '@/lib/utils/qr-code';
+import { QrCode } from 'lucide-react';
 
 interface Student {
   id: string;
@@ -44,6 +45,7 @@ interface PDFGeneratorProps {
   group: Group;
   paperSize: 'LETTER' | 'A4';
   fileName: string;
+  onGenerated?: () => void;
 }
 
 // Definir estilos para el PDF
@@ -400,7 +402,7 @@ const PDFDocument = ({ exam, group }: { exam: Exam; group: Group }) => {
 );
 };
 
-export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName }: PDFGeneratorProps) {
+export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName, onGenerated }: PDFGeneratorProps) {
   const [isClient, setIsClient] = useState(false);
   const t = useTranslations('dashboard.exams.results.pdfExport');
 
@@ -462,8 +464,10 @@ export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName }: P
           <a
             href={url || '#'}
             download={fileName}
+            onClick={() => onGenerated?.()}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
           >
+            <QrCode className="mr-2 h-4 w-4" />
             Descargar PDF
           </a>
         );

@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { useOnboarding } from "@/lib/contexts/onboarding-context";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import {
@@ -34,6 +35,7 @@ interface ChecklistItemData {
 export function OnboardingChecklist() {
   const t = useTranslations("onboarding.checklist");
   const router = useRouter();
+  const pathname = usePathname();
   const { 
     onboardingStatus, 
     isLegacyUser, 
@@ -53,13 +55,14 @@ export function OnboardingChecklist() {
     first_scan: false,
   });
   
-  // Prevent multiple checks
-  const hasChecked = useRef(false);
+  const lastCheckedPathRef = useRef<string | null>(null);
+  const isCheckingRef = useRef(false);
 
-  // Check actual progress from database (only once)
+  // Check actual progress from database
   const checkProgress = useCallback(async () => {
-    if (hasChecked.current) return;
-    hasChecked.current = true;
+    // Prevent concurrent checks
+    if (isCheckingRef.current) return;
+    isCheckingRef.current = true;
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -74,11 +77,12 @@ export function OnboardingChecklist() {
         .select("*", { count: "exact", head: true })
         .eq("profesor_id", user.id);
 
-      // Check if user has published any exam (examen_grupo)
+      // Check if user has published any exam (estado = 'publicado')
       const { count: publishedCount } = await supabase
-        .from("examen_grupo")
-        .select("*, examenes!inner(profesor_id)", { count: "exact", head: true })
-        .eq("examenes.profesor_id", user.id);
+        .from("examenes")
+        .select("*", { count: "exact", head: true })
+        .eq("profesor_id", user.id)
+        .eq("estado", "publicado");
 
       // Check if user has any exam results (indicates scanning)
       const { count: scanCount } = await supabase
@@ -106,16 +110,40 @@ export function OnboardingChecklist() {
       console.error("Error checking progress:", error);
     } finally {
       setCheckingProgress(false);
+      isCheckingRef.current = false;
     }
   }, [onboardingStatus?.checklist_items, completeChecklistItem]);
 
+  // Check on mount, route change, and when page becomes visible
   useEffect(() => {
-    if (!isLoading && !isLegacyUser && !hasChecked.current) {
-      checkProgress();
-    } else if (isLoading || isLegacyUser) {
+    if (isLoading || isLegacyUser) {
       setCheckingProgress(false);
+      return;
     }
-  }, [isLoading, isLegacyUser, checkProgress]);
+
+    // Only check if pathname changed
+    if (lastCheckedPathRef.current !== pathname) {
+      lastCheckedPathRef.current = pathname;
+      checkProgress();
+    }
+
+    // Refresh when user returns to tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !isLoading && !isLegacyUser) {
+        checkProgress();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isLoading, isLegacyUser, checkProgress, pathname]);
+
+  // Sync pdf_exported from context when it changes (for immediate UI update)
+  useEffect(() => {
+    if (onboardingStatus?.checklist_items?.pdf_exported && !itemsStatus.pdf_exported) {
+      setItemsStatus(prev => ({ ...prev, pdf_exported: true }));
+    }
+  }, [onboardingStatus?.checklist_items?.pdf_exported, itemsStatus.pdf_exported]);
 
   // Don't show for legacy users or if dismissed
   if (isLegacyUser || isDismissed || isLoading || checkingProgress) {
@@ -293,7 +321,7 @@ export function OnboardingChecklist() {
                 )}>
                   {t(`items.${translationKey}.title`)}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground">
                   {t(`items.${translationKey}.description`)}
                 </p>
               </div>

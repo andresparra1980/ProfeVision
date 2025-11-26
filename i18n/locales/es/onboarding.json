@@ -139,7 +139,7 @@
       },
       "publishExam": {
         "title": "Publica el examen",
-        "description": "Asigna el examen a un grupo",
+        "description": "Finaliza el examen para imprimir y calificar. Haz click en 'Publicar' en las opciones del examen.",
         "cta": "Publicar"
       },
       "exportPdf": {

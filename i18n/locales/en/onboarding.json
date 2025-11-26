@@ -139,7 +139,7 @@
       },
       "publishExam": {
         "title": "Publish the exam",
-        "description": "Assign the exam to a group",
+        "description": "Finalize the exam to print and grade. Click 'Publish' in the exam options.",
         "cta": "Publish"
       },
       "exportPdf": {

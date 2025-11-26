@@ -13,14 +13,21 @@ import {
   Pencil,
   Trash2,
   Printer,
-  FileOutput,
   Users,
   Eye,
   Plus,
   FileText, // Kept for empty state
   Link,
   Calendar,
+  Send,
 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { supabase } from "@/lib/supabase";
 import SimilarExamModal from "./SimilarExamModal";
 import SimilarExamMetadataDialog, { SimilarExamMeta } from "./SimilarExamMetadataDialog";
@@ -90,6 +97,7 @@ interface ExamCardContentProps {
   router: ReturnType<typeof useRouter>;
   onOpenDeleteDialog: (_examId: string) => void;
   onStartSimilar: (_examId: string) => void;
+  onPublish: (_examId: string) => void;
 }
 
 function ExamCardContent({
@@ -97,24 +105,53 @@ function ExamCardContent({
   router,
   onOpenDeleteDialog,
   onStartSimilar,
+  onPublish,
 }: ExamCardContentProps) {
   const t = useTranslations('dashboard.exams');
   
   return (
     <div className="space-y-1">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start h-auto py-2 px-2"
-        onClick={() => {
-          router.push({
-            pathname: '/dashboard/exams/[id]/edit',
-            params: { id: exam.id },
-          });
-        }}
-      >
-        <Pencil className="mr-2 h-4 w-4" /> {t('actions.edit')}
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start h-auto py-2 px-2"
+              onClick={() => {
+                router.push({
+                  pathname: '/dashboard/exams/[id]/edit',
+                  params: { id: exam.id },
+                });
+              }}
+            >
+              <Pencil className="mr-2 h-4 w-4" /> {t('actions.edit')}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{exam.estado === "borrador" ? t('tooltips.editDraft') : t('tooltips.editPublished')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      {exam.estado === "borrador" && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-auto py-2 px-2 text-primary"
+                onClick={() => onPublish(exam.id)}
+              >
+                <Send className="mr-2 h-4 w-4" /> {t('actions.publish')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <p>{t('tooltips.publishWarning')}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
       <Button
         variant="ghost"
         size="sm"
@@ -144,20 +181,7 @@ function ExamCardContent({
             });
           }}
         >
-          <Printer className="mr-2 h-4 w-4" /> {t('actions.print')}
-      </Button>
-                             <Button
-           variant="ghost"
-           size="sm"
-           className="w-full justify-start h-auto py-2 px-2"
-           onClick={() => {
-             router.push({
-               pathname: '/dashboard/exams/[id]/responses',
-               params: { id: exam.id },
-             });
-           }}
-         >
-           <FileOutput className="mr-2 h-4 w-4" /> {t('actions.generateSheets')}
+          <Printer className="mr-2 h-4 w-4" /> {t('actions.exportAndPrint')}
       </Button>
               <Button
           variant="ghost"
@@ -378,6 +402,35 @@ export default function ExamsTableMobile({
     }
   };
 
+  const handlePublish = async (examId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error(t('messages.unauthorized'));
+        return;
+      }
+
+      const response = await fetch(`/api/exams/${examId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ estado: 'publicado' }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error publishing exam');
+      }
+
+      toast.success(t('messages.examPublished'));
+      window.location.reload();
+    } catch (error) {
+      console.error("Error publishing exam:", error);
+      toast.error(t('messages.publishError'));
+    }
+  };
+
   const startSimilarJob = async (examId: string, meta?: SimilarExamMeta) => {
     try {
       const { data: session } = await supabase.auth.getSession();
@@ -458,6 +511,7 @@ export default function ExamsTableMobile({
                   router={router}
                   onOpenDeleteDialog={onOpenDeleteDialog}
                   onStartSimilar={startSimilarJob}
+                  onPublish={handlePublish}
                 />
               </div>
             </div>
@@ -482,6 +536,7 @@ export default function ExamsTableMobile({
                   router={router}
                   onOpenDeleteDialog={onOpenDeleteDialog}
                   onStartSimilar={startSimilarJob}
+                  onPublish={handlePublish}
                 />
               </AccordionContent>
             </AccordionItem>

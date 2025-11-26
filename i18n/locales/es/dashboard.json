@@ -77,7 +77,9 @@
       "viewResults": "Ver Resultados",
       "linkComponent": "Vincular Componente",
       "linkComponentFull": "Vincular a Componente de Nota",
-      "backToExams": "Volver a Exámenes"
+      "backToExams": "Volver a Exámenes",
+      "publish": "Publicar",
+      "exportAndPrint": "Exportar PDFs e Imprimir"
     },
     "form": {
       "title": "Título del examen",
@@ -163,6 +165,11 @@
       "success": "Éxito",
       "examCreated": "Examen creado correctamente",
       "error": "Error"
+    },
+    "tooltips": {
+      "publishWarning": "Al publicar, el examen se cierra para edición. No podrás modificar textos de preguntas u opciones, solo deshabilitar preguntas o cambiar la respuesta correcta.",
+      "editDraft": "Edita preguntas, opciones y textos libremente. También puedes usar el Chat IA para modificar el examen.",
+      "editPublished": "Solo puedes deshabilitar preguntas o cambiar la respuesta correcta. Los textos están bloqueados."
     },
     "details": {
       "title": "Detalles del Examen",
@@ -578,13 +585,23 @@
       "error": "Error al vincular las calificaciones"
     },
     "export": {
+      "pageTitle": "Exportar PDFs e Imprimir",
       "title": "Exportar Formatos",
       "availableFormats": "Formatos Disponibles",
       "description": "Descarga diferentes formatos de tu examen para impresión y distribución",
-      "questionSheet": "Hoja de Preguntas",
-      "questionSheetDesc": "Descarga el examen con todas las preguntas y opciones de respuesta",
-      "answerSheets": "Hojas de Respuesta",
-      "answerSheetsDesc": "Genera hojas de respuesta personalizadas para cada estudiante",
+      "answerSheets": {
+        "title": "Hojas de Respuesta",
+        "description": "Genera las hojas donde los estudiantes marcarán sus respuestas",
+        "info": "Cada estudiante recibe una hoja única con su nombre, identificación y un código QR único para escaneo automático.",
+        "selectGroup": "Selecciona el grupo",
+        "selectGroupHint": "Selecciona un grupo para generar las hojas de respuesta.",
+        "noGroups": "No hay grupos asignados a este examen. Asigna un grupo primero."
+      },
+      "questionSheet": {
+        "title": "Hoja de Preguntas",
+        "optional": "opcional",
+        "description": "Una sola copia con todas las preguntas del examen para entregar a los estudiantes o proyectar."
+      },
       "preview": "Vista Previa",
       "downloadPDF": "Descargar PDF",
       "downloadTex": "Descargar LaTeX",

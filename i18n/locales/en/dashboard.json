@@ -76,7 +76,9 @@
       "viewResults": "View Results",
       "linkComponent": "Link Component",
       "linkComponentFull": "Link to Grade Component",
-      "backToExams": "Back to Exams"
+      "backToExams": "Back to Exams",
+      "publish": "Publish",
+      "exportAndPrint": "Export PDFs and Print"
     },
     "form": {
       "title": "Exam title",
@@ -162,6 +164,11 @@
       "success": "Success",
       "examCreated": "Exam created successfully",
       "error": "Error"
+    },
+    "tooltips": {
+      "publishWarning": "Once published, the exam is locked for editing. You won't be able to modify question or option texts, only disable questions or change the correct answer.",
+      "editDraft": "Edit questions, options and texts freely. You can also use AI Chat to modify the exam.",
+      "editPublished": "You can only disable questions or change the correct answer. Texts are locked."
     },
     "details": {
       "title": "Exam Details",
@@ -577,13 +584,23 @@
       "error": "Error linking grades"
     },
     "export": {
+      "pageTitle": "Export PDFs and Print",
       "title": "Export Formats",
       "availableFormats": "Available Formats",
       "description": "Download different formats of your exam for printing and distribution",
-      "questionSheet": "Question Sheet",
-      "questionSheetDesc": "Download the exam with all questions and answer options",
-      "answerSheets": "Answer Sheets",
-      "answerSheetsDesc": "Generate personalized answer sheets for each student",
+      "answerSheets": {
+        "title": "Answer Sheets",
+        "description": "Generate the sheets where students will mark their answers",
+        "info": "Each student receives a unique sheet with their name, ID, and a unique QR code for automatic scanning.",
+        "selectGroup": "Select the group",
+        "selectGroupHint": "Select a group to generate the answer sheets.",
+        "noGroups": "No groups assigned to this exam. Assign a group first."
+      },
+      "questionSheet": {
+        "title": "Question Sheet",
+        "optional": "optional",
+        "description": "A single copy with all exam questions to give to students or project."
+      },
       "preview": "Preview",
       "downloadPDF": "Download PDF",
       "downloadTex": "Download LaTeX",
