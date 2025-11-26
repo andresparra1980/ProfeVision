@@ -9,6 +9,7 @@
     --primary: #0b890f;
     --secondary: #bc152b;
     --accent: #ffd60a;
+    --feature: #890B85;
 
     --foreground: var(--text);
     --card: #f8f9fa;
@@ -41,6 +42,7 @@
     --primary: #76f47a;
     --secondary: #ea4359;
     --accent: #f5cc00;
+    --feature: #F476F0;
 
     --foreground: var(--text);
     --card: #333334;

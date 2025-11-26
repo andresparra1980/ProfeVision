@@ -232,7 +232,7 @@ export function OnboardingChecklist() {
     return (
       <>
         {/* Desktop: vertical collapsed bar on right edge, centered */}
-        <Card className="hidden md:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 shadow-lg border-accent bg-card/95 backdrop-blur rounded-l-lg rounded-r-none flex-col items-center py-3 px-1 gap-2">
+        <Card className="hidden md:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 shadow-lg border-feature bg-card/95 backdrop-blur rounded-l-lg rounded-r-none flex-col items-center py-3 px-1 gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -253,7 +253,7 @@ export function OnboardingChecklist() {
         </Card>
 
         {/* Mobile: horizontal bar above "Califica Ya" button */}
-        <Card className="md:hidden fixed bottom-20 right-4 left-4 z-40 p-3 shadow-lg border-accent bg-card/95 backdrop-blur">
+        <Card className="md:hidden fixed bottom-20 right-4 left-4 z-40 p-3 shadow-lg border-feature bg-card">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10">
               <Sparkles className="h-4 w-4 text-primary" />
@@ -281,7 +281,7 @@ export function OnboardingChecklist() {
   return (
     <>
     {/* Desktop: right edge, vertically centered */}
-    <Card className="hidden md:block fixed right-0 top-1/2 -translate-y-1/2 z-40 w-80 shadow-lg border-accent bg-card/95 backdrop-blur rounded-l-lg rounded-r-none">
+    <Card className="hidden md:block fixed right-0 top-1/2 -translate-y-1/2 z-40 w-80 shadow-lg border-feature bg-card/95 backdrop-blur rounded-l-lg rounded-r-none">
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-2">
@@ -377,7 +377,7 @@ export function OnboardingChecklist() {
     </Card>
 
     {/* Mobile: bottom positioned, above "Califica Ya" button */}
-    <Card className="md:hidden fixed bottom-20 right-4 left-4 z-40 shadow-lg border-accent bg-card/95 backdrop-blur">
+    <Card className="md:hidden fixed bottom-20 right-4 left-4 z-40 shadow-lg border-feature bg-card">
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-2">
