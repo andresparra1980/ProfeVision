@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useOnboarding } from "@/lib/contexts/onboarding-context";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, X } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 // Steps
 import { 
@@ -101,7 +101,7 @@ export function OnboardingWizard() {
     }
   }, [completeWizardStep]);
 
-  const progressPercent = ((currentStep + 1) / TOTAL_STEPS) * 100;
+  const progressPercent = (currentStep / TOTAL_STEPS) * 100;
 
   const renderStep = () => {
     switch (currentStep) {
@@ -174,19 +174,9 @@ export function OnboardingWizard() {
         </VisuallyHidden>
         {/* Header with progress */}
         <div className="p-6 pb-4 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xl font-semibold">{t("wizard.title")}</h2>
-              <p className="text-sm text-muted-foreground">{t("wizard.subtitle")}</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSkip}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">{t("wizard.title")}</h2>
+            <p className="text-sm text-muted-foreground">{t("wizard.subtitle")}</p>
           </div>
           
           <div className="space-y-2">
