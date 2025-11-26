@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { useRouter } from "@/i18n/navigation";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/lib/contexts/sidebar-context";
 import {
   Check,
   ChevronLeft,
@@ -38,6 +39,7 @@ export function OnboardingChecklist() {
   const t = useTranslations("onboarding.checklist");
   const router = useRouter();
   const pathname = usePathname();
+  const { isOpen: isSidebarOpen } = useSidebar();
   const { 
     onboardingStatus, 
     isLegacyUser, 
@@ -45,6 +47,16 @@ export function OnboardingChecklist() {
     completeChecklistItem,
     isLoading,
   } = useOnboarding();
+  
+  // Check if FAB (Califica Ya button) is visible - same logic as FloatingActionButton
+  const isFabVisible = useMemo(() => {
+    if (isSidebarOpen) return false;
+    const segments = pathname.split('/').filter(Boolean);
+    const dashIndex = segments.indexOf('dashboard');
+    const isInDashboard = dashIndex !== -1;
+    const depthAfterDashboard = isInDashboard ? segments.length - (dashIndex + 1) : 0;
+    return isInDashboard && depthAfterDashboard <= 1;
+  }, [pathname, isSidebarOpen]);
   
   const [isMinimized, setIsMinimized] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -252,8 +264,11 @@ export function OnboardingChecklist() {
           </div>
         </Card>
 
-        {/* Mobile: horizontal bar above "Califica Ya" button */}
-        <Card className="md:hidden fixed bottom-20 right-4 left-4 z-40 p-3 shadow-lg border-feature bg-card">
+        {/* Mobile: horizontal bar - above FAB if visible, at bottom otherwise */}
+        <Card className={cn(
+          "md:hidden fixed right-4 left-4 z-40 p-3 shadow-lg border-feature bg-card",
+          isFabVisible ? "bottom-20" : "bottom-4"
+        )}>
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10">
               <Sparkles className="h-4 w-4 text-primary" />
@@ -376,8 +391,11 @@ export function OnboardingChecklist() {
       </div>
     </Card>
 
-    {/* Mobile: bottom positioned, above "Califica Ya" button */}
-    <Card className="md:hidden fixed bottom-20 right-4 left-4 z-40 shadow-lg border-feature bg-card">
+    {/* Mobile: bottom positioned - above FAB if visible, at bottom otherwise */}
+    <Card className={cn(
+      "md:hidden fixed right-4 left-4 z-40 shadow-lg border-feature bg-card",
+      isFabVisible ? "bottom-20" : "bottom-4"
+    )}>
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-2">
