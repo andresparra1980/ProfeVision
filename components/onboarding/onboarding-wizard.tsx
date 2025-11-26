@@ -165,7 +165,7 @@ export function OnboardingWizard() {
   return (
     <Dialog open={shouldShowWizard}>
       <DialogContent 
-        className="max-w-2xl max-h-[90vh] overflow-hidden p-0" 
+        className="max-w-2xl max-h-[90vh] overflow-hidden p-0 md:max-w-2xl md:max-h-[90vh] max-md:w-screen max-md:h-screen max-md:max-w-none max-md:max-h-none max-md:rounded-none max-md:border-0 max-md:!z-[10000] max-md:flex max-md:flex-col" 
         hideCloseButton
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -194,7 +194,7 @@ export function OnboardingWizard() {
         </div>
 
         {/* Step content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)] max-md:max-h-none max-md:flex-1">
           {renderStep()}
         </div>
 
