@@ -518,8 +518,8 @@ export default function ExamsTableMobile({
           ))}
         </div>
       ) : (
-        // Single column layout: collapsible accordion
-        <Accordion type="single" collapsible className="w-full space-y-2">
+        // Single column layout: collapsible accordion (first item expanded by default)
+        <Accordion type="single" collapsible className="w-full space-y-2" defaultValue={filteredExams[0]?.id}>
           {filteredExams.map((exam) => (
             <AccordionItem
               value={exam.id}
