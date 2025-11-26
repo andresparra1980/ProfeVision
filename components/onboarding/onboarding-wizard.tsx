@@ -167,8 +167,13 @@ export function OnboardingWizard() {
   }
 
   return (
-    <Dialog open={shouldShowWizard} onOpenChange={(open) => !open && dismissWizard()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0">
+    <Dialog open={shouldShowWizard}>
+      <DialogContent 
+        className="max-w-2xl max-h-[90vh] overflow-hidden p-0" 
+        hideCloseButton
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <VisuallyHidden>
           <DialogTitle>{t("wizard.title")}</DialogTitle>
         </VisuallyHidden>
