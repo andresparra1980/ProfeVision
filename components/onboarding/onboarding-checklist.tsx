@@ -45,7 +45,12 @@ export function OnboardingChecklist() {
   } = useOnboarding();
   
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem("onboarding_checklist_dismissed") === "true";
+    }
+    return false;
+  });
   const [checkingProgress, setCheckingProgress] = useState(true);
   const [showExamDrawer, setShowExamDrawer] = useState(false);
   const [itemsStatus, setItemsStatus] = useState<Record<ChecklistItemKey, boolean>>({
