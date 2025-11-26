@@ -50,7 +50,7 @@ export function ExamCreationDrawer({ open, onOpenChange }: ExamCreationDrawerPro
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[85vh] max-w-4xl mx-auto bg-card">
+        <DrawerContent className="max-h-[85vh] max-w-4xl mx-auto bg-card mb-16 md:mb-0">
           <DrawerHeader className="text-center pb-2">
             <DrawerTitle className="text-xl">{t("title")}</DrawerTitle>
             <DrawerDescription>{t("subtitle")}</DrawerDescription>
