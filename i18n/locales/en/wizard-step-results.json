@@ -43,6 +43,8 @@
     "serverEmptyResponse": "Server responded with empty body",
     "timeoutError": "Request exceeded maximum timeout (60 seconds)",
     "formatError": "Format error",
-    "unknownError": "Unknown error"
+    "unknownError": "Unknown error",
+    "unauthorized": "Unauthorized. Please log in to continue.",
+    "notOwner": "This exam belongs to another account. You cannot save results for exams that are not yours."
   }
 } 

@@ -274,6 +274,24 @@ export async function POST(req: NextRequest) {
     // Inicializar cliente de Supabase con permisos de admin
     const supabase = createAdminSupabaseClient();
 
+    // Verificar autenticación del usuario
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.unauthorized') },
+        { status: 401 }
+      );
+    }
+    const token = authHeader.split(" ")[1];
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.unauthorized') },
+        { status: 401 }
+      );
+    }
+
     // Extraer información del QR
     const examId =
       qrData.examId || qrData.examenId || qrData.exam_id || qrData.examen_id;
@@ -292,7 +310,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Obtener profesor_id del examen al principio
+    // Obtener profesor_id del examen y validar ownership
     let profesorId;
     try {
       const { data: examData, error: examError } = await supabase
@@ -305,15 +323,32 @@ export async function POST(req: NextRequest) {
         if (DEBUG) {
           logger.error("Error al obtener profesor_id del examen:", examError);
         }
-        // Continuamos aunque no tengamos el profesor_id
-      } else {
-        profesorId = examData.profesor_id;
+        return NextResponse.json(
+          { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.examNotFound') },
+          { status: 404 }
+        );
+      }
+      
+      profesorId = examData.profesor_id;
+      
+      // Validar que el usuario autenticado es el dueño del examen
+      if (profesorId !== user.id) {
+        if (DEBUG) {
+          logger.warn(`User ${user.id} tried to save results for exam owned by ${profesorId}`);
+        }
+        return NextResponse.json(
+          { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.notOwner'), code: 'NOT_OWNER' },
+          { status: 403 }
+        );
       }
     } catch (error) {
       if (DEBUG) {
         logger.error("Error al obtener profesor_id:", error);
       }
-      // Continuamos sin profesor_id
+      return NextResponse.json(
+        { error: (await getApiTranslator(req, 'exams.save-results')).t('errors.internal') },
+        { status: 500 }
+      );
     }
 
     // Check tier limits for scan feature

@@ -18,6 +18,7 @@ import {
   DuplicateInfo
 } from '../types';
 import logger from '@/lib/utils/logger';
+import { supabase } from '@/lib/supabase/client';
 
 // Constants
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -114,6 +115,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   const [saved, setSaved] = useState(false);
   const [isDuplicate, setIsDuplicate] = useState<boolean>(false);
   const [duplicateInfo, setDuplicateInfo] = useState<DuplicateInfo | null>(null);
+  const [ownershipError, setOwnershipError] = useState(false);
 
   const selectedAnswersForOMR = useMemo(() => {
     // if (DEBUG) console.log('[Results] Memoizing selectedAnswersForOMR', answers);
@@ -754,6 +756,12 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       }
       
       try {
+        // Obtener token de autenticación
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          throw new Error(t('errors.unauthorized'));
+        }
+        
         // Enviar datos al endpoint con timeout para evitar esperas indefinidas
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 segundos
@@ -762,6 +770,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
           },
           body: JSON.stringify(data),
           signal: controller.signal
@@ -773,9 +782,11 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         // Verificar si la respuesta es exitosa
         if (!response.ok) {
           let errorMessage = t('errors.saveResults');
+          let errorCode = '';
           try {
             const errorData = await response.json();
             errorMessage = errorData.error || errorMessage;
+            errorCode = errorData.code || '';
             if (errorData.details) {
               console.error('Detalles del error:', errorData.details);
             }
@@ -797,6 +808,15 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
               errorMessage = `Error ${response.status}: ${errorMessage}`;
             }
           }
+          
+          // Error específico para examen de otra cuenta
+          if (errorCode === 'NOT_OWNER') {
+            toast.error(t('errors.notOwner'));
+            setOwnershipError(true);
+            setSaving(false);
+            return;
+          }
+          
           throw new Error(errorMessage);
         }
         
@@ -867,6 +887,14 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         <Alert variant="destructive">
           <AlertDescription>
             {entityNames.error}
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {ownershipError && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            {t('errors.notOwner')}
           </AlertDescription>
         </Alert>
       )}
@@ -965,7 +993,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           <Button 
             variant="default" 
             onClick={handleSaveResults} 
-            disabled={saving || examScore.loading || entityNames.loading || examScore.error !== null}
+            disabled={saving || examScore.loading || entityNames.loading || examScore.error !== null || ownershipError}
             className="bg-primary"
           >
             {saving ? (

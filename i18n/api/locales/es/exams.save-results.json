@@ -7,7 +7,10 @@
     "uploadProcessed": "Error al guardar imagen procesada",
     "saveResults": "Error al guardar resultados",
     "saveScans": "Error al guardar imágenes escaneadas",
-    "internal": "Error interno del servidor"
+    "internal": "Error interno del servidor",
+    "unauthorized": "No autorizado. Inicia sesión para continuar.",
+    "examNotFound": "Examen no encontrado",
+    "notOwner": "Este examen pertenece a otra cuenta"
   }
 }
 
