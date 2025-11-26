@@ -56,6 +56,7 @@ export function OnboardingChecklist() {
   });
   
   const lastCheckedPathRef = useRef<string | null>(null);
+  const dismissedOnPathRef = useRef<string | null>(null);
   const isCheckingRef = useRef(false);
 
   // Check actual progress from database
@@ -125,6 +126,15 @@ export function OnboardingChecklist() {
     if (lastCheckedPathRef.current !== pathname) {
       lastCheckedPathRef.current = pathname;
       checkProgress();
+      
+      // Reappear if dismissed and navigated to different route (unless steps 1-3 complete)
+      if (isDismissed && dismissedOnPathRef.current && dismissedOnPathRef.current !== pathname) {
+        const firstThreeComplete = itemsStatus.exam_created && itemsStatus.exam_published && itemsStatus.pdf_exported;
+        if (!firstThreeComplete) {
+          setIsDismissed(false);
+          dismissedOnPathRef.current = null;
+        }
+      }
     }
 
     // Refresh when user returns to tab
@@ -136,7 +146,7 @@ export function OnboardingChecklist() {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [isLoading, isLegacyUser, checkProgress, pathname]);
+  }, [isLoading, isLegacyUser, checkProgress, pathname, isDismissed, itemsStatus.exam_created, itemsStatus.exam_published, itemsStatus.pdf_exported]);
 
   // Sync pdf_exported from context when it changes (for immediate UI update)
   useEffect(() => {
@@ -202,8 +212,13 @@ export function OnboardingChecklist() {
 
   const handleDismiss = () => {
     setIsDismissed(true);
-    // Could persist this to localStorage or DB
-    localStorage.setItem("onboarding_checklist_dismissed", "true");
+    dismissedOnPathRef.current = pathname;
+    
+    // Only persist to localStorage if steps 1-3 are complete (permanent dismiss)
+    const firstThreeComplete = itemsStatus.exam_created && itemsStatus.exam_published && itemsStatus.pdf_exported;
+    if (firstThreeComplete) {
+      localStorage.setItem("onboarding_checklist_dismissed", "true");
+    }
   };
 
   if (isMinimized) {
