@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
+import { useOnboarding } from "@/lib/contexts/onboarding-context";
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,7 @@ export function SaveDraftDialog({
   const [savingDraft, setSavingDraft] = React.useState(false);
   const router = useRouter();
   const isEditing = Boolean(existing?.id);
+  const { completeChecklistItem } = useOnboarding();
 
   // For creation we require metadata; for edit we allow empty/unchanged values
   const draftSchema = React.useMemo(() => {
@@ -214,6 +216,12 @@ export function SaveDraftDialog({
               : t("saveDraftDialog.toasts.savedDesc"),
           }
         );
+        
+        // Mark onboarding checklist item as completed (only for new exams)
+        if (!isEditing) {
+          completeChecklistItem('exam_created');
+        }
+        
         router.push("/dashboard/exams");
       } catch (e) {
         toast.error(t("saveDraftDialog.toasts.error"), {
