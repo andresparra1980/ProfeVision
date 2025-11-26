@@ -575,11 +575,8 @@ export default function CreateExamPage() {
         // Actualizar el formulario con datos importados
         console.log('[CREATE PAGE] Setting numero_preguntas to:', preguntasImportadas.length);
         form.setValue('numero_preguntas', preguntasImportadas.length);
-        // Usar claves existentes bajo createWithAI y asegurar defaultValue para el sustantivo "preguntas"
-        form.setValue(
-          'titulo',
-          `${t('exams.createWithAI.importedTitle', { defaultValue: 'Examen Importado' })} - ${parsedData.total_preguntas} ${t('exams.questions', { defaultValue: 'preguntas' })}`
-        );
+        // No pre-rellenar el título - el usuario debe escribirlo manualmente
+        form.setValue('titulo', '');
         
         // Establecer las preguntas
         console.log('[CREATE PAGE] Setting allStoredQuestions and preguntas');
@@ -719,6 +716,11 @@ export default function CreateExamPage() {
         <Card>
           <CardHeader>
             <CardTitle>{t('exams.form.generalInfo', { defaultValue: 'Información General' })}</CardTitle>
+            {((form.watch('titulo') ?? '') === '' || (form.watch('materia_id') ?? '') === '' || (form.watch('grupo_id') ?? '') === '') && (
+              <p className="text-sm text-muted-foreground">
+                {t('exams.form.completeRequiredFields', { defaultValue: 'Completa los campos resaltados para continuar' })}
+              </p>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -727,7 +729,9 @@ export default function CreateExamPage() {
               <Input
                 id="titulo"
                   placeholder={t('exams.form.titlePlaceholder')}
-                  className="placeholder:text-muted-foreground/50"
+                  className={`placeholder:text-muted-foreground/50 ${
+                    (form.watch('titulo') ?? '') === '' ? 'required-field-highlight' : ''
+                  }`}
                   {...form.register('titulo')}
                 />
                 {form.formState.errors.titulo && (
@@ -741,7 +745,7 @@ export default function CreateExamPage() {
                   onValueChange={(value: string) => form.setValue('materia_id', value)}
                   value={form.watch('materia_id')}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={(form.watch('materia_id') ?? '') === '' ? 'required-field-highlight' : ''}>
                     <SelectValue placeholder={t('exams.form.selectSubject', { defaultValue: 'Selecciona una materia' })} />
                   </SelectTrigger>
                   <SelectContent>
@@ -764,7 +768,7 @@ export default function CreateExamPage() {
                   value={form.watch('grupo_id')}
                   disabled={!form.watch('materia_id')}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={(form.watch('grupo_id') ?? '') === '' && (form.watch('materia_id') ?? '') !== '' ? 'required-field-highlight' : ''}>
                     <SelectValue placeholder={
                       form.watch('materia_id')
                         ? gruposFiltrados.length > 0
@@ -1021,7 +1025,10 @@ export default function CreateExamPage() {
         </div>
 
         <div className="flex justify-end gap-4">
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading || (form.watch('titulo') ?? '') === '' || (form.watch('materia_id') ?? '') === '' || (form.watch('grupo_id') ?? '') === ''}
+            >
               {loading ? (
                 <>
                   <span className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />

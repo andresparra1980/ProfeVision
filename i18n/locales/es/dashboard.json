@@ -106,7 +106,8 @@
       "addOption": "Añadir opción",
       "addQuestion": "Añadir pregunta",
       "creating": "Creando...",
-      "optionsNote": "Solo se guardarán las opciones que tengan texto"
+      "optionsNote": "Solo se guardarán las opciones que tengan texto",
+      "completeRequiredFields": "Completa los campos resaltados para continuar"
     },
     "table": {
       "name": "Nombre",

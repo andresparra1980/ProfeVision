@@ -105,7 +105,8 @@
       "addOption": "Add option",
       "addQuestion": "Add question",
       "creating": "Creating...",
-      "optionsNote": "Only options with text will be saved"
+      "optionsNote": "Only options with text will be saved",
+      "completeRequiredFields": "Complete the highlighted fields to continue"
     },
     "table": {
       "name": "Name",
