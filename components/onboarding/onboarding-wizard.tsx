@@ -4,7 +4,9 @@ import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useOnboarding } from "@/lib/contexts/onboarding-context";
@@ -167,6 +169,9 @@ export function OnboardingWizard() {
   return (
     <Dialog open={shouldShowWizard} onOpenChange={(open) => !open && dismissWizard()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0">
+        <VisuallyHidden>
+          <DialogTitle>{t("wizard.title")}</DialogTitle>
+        </VisuallyHidden>
         {/* Header with progress */}
         <div className="p-6 pb-4 border-b">
           <div className="flex items-center justify-between mb-4">
