@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import logger from "@/lib/utils/logger";
+import { useChecklistItem } from "@/lib/contexts/onboarding-context";
 
 interface TipoPregunta {
   id: string;
@@ -86,6 +87,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
     ],
   });
   const [editorKey, setEditorKey] = useState(0);
+  const { complete: completeExamPublished } = useChecklistItem('exam_published');
 
   const fetchExamDetails = useCallback(async () => {
     try {
@@ -406,6 +408,9 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       toast.success("Éxito", {
         description: t('messages.examPublished'),
       });
+
+      // Mark checklist item as complete for onboarding
+      await completeExamPublished();
 
       // Recargar datos del examen
       fetchExamDetails();
