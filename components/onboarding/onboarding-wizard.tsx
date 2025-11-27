@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
@@ -165,16 +166,17 @@ export function OnboardingWizard() {
   return (
     <Dialog open={shouldShowWizard}>
       <DialogContent 
-        className="max-w-2xl max-h-[90vh] overflow-hidden p-0 md:max-w-2xl md:max-h-[90vh] max-md:w-screen max-md:h-screen max-md:max-w-none max-md:max-h-none max-md:rounded-none max-md:border-0 max-md:!z-[10000] max-md:flex max-md:flex-col" 
+        className="max-w-2xl max-h-[90vh] overflow-hidden p-0 md:max-w-2xl md:max-h-[90vh] max-md:!fixed max-md:!inset-0 max-md:!translate-x-0 max-md:!translate-y-0 max-md:!top-0 max-md:!left-0 max-md:w-screen max-md:h-[100dvh] max-md:max-w-none max-md:max-h-none max-md:rounded-none max-md:border-0 max-md:!z-[10000] max-md:flex max-md:flex-col" 
         hideCloseButton
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <VisuallyHidden>
           <DialogTitle>{t("wizard.title")}</DialogTitle>
+          <DialogDescription>{t("wizard.subtitle")}</DialogDescription>
         </VisuallyHidden>
-        {/* Header with progress */}
-        <div className="p-6 pb-4 border-b">
+        {/* Header with progress - fixed height, never scrolls */}
+        <div className="p-4 md:p-6 pb-4 border-b flex-shrink-0">
           <div className="mb-4">
             <h2 className="text-xl font-semibold">{t("wizard.title")}</h2>
             <p className="text-sm text-muted-foreground">{t("wizard.subtitle")}</p>
@@ -193,14 +195,14 @@ export function OnboardingWizard() {
           </div>
         </div>
 
-        {/* Step content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)] max-md:max-h-none max-md:flex-1">
+        {/* Step content - scrollable, takes remaining space */}
+        <div className="p-4 md:p-6 overflow-y-auto flex-1 min-h-0">
           {renderStep()}
         </div>
 
-        {/* Footer navigation */}
+        {/* Footer navigation - fixed height, never scrolls */}
         {currentStep > 0 && currentStep < TOTAL_STEPS - 1 && (
-          <div className="p-6 pt-4 border-t flex justify-between">
+          <div className="p-4 md:p-6 pt-4 border-t flex justify-between flex-shrink-0">
             <Button
               variant="ghost"
               onClick={handleBack}
@@ -209,8 +211,6 @@ export function OnboardingWizard() {
               <ChevronLeft className="h-4 w-4 mr-2" />
               {t("wizard.back")}
             </Button>
-            
-
           </div>
         )}
       </DialogContent>
