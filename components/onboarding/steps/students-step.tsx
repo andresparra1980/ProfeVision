@@ -112,50 +112,52 @@ export function StudentsStep({ groupId, data: initialData, onUpdate, onNext, isS
         </TabsList>
         
         <TabsContent value="manual" className="space-y-4 mt-4">
-          {/* Add student form */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="student-firstname" className="text-xs">{t("firstNameLabel")}</Label>
-              <Input
-                id="student-firstname"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder={t("firstNamePlaceholder")}
-                size={1}
-              />
+          {/* Add student form - with border */}
+          <div className="border rounded-lg p-3 space-y-3">
+            {/* Mobile: 1 column, Desktop: 2 rows layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="student-firstname" className="text-xs">{t("firstNameLabel")}</Label>
+                <Input
+                  id="student-firstname"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder={t("firstNamePlaceholder")}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="student-lastname" className="text-xs">{t("lastNameLabel")}</Label>
+                <Input
+                  id="student-lastname"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder={t("lastNamePlaceholder")}
+                />
+              </div>
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="student-lastname" className="text-xs">{t("lastNameLabel")}</Label>
-              <Input
-                id="student-lastname"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder={t("lastNamePlaceholder")}
-                size={1}
-              />
-            </div>
-            <div className="space-y-1">
+            {/* Identificacion - full width mobile, narrow desktop */}
+            <div className="space-y-1 md:max-w-[200px]">
               <Label htmlFor="student-id" className="text-xs">{t("idLabel")}</Label>
               <Input
                 id="student-id"
                 value={identification}
                 onChange={(e) => setIdentification(e.target.value)}
                 placeholder={t("idPlaceholder")}
-                size={1}
               />
             </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddStudent}
+              disabled={!canAddStudent}
+              className="w-full md:w-auto"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t("addStudent")}
+            </Button>
           </div>
-          
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddStudent}
-            disabled={!canAddStudent}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t("addStudent")}
-          </Button>
 
           {/* Students list */}
           {students.length > 0 ? (

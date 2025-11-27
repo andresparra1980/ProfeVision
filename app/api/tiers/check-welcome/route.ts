@@ -15,9 +15,11 @@ export async function GET(req: NextRequest) {
     try {
       const authResult = await verifyTeacherAuth(req);
       user = authResult.user;
-    } catch (_error) {
+    } catch (authError) {
+      const errorMessage = authError instanceof Error ? authError.message : 'Unknown auth error';
+      logger.error('Auth failed in check-welcome:', errorMessage);
       return NextResponse.json(
-        { error: 'No autorizado' },
+        { error: 'No autorizado', reason: errorMessage },
         { status: 401 }
       );
     }

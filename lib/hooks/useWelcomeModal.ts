@@ -36,7 +36,8 @@ export function useWelcomeModal() {
       });
 
       if (!response.ok) {
-        logger.error("[useWelcomeModal] Error checking welcome status");
+        const errorData = await response.json().catch(() => ({}));
+        logger.error("[useWelcomeModal] Error checking welcome status", response.status, errorData);
         return;
       }
 
@@ -44,7 +45,7 @@ export function useWelcomeModal() {
       setShowWelcome(data.showWelcome);
     } catch (err: unknown) {
       const errorObj = err as Error;
-      logger.error("[useWelcomeModal] Error:", errorObj);
+      logger.error("[useWelcomeModal] Error checking welcome status", errorObj?.message || err);
     } finally {
       setLoading(false);
     }
