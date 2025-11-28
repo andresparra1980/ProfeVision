@@ -639,7 +639,7 @@
         "exam": "Exam:",
         "duration": "Duration:",
         "minutes": "minutes",
-        "pageOf": "Page {current} of {total}",
+        "pageOf": "Page __current__ of __total__",
         "instructions": "Instructions: Fill in the circle completely that corresponds to the correct answer. Use black or blue ink pen. Do not use red pen or pencil. Make sure to erase completely if you need to change an answer.",
         "loading": "Loading...",
         "downloadPdf": "Download PDF"

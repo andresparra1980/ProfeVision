@@ -51,7 +51,7 @@ export interface AnswerSheetLabels {
   exam: string; // "Examen:" / "Exam:"
   duration: string; // "Duración:" / "Duration:"
   minutes: string; // "minutos" / "minutes"
-  pageOf: string; // "Página {current} de {total}" pattern
+  pageOf: string; // "Página __current__ de __total__" pattern
   instructions: string; // Full instructions text
   loading: string; // "Cargando..." / "Loading..."
   downloadPdf: string; // "Descargar PDF" / "Download PDF"
@@ -366,7 +366,7 @@ const AnswerSheet = ({ exam, student, group, labels }: { exam: Exam; student: St
                     <Text style={styles.infoText}>{labels.exam} {exam.titulo}</Text>
                     <Text style={styles.infoText}>{labels.duration} {exam.duracion_minutos} {labels.minutes}</Text>
                     {paginasPreguntas.length > 1 && (
-                      <Text style={styles.infoText}>{labels.pageOf.replace('{current}', String(pageIndex + 1)).replace('{total}', String(paginasPreguntas.length))}</Text>
+                      <Text style={styles.infoText}>{labels.pageOf.replace('__current__', String(pageIndex + 1)).replace('__total__', String(paginasPreguntas.length))}</Text>
                     )}
                   </View>
                 </View>
