@@ -1,12 +1,10 @@
 "use client";
 
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { Document, Page, Text, View, StyleSheet, Circle, Svg, Path, Image, BlobProvider } from '@react-pdf/renderer';
+import { useState, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { generateLMarkerPath, calculateMarkerDimensions, generateMarkerContainerStyle } from '@/lib/utils/corner-markers';
-import { generateOptimizedQRCode, generateOptimizedQRData } from '@/lib/utils/qr-code';
-import { QrCode } from 'lucide-react';
+import { QrCode, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Student {
   id: string;
@@ -42,19 +40,19 @@ interface Exam {
 
 // Labels for i18n support (react-pdf doesn't support hooks inside Document)
 export interface AnswerSheetLabels {
-  title: string; // "HOJA DE RESPUESTAS" / "ANSWER SHEET"
-  studentInfo: string; // "Información del Estudiante" / "Student Information"
-  name: string; // "Nombre:" / "Name:"
-  identification: string; // "Identificación:" / "ID:"
-  group: string; // "Grupo:" / "Group:"
-  subject: string; // "Materia:" / "Subject:"
-  exam: string; // "Examen:" / "Exam:"
-  duration: string; // "Duración:" / "Duration:"
-  minutes: string; // "minutos" / "minutes"
-  pageOf: string; // "Página __current__ de __total__" pattern
-  instructions: string; // Full instructions text
-  loading: string; // "Cargando..." / "Loading..."
-  downloadPdf: string; // "Descargar PDF" / "Download PDF"
+  title: string;
+  studentInfo: string;
+  name: string;
+  identification: string;
+  group: string;
+  subject: string;
+  exam: string;
+  duration: string;
+  minutes: string;
+  pageOf: string;
+  instructions: string;
+  loading: string;
+  downloadPdf: string;
 }
 
 interface PDFGeneratorProps {
@@ -66,430 +64,402 @@ interface PDFGeneratorProps {
   labels: AnswerSheetLabels;
 }
 
-// Definir estilos para el PDF
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: 'column',
-    backgroundColor: '#ffffff',
-    padding: 0,
-    height: '100%',
-    border: '0', // Usar un ancho de borde de 0 en lugar de 'none'
-  },
-  container: {
-    margin: calculateMarkerDimensions().margin * 2, // Doble del margen de los marcadores
-    minHeight: 720,
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  headerSection: {
-    padding: '5 10',
-    height: 120, // Restaurado al valor original
-    marginBottom: 8,
-  },
-  mainTitle: {
-    fontSize: 16, // Restaurado al valor original
-    textAlign: 'center',
-    fontWeight: 'bold',
-    marginBottom: 3,
-  },
-  infoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    height: 100, // Restaurado al valor original
-    paddingTop: 0,
-  },
-  qrCode: {
-    width: 100, // Restaurado al valor original
-    height: 100, // Restaurado al valor original
-    marginTop: -8,
-    marginLeft: -5,
-  },
-  studentInfo: {
-    width: '65%',
-    border: '3pt solid black', // Aumentado a 3pt (triple de grosor original)
-    padding: 8,
-  },
-  infoTitle: {
-    fontSize: 10, // Restaurado al valor original
-    fontWeight: 'bold',
-    marginBottom: 4, // Restaurado al valor original
-  },
-  infoText: {
-    fontSize: 8, // Restaurado al valor original
-    marginBottom: 3, // Restaurado al valor original
-    lineHeight: 1.2,
-  },
-  answersSection: {
-    padding: 10, // Mantener reducido para ahorrar espacio
-    position: 'relative',
-    flexGrow: 1,
-    height: 'calc(100% - 140px)', // Restaurado al valor original
-    border: '3pt solid black', // Aumentado a 3pt (triple de grosor original)
-    margin: '8 8 15 8',
-  },
-  columnsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 5, // Reducido de 10 a 5
-    flexGrow: 1,
-  },
-  column: {
-    width: '48%',
-    borderRight: '1.5pt solid #cccccc', // Aumentado a 1.5pt (triple de grosor original)
-    paddingRight: 8,
-    '&:last-child': {
-      borderRight: 'none',
-      paddingRight: 0,
-    },
-  },
-  questionRow: {
-    flexDirection: 'row',
-    marginBottom: 5, // Reducido de 12 a 5
-    alignItems: 'center',
-    minHeight: 16, // Reducido de 22 a 16
-    borderBottom: '1pt solid #cccccc', // Reducido de 1.5pt a 1pt
-    paddingBottom: 2, // Reducido de 5 a 2
-  },
-  questionNumberContainer: {
-    width: 18,
-    height: 18,
-    marginRight: 8,
-    backgroundColor: '#ffffff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  questionNumber: {
-    fontSize: 8, // Reducido de 10 a 8
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  optionsRow: {
-    flexDirection: 'row',
-    gap: 16, // Reducido de 24 a 16
-    flex: 1,
-    paddingLeft: 2, // Reducido de 4 a 2
-  },
-  optionBubble: {
-    width: 18, // Reducido de 24 a 18
-    height: 18, // Reducido de 24 a 18
-    position: 'relative',
-    backgroundColor: '#ffffff',
-  },
-  instructions: {
-    fontSize: 8, // Restaurado al valor original
-    fontStyle: 'italic',
-    textAlign: 'center',
-    paddingHorizontal: 20,
-    position: 'absolute',
-    bottom: calculateMarkerDimensions().margin + 5,
-    left: calculateMarkerDimensions().margin * 2,
-    right: calculateMarkerDimensions().margin * 2,
-    color: '#000000',
-  },
-});
+// Cache for generated PDFs to avoid regeneration
+const pdfCache = new Map<string, string>();
 
-// Componente para los marcadores en forma de L
-const CornerMarker = ({ position, paperSize: _paperSize = 'LETTER' }: { position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'; paperSize?: 'LETTER' | 'A4' }) => {
-  const { size, margin } = calculateMarkerDimensions(_paperSize);
-  const containerStyle = generateMarkerContainerStyle(position, margin);
-  const path = generateLMarkerPath(size);
-  
-  return (
-    <View style={containerStyle}>
-      <Svg width={size} height={size}>
-        <Path d={path} fill="#000000" />
-      </Svg>
-    </View>
-  );
-};
+function getCacheKey(examId: string, groupId: string): string {
+  return `${examId}-${groupId}`;
+}
 
-// Componente para una burbuja de opción mejorada
-// Reducido de 24 a 18
-// Círculo exterior más grueso para mejor detección
-// Círculo interior para guía visual
-const OptionBubble = ({ letter }: { letter: string }) => (
-  <View style={styles.optionBubble}>
-    <Svg width={18} height={18}>
-      <Circle 
-        cx={9}
-        cy={9}
-        r={7}
-        stroke="#000000" 
-        strokeWidth={1.5}
-        fill="none" 
-      />
-      <Circle 
-        cx={9}
-        cy={9}
-        r={6}
-        stroke="#cccccc" 
-        strokeWidth={0.5} 
-        fill="none" 
-      />
-    </Svg>
-    <Text
-      style={{
-        position: 'absolute',
-        top: 4,
-        left: letter.length > 1 ? 4 : 6,
-        fontSize: 8,
-        fontWeight: 'bold',
-      }}
-    >
-      {letter}
-    </Text>
-  </View>
-);
-
-// Función para determinar las opciones de respuesta
-const getQuestionOptions = (pregunta: Exam['preguntas'][0]): string[] => {
-  // Si es una pregunta de Falso/Verdadero
-  if (pregunta.opciones_respuesta.length === 2 && 
-      pregunta.opciones_respuesta.some(o => o.texto.toLowerCase().includes('falso')) &&
-      pregunta.opciones_respuesta.some(o => o.texto.toLowerCase().includes('verdadero'))) {
-    // Determinar el orden V/F basado en el texto de la primera opción
-    const firstOptionText = pregunta.opciones_respuesta[0].texto.toLowerCase().trim();
-    if (firstOptionText === 'v' || firstOptionText.includes('verdadero')) {
-      return ['V', 'F'];
-    } else {
-      // Si la primera opción no es 'v' ni 'verdadero',
-      // se asume que es 'f' o 'falso' (dado el some() check anterior que confirma una opción de cada tipo)
-      return ['F', 'V'];
-    }
-  }
-  
-  // Para otras preguntas, usar letras según la cantidad de opciones
-  return pregunta.opciones_respuesta.map((_, index) => 
-    String.fromCharCode(65 + index)
-  );
-};
-
-// Componente para una fila de pregunta con sus opciones
-const QuestionRow = ({ pregunta, number }: { pregunta: Exam['preguntas'][0]; number: number }) => {
-  const options = getQuestionOptions(pregunta);
-  
-  return (
-    <View style={styles.questionRow}>
-      <View style={styles.questionNumberContainer}>
-        <Text style={styles.questionNumber}>{number}</Text>
-      </View>
-      <View style={styles.optionsRow}>
-        {options.map((letter, index) => (
-          <OptionBubble 
-            key={index} 
-            letter={letter}
-          />
-        ))}
-      </View>
-    </View>
-  );
-};
-
-// Componente para una columna de preguntas
-const QuestionsColumn = ({ preguntas, startIndex }: { preguntas: Exam['preguntas']; startIndex: number }) => (
-  <View style={styles.column}>
-    {preguntas.map((pregunta, index) => (
-      <QuestionRow 
-        key={pregunta.id} 
-        pregunta={pregunta}
-        number={startIndex + index + 1}
-      />
-    ))}
-  </View>
-);
-
-// Componente para el código QR
-const QRCodeComponent = ({ data }: { data: string }) => {
-  const [qrDataUrl, setQrDataUrl] = useState<string>('');
-
-  useEffect(() => {
-    generateOptimizedQRCode(data).then(url => {
-      setQrDataUrl(url);
-    });
-  }, [data]);
-
-  if (!qrDataUrl) return null;
-
-  return (
-    <View style={styles.qrCode}>
-      {/* eslint-disable-next-line jsx-a11y/alt-text */}
-      <Image src={qrDataUrl} style={{ width: 100, height: 100 }} />
-    </View>
-  );
-};
-
-// Componente para una hoja de respuestas individual
-// Dividir las preguntas en grupos de 40 máximo (antes 20)
-// Dividir en columnas de 20 preguntas cada una (antes 10)
-const AnswerSheet = ({ exam, student, group, labels }: { exam: Exam; student: Student; group: Group; labels: AnswerSheetLabels }) => {
-  const qrData = generateOptimizedQRData({
-    examId: exam.id,
-    studentId: student.id,
-    groupId: group.id
-  });
-
-  const paginasPreguntas = [];
-  for (let i = 0; i < exam.preguntas.length; i += 40) {
-    paginasPreguntas.push(exam.preguntas.slice(i, i + 40));
-  }
-
-  return (
-    <>
-      {paginasPreguntas.map((preguntasPagina, pageIndex) => {
-        const preguntasCol1 = preguntasPagina.slice(0, 20);
-        const preguntasCol2 = preguntasPagina.slice(20, 40);
-
-        return (
-          <Page key={pageIndex} size="LETTER" style={styles.page}>
-            <CornerMarker position="top-left" />
-            <CornerMarker position="top-right" />
-            <CornerMarker position="bottom-left" />
-            <CornerMarker position="bottom-right" />
-
-            <View style={styles.container}>
-              <View style={styles.headerSection}>
-                <Text style={styles.mainTitle}>{labels.title}</Text>
-                
-                <View style={styles.infoContainer}>
-                  <View style={styles.qrCode}>
-                    <QRCodeComponent data={qrData} />
-                  </View>
-                  
-                  <View style={styles.studentInfo}>
-                    <Text style={styles.infoTitle}>{labels.studentInfo}</Text>
-                    <Text style={styles.infoText}>{labels.name} {student.nombres ? `${student.nombres} ${student.apellidos}` : student.apellidos}</Text>
-                    <Text style={styles.infoText}>{labels.identification} {student.identificacion}</Text>
-                    <Text style={styles.infoText}>{labels.group} {group.nombre}</Text>
-                    <Text style={styles.infoText}>{labels.subject} {group.materia.nombre}</Text>
-                    <Text style={styles.infoText}>{labels.exam} {exam.titulo}</Text>
-                    <Text style={styles.infoText}>{labels.duration} {exam.duracion_minutos} {labels.minutes}</Text>
-                    {paginasPreguntas.length > 1 && (
-                      <Text style={styles.infoText}>{labels.pageOf.replace('__current__', String(pageIndex + 1)).replace('__total__', String(paginasPreguntas.length))}</Text>
-                    )}
-                  </View>
-                </View>
-              </View>
-
-              <View style={styles.answersSection}>
-                <View style={styles.columnsContainer}>
-                  <QuestionsColumn 
-                    preguntas={preguntasCol1} 
-                    startIndex={pageIndex * 40}
-                  />
-                  {preguntasCol2.length > 0 && (
-                    <QuestionsColumn 
-                      preguntas={preguntasCol2}
-                      startIndex={pageIndex * 40 + 20}
-                    />
-                  )}
-                </View>
-              </View>
-            </View>
-
-            <Text style={styles.instructions}>
-              {labels.instructions}
-            </Text>
-          </Page>
-        );
-      })}
-    </>
-  );
-};
-
-// Componente principal que genera el PDF
-const PDFDocument = ({ exam, group, labels }: { exam: Exam; group: Group; labels: AnswerSheetLabels }) => {
-  // Ordenar estudiantes alfabéticamente por apellido
-  const sortedStudents = [...group.estudiantes].sort((a, b) => 
-    a.apellidos.localeCompare(b.apellidos, 'es', { sensitivity: 'base' })
-  );
-
-  return (
-  <Document>
-      {sortedStudents.map((student) => (
-      <AnswerSheet
-        key={student.id}
-        exam={exam}
-        student={student}
-        group={group}
-        labels={labels}
-      />
-    ))}
-  </Document>
-);
-};
-
-export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName, onGenerated, labels }: PDFGeneratorProps) {
-  const [isClient, setIsClient] = useState(false);
+export function PDFGenerator({ exam, group, paperSize, fileName, onGenerated, labels }: PDFGeneratorProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const t = useTranslations('dashboard.exams.results.pdfExport');
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  // Memoize sorted students
+  const sortedStudents = useMemo(() => 
+    [...group.estudiantes].sort((a, b) => 
+      a.apellidos.localeCompare(b.apellidos, 'es', { sensitivity: 'base' })
+    ),
+    [group.estudiantes]
+  );
 
-  // Validar que el examen tenga la estructura correcta
-  if (!exam?.preguntas?.length) {
-    return (
-      <button
-        disabled
-        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-      >
-        {t('noQuestions')}
-      </button>
-    );
-  }
+  // Check cache on mount/group change
+  const cacheKey = getCacheKey(exam.id, group.id);
+  
+  // Generate PDF on demand (not automatically)
+  const generatePDF = useCallback(async () => {
+    // Check cache first
+    const cached = pdfCache.get(cacheKey);
+    if (cached) {
+      setPdfUrl(cached);
+      return;
+    }
 
-  if (!isClient) {
-    return (
-      <button
-        disabled
-        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-      >
-        {labels.loading}
-      </button>
-    );
-  }
+    setIsGenerating(true);
+    setError(null);
 
-  // Usar BlobProvider en lugar de PDFDownloadLink para evitar el error
-  return (
-    <BlobProvider document={<PDFDocument exam={exam} group={group} labels={labels} />}>
-      {({ url, loading, error }) => {
-        if (loading) {
-          return (
-            <button
-              disabled
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-            >
-              {t('generatingPDF')}
-            </button>
-          );
+    try {
+      // Dynamic import to avoid loading react-pdf until needed
+      const [
+        { Document, Page, Text, View, StyleSheet, Circle, Svg, Path, Image, pdf },
+        { generateLMarkerPath, calculateMarkerDimensions, generateMarkerContainerStyle },
+        { generateOptimizedQRCode, generateOptimizedQRData }
+      ] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('@/lib/utils/corner-markers'),
+        import('@/lib/utils/qr-code')
+      ]);
+
+      // Pre-generate all QR codes in parallel (big optimization)
+      const qrDataPromises = sortedStudents.map(async (student) => {
+        const qrData = generateOptimizedQRData({
+          examId: exam.id,
+          studentId: student.id,
+          groupId: group.id
+        });
+        const qrDataUrl = await generateOptimizedQRCode(qrData);
+        return { studentId: student.id, qrDataUrl };
+      });
+      
+      const qrResults = await Promise.all(qrDataPromises);
+      const qrMap = new Map(qrResults.map(r => [r.studentId, r.qrDataUrl]));
+
+      // Create styles
+      const markerDimensions = calculateMarkerDimensions(paperSize);
+      const styles = StyleSheet.create({
+        page: {
+          flexDirection: 'column',
+          backgroundColor: '#ffffff',
+          padding: 0,
+          height: '100%',
+        },
+        container: {
+          margin: markerDimensions.margin * 2,
+          minHeight: 720,
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+        headerSection: {
+          padding: '5 10',
+          height: 120,
+          marginBottom: 8,
+        },
+        mainTitle: {
+          fontSize: 16,
+          textAlign: 'center',
+          fontWeight: 'bold',
+          marginBottom: 3,
+        },
+        infoContainer: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          height: 100,
+          paddingTop: 0,
+        },
+        qrCode: {
+          width: 100,
+          height: 100,
+          marginTop: -8,
+          marginLeft: -5,
+        },
+        studentInfo: {
+          width: '65%',
+          border: '3pt solid black',
+          padding: 8,
+        },
+        infoTitle: {
+          fontSize: 10,
+          fontWeight: 'bold',
+          marginBottom: 4,
+        },
+        infoText: {
+          fontSize: 8,
+          marginBottom: 3,
+          lineHeight: 1.2,
+        },
+        answersSection: {
+          padding: 10,
+          position: 'relative',
+          flexGrow: 1,
+          border: '3pt solid black',
+          margin: '8 8 15 8',
+        },
+        columnsContainer: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          paddingVertical: 5,
+          flexGrow: 1,
+        },
+        column: {
+          width: '48%',
+          borderRight: '1.5pt solid #cccccc',
+          paddingRight: 8,
+        },
+        questionRow: {
+          flexDirection: 'row',
+          marginBottom: 5,
+          alignItems: 'center',
+          minHeight: 16,
+          borderBottom: '1pt solid #cccccc',
+          paddingBottom: 2,
+        },
+        questionNumberContainer: {
+          width: 18,
+          height: 18,
+          marginRight: 8,
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        questionNumber: {
+          fontSize: 8,
+          fontWeight: 'bold',
+          textAlign: 'center',
+        },
+        optionsRow: {
+          flexDirection: 'row',
+          gap: 16,
+          flex: 1,
+          paddingLeft: 2,
+        },
+        optionBubble: {
+          width: 18,
+          height: 18,
+          position: 'relative',
+          backgroundColor: '#ffffff',
+        },
+        instructions: {
+          fontSize: 8,
+          fontStyle: 'italic',
+          textAlign: 'center',
+          paddingHorizontal: 20,
+          position: 'absolute',
+          bottom: markerDimensions.margin + 5,
+          left: markerDimensions.margin * 2,
+          right: markerDimensions.margin * 2,
+          color: '#000000',
+        },
+      });
+
+      // Helper: get question options
+      const getQuestionOptions = (pregunta: Exam['preguntas'][0]): string[] => {
+        if (pregunta.opciones_respuesta.length === 2 && 
+            pregunta.opciones_respuesta.some(o => o.texto.toLowerCase().includes('falso')) &&
+            pregunta.opciones_respuesta.some(o => o.texto.toLowerCase().includes('verdadero'))) {
+          const firstOptionText = pregunta.opciones_respuesta[0].texto.toLowerCase().trim();
+          if (firstOptionText === 'v' || firstOptionText.includes('verdadero')) {
+            return ['V', 'F'];
+          }
+          return ['F', 'V'];
         }
+        return pregunta.opciones_respuesta.map((_, index) => String.fromCharCode(65 + index));
+      };
 
-        if (error) {
-          console.error('Error generando PDF:', error);
-          return (
-            <button
-              disabled
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-            >
-              {t('generationError')}
-            </button>
-          );
+      // Build document
+      const CornerMarker = ({ position }: { position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' }) => {
+        const { size, margin } = calculateMarkerDimensions(paperSize);
+        const containerStyle = generateMarkerContainerStyle(position, margin);
+        const path = generateLMarkerPath(size);
+        return (
+          <View style={containerStyle}>
+            <Svg width={size} height={size}>
+              <Path d={path} fill="#000000" />
+            </Svg>
+          </View>
+        );
+      };
+
+      const OptionBubble = ({ letter }: { letter: string }) => (
+        <View style={styles.optionBubble}>
+          <Svg width={18} height={18}>
+            <Circle cx={9} cy={9} r={7} stroke="#000000" strokeWidth={1.5} fill="none" />
+            <Circle cx={9} cy={9} r={6} stroke="#cccccc" strokeWidth={0.5} fill="none" />
+          </Svg>
+          <Text style={{ position: 'absolute', top: 4, left: letter.length > 1 ? 4 : 6, fontSize: 8, fontWeight: 'bold' }}>
+            {letter}
+          </Text>
+        </View>
+      );
+
+      const QuestionRow = ({ pregunta, number }: { pregunta: Exam['preguntas'][0]; number: number }) => {
+        const options = getQuestionOptions(pregunta);
+        return (
+          <View style={styles.questionRow}>
+            <View style={styles.questionNumberContainer}>
+              <Text style={styles.questionNumber}>{number}</Text>
+            </View>
+            <View style={styles.optionsRow}>
+              {options.map((letter, index) => (
+                <OptionBubble key={index} letter={letter} />
+              ))}
+            </View>
+          </View>
+        );
+      };
+
+      const QuestionsColumn = ({ preguntas, startIndex }: { preguntas: Exam['preguntas']; startIndex: number }) => (
+        <View style={styles.column}>
+          {preguntas.map((pregunta, index) => (
+            <QuestionRow key={pregunta.id} pregunta={pregunta} number={startIndex + index + 1} />
+          ))}
+        </View>
+      );
+
+      const AnswerSheet = ({ student, qrDataUrl }: { student: Student; qrDataUrl: string }) => {
+        const paginasPreguntas: Exam['preguntas'][] = [];
+        for (let i = 0; i < exam.preguntas.length; i += 40) {
+          paginasPreguntas.push(exam.preguntas.slice(i, i + 40));
         }
 
         return (
-          <a
-            href={url || '#'}
-            download={fileName}
-            onClick={() => onGenerated?.()}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            <QrCode className="mr-2 h-4 w-4" />
-            {labels.downloadPdf}
-          </a>
+          <>
+            {paginasPreguntas.map((preguntasPagina, pageIndex) => {
+              const preguntasCol1 = preguntasPagina.slice(0, 20);
+              const preguntasCol2 = preguntasPagina.slice(20, 40);
+
+              return (
+                <Page key={pageIndex} size="LETTER" style={styles.page}>
+                  <CornerMarker position="top-left" />
+                  <CornerMarker position="top-right" />
+                  <CornerMarker position="bottom-left" />
+                  <CornerMarker position="bottom-right" />
+
+                  <View style={styles.container}>
+                    <View style={styles.headerSection}>
+                      <Text style={styles.mainTitle}>{labels.title}</Text>
+                      
+                      <View style={styles.infoContainer}>
+                        <View style={styles.qrCode}>
+                          {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                          <Image src={qrDataUrl} style={{ width: 100, height: 100 }} />
+                        </View>
+                        
+                        <View style={styles.studentInfo}>
+                          <Text style={styles.infoTitle}>{labels.studentInfo}</Text>
+                          <Text style={styles.infoText}>{labels.name} {student.nombres ? `${student.nombres} ${student.apellidos}` : student.apellidos}</Text>
+                          <Text style={styles.infoText}>{labels.identification} {student.identificacion}</Text>
+                          <Text style={styles.infoText}>{labels.group} {group.nombre}</Text>
+                          <Text style={styles.infoText}>{labels.subject} {group.materia.nombre}</Text>
+                          <Text style={styles.infoText}>{labels.exam} {exam.titulo}</Text>
+                          <Text style={styles.infoText}>{labels.duration} {exam.duracion_minutos} {labels.minutes}</Text>
+                          {paginasPreguntas.length > 1 && (
+                            <Text style={styles.infoText}>
+                              {labels.pageOf.replace('__current__', String(pageIndex + 1)).replace('__total__', String(paginasPreguntas.length))}
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+                    </View>
+
+                    <View style={styles.answersSection}>
+                      <View style={styles.columnsContainer}>
+                        <QuestionsColumn preguntas={preguntasCol1} startIndex={pageIndex * 40} />
+                        {preguntasCol2.length > 0 && (
+                          <QuestionsColumn preguntas={preguntasCol2} startIndex={pageIndex * 40 + 20} />
+                        )}
+                      </View>
+                    </View>
+                  </View>
+
+                  <Text style={styles.instructions}>{labels.instructions}</Text>
+                </Page>
+              );
+            })}
+          </>
         );
-      }}
-    </BlobProvider>
+      };
+
+      const PDFDocument = (
+        <Document>
+          {sortedStudents.map((student) => (
+            <AnswerSheet 
+              key={student.id} 
+              student={student} 
+              qrDataUrl={qrMap.get(student.id) || ''} 
+            />
+          ))}
+        </Document>
+      );
+
+      // Generate blob
+      const blob = await pdf(PDFDocument).toBlob();
+      const url = URL.createObjectURL(blob);
+      
+      // Cache it
+      pdfCache.set(cacheKey, url);
+      setPdfUrl(url);
+      
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [exam, group, sortedStudents, labels, paperSize, cacheKey]);
+
+  // Download the PDF
+  const handleDownload = useCallback(() => {
+    if (pdfUrl) {
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      onGenerated?.();
+    }
+  }, [pdfUrl, fileName, onGenerated]);
+
+  // Validate exam has questions
+  if (!exam?.preguntas?.length) {
+    return (
+      <Button disabled variant="default">
+        {t('noQuestions')}
+      </Button>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Button disabled variant="destructive">
+        {t('generationError')}
+      </Button>
+    );
+  }
+
+  // If PDF is ready, show download button
+  if (pdfUrl) {
+    return (
+      <Button onClick={handleDownload} variant="default">
+        <QrCode className="mr-2 h-4 w-4" />
+        {labels.downloadPdf}
+      </Button>
+    );
+  }
+
+  // Show generate button (not loading state until clicked)
+  return (
+    <Button 
+      onClick={generatePDF} 
+      disabled={isGenerating}
+      variant="default"
+    >
+      {isGenerating ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {t('generatingPDF')}
+        </>
+      ) : (
+        <>
+          <QrCode className="mr-2 h-4 w-4" />
+          {labels.downloadPdf}
+        </>
+      )}
+    </Button>
   );
-} 
+}
