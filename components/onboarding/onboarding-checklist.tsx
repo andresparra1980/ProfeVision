@@ -79,7 +79,8 @@ export function OnboardingChecklist() {
   const isCheckingRef = useRef(false);
 
   // Check actual progress from database
-  const checkProgress = useCallback(async () => {
+  // Note: isLegacyUser is captured at call time via closure to prevent DB writes for legacy users
+  const checkProgress = useCallback(async (isLegacy: boolean) => {
     // Prevent concurrent checks
     if (isCheckingRef.current) return;
     isCheckingRef.current = true;
@@ -120,10 +121,13 @@ export function OnboardingChecklist() {
       setItemsStatus(newStatus);
 
       // Update checklist items in DB if they changed (don't await, fire and forget)
-      for (const [key, value] of Object.entries(newStatus)) {
-        const savedValue = onboardingStatus?.checklist_items?.[key as ChecklistItemKey];
-        if (value && !savedValue) {
-          completeChecklistItem(key as ChecklistItemKey);
+      // Skip DB writes for legacy users to avoid creating partial onboarding_status blobs
+      if (!isLegacy) {
+        for (const [key, value] of Object.entries(newStatus)) {
+          const savedValue = onboardingStatus?.checklist_items?.[key as ChecklistItemKey];
+          if (value && !savedValue) {
+            completeChecklistItem(key as ChecklistItemKey);
+          }
         }
       }
     } catch (error) {
@@ -144,7 +148,7 @@ export function OnboardingChecklist() {
     // Only check if pathname changed
     if (lastCheckedPathRef.current !== pathname) {
       lastCheckedPathRef.current = pathname;
-      checkProgress();
+      checkProgress(isLegacyUser);
       
       // Reappear if dismissed and navigated to different route (unless steps 1-3 complete)
       if (isDismissed && dismissedOnPathRef.current && dismissedOnPathRef.current !== pathname) {
@@ -159,7 +163,7 @@ export function OnboardingChecklist() {
     // Refresh when user returns to tab
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && !isLoading && !isLegacyUser) {
-        checkProgress();
+        checkProgress(isLegacyUser);
       }
     };
 

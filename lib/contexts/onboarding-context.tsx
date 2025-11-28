@@ -285,14 +285,16 @@ export function useOnboardingStep(stepIndex: number) {
  * Hook for tracking checklist items
  */
 export function useChecklistItem(item: ChecklistItem) {
-  const { onboardingStatus, completeChecklistItem } = useOnboarding();
+  const { onboardingStatus, completeChecklistItem, isLegacyUser } = useOnboarding();
   
   const isCompleted = onboardingStatus?.checklist_items?.[item] ?? false;
   
   const complete = useCallback(async () => {
     if (isCompleted) return true;
+    // Skip DB writes for legacy users to avoid creating partial onboarding_status blobs
+    if (isLegacyUser) return true;
     return completeChecklistItem(item);
-  }, [completeChecklistItem, item, isCompleted]);
+  }, [completeChecklistItem, item, isCompleted, isLegacyUser]);
   
   return {
     isCompleted,
