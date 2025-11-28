@@ -37,7 +37,7 @@ export function useWelcomeModal() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        logger.error("[useWelcomeModal] Error checking welcome status", response.status, errorData);
+        logger.error("[useWelcomeModal] Error checking welcome status", { status: response.status, ...errorData });
         return;
       }
 

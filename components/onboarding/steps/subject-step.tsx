@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslations } from "next-intl";
-import { BookOpen, ChevronRight, Building2 } from "lucide-react";
+import { BookOpen, ChevronRight } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
@@ -16,8 +23,12 @@ interface SubjectData {
   description?: string;
 }
 
+interface Institution {
+  id: string;
+  nombre: string;
+}
+
 interface SubjectStepProps {
-  institutionName?: string;
   institutionId?: string;
   data?: SubjectData;
   onUpdate: (_data: SubjectData) => void;
@@ -25,13 +36,45 @@ interface SubjectStepProps {
   isSubmitting: boolean;
 }
 
-export function SubjectStep({ institutionName, institutionId, data: initialData, onUpdate, onNext, isSubmitting }: SubjectStepProps) {
+export function SubjectStep({ institutionId: initialInstitutionId, data: initialData, onUpdate, onNext, isSubmitting }: SubjectStepProps) {
   const t = useTranslations("onboarding.subject");
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  // Institutions
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [selectedInstitutionId, setSelectedInstitutionId] = useState(initialInstitutionId || "");
 
-  const isValid = name.trim().length > 0 && institutionId;
+  // Load institutions on mount
+  useEffect(() => {
+    const loadInstitutions = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("entidades_educativas")
+          .select("id, nombre")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        setInstitutions(data || []);
+        
+        // Prepopulate with most recent if no initial value
+        if (!initialInstitutionId && data && data.length > 0) {
+          setSelectedInstitutionId(data[0].id);
+        }
+      } catch (error) {
+        console.error("Error loading institutions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInstitutions();
+  }, [initialInstitutionId]);
+
+  const isValid = name.trim().length > 0 && selectedInstitutionId;
 
   const handleSubmit = async () => {
     if (!isValid) return;
@@ -46,7 +89,7 @@ export function SubjectStep({ institutionName, institutionId, data: initialData,
         .insert({
           nombre: name.trim(),
           descripcion: description.trim() || null,
-          entidad_id: institutionId,
+          entidad_id: selectedInstitutionId,
           profesor_id: user.id,
         })
         .select("id")
@@ -69,6 +112,14 @@ export function SubjectStep({ institutionName, institutionId, data: initialData,
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -82,19 +133,29 @@ export function SubjectStep({ institutionName, institutionId, data: initialData,
         </div>
       </div>
 
-      {/* Institution badge */}
-      {institutionName && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
-          <Building2 className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">
-            <span className="text-muted-foreground">{t("institutionLabel")}:</span>{" "}
-            <span className="font-medium">{institutionName}</span>
-          </span>
-        </div>
-      )}
-
       {/* Form */}
       <div className="space-y-4">
+        {/* Institution Select */}
+        <div className="space-y-2">
+          <Label htmlFor="subject-institution">{t("institutionLabel")}</Label>
+          {institutions.length > 0 ? (
+            <Select value={selectedInstitutionId} onValueChange={setSelectedInstitutionId}>
+              <SelectTrigger id="subject-institution">
+                <SelectValue placeholder={t("selectInstitution")} />
+              </SelectTrigger>
+              <SelectContent>
+                {institutions.map((inst) => (
+                  <SelectItem key={inst.id} value={inst.id}>
+                    {inst.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-sm text-destructive">{t("noInstitutions")}</p>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="subject-name">{t("nameLabel")}</Label>
           <Input
@@ -102,7 +163,6 @@ export function SubjectStep({ institutionName, institutionId, data: initialData,
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t("namePlaceholder")}
-            autoFocus
           />
         </div>
 

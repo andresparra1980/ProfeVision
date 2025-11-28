@@ -155,7 +155,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
     }
   }, [searchQuery, groupStudents, t]);
 
-  const handleImportComplete = useCallback(() => {
+  const handleImportComplete = useCallback((_importedCount: number) => {
     toast.success(t('success.title'), {
       description: t('success.importComplete'),
     });

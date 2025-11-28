@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,7 @@ interface GroupData {
 
 interface StudentData {
   id?: string;
-  firstName: string;
+  firstName: string | null;
   lastName: string;
   identification: string;
 }
@@ -61,11 +61,20 @@ const TOTAL_STEPS = 6;
 
 export function OnboardingWizard() {
   const t = useTranslations("onboarding");
-  const { shouldShowWizard, completeWizardStep } = useOnboarding();
+  const { shouldShowWizard, completeWizardStep, onboardingStatus } = useOnboarding();
   
-  const [currentStep, setCurrentStep] = useState(0);
+  // Initialize step from DB status, default to 0
+  const initialStep = onboardingStatus?.wizard_step ?? 0;
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const [wizardData, setWizardData] = useState<WizardData>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Sync with DB when onboardingStatus loads
+  useEffect(() => {
+    if (onboardingStatus?.wizard_step !== undefined && onboardingStatus.wizard_step !== currentStep) {
+      setCurrentStep(onboardingStatus.wizard_step);
+    }
+  }, [onboardingStatus?.wizard_step]);
 
   const updateWizardData = useCallback((data: Partial<WizardData>) => {
     setWizardData(prev => ({ ...prev, ...data }));
@@ -116,7 +125,6 @@ export function OnboardingWizard() {
       case 2:
         return (
           <SubjectStep
-            institutionName={wizardData.institution?.name}
             institutionId={wizardData.institution?.id}
             data={wizardData.subject}
             onUpdate={(data: SubjectData) => updateWizardData({ subject: data })}

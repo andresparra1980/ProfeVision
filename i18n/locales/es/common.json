@@ -1044,8 +1044,35 @@
   },
   "components": {
     "excelImport": {
+      "options": {
+        "title": "Opciones de importación",
+        "separateNames": "Los apellidos y nombres están en campos separados",
+        "includeEmails": "Incluir correos electrónicos"
+      },
+      "columns": {
+        "names": "Nombres",
+        "surnames": "Apellidos",
+        "fullName": "Apellidos y Nombres",
+        "identification": "Identificación",
+        "email": "Email"
+      },
+      "example": {
+        "student1": {
+          "firstName": "Juan Carlos",
+          "lastName": "Pérez González",
+          "id": "12345678",
+          "email": "estudiante1@ejemplo.com"
+        },
+        "student2": {
+          "firstName": "María José",
+          "lastName": "López Ramírez",
+          "id": "87654321",
+          "email": "estudiante2@ejemplo.com"
+        }
+      },
+      "sheetName": "Estudiantes",
       "downloadTemplate": "Descargar formato",
-      "downloadDescription": "Descarga el formato de ejemplo para importar estudiantes",
+      "downloadDescription": "Descarga el formato según las opciones seleccionadas",
       "selectFile": "Seleccionar archivo Excel",
       "errorsFound": "Se encontraron los siguientes errores:",
       "preview": {
@@ -1053,6 +1080,7 @@
         "table": {
           "names": "Nombres",
           "surnames": "Apellidos",
+          "fullName": "Apellidos y Nombres",
           "identification": "Identificación",
           "email": "Email",
           "andMore": "Y {count} más..."
@@ -1074,8 +1102,13 @@
       "error": {
         "title": "Error",
         "readingFile": "No se pudo leer el archivo. Asegúrate de que sea un archivo Excel válido.",
-        "noDataToImport": "No hay datos válidos para importar"
-      }
+        "noDataToImport": "No hay datos válidos para importar",
+        "invalidHeaders": "Los encabezados del archivo no son válidos. No borres la primera fila del formato.",
+        "expectedHeaders": "Los encabezados esperados son:",
+        "expectedHeadersSeparate": "{names}, {surnames}, {id}{email}",
+        "expectedHeadersCombined": "{fullName}, {id}{email}"
+      },
+      "headerWarning": "No borrar los nombres de las columnas en la primera fila del archivo."
     }
   },
   "developmentOverlay": {

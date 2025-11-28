@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Download, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -12,14 +14,14 @@ import logger from "@/lib/utils/logger";
 
 interface Student {
   id?: string;
-  nombres: string;
+  nombres: string | null;
   apellidos: string;
   identificacion: string;
   email: string;
 }
 
 interface ExcelImportProps {
-  onImportComplete: () => void;
+  onImportComplete: (_importedCount: number) => void;
   groupId?: string;
 }
 
@@ -29,6 +31,11 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
   const [preview, setPreview] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, _setErrors] = useState<string[]>([]);
+  
+  // Import options
+  const [separateNames, setSeparateNames] = useState(false);
+  const [includeEmails, setIncludeEmails] = useState(false);
+  const [headerError, setHeaderError] = useState(false);
   
   const _validateData = (data: Record<string, string>[]): { valid: Student[], errors: string[] } => {
     const validStudents: Student[] = [];
@@ -102,15 +109,64 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
 
     try {
       setIsLoading(true);
+      setHeaderError(false);
       const data = await readExcelFile(file);
       
-      // Mapear los datos a nuestro formato
-      const mappedData = data.map((row: Record<string, string>) => ({
-        nombres: row.nombres || row.Nombres || '',
-        apellidos: row.apellidos || row.Apellidos || '',
-        identificacion: row.identificacion || row.Identificación || row.ID || '',
-        email: row.email || row.Email || row.Correo || '',
-      }));
+      if (data.length === 0) {
+        toast.error(t('components.excelImport.error.title'), {
+          description: t('components.excelImport.validation.emptyFile'),
+        });
+        return;
+      }
+      
+      // Columnas internacionalizadas
+      const colNames = t('components.excelImport.columns.names');
+      const colSurnames = t('components.excelImport.columns.surnames');
+      const colFullName = t('components.excelImport.columns.fullName');
+      const colId = t('components.excelImport.columns.identification');
+      const colEmail = t('components.excelImport.columns.email');
+      
+      // Verificar que los headers existen
+      const firstRow = data[0];
+      const headers = Object.keys(firstRow);
+      
+      // Headers válidos según el modo
+      const hasValidHeaders = separateNames
+        ? headers.some(h => [colNames, 'nombres', 'Nombres', 'Names'].includes(h)) &&
+          headers.some(h => [colSurnames, 'apellidos', 'Apellidos', 'Surnames'].includes(h))
+        : headers.some(h => [colFullName, 'Apellidos y Nombres', 'Surnames and Names', 'Nombre', 'nombre'].includes(h));
+      
+      const hasIdHeader = headers.some(h => [colId, 'identificacion', 'Identificación', 'ID', 'id'].includes(h));
+      
+      if (!hasValidHeaders || !hasIdHeader) {
+        setHeaderError(true);
+        toast.error(t('components.excelImport.error.title'), {
+          description: t('components.excelImport.error.invalidHeaders'),
+        });
+        return;
+      }
+      
+      // Mapear los datos según las opciones seleccionadas
+      const mappedData = data.map((row: Record<string, string>) => {
+        if (separateNames) {
+          // Campos separados: Nombres y Apellidos
+          return {
+            nombres: row[colNames] || row.nombres || row.Nombres || row.Names || '',
+            apellidos: row[colSurnames] || row.apellidos || row.Apellidos || row.Surnames || '',
+            identificacion: row[colId] || row.identificacion || row.Identificación || row.ID || '',
+            email: includeEmails ? (row[colEmail] || row.email || row.Email || row.Correo || '') : '',
+          };
+        } else {
+          // Campo combinado: "Apellidos y Nombres" va todo a apellidos, nombres queda null
+          const fullName = row[colFullName] || row['Apellidos y Nombres'] || row['Surnames and Names'] || row.Nombre || row.nombre || '';
+          return {
+            nombres: null,
+            apellidos: fullName.trim(),
+            identificacion: row[colId] || row.identificacion || row.Identificación || row.ID || '',
+            email: includeEmails ? (row[colEmail] || row.email || row.Email || row.Correo || '') : '',
+          };
+        }
+      });
 
       setPreview(mappedData);
       setFile(file);
@@ -170,6 +226,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
 
     setIsLoading(true);
     let shouldNotifyParent = false;
+    let importedCount = 0;
 
     try {
       if (groupId) {
@@ -257,6 +314,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
         toast.success("Éxito", {
           description: `Se importaron y asignaron ${estudianteIds.length} estudiantes al grupo`,
         });
+        importedCount = estudianteIds.length;
         shouldNotifyParent = true;
       } else {
         // Si no hay grupo, simplemente insertar todos
@@ -274,6 +332,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
           toast.success("Éxito", {
             description: `Se importaron ${successCount} estudiantes correctamente`,
           });
+          importedCount = successCount;
           shouldNotifyParent = true;
         }
       }
@@ -290,7 +349,7 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     } finally {
       setIsLoading(false);
       if (shouldNotifyParent) {
-        onImportComplete();
+        onImportComplete(importedCount);
       }
     }
   };
@@ -299,27 +358,58 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     // Crear un libro de trabajo
     const wb = XLSX.utils.book_new();
     
-    // Datos de ejemplo
-    const exampleData = [
-      { 
-        Nombres: "Juan Carlos",
-        Apellidos: "Pérez González",
-        Identificación: "12345678",
-        Email: "estudiante1@ejemplo.com"
-      },
-      {
-        Nombres: "María José",
-        Apellidos: "López Ramírez",
-        Identificación: "87654321",
-        Email: "estudiante2@ejemplo.com"
-      },
-    ];
+    // Obtener datos de ejemplo internacionalizados
+    const example1 = {
+      firstName: t('components.excelImport.example.student1.firstName'),
+      lastName: t('components.excelImport.example.student1.lastName'),
+      id: t('components.excelImport.example.student1.id'),
+      email: t('components.excelImport.example.student1.email'),
+    };
+    const example2 = {
+      firstName: t('components.excelImport.example.student2.firstName'),
+      lastName: t('components.excelImport.example.student2.lastName'),
+      id: t('components.excelImport.example.student2.id'),
+      email: t('components.excelImport.example.student2.email'),
+    };
+    
+    // Headers internacionalizados
+    const colNames = t('components.excelImport.columns.names');
+    const colSurnames = t('components.excelImport.columns.surnames');
+    const colFullName = t('components.excelImport.columns.fullName');
+    const colId = t('components.excelImport.columns.identification');
+    const colEmail = t('components.excelImport.columns.email');
+    
+    // Datos de ejemplo según las opciones seleccionadas
+    let exampleData: Record<string, string>[];
+    
+    if (separateNames && includeEmails) {
+      exampleData = [
+        { [colNames]: example1.firstName, [colSurnames]: example1.lastName, [colId]: example1.id, [colEmail]: example1.email },
+        { [colNames]: example2.firstName, [colSurnames]: example2.lastName, [colId]: example2.id, [colEmail]: example2.email },
+      ];
+    } else if (separateNames && !includeEmails) {
+      exampleData = [
+        { [colNames]: example1.firstName, [colSurnames]: example1.lastName, [colId]: example1.id },
+        { [colNames]: example2.firstName, [colSurnames]: example2.lastName, [colId]: example2.id },
+      ];
+    } else if (!separateNames && includeEmails) {
+      exampleData = [
+        { [colFullName]: `${example1.lastName} ${example1.firstName}`, [colId]: example1.id, [colEmail]: example1.email },
+        { [colFullName]: `${example2.lastName} ${example2.firstName}`, [colId]: example2.id, [colEmail]: example2.email },
+      ];
+    } else {
+      // Default: combined names, no email
+      exampleData = [
+        { [colFullName]: `${example1.lastName} ${example1.firstName}`, [colId]: example1.id },
+        { [colFullName]: `${example2.lastName} ${example2.firstName}`, [colId]: example2.id },
+      ];
+    }
     
     // Crear una hoja de trabajo
     const ws = XLSX.utils.json_to_sheet(exampleData);
     
     // Añadir la hoja al libro
-    XLSX.utils.book_append_sheet(wb, ws, "Estudiantes");
+    XLSX.utils.book_append_sheet(wb, ws, t('components.excelImport.sheetName'));
     
     // Generar el archivo y descargarlo
     XLSX.writeFile(wb, "formato_estudiantes.xlsx");
@@ -327,18 +417,48 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
   
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-4 items-center mb-6">
-                <Button
-          variant="outline"
-          onClick={downloadTemplate}
-          className="flex items-center"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          {t('components.excelImport.downloadTemplate')}
-        </Button>
-        <div className="text-sm text-muted-foreground">
-          {t('components.excelImport.downloadDescription')}
+      {/* Import options */}
+      <div className="space-y-3 p-4 border rounded-lg bg-muted/20">
+        <p className="text-sm font-medium">{t('components.excelImport.options.title')}</p>
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="separate-names" 
+            checked={separateNames}
+            onCheckedChange={(checked) => setSeparateNames(checked === true)}
+          />
+          <Label htmlFor="separate-names" className="text-sm cursor-pointer">
+            {t('components.excelImport.options.separateNames')}
+          </Label>
         </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="include-emails" 
+            checked={includeEmails}
+            onCheckedChange={(checked) => setIncludeEmails(checked === true)}
+          />
+          <Label htmlFor="include-emails" className="text-sm cursor-pointer">
+            {t('components.excelImport.options.includeEmails')}
+          </Label>
+        </div>
+      </div>
+
+      <div className="space-y-2 mb-6">
+        <div className="flex flex-wrap gap-4 items-center">
+          <Button
+            variant="outline"
+            onClick={downloadTemplate}
+            className="flex items-center"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            {t('components.excelImport.downloadTemplate')}
+          </Button>
+          <div className="text-sm text-muted-foreground">
+            {t('components.excelImport.downloadDescription')}
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t('components.excelImport.headerWarning')}
+        </p>
       </div>
       
       <div className="border rounded-md p-4 bg-muted/30">
@@ -357,6 +477,27 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
             className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none p-2"
           />
         </div>
+        
+        {headerError && (
+          <div className="rounded-md bg-secondary/50 p-3 mb-4">
+            <p className="text-sm font-medium mb-2">{t('components.excelImport.error.expectedHeaders')}</p>
+            <p className="text-xs text-muted-foreground">
+              {separateNames 
+                ? t('components.excelImport.error.expectedHeadersSeparate', { 
+                    names: t('components.excelImport.columns.names'),
+                    surnames: t('components.excelImport.columns.surnames'),
+                    id: t('components.excelImport.columns.identification'),
+                    email: includeEmails ? `, ${t('components.excelImport.columns.email')}` : ''
+                  })
+                : t('components.excelImport.error.expectedHeadersCombined', {
+                    fullName: t('components.excelImport.columns.fullName'),
+                    id: t('components.excelImport.columns.identification'),
+                    email: includeEmails ? `, ${t('components.excelImport.columns.email')}` : ''
+                  })
+              }
+            </p>
+          </div>
+        )}
         
         {errors.length > 0 && (
           <div className="rounded-md bg-destructive/10 p-3 mb-4">
@@ -378,27 +519,43 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
           <div className="mt-4">
             <h3 className="text-sm font-medium mb-2">{t('components.excelImport.preview.title', { count: preview.length })}</h3>
             <div className="overflow-auto max-h-36 rounded-md border">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('components.excelImport.preview.table.names')}</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('components.excelImport.preview.table.surnames')}</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('components.excelImport.preview.table.identification')}</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('components.excelImport.preview.table.email')}</th>
+                    {separateNames ? (
+                      <>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('components.excelImport.preview.table.names')}</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('components.excelImport.preview.table.surnames')}</th>
+                      </>
+                    ) : (
+                      <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('components.excelImport.preview.table.fullName')}</th>
+                    )}
+                    <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('components.excelImport.preview.table.identification')}</th>
+                    {includeEmails && (
+                      <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('components.excelImport.preview.table.email')}</th>
+                    )}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-background divide-y divide-border">
                   {preview.slice(0, 5).map((student, index) => (
                     <tr key={index}>
-                      <td className="px-4 py-2 text-xs">{student.nombres}</td>
-                      <td className="px-4 py-2 text-xs">{student.apellidos}</td>
+                      {separateNames ? (
+                        <>
+                          <td className="px-4 py-2 text-xs">{student.nombres}</td>
+                          <td className="px-4 py-2 text-xs">{student.apellidos}</td>
+                        </>
+                      ) : (
+                        <td className="px-4 py-2 text-xs">{student.apellidos}</td>
+                      )}
                       <td className="px-4 py-2 text-xs">{student.identificacion}</td>
-                      <td className="px-4 py-2 text-xs">{student.email || "-"}</td>
+                      {includeEmails && (
+                        <td className="px-4 py-2 text-xs">{student.email || "-"}</td>
+                      )}
                     </tr>
                   ))}
                   {preview.length > 5 && (
                     <tr>
-                      <td colSpan={4} className="px-4 py-2 text-xs text-center">
+                      <td colSpan={separateNames ? (includeEmails ? 4 : 3) : (includeEmails ? 3 : 2)} className="px-4 py-2 text-xs text-center text-muted-foreground">
                         {t('components.excelImport.preview.table.andMore', { count: preview.length - 5 })}
                       </td>
                     </tr>

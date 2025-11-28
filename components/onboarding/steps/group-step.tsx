@@ -1,11 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslations } from "next-intl";
-import { Users, ChevronRight, BookOpen } from "lucide-react";
+import { Users, ChevronRight } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
@@ -14,6 +21,14 @@ interface GroupData {
   name: string;
   year?: string;
   period?: string;
+}
+
+interface Subject {
+  id: string;
+  nombre: string;
+  entidades_educativas: {
+    nombre: string;
+  } | null;
 }
 
 interface GroupStepProps {
@@ -25,14 +40,53 @@ interface GroupStepProps {
   isSubmitting: boolean;
 }
 
-export function GroupStep({ subjectName, subjectId, data: initialData, onUpdate, onNext, isSubmitting }: GroupStepProps) {
+export function GroupStep({ subjectId: initialSubjectId, data: initialData, onUpdate, onNext, isSubmitting }: GroupStepProps) {
   const t = useTranslations("onboarding.group");
   const [name, setName] = useState(initialData?.name || "");
   const [year, setYear] = useState(initialData?.year || "");
   const [period, setPeriod] = useState(initialData?.period || "");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  // Subjects
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [selectedSubjectId, setSelectedSubjectId] = useState(initialSubjectId || "");
 
-  const isValid = name.trim().length > 0 && subjectId;
+  // Load subjects on mount
+  useEffect(() => {
+    const loadSubjects = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("materias")
+          .select("id, nombre, entidades_educativas(nombre)")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        setSubjects(data || []);
+        
+        // Prepopulate with most recent if no initial value
+        if (!initialSubjectId && data && data.length > 0) {
+          setSelectedSubjectId(data[0].id);
+        }
+      } catch (error) {
+        console.error("Error loading subjects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSubjects();
+  }, [initialSubjectId]);
+
+  const isValid = name.trim().length > 0 && selectedSubjectId;
+
+  const getSubjectDisplayName = (subject: Subject) => {
+    const institutionName = subject.entidades_educativas?.nombre;
+    return institutionName 
+      ? `${subject.nombre} - ${institutionName}`
+      : subject.nombre;
+  };
 
   const handleSubmit = async () => {
     if (!isValid) return;
@@ -46,7 +100,7 @@ export function GroupStep({ subjectName, subjectId, data: initialData, onUpdate,
         .from("grupos")
         .insert({
           nombre: name.trim(),
-          materia_id: subjectId,
+          materia_id: selectedSubjectId,
           profesor_id: user.id,
           año_escolar: year.trim() || null,
           periodo_escolar: period.trim() || null,
@@ -72,6 +126,14 @@ export function GroupStep({ subjectName, subjectId, data: initialData, onUpdate,
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -85,19 +147,29 @@ export function GroupStep({ subjectName, subjectId, data: initialData, onUpdate,
         </div>
       </div>
 
-      {/* Subject badge */}
-      {subjectName && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
-          <BookOpen className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">
-            <span className="text-muted-foreground">{t("subjectLabel")}:</span>{" "}
-            <span className="font-medium">{subjectName}</span>
-          </span>
-        </div>
-      )}
-
       {/* Form */}
       <div className="space-y-4">
+        {/* Subject Select */}
+        <div className="space-y-2">
+          <Label htmlFor="group-subject">{t("subjectLabel")}</Label>
+          {subjects.length > 0 ? (
+            <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
+              <SelectTrigger id="group-subject">
+                <SelectValue placeholder={t("selectSubject")} />
+              </SelectTrigger>
+              <SelectContent>
+                {subjects.map((subject) => (
+                  <SelectItem key={subject.id} value={subject.id}>
+                    {getSubjectDisplayName(subject)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-sm text-destructive">{t("noSubjects")}</p>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="group-name">{t("nameLabel")}</Label>
           <Input
@@ -105,7 +177,6 @@ export function GroupStep({ subjectName, subjectId, data: initialData, onUpdate,
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t("namePlaceholder")}
-            autoFocus
           />
         </div>
 
