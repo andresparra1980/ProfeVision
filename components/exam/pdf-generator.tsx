@@ -40,12 +40,30 @@ interface Exam {
   }>;
 }
 
+// Labels for i18n support (react-pdf doesn't support hooks inside Document)
+export interface AnswerSheetLabels {
+  title: string; // "HOJA DE RESPUESTAS" / "ANSWER SHEET"
+  studentInfo: string; // "Información del Estudiante" / "Student Information"
+  name: string; // "Nombre:" / "Name:"
+  identification: string; // "Identificación:" / "ID:"
+  group: string; // "Grupo:" / "Group:"
+  subject: string; // "Materia:" / "Subject:"
+  exam: string; // "Examen:" / "Exam:"
+  duration: string; // "Duración:" / "Duration:"
+  minutes: string; // "minutos" / "minutes"
+  pageOf: string; // "Página {current} de {total}" pattern
+  instructions: string; // Full instructions text
+  loading: string; // "Cargando..." / "Loading..."
+  downloadPdf: string; // "Descargar PDF" / "Download PDF"
+}
+
 interface PDFGeneratorProps {
   exam: Exam;
   group: Group;
   paperSize: 'LETTER' | 'A4';
   fileName: string;
   onGenerated?: () => void;
+  labels: AnswerSheetLabels;
 }
 
 // Definir estilos para el PDF
@@ -305,7 +323,7 @@ const QRCodeComponent = ({ data }: { data: string }) => {
 // Componente para una hoja de respuestas individual
 // Dividir las preguntas en grupos de 40 máximo (antes 20)
 // Dividir en columnas de 20 preguntas cada una (antes 10)
-const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; group: Group }) => {
+const AnswerSheet = ({ exam, student, group, labels }: { exam: Exam; student: Student; group: Group; labels: AnswerSheetLabels }) => {
   const qrData = generateOptimizedQRData({
     examId: exam.id,
     studentId: student.id,
@@ -332,7 +350,7 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
 
             <View style={styles.container}>
               <View style={styles.headerSection}>
-                <Text style={styles.mainTitle}>HOJA DE RESPUESTAS</Text>
+                <Text style={styles.mainTitle}>{labels.title}</Text>
                 
                 <View style={styles.infoContainer}>
                   <View style={styles.qrCode}>
@@ -340,15 +358,15 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
                   </View>
                   
                   <View style={styles.studentInfo}>
-                    <Text style={styles.infoTitle}>Información del Estudiante</Text>
-                    <Text style={styles.infoText}>Nombre: {student.nombres ? `${student.nombres} ${student.apellidos}` : student.apellidos}</Text>
-                    <Text style={styles.infoText}>Identificación: {student.identificacion}</Text>
-                    <Text style={styles.infoText}>Grupo: {group.nombre}</Text>
-                    <Text style={styles.infoText}>Materia: {group.materia.nombre}</Text>
-                    <Text style={styles.infoText}>Examen: {exam.titulo}</Text>
-                    <Text style={styles.infoText}>Duración: {exam.duracion_minutos} minutos</Text>
+                    <Text style={styles.infoTitle}>{labels.studentInfo}</Text>
+                    <Text style={styles.infoText}>{labels.name} {student.nombres ? `${student.nombres} ${student.apellidos}` : student.apellidos}</Text>
+                    <Text style={styles.infoText}>{labels.identification} {student.identificacion}</Text>
+                    <Text style={styles.infoText}>{labels.group} {group.nombre}</Text>
+                    <Text style={styles.infoText}>{labels.subject} {group.materia.nombre}</Text>
+                    <Text style={styles.infoText}>{labels.exam} {exam.titulo}</Text>
+                    <Text style={styles.infoText}>{labels.duration} {exam.duracion_minutos} {labels.minutes}</Text>
                     {paginasPreguntas.length > 1 && (
-                      <Text style={styles.infoText}>Página {pageIndex + 1} de {paginasPreguntas.length}</Text>
+                      <Text style={styles.infoText}>{labels.pageOf.replace('{current}', String(pageIndex + 1)).replace('{total}', String(paginasPreguntas.length))}</Text>
                     )}
                   </View>
                 </View>
@@ -371,8 +389,7 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
             </View>
 
             <Text style={styles.instructions}>
-              Instrucciones: Rellene completamente el círculo que corresponda a la respuesta correcta.
-              Use bolígrafo negro o azul. No use bolígrafo rojo o lápiz. Asegúrese de borrar completamente si necesita cambiar una respuesta.
+              {labels.instructions}
             </Text>
           </Page>
         );
@@ -382,7 +399,7 @@ const AnswerSheet = ({ exam, student, group }: { exam: Exam; student: Student; g
 };
 
 // Componente principal que genera el PDF
-const PDFDocument = ({ exam, group }: { exam: Exam; group: Group }) => {
+const PDFDocument = ({ exam, group, labels }: { exam: Exam; group: Group; labels: AnswerSheetLabels }) => {
   // Ordenar estudiantes alfabéticamente por apellido
   const sortedStudents = [...group.estudiantes].sort((a, b) => 
     a.apellidos.localeCompare(b.apellidos, 'es', { sensitivity: 'base' })
@@ -396,13 +413,14 @@ const PDFDocument = ({ exam, group }: { exam: Exam; group: Group }) => {
         exam={exam}
         student={student}
         group={group}
+        labels={labels}
       />
     ))}
   </Document>
 );
 };
 
-export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName, onGenerated }: PDFGeneratorProps) {
+export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName, onGenerated, labels }: PDFGeneratorProps) {
   const [isClient, setIsClient] = useState(false);
   const t = useTranslations('dashboard.exams.results.pdfExport');
 
@@ -428,14 +446,14 @@ export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName, onG
         disabled
         className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
       >
-        Cargando...
+        {labels.loading}
       </button>
     );
   }
 
   // Usar BlobProvider en lugar de PDFDownloadLink para evitar el error
   return (
-    <BlobProvider document={<PDFDocument exam={exam} group={group} />}>
+    <BlobProvider document={<PDFDocument exam={exam} group={group} labels={labels} />}>
       {({ url, loading, error }) => {
         if (loading) {
           return (
@@ -468,7 +486,7 @@ export function PDFGenerator({ exam, group, paperSize: _paperSize, fileName, onG
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
           >
             <QrCode className="mr-2 h-4 w-4" />
-            Descargar PDF
+            {labels.downloadPdf}
           </a>
         );
       }}

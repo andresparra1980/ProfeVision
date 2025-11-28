@@ -1,3 +1,13 @@
+// Labels for i18n support in LaTeX export
+export type LatexLabels = {
+  group: string; // "Grupo:" / "Group:"
+  instructions: string; // "Instrucciones:" / "Instructions:"
+  duration: string; // "Duración:" / "Duration:"
+  minutes: string; // "minutos" / "minutes"
+  totalScore: string; // "Puntaje total:" / "Total score:"
+  pts: string; // "pts" / "pts"
+};
+
 export type LatexOptions = {
   fontSize?: '8pt' | '10pt' | '12pt';
   columns?: 1 | 2 | 3;
@@ -11,6 +21,8 @@ export type LatexOptions = {
   dateText?: string | null;
   description?: string | null;
   instructions?: string | null;
+  locale?: 'es' | 'en'; // For babel package
+  labels?: LatexLabels;
 };
 
 export type ExamLike = {
@@ -92,6 +104,7 @@ function latexPreamble(opts: LatexOptions): string {
   const orientation = opts.orientation ?? 'portrait';
   const columns = opts.columns ?? 2;
   const balance = opts.columnBalance ?? 'unbalanced';
+  const locale = opts.locale ?? 'es';
 
   // geometry options: map to geometry keywords
   const paperOpt = paper === 'letter' ? 'letterpaper'
@@ -104,9 +117,12 @@ function latexPreamble(opts: LatexOptions): string {
   const klass = fontSize === '8pt' ? 'extarticle' : 'article';
   const classSize = fontSize === '8pt' ? '8pt' : fontSize; // 10pt or 12pt are valid with article
 
+  // babel language
+  const babelLang = locale === 'en' ? 'english' : 'spanish';
+
   return [
     `\\documentclass[${classSize}]{${klass}}`,
-    `\\usepackage[spanish]{babel}`,
+    `\\usepackage[${babelLang}]{babel}`,
     // Use modern Unicode engine defaults (Tectonic/XeTeX): fontspec for full Unicode support
     `\\usepackage{fontspec}`,
     `\\usepackage{microtype}`,
@@ -130,18 +146,29 @@ function latexPreamble(opts: LatexOptions): string {
   ].filter(Boolean).join('\n');
 }
 
+// Default labels (Spanish)
+const defaultLabels: LatexLabels = {
+  group: 'Grupo:',
+  instructions: 'Instrucciones:',
+  duration: 'Duración:',
+  minutes: 'minutos',
+  totalScore: 'Puntaje total:',
+  pts: 'pts',
+};
+
 function latexHeader(exam: ExamLike, opts: LatexOptions): string {
   const inst = escapeLatexOutsideMath(opts.institutionName ?? exam.materias.entidad.nombre);
   const subj = escapeLatexOutsideMath(opts.subjectName ?? exam.materias.nombre);
   const title = escapeLatexOutsideMath(opts.title ?? exam.titulo);
   const desc = opts.description ?? exam.descripcion ?? '';
   const instructions = opts.instructions ?? exam.instrucciones ?? '';
+  const labels = opts.labels ?? defaultLabels;
 
   const lines: string[] = [];
   lines.push(`\\begin{center}`);
   lines.push(`\\textbf{${inst}}\\\\`);
   lines.push(`${subj}\\\\`);
-  if (opts.groupName) lines.push(`Grupo: ${escapeLatexOutsideMath(opts.groupName)}\\\\`);
+  if (opts.groupName) lines.push(`${labels.group} ${escapeLatexOutsideMath(opts.groupName)}\\\\`);
   if (opts.dateText) lines.push(`${escapeLatexOutsideMath(opts.dateText)}\\\\`);
   lines.push(`\\vspace{0.5em}`);
   lines.push(`\\Large \\textbf{${title}}`);
@@ -151,23 +178,24 @@ function latexHeader(exam: ExamLike, opts: LatexOptions): string {
     lines.push('');
   }
   if (instructions) {
-    lines.push('\\textbf{Instrucciones:}');
+    lines.push(`\\textbf{${labels.instructions}}`);
     lines.push(escapeLatexOutsideMath(instructions));
     lines.push('');
   }
-  lines.push(`Duración: ${exam.duracion_minutos} minutos\\hfill Puntaje total: ${exam.puntaje_total}`);
+  lines.push(`${labels.duration} ${exam.duracion_minutos} ${labels.minutes}\\hfill ${labels.totalScore} ${exam.puntaje_total}`);
   lines.push('');
   return lines.join('\n');
 }
 
-function latexQuestions(exam: ExamLike): string {
+function latexQuestions(exam: ExamLike, opts: LatexOptions): string {
+  const labels = opts.labels ?? defaultLabels;
   const q: string[] = [];
   q.push('\\begin{enumerate}');
   exam.preguntas.forEach((p) => {
     const text = escapeLatexOutsideMath(p.texto || '');
     // Permit content to break across columns/pages: avoid minipage so LaTeX can split naturally
     // Use declaration form {\bfseries ...} instead of \textbf{...} to avoid fragile-argument issues with long text
-    q.push(`  \\item {\\bfseries ${text}} (\\emph{${p.puntaje} pts})`);
+    q.push(`  \\item {\\bfseries ${text}} (\\emph{${p.puntaje} ${labels.pts}})`);
     if (p.opciones_respuesta && p.opciones_respuesta.length > 0) {
       q.push('    \\begin{enumerate}');
       p.opciones_respuesta.forEach((o) => {
@@ -194,7 +222,7 @@ export function buildExamTex(exam: ExamLike, opts: LatexOptions = {}): string {
   return [
     latexPreamble(opts),
     latexHeader(exam, opts),
-    latexQuestions(exam),
+    latexQuestions(exam, opts),
     latexEnd(opts)
   ].join('\n\n');
 }

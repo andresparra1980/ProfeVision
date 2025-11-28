@@ -628,7 +628,30 @@
       "a4": "A4 (210mm x 297mm)",
       "legal": "Legal (8.5\" x 14\")",
       "exportConfiguration": "Export Configuration",
-      "exportConfigurationDesc": "Select the group and paper size for export"
+      "exportConfigurationDesc": "Select the group and paper size for export",
+      "answerSheetLabels": {
+        "title": "ANSWER SHEET",
+        "studentInfo": "Student Information",
+        "name": "Name:",
+        "identification": "ID:",
+        "group": "Group:",
+        "subject": "Subject:",
+        "exam": "Exam:",
+        "duration": "Duration:",
+        "minutes": "minutes",
+        "pageOf": "Page {current} of {total}",
+        "instructions": "Instructions: Fill in the circle completely that corresponds to the correct answer. Use black or blue ink pen. Do not use red pen or pencil. Make sure to erase completely if you need to change an answer.",
+        "loading": "Loading...",
+        "downloadPdf": "Download PDF"
+      },
+      "latexLabels": {
+        "group": "Group:",
+        "instructions": "Instructions:",
+        "duration": "Duration:",
+        "minutes": "minutes",
+        "totalScore": "Total score:",
+        "pts": "pts"
+      }
     },
     "textExport": {
       "title": "Export text",

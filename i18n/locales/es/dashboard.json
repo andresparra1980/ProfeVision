@@ -629,7 +629,30 @@
       "a4": "A4 (210mm x 297mm)",
       "legal": "Legal (8.5\" x 14\")",
       "exportConfiguration": "Configuración de Exportación",
-      "exportConfigurationDesc": "Selecciona el grupo y el tamaño de papel para exportar"
+      "exportConfigurationDesc": "Selecciona el grupo y el tamaño de papel para exportar",
+      "answerSheetLabels": {
+        "title": "HOJA DE RESPUESTAS",
+        "studentInfo": "Información del Estudiante",
+        "name": "Nombre:",
+        "identification": "Identificación:",
+        "group": "Grupo:",
+        "subject": "Materia:",
+        "exam": "Examen:",
+        "duration": "Duración:",
+        "minutes": "minutos",
+        "pageOf": "Página {current} de {total}",
+        "instructions": "Instrucciones: Rellene completamente el círculo que corresponda a la respuesta correcta. Use bolígrafo negro o azul. No use bolígrafo rojo o lápiz. Asegúrese de borrar completamente si necesita cambiar una respuesta.",
+        "loading": "Cargando...",
+        "downloadPdf": "Descargar PDF"
+      },
+      "latexLabels": {
+        "group": "Grupo:",
+        "instructions": "Instrucciones:",
+        "duration": "Duración:",
+        "minutes": "minutos",
+        "totalScore": "Puntaje total:",
+        "pts": "pts"
+      }
     },
     "textExport": {
       "title": "Exportar texto",

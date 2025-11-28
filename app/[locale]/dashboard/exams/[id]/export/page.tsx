@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { ChevronLeft, Printer, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,11 +11,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { Separator } from "@/components/ui/separator";
 
 import TextExportDialog from "../../components/TextExportDialog";
-import { buildExamTex, type LatexOptions } from "@/lib/latex/buildExamTex";
+import { buildExamTex, type LatexOptions, type LatexLabels } from "@/lib/latex/buildExamTex";
+import type { AnswerSheetLabels } from "@/components/exam/pdf-generator";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Student } from "@/lib/types/database";
@@ -107,6 +108,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   
   const router = useRouter();
   const t = useTranslations('dashboard');
+  const locale = useLocale();
+  const dateFnsLocale = locale === 'en' ? enUS : es;
   const [loading, setLoading] = useState(true);
   const [exam, setExam] = useState<ExamDetails | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
@@ -125,6 +128,32 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   // Onboarding checklist
   const { complete: completePdfExported, isCompleted: pdfAlreadyExported } = useChecklistItem('pdf_exported');
   const { refetch } = useOnboarding();
+
+  // i18n labels for PDF and LaTeX exports
+  const answerSheetLabels: AnswerSheetLabels = {
+    title: t('exams.export.answerSheetLabels.title'),
+    studentInfo: t('exams.export.answerSheetLabels.studentInfo'),
+    name: t('exams.export.answerSheetLabels.name'),
+    identification: t('exams.export.answerSheetLabels.identification'),
+    group: t('exams.export.answerSheetLabels.group'),
+    subject: t('exams.export.answerSheetLabels.subject'),
+    exam: t('exams.export.answerSheetLabels.exam'),
+    duration: t('exams.export.answerSheetLabels.duration'),
+    minutes: t('exams.export.answerSheetLabels.minutes'),
+    pageOf: t('exams.export.answerSheetLabels.pageOf'),
+    instructions: t('exams.export.answerSheetLabels.instructions'),
+    loading: t('exams.export.answerSheetLabels.loading'),
+    downloadPdf: t('exams.export.answerSheetLabels.downloadPdf'),
+  };
+
+  const latexLabels: LatexLabels = {
+    group: t('exams.export.latexLabels.group'),
+    instructions: t('exams.export.latexLabels.instructions'),
+    duration: t('exams.export.latexLabels.duration'),
+    minutes: t('exams.export.latexLabels.minutes'),
+    totalScore: t('exams.export.latexLabels.totalScore'),
+    pts: t('exams.export.latexLabels.pts'),
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -314,6 +343,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const handleDownloadTex = () => {
     if (!exam) return;
     const selectedGroup = exam.examen_grupo?.find(eg => eg.grupo.id === selectedGroupId);
+    const dateFormat = locale === 'en' ? "MMMM d, yyyy" : "d 'de' MMMM 'de' yyyy";
     const opts: LatexOptions = {
       fontSize: latexFontSize,
       columns: latexColumns,
@@ -323,9 +353,11 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       subjectName: exam.materias.nombre,
       title: exam.titulo,
       groupName: selectedGroup?.grupo?.nombre ?? null,
-      dateText: exam.created_at ? format(new Date(exam.created_at), "d 'de' MMMM 'de' yyyy", { locale: es }) : null,
+      dateText: exam.created_at ? format(new Date(exam.created_at), dateFormat, { locale: dateFnsLocale }) : null,
       description: exam.descripcion ?? undefined,
       instructions: exam.instrucciones ?? undefined,
+      locale: locale as 'es' | 'en',
+      labels: latexLabels,
     };
     const tex = buildExamTex({
       titulo: exam.titulo,
@@ -362,6 +394,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       if (!exam) return;
       setCompiling(true);
       const selectedGroup = exam.examen_grupo?.find((eg) => eg.grupo.id === selectedGroupId);
+      const dateFormat = locale === 'en' ? "MMMM d, yyyy" : "d 'de' MMMM 'de' yyyy";
       const opts: LatexOptions = {
         fontSize: latexFontSize,
         columns: latexColumns,
@@ -371,9 +404,11 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
         subjectName: exam.materias.nombre,
         title: exam.titulo,
         groupName: selectedGroup?.grupo?.nombre ?? null,
-        dateText: exam.created_at ? format(new Date(exam.created_at), "d 'de' MMMM 'de' yyyy", { locale: es }) : null,
+        dateText: exam.created_at ? format(new Date(exam.created_at), dateFormat, { locale: dateFnsLocale }) : null,
         description: exam.descripcion ?? undefined,
         instructions: exam.instrucciones ?? undefined,
+        locale: locale as 'es' | 'en',
+        labels: latexLabels,
       };
       const tex = buildExamTex(
         {
@@ -550,6 +585,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                       paperSize="LETTER"
                       fileName={`hojas-respuesta-${exam.titulo}-${selectedGroup.nombre}.pdf`}
                       onGenerated={handleAnswerSheetsGenerated}
+                      labels={answerSheetLabels}
                     />
 
                     {/* Info como nota debajo del botón */}
