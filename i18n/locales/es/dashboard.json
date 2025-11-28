@@ -64,7 +64,7 @@
     "actions": {
       "create": "Crear",
       "createWithAI": "Crear con IA",
-      "createSimilarExam": "Crear examen similar",
+      "createSimilarExam": "Generar examen similar con IA",
       "import": "Importar",
       "edit": "Editar",
       "delete": "Eliminar",
@@ -172,7 +172,8 @@
     "tooltips": {
       "publishWarning": "Al publicar, el examen se cierra para edición. No podrás modificar textos de preguntas u opciones, solo deshabilitar preguntas o cambiar la respuesta correcta.",
       "editDraft": "Edita preguntas, opciones y textos libremente. También puedes usar el Chat IA para modificar el examen.",
-      "editPublished": "Solo puedes deshabilitar preguntas o cambiar la respuesta correcta. Los textos están bloqueados."
+      "editPublished": "Solo puedes deshabilitar preguntas o cambiar la respuesta correcta. Los textos están bloqueados.",
+      "exportRequiresPublishedAndGroup": "El examen debe estar publicado y tener al menos un grupo asignado para exportar."
     },
     "details": {
       "title": "Detalles del Examen",

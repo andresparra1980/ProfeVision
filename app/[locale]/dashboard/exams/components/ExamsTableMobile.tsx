@@ -15,7 +15,7 @@ import {
   Printer,
   Users,
   Eye,
-  Plus,
+  WandSparkles,
   FileText, // Kept for empty state
   Link,
   Calendar,
@@ -155,35 +155,39 @@ function ExamCardContent({
       <Button
         variant="ghost"
         size="sm"
-        className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400"
+        className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400" 
         onClick={() => onStartSimilar(exam.id)}
       >
-        <Plus className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
+        <WandSparkles className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
       </Button>
-      {exam.estado === "borrador" && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start h-auto py-2 px-2 text-red-500 dark:text-red-400"
-          onClick={() => onOpenDeleteDialog(exam.id)}
-        >
-          <Trash2 className="mr-2 h-4 w-4" /> {t('actions.delete')}
-        </Button>
-      )}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="w-full">
               <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start h-auto py-2 px-2"
-          onClick={() => {
-            router.push({
-              pathname: '/dashboard/exams/[id]/export',
-              params: { id: exam.id },
-            });
-          }}
-        >
-          <Printer className="mr-2 h-4 w-4" /> {t('actions.exportAndPrint')}
-      </Button>
-              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-auto py-2 px-2"
+                disabled={exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0}
+                onClick={() => {
+                  router.push({
+                    pathname: '/dashboard/exams/[id]/export',
+                    params: { id: exam.id },
+                  });
+                }}
+              >
+                <Printer className="mr-2 h-4 w-4" /> {t('actions.exportAndPrint')}
+              </Button>
+            </span>
+          </TooltipTrigger>
+          {(exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0) && (
+            <TooltipContent side="bottom" className="max-w-xs">
+              <p>{t('tooltips.exportRequiresPublishedAndGroup')}</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
+      <Button
           variant="ghost"
           size="sm"
           className="w-full justify-start h-auto py-2 px-2"
@@ -196,7 +200,7 @@ function ExamCardContent({
         >
           <Users className="mr-2 h-4 w-4" /> {t('actions.assignGroups')}
       </Button>
-              <Button
+      <Button
           variant="ghost"
           size="sm"
           className="w-full justify-start h-auto py-2 px-2"
@@ -209,11 +213,21 @@ function ExamCardContent({
         >
           <Link className="mr-2 h-4 w-4" /> {t('actions.linkComponentFull')}
       </Button>
+      {exam.estado === "borrador" && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start h-auto py-2 px-2 text-red-500 dark:text-red-400"
+          onClick={() => onOpenDeleteDialog(exam.id)}
+        >
+          <Trash2 className="mr-2 h-4 w-4" /> {t('actions.delete')}
+        </Button>
+      )}
       {exam.estado === "publicado" && (
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start h-auto py-2 px-2 text-purple-500 font-semibold"
+          className="w-full justify-start h-auto py-2 px-2 text-primary font-semibold"
           onClick={() => {
             router.push({
               pathname: '/dashboard/exams/[id]/results',
