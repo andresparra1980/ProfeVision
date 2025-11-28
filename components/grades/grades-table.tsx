@@ -1,4 +1,5 @@
 import React from 'react';
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Table,
@@ -23,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase/client';
 import logger from '@/lib/utils/logger';
+import { hasNombresSeparados } from '@/lib/utils/student-name';
 
 interface Calificaciones {
   porComponente: Record<string, Record<string, number>>;
@@ -60,6 +62,10 @@ export function GradesTable({
   componentesVinculados = {},
 }: GradesTableProps) {
   const t = useTranslations('dashboard.components.gradesTable');
+  
+  // Detectar si los estudiantes tienen nombres separados
+  const nombresSeparados = useMemo(() => hasNombresSeparados(estudiantes), [estudiantes]);
+  
   // Función para calcular la nota final de un periodo para un estudiante
   const calcularNotaPeriodo = (estudiante: Estudiante, periodo: Periodo) => {
     const componentesPeriodo = componentes.filter(c => c.periodo_id === periodo.id);
@@ -211,9 +217,18 @@ export function GradesTable({
                 </TableHead>
               </TableRow>
               <TableRow className="border-b-2 border-border">
-                <TableHead className="w-[120px] min-w-[120px] md:sticky left-0 z-20 bg-card dark:bg-card">{t('surnames')}</TableHead>
-                <TableHead className="w-[120px] min-w-[120px] md:sticky left-[120px] z-20 bg-card dark:bg-card">{t('names')}</TableHead>
-                <TableHead className="w-[100px] min-w-[100px] md:sticky left-[240px] z-20 bg-card dark:bg-card">{t('identification')}</TableHead>
+                {nombresSeparados ? (
+                  <>
+                    <TableHead className="w-[120px] min-w-[120px] md:sticky left-0 z-20 bg-card dark:bg-card">{t('surnames')}</TableHead>
+                    <TableHead className="w-[120px] min-w-[120px] md:sticky left-[120px] z-20 bg-card dark:bg-card">{t('names')}</TableHead>
+                    <TableHead className="w-[100px] min-w-[100px] md:sticky left-[240px] z-20 bg-card dark:bg-card">{t('identification')}</TableHead>
+                  </>
+                ) : (
+                  <>
+                    <TableHead className="w-[140px] min-w-[140px] md:sticky left-0 z-20 bg-card dark:bg-card">{t('fullName')}</TableHead>
+                    <TableHead className="w-[100px] min-w-[100px] md:sticky left-[140px] z-20 bg-card dark:bg-card">{t('identification')}</TableHead>
+                  </>
+                )}
                 {periodos.map(periodo => (
                   <React.Fragment key={periodo.id}>
                     {componentes
@@ -325,15 +340,28 @@ export function GradesTable({
             <TableBody>
               {estudiantes.map(estudiante => (
                 <TableRow key={estudiante.id}>
-                  <TableCell className="font-medium w-[120px] min-w-[120px] md:sticky left-0 z-10 bg-white dark:bg-black">
-                    {estudiante.apellidos}
-                  </TableCell>
-                  <TableCell className="w-[120px] min-w-[120px] md:sticky left-[120px] z-10 bg-white dark:bg-black">
-                    {estudiante.nombres || ''}
-                  </TableCell>
-                  <TableCell className="w-[100px] min-w-[100px] md:sticky left-[240px] z-10 bg-white dark:bg-black">
-                    {estudiante.identificacion}
-                  </TableCell>
+                  {nombresSeparados ? (
+                    <>
+                      <TableCell className="font-medium w-[120px] min-w-[120px] md:sticky left-0 z-10 bg-white dark:bg-black">
+                        {estudiante.apellidos}
+                      </TableCell>
+                      <TableCell className="w-[120px] min-w-[120px] md:sticky left-[120px] z-10 bg-white dark:bg-black">
+                        {estudiante.nombres || ''}
+                      </TableCell>
+                      <TableCell className="w-[100px] min-w-[100px] md:sticky left-[240px] z-10 bg-white dark:bg-black">
+                        {estudiante.identificacion}
+                      </TableCell>
+                    </>
+                  ) : (
+                    <>
+                      <TableCell className="font-medium w-[140px] min-w-[140px] md:sticky left-0 z-10 bg-white dark:bg-black">
+                        {estudiante.apellidos}
+                      </TableCell>
+                      <TableCell className="w-[100px] min-w-[100px] md:sticky left-[140px] z-10 bg-white dark:bg-black">
+                        {estudiante.identificacion}
+                      </TableCell>
+                    </>
+                  )}
                   {periodos.map(periodo => (
                     <React.Fragment key={periodo.id}>
                       {componentes

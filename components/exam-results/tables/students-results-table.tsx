@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { monoFont } from '@/lib/fonts';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Estudiante, ResultadoExamen } from '../utils/types';
+import { getStudentDisplayName } from '@/lib/utils/student-name';
 
 interface StudentsResultsTableProps {
   todosEstudiantes: Estudiante[];
@@ -49,7 +50,7 @@ export function StudentsResultsTable({
         if (!searchQuery) return true;
         const searchLower = searchQuery.toLowerCase();
         return (
-          estudiante.nombres.toLowerCase().includes(searchLower) ||
+          (estudiante.nombres && estudiante.nombres.toLowerCase().includes(searchLower)) ||
           estudiante.apellidos.toLowerCase().includes(searchLower)
         );
       });
@@ -87,7 +88,7 @@ export function StudentsResultsTable({
               {t('table.name')}
             </div>
             <div className={`text-sm font-medium ${monoFont}`}>
-              {estudiante.nombres ? `${estudiante.apellidos}, ${estudiante.nombres}` : estudiante.apellidos}
+              {getStudentDisplayName(estudiante, 'lastFirst')}
             </div>
           </div>
 
@@ -227,7 +228,7 @@ export function StudentsResultsTable({
                           >
                             <td className="py-3 px-4">
                               <div className={`${monoFont}`}>
-                                {estudiante.nombres ? `${estudiante.apellidos}, ${estudiante.nombres}` : estudiante.apellidos}
+                                {getStudentDisplayName(estudiante, 'lastFirst')}
                               </div>
                             </td>
                             <td className="py-3 px-4">

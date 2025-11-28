@@ -472,6 +472,7 @@
       "excel": {
         "lastName": "Apellidos",
         "firstName": "Nombres",
+        "fullName": "Apellidos y Nombres",
         "identification": "Identificación",
         "score": "Nota",
         "percentage": "Porcentaje",
@@ -1052,6 +1053,7 @@
         "identification": "Identificación",
         "names": "Nombres",
         "surnames": "Apellidos",
+        "fullName": "Apellidos y Nombres",
         "email": "Email",
         "actions": "Acciones"
       }
@@ -1135,6 +1137,7 @@
       "exportFinalGrades": "Exportar notas finales",
       "surnames": "Apellidos",
       "names": "Nombres",
+      "fullName": "Apellidos y Nombres",
       "identification": "Identificación",
       "exam": "Examen",
       "linkedToExam": "Vinculado al examen",
@@ -1229,6 +1232,7 @@
       "headers": {
         "surnames": "Apellidos",
         "names": "Nombres",
+        "fullName": "Apellidos y Nombres",
         "identification": "Identificación",
         "email": "Email",
         "actions": "Acciones"

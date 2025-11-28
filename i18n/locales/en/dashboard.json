@@ -471,6 +471,7 @@
       "excel": {
         "lastName": "Last Name",
         "firstName": "First Name",
+        "fullName": "Full Name",
         "identification": "Identification",
         "score": "Score",
         "percentage": "Percentage",
@@ -1051,6 +1052,7 @@
         "identification": "Identification",
         "names": "Names",
         "surnames": "Surnames",
+        "fullName": "Full Name",
         "email": "Email",
         "actions": "Actions"
       }
@@ -1134,6 +1136,7 @@
       "exportFinalGrades": "Export final grades",
       "surnames": "Surnames",
       "names": "Names",
+      "fullName": "Full Name",
       "identification": "Identification",
       "exam": "Exam",
       "linkedToExam": "Linked to exam",
@@ -1228,6 +1231,7 @@
       "headers": {
         "surnames": "Surnames",
         "names": "Names",
+        "fullName": "Full Name",
         "identification": "Identification",
         "email": "Email",
         "actions": "Actions"

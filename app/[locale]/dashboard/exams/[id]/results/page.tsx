@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import dynamic from 'next/dynamic';
+import { hasNombresSeparados } from '@/lib/utils/student-name';
 
 // Hooks
 import { useExamResults } from '@/components/exam-results/hooks/use-exam-results';
@@ -157,36 +158,52 @@ export default function ExamResultsPage() {
     }
 
     try {
-      // Crear datos para exportar
-      // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
-      const dataToExport = resultados.map(resultado => ({
-        [t('excel.lastName')]: resultado.estudiante.apellidos,
-        [t('excel.firstName')]: resultado.estudiante.nombres || '',
-        [t('excel.identification')]: resultado.estudiante.identificacion,
-        [t('excel.score')]: resultado.puntaje_obtenido.toFixed(2),
-        [t('excel.percentage')]: `${resultado.porcentaje.toFixed(2)}%`,
-        [t('excel.gradedDate')]: new Date(resultado.fecha_calificacion).toLocaleDateString()
-      }));
+      // Detectar si los estudiantes tienen nombres separados o combinados
+      const allStudents = [
+        ...resultados.map(r => r.estudiante),
+        ...todosEstudiantes
+      ];
+      const separados = hasNombresSeparados(allStudents);
+      
+      // Labels dinámicos según el formato
+      const nameLabel = separados ? t('excel.lastName') : t('excel.fullName');
+      
+      // Crear datos para exportar con estructura dinámica
+      const dataToExport = resultados.map(resultado => {
+        const base: Record<string, string> = {
+          [nameLabel]: resultado.estudiante.apellidos,
+          [t('excel.identification')]: resultado.estudiante.identificacion,
+          [t('excel.score')]: resultado.puntaje_obtenido.toFixed(2),
+          [t('excel.percentage')]: `${resultado.porcentaje.toFixed(2)}%`,
+          [t('excel.gradedDate')]: new Date(resultado.fecha_calificacion).toLocaleDateString()
+        };
+        if (separados) {
+          base[t('excel.firstName')] = resultado.estudiante.nombres || '';
+        }
+        return base;
+      });
 
       // Agregar estudiantes sin calificación
       todosEstudiantes
         .filter(estudiante => !resultados.some(r => r.estudiante.id === estudiante.id))
         .forEach(estudiante => {
-          dataToExport.push({
-            [t('excel.lastName')]: estudiante.apellidos,
-            [t('excel.firstName')]: estudiante.nombres || '',
+          const base: Record<string, string> = {
+            [nameLabel]: estudiante.apellidos,
             [t('excel.identification')]: estudiante.identificacion,
             [t('excel.score')]: t('excel.notPresented'),
             [t('excel.percentage')]: "0.00%",
             [t('excel.gradedDate')]: ""
-          });
+          };
+          if (separados) {
+            base[t('excel.firstName')] = estudiante.nombres || '';
+          }
+          dataToExport.push(base);
         });
 
-      // Ordenar datos por apellidos en orden ascendente usando etiqueta localizada
-      const lastNameLabel = t('excel.lastName');
+      // Ordenar datos por nombre/apellidos en orden ascendente
       dataToExport.sort((a, b) => {
-        const aLast = String(a[lastNameLabel] ?? '');
-        const bLast = String(b[lastNameLabel] ?? '');
+        const aLast = String(a[nameLabel] ?? '');
+        const bLast = String(b[nameLabel] ?? '');
         return aLast.localeCompare(bLast, locale);
       });
 

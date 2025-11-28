@@ -10,6 +10,7 @@ import { ComponenteCalificacion, Estudiante, Periodo } from '@/lib/types/databas
 import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase/client';
 import logger from '@/lib/utils/logger';
+import { hasNombresSeparados } from '@/lib/utils/student-name';
 
 // Extiende la interfaz ComponenteCalificacion para incluir la propiedad grupo_id
 interface ComponenteCalificacionWithGrupo extends ComponenteCalificacion {
@@ -293,14 +294,21 @@ export function GradesExcelModal({
       ? ((calificaciones as unknown as { porComponente: Record<string, Record<string, number>> }).porComponente[componente.id] || {})
       : calificaciones as Record<string, number>;
 
-    // Crear array de datos para exportar
-    // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
-    const dataToExport = estudiantes.map(estudiante => ({
-      "Identificación": estudiante.identificacion,
-      "Nombres": estudiante.nombres || '',
-      "Apellidos": estudiante.apellidos,
-      "Calificación": componentGrades[estudiante.id] !== undefined ? componentGrades[estudiante.id] : ''
-    }));
+    // Detectar formato de nombres
+    const separados = hasNombresSeparados(estudiantes);
+
+    // Crear array de datos para exportar con estructura dinámica
+    const dataToExport = estudiantes.map(estudiante => {
+      const base: Record<string, string | number> = {
+        "Identificación": estudiante.identificacion,
+        [separados ? "Apellidos" : "Apellidos y Nombres"]: estudiante.apellidos,
+        "Calificación": componentGrades[estudiante.id] !== undefined ? componentGrades[estudiante.id] : ''
+      };
+      if (separados) {
+        base["Nombres"] = estudiante.nombres || '';
+      }
+      return base;
+    });
     
     // Crear un libro de trabajo
     const wb = XLSX.utils.book_new();
@@ -318,14 +326,21 @@ export function GradesExcelModal({
   const downloadTemplate = () => {
     if (!componente) return;
 
-    // Crear array de datos para la plantilla
-    // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
-    const dataToExport = estudiantes.map(estudiante => ({
-      "Identificación": estudiante.identificacion,
-      "Nombres": estudiante.nombres || '',
-      "Apellidos": estudiante.apellidos,
-      "Calificación": ''
-    }));
+    // Detectar formato de nombres
+    const separados = hasNombresSeparados(estudiantes);
+
+    // Crear array de datos para la plantilla con estructura dinámica
+    const dataToExport = estudiantes.map(estudiante => {
+      const base: Record<string, string> = {
+        "Identificación": estudiante.identificacion,
+        [separados ? "Apellidos" : "Apellidos y Nombres"]: estudiante.apellidos,
+        "Calificación": ''
+      };
+      if (separados) {
+        base["Nombres"] = estudiante.nombres || '';
+      }
+      return base;
+    });
     
     // Crear un libro de trabajo
     const wb = XLSX.utils.book_new();
@@ -358,6 +373,9 @@ export function GradesExcelModal({
     logger.log('Periodo actual:', periodoActual);
     logger.log('Porcentaje del periodo:', periodoActual.porcentaje);
 
+    // Detectar formato de nombres
+    const separados = hasNombresSeparados(estudiantes);
+
     // Crear el libro de trabajo
     const wb = XLSX.utils.book_new();
     
@@ -373,11 +391,11 @@ export function GradesExcelModal({
       [''] // Línea en blanco antes de los datos
     ];
 
-    // Preparar encabezados de columnas
+    // Preparar encabezados de columnas (dinámicos según formato de nombres)
     const columns = [
       'Identificación',
-      'Apellidos',
-      'Nombres',
+      separados ? 'Apellidos' : 'Apellidos y Nombres',
+      ...(separados ? ['Nombres'] : []),
       ...componentesPeriodo.map(comp => `${comp.nombre} (${comp.porcentaje}%)`),
       'Nota Periodo (Pond.)',
       'Nota Periodo (Abs.)'
@@ -402,11 +420,10 @@ export function GradesExcelModal({
       // Verificar que tenemos el periodo y su porcentaje antes de calcular
       if (!periodoActual?.porcentaje) {
         logger.error('No se encontró el porcentaje del periodo o el periodo es nulo');
-        // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
         return [
           estudiante.identificacion,
           estudiante.apellidos,
-          estudiante.nombres || '',
+          ...(separados ? [estudiante.nombres || ''] : []),
           ...notasComponentes.map(nota => nota || ''),
           notaPonderada.toFixed(2),
           '0.00'
@@ -416,11 +433,10 @@ export function GradesExcelModal({
       // Calcular nota absoluta solo si hay una nota ponderada
       const notaAbsoluta = notaPonderada > 0 ? notaPonderada / (periodoActual.porcentaje / 100) : 0;
 
-      // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
       return [
         estudiante.identificacion,
         estudiante.apellidos,
-        estudiante.nombres || '',
+        ...(separados ? [estudiante.nombres || ''] : []),
         ...notasComponentes.map(nota => nota || ''),
         notaPonderada.toFixed(2),
         notaAbsoluta.toFixed(2)
@@ -460,6 +476,9 @@ export function GradesExcelModal({
       // Asegurar que g tenga grupo_id antes de compararlos
       return (g as ComponenteCalificacionWithGrupo).grupo_id === grupo.id;
     }) || [];
+
+    // Detectar formato de nombres
+    const separados = hasNombresSeparados(estudiantes);
     
     // Crear el libro de trabajo
     const wb = XLSX.utils.book_new();
@@ -476,11 +495,11 @@ export function GradesExcelModal({
       [''] // Línea en blanco antes de los datos
     ];
 
-    // Preparar encabezados de columnas
-    const columns = [
+    // Preparar encabezados de columnas (dinámicos según formato de nombres)
+    const columns: string[] = [
       'Identificación',
-      'Apellidos',
-      'Nombres'
+      separados ? 'Apellidos' : 'Apellidos y Nombres',
+      ...(separados ? ['Nombres'] : [])
     ];
 
     // Agregar columnas para cada periodo y sus componentes
@@ -501,12 +520,11 @@ export function GradesExcelModal({
     columns.push('Nota Final');
 
     // Preparar datos de estudiantes
-    // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
     const studentsData = estudiantes.map(estudiante => {
-      const rowData = [
+      const rowData: (string | number)[] = [
         estudiante.identificacion,
         estudiante.apellidos,
-        estudiante.nombres || ''
+        ...(separados ? [estudiante.nombres || ''] : [])
       ];
 
       // Agregar notas de cada periodo y sus componentes
