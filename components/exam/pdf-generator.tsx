@@ -66,6 +66,7 @@ interface AnswerSheetExporterProps {
   labels: AnswerSheetLabels;
   selectGroupLabel: string;
   selectGroupPlaceholder: string;
+  studentsLabel: string;
 }
 
 // Cache for generated PDFs to avoid regeneration
@@ -83,6 +84,7 @@ export function AnswerSheetExporter({
   labels,
   selectGroupLabel,
   selectGroupPlaceholder,
+  studentsLabel,
 }: AnswerSheetExporterProps) {
   const [selectedGroupId, setSelectedGroupId] = useState<string>(groups.length === 1 ? groups[0].id : '');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -356,7 +358,7 @@ export function AnswerSheetExporter({
           <SelectContent>
             {groups.map((g) => (
               <SelectItem key={g.id} value={g.id}>
-                {g.nombre} ({g.estudiantes.length} estudiantes)
+                {g.nombre} ({g.estudiantes.length} {studentsLabel})
               </SelectItem>
             ))}
           </SelectContent>
@@ -387,7 +389,7 @@ export function AnswerSheetExporter({
           </Button>
           {isGenerating && (
             <span className="text-sm text-muted-foreground">
-              {sortedStudents.length} estudiantes...
+              {sortedStudents.length} {studentsLabel}...
             </span>
           )}
         </div>

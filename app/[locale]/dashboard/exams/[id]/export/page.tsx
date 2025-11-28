@@ -565,6 +565,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                   labels={answerSheetLabels}
                   selectGroupLabel={t('exams.export.answerSheets.selectGroup')}
                   selectGroupPlaceholder={t('exams.export.answerSheets.selectGroupHint')}
+                  studentsLabel={t('exams.export.answerSheets.students')}
                 />
 
                 {/* Info como nota debajo */}

@@ -595,7 +595,8 @@
         "description": "Genera las hojas donde los estudiantes marcarán sus respuestas",
         "info": "Cada estudiante recibe una hoja única con su nombre, identificación y un código QR único para escaneo automático.",
         "selectGroup": "Selecciona el grupo",
-        "selectGroupHint": "Selecciona un grupo para generar las hojas de respuesta.",
+        "selectGroupHint": "Selecciona un grupo",
+        "students": "estudiantes",
         "noGroups": "No hay grupos asignados a este examen. Asigna un grupo primero."
       },
       "questionSheet": {

@@ -594,7 +594,8 @@
         "description": "Generate the sheets where students will mark their answers",
         "info": "Each student receives a unique sheet with their name, ID, and a unique QR code for automatic scanning.",
         "selectGroup": "Select the group",
-        "selectGroupHint": "Select a group to generate the answer sheets.",
+        "selectGroupHint": "Select a group",
+        "students": "students",
         "noGroups": "No groups assigned to this exam. Assign a group first."
       },
       "questionSheet": {
