@@ -46,6 +46,7 @@ interface Exam {
     grupo: {
       id: string;
       nombre: string;
+      estado: string; // 'activo' | 'archivado'
     };
     fecha_aplicacion: string;
     estado: string;
@@ -77,6 +78,7 @@ export default function ExamsPage() {
   const [examToDelete, setExamToDelete] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showArchivedGroups, setShowArchivedGroups] = useState(false);
 
   const fetchExams = useCallback(async () => {
     try {
@@ -88,7 +90,7 @@ export default function ExamsPage() {
           *,
           materias(nombre),
           examen_grupo(
-            grupo:grupo_id(id, nombre),
+            grupo:grupo_id(id, nombre, estado),
             fecha_aplicacion,
             estado
           )
@@ -125,14 +127,31 @@ export default function ExamsPage() {
     fetchExams();
   }, [fetchExams]);
 
-  const filteredExams = rawExams.filter(
-    (exam) =>
+  // Filter exams: by search query and by archived groups
+  const filteredExams = rawExams.filter((exam) => {
+    // Search filter
+    const matchesSearch =
       exam.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (exam.descripcion &&
         exam.descripcion.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (exam.materias?.nombre &&
-        exam.materias.nombre.toLowerCase().includes(searchQuery.toLowerCase())),
-  );
+        exam.materias.nombre.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    if (!matchesSearch) return false;
+
+    // Archived groups filter
+    if (!showArchivedGroups) {
+      // If exam has no groups assigned, show it
+      if (!exam.examen_grupo || exam.examen_grupo.length === 0) return true;
+      // If ALL groups are archived, hide the exam
+      const allGroupsArchived = exam.examen_grupo.every(
+        (eg) => eg.grupo?.estado === 'archivado'
+      );
+      if (allGroupsArchived) return false;
+    }
+
+    return true;
+  });
 
 
   const handleOpenDeleteDialog = (examId: string) => {
@@ -287,6 +306,8 @@ export default function ExamsPage() {
           handleCreateExam={handleCreateExam}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          showArchivedGroups={showArchivedGroups}
+          setShowArchivedGroups={setShowArchivedGroups}
         />
 
       <ImportExamDialog

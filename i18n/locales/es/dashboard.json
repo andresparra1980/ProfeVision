@@ -127,6 +127,9 @@
       "assignedGroups": "Grupos Asignados",
       "noGroups": "Sin grupos asignados"
     },
+    "filters": {
+      "showArchivedGroups": "Mostrar exámenes de grupos archivados"
+    },
     "status": {
       "draft": "Borrador",
       "published": "Publicado",

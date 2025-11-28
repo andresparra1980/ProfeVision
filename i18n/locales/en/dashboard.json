@@ -126,6 +126,9 @@
       "assignedGroups": "Assigned Groups",
       "noGroups": "No groups assigned"
     },
+    "filters": {
+      "showArchivedGroups": "Show exams from archived groups"
+    },
     "status": {
       "draft": "Draft",
       "published": "Published",

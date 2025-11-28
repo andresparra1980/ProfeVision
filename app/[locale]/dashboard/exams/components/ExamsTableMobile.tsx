@@ -257,6 +257,8 @@ interface ExamsTableMobileProps {
   handleCreateExam: () => void;
   searchQuery: string;
   setSearchQuery: (_query: string) => void;
+  showArchivedGroups: boolean;
+  setShowArchivedGroups: (_show: boolean) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -363,6 +365,8 @@ export default function ExamsTableMobile({
   handleCreateExam: _handleCreateExam,
   searchQuery,
   setSearchQuery,
+  showArchivedGroups,
+  setShowArchivedGroups,
 }: ExamsTableMobileProps) {
   const router = useRouter();
   const t = useTranslations('dashboard.exams');
@@ -470,6 +474,21 @@ export default function ExamsTableMobile({
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full bg-card dark:bg-card placeholder:text-muted-foreground max-w-sm"
       />
+      
+      {/* Checkbox for showing exams from archived groups */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="show-archived-groups"
+          checked={showArchivedGroups}
+          onChange={(e) => setShowArchivedGroups(e.target.checked)}
+          className="rounded border-gray-300 text-primary focus:ring-primary"
+        />
+        <label htmlFor="show-archived-groups" className="text-sm text-muted-foreground">
+          {t('filters.showArchivedGroups')}
+        </label>
+      </div>
+
       {loading ? (
         <ExamsPageSkeleton />
       ) : filteredExams.length === 0 ? (
