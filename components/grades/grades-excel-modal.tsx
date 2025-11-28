@@ -297,17 +297,21 @@ export function GradesExcelModal({
     // Detectar formato de nombres
     const separados = hasNombresSeparados(estudiantes);
 
-    // Crear array de datos para exportar con estructura dinámica
+    // Crear array de datos para exportar (orden de columnas garantizado)
     const dataToExport = estudiantes.map(estudiante => {
-      const base: Record<string, string | number> = {
+      if (separados) {
+        return {
+          "Identificación": estudiante.identificacion,
+          "Apellidos": estudiante.apellidos,
+          "Nombres": estudiante.nombres || '',
+          "Calificación": componentGrades[estudiante.id] !== undefined ? componentGrades[estudiante.id] : ''
+        };
+      }
+      return {
         "Identificación": estudiante.identificacion,
-        [separados ? "Apellidos" : "Apellidos y Nombres"]: estudiante.apellidos,
+        "Apellidos y Nombres": estudiante.apellidos,
         "Calificación": componentGrades[estudiante.id] !== undefined ? componentGrades[estudiante.id] : ''
       };
-      if (separados) {
-        base["Nombres"] = estudiante.nombres || '';
-      }
-      return base;
     });
     
     // Crear un libro de trabajo
@@ -331,15 +335,20 @@ export function GradesExcelModal({
 
     // Crear array de datos para la plantilla con estructura dinámica
     const dataToExport = estudiantes.map(estudiante => {
-      const base: Record<string, string> = {
-        "Identificación": estudiante.identificacion,
-        [separados ? "Apellidos" : "Apellidos y Nombres"]: estudiante.apellidos,
-        "Calificación": ''
-      };
       if (separados) {
-        base["Nombres"] = estudiante.nombres || '';
+        return {
+          "Identificación": estudiante.identificacion,
+          "Apellidos": estudiante.apellidos,
+          "Nombres": estudiante.nombres || '',
+          "Calificación": ''
+        };
+      } else {
+        return {
+          "Identificación": estudiante.identificacion,
+          "Apellidos y Nombres": estudiante.apellidos,
+          "Calificación": ''
+        };
       }
-      return base;
     });
     
     // Crear un libro de trabajo

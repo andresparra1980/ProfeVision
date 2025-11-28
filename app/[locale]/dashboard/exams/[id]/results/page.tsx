@@ -165,45 +165,56 @@ export default function ExamResultsPage() {
       ];
       const separados = hasNombresSeparados(allStudents);
       
-      // Labels dinámicos según el formato
-      const nameLabel = separados ? t('excel.lastName') : t('excel.fullName');
-      
-      // Crear datos para exportar con estructura dinámica
+      // Crear datos para exportar con estructura dinámica (orden de columnas garantizado)
       const dataToExport = resultados.map(resultado => {
-        const base: Record<string, string> = {
-          [nameLabel]: resultado.estudiante.apellidos,
+        if (separados) {
+          return {
+            [t('excel.lastName')]: resultado.estudiante.apellidos,
+            [t('excel.firstName')]: resultado.estudiante.nombres || '',
+            [t('excel.identification')]: resultado.estudiante.identificacion,
+            [t('excel.score')]: resultado.puntaje_obtenido.toFixed(2),
+            [t('excel.percentage')]: `${resultado.porcentaje.toFixed(2)}%`,
+            [t('excel.gradedDate')]: new Date(resultado.fecha_calificacion).toLocaleDateString()
+          };
+        }
+        return {
+          [t('excel.fullName')]: resultado.estudiante.apellidos,
           [t('excel.identification')]: resultado.estudiante.identificacion,
           [t('excel.score')]: resultado.puntaje_obtenido.toFixed(2),
           [t('excel.percentage')]: `${resultado.porcentaje.toFixed(2)}%`,
           [t('excel.gradedDate')]: new Date(resultado.fecha_calificacion).toLocaleDateString()
         };
-        if (separados) {
-          base[t('excel.firstName')] = resultado.estudiante.nombres || '';
-        }
-        return base;
       });
 
       // Agregar estudiantes sin calificación
       todosEstudiantes
         .filter(estudiante => !resultados.some(r => r.estudiante.id === estudiante.id))
         .forEach(estudiante => {
-          const base: Record<string, string> = {
-            [nameLabel]: estudiante.apellidos,
-            [t('excel.identification')]: estudiante.identificacion,
-            [t('excel.score')]: t('excel.notPresented'),
-            [t('excel.percentage')]: "0.00%",
-            [t('excel.gradedDate')]: ""
-          };
           if (separados) {
-            base[t('excel.firstName')] = estudiante.nombres || '';
+            dataToExport.push({
+              [t('excel.lastName')]: estudiante.apellidos,
+              [t('excel.firstName')]: estudiante.nombres || '',
+              [t('excel.identification')]: estudiante.identificacion,
+              [t('excel.score')]: t('excel.notPresented'),
+              [t('excel.percentage')]: "0.00%",
+              [t('excel.gradedDate')]: ""
+            });
+          } else {
+            dataToExport.push({
+              [t('excel.fullName')]: estudiante.apellidos,
+              [t('excel.identification')]: estudiante.identificacion,
+              [t('excel.score')]: t('excel.notPresented'),
+              [t('excel.percentage')]: "0.00%",
+              [t('excel.gradedDate')]: ""
+            });
           }
-          dataToExport.push(base);
         });
 
       // Ordenar datos por nombre/apellidos en orden ascendente
+      const sortKey = separados ? t('excel.lastName') : t('excel.fullName');
       dataToExport.sort((a, b) => {
-        const aLast = String(a[nameLabel] ?? '');
-        const bLast = String(b[nameLabel] ?? '');
+        const aLast = String(a[sortKey] ?? '');
+        const bLast = String(b[sortKey] ?? '');
         return aLast.localeCompare(bLast, locale);
       });
 
