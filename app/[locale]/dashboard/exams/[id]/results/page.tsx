@@ -240,15 +240,23 @@ export default function ExamResultsPage() {
         [''] // Línea en blanco antes de los datos de estudiantes
       ];
 
-      // Crear cabeceras de columnas (localizadas)
-      const columnsRow = [
-        t('excel.lastName'),
-        t('excel.firstName'),
-        t('excel.identification'),
-        t('excel.score'),
-        t('excel.percentage'),
-        t('excel.gradedDate')
-      ];
+      // Crear cabeceras de columnas (localizadas) - dinámico según formato de nombres
+      const columnsRow = separados
+        ? [
+            t('excel.lastName'),
+            t('excel.firstName'),
+            t('excel.identification'),
+            t('excel.score'),
+            t('excel.percentage'),
+            t('excel.gradedDate')
+          ]
+        : [
+            t('excel.fullName'),
+            t('excel.identification'),
+            t('excel.score'),
+            t('excel.percentage'),
+            t('excel.gradedDate')
+          ];
 
       // Combinar todo en una matriz
       const allData = [...headerData, columnsRow];
@@ -262,10 +270,12 @@ export default function ExamResultsPage() {
       const ws = XLSX.utils.aoa_to_sheet(allData);
 
       // Aplicar estilos (merge cells para título y secciones)
+      // Número de columnas: 6 si separados, 5 si combinados
+      const lastCol = separados ? 5 : 4;
       ws['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // Título
-        { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } }, // Detalles del examen
-        { s: { r: 8, c: 0 }, e: { r: 8, c: 5 } }  // Estadísticas
+        { s: { r: 0, c: 0 }, e: { r: 0, c: lastCol } }, // Título
+        { s: { r: 2, c: 0 }, e: { r: 2, c: lastCol } }, // Detalles del examen
+        { s: { r: 8, c: 0 }, e: { r: 8, c: lastCol } }  // Estadísticas
       ];
 
       // Añadir la hoja al libro
