@@ -23,11 +23,11 @@ import { Student } from "@/lib/types/database";
 import { useChecklistItem, useOnboarding } from "@/lib/contexts/onboarding-context";
 
 // Importar el componente PDF de forma dinámica
-const PDFGenerator = dynamic(
-  () => import('@/components/exam/pdf-generator').then(mod => mod.PDFGenerator),
+const AnswerSheetExporter = dynamic(
+  () => import('@/components/exam/pdf-generator').then(mod => mod.AnswerSheetExporter),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-10 w-32" />
+    loading: () => <Skeleton className="h-20 w-full max-w-xs" />
   }
 );
 
@@ -112,8 +112,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const dateFnsLocale = locale === 'en' ? enUS : es;
   const [loading, setLoading] = useState(true);
   const [exam, setExam] = useState<ExamDetails | null>(null);
-  const [selectedGroupId, setSelectedGroupId] = useState<string>("");
   const [groups, setGroups] = useState<Group[]>([]);
+
   const [textDialogOpen, setTextDialogOpen] = useState(false);
   const [textExportContent, setTextExportContent] = useState("");
   const [textExportHtmlContent, setTextExportHtmlContent] = useState("");
@@ -215,11 +215,6 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       }
       
       setExam(data as ExamDetails);
-      
-      // Si solo hay un grupo asignado, seleccionarlo automáticamente
-      if (data.examen_grupo && data.examen_grupo.length === 1) {
-        setSelectedGroupId(data.examen_grupo[0].grupo.id);
-      }
 
       // Cargar grupos con estudiantes
       if (data.examen_grupo && data.examen_grupo.length > 0) {
@@ -342,7 +337,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
 
   const handleDownloadTex = () => {
     if (!exam) return;
-    const selectedGroup = exam.examen_grupo?.find(eg => eg.grupo.id === selectedGroupId);
+    // Use first group for LaTeX header (optional)
+    const selectedGroup = exam.examen_grupo?.[0];
     const dateFormat = locale === 'en' ? "MMMM d, yyyy" : "d 'de' MMMM 'de' yyyy";
     const opts: LatexOptions = {
       fontSize: latexFontSize,
@@ -393,7 +389,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     try {
       if (!exam) return;
       setCompiling(true);
-      const selectedGroup = exam.examen_grupo?.find((eg) => eg.grupo.id === selectedGroupId);
+      // Use first group for LaTeX header (optional)
+      const selectedGroup = exam.examen_grupo?.[0];
       const dateFormat = locale === 'en' ? "MMMM d, yyyy" : "d 'de' MMMM 'de' yyyy";
       const opts: LatexOptions = {
         fontSize: latexFontSize,
@@ -499,7 +496,6 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     );
   }
 
-  const selectedGroup = groups.find(g => g.id === selectedGroupId);
   const hasGroups = exam.examen_grupo && exam.examen_grupo.length > 0;
 
   return (
@@ -545,59 +541,36 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                   {t('exams.actions.assignGroups')}
                 </Button>
               </div>
-            ) : (
+            ) : isClient && (
               <>
-                {/* Selector de grupo - siempre mostrar RadioGroup */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">{t('exams.export.answerSheets.selectGroup')}</Label>
-                  <RadioGroup value={selectedGroupId} onValueChange={setSelectedGroupId}>
-                    {exam.examen_grupo?.map((eg) => (
-                      <div key={eg.grupo.id} className="flex items-center space-x-2">
-                        <RadioGroupItem value={eg.grupo.id} id={`group-${eg.grupo.id}`} />
-                        <Label htmlFor={`group-${eg.grupo.id}`}>{eg.grupo.nombre}</Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
+                <AnswerSheetExporter
+                  exam={{
+                    id: exam.id,
+                    titulo: exam.titulo,
+                    descripcion: exam.descripcion || undefined,
+                    duracion_minutos: exam.duracion_minutos,
+                    preguntas: exam.preguntas.map(p => ({
+                      id: p.id,
+                      texto: p.texto,
+                      puntaje: p.puntaje,
+                      opciones_respuesta: p.opciones_respuesta.map(o => ({
+                        id: o.id,
+                        texto: o.texto,
+                      }))
+                    }))
+                  }}
+                  groups={groups}
+                  paperSize="LETTER"
+                  onGenerated={handleAnswerSheetsGenerated}
+                  labels={answerSheetLabels}
+                  selectGroupLabel={t('exams.export.answerSheets.selectGroup')}
+                  selectGroupPlaceholder={t('exams.export.answerSheets.selectGroupHint')}
+                />
 
-                {/* Generador de PDF */}
-                {selectedGroupId && selectedGroup && isClient && (
-                  <div className="pt-2">
-                    <PDFGenerator
-                      exam={{
-                        id: exam.id,
-                        titulo: exam.titulo,
-                        descripcion: exam.descripcion || undefined,
-                        duracion_minutos: exam.duracion_minutos,
-                        preguntas: exam.preguntas.map(p => ({
-                          id: p.id,
-                          texto: p.texto,
-                          puntaje: p.puntaje,
-                          orden: p.orden,
-                          opciones_respuesta: p.opciones_respuesta.map(o => ({
-                            id: o.id,
-                            texto: o.texto,
-                            orden: o.orden
-                          }))
-                        }))
-                      }}
-                      group={selectedGroup}
-                      paperSize="LETTER"
-                      fileName={`hojas-respuesta-${exam.titulo}-${selectedGroup.nombre}.pdf`}
-                      onGenerated={handleAnswerSheetsGenerated}
-                      labels={answerSheetLabels}
-                    />
-
-                    {/* Info como nota debajo del botón */}
-                    <p className="text-xs text-muted-foreground mt-3">
-                      {t('exams.export.answerSheets.info')}
-                    </p>
-                  </div>
-                )}
-
-                {!selectedGroupId && exam.examen_grupo && exam.examen_grupo.length > 1 && (
-                  <p className="text-sm text-muted-foreground">{t('exams.export.answerSheets.selectGroupHint')}</p>
-                )}
+                {/* Info como nota debajo */}
+                <p className="text-xs text-muted-foreground mt-3">
+                  {t('exams.export.answerSheets.info')}
+                </p>
               </>
             )}
           </CardContent>
