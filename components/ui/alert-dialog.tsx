@@ -6,7 +6,26 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-const AlertDialog = AlertDialogPrimitive.Root
+// Wrapper to fix iOS Safari pointer-events bug
+// See: https://github.com/radix-ui/primitives/issues/2122
+function AlertDialog({ 
+  onOpenChange, 
+  ...props 
+}: React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Root>) {
+  const handleOpenChange = React.useCallback((open: boolean) => {
+    onOpenChange?.(open);
+    
+    // Fix iOS Safari: remove pointer-events from body when dialog closes
+    if (!open) {
+      // Use setTimeout to ensure this runs after Radix's internal cleanup
+      setTimeout(() => {
+        document.body.style.removeProperty('pointer-events');
+      }, 0);
+    }
+  }, [onOpenChange]);
+
+  return <AlertDialogPrimitive.Root onOpenChange={handleOpenChange} {...props} />;
+}
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger
 
