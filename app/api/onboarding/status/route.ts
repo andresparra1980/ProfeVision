@@ -39,7 +39,9 @@ export async function GET(req: NextRequest) {
 
     // Determine user type and onboarding state
     const onboardingStatus = profesor.onboarding_status as OnboardingStatus | null;
-    const isLegacyUser = onboardingStatus === null;
+    // Legacy user: null OR partial blob without wizard data (defensive check for corrupted states)
+    const isLegacyUser = onboardingStatus === null || 
+      (!onboardingStatus?.wizard_completed && !onboardingStatus?.wizard_step && onboardingStatus?.wizard_step !== 0);
     
     // Should show wizard?
     // - Post-migration user with incomplete wizard: YES
