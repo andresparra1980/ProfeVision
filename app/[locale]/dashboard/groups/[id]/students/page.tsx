@@ -337,7 +337,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
                           className="flex items-center justify-between p-2 border rounded"
                         >
                           <div>
-                            <p className="font-medium">{student.nombres} {student.apellidos}</p>
+                            <p className="font-medium">{student.nombres ? `${student.nombres} ${student.apellidos}` : student.apellidos}</p>
                             <p className="text-sm text-muted-foreground">
                               {student.identificacion}
                             </p>
@@ -379,7 +379,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
                   {groupStudents.map((student) => (
                     <TableRow key={student.id}>
                       <TableCell>{student.identificacion}</TableCell>
-                      <TableCell>{student.nombres}</TableCell>
+                      <TableCell>{student.nombres || ''}</TableCell>
                       <TableCell>{student.apellidos}</TableCell>
                       <TableCell>{student.email}</TableCell>
                       <TableCell className="text-right">

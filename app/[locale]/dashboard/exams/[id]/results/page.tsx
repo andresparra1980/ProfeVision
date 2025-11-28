@@ -158,9 +158,10 @@ export default function ExamResultsPage() {
 
     try {
       // Crear datos para exportar
+      // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
       const dataToExport = resultados.map(resultado => ({
         [t('excel.lastName')]: resultado.estudiante.apellidos,
-        [t('excel.firstName')]: resultado.estudiante.nombres,
+        [t('excel.firstName')]: resultado.estudiante.nombres || '',
         [t('excel.identification')]: resultado.estudiante.identificacion,
         [t('excel.score')]: resultado.puntaje_obtenido.toFixed(2),
         [t('excel.percentage')]: `${resultado.porcentaje.toFixed(2)}%`,
@@ -173,7 +174,7 @@ export default function ExamResultsPage() {
         .forEach(estudiante => {
           dataToExport.push({
             [t('excel.lastName')]: estudiante.apellidos,
-            [t('excel.firstName')]: estudiante.nombres,
+            [t('excel.firstName')]: estudiante.nombres || '',
             [t('excel.identification')]: estudiante.identificacion,
             [t('excel.score')]: t('excel.notPresented'),
             [t('excel.percentage')]: "0.00%",

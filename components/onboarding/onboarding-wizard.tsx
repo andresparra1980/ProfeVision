@@ -74,6 +74,7 @@ export function OnboardingWizard() {
     if (onboardingStatus?.wizard_step !== undefined && onboardingStatus.wizard_step !== currentStep) {
       setCurrentStep(onboardingStatus.wizard_step);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboardingStatus?.wizard_step]);
 
   const updateWizardData = useCallback((data: Partial<WizardData>) => {

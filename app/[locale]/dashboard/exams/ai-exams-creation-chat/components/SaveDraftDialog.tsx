@@ -232,7 +232,7 @@ export function SaveDraftDialog({
         setSavingDraft(false);
       }
     },
-    [existing?.id, isEditing, mapAIQuestionsToApi, router, t]
+    [existing?.id, isEditing, mapAIQuestionsToApi, router, t, completeChecklistItem]
   );
 
   return (

@@ -87,7 +87,7 @@ export function StudentsResultsTable({
               {t('table.name')}
             </div>
             <div className={`text-sm font-medium ${monoFont}`}>
-              {estudiante.apellidos}, {estudiante.nombres}
+              {estudiante.nombres ? `${estudiante.apellidos}, ${estudiante.nombres}` : estudiante.apellidos}
             </div>
           </div>
 
@@ -227,7 +227,7 @@ export function StudentsResultsTable({
                           >
                             <td className="py-3 px-4">
                               <div className={`${monoFont}`}>
-                                {estudiante.apellidos}, {estudiante.nombres}
+                                {estudiante.nombres ? `${estudiante.apellidos}, ${estudiante.nombres}` : estudiante.apellidos}
                               </div>
                             </td>
                             <td className="py-3 px-4">

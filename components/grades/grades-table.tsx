@@ -329,7 +329,7 @@ export function GradesTable({
                     {estudiante.apellidos}
                   </TableCell>
                   <TableCell className="w-[120px] min-w-[120px] md:sticky left-[120px] z-10 bg-white dark:bg-black">
-                    {estudiante.nombres}
+                    {estudiante.nombres || ''}
                   </TableCell>
                   <TableCell className="w-[100px] min-w-[100px] md:sticky left-[240px] z-10 bg-white dark:bg-black">
                     {estudiante.identificacion}

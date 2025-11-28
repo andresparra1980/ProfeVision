@@ -170,7 +170,7 @@ export function StudentsTable({
                       }`}
                     >
                       <TableCell className={`font-medium ${monoFont}`}>{student.apellidos}</TableCell>
-                      <TableCell className={monoFont}>{student.nombres}</TableCell>
+                      <TableCell className={monoFont}>{student.nombres || ''}</TableCell>
                       <TableCell className={monoFont}>{student.identificacion}</TableCell>
                       <TableCell className={monoFont}>{student.email || "-"}</TableCell>
                       <TableCell>

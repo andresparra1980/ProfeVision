@@ -294,9 +294,10 @@ export function GradesExcelModal({
       : calificaciones as Record<string, number>;
 
     // Crear array de datos para exportar
+    // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
     const dataToExport = estudiantes.map(estudiante => ({
       "Identificación": estudiante.identificacion,
-      "Nombres": estudiante.nombres,
+      "Nombres": estudiante.nombres || '',
       "Apellidos": estudiante.apellidos,
       "Calificación": componentGrades[estudiante.id] !== undefined ? componentGrades[estudiante.id] : ''
     }));
@@ -318,9 +319,10 @@ export function GradesExcelModal({
     if (!componente) return;
 
     // Crear array de datos para la plantilla
+    // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
     const dataToExport = estudiantes.map(estudiante => ({
       "Identificación": estudiante.identificacion,
-      "Nombres": estudiante.nombres,
+      "Nombres": estudiante.nombres || '',
       "Apellidos": estudiante.apellidos,
       "Calificación": ''
     }));
@@ -400,10 +402,11 @@ export function GradesExcelModal({
       // Verificar que tenemos el periodo y su porcentaje antes de calcular
       if (!periodoActual?.porcentaje) {
         logger.error('No se encontró el porcentaje del periodo o el periodo es nulo');
+        // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
         return [
           estudiante.identificacion,
           estudiante.apellidos,
-          estudiante.nombres,
+          estudiante.nombres || '',
           ...notasComponentes.map(nota => nota || ''),
           notaPonderada.toFixed(2),
           '0.00'
@@ -413,10 +416,11 @@ export function GradesExcelModal({
       // Calcular nota absoluta solo si hay una nota ponderada
       const notaAbsoluta = notaPonderada > 0 ? notaPonderada / (periodoActual.porcentaje / 100) : 0;
 
+      // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
       return [
         estudiante.identificacion,
         estudiante.apellidos,
-        estudiante.nombres,
+        estudiante.nombres || '',
         ...notasComponentes.map(nota => nota || ''),
         notaPonderada.toFixed(2),
         notaAbsoluta.toFixed(2)
@@ -497,11 +501,12 @@ export function GradesExcelModal({
     columns.push('Nota Final');
 
     // Preparar datos de estudiantes
+    // Nota: si nombres es null, apellidos contiene "Apellidos y Nombres" combinado
     const studentsData = estudiantes.map(estudiante => {
       const rowData = [
         estudiante.identificacion,
         estudiante.apellidos,
-        estudiante.nombres
+        estudiante.nombres || ''
       ];
 
       // Agregar notas de cada periodo y sus componentes
@@ -641,7 +646,7 @@ export function GradesExcelModal({
                       {preview.slice(0, 5).map((item, index) => (
                         <tr key={index}>
                           <td className="px-4 py-2 text-xs">{item.identificacion}</td>
-                          <td className="px-4 py-2 text-xs">{item.nombres} {item.apellidos}</td>
+                          <td className="px-4 py-2 text-xs">{item.nombres ? `${item.nombres} ${item.apellidos}` : item.apellidos}</td>
                           <td className="px-4 py-2 text-xs">{item.valor}</td>
                         </tr>
                       ))}
