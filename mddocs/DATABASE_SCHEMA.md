@@ -1,6 +1,6 @@
 # ProfeVision - Database Schema (Public Schema)
 
-**Fecha**: 2025-11-04
+**Fecha**: 2025-11-28
 **Base de Datos**: PostgreSQL (Supabase)
 **Schema**: `public`
 **RLS**: Habilitado en todas las tablas
@@ -17,7 +17,8 @@
 6. [Grading Schemes](#grading-schemes)
 7. [Sistema de Tiers y Suscripciones](#sistema-de-tiers-y-suscripciones)
 8. [Procesos y Jobs](#procesos-y-jobs)
-9. [Relaciones Clave](#relaciones-clave)
+9. [Sistema de Onboarding](#sistema-de-onboarding)
+10. [Relaciones Clave](#relaciones-clave)
 
 ---
 
@@ -37,10 +38,11 @@
 | `foto_url` | text | nullable, updatable | - | URL de foto de perfil |
 | `subscription_tier` | text | updatable | 'grandfathered' | Tier de suscripción |
 | `subscription_status` | text | updatable | 'active' | Estado de suscripción |
-| `subscription_cycle_start` | date | nullable, updatable | - | Inicio del ciclo de facturación |
+| `subscription_cycle_start` | timestamptz | nullable, updatable | - | Inicio del ciclo de facturación |
 | `polar_subscription_id` | text | nullable, updatable | - | ID de suscripción en Polar.sh |
 | `polar_customer_id` | text | nullable, updatable | - | ID de cliente en Polar.sh |
-| `first_login_completed` | bool | updatable | false | Si completó el primer login |
+| `first_login_completed` | bool | nullable, updatable | false | Si completó el primer login (legacy) |
+| `onboarding_status` | jsonb | nullable, updatable | NULL | Estado de onboarding (ver sección) |
 | `created_at` | timestamptz | updatable | now() | Fecha de creación |
 | `updated_at` | timestamptz | updatable | now() | Fecha de actualización |
 
@@ -50,7 +52,7 @@
 - CHECK: `subscription_status IN ('active', 'cancelled', 'past_due')`
 
 **RLS**: ✅ Habilitado
-**Rows**: 30
+**Rows**: ~30
 
 ---
 
@@ -854,7 +856,80 @@ CREATE INDEX IF NOT EXISTS idx_estudiante_grupo_estudiante_id
 
 ---
 
+## Sistema de Onboarding
+
+### Columna `onboarding_status` (en `profesores`)
+
+**Tipo**: JSONB (nullable)
+**Default**: NULL
+
+#### Estructura del JSON:
+```json
+{
+  "wizard_completed": boolean,
+  "wizard_step": number,           // 0-5
+  "wizard_started_at": timestamp,
+  "wizard_completed_at": timestamp,
+  "checklist_items": {
+    "exam_created": boolean,
+    "exam_published": boolean,
+    "pdf_exported": boolean,
+    "first_scan": boolean
+  },
+  "skipped": boolean,
+  "skip_reason": string
+}
+```
+
+#### Lógica de Detección de Usuario:
+
+| `onboarding_status` | `first_login_completed` | Tipo de Usuario | Muestra Wizard |
+|---------------------|------------------------|-----------------|----------------|
+| `NULL` | cualquier | Legacy | NO |
+| `{wizard_completed: false}` | cualquier | Nuevo (post-migración) | SÍ |
+| `{wizard_completed: true}` | cualquier | Completó wizard | NO (solo checklist) |
+
+---
+
+### Función RPC: `update_onboarding_status`
+
+```sql
+CREATE OR REPLACE FUNCTION public.update_onboarding_status(
+  p_user_id uuid, 
+  p_status_json jsonb
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+```
+
+**Descripción**: Actualiza el onboarding_status con deep merge
+
+**Lógica**:
+1. Si no hay status actual → usa el JSON como base
+2. Si hay status → hace merge:
+   - `checklist_items`: deep merge (preserva valores existentes)
+   - Otros campos: merge simple (sobrescribe)
+3. Actualiza `updated_at` automáticamente
+4. Retorna el status completo
+
+**Ejemplo de uso**:
+```sql
+SELECT update_onboarding_status(
+  'user-uuid',
+  '{"wizard_step": 2}'::jsonb
+);
+```
+
+---
+
 ## Cambios Recientes
+
+### 2025-11-28: Sistema de Onboarding
+- ✅ Nueva columna `onboarding_status` (JSONB) en `profesores`
+- ✅ Nueva función RPC `update_onboarding_status` (SECURITY DEFINER)
+- ✅ Deep merge de `checklist_items` para preservar progreso
+- ✅ Compatible con usuarios legacy (NULL = no afectados)
 
 ### 2025-11-04: Sistema de Tiers y Suscripciones
 - ✅ Agregados campos de subscription a tabla `profesores`
@@ -866,6 +941,6 @@ CREATE INDEX IF NOT EXISTS idx_estudiante_grupo_estudiante_id
 
 ---
 
-**Última Actualización**: 2025-11-04
+**Última Actualización**: 2025-11-28
 **Fuente**: Supabase MCP + Migraciones manuales
-**Versión**: 1.1
+**Versión**: 1.2
