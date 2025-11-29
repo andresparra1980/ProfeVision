@@ -172,7 +172,12 @@
       "publishWarning": "Once published, the exam is locked for editing. You won't be able to modify question or option texts, only disable questions or change the correct answer.",
       "editDraft": "Edit questions, options and texts freely. You can also use AI Chat to modify the exam.",
       "editPublished": "You can only disable questions or change the correct answer. Texts are locked.",
-      "exportRequiresPublishedAndGroup": "The exam must be published and have at least one group assigned to be able to export and print."
+      "exportRequiresPublishedAndGroup": "The exam must be published and have at least one group assigned to be able to export and print.",
+      "createSimilarExam": "With one click, our AI agent automatically generates a new exam based on this one, with similar topics, questions, and difficulty level.",
+      "assignGroups": "Assign this exam to the group that will take it. This allows you to print personalized answer sheets for each student.",
+      "linkComponent": "Optionally link this exam's grades to a grade component created in Groups → Grading Scheme. Grades will automatically populate in the grade table for all students.",
+      "exportAndPrint": "Print all personalized answer sheets for each student and export the exam questions as PDF.",
+      "viewResults": "View statistics and all exam results, including detection images and original answer sheets filled out by students once you scan the forms."
     },
     "details": {
       "title": "Exam Details",

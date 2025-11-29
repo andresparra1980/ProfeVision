@@ -173,7 +173,12 @@
       "publishWarning": "Al publicar, el examen se cierra para edición. No podrás modificar textos de preguntas u opciones, solo deshabilitar preguntas o cambiar la respuesta correcta.",
       "editDraft": "Edita preguntas, opciones y textos libremente. También puedes usar el Chat IA para modificar el examen.",
       "editPublished": "Solo puedes deshabilitar preguntas o cambiar la respuesta correcta. Los textos están bloqueados.",
-      "exportRequiresPublishedAndGroup": "El examen debe estar publicado y tener al menos un grupo asignado para poder exportarlo e imprimirlo."
+      "exportRequiresPublishedAndGroup": "El examen debe estar publicado y tener al menos un grupo asignado para poder exportarlo e imprimirlo.",
+      "createSimilarExam": "Con un solo clic, nuestro agente de IA genera automáticamente un nuevo examen basado en este, con temas, preguntas y nivel de dificultad similares.",
+      "assignGroups": "Asigna este examen al grupo que lo presentará. Esto permite imprimir hojas de respuesta personalizadas para cada estudiante.",
+      "linkComponent": "Opcionalmente, vincula las notas de este examen a un componente de nota creado en Grupos → Esquema de Calificaciones. Las notas se llenarán automáticamente en el tabulado para todos los estudiantes.",
+      "exportAndPrint": "Imprime todas las hojas de respuesta personalizadas para cada estudiante y exporta las preguntas del examen en PDF.",
+      "viewResults": "Observa las estadísticas y todos los resultados del examen, incluyendo las imágenes de detección y las hojas de respuesta originales diligenciadas por los estudiantes una vez escanees los formatos."
     },
     "details": {
       "title": "Detalles del Examen",

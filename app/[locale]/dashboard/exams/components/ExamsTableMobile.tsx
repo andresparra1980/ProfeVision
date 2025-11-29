@@ -152,14 +152,23 @@ function ExamCardContent({
           </Tooltip>
         </TooltipProvider>
       )}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400" 
-        onClick={() => onStartSimilar(exam.id)}
-      >
-        <WandSparkles className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400" 
+              onClick={() => onStartSimilar(exam.id)}
+            >
+              <WandSparkles className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{t('tooltips.createSimilarExam')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -180,39 +189,57 @@ function ExamCardContent({
               </Button>
             </span>
           </TooltipTrigger>
-          {(exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0) && (
-            <TooltipContent side="bottom" className="max-w-xs">
-              <p>{t('tooltips.exportRequiresPublishedAndGroup')}</p>
-            </TooltipContent>
-          )}
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{(exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0) 
+              ? t('tooltips.exportRequiresPublishedAndGroup') 
+              : t('tooltips.exportAndPrint')}</p>
+          </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start h-auto py-2 px-2"
-          onClick={() => {
-            router.push({
-              pathname: '/dashboard/exams/[id]/assign',
-              params: { id: exam.id },
-            });
-          }}
-        >
-          <Users className="mr-2 h-4 w-4" /> {t('actions.assignGroups')}
-      </Button>
-      <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start h-auto py-2 px-2"
-          onClick={() => {
-            router.push({
-              pathname: '/dashboard/exams/[id]/link-grade-component',
-              params: { id: exam.id },
-            });
-          }}
-        >
-          <Link className="mr-2 h-4 w-4" /> {t('actions.linkComponentFull')}
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start h-auto py-2 px-2"
+              onClick={() => {
+                router.push({
+                  pathname: '/dashboard/exams/[id]/assign',
+                  params: { id: exam.id },
+                });
+              }}
+            >
+              <Users className="mr-2 h-4 w-4" /> {t('actions.assignGroups')}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{t('tooltips.assignGroups')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start h-auto py-2 px-2"
+              onClick={() => {
+                router.push({
+                  pathname: '/dashboard/exams/[id]/link-grade-component',
+                  params: { id: exam.id },
+                });
+              }}
+            >
+              <Link className="mr-2 h-4 w-4" /> {t('actions.linkComponentFull')}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{t('tooltips.linkComponent')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       {exam.estado === "borrador" && (
         <Button
           variant="ghost"
@@ -224,19 +251,28 @@ function ExamCardContent({
         </Button>
       )}
       {exam.estado === "publicado" && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start h-auto py-2 px-2 text-primary font-semibold"
-          onClick={() => {
-            router.push({
-              pathname: '/dashboard/exams/[id]/results',
-              params: { id: exam.id },
-            });
-          }}
-        >
-          <Eye className="mr-2 h-4 w-4" /> {t('actions.viewResults')}
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-auto py-2 px-2 text-primary font-semibold"
+                onClick={() => {
+                  router.push({
+                    pathname: '/dashboard/exams/[id]/results',
+                    params: { id: exam.id },
+                  });
+                }}
+              >
+                <Eye className="mr-2 h-4 w-4" /> {t('actions.viewResults')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <p>{t('tooltips.viewResults')}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
     </div>
   );
