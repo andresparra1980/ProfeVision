@@ -172,7 +172,7 @@
       "publishWarning": "Once published, the exam is locked for editing. You won't be able to modify question or option texts, only disable questions or change the correct answer.",
       "editDraft": "Edit questions, options and texts freely. You can also use AI Chat to modify the exam.",
       "editPublished": "You can only disable questions or change the correct answer. Texts are locked.",
-      "exportRequiresPublishedAndGroup": "The exam must be published and have at least one group assigned to export."
+      "exportRequiresPublishedAndGroup": "The exam must be published and have at least one group assigned to be able to export and print."
     },
     "details": {
       "title": "Exam Details",

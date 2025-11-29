@@ -55,10 +55,10 @@ export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDelete
   return (
     <Card key={grupo.id} className="flex flex-col">
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle>
-              <span className="truncate block">{grupo.nombre}</span>
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="truncate">
+              {grupo.nombre}
             </CardTitle>
             <div className="text-sm text-muted-foreground space-y-1">
               <div className="text-sm">

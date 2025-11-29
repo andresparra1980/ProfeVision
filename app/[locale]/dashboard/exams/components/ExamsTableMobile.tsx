@@ -78,7 +78,7 @@ function ExamCardHeader({ exam, t, onTitleSave }: ExamCardHeaderProps) {
 
       {/* Bottom row: Status left, Date right */}
       <div className="flex justify-between items-center">
-        <div>{getStatusBadge(exam.estado, t)}</div>
+        <div>{getStatusBadge(exam.estado, t, isExamArchived(exam))}</div>
         <span className="text-xs text-muted-foreground flex items-center">
           <Calendar className="h-3 w-3 mr-1" />
           {new Date(exam.created_at).toLocaleDateString("en-GB", {
@@ -257,6 +257,7 @@ interface Exam {
     grupo: {
       id: string;
       nombre: string;
+      estado?: string; // 'activo' | 'archivado'
     };
     fecha_aplicacion: string;
     estado: string;
@@ -275,8 +276,14 @@ interface ExamsTableMobileProps {
   setShowArchivedGroups: (_show: boolean) => void;
 }
 
+// Helper to check if exam belongs to archived group(s)
+const isExamArchived = (exam: Exam): boolean => {
+  if (!exam.examen_grupo || exam.examen_grupo.length === 0) return false;
+  return exam.examen_grupo.every((eg) => eg.grupo?.estado === 'archivado');
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getStatusBadge = (status: string, t: any) => {
+const getStatusBadge = (status: string, t: any, archived?: boolean) => {
   const baseStyle: React.CSSProperties = {
     padding: "3px 8px",
     fontSize: "12px",
@@ -288,6 +295,22 @@ const getStatusBadge = (status: string, t: any) => {
     borderRadius: "3px",
     textTransform: "uppercase" as const,
   };
+
+  // If archived, show archived badge regardless of status
+  if (archived) {
+    return (
+      <span
+        style={{
+          ...baseStyle,
+          background: "var(--foreground)",
+          color: "var(--background)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+        }}
+      >
+        {t('status.archived')}
+      </span>
+    );
+  }
 
   switch (status) {
     case "borrador":
