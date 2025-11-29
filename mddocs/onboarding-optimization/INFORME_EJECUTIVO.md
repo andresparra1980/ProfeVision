@@ -136,8 +136,8 @@ Durante el desarrollo se implementaron fixes relacionados:
 1. **iOS Safari** - Bug de pointer-events en AlertDialog
 2. **Excel Export** - Headers dinámicos según formato de nombres
 3. **PDF Generator** - Optimización client-side con cache
-4. **GroupCard** - Título responsive + badge ARCHIVADO
-5. **ExamsTable** - Tooltips descriptivos en acciones
+4. **GroupCard** - Título responsive
+5. **ExamsTable** - Tooltips descriptivos en acciones + badge ARCHIVADO
 6. **Import Excel** - i18n completo + dark mode
 
 ---
