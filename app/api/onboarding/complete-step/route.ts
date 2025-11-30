@@ -74,8 +74,6 @@ export async function POST(req: NextRequest) {
       };
     }
 
-    logger.log('[complete-step] statusUpdate:', statusUpdate);
-    
     // Use the SQL function to merge status
     const { data, error } = await supabase.rpc('update_onboarding_status', {
       p_user_id: user.id,
@@ -89,8 +87,6 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
-
-    logger.log('[complete-step] response data:', data);
 
     return NextResponse.json({
       success: true,
