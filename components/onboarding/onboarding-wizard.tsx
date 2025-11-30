@@ -8,11 +8,9 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useOnboarding } from "@/lib/contexts/onboarding-context";
 import { useTranslations } from "next-intl";
-import { ChevronLeft } from "lucide-react";
 
 // Steps
 import { 
@@ -21,7 +19,6 @@ import {
   SubjectStep,
   GroupStep,
   StudentsStep,
-  ExamOptionsStep,
   CompletionStep,
 } from "./steps";
 
@@ -58,7 +55,7 @@ export interface WizardData {
   students?: StudentData[];
 }
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
 
 export function OnboardingWizard() {
   const t = useTranslations("onboarding");
@@ -94,12 +91,6 @@ export function OnboardingWizard() {
       }
     }
   }, [currentStep, completeWizardStep]);
-
-  const handleBack = useCallback(() => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    }
-  }, [currentStep]);
 
   const handleComplete = useCallback(async () => {
     setIsSubmitting(true);
@@ -158,15 +149,6 @@ export function OnboardingWizard() {
         );
       case 5:
         return (
-          <ExamOptionsStep
-            subjectId={wizardData.subject?.id}
-            groupId={wizardData.group?.id}
-            onComplete={handleNext}
-            isSubmitting={isSubmitting}
-          />
-        );
-      case 6:
-        return (
           <CompletionStep
             onCompleteAction={handleComplete}
             isSubmitting={isSubmitting}
@@ -218,19 +200,7 @@ export function OnboardingWizard() {
           {renderStep()}
         </div>
 
-        {/* Footer navigation - fixed height, never scrolls */}
-        {currentStep > 0 && currentStep < TOTAL_STEPS - 1 && (
-          <div className="p-4 md:p-6 pt-4 border-t flex justify-between flex-shrink-0">
-            <Button
-              variant="ghost"
-              onClick={handleBack}
-              disabled={isSubmitting}
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              {t("wizard.back")}
-            </Button>
-          </div>
-        )}
+
       </DialogContent>
     </Dialog>
   );
