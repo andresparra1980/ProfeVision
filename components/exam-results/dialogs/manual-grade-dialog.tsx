@@ -50,7 +50,7 @@ export function ManualGradeDialog({
             <Label htmlFor="estudiante">{t('dialogs.studentLabel')}</Label>
             <Input
               id="estudiante"
-              value={estudiante ? `${estudiante.apellidos}, ${estudiante.nombres}` : ''}
+              value={estudiante ? (estudiante.nombres ? `${estudiante.apellidos}, ${estudiante.nombres}` : estudiante.apellidos) : ''}
               disabled
             />
           </div>

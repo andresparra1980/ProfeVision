@@ -9,6 +9,7 @@
     --primary: #0b890f;
     --secondary: #bc152b;
     --accent: #ffd60a;
+    --feature: #890B85;
 
     --foreground: var(--text);
     --card: #f8f9fa;
@@ -41,6 +42,7 @@
     --primary: #76f47a;
     --secondary: #ea4359;
     --accent: #f5cc00;
+    --feature: #F476F0;
 
     --foreground: var(--text);
     --card: #333334;
@@ -111,6 +113,11 @@
       transform: translateX(100%);
     }
   }
+  
+  /* Required field highlight */
+  .required-field-highlight {
+    @apply border-primary border-2 !important;
+  }
   .drop-shadow-glow {
     filter: drop-shadow(0 0 6px #fbbf24) drop-shadow(0 0 12px #f472b6)
       drop-shadow(0 0 18px #a78bfa);
@@ -148,5 +155,11 @@
     100% {
       color: white;
     }
+  }
+}
+
+@layer utilities {
+  .writing-vertical-lr {
+    writing-mode: vertical-lr;
   }
 }

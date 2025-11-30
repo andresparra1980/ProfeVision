@@ -1,0 +1,185 @@
+{
+  "wizard": {
+    "title": "Set up your account",
+    "subtitle": "We'll guide you step by step",
+    "skip": "Skip",
+    "skipConfirm": "You can complete this later from the dashboard",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "saving": "Saving...",
+    "finish": "Finish",
+    "step": "Step {current} of {total}",
+    "progress": "{percent}% complete"
+  },
+  "welcome": {
+    "title": "Welcome to ProfeVision",
+    "greeting": "Hello{name}",
+    "description": "Let's set up your account in a few minutes. We'll create your first institution, subject, group and students.",
+    "duration": "About 3 minutes",
+    "steps": "5 simple steps",
+    "start": "Get Started"
+  },
+  "institution": {
+    "title": "Your institution",
+    "description": "Where do you teach?",
+    "nameLabel": "Institution name",
+    "namePlaceholder": "E.g: St. Joseph School",
+    "typeLabel": "Institution type",
+    "typePlaceholder": "Select type",
+    "types": {
+      "school": "School",
+      "university": "University",
+      "institute": "Institute",
+      "academy": "Academy",
+      "other": "Other"
+    },
+    "logoLabel": "Logo (optional)",
+    "logoHint": "Drag or click to upload",
+    "skipLogo": "Add later"
+  },
+  "subject": {
+    "title": "Your subject",
+    "description": "What do you teach?",
+    "institutionLabel": "Institution",
+    "selectInstitution": "Select an institution",
+    "noInstitutions": "No institutions found. Go back to previous step.",
+    "nameLabel": "Subject name",
+    "namePlaceholder": "E.g: Mathematics",
+    "levelLabel": "Education level (optional)",
+    "levelPlaceholder": "E.g: High School, College",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Brief subject description"
+  },
+  "group": {
+    "title": "Your group",
+    "description": "Who do you teach?",
+    "subjectLabel": "Subject",
+    "selectSubject": "Select a subject",
+    "noSubjects": "No subjects found. Go back to previous step.",
+    "nameLabel": "Group name",
+    "namePlaceholder": "E.g: 3rd Grade A, Section 101",
+    "yearLabel": "School year (optional)",
+    "yearPlaceholder": "E.g: 2024-2025",
+    "periodLabel": "Period (optional)",
+    "periodPlaceholder": "E.g: First semester"
+  },
+  "students": {
+    "title": "Your students",
+    "description": "Add students to your group",
+    "groupLabel": "Group",
+    "selectGroup": "Select a group",
+    "noGroups": "No groups found. Go back to previous step.",
+    "importTab": "Import Excel",
+    "manualTab": "Add manually",
+    "importHint": "Upload an Excel file with your students",
+    "importButton": "Select file",
+    "separateNamesOption": "Surnames and names are in separate fields",
+    "fullNameLabel": "Surnames and Names",
+    "fullNamePlaceholder": "E.g: Smith John",
+    "firstNameLabel": "First name",
+    "firstNamePlaceholder": "Student's first name",
+    "lastNameLabel": "Last name",
+    "lastNamePlaceholder": "Student's last name",
+    "idLabel": "ID",
+    "idPlaceholder": "Code or document",
+    "addStudent": "Add student",
+    "studentCount": "{count} student(s) added",
+    "noStudents": "No students added yet",
+    "noGroupForImport": "Cannot import without a created group",
+    "importSuccess": "Students imported successfully",
+    "skipStudents": "Add later",
+    "skipWarning": "You can add students later, but you'll need at least one to create exams",
+    "removeStudent": "Remove"
+  },
+  "examOptions": {
+    "title": "Create your first exam",
+    "description": "How do you want to start?",
+    "aiOption": {
+      "title": "Create with AI",
+      "description": "Generate questions automatically with artificial intelligence",
+      "badge": "Recommended"
+    },
+    "importOption": {
+      "title": "Import existing",
+      "description": "Upload a PDF or Word document with your questions"
+    },
+    "manualOption": {
+      "title": "Create manually",
+      "description": "Write your own questions from scratch"
+    },
+    "exploreOption": {
+      "title": "Explore first",
+      "description": "See the dashboard and create exam later"
+    }
+  },
+  "complete": {
+    "title": "All set!",
+    "description": "Your account is configured and ready to use",
+    "goToDashboard": "Go to dashboard"
+  },
+  "completion": {
+    "title": "Congratulations!",
+    "description": "You've successfully set up your ProfeVision account. You're just a few steps away from getting the most out of it.",
+    "nextStepsTitle": "Next Steps",
+    "steps": {
+      "createExam": "Create your first exam",
+      "publishExam": "Publish it",
+      "printSheets": "Print the answer sheets",
+      "scanExam": "Scan with your phone to grade instantly"
+    },
+    "progressTrackerHint": "You'll find a progress tracker on your dashboard to guide you through these steps.",
+    "startButton": "Start using ProfeVision",
+    "finishing": "Finishing..."
+  },
+  "examCreationDrawer": {
+    "title": "Create your first exam",
+    "subtitle": "Choose how you want to start",
+    "import": {
+      "title": "Import exam",
+      "description": "Upload a PDF or Word with your questions. AI will automatically extract questions and options. Mark the correct answer with an asterisk (*) at the end.",
+      "showExample": "See format example",
+      "exampleTitle": "Import format example",
+      "exampleAlt": "Example document with formatted questions",
+      "exampleCaption": "Mark the correct answer by adding an asterisk (*) at the end of the option."
+    },
+    "ai": {
+      "title": "Generate with AI",
+      "description": "Describe the topic and AI will generate multiple choice questions. You can upload reference documents for better accuracy.",
+      "badge": "Recommended",
+      "chatHint": "Interactive chat"
+    }
+  },
+  "checklist": {
+    "title": "Getting Started",
+    "subtitle": "Complete these steps to get the most out of ProfeVision",
+    "progress": "{completed} of {total} completed",
+    "minimize": "Minimize",
+    "expand": "Expand",
+    "dismiss": "Don't show again",
+    "dismissConfirm": "You can access this guide from your profile",
+    "allComplete": "You've completed all steps!",
+    "items": {
+      "createExam": {
+        "title": "Create your first exam",
+        "description": "Use AI, import or create manually",
+        "cta": "Create exam"
+      },
+      "publishExam": {
+        "title": "Publish the exam",
+        "description": "Finalize the exam to print and grade. Click 'Publish' in the exam options.",
+        "cta": "Publish"
+      },
+      "exportPdf": {
+        "title": "Export answer sheets",
+        "description": "Download PDFs to print",
+        "cta": "Export PDF"
+      },
+      "scanExam": {
+        "title": "Scan your first exam",
+        "description": "Use camera of your phone to grade automatically",
+        "cta": "Scan"
+      }
+    }
+  }
+}

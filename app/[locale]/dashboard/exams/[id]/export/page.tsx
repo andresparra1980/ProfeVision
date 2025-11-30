@@ -2,8 +2,8 @@
 
 import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
-import { ChevronLeft, Printer, FileText } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { ChevronLeft, Printer, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -11,11 +11,25 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
-// removed local PDF preview/export
+import { es, enUS } from "date-fns/locale";
 import { Separator } from "@/components/ui/separator";
+
 import TextExportDialog from "../../components/TextExportDialog";
-import { buildExamTex, type LatexOptions } from "@/lib/latex/buildExamTex";
+import { buildExamTex, type LatexOptions, type LatexLabels } from "@/lib/latex/buildExamTex";
+import type { AnswerSheetLabels } from "@/components/exam/pdf-generator";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Student } from "@/lib/types/database";
+import { useChecklistItem, useOnboarding } from "@/lib/contexts/onboarding-context";
+
+// Importar el componente PDF de forma dinámica
+const AnswerSheetExporter = dynamic(
+  () => import('@/components/exam/pdf-generator').then(mod => mod.AnswerSheetExporter),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-20 w-full max-w-xs" />
+  }
+);
 
 // Tipos
 interface ExamDetails {
@@ -66,16 +80,40 @@ interface ExamDetails {
   }>;
 }
 
+interface Group {
+  id: string;
+  nombre: string;
+  materia: {
+    nombre: string;
+  };
+  estudiantes: Student[];
+}
+
+interface GroupWithEstudiantes {
+  grupos: {
+    id: string;
+    nombre: string;
+    materias: {
+      nombre: string;
+    };
+    estudiantes: Array<{
+      estudiante: Student;
+    }>;
+  };
+}
+
 export default function ExportExamPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const examId = resolvedParams.id;
   
   const router = useRouter();
   const t = useTranslations('dashboard');
+  const locale = useLocale();
+  const dateFnsLocale = locale === 'en' ? enUS : es;
   const [loading, setLoading] = useState(true);
   const [exam, setExam] = useState<ExamDetails | null>(null);
-  // removed local PDF preview state
-  const [selectedGroupId, setSelectedGroupId] = useState<string>("");
+  const [groups, setGroups] = useState<Group[]>([]);
+
   const [textDialogOpen, setTextDialogOpen] = useState(false);
   const [textExportContent, setTextExportContent] = useState("");
   const [textExportHtmlContent, setTextExportHtmlContent] = useState("");
@@ -85,6 +123,41 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const [latexOrientation, setLatexOrientation] = useState<"portrait"|"landscape">("portrait");
   const [latexPaper, setLatexPaper] = useState<"letter"|"a4"|"legal">("letter");
   const [compiling, setCompiling] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  
+  // Onboarding checklist
+  const { complete: completePdfExported, isCompleted: pdfAlreadyExported } = useChecklistItem('pdf_exported');
+  const { refetch } = useOnboarding();
+
+  // i18n labels for PDF and LaTeX exports
+  const answerSheetLabels: AnswerSheetLabels = {
+    title: t('exams.export.answerSheetLabels.title'),
+    studentInfo: t('exams.export.answerSheetLabels.studentInfo'),
+    name: t('exams.export.answerSheetLabels.name'),
+    identification: t('exams.export.answerSheetLabels.identification'),
+    group: t('exams.export.answerSheetLabels.group'),
+    subject: t('exams.export.answerSheetLabels.subject'),
+    exam: t('exams.export.answerSheetLabels.exam'),
+    duration: t('exams.export.answerSheetLabels.duration'),
+    minutes: t('exams.export.answerSheetLabels.minutes'),
+    pageOf: t('exams.export.answerSheetLabels.pageOf'),
+    instructions: t('exams.export.answerSheetLabels.instructions'),
+    loading: t('exams.export.answerSheetLabels.loading'),
+    downloadPdf: t('exams.export.answerSheetLabels.downloadPdf'),
+  };
+
+  const latexLabels: LatexLabels = {
+    group: t('exams.export.latexLabels.group'),
+    instructions: t('exams.export.latexLabels.instructions'),
+    duration: t('exams.export.latexLabels.duration'),
+    minutes: t('exams.export.latexLabels.minutes'),
+    totalScore: t('exams.export.latexLabels.totalScore'),
+    pts: t('exams.export.latexLabels.pts'),
+  };
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const fetchExamDetails = useCallback(async () => {
     try {
@@ -142,10 +215,46 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       }
       
       setExam(data as ExamDetails);
-      
-      // Si solo hay un grupo asignado, seleccionarlo automáticamente
-      if (data.examen_grupo && data.examen_grupo.length === 1) {
-        setSelectedGroupId(data.examen_grupo[0].grupo.id);
+
+      // Cargar grupos con estudiantes
+      if (data.examen_grupo && data.examen_grupo.length > 0) {
+        const { data: groupsData, error: groupsError } = await supabase
+          .from('examen_grupo')
+          .select(`
+            grupos!inner (
+              id,
+              nombre,
+              materias!inner (
+                nombre
+              ),
+              estudiantes:estudiante_grupo!inner (
+                estudiante:estudiantes!inner (
+                  id,
+                  nombres,
+                  apellidos,
+                  identificacion
+                )
+              )
+            )
+          `)
+          .eq('examen_id', examId);
+
+        if (!groupsError && groupsData) {
+          const transformedGroups: Group[] = groupsData.map((item: GroupWithEstudiantes) => ({
+            id: item.grupos.id,
+            nombre: item.grupos.nombre,
+            materia: {
+              nombre: item.grupos.materias.nombre,
+            },
+            estudiantes: item.grupos.estudiantes.map((e) => ({
+              id: e.estudiante.id,
+              nombres: e.estudiante.nombres,
+              apellidos: e.estudiante.apellidos,
+              identificacion: e.estudiante.identificacion,
+            })),
+          }));
+          setGroups(transformedGroups);
+        }
       }
     } catch (error) {
       console.error("Error fetching exam details:", error);
@@ -194,7 +303,6 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     const parts: string[] = [];
     parts.push(
       '<!DOCTYPE html><html><head><meta charset="utf-8">' +
-        // Ensure single spacing for options when pasting into Word
         '<style>' +
           'p{margin:0;}' +
           '.q{font-weight:700;margin:0 0 6px 0;}' +
@@ -212,7 +320,6 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
         const optText = escapeHtml((opt.texto || "").trim());
         parts.push(`<p class="opt">${letter}. ${optText}</p>`);
       });
-      // Spacer between questions
       parts.push('<p style="margin:0 0 10px 0">&nbsp;</p>');
     });
     parts.push("</body></html>");
@@ -230,8 +337,9 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
 
   const handleDownloadTex = () => {
     if (!exam) return;
-    // metadata
-    const selectedGroup = exam.examen_grupo?.find(eg => eg.grupo.id === selectedGroupId);
+    // Use first group for LaTeX header (optional)
+    const selectedGroup = exam.examen_grupo?.[0];
+    const dateFormat = locale === 'en' ? "MMMM d, yyyy" : "d 'de' MMMM 'de' yyyy";
     const opts: LatexOptions = {
       fontSize: latexFontSize,
       columns: latexColumns,
@@ -241,9 +349,11 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
       subjectName: exam.materias.nombre,
       title: exam.titulo,
       groupName: selectedGroup?.grupo?.nombre ?? null,
-      dateText: exam.created_at ? format(new Date(exam.created_at), "d 'de' MMMM 'de' yyyy", { locale: es }) : null,
+      dateText: exam.created_at ? format(new Date(exam.created_at), dateFormat, { locale: dateFnsLocale }) : null,
       description: exam.descripcion ?? undefined,
       instructions: exam.instrucciones ?? undefined,
+      locale: locale as 'es' | 'en',
+      labels: latexLabels,
     };
     const tex = buildExamTex({
       titulo: exam.titulo,
@@ -275,12 +385,13 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     URL.revokeObjectURL(url);
   };
 
-  // Compilar en el servidor usando el endpoint local con Tectonic
   const handleCompileServer = async () => {
     try {
       if (!exam) return;
       setCompiling(true);
-      const selectedGroup = exam.examen_grupo?.find((eg) => eg.grupo.id === selectedGroupId);
+      // Use first group for LaTeX header (optional)
+      const selectedGroup = exam.examen_grupo?.[0];
+      const dateFormat = locale === 'en' ? "MMMM d, yyyy" : "d 'de' MMMM 'de' yyyy";
       const opts: LatexOptions = {
         fontSize: latexFontSize,
         columns: latexColumns,
@@ -290,9 +401,11 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
         subjectName: exam.materias.nombre,
         title: exam.titulo,
         groupName: selectedGroup?.grupo?.nombre ?? null,
-        dateText: exam.created_at ? format(new Date(exam.created_at), "d 'de' MMMM 'de' yyyy", { locale: es }) : null,
+        dateText: exam.created_at ? format(new Date(exam.created_at), dateFormat, { locale: dateFnsLocale }) : null,
         description: exam.descripcion ?? undefined,
         instructions: exam.instrucciones ?? undefined,
+        locale: locale as 'es' | 'en',
+        labels: latexLabels,
       };
       const tex = buildExamTex(
         {
@@ -351,7 +464,15 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     }
   };
 
-  // removed local PDF export (React-PDF)
+  // Handler when answer sheets PDF is generated
+  const handleAnswerSheetsGenerated = async () => {
+    if (!pdfAlreadyExported) {
+      const success = await completePdfExported();
+      if (success) {
+        await refetch();
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -375,7 +496,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     );
   }
 
-  // removed preview overlay
+  const hasGroups = exam.examen_grupo && exam.examen_grupo.length > 0;
 
   return (
     <div className="space-y-6">
@@ -391,73 +512,109 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
           </Button>
           <h2 className="text-3xl font-bold tracking-tight">{exam.titulo}</h2>
           <p className="text-muted-foreground">
-            {exam.materias?.nombre} | {t('exams.export.title')}
+            {exam.materias?.nombre} | {t('exams.export.pageTitle')}
           </p>
         </div>
       </div>
 
       <div className="grid gap-6">
+        {/* SECCIÓN 1: Hojas de Respuesta */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('exams.export.availableFormats')}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              {t('exams.export.answerSheets.title')}
+            </CardTitle>
             <CardDescription>
-              {t('exams.export.description')}
+              {t('exams.export.answerSheets.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!hasGroups ? (
+              <div className="text-center py-4">
+                <p className="text-muted-foreground">{t('exams.export.answerSheets.noGroups')}</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-2"
+                  onClick={() => router.push({ pathname: '/dashboard/exams/[id]/assign', params: { id: examId } })}
+                >
+                  {t('exams.actions.assignGroups')}
+                </Button>
+              </div>
+            ) : isClient && (
+              <>
+                <AnswerSheetExporter
+                  exam={{
+                    id: exam.id,
+                    titulo: exam.titulo,
+                    descripcion: exam.descripcion || undefined,
+                    duracion_minutos: exam.duracion_minutos,
+                    preguntas: exam.preguntas.map(p => ({
+                      id: p.id,
+                      texto: p.texto,
+                      puntaje: p.puntaje,
+                      opciones_respuesta: p.opciones_respuesta.map(o => ({
+                        id: o.id,
+                        texto: o.texto,
+                      }))
+                    }))
+                  }}
+                  groups={groups}
+                  paperSize="LETTER"
+                  onGenerated={handleAnswerSheetsGenerated}
+                  labels={answerSheetLabels}
+                  selectGroupLabel={t('exams.export.answerSheets.selectGroup')}
+                  selectGroupPlaceholder={t('exams.export.answerSheets.selectGroupHint')}
+                  studentsLabel={t('exams.export.answerSheets.students')}
+                />
+
+                {/* Info como nota debajo */}
+                <p className="text-xs text-muted-foreground mt-3">
+                  {t('exams.export.answerSheets.info')}
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Separator />
+
+        {/* SECCIÓN 2: Hoja de Preguntas (opcional) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {t('exams.export.questionSheet.title')}
+              <span className="text-xs font-normal text-muted-foreground">({t('exams.export.questionSheet.optional')})</span>
+            </CardTitle>
+            <CardDescription>
+              {t('exams.export.questionSheet.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            {/* Selector de grupo al inicio (solo si hay más de un grupo) */}
-            {exam.examen_grupo && exam.examen_grupo.length > 1 && (
-              <div className="space-y-2">
-                <Label>{t('exams.export.group')}</Label>
-                <select
-                  className="w-full border rounded-md px-3 py-2 bg-background"
-                  value={selectedGroupId}
-                  onChange={(e) => setSelectedGroupId(e.target.value)}
-                >
-                  <option value="">{t('exams.export.selectGroup')}</option>
-                  {exam.examen_grupo.map((eg) => (
-                    <option key={eg.grupo.id} value={eg.grupo.id}>
-                      {eg.grupo.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <div className="flex flex-col items-start gap-2">
-              <h3 className="text-lg font-semibold">{t('exams.export.questionSheet')}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t('exams.export.questionSheetDesc')}
-              </p>
-              <div className="flex gap-2 flex-wrap items-center">
-                <Button
-                  variant="secondary"
-                  onClick={openTextExport}
-                  disabled={Boolean(exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId)}
-                  title={exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId ? t('exams.export.selectGroup') : undefined}
-                >
-                  {t('exams.export.exportText')}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleDownloadTex}
-                  disabled={Boolean(exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId)}
-                  title={exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId ? t('exams.export.selectGroup') : undefined}
-                >
-                  <FileText className="mr-2 h-4 w-4" /> {t('exams.export.downloadTex')}
-                </Button>
-                <Button
-                  variant="default"
-                  onClick={handleCompileServer}
-                  disabled={compiling || Boolean(exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId)}
-                  title={exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId ? t('exams.export.selectGroup') : undefined}
-                >
-                  <Printer className="mr-2 h-4 w-4" /> {compiling ? t('common.loading') : t('exams.export.downloadPDF')}
-                </Button>
-              </div>
-              {exam.examen_grupo && exam.examen_grupo.length > 1 && !selectedGroupId && (
-                <p className="text-sm text-muted-foreground">{t('exams.export.selectGroupHint')}</p>
-              )}
+            {/* Botones de exportación */}
+            <div className="flex gap-2 flex-wrap items-center">
+              <Button
+                variant="secondary"
+                onClick={openTextExport}
+              >
+                {t('exams.export.exportText')}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleDownloadTex}
+              >
+                <FileText className="mr-2 h-4 w-4" /> {t('exams.export.downloadTex')}
+              </Button>
+              <Button
+                variant="default"
+                onClick={handleCompileServer}
+                disabled={compiling}
+              >
+                <Printer className="mr-2 h-4 w-4" /> {compiling ? t('common.loading') : t('exams.export.downloadPDF')}
+              </Button>
             </div>
+
             <Separator />
 
             {/* Opciones de exportación */}
@@ -497,20 +654,18 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
                 </RadioGroup>
               </div>
             </div>
-
-            {/* Selector de grupo movido arriba */}
           </CardContent>
         </Card>
-        
       </div>
-    <TextExportDialog
-      _open={textDialogOpen}
-      onOpenChange={setTextDialogOpen}
-      content={textExportContent}
-      htmlContent={textExportHtmlContent}
-      title={t('exams.export.exportText')}
-      description={t('exams.export.description')}
-    />
-  </div>
-);
+
+      <TextExportDialog
+        _open={textDialogOpen}
+        onOpenChange={setTextDialogOpen}
+        content={textExportContent}
+        htmlContent={textExportHtmlContent}
+        title={t('exams.export.exportText')}
+        description={t('exams.export.description')}
+      />
+    </div>
+  );
 }

@@ -64,7 +64,7 @@
     "actions": {
       "create": "Crear",
       "createWithAI": "Crear con IA",
-      "createSimilarExam": "Crear examen similar",
+      "createSimilarExam": "Generar examen similar con IA",
       "import": "Importar",
       "edit": "Editar",
       "delete": "Eliminar",
@@ -77,7 +77,9 @@
       "viewResults": "Ver Resultados",
       "linkComponent": "Vincular Componente",
       "linkComponentFull": "Vincular a Componente de Nota",
-      "backToExams": "Volver a Exámenes"
+      "backToExams": "Volver a Exámenes",
+      "publish": "Publicar",
+      "exportAndPrint": "Exportar PDFs e Imprimir"
     },
     "form": {
       "title": "Título del examen",
@@ -106,7 +108,8 @@
       "addOption": "Añadir opción",
       "addQuestion": "Añadir pregunta",
       "creating": "Creando...",
-      "optionsNote": "Solo se guardarán las opciones que tengan texto"
+      "optionsNote": "Solo se guardarán las opciones que tengan texto",
+      "completeRequiredFields": "Completa los campos resaltados para continuar"
     },
     "table": {
       "name": "Nombre",
@@ -123,6 +126,9 @@
       "allExamsDesc": "Lista de todos los exámenes creados.",
       "assignedGroups": "Grupos Asignados",
       "noGroups": "Sin grupos asignados"
+    },
+    "filters": {
+      "showArchivedGroups": "Mostrar exámenes de grupos archivados"
     },
     "status": {
       "draft": "Borrador",
@@ -162,6 +168,17 @@
       "success": "Éxito",
       "examCreated": "Examen creado correctamente",
       "error": "Error"
+    },
+    "tooltips": {
+      "publishWarning": "Al publicar, el examen se cierra para edición. No podrás modificar textos de preguntas u opciones, solo deshabilitar preguntas o cambiar la respuesta correcta.",
+      "editDraft": "Edita preguntas, opciones y textos libremente. También puedes usar el Chat IA para modificar el examen.",
+      "editPublished": "Solo puedes deshabilitar preguntas o cambiar la respuesta correcta. Los textos están bloqueados.",
+      "exportRequiresPublishedAndGroup": "El examen debe estar publicado y tener al menos un grupo asignado para poder exportarlo e imprimirlo.",
+      "createSimilarExam": "Con un solo clic, nuestro agente de IA genera automáticamente un nuevo examen basado en este, con temas, preguntas y nivel de dificultad similares.",
+      "assignGroups": "Asigna este examen al grupo que lo presentará. Esto permite imprimir hojas de respuesta personalizadas para cada estudiante.",
+      "linkComponent": "Opcionalmente, vincula las notas de este examen a un componente de nota creado en Grupos → Esquema de Calificaciones. Las notas se llenarán automáticamente en el tabulado para todos los estudiantes.",
+      "exportAndPrint": "Imprime todas las hojas de respuesta personalizadas para cada estudiante y exporta las preguntas del examen en PDF.",
+      "viewResults": "Observa las estadísticas y todos los resultados del examen, incluyendo las imágenes de detección y las hojas de respuesta originales diligenciadas por los estudiantes una vez escanees los formatos."
     },
     "details": {
       "title": "Detalles del Examen",
@@ -464,6 +481,7 @@
       "excel": {
         "lastName": "Apellidos",
         "firstName": "Nombres",
+        "fullName": "Apellidos y Nombres",
         "identification": "Identificación",
         "score": "Nota",
         "percentage": "Porcentaje",
@@ -577,13 +595,24 @@
       "error": "Error al vincular las calificaciones"
     },
     "export": {
+      "pageTitle": "Exportar PDFs e Imprimir",
       "title": "Exportar Formatos",
       "availableFormats": "Formatos Disponibles",
       "description": "Descarga diferentes formatos de tu examen para impresión y distribución",
-      "questionSheet": "Hoja de Preguntas",
-      "questionSheetDesc": "Descarga el examen con todas las preguntas y opciones de respuesta",
-      "answerSheets": "Hojas de Respuesta",
-      "answerSheetsDesc": "Genera hojas de respuesta personalizadas para cada estudiante",
+      "answerSheets": {
+        "title": "Hojas de Respuesta",
+        "description": "Genera las hojas donde los estudiantes marcarán sus respuestas",
+        "info": "Cada estudiante recibe una hoja única con su nombre, identificación y un código QR único para escaneo automático.",
+        "selectGroup": "Selecciona el grupo",
+        "selectGroupHint": "Selecciona un grupo",
+        "students": "estudiantes",
+        "noGroups": "No hay grupos asignados a este examen. Asigna un grupo primero."
+      },
+      "questionSheet": {
+        "title": "Hoja de Preguntas",
+        "optional": "opcional",
+        "description": "Una sola copia con todas las preguntas del examen para entregar a los estudiantes o proyectar."
+      },
       "preview": "Vista Previa",
       "downloadPDF": "Descargar PDF",
       "downloadTex": "Descargar LaTeX",
@@ -610,7 +639,30 @@
       "a4": "A4 (210mm x 297mm)",
       "legal": "Legal (8.5\" x 14\")",
       "exportConfiguration": "Configuración de Exportación",
-      "exportConfigurationDesc": "Selecciona el grupo y el tamaño de papel para exportar"
+      "exportConfigurationDesc": "Selecciona el grupo y el tamaño de papel para exportar",
+      "answerSheetLabels": {
+        "title": "HOJA DE RESPUESTAS",
+        "studentInfo": "Información del Estudiante",
+        "name": "Nombre:",
+        "identification": "Identificación:",
+        "group": "Grupo:",
+        "subject": "Materia:",
+        "exam": "Examen:",
+        "duration": "Duración:",
+        "minutes": "minutos",
+        "pageOf": "Página __current__ de __total__",
+        "instructions": "Instrucciones: Rellene completamente el círculo que corresponda a la respuesta correcta. Use bolígrafo negro o azul. No use bolígrafo rojo o lápiz. Asegúrese de borrar completamente si necesita cambiar una respuesta.",
+        "loading": "Cargando...",
+        "downloadPdf": "Descargar PDF"
+      },
+      "latexLabels": {
+        "group": "Grupo:",
+        "instructions": "Instrucciones:",
+        "duration": "Duración:",
+        "minutes": "minutos",
+        "totalScore": "Puntaje total:",
+        "pts": "pts"
+      }
     },
     "textExport": {
       "title": "Exportar texto",
@@ -701,6 +753,14 @@
       "actions": {
         "cancel": "Cancelar",
         "import": "Importar Examen"
+      },
+      "formatExample": {
+        "button": "Ver ejemplo",
+        "toggle": "Ver ejemplo de formato",
+        "title": "Ejemplo de formato correcto",
+        "close": "Cerrar",
+        "imageAlt": "Ejemplo de documento con preguntas formateadas correctamente",
+        "caption": "Marca la respuesta correcta agregando un asterisco (*) al final de la opcion. Ejemplo: 'b. Lorem ipsum dolor *'"
       }
     }
   },
@@ -924,7 +984,15 @@
       "archive": "Archivar",
       "activate": "Activar",
       "delete": "Eliminar",
-      "students": "estudiantes"
+      "students": "estudiantes",
+      "tooltips": {
+        "editGroup": "Editar nombre del grupo, materia u otros detalles",
+        "manageStudents": "Agregar, eliminar o importar estudiantes en este grupo",
+        "gradeTable": "Ver y gestionar las calificaciones de los estudiantes de este grupo",
+        "gradingScheme": "Configurar componentes y pesos de calificación para este grupo",
+        "archive": "Archivar este grupo para ocultarlo de la lista principal",
+        "activate": "Restaurar este grupo a la lista de activos"
+      }
     },
     "form": {
       "newGroup": "Nuevo grupo",
@@ -1026,6 +1094,7 @@
         "identification": "Identificación",
         "names": "Nombres",
         "surnames": "Apellidos",
+        "fullName": "Apellidos y Nombres",
         "email": "Email",
         "actions": "Acciones"
       }
@@ -1109,6 +1178,7 @@
       "exportFinalGrades": "Exportar notas finales",
       "surnames": "Apellidos",
       "names": "Nombres",
+      "fullName": "Apellidos y Nombres",
       "identification": "Identificación",
       "exam": "Examen",
       "linkedToExam": "Vinculado al examen",
@@ -1203,6 +1273,7 @@
       "headers": {
         "surnames": "Apellidos",
         "names": "Nombres",
+        "fullName": "Apellidos y Nombres",
         "identification": "Identificación",
         "email": "Email",
         "actions": "Acciones"

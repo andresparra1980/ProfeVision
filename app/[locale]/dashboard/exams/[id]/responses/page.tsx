@@ -13,6 +13,7 @@ import { Student } from '@/lib/types/database';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { AnswerSheetLabels } from '@/components/exam/pdf-generator';
 
 // Configurar flag de debug para mensajes de consola
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -67,7 +68,7 @@ interface Exam {
 }
 
 // Componente para generar todas las hojas de respuesta
-const AllAnswerSheets = ({ exam, group, paperSize }: { exam: Exam; group: Group; paperSize: 'LETTER' | 'A4' }) => {
+const AllAnswerSheets = ({ exam, group, paperSize, labels }: { exam: Exam; group: Group; paperSize: 'LETTER' | 'A4'; labels: AnswerSheetLabels }) => {
   if (!exam || !group) return null;
   
   return (
@@ -76,6 +77,7 @@ const AllAnswerSheets = ({ exam, group, paperSize }: { exam: Exam; group: Group;
       group={group}
       paperSize={paperSize}
       fileName={`hojas-respuesta-${exam.titulo}-${group.nombre}.pdf`}
+      labels={labels}
     />
   );
 };
@@ -90,6 +92,7 @@ export default function ResponseSheetsPage({ params: pageParams }: PageProps) {
   const { id } = use(pageParams);
   const router = useRouter();
   const t = useTranslations('dashboard.exams.responses');
+  const tExport = useTranslations('dashboard.exams.export');
   // const params = useParams(); // Removed as 'id' from pageParams is used
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [_paperSize, _setPaperSize] = useState<'LETTER' | 'A4'>('LETTER');
@@ -97,6 +100,23 @@ export default function ResponseSheetsPage({ params: pageParams }: PageProps) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
+
+  // i18n labels for PDF export
+  const answerSheetLabels: AnswerSheetLabels = {
+    title: tExport('answerSheetLabels.title'),
+    studentInfo: tExport('answerSheetLabels.studentInfo'),
+    name: tExport('answerSheetLabels.name'),
+    identification: tExport('answerSheetLabels.identification'),
+    group: tExport('answerSheetLabels.group'),
+    subject: tExport('answerSheetLabels.subject'),
+    exam: tExport('answerSheetLabels.exam'),
+    duration: tExport('answerSheetLabels.duration'),
+    minutes: tExport('answerSheetLabels.minutes'),
+    pageOf: tExport('answerSheetLabels.pageOf'),
+    instructions: tExport('answerSheetLabels.instructions'),
+    loading: tExport('answerSheetLabels.loading'),
+    downloadPdf: tExport('answerSheetLabels.downloadPdf'),
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -300,7 +320,8 @@ export default function ResponseSheetsPage({ params: pageParams }: PageProps) {
                 <AllAnswerSheets 
                   exam={exam} 
                   group={selectedGroup} 
-                  paperSize={"LETTER"} 
+                  paperSize={"LETTER"}
+                  labels={answerSheetLabels}
                 />
               )}
             </CardContent>

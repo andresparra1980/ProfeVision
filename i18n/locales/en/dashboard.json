@@ -63,7 +63,7 @@
     "actions": {
       "create": "Create",
       "createWithAI": "Create with AI",
-      "createSimilarExam": "Create similar exam",
+      "createSimilarExam": "Generate similar exam with AI",
       "import": "Import",
       "edit": "Edit",
       "delete": "Delete",
@@ -76,7 +76,9 @@
       "viewResults": "View Results",
       "linkComponent": "Link Component",
       "linkComponentFull": "Link to Grade Component",
-      "backToExams": "Back to Exams"
+      "backToExams": "Back to Exams",
+      "publish": "Publish",
+      "exportAndPrint": "Export PDFs and Print"
     },
     "form": {
       "title": "Exam title",
@@ -105,7 +107,8 @@
       "addOption": "Add option",
       "addQuestion": "Add question",
       "creating": "Creating...",
-      "optionsNote": "Only options with text will be saved"
+      "optionsNote": "Only options with text will be saved",
+      "completeRequiredFields": "Complete the highlighted fields to continue"
     },
     "table": {
       "name": "Name",
@@ -122,6 +125,9 @@
       "allExamsDesc": "List of all created exams.",
       "assignedGroups": "Assigned Groups",
       "noGroups": "No groups assigned"
+    },
+    "filters": {
+      "showArchivedGroups": "Show exams from archived groups"
     },
     "status": {
       "draft": "Draft",
@@ -161,6 +167,17 @@
       "success": "Success",
       "examCreated": "Exam created successfully",
       "error": "Error"
+    },
+    "tooltips": {
+      "publishWarning": "Once published, the exam is locked for editing. You won't be able to modify question or option texts, only disable questions or change the correct answer.",
+      "editDraft": "Edit questions, options and texts freely. You can also use AI Chat to modify the exam.",
+      "editPublished": "You can only disable questions or change the correct answer. Texts are locked.",
+      "exportRequiresPublishedAndGroup": "The exam must be published and have at least one group assigned to be able to export and print.",
+      "createSimilarExam": "With one click, our AI agent automatically generates a new exam based on this one, with similar topics, questions, and difficulty level.",
+      "assignGroups": "Assign this exam to the group that will take it. This allows you to print personalized answer sheets for each student.",
+      "linkComponent": "Optionally link this exam's grades to a grade component created in Groups → Grading Scheme. Grades will automatically populate in the grade table for all students.",
+      "exportAndPrint": "Print all personalized answer sheets for each student and export the exam questions as PDF.",
+      "viewResults": "View statistics and all exam results, including detection images and original answer sheets filled out by students once you scan the forms."
     },
     "details": {
       "title": "Exam Details",
@@ -463,6 +480,7 @@
       "excel": {
         "lastName": "Last Name",
         "firstName": "First Name",
+        "fullName": "Full Name",
         "identification": "Identification",
         "score": "Score",
         "percentage": "Percentage",
@@ -576,13 +594,24 @@
       "error": "Error linking grades"
     },
     "export": {
+      "pageTitle": "Export PDFs and Print",
       "title": "Export Formats",
       "availableFormats": "Available Formats",
       "description": "Download different formats of your exam for printing and distribution",
-      "questionSheet": "Question Sheet",
-      "questionSheetDesc": "Download the exam with all questions and answer options",
-      "answerSheets": "Answer Sheets",
-      "answerSheetsDesc": "Generate personalized answer sheets for each student",
+      "answerSheets": {
+        "title": "Answer Sheets",
+        "description": "Generate the sheets where students will mark their answers",
+        "info": "Each student receives a unique sheet with their name, ID, and a unique QR code for automatic scanning.",
+        "selectGroup": "Select the group",
+        "selectGroupHint": "Select a group",
+        "students": "students",
+        "noGroups": "No groups assigned to this exam. Assign a group first."
+      },
+      "questionSheet": {
+        "title": "Question Sheet",
+        "optional": "optional",
+        "description": "A single copy with all exam questions to give to students or project."
+      },
       "preview": "Preview",
       "downloadPDF": "Download PDF",
       "downloadTex": "Download LaTeX",
@@ -609,7 +638,30 @@
       "a4": "A4 (210mm x 297mm)",
       "legal": "Legal (8.5\" x 14\")",
       "exportConfiguration": "Export Configuration",
-      "exportConfigurationDesc": "Select the group and paper size for export"
+      "exportConfigurationDesc": "Select the group and paper size for export",
+      "answerSheetLabels": {
+        "title": "ANSWER SHEET",
+        "studentInfo": "Student Information",
+        "name": "Name:",
+        "identification": "ID:",
+        "group": "Group:",
+        "subject": "Subject:",
+        "exam": "Exam:",
+        "duration": "Duration:",
+        "minutes": "minutes",
+        "pageOf": "Page __current__ of __total__",
+        "instructions": "Instructions: Fill in the circle completely that corresponds to the correct answer. Use black or blue ink pen. Do not use red pen or pencil. Make sure to erase completely if you need to change an answer.",
+        "loading": "Loading...",
+        "downloadPdf": "Download PDF"
+      },
+      "latexLabels": {
+        "group": "Group:",
+        "instructions": "Instructions:",
+        "duration": "Duration:",
+        "minutes": "minutes",
+        "totalScore": "Total score:",
+        "pts": "pts"
+      }
     },
     "textExport": {
       "title": "Export text",
@@ -700,6 +752,14 @@
       "actions": {
         "cancel": "Cancel",
         "import": "Import Exam"
+      },
+      "formatExample": {
+        "button": "See example",
+        "toggle": "See format example",
+        "title": "Correct format example",
+        "close": "Close",
+        "imageAlt": "Example document with correctly formatted questions",
+        "caption": "Mark the correct answer by adding an asterisk (*) at the end of the option. Example: 'b. Lorem ipsum dolor *'"
       }
     }
   },
@@ -923,7 +983,15 @@
       "archive": "Archive",
       "activate": "Activate",
       "delete": "Delete",
-      "students": "students"
+      "students": "students",
+      "tooltips": {
+        "editGroup": "Edit group name, subject, or other details",
+        "manageStudents": "Add, remove, or import students in this group",
+        "gradeTable": "View and manage student grades for this group",
+        "gradingScheme": "Configure grade components and weights for this group",
+        "archive": "Archive this group to hide it from the main list",
+        "activate": "Restore this group to the active list"
+      }
     },
     "form": {
       "newGroup": "New group",
@@ -1025,6 +1093,7 @@
         "identification": "Identification",
         "names": "Names",
         "surnames": "Surnames",
+        "fullName": "Full Name",
         "email": "Email",
         "actions": "Actions"
       }
@@ -1108,6 +1177,7 @@
       "exportFinalGrades": "Export final grades",
       "surnames": "Surnames",
       "names": "Names",
+      "fullName": "Full Name",
       "identification": "Identification",
       "exam": "Exam",
       "linkedToExam": "Linked to exam",
@@ -1202,6 +1272,7 @@
       "headers": {
         "surnames": "Surnames",
         "names": "Names",
+        "fullName": "Full Name",
         "identification": "Identification",
         "email": "Email",
         "actions": "Actions"

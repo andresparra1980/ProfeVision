@@ -13,15 +13,21 @@ import {
   Pencil,
   Trash2,
   Printer,
-  FileOutput,
   Users,
   Eye,
-  Upload,
-  Plus,
+  WandSparkles,
   FileText, // Kept for empty state
   Link,
   Calendar,
+  Send,
 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { supabase } from "@/lib/supabase";
 import SimilarExamModal from "./SimilarExamModal";
 import SimilarExamMetadataDialog, { SimilarExamMeta } from "./SimilarExamMetadataDialog";
@@ -72,7 +78,7 @@ function ExamCardHeader({ exam, t, onTitleSave }: ExamCardHeaderProps) {
 
       {/* Bottom row: Status left, Date right */}
       <div className="flex justify-between items-center">
-        <div>{getStatusBadge(exam.estado, t)}</div>
+        <div>{getStatusBadge(exam.estado, t, isExamArchived(exam))}</div>
         <span className="text-xs text-muted-foreground flex items-center">
           <Calendar className="h-3 w-3 mr-1" />
           {new Date(exam.created_at).toLocaleDateString("en-GB", {
@@ -91,6 +97,7 @@ interface ExamCardContentProps {
   router: ReturnType<typeof useRouter>;
   onOpenDeleteDialog: (_examId: string) => void;
   onStartSimilar: (_examId: string) => void;
+  onPublish: (_examId: string) => void;
 }
 
 function ExamCardContent({
@@ -98,32 +105,141 @@ function ExamCardContent({
   router,
   onOpenDeleteDialog,
   onStartSimilar,
+  onPublish,
 }: ExamCardContentProps) {
   const t = useTranslations('dashboard.exams');
   
   return (
     <div className="space-y-1">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start h-auto py-2 px-2"
-        onClick={() => {
-          router.push({
-            pathname: '/dashboard/exams/[id]/edit',
-            params: { id: exam.id },
-          });
-        }}
-      >
-        <Pencil className="mr-2 h-4 w-4" /> {t('actions.edit')}
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400"
-        onClick={() => onStartSimilar(exam.id)}
-      >
-        <Plus className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start h-auto py-2 px-2"
+              onClick={() => {
+                router.push({
+                  pathname: '/dashboard/exams/[id]/edit',
+                  params: { id: exam.id },
+                });
+              }}
+            >
+              <Pencil className="mr-2 h-4 w-4" /> {t('actions.edit')}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{exam.estado === "borrador" ? t('tooltips.editDraft') : t('tooltips.editPublished')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      {exam.estado === "borrador" && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-auto py-2 px-2 text-primary"
+                onClick={() => onPublish(exam.id)}
+              >
+                <Send className="mr-2 h-4 w-4" /> {t('actions.publish')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <p>{t('tooltips.publishWarning')}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400" 
+              onClick={() => onStartSimilar(exam.id)}
+            >
+              <WandSparkles className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{t('tooltips.createSimilarExam')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="w-full">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-auto py-2 px-2"
+                disabled={exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0}
+                onClick={() => {
+                  router.push({
+                    pathname: '/dashboard/exams/[id]/export',
+                    params: { id: exam.id },
+                  });
+                }}
+              >
+                <Printer className="mr-2 h-4 w-4" /> {t('actions.exportAndPrint')}
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{(exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0) 
+              ? t('tooltips.exportRequiresPublishedAndGroup') 
+              : t('tooltips.exportAndPrint')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start h-auto py-2 px-2"
+              onClick={() => {
+                router.push({
+                  pathname: '/dashboard/exams/[id]/assign',
+                  params: { id: exam.id },
+                });
+              }}
+            >
+              <Users className="mr-2 h-4 w-4" /> {t('actions.assignGroups')}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{t('tooltips.assignGroups')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start h-auto py-2 px-2"
+              onClick={() => {
+                router.push({
+                  pathname: '/dashboard/exams/[id]/link-grade-component',
+                  params: { id: exam.id },
+                });
+              }}
+            >
+              <Link className="mr-2 h-4 w-4" /> {t('actions.linkComponentFull')}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p>{t('tooltips.linkComponent')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       {exam.estado === "borrador" && (
         <Button
           variant="ghost"
@@ -134,72 +250,29 @@ function ExamCardContent({
           <Trash2 className="mr-2 h-4 w-4" /> {t('actions.delete')}
         </Button>
       )}
-              <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start h-auto py-2 px-2"
-          onClick={() => {
-            router.push({
-              pathname: '/dashboard/exams/[id]/export',
-              params: { id: exam.id },
-            });
-          }}
-        >
-          <Printer className="mr-2 h-4 w-4" /> {t('actions.print')}
-      </Button>
-                             <Button
-           variant="ghost"
-           size="sm"
-           className="w-full justify-start h-auto py-2 px-2"
-           onClick={() => {
-             router.push({
-               pathname: '/dashboard/exams/[id]/responses',
-               params: { id: exam.id },
-             });
-           }}
-         >
-           <FileOutput className="mr-2 h-4 w-4" /> {t('actions.generateSheets')}
-      </Button>
-              <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start h-auto py-2 px-2"
-          onClick={() => {
-            router.push({
-              pathname: '/dashboard/exams/[id]/assign',
-              params: { id: exam.id },
-            });
-          }}
-        >
-          <Users className="mr-2 h-4 w-4" /> {t('actions.assignGroups')}
-      </Button>
-              <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start h-auto py-2 px-2"
-          onClick={() => {
-            router.push({
-              pathname: '/dashboard/exams/[id]/link-grade-component',
-              params: { id: exam.id },
-            });
-          }}
-        >
-          <Link className="mr-2 h-4 w-4" /> {t('actions.linkComponentFull')}
-      </Button>
       {exam.estado === "publicado" && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start h-auto py-2 px-2 text-purple-500 font-semibold"
-          onClick={() => {
-            router.push({
-              pathname: '/dashboard/exams/[id]/results',
-              params: { id: exam.id },
-            });
-          }}
-        >
-          <Eye className="mr-2 h-4 w-4" /> {t('actions.viewResults')}
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-auto py-2 px-2 text-primary font-semibold"
+                onClick={() => {
+                  router.push({
+                    pathname: '/dashboard/exams/[id]/results',
+                    params: { id: exam.id },
+                  });
+                }}
+              >
+                <Eye className="mr-2 h-4 w-4" /> {t('actions.viewResults')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <p>{t('tooltips.viewResults')}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
     </div>
   );
@@ -220,6 +293,7 @@ interface Exam {
     grupo: {
       id: string;
       nombre: string;
+      estado?: string; // 'activo' | 'archivado'
     };
     fecha_aplicacion: string;
     estado: string;
@@ -234,10 +308,18 @@ interface ExamsTableMobileProps {
   handleCreateExam: () => void;
   searchQuery: string;
   setSearchQuery: (_query: string) => void;
+  showArchivedGroups: boolean;
+  setShowArchivedGroups: (_show: boolean) => void;
 }
 
+// Helper to check if exam belongs to archived group(s)
+const isExamArchived = (exam: Exam): boolean => {
+  if (!exam.examen_grupo || exam.examen_grupo.length === 0) return false;
+  return exam.examen_grupo.every((eg) => eg.grupo?.estado === 'archivado');
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getStatusBadge = (status: string, t: any) => {
+const getStatusBadge = (status: string, t: any, archived?: boolean) => {
   const baseStyle: React.CSSProperties = {
     padding: "3px 8px",
     fontSize: "12px",
@@ -249,6 +331,22 @@ const getStatusBadge = (status: string, t: any) => {
     borderRadius: "3px",
     textTransform: "uppercase" as const,
   };
+
+  // If archived, show archived badge regardless of status
+  if (archived) {
+    return (
+      <span
+        style={{
+          ...baseStyle,
+          background: "var(--foreground)",
+          color: "var(--background)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+        }}
+      >
+        {t('status.archived')}
+      </span>
+    );
+  }
 
   switch (status) {
     case "borrador":
@@ -336,10 +434,12 @@ export default function ExamsTableMobile({
   filteredExams,
   loading,
   onOpenDeleteDialog,
-  setShowImportDialog,
-  handleCreateExam,
+  setShowImportDialog: _setShowImportDialog,
+  handleCreateExam: _handleCreateExam,
   searchQuery,
   setSearchQuery,
+  showArchivedGroups,
+  setShowArchivedGroups,
 }: ExamsTableMobileProps) {
   const router = useRouter();
   const t = useTranslations('dashboard.exams');
@@ -376,6 +476,35 @@ export default function ExamsTableMobile({
     } catch (error) {
       console.error("Error updating exam title:", error);
       throw error;
+    }
+  };
+
+  const handlePublish = async (examId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error(t('messages.unauthorized'));
+        return;
+      }
+
+      const response = await fetch(`/api/exams/${examId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ estado: 'publicado' }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error publishing exam');
+      }
+
+      toast.success(t('messages.examPublished'));
+      window.location.reload();
+    } catch (error) {
+      console.error("Error publishing exam:", error);
+      toast.error(t('messages.publishError'));
     }
   };
 
@@ -418,6 +547,21 @@ export default function ExamsTableMobile({
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full bg-card dark:bg-card placeholder:text-muted-foreground max-w-sm"
       />
+      
+      {/* Checkbox for showing exams from archived groups */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="show-archived-groups"
+          checked={showArchivedGroups}
+          onChange={(e) => setShowArchivedGroups(e.target.checked)}
+          className="rounded border-gray-300 text-primary focus:ring-primary"
+        />
+        <label htmlFor="show-archived-groups" className="text-sm text-muted-foreground">
+          {t('filters.showArchivedGroups')}
+        </label>
+      </div>
+
       {loading ? (
         <ExamsPageSkeleton />
       ) : filteredExams.length === 0 ? (
@@ -438,20 +582,6 @@ export default function ExamsTableMobile({
               <p className="text-sm text-muted-foreground">
                 {t('messages.noExamsDescription')}
               </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-2 pt-4">
-                <Button
-                  onClick={() => setShowImportDialog(true)}
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  {t('import')}
-                </Button>
-                <Button onClick={handleCreateExam} className="w-full sm:w-auto">
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t('create')}
-                </Button>
-              </div>
             </div>
           )}
         </div>
@@ -473,14 +603,15 @@ export default function ExamsTableMobile({
                   router={router}
                   onOpenDeleteDialog={onOpenDeleteDialog}
                   onStartSimilar={startSimilarJob}
+                  onPublish={handlePublish}
                 />
               </div>
             </div>
           ))}
         </div>
       ) : (
-        // Single column layout: collapsible accordion
-        <Accordion type="single" collapsible className="w-full space-y-2">
+        // Single column layout: collapsible accordion (first item expanded by default)
+        <Accordion type="single" collapsible className="w-full space-y-2" defaultValue={filteredExams[0]?.id}>
           {filteredExams.map((exam) => (
             <AccordionItem
               value={exam.id}
@@ -497,6 +628,7 @@ export default function ExamsTableMobile({
                   router={router}
                   onOpenDeleteDialog={onOpenDeleteDialog}
                   onStartSimilar={startSimilarJob}
+                  onPublish={handlePublish}
                 />
               </AccordionContent>
             </AccordionItem>

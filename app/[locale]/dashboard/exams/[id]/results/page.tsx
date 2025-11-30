@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import dynamic from 'next/dynamic';
+import { hasNombresSeparados } from '@/lib/utils/student-name';
 
 // Hooks
 import { useExamResults } from '@/components/exam-results/hooks/use-exam-results';
@@ -157,35 +158,63 @@ export default function ExamResultsPage() {
     }
 
     try {
-      // Crear datos para exportar
-      const dataToExport = resultados.map(resultado => ({
-        [t('excel.lastName')]: resultado.estudiante.apellidos,
-        [t('excel.firstName')]: resultado.estudiante.nombres,
-        [t('excel.identification')]: resultado.estudiante.identificacion,
-        [t('excel.score')]: resultado.puntaje_obtenido.toFixed(2),
-        [t('excel.percentage')]: `${resultado.porcentaje.toFixed(2)}%`,
-        [t('excel.gradedDate')]: new Date(resultado.fecha_calificacion).toLocaleDateString()
-      }));
+      // Detectar si los estudiantes tienen nombres separados o combinados
+      const allStudents = [
+        ...resultados.map(r => r.estudiante),
+        ...todosEstudiantes
+      ];
+      const separados = hasNombresSeparados(allStudents);
+      
+      // Crear datos para exportar con estructura dinámica (orden de columnas garantizado)
+      const dataToExport = resultados.map(resultado => {
+        if (separados) {
+          return {
+            [t('excel.lastName')]: resultado.estudiante.apellidos,
+            [t('excel.firstName')]: resultado.estudiante.nombres || '',
+            [t('excel.identification')]: resultado.estudiante.identificacion,
+            [t('excel.score')]: resultado.puntaje_obtenido.toFixed(2),
+            [t('excel.percentage')]: `${resultado.porcentaje.toFixed(2)}%`,
+            [t('excel.gradedDate')]: new Date(resultado.fecha_calificacion).toLocaleDateString()
+          };
+        }
+        return {
+          [t('excel.fullName')]: resultado.estudiante.apellidos,
+          [t('excel.identification')]: resultado.estudiante.identificacion,
+          [t('excel.score')]: resultado.puntaje_obtenido.toFixed(2),
+          [t('excel.percentage')]: `${resultado.porcentaje.toFixed(2)}%`,
+          [t('excel.gradedDate')]: new Date(resultado.fecha_calificacion).toLocaleDateString()
+        };
+      });
 
       // Agregar estudiantes sin calificación
       todosEstudiantes
         .filter(estudiante => !resultados.some(r => r.estudiante.id === estudiante.id))
         .forEach(estudiante => {
-          dataToExport.push({
-            [t('excel.lastName')]: estudiante.apellidos,
-            [t('excel.firstName')]: estudiante.nombres,
-            [t('excel.identification')]: estudiante.identificacion,
-            [t('excel.score')]: t('excel.notPresented'),
-            [t('excel.percentage')]: "0.00%",
-            [t('excel.gradedDate')]: ""
-          });
+          if (separados) {
+            dataToExport.push({
+              [t('excel.lastName')]: estudiante.apellidos,
+              [t('excel.firstName')]: estudiante.nombres || '',
+              [t('excel.identification')]: estudiante.identificacion,
+              [t('excel.score')]: t('excel.notPresented'),
+              [t('excel.percentage')]: "0.00%",
+              [t('excel.gradedDate')]: ""
+            });
+          } else {
+            dataToExport.push({
+              [t('excel.fullName')]: estudiante.apellidos,
+              [t('excel.identification')]: estudiante.identificacion,
+              [t('excel.score')]: t('excel.notPresented'),
+              [t('excel.percentage')]: "0.00%",
+              [t('excel.gradedDate')]: ""
+            });
+          }
         });
 
-      // Ordenar datos por apellidos en orden ascendente usando etiqueta localizada
-      const lastNameLabel = t('excel.lastName');
+      // Ordenar datos por nombre/apellidos en orden ascendente
+      const sortKey = separados ? t('excel.lastName') : t('excel.fullName');
       dataToExport.sort((a, b) => {
-        const aLast = String(a[lastNameLabel] ?? '');
-        const bLast = String(b[lastNameLabel] ?? '');
+        const aLast = String(a[sortKey] ?? '');
+        const bLast = String(b[sortKey] ?? '');
         return aLast.localeCompare(bLast, locale);
       });
 
@@ -211,15 +240,23 @@ export default function ExamResultsPage() {
         [''] // Línea en blanco antes de los datos de estudiantes
       ];
 
-      // Crear cabeceras de columnas (localizadas)
-      const columnsRow = [
-        t('excel.lastName'),
-        t('excel.firstName'),
-        t('excel.identification'),
-        t('excel.score'),
-        t('excel.percentage'),
-        t('excel.gradedDate')
-      ];
+      // Crear cabeceras de columnas (localizadas) - dinámico según formato de nombres
+      const columnsRow = separados
+        ? [
+            t('excel.lastName'),
+            t('excel.firstName'),
+            t('excel.identification'),
+            t('excel.score'),
+            t('excel.percentage'),
+            t('excel.gradedDate')
+          ]
+        : [
+            t('excel.fullName'),
+            t('excel.identification'),
+            t('excel.score'),
+            t('excel.percentage'),
+            t('excel.gradedDate')
+          ];
 
       // Combinar todo en una matriz
       const allData = [...headerData, columnsRow];
@@ -233,10 +270,12 @@ export default function ExamResultsPage() {
       const ws = XLSX.utils.aoa_to_sheet(allData);
 
       // Aplicar estilos (merge cells para título y secciones)
+      // Número de columnas: 6 si separados, 5 si combinados
+      const lastCol = separados ? 5 : 4;
       ws['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // Título
-        { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } }, // Detalles del examen
-        { s: { r: 8, c: 0 }, e: { r: 8, c: 5 } }  // Estadísticas
+        { s: { r: 0, c: 0 }, e: { r: 0, c: lastCol } }, // Título
+        { s: { r: 2, c: 0 }, e: { r: 2, c: lastCol } }, // Detalles del examen
+        { s: { r: 8, c: 0 }, e: { r: 8, c: lastCol } }  // Estadísticas
       ];
 
       // Añadir la hoja al libro

@@ -10,6 +10,7 @@ import { ComponenteCalificacion, Estudiante, Periodo } from '@/lib/types/databas
 import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase/client';
 import logger from '@/lib/utils/logger';
+import { hasNombresSeparados } from '@/lib/utils/student-name';
 
 // Extiende la interfaz ComponenteCalificacion para incluir la propiedad grupo_id
 interface ComponenteCalificacionWithGrupo extends ComponenteCalificacion {
@@ -293,13 +294,25 @@ export function GradesExcelModal({
       ? ((calificaciones as unknown as { porComponente: Record<string, Record<string, number>> }).porComponente[componente.id] || {})
       : calificaciones as Record<string, number>;
 
-    // Crear array de datos para exportar
-    const dataToExport = estudiantes.map(estudiante => ({
-      "Identificación": estudiante.identificacion,
-      "Nombres": estudiante.nombres,
-      "Apellidos": estudiante.apellidos,
-      "Calificación": componentGrades[estudiante.id] !== undefined ? componentGrades[estudiante.id] : ''
-    }));
+    // Detectar formato de nombres
+    const separados = hasNombresSeparados(estudiantes);
+
+    // Crear array de datos para exportar (orden de columnas garantizado)
+    const dataToExport = estudiantes.map(estudiante => {
+      if (separados) {
+        return {
+          "Identificación": estudiante.identificacion,
+          "Apellidos": estudiante.apellidos,
+          "Nombres": estudiante.nombres || '',
+          "Calificación": componentGrades[estudiante.id] !== undefined ? componentGrades[estudiante.id] : ''
+        };
+      }
+      return {
+        "Identificación": estudiante.identificacion,
+        "Apellidos y Nombres": estudiante.apellidos,
+        "Calificación": componentGrades[estudiante.id] !== undefined ? componentGrades[estudiante.id] : ''
+      };
+    });
     
     // Crear un libro de trabajo
     const wb = XLSX.utils.book_new();
@@ -317,13 +330,26 @@ export function GradesExcelModal({
   const downloadTemplate = () => {
     if (!componente) return;
 
-    // Crear array de datos para la plantilla
-    const dataToExport = estudiantes.map(estudiante => ({
-      "Identificación": estudiante.identificacion,
-      "Nombres": estudiante.nombres,
-      "Apellidos": estudiante.apellidos,
-      "Calificación": ''
-    }));
+    // Detectar formato de nombres
+    const separados = hasNombresSeparados(estudiantes);
+
+    // Crear array de datos para la plantilla con estructura dinámica
+    const dataToExport = estudiantes.map(estudiante => {
+      if (separados) {
+        return {
+          "Identificación": estudiante.identificacion,
+          "Apellidos": estudiante.apellidos,
+          "Nombres": estudiante.nombres || '',
+          "Calificación": ''
+        };
+      } else {
+        return {
+          "Identificación": estudiante.identificacion,
+          "Apellidos y Nombres": estudiante.apellidos,
+          "Calificación": ''
+        };
+      }
+    });
     
     // Crear un libro de trabajo
     const wb = XLSX.utils.book_new();
@@ -356,6 +382,9 @@ export function GradesExcelModal({
     logger.log('Periodo actual:', periodoActual);
     logger.log('Porcentaje del periodo:', periodoActual.porcentaje);
 
+    // Detectar formato de nombres
+    const separados = hasNombresSeparados(estudiantes);
+
     // Crear el libro de trabajo
     const wb = XLSX.utils.book_new();
     
@@ -371,11 +400,11 @@ export function GradesExcelModal({
       [''] // Línea en blanco antes de los datos
     ];
 
-    // Preparar encabezados de columnas
+    // Preparar encabezados de columnas (dinámicos según formato de nombres)
     const columns = [
       'Identificación',
-      'Apellidos',
-      'Nombres',
+      separados ? 'Apellidos' : 'Apellidos y Nombres',
+      ...(separados ? ['Nombres'] : []),
       ...componentesPeriodo.map(comp => `${comp.nombre} (${comp.porcentaje}%)`),
       'Nota Periodo (Pond.)',
       'Nota Periodo (Abs.)'
@@ -403,7 +432,7 @@ export function GradesExcelModal({
         return [
           estudiante.identificacion,
           estudiante.apellidos,
-          estudiante.nombres,
+          ...(separados ? [estudiante.nombres || ''] : []),
           ...notasComponentes.map(nota => nota || ''),
           notaPonderada.toFixed(2),
           '0.00'
@@ -416,7 +445,7 @@ export function GradesExcelModal({
       return [
         estudiante.identificacion,
         estudiante.apellidos,
-        estudiante.nombres,
+        ...(separados ? [estudiante.nombres || ''] : []),
         ...notasComponentes.map(nota => nota || ''),
         notaPonderada.toFixed(2),
         notaAbsoluta.toFixed(2)
@@ -456,6 +485,9 @@ export function GradesExcelModal({
       // Asegurar que g tenga grupo_id antes de compararlos
       return (g as ComponenteCalificacionWithGrupo).grupo_id === grupo.id;
     }) || [];
+
+    // Detectar formato de nombres
+    const separados = hasNombresSeparados(estudiantes);
     
     // Crear el libro de trabajo
     const wb = XLSX.utils.book_new();
@@ -472,11 +504,11 @@ export function GradesExcelModal({
       [''] // Línea en blanco antes de los datos
     ];
 
-    // Preparar encabezados de columnas
-    const columns = [
+    // Preparar encabezados de columnas (dinámicos según formato de nombres)
+    const columns: string[] = [
       'Identificación',
-      'Apellidos',
-      'Nombres'
+      separados ? 'Apellidos' : 'Apellidos y Nombres',
+      ...(separados ? ['Nombres'] : [])
     ];
 
     // Agregar columnas para cada periodo y sus componentes
@@ -498,10 +530,10 @@ export function GradesExcelModal({
 
     // Preparar datos de estudiantes
     const studentsData = estudiantes.map(estudiante => {
-      const rowData = [
+      const rowData: (string | number)[] = [
         estudiante.identificacion,
         estudiante.apellidos,
-        estudiante.nombres
+        ...(separados ? [estudiante.nombres || ''] : [])
       ];
 
       // Agregar notas de cada periodo y sus componentes
@@ -641,7 +673,7 @@ export function GradesExcelModal({
                       {preview.slice(0, 5).map((item, index) => (
                         <tr key={index}>
                           <td className="px-4 py-2 text-xs">{item.identificacion}</td>
-                          <td className="px-4 py-2 text-xs">{item.nombres} {item.apellidos}</td>
+                          <td className="px-4 py-2 text-xs">{item.nombres ? `${item.nombres} ${item.apellidos}` : item.apellidos}</td>
                           <td className="px-4 py-2 text-xs">{item.valor}</td>
                         </tr>
                       ))}

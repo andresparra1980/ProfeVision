@@ -257,7 +257,7 @@ export const AnswerSheetPDF = ({ exam, student, group, paperSize = 'LETTER' }: A
             <View style={styles.headerInfo}>
               <Text style={styles.title}>{exam.titulo}</Text>
               <Text style={styles.studentInfo}>
-                Estudiante: {student.nombres} {student.apellidos}
+                Estudiante: {student.nombres ? `${student.nombres} ${student.apellidos}` : student.apellidos}
               </Text>
               <Text style={styles.studentInfo}>
                 Identificación: {student.identificacion}

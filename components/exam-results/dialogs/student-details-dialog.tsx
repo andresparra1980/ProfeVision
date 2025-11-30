@@ -29,7 +29,7 @@ export function StudentDetailsDialog({
         <DialogHeader>
           <DialogTitle>{t('modal.title')}</DialogTitle>
           <DialogDescription>
-            {t('modal.description')} {resultado?.estudiante.nombres} {resultado?.estudiante.apellidos}
+            {t('modal.description')} {resultado?.estudiante.nombres ? `${resultado.estudiante.nombres} ${resultado.estudiante.apellidos}` : resultado?.estudiante.apellidos}
           </DialogDescription>
         </DialogHeader>
 

@@ -43,6 +43,8 @@
     "serverEmptyResponse": "El servidor respondió con un cuerpo vacío",
     "timeoutError": "La solicitud excedió el tiempo máximo de espera (60 segundos)",
     "formatError": "Error de formato",
-    "unknownError": "Error desconocido"
+    "unknownError": "Error desconocido",
+    "unauthorized": "No autorizado. Inicia sesión para continuar.",
+    "notOwner": "Este examen pertenece a otra cuenta. No puedes guardar resultados para exámenes que no son tuyos."
   }
 } 

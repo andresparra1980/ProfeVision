@@ -10,10 +10,13 @@ import { ScanExamFeature } from "@/components/exam/scan-exam-feature";
 import { toast } from "sonner";
 import type { User, Session } from '@supabase/supabase-js';
 import { SidebarProvider } from "@/lib/contexts/sidebar-context";
+import { OnboardingProvider } from "@/lib/contexts/onboarding-context";
 import logger from "@/lib/utils/logger";
 import { useTranslations, useLocale } from 'next-intl';
 import { useWelcomeModal } from "@/lib/hooks/useWelcomeModal";
 import { WelcomeTierModal } from "@/components/shared/welcome-tier-modal";
+import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
+import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
 
 // Helper function to delete cookies by name prefix
 function deleteSupabaseCookies() {
@@ -149,6 +152,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
+      <OnboardingProvider>
       <div className="flex h-screen overflow-hidden relative">
         {user ? (
           <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
@@ -178,7 +182,14 @@ export default function DashboardLayout({
             });
           }}
         />
+
+        {/* Onboarding Wizard para nuevos usuarios */}
+        <OnboardingWizard />
+
+        {/* Checklist para tracking de progreso */}
+        <OnboardingChecklist />
       </div>
+      </OnboardingProvider>
     </SidebarProvider>
   );
 } 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase/client';
 import { GradesTable } from '@/components/grades/grades-table';
@@ -189,7 +189,7 @@ export default function GradesPage({ params }: GradesPageProps) {
         toast(t('error.noScheme'), {
           description: t('error.mustCreateScheme'),
         });
-        router.push(`/dashboard/groups/${groupId}/grading-scheme`);
+        router.push({ pathname: '/dashboard/groups/[id]/grading-scheme', params: { id: groupId } });
         return;
       }
 
@@ -488,7 +488,7 @@ export default function GradesPage({ params }: GradesPageProps) {
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => router.push("/dashboard/groups")}
+          onClick={() => router.push({ pathname: '/dashboard/groups' })}
           className="mb-0 w-fit"
         >
           <ChevronLeft className="mr-2 h-4 w-4" /> {t('backToGroups')}

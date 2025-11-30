@@ -1072,8 +1072,35 @@
   },
   "components": {
     "excelImport": {
+      "options": {
+        "title": "Import options",
+        "separateNames": "Surnames and names are in separate fields",
+        "includeEmails": "Include email addresses"
+      },
+      "columns": {
+        "names": "Names",
+        "surnames": "Surnames",
+        "fullName": "Surnames and Names",
+        "identification": "ID",
+        "email": "Email"
+      },
+      "example": {
+        "student1": {
+          "firstName": "John",
+          "lastName": "Smith",
+          "id": "12345678",
+          "email": "student1@example.com"
+        },
+        "student2": {
+          "firstName": "Jane",
+          "lastName": "Doe",
+          "id": "87654321",
+          "email": "student2@example.com"
+        }
+      },
+      "sheetName": "Students",
       "downloadTemplate": "Download Template",
-      "downloadDescription": "Download the sample format to import students",
+      "downloadDescription": "Download the format based on selected options",
       "selectFile": "Select Excel File",
       "errorsFound": "The following errors were found:",
       "preview": {
@@ -1081,6 +1108,7 @@
         "table": {
           "names": "Names",
           "surnames": "Surnames",
+          "fullName": "Surnames and Names",
           "identification": "Identification",
           "email": "Email",
           "andMore": "And {count} more..."
@@ -1102,8 +1130,13 @@
       "error": {
         "title": "Error",
         "readingFile": "Could not read the file. Make sure it's a valid Excel file.",
-        "noDataToImport": "No valid data to import"
-      }
+        "noDataToImport": "No valid data to import",
+        "invalidHeaders": "The file headers are not valid. Do not delete the first row of the template.",
+        "expectedHeaders": "Expected headers are:",
+        "expectedHeadersSeparate": "{names}, {surnames}, {id}{email}",
+        "expectedHeadersCombined": "{fullName}, {id}{email}"
+      },
+      "headerWarning": "Do not delete the column names in the first row of the file."
     }
   },
   "developmentOverlay": {

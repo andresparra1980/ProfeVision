@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useTranslations } from "next-intl";
 import { monoFont } from "@/lib/fonts";
+import { hasNombresSeparados } from "@/lib/utils/student-name";
 
 interface Student {
   id: string;
@@ -35,11 +36,14 @@ export function StudentsTable({
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 10;
 
+  // Detectar si los estudiantes tienen nombres separados
+  const nombresSeparados = useMemo(() => hasNombresSeparados(students), [students]);
+
   // Filter students based on search query (memoizado)
   const filteredStudents = useMemo(() => {
     return students.filter((student) =>
       student.apellidos.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.nombres.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (student.nombres && student.nombres.toLowerCase().includes(searchQuery.toLowerCase())) ||
       student.identificacion.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (student.email && student.email.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -150,8 +154,14 @@ export function StudentsTable({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('table.headers.surnames')}</TableHead>
-                  <TableHead>{t('table.headers.names')}</TableHead>
+                  {nombresSeparados ? (
+                    <>
+                      <TableHead>{t('table.headers.surnames')}</TableHead>
+                      <TableHead>{t('table.headers.names')}</TableHead>
+                    </>
+                  ) : (
+                    <TableHead>{t('table.headers.fullName')}</TableHead>
+                  )}
                   <TableHead>{t('table.headers.identification')}</TableHead>
                   <TableHead>{t('table.headers.email')}</TableHead>
                   <TableHead>{t('table.headers.actions')}</TableHead>
@@ -169,8 +179,14 @@ export function StudentsTable({
                         isEven ? 'bg-muted/30' : 'bg-background'
                       }`}
                     >
-                      <TableCell className={`font-medium ${monoFont}`}>{student.apellidos}</TableCell>
-                      <TableCell className={monoFont}>{student.nombres}</TableCell>
+                      {nombresSeparados ? (
+                        <>
+                          <TableCell className={`font-medium ${monoFont}`}>{student.apellidos}</TableCell>
+                          <TableCell className={monoFont}>{student.nombres || ''}</TableCell>
+                        </>
+                      ) : (
+                        <TableCell className={`font-medium ${monoFont}`}>{student.apellidos}</TableCell>
+                      )}
                       <TableCell className={monoFont}>{student.identificacion}</TableCell>
                       <TableCell className={monoFont}>{student.email || "-"}</TableCell>
                       <TableCell>

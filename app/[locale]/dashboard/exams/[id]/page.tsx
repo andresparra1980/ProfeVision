@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { Button } from '@/components/ui/button';
-import { PDFGenerator } from '@/components/exam/pdf-generator';
+import { PDFGenerator, type AnswerSheetLabels } from '@/components/exam/pdf-generator';
 import { toast } from 'sonner';
 import { Camera, Trash2 } from 'lucide-react';
 import { Grupo as BaseGrupo, Student } from '@/lib/types/database';
@@ -50,10 +50,28 @@ export default function ExamPage({ params }: { params: Promise<{ id: string }> }
   const { id } = use(params);
   const router = useRouter();
   const t = useTranslations('dashboard.exams');
+  const tExport = useTranslations('dashboard.exams.export');
   const [exam, setExam] = useState<Exam | null>(null);
   const [group, setGroup] = useState<ExamGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // i18n labels for PDF export
+  const answerSheetLabels: AnswerSheetLabels = {
+    title: tExport('answerSheetLabels.title'),
+    studentInfo: tExport('answerSheetLabels.studentInfo'),
+    name: tExport('answerSheetLabels.name'),
+    identification: tExport('answerSheetLabels.identification'),
+    group: tExport('answerSheetLabels.group'),
+    subject: tExport('answerSheetLabels.subject'),
+    exam: tExport('answerSheetLabels.exam'),
+    duration: tExport('answerSheetLabels.duration'),
+    minutes: tExport('answerSheetLabels.minutes'),
+    pageOf: tExport('answerSheetLabels.pageOf'),
+    instructions: tExport('answerSheetLabels.instructions'),
+    loading: tExport('answerSheetLabels.loading'),
+    downloadPdf: tExport('answerSheetLabels.downloadPdf'),
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -205,6 +223,7 @@ export default function ExamPage({ params }: { params: Promise<{ id: string }> }
             group={pdfGroup} 
             paperSize="LETTER"
             fileName={`${exam.titulo.toLowerCase().replace(/\s+/g, '_')}.pdf`}
+            labels={answerSheetLabels}
           />
         </div>
       </div>

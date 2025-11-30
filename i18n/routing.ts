@@ -163,6 +163,18 @@ export const pathnames = {
     es: '/dashboard/grupos', 
     en: '/dashboard/groups' 
   },
+  '/dashboard/groups/[id]/students': {
+    es: '/dashboard/grupos/[id]/estudiantes',
+    en: '/dashboard/groups/[id]/students'
+  },
+  '/dashboard/groups/[id]/grades': {
+    es: '/dashboard/grupos/[id]/calificaciones',
+    en: '/dashboard/groups/[id]/grades'
+  },
+  '/dashboard/groups/[id]/grading-scheme': {
+    es: '/dashboard/grupos/[id]/esquema-calificacion',
+    en: '/dashboard/groups/[id]/grading-scheme'
+  },
   '/dashboard/subjects': { 
     es: '/dashboard/materias', 
     en: '/dashboard/subjects' 

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, Plus, Search, X, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { ExcelImport } from "@/components/students/excel-import";
 import { use } from "react";
+import { hasNombresSeparados, getStudentDisplayName } from "@/lib/utils/student-name";
 
 interface Student {
   id: string;
@@ -66,6 +67,9 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
   const [isAdding, setIsAdding] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  // Detectar si los estudiantes tienen nombres separados o combinados
+  const nombresSeparados = useMemo(() => hasNombresSeparados(groupStudents), [groupStudents]);
 
   // Callback functions
   const fetchGroupDetails = useCallback(async () => {
@@ -155,7 +159,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
     }
   }, [searchQuery, groupStudents, t]);
 
-  const handleImportComplete = useCallback(() => {
+  const handleImportComplete = useCallback((_importedCount: number) => {
     toast.success(t('success.title'), {
       description: t('success.importComplete'),
     });
@@ -241,7 +245,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
         <p>{t('error.groupNotFound')}</p>
         <Button 
           className="mt-4"
-          onClick={() => router.push("/dashboard/groups")}
+          onClick={() => router.push({ pathname: '/dashboard/groups' })}
         >
           {t('backToGroups')}
         </Button>
@@ -256,7 +260,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => router.push("/dashboard/groups")}
+          onClick={() => router.push({ pathname: '/dashboard/groups' })}
           className="mb-2"
         >
           <ChevronLeft className="mr-2 h-4 w-4" /> {t('backToGroups')}
@@ -337,7 +341,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
                           className="flex items-center justify-between p-2 border rounded"
                         >
                           <div>
-                            <p className="font-medium">{student.nombres} {student.apellidos}</p>
+                            <p className="font-medium">{getStudentDisplayName(student)}</p>
                             <p className="text-sm text-muted-foreground">
                               {student.identificacion}
                             </p>
@@ -369,8 +373,14 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t('table.identification')}</TableHead>
-                    <TableHead>{t('table.names')}</TableHead>
-                    <TableHead>{t('table.surnames')}</TableHead>
+                    {nombresSeparados ? (
+                      <>
+                        <TableHead>{t('table.surnames')}</TableHead>
+                        <TableHead>{t('table.names')}</TableHead>
+                      </>
+                    ) : (
+                      <TableHead>{t('table.fullName')}</TableHead>
+                    )}
                     <TableHead>{t('table.email')}</TableHead>
                     <TableHead className="text-right">{t('table.actions')}</TableHead>
                   </TableRow>
@@ -379,8 +389,14 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
                   {groupStudents.map((student) => (
                     <TableRow key={student.id}>
                       <TableCell>{student.identificacion}</TableCell>
-                      <TableCell>{student.nombres}</TableCell>
-                      <TableCell>{student.apellidos}</TableCell>
+                      {nombresSeparados ? (
+                        <>
+                          <TableCell>{student.apellidos}</TableCell>
+                          <TableCell>{student.nombres || ''}</TableCell>
+                        </>
+                      ) : (
+                        <TableCell>{student.apellidos}</TableCell>
+                      )}
                       <TableCell>{student.email}</TableCell>
                       <TableCell className="text-right">
                         <Button

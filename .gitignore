@@ -181,3 +181,4 @@ omr-service/build/
 
 # ZED
 .zed/*
+.opencode.json

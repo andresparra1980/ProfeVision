@@ -64,6 +64,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ).default,
     // 🎯 Tiers system
     tiers: (await import(`./locales/${locale}/tiers.json`)).default,
+    // 🚀 Onboarding wizard and checklist
+    onboarding: (await import(`./locales/${locale}/onboarding.json`)).default,
   };
 
   return {

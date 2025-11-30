@@ -123,7 +123,7 @@ export default function GroupsPage() {
         `)
         .eq("profesor_id", profesor.id)
         .eq("estado", mostrarArchivados ? 'archivado' : 'activo')
-        .order("nombre");
+        .order("created_at", { ascending: false });
 
       if (gruposError) throw gruposError;
       
@@ -450,7 +450,7 @@ export default function GroupsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="w-full grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 items-start auto-rows-min">
           {grupos.map((grupo) => (
             <GroupCard
               key={grupo.id}

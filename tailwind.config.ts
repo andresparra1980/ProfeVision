@@ -116,6 +116,10 @@ const config: Config = {
           DEFAULT: "var(--accent)",
           foreground: "var(--accent-foreground)",
         },
+        feature: {
+          DEFAULT: "var(--feature)",
+          foreground: "var(--primary-foreground)",
+        },
         popover: {
           DEFAULT: "var(--popover)",
           foreground: "var(--popover-foreground)",

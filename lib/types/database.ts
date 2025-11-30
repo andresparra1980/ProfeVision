@@ -92,8 +92,31 @@ export interface Profesor {
   telefono: string | null;
   cargo: string | null;
   biografia: string | null;
+  foto_url: string | null;
+  first_login_completed: boolean | null;
+  onboarding_status: OnboardingStatus | null;
+  subscription_tier: string | null;
+  subscription_status: string | null;
+  subscription_cycle_start: string | null;
+  polar_subscription_id: string | null;
+  polar_customer_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface OnboardingStatus {
+  wizard_completed?: boolean;
+  wizard_step?: number;
+  wizard_started_at?: string;
+  wizard_completed_at?: string;
+  checklist_items?: {
+    exam_created?: boolean;
+    exam_published?: boolean;
+    pdf_exported?: boolean;
+    first_scan?: boolean;
+  };
+  skipped?: boolean;
+  skip_reason?: string;
 }
 
 export interface Database {
@@ -494,29 +517,56 @@ export interface Database {
       profesores: {
         Row: {
           apellidos: string
+          biografia: string | null
+          cargo: string | null
           created_at: string
-          email: string
+          first_login_completed: boolean | null
+          foto_url: string | null
           id: string
-          identificacion: string
           nombres: string
+          onboarding_status: Json | null
+          polar_customer_id: string | null
+          polar_subscription_id: string | null
+          subscription_cycle_start: string | null
+          subscription_status: string | null
+          subscription_tier: string | null
+          telefono: string | null
           updated_at: string
         }
         Insert: {
-          apellidos: string
+          apellidos?: string
+          biografia?: string | null
+          cargo?: string | null
           created_at?: string
-          email: string
-          id?: string
-          identificacion: string
-          nombres: string
+          first_login_completed?: boolean | null
+          foto_url?: string | null
+          id: string
+          nombres?: string
+          onboarding_status?: Json | null
+          polar_customer_id?: string | null
+          polar_subscription_id?: string | null
+          subscription_cycle_start?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          telefono?: string | null
           updated_at?: string
         }
         Update: {
           apellidos?: string
+          biografia?: string | null
+          cargo?: string | null
           created_at?: string
-          email?: string
+          first_login_completed?: boolean | null
+          foto_url?: string | null
           id?: string
-          identificacion?: string
           nombres?: string
+          onboarding_status?: Json | null
+          polar_customer_id?: string | null
+          polar_subscription_id?: string | null
+          subscription_cycle_start?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          telefono?: string | null
           updated_at?: string
         }
         Relationships: []

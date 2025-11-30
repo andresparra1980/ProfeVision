@@ -7,7 +7,10 @@
     "uploadProcessed": "Failed to save processed image",
     "saveResults": "Failed to save results",
     "saveScans": "Failed to save scanned images",
-    "internal": "Internal server error"
+    "internal": "Internal server error",
+    "unauthorized": "Unauthorized. Please log in to continue.",
+    "examNotFound": "Exam not found",
+    "notOwner": "This exam belongs to another account"
   }
 }
 
