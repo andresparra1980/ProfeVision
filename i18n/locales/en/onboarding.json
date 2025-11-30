@@ -116,6 +116,20 @@
     "description": "Your account is configured and ready to use",
     "goToDashboard": "Go to dashboard"
   },
+  "completion": {
+    "title": "Congratulations!",
+    "description": "You've successfully set up your ProfeVision account. You're just a few steps away from getting the most out of it.",
+    "nextStepsTitle": "Next Steps",
+    "steps": {
+      "createExam": "Create your first exam",
+      "publishExam": "Publish it",
+      "printSheets": "Print the answer sheets",
+      "scanExam": "Scan with your phone to grade instantly"
+    },
+    "progressTrackerHint": "You'll find a progress tracker on your dashboard to guide you through these steps.",
+    "startButton": "Start using ProfeVision",
+    "finishing": "Finishing..."
+  },
   "examCreationDrawer": {
     "title": "Create your first exam",
     "subtitle": "Choose how you want to start",

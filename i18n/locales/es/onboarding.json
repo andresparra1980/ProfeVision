@@ -116,6 +116,20 @@
     "description": "Tu cuenta esta configurada y lista para usar",
     "goToDashboard": "Ir al panel"
   },
+  "completion": {
+    "title": "Felicitaciones!",
+    "description": "Has configurado tu cuenta ProfeVision exitosamente. Estas a unos pocos pasos de aprovecharlo al maximo.",
+    "nextStepsTitle": "Proximos Pasos",
+    "steps": {
+      "createExam": "Crea tu primer examen",
+      "publishExam": "Publicalo",
+      "printSheets": "Imprime las hojas de respuestas",
+      "scanExam": "Escanealo con tu celular para calificarlo al instante"
+    },
+    "progressTrackerHint": "Encontraras un rastreador de progreso en tu panel para guiarte en estos pasos.",
+    "startButton": "Empezar a usar ProfeVision",
+    "finishing": "Finalizando..."
+  },
   "examCreationDrawer": {
     "title": "Crea tu primer examen",
     "subtitle": "Elige como quieres empezar",

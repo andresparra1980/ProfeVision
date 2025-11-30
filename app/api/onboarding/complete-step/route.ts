@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
           statusUpdate.wizard_started_at = new Date().toISOString();
         }
         
-        // Final step (6 steps: 0-5, so step 5 is the last)
-        if (wizard_step >= 5) {
+        // Final step (7 steps: 0-6, so step 6 is the last)
+        if (wizard_step >= 6) {
           statusUpdate.wizard_completed = true;
           statusUpdate.wizard_completed_at = new Date().toISOString();
         }

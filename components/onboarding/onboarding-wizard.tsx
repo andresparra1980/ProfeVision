@@ -22,6 +22,7 @@ import {
   GroupStep,
   StudentsStep,
   ExamOptionsStep,
+  CompletionStep,
 } from "./steps";
 
 interface InstitutionData {
@@ -57,7 +58,7 @@ export interface WizardData {
   students?: StudentData[];
 }
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 export function OnboardingWizard() {
   const t = useTranslations("onboarding");
@@ -160,7 +161,14 @@ export function OnboardingWizard() {
           <ExamOptionsStep
             subjectId={wizardData.subject?.id}
             groupId={wizardData.group?.id}
-            onComplete={handleComplete}
+            onComplete={handleNext}
+            isSubmitting={isSubmitting}
+          />
+        );
+      case 6:
+        return (
+          <CompletionStep
+            onCompleteAction={handleComplete}
             isSubmitting={isSubmitting}
           />
         );

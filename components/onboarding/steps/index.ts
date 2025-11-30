@@ -4,3 +4,4 @@ export { SubjectStep } from './subject-step';
 export { GroupStep } from './group-step';
 export { StudentsStep } from './students-step';
 export { ExamOptionsStep } from './exam-options-step';
+export { CompletionStep } from './completion-step';
