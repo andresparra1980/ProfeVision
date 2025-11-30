@@ -58,7 +58,9 @@ export async function POST(req: NextRequest) {
         }
         
         // Final step (6 steps: 0-5, so step 5 is the last)
-        if (wizard_step >= 5) {
+        // Note: We only mark completed when wizard_step > 5 (after user closes from completion screen)
+        // This allows the completion step (5) to be shown before closing
+        if (wizard_step > 5) {
           statusUpdate.wizard_completed = true;
           statusUpdate.wizard_completed_at = new Date().toISOString();
         }

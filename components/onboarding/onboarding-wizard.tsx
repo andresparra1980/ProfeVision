@@ -95,7 +95,8 @@ export function OnboardingWizard() {
   const handleComplete = useCallback(async () => {
     setIsSubmitting(true);
     try {
-      await completeWizardStep(TOTAL_STEPS - 1);
+      // Send TOTAL_STEPS (6) to trigger wizard_completed in the API
+      await completeWizardStep(TOTAL_STEPS);
     } finally {
       setIsSubmitting(false);
     }
