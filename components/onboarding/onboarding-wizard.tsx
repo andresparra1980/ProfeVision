@@ -85,8 +85,9 @@ export function OnboardingWizard() {
     if (currentStep < TOTAL_STEPS - 1) {
       setIsSubmitting(true);
       try {
-        await completeWizardStep(currentStep);
-        setCurrentStep(prev => prev + 1);
+        const nextStep = currentStep + 1;
+        await completeWizardStep(nextStep);
+        setCurrentStep(nextStep);
       } finally {
         setIsSubmitting(false);
       }
