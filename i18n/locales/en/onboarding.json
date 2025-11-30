@@ -177,7 +177,7 @@
       },
       "scanExam": {
         "title": "Scan your first exam",
-        "description": "Use camera to grade automatically",
+        "description": "Use camera of your phone to grade automatically",
         "cta": "Scan"
       }
     }

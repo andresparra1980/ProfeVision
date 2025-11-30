@@ -177,7 +177,7 @@
       },
       "scanExam": {
         "title": "Escanea tu primer examen",
-        "description": "Usa la camara para calificar automaticamente",
+        "description": "Usa la cámara de tu celular para calificar automaticamente",
         "cta": "Escanear"
       }
     }
