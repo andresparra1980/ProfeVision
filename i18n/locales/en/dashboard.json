@@ -983,7 +983,15 @@
       "archive": "Archive",
       "activate": "Activate",
       "delete": "Delete",
-      "students": "students"
+      "students": "students",
+      "tooltips": {
+        "editGroup": "Edit group name, subject, or other details",
+        "manageStudents": "Add, remove, or import students in this group",
+        "gradeTable": "View and manage student grades for this group",
+        "gradingScheme": "Configure grade components and weights for this group",
+        "archive": "Archive this group to hide it from the main list",
+        "activate": "Restore this group to the active list"
+      }
     },
     "form": {
       "newGroup": "New group",

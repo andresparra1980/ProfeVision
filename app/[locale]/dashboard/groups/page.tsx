@@ -123,7 +123,7 @@ export default function GroupsPage() {
         `)
         .eq("profesor_id", profesor.id)
         .eq("estado", mostrarArchivados ? 'archivado' : 'activo')
-        .order("nombre");
+        .order("created_at", { ascending: false });
 
       if (gruposError) throw gruposError;
       

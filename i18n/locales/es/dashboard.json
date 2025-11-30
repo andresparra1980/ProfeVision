@@ -984,7 +984,15 @@
       "archive": "Archivar",
       "activate": "Activar",
       "delete": "Eliminar",
-      "students": "estudiantes"
+      "students": "estudiantes",
+      "tooltips": {
+        "editGroup": "Editar nombre del grupo, materia u otros detalles",
+        "manageStudents": "Agregar, eliminar o importar estudiantes en este grupo",
+        "gradeTable": "Ver y gestionar las calificaciones de los estudiantes de este grupo",
+        "gradingScheme": "Configurar componentes y pesos de calificación para este grupo",
+        "archive": "Archivar este grupo para ocultarlo de la lista principal",
+        "activate": "Restaurar este grupo a la lista de activos"
+      }
     },
     "form": {
       "newGroup": "Nuevo grupo",
