@@ -52,14 +52,19 @@ export async function GET(req: NextRequest) {
       shouldShowWizard = true;
     }
 
+    // Check if all 4 checklist items are complete
+    const requiredChecklistItems = ['exam_created', 'exam_published', 'pdf_exported', 'first_scan'];
+    const checklistItems = onboardingStatus?.checklist_items || {};
+    const checklistComplete = requiredChecklistItems.every(
+      item => checklistItems[item as keyof typeof checklistItems] === true
+    );
+
     const response = {
       is_legacy_user: isLegacyUser,
       first_login_completed: profesor.first_login_completed,
       onboarding_status: onboardingStatus,
       should_show_wizard: shouldShowWizard,
-      checklist_complete: onboardingStatus?.checklist_items 
-        ? Object.values(onboardingStatus.checklist_items).every(Boolean)
-        : false,
+      checklist_complete: checklistComplete,
     };
 
     return NextResponse.json(response);

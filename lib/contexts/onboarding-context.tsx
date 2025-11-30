@@ -218,12 +218,17 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       const newStatus = data.onboarding_status as OnboardingStatus;
       
+      // Check if all 4 checklist items are complete
+      const requiredItems = ['exam_created', 'exam_published', 'pdf_exported', 'first_scan'];
+      const items = newStatus.checklist_items || {};
+      const allComplete = requiredItems.every(
+        item => items[item as keyof typeof items] === true
+      );
+      
       setState(prev => ({
         ...prev,
         onboardingStatus: newStatus,
-        checklistComplete: newStatus.checklist_items 
-          ? Object.values(newStatus.checklist_items).every(Boolean)
-          : false,
+        checklistComplete: allComplete,
       }));
       
       return true;
