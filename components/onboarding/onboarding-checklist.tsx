@@ -19,7 +19,7 @@ import {
   ChevronDown,
   FileText,
   Send,
-  Download,
+  Printer,
   ScanLine,
   X,
   Sparkles,
@@ -208,7 +208,7 @@ export function OnboardingChecklist() {
     },
     {
       key: "pdf_exported",
-      icon: <Download className="h-4 w-4" />,
+      icon: <Printer className="h-4 w-4" />,
       completed: itemsStatus.pdf_exported,
       route: "/dashboard/exams",
     },
