@@ -38,6 +38,7 @@ interface SubjectStepProps {
 
 export function SubjectStep({ institutionId: initialInstitutionId, data: initialData, onUpdate, onNext, isSubmitting }: SubjectStepProps) {
   const t = useTranslations("onboarding.subject");
+  const tWizard = useTranslations("onboarding.wizard");
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [saving, setSaving] = useState(false);
@@ -184,7 +185,7 @@ export function SubjectStep({ institutionId: initialInstitutionId, data: initial
           onClick={handleSubmit}
           disabled={!isValid || saving || isSubmitting}
         >
-          {saving ? "Guardando..." : "Continuar"}
+          {saving ? tWizard("saving") : tWizard("continue")}
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

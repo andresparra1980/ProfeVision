@@ -6,6 +6,8 @@
     "skipConfirm": "You can complete this later from the dashboard",
     "back": "Back",
     "next": "Next",
+    "continue": "Continue",
+    "saving": "Saving...",
     "finish": "Finish",
     "step": "Step {current} of {total}",
     "progress": "{percent}% complete"

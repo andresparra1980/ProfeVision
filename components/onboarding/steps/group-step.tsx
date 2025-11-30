@@ -42,6 +42,7 @@ interface GroupStepProps {
 
 export function GroupStep({ subjectId: initialSubjectId, data: initialData, onUpdate, onNext, isSubmitting }: GroupStepProps) {
   const t = useTranslations("onboarding.group");
+  const tWizard = useTranslations("onboarding.wizard");
   const [name, setName] = useState(initialData?.name || "");
   const [year, setYear] = useState(initialData?.year || "");
   const [period, setPeriod] = useState(initialData?.period || "");
@@ -208,7 +209,7 @@ export function GroupStep({ subjectId: initialSubjectId, data: initialData, onUp
           onClick={handleSubmit}
           disabled={!isValid || saving || isSubmitting}
         >
-          {saving ? "Guardando..." : "Continuar"}
+          {saving ? tWizard("saving") : tWizard("continue")}
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

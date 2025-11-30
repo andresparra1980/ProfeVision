@@ -6,6 +6,8 @@
     "skipConfirm": "Puedes completar esto despues desde el panel",
     "back": "Atras",
     "next": "Siguiente",
+    "continue": "Continuar",
+    "saving": "Guardando...",
     "finish": "Finalizar",
     "step": "Paso {current} de {total}",
     "progress": "{percent}% completado"

@@ -33,6 +33,7 @@ const INSTITUTION_TYPES = ["school", "university", "institute", "academy", "othe
 
 export function InstitutionStep({ data: initialData, onUpdate, onNext, isSubmitting }: InstitutionStepProps) {
   const t = useTranslations("onboarding.institution");
+  const tWizard = useTranslations("onboarding.wizard");
   const [name, setName] = useState(initialData?.name || "");
   const [type, setType] = useState(initialData?.type || "school");
   const [saving, setSaving] = useState(false);
@@ -137,7 +138,7 @@ export function InstitutionStep({ data: initialData, onUpdate, onNext, isSubmitt
           onClick={handleSubmit}
           disabled={!isValid || saving || isSubmitting}
         >
-          {saving ? "Guardando..." : "Continuar"}
+          {saving ? tWizard("saving") : tWizard("continue")}
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

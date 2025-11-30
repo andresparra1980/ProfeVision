@@ -44,6 +44,7 @@ interface StudentsStepProps {
 
 export function StudentsStep({ groupId: initialGroupId, data: initialData, onUpdate, onNext, isSubmitting }: StudentsStepProps) {
   const t = useTranslations("onboarding.students");
+  const tWizard = useTranslations("onboarding.wizard");
   const [students, setStudents] = useState<StudentData[]>(initialData || []);
   const [fullName, setFullName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -355,7 +356,7 @@ export function StudentsStep({ groupId: initialGroupId, data: initialData, onUpd
           onClick={handleSubmit}
           disabled={(students.length === 0 && !hasImportedStudents) || saving || isSubmitting || !selectedGroupId}
         >
-          {saving ? "Guardando..." : "Continuar"}
+          {saving ? tWizard("saving") : tWizard("continue")}
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
