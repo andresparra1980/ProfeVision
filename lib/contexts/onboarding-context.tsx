@@ -154,12 +154,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       const newStatus = data.onboarding_status as OnboardingStatus;
       
-      console.log('[Onboarding] completeWizardStep response:', { step, newStatus, wizard_completed: newStatus?.wizard_completed });
+      // Force close wizard if step >= 6 (completion step action)
+      const shouldClose = step >= 6 || newStatus?.wizard_completed;
       
       setState(prev => ({
         ...prev,
         onboardingStatus: newStatus,
-        shouldShowWizard: !newStatus?.wizard_completed,
+        shouldShowWizard: !shouldClose,
       }));
       
       return true;
