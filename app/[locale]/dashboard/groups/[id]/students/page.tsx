@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, Plus, Search, X, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -245,7 +245,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
         <p>{t('error.groupNotFound')}</p>
         <Button 
           className="mt-4"
-          onClick={() => router.push("/dashboard/groups")}
+          onClick={() => router.push({ pathname: '/dashboard/groups' })}
         >
           {t('backToGroups')}
         </Button>
@@ -260,7 +260,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => router.push("/dashboard/groups")}
+          onClick={() => router.push({ pathname: '/dashboard/groups' })}
           className="mb-2"
         >
           <ChevronLeft className="mr-2 h-4 w-4" /> {t('backToGroups')}

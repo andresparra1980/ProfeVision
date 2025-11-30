@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { GradingSchemeEditor } from '@/components/grading/grading-scheme-editor';
 import { supabase } from '@/lib/supabase/client';
@@ -160,7 +161,7 @@ export default function GradingSchemePage() {
         description: t('success.schemeSaved'),
       });
 
-      router.push(`/dashboard/groups/${groupId}/grades`);
+      router.push({ pathname: '/dashboard/groups/[id]/grades', params: { id: groupId } });
     } catch (error) {
       console.error('Error:', error);
       throw error; // El componente GradingSchemeEditor manejará este error
@@ -181,7 +182,7 @@ export default function GradingSchemePage() {
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => router.push("/dashboard/groups")}
+          onClick={() => router.push({ pathname: '/dashboard/groups' })}
           className="mb-0 w-fit"
         >
           <ChevronLeft className="mr-2 h-4 w-4" /> {t('backToGroups')}
