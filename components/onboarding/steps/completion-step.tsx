@@ -77,7 +77,10 @@ export function CompletionStep({ onCompleteAction, isSubmitting }: CompletionSte
 
   const handleFinish = async () => {
     await onCompleteAction();
-    router.push({ pathname: "/dashboard" });
+    // Small delay to ensure state updates propagate before navigation
+    setTimeout(() => {
+      router.push({ pathname: "/dashboard" });
+    }, 100);
   };
 
   return (
