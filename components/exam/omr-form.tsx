@@ -115,10 +115,13 @@ export function OMRForm({
   };
 
   return (
-    <div className={`border rounded-lg p-4 ${className}`}>
+    <div className={`border rounded-lg p-4 overflow-hidden ${className}`}>
       {title && <h3 className="text-center font-medium text-lg mb-4">{title}</h3>}
       
-      <div className={`grid grid-cols-${numColumns} gap-6`} style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}>
+      <div 
+        className="grid gap-4 sm:gap-6" 
+        style={{ gridTemplateColumns: `repeat(${numColumns}, minmax(0, 1fr))` }}
+      >
         {columns.map((column, colIndex) => (
           <div key={`column-${colIndex}`} className="space-y-2">
             {showHeaders && (
