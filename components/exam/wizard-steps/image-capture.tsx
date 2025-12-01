@@ -35,16 +35,16 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
       
       {!capturedImage ? (
         <>
-          <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <Camera className="w-16 h-16 text-gray-400" />
-              <div className="text-gray-500">
-                <p className="mb-2">{t('capture.instruction')}</p>
-                <p className="text-sm">{t('capture.subInstruction')}</p>
+          <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+            <div className="flex flex-col items-center justify-center space-y-2">
+              <Camera className="w-12 h-12 text-gray-400" />
+              <div className="text-gray-500 text-sm">
+                <p className="mb-1">{t('capture.instruction')}</p>
+                <p className="text-xs">{t('capture.subInstruction')}</p>
               </div>
               <Button 
                 onClick={triggerFileInput}
-                className="mt-4 bg-primary flex items-center gap-2"
+                className="mt-2 bg-primary flex items-center gap-2"
               >
                 <Camera className="w-4 h-4" />
                 {t('capture.button')}
@@ -57,7 +57,7 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <p className="text-xs text-gray-500 mt-4">
+              <p className="text-xs text-gray-500 mt-2">
                 {t('capture.description')}
               </p>
             </div>

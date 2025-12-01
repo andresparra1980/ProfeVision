@@ -123,29 +123,32 @@ export function OMRForm({
         style={{ gridTemplateColumns: `repeat(${numColumns}, minmax(0, 1fr))` }}
       >
         {columns.map((column, colIndex) => (
-          <div key={`column-${colIndex}`} className="space-y-2">
-            {showHeaders && (
-              <div className="flex justify-center mb-2 text-sm font-medium">
-                Preguntas {column.startQuestion} - {column.endQuestion}
+          <div 
+            key={`column-${colIndex}`} 
+            className={`space-y-2 ${colIndex > 0 ? 'border-l border-gray-300 dark:border-gray-600 pl-1' : ''}`}
+          >
+              {showHeaders && (
+                <div className="flex justify-center mb-2 text-sm font-medium">
+                  Preguntas {column.startQuestion} - {column.endQuestion}
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                {column.questions.map(questionNumber => (
+                  <MultipleChoiceOptions
+                    key={`question-${questionNumber}`}
+                    questionNumber={showQuestionNumbers ? questionNumber : undefined}
+                    selectedOption={selectedAnswers[questionNumber] || '-'}
+                    numOptions={numOptions}
+                    disabled={disabledQuestions.includes(questionNumber)}
+                    readOnly={!editable}
+                    onSelect={(option) => handleOptionSelect(questionNumber, option)}
+                    size={size}
+                    isCorrect={correctnessMap?.[questionNumber]}
+                  />
+                ))}
               </div>
-            )}
-            
-            <div className="space-y-2">
-              {column.questions.map(questionNumber => (
-                <MultipleChoiceOptions
-                  key={`question-${questionNumber}`}
-                  questionNumber={showQuestionNumbers ? questionNumber : undefined}
-                  selectedOption={selectedAnswers[questionNumber] || '-'}
-                  numOptions={numOptions}
-                  disabled={disabledQuestions.includes(questionNumber)}
-                  readOnly={!editable}
-                  onSelect={(option) => handleOptionSelect(questionNumber, option)}
-                  size={size}
-                  isCorrect={correctnessMap?.[questionNumber]}
-                />
-              ))}
             </div>
-          </div>
         ))}
       </div>
     </div>

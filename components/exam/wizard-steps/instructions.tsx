@@ -43,11 +43,11 @@ export function Instructions({ onNext, scanUsage, canScan = true, loading = fals
       )}
 
       <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-        <h3 className="font-semibold text-amber-800 mb-2">{t('subtitle')}</h3>
-        <p className="text-amber-700 mb-4">
+        <h3 className="font-semibold text-amber-800 mb-2 text-sm">{t('subtitle')}</h3>
+        <p className="text-amber-700 mb-4 text-sm">
           {t('description')}
         </p>
-        <ul className="space-y-2 text-amber-700 list-disc pl-5">
+        <ul className="space-y-1 text-amber-700 list-disc pl-5 text-sm">
           <li>{t('steps.0')}</li>
           <li>{t('steps.1')}</li>
           <li>{t('steps.2')}</li>

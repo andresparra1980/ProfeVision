@@ -47,9 +47,9 @@ export function MultipleChoiceOptions({
 
   // Determinar tamaño de las burbujas
   const sizeClasses = {
-    sm: 'w-4 h-4 text-[10px]',
-    md: 'w-5 h-5 text-xs',
-    lg: 'w-6 h-6 text-sm'
+    sm: 'w-3.5 h-3.5 text-[9px]',
+    md: 'w-4 h-4 text-[10px]',
+    lg: 'w-5 h-5 text-xs'
   };
   
   const bubbleSize = sizeClasses[size];
@@ -86,18 +86,20 @@ export function MultipleChoiceOptions({
     });
   };
 
+  const iconSize = 14;
+
   return (
     <div className={`flex items-center space-x-1 ${className}`}>
       {questionNumber !== undefined && (
-        <span className={`font-medium min-w-[25px] ${disabled ? 'line-through opacity-40' : ''}`}>
-          {questionNumber}.
+        <span className={`font-mono font-medium text-sm min-w-[26px] ${disabled ? 'line-through opacity-40' : ''}`}>
+          {String(questionNumber).padStart(2, '0')}.
         </span>
       )}
       <div className="flex items-center space-x-1">
         {renderOptions()}
       </div>
-      {!disabled && isCorrect === true && <Check className="text-green-600 dark:text-green-400 ml-1" size={18} />}
-      {!disabled && isCorrect === false && <X className="text-red-600 dark:text-red-400 ml-1" size={18} />}
+      {!disabled && isCorrect === true && <Check className="text-green-600 dark:text-green-400 ml-0.5 flex-shrink-0" size={iconSize} />}
+      {!disabled && isCorrect === false && <X className="text-red-600 dark:text-red-400 ml-0.5 flex-shrink-0" size={iconSize} />}
       {showLabels && (
         <div className="flex ml-2 text-xs text-gray-500 dark:text-gray-400 space-x-2">
           {Array.from({ length: numOptions }).map((_, i) => (
