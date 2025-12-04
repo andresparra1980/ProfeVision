@@ -87,16 +87,6 @@ const nextConfig: NextConfig = {
 
   transpilePackages: ["@react-pdf/renderer"],
 
-  // Turbopack configuration (stable in Next.js 15+)
-  turbopack: {
-    resolveAlias: {
-      // Handle browser-incompatible packages
-      canvas: "./lib/empty-module.js",
-      pdfkit: "./lib/empty-module.js",
-    },
-    resolveExtensions: [".mdx", ".tsx", ".ts", ".jsx", ".js", ".mjs", ".json"],
-  },
-
   webpack: (config, { isServer }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
