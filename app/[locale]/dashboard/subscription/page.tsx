@@ -200,6 +200,7 @@ export default function SubscriptionPage() {
             <PricingCard
               tier="free"
               isCurrentPlan={currentTier === "free"}
+              isDowngrade={currentTier === "plus"}
               onUpgrade={handleUpgrade}
             />
             <PricingCard

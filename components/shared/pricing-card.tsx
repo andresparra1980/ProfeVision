@@ -19,6 +19,7 @@ interface PricingCardProps {
   tier: PricingTier;
   onUpgrade?: () => void;
   isCurrentPlan?: boolean;
+  isDowngrade?: boolean; // True si usuario Plus ve la card Free
   className?: string;
 }
 
@@ -26,6 +27,7 @@ export function PricingCard({
   tier,
   onUpgrade,
   isCurrentPlan = false,
+  isDowngrade = false,
   className,
 }: PricingCardProps) {
   const t = useTranslations("tiers.pricing");
@@ -113,6 +115,10 @@ export function PricingCard({
         {isCurrentPlan ? (
           <Button variant="outline" className="w-full" disabled>
             {t("actions.currentPlan", { defaultValue: "Current plan" })}
+          </Button>
+        ) : isDowngrade ? (
+          <Button variant="ghost" className="w-full text-muted-foreground" onClick={onUpgrade}>
+            {t("actions.downgradeToFree", { defaultValue: "Downgrade to Free" })}
           </Button>
         ) : (
           <Button

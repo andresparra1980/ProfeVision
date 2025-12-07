@@ -108,7 +108,8 @@
     "actions": {
       "startFree": "Start for free",
       "upgradePlus": "Upgrade to Plus",
-      "currentPlan": "Current plan"
+      "currentPlan": "Current plan",
+      "downgradeToFree": "Downgrade to Free"
     }
   },
   "welcome": {
