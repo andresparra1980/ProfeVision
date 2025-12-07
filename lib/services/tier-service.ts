@@ -229,8 +229,41 @@ export class TierService {
   static async getUsageStats(supabase: SupabaseClient, profesorId: string): Promise<UsageStats> {
     try {
       // Get current tier and status
-      const tier = await this.getCurrentTier(supabase, profesorId);
-      const subscriptionStatus = await this.getSubscriptionStatus(supabase, profesorId);
+      let tier = await this.getCurrentTier(supabase, profesorId);
+      let subscriptionStatus = await this.getSubscriptionStatus(supabase, profesorId);
+
+      // Fallback: verificar si suscripción cancelada ya expiró (en caso de webhook fallido)
+      if (subscriptionStatus === 'cancelled' && tier === 'plus') {
+        const { data: profesor } = await supabase
+          .from('profesores')
+          .select('subscription_cycle_start')
+          .eq('id', profesorId)
+          .single();
+
+        if (profesor?.subscription_cycle_start) {
+          const cycleStart = new Date(profesor.subscription_cycle_start);
+          const now = new Date();
+          // Si ya pasó más de ~30 días desde el inicio del ciclo, expiró
+          const daysSinceCycleStart = Math.floor((now.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (daysSinceCycleStart > 32) { // 32 días de gracia
+            logger.warn(`[TierService] Suscripción expirada detectada para profesor ${profesorId}, haciendo downgrade automático`);
+            
+            // Auto-downgrade
+            await supabase
+              .from('profesores')
+              .update({
+                subscription_tier: 'free',
+                subscription_status: 'expired',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', profesorId);
+
+            tier = 'free';
+            subscriptionStatus = 'expired';
+          }
+        }
+      }
 
       // Get tier limits
       const limits = await this.getTierLimits(supabase, tier);
