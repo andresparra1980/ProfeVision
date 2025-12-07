@@ -45,10 +45,10 @@ export default function SubscriptionPage() {
       // Polling: reintentar refetch hasta que el tier sea "plus" (máx 5 intentos)
       let attempts = 0;
       const maxAttempts = 5;
-      const pollInterval = setInterval(async () => {
+      const pollInterval = setInterval(() => {
         attempts++;
-        const data = await refetch();
-        if (data?.tier?.name === "plus" || attempts >= maxAttempts) {
+        refetch();
+        if (attempts >= maxAttempts) {
           clearInterval(pollInterval);
         }
       }, 1500);
@@ -59,6 +59,8 @@ export default function SubscriptionPage() {
       return () => clearInterval(pollInterval);
     }
   }, [searchParams, t, refetch]);
+  
+
 
   const handleUpgrade = () => {
     if (!userEmail) {
