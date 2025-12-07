@@ -41,6 +41,6 @@ export async function GET() {
 
   const session = await response.json();
   
-  // Redirigir al portal de Polar
-  return NextResponse.redirect(session.customer_portal_url);
+  // Retornar la URL del portal
+  return NextResponse.json({ url: session.customer_portal_url });
 }

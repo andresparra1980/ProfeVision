@@ -74,9 +74,15 @@ export default function SubscriptionPage() {
     window.location.href = checkoutUrl;
   };
 
-  const handleManageSubscription = () => {
-    // Redirigir al portal de cliente de Polar
-    window.location.href = "/api/polar/portal";
+  const handleManageSubscription = async () => {
+    try {
+      const response = await fetch("/api/polar/portal");
+      if (!response.ok) throw new Error("Error al obtener portal");
+      const { url } = await response.json();
+      window.open(url, "_blank");
+    } catch {
+      toast.error("Error", { description: "No se pudo abrir el portal de suscripción" });
+    }
   };
 
   const isGrandfathered = usage?.tier.name === "grandfathered";
