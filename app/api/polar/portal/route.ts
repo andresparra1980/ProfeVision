@@ -6,7 +6,6 @@ export const GET = CustomerPortal({
   accessToken: process.env.POLAR_ACCESS_TOKEN!,
   server: "sandbox", // TODO: cambiar a "production" en prod
   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getCustomerId: async (_req: NextRequest) => {
     // Obtener usuario autenticado
     const supabase = await createClient();

@@ -43,7 +43,6 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations('dashboard');
-  const tTiers = useTranslations('tiers');
   const locale = useLocale();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
