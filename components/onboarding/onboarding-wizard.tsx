@@ -57,7 +57,11 @@ export interface WizardData {
 
 const TOTAL_STEPS = 6;
 
-export function OnboardingWizard() {
+interface OnboardingWizardProps {
+  waitForWelcome?: boolean;
+}
+
+export function OnboardingWizard({ waitForWelcome = false }: OnboardingWizardProps) {
   const t = useTranslations("onboarding");
   const { shouldShowWizard, completeWizardStep, onboardingStatus } = useOnboarding();
   
@@ -160,7 +164,8 @@ export function OnboardingWizard() {
     }
   };
 
-  if (!shouldShowWizard) {
+  // No mostrar si welcome modal está activo (esperar a que termine)
+  if (!shouldShowWizard || waitForWelcome) {
     return null;
   }
 

@@ -169,7 +169,7 @@ export default function DashboardLayout({
             </div>
           </main>
         </div>
-        <ScanExamFeature />
+        <ScanExamFeature hideForWelcome={showWelcome} />
 
         {/* Welcome Modal para primer login */}
         <WelcomeTierModal
@@ -183,8 +183,8 @@ export default function DashboardLayout({
           }}
         />
 
-        {/* Onboarding Wizard para nuevos usuarios */}
-        <OnboardingWizard />
+        {/* Onboarding Wizard para nuevos usuarios (espera a que termine Welcome) */}
+        <OnboardingWizard waitForWelcome={showWelcome} />
 
         {/* Checklist para tracking de progreso */}
         <OnboardingChecklist />

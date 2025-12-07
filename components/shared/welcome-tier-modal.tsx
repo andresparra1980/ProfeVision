@@ -77,10 +77,38 @@ export function WelcomeTierModal({
     }
   };
 
-  const handleUpgrade = () => {
-    toast.info(t("pricing.comingSoon", { defaultValue: "Coming Soon" }), {
-      description: t("pricing.comingSoonDesc", { defaultValue: "Payment functionality will be available soon. Stay tuned!" }),
-    });
+  const handleUpgrade = async () => {
+    try {
+      // Obtener email del usuario
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) {
+        toast.error("Error", { description: "No se pudo obtener tu email" });
+        return;
+      }
+
+      // Primero completar el welcome (marcar first_login_completed = true)
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await fetch("/api/tiers/complete-welcome", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+        });
+      }
+
+      // Redirigir al checkout de Polar
+      const productId = billingPeriod === "monthly" 
+        ? process.env.NEXT_PUBLIC_POLAR_PRODUCT_ID_MONTHLY
+        : process.env.NEXT_PUBLIC_POLAR_PRODUCT_ID_ANNUAL;
+      
+      const checkoutUrl = `/api/polar/checkout?products=${productId}&customerEmail=${encodeURIComponent(user.email)}`;
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      logger.error("[WelcomeTierModal] Error initiating checkout:", error);
+      toast.error("Error", { description: "No se pudo iniciar el checkout" });
+    }
   };
 
   return (

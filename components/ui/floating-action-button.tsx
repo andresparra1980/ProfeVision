@@ -3,15 +3,18 @@
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/sidebar-context';
+import { useOnboarding } from '@/lib/contexts/onboarding-context';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 
 interface FloatingActionButtonProps {
   onClick: () => void;
+  hideForWelcome?: boolean;
 }
 
-export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
+export function FloatingActionButton({ onClick, hideForWelcome = false }: FloatingActionButtonProps) {
   const { isOpen } = useSidebar();
+  const { shouldShowWizard } = useOnboarding();
   const t = useTranslations('floating-action-button');
   const pathname = usePathname();
 
@@ -32,6 +35,11 @@ export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
 
   // Ocultar cuando no estemos en dashboard o cuando haya más de un nivel de profundidad
   if (!isTopDashboardSection) {
+    return null;
+  }
+
+  // Ocultar durante onboarding wizard o welcome modal
+  if (shouldShowWizard || hideForWelcome) {
     return null;
   }
 
