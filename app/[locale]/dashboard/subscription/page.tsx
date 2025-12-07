@@ -35,16 +35,28 @@ export default function SubscriptionPage() {
     getUser();
   }, []);
 
-  // Mostrar toast si viene de un upgrade exitoso
+  // Mostrar toast si viene de un upgrade exitoso y hacer polling hasta que se refleje el cambio
   useEffect(() => {
     if (searchParams.get("upgraded") === "true") {
       toast.success(t("pricing.upgradeSuccess", { defaultValue: "Welcome to Plus!" }), {
         description: t("pricing.upgradeSuccessDesc", { defaultValue: "Your subscription has been activated. Enjoy unlimited features!" }),
       });
-      // Refrescar datos de uso
-      refetch();
+      
+      // Polling: reintentar refetch hasta que el tier sea "plus" (máx 5 intentos)
+      let attempts = 0;
+      const maxAttempts = 5;
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        const data = await refetch();
+        if (data?.tier?.name === "plus" || attempts >= maxAttempts) {
+          clearInterval(pollInterval);
+        }
+      }, 1500);
+      
       // Limpiar URL
       window.history.replaceState({}, "", window.location.pathname);
+      
+      return () => clearInterval(pollInterval);
     }
   }, [searchParams, t, refetch]);
 
