@@ -45,7 +45,7 @@ export function FloatingActionButton({ onClick, hideForWelcome = false }: Floati
 
   return (
     // Bottom bar fija para mobile, oculta en desktop
-    <div className="fixed bottom-0 left-0 w-full bg-background/50 backdrop-blur-sm border-t border-border shadow-lg md:hidden z-[9999]">
+    <div className="fixed bottom-0 left-0 w-full bg-background/50 backdrop-blur-sm border-t border-border shadow-lg md:hidden z-40">
       <div className="flex justify-center py-4 px-4 safe-area-pb">
         <Button
           onClick={onClick}
