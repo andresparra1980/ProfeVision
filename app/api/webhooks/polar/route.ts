@@ -9,36 +9,30 @@ const supabaseAdmin = createClient(
 );
 
 /**
- * Busca profesor por email en auth.users
+ * Obtiene el profesor ID desde metadata o buscando por polar_customer_id
  */
-async function findProfesorByEmail(email: string) {
-  // Buscar usuario en auth.users
-  const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
-  
-  if (authError) {
-    logger.error("Error listando usuarios:", authError);
-    return null;
+async function getProfesorId(metadata: Record<string, string> | undefined, polarCustomerId?: string): Promise<string | null> {
+  // Primero intentar desde metadata (checkout nuevo)
+  if (metadata?.supabase_user_id) {
+    logger.log(`Usando supabase_user_id desde metadata: ${metadata.supabase_user_id}`);
+    return metadata.supabase_user_id;
   }
 
-  const user = authData.users.find(u => u.email === email);
-  if (!user) {
-    logger.warn(`Usuario no encontrado con email: ${email}`);
-    return null;
+  // Fallback: buscar por polar_customer_id (para eventos futuros como cancel/revoke)
+  if (polarCustomerId) {
+    const { data: profesor, error } = await supabaseAdmin
+      .from("profesores")
+      .select("id")
+      .eq("polar_customer_id", polarCustomerId)
+      .single();
+
+    if (!error && profesor) {
+      logger.log(`Encontrado profesor por polar_customer_id: ${profesor.id}`);
+      return profesor.id;
+    }
   }
 
-  // Verificar que existe en profesores
-  const { data: profesor, error } = await supabaseAdmin
-    .from("profesores")
-    .select("id, subscription_tier, subscription_status")
-    .eq("id", user.id)
-    .single();
-
-  if (error) {
-    logger.error("Error buscando profesor:", error);
-    return null;
-  }
-
-  return profesor;
+  return null;
 }
 
 /**
@@ -77,20 +71,15 @@ export const POST = Webhooks({
     logger.log("subscription.created recibido:", payload.data.id);
     
     const subscription = payload.data;
-    const customerEmail = subscription.customer?.email;
+    const metadata = subscription.metadata as Record<string, string> | undefined;
     
-    if (!customerEmail) {
-      logger.warn("subscription.created sin email de customer");
+    const profesorId = await getProfesorId(metadata, subscription.customer?.id);
+    if (!profesorId) {
+      logger.warn("subscription.created: No se pudo determinar profesor ID");
       return;
     }
 
-    const profesor = await findProfesorByEmail(customerEmail);
-    if (!profesor) {
-      logger.warn(`No se encontró profesor para email: ${customerEmail}`);
-      return;
-    }
-
-    await updateProfesorSubscription(profesor.id, {
+    await updateProfesorSubscription(profesorId, {
       subscription_tier: "plus",
       subscription_status: "active",
       polar_customer_id: subscription.customer?.id,
@@ -98,21 +87,19 @@ export const POST = Webhooks({
       subscription_cycle_start: subscription.startedAt?.toString() || new Date().toISOString(),
     });
 
-    logger.log(`Upgrade a Plus completado para profesor: ${profesor.id}`);
+    logger.log(`Upgrade a Plus completado para profesor: ${profesorId}`);
   },
 
   onSubscriptionActive: async (payload) => {
     logger.log("subscription.active recibido:", payload.data.id);
     
     const subscription = payload.data;
-    const customerEmail = subscription.customer?.email;
+    const metadata = subscription.metadata as Record<string, string> | undefined;
     
-    if (!customerEmail) return;
+    const profesorId = await getProfesorId(metadata, subscription.customer?.id);
+    if (!profesorId) return;
 
-    const profesor = await findProfesorByEmail(customerEmail);
-    if (!profesor) return;
-
-    await updateProfesorSubscription(profesor.id, {
+    await updateProfesorSubscription(profesorId, {
       subscription_status: "active",
     });
   },
@@ -121,40 +108,36 @@ export const POST = Webhooks({
     logger.log("subscription.canceled recibido:", payload.data.id);
     
     const subscription = payload.data;
-    const customerEmail = subscription.customer?.email;
+    const metadata = subscription.metadata as Record<string, string> | undefined;
     
-    if (!customerEmail) return;
-
-    const profesor = await findProfesorByEmail(customerEmail);
-    if (!profesor) return;
+    const profesorId = await getProfesorId(metadata, subscription.customer?.id);
+    if (!profesorId) return;
 
     // Usuario canceló pero mantiene acceso hasta fin de periodo
-    await updateProfesorSubscription(profesor.id, {
+    await updateProfesorSubscription(profesorId, {
       subscription_status: "cancelled",
       // subscription_tier permanece "plus" hasta que expire
     });
 
-    logger.log(`Suscripción cancelada (mantiene acceso): ${profesor.id}`);
+    logger.log(`Suscripción cancelada (mantiene acceso): ${profesorId}`);
   },
 
   onSubscriptionRevoked: async (payload) => {
     logger.log("subscription.revoked recibido:", payload.data.id);
     
     const subscription = payload.data;
-    const customerEmail = subscription.customer?.email;
+    const metadata = subscription.metadata as Record<string, string> | undefined;
     
-    if (!customerEmail) return;
-
-    const profesor = await findProfesorByEmail(customerEmail);
-    if (!profesor) return;
+    const profesorId = await getProfesorId(metadata, subscription.customer?.id);
+    if (!profesorId) return;
 
     // Suscripción expiró - downgrade a free
-    await updateProfesorSubscription(profesor.id, {
+    await updateProfesorSubscription(profesorId, {
       subscription_tier: "free",
       subscription_status: "expired",
     });
 
-    logger.log(`Downgrade a Free completado para profesor: ${profesor.id}`);
+    logger.log(`Downgrade a Free completado para profesor: ${profesorId}`);
   },
 
   onSubscriptionUpdated: async (payload) => {
