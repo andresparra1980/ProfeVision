@@ -27,6 +27,7 @@ export interface TierLimits {
 
 export interface UsageStats {
   tier: SubscriptionTier;
+  subscription_status: SubscriptionStatus;
   ai_generation: {
     used: number;
     limit: number;
@@ -194,6 +195,32 @@ export class TierService {
   }
 
   /**
+   * Get the current subscription status for a professor
+   * @param supabase - Supabase client instance
+   * @param profesorId - The professor's UUID
+   * @returns Promise<SubscriptionStatus>
+   */
+  static async getSubscriptionStatus(supabase: SupabaseClient, profesorId: string): Promise<SubscriptionStatus> {
+    try {
+      const { data, error } = await supabase
+        .from('profesores')
+        .select('subscription_status')
+        .eq('id', profesorId)
+        .single();
+
+      if (error) {
+        logger.error('Error fetching subscription status:', error);
+        throw new Error(`Failed to fetch subscription status: ${error.message}`);
+      }
+
+      return (data?.subscription_status || 'active') as SubscriptionStatus;
+    } catch (error) {
+      logger.error('Error in getSubscriptionStatus:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get comprehensive usage statistics for a professor
    * @param supabase - Supabase client instance
    * @param profesorId - The professor's UUID
@@ -201,8 +228,9 @@ export class TierService {
    */
   static async getUsageStats(supabase: SupabaseClient, profesorId: string): Promise<UsageStats> {
     try {
-      // Get current tier
+      // Get current tier and status
       const tier = await this.getCurrentTier(supabase, profesorId);
+      const subscriptionStatus = await this.getSubscriptionStatus(supabase, profesorId);
 
       // Get tier limits
       const limits = await this.getTierLimits(supabase, tier);
@@ -236,6 +264,7 @@ export class TierService {
 
       return {
         tier,
+        subscription_status: subscriptionStatus,
         ai_generation: {
           used: aiUsed,
           limit: limits.ai_generations_per_month,

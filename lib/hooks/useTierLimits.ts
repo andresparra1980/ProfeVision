@@ -11,11 +11,14 @@ export interface UsageData {
   remaining: number;
 }
 
+export type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'trialing';
+
 export interface TierUsageStats {
   tier: {
     name: string;
     display_name: string;
   };
+  subscription_status: SubscriptionStatus;
   ai_generation: UsageData;
   scans: UsageData;
   cycle: {

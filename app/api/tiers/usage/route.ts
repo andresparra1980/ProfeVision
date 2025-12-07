@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
         name: usageStats.tier,
         display_name: tierDisplayNames[usageStats.tier] || usageStats.tier,
       },
+      subscription_status: usageStats.subscription_status,
       ai_generation: {
         used: usageStats.ai_generation.used,
         limit: usageStats.ai_generation.limit,

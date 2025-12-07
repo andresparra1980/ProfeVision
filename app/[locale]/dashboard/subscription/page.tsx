@@ -67,6 +67,7 @@ export default function SubscriptionPage() {
 
   const isGrandfathered = usage?.tier.name === "grandfathered";
   const currentTier = (usage?.tier.name || "free") as SubscriptionTier;
+  const isCancelled = usage?.subscription_status === "cancelled";
 
   return (
     <div className="space-y-6">
@@ -92,6 +93,25 @@ export default function SubscriptionPage() {
       ) : (
         <>
 
+      {/* Aviso de suscripción cancelada */}
+      {isCancelled && currentTier === "plus" && (
+        <Alert className="border-orange-500 bg-orange-50 dark:bg-orange-900/20">
+          <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+          <AlertTitle className="text-orange-800 dark:text-orange-200">
+            {t('subscription.cancelled.title', { defaultValue: 'Subscription Cancelled' })}
+          </AlertTitle>
+          <AlertDescription className="text-orange-700 dark:text-orange-300">
+            {t('subscription.cancelled.description', {
+              defaultValue: 'Your subscription has been cancelled. You will maintain access to Plus features until'
+            })} {new Date(usage.cycle.end).toLocaleDateString(locale, {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            })}.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Botón gestionar suscripción para usuarios Plus */}
       {currentTier === "plus" && (
         <Card>
@@ -100,7 +120,10 @@ export default function SubscriptionPage() {
               {t('subscription.manage.title', { defaultValue: 'Manage Subscription' })}
             </CardTitle>
             <CardDescription>
-              {t('subscription.manage.description', { defaultValue: 'View invoices, update payment method, or cancel your subscription' })}
+              {isCancelled 
+                ? t('subscription.manage.descriptionCancelled', { defaultValue: 'View invoices or reactivate your subscription' })
+                : t('subscription.manage.description', { defaultValue: 'View invoices, update payment method, or cancel your subscription' })
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
