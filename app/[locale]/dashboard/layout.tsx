@@ -177,9 +177,6 @@ export default function DashboardLayout({
           onOpenChange={setShowWelcome}
           onComplete={() => {
             setShowWelcome(false);
-            toast.success(tTiers('welcome.success', { defaultValue: 'Welcome to ProfeVision!' }), {
-              description: tTiers('welcome.successDesc', { defaultValue: 'Your account has been set up successfully.' }),
-            });
           }}
         />
 
