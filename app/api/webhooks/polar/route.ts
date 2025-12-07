@@ -84,7 +84,7 @@ export const POST = Webhooks({
       subscription_status: "active",
       polar_customer_id: subscription.customer?.id,
       polar_subscription_id: subscription.id,
-      subscription_cycle_start: subscription.startedAt?.toString() || new Date().toISOString(),
+      subscription_cycle_start: subscription.startedAt ? new Date(subscription.startedAt).toISOString() : new Date().toISOString(),
     });
 
     logger.log(`Upgrade a Plus completado para profesor: ${profesorId}`);
