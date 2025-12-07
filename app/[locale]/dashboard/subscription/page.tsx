@@ -157,14 +157,24 @@ export default function SubscriptionPage() {
             <Calendar className="h-5 w-5" />
             {t('subscription.usage.title', { defaultValue: 'Current Usage' })}
           </CardTitle>
-          <CardDescription>
-            {t('subscription.usage.description', {
-              defaultValue: 'Your cycle renews on the'
-            })} {new Date(usage.cycle.end).toLocaleDateString(locale, {
-              day: 'numeric',
-              month: 'long'
-            })} ({usage.cycle.daysUntilReset} {usage.cycle.daysUntilReset === 1 ? t('subscription.usage.day', { defaultValue: 'day' }) : t('subscription.usage.days', { defaultValue: 'days' })})
-          </CardDescription>
+          {/* Solo mostrar ciclo de renovación para planes de pago */}
+          {(currentTier === "plus" || currentTier === "admin") && (
+            <CardDescription>
+              {t('subscription.usage.description', {
+                defaultValue: 'Your cycle renews on the'
+              })} {new Date(usage.cycle.end).toLocaleDateString(locale, {
+                day: 'numeric',
+                month: 'long'
+              })} ({usage.cycle.daysUntilReset} {usage.cycle.daysUntilReset === 1 ? t('subscription.usage.day', { defaultValue: 'day' }) : t('subscription.usage.days', { defaultValue: 'days' })})
+            </CardDescription>
+          )}
+          {currentTier === "free" && (
+            <CardDescription>
+              {t('subscription.usage.freeDescription', {
+                defaultValue: 'Your monthly usage limits reset automatically each month'
+              })}
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent className="space-y-6">
           <UsageIndicator

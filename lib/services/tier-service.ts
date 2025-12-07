@@ -259,6 +259,24 @@ export class TierService {
               })
               .eq('id', profesorId);
 
+            // Resetear usage para el nuevo ciclo free
+            const newCycleStart = new Date();
+            const newCycleEnd = new Date();
+            newCycleEnd.setMonth(newCycleEnd.getMonth() + 1);
+            
+            await supabase
+              .from('usage_tracking')
+              .upsert({
+                profesor_id: profesorId,
+                month_year: `${newCycleStart.getFullYear()}-${String(newCycleStart.getMonth() + 1).padStart(2, '0')}`,
+                ai_generations_used: 0,
+                scans_used: 0,
+                cycle_start_date: newCycleStart.toISOString().split('T')[0],
+                cycle_end_date: newCycleEnd.toISOString().split('T')[0],
+              }, {
+                onConflict: 'profesor_id,month_year',
+              });
+
             tier = 'free';
             subscriptionStatus = 'expired';
           }

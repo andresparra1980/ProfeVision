@@ -39,6 +39,7 @@
     "usage": {
       "title": "Uso Actual",
       "description": "Tu ciclo se renueva el",
+      "freeDescription": "Tus límites de uso mensual se reinician automáticamente cada mes",
       "day": "día",
       "days": "días",
       "aiGenerations": "Generaciones con IA",

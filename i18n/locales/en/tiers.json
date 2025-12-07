@@ -37,6 +37,7 @@
     "usage": {
       "title": "Current Usage",
       "description": "Your cycle renews on the",
+      "freeDescription": "Your monthly usage limits reset automatically each month",
       "day": "day",
       "days": "days",
       "aiGenerations": "AI Generations",
