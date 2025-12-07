@@ -12,6 +12,16 @@
       "title": "Founders Plan",
       "description": "Thank you for being one of ProfeVision's first users! Your invaluable support helps us turn a dream into a service that will help teachers take back control of their time and save them tedious hours grading exams manually. For now, you can use all features without limits. For any questions, requests, or suggestions, write to us at founders@profevision.com"
     },
+    "cancelled": {
+      "title": "Subscription Cancelled",
+      "description": "Your subscription has been cancelled. You will maintain access to Plus features until"
+    },
+    "manage": {
+      "title": "Manage Subscription",
+      "description": "View invoices, update payment method, or cancel your subscription",
+      "descriptionCancelled": "View invoices or reactivate your subscription",
+      "button": "Go to Customer Portal"
+    },
     "plus": {
       "title": "Plus Plan",
       "description": "Premium plan with unlimited access to all ProfeVision features."
@@ -54,6 +64,8 @@
   "pricing": {
     "comingSoon": "Coming Soon",
     "comingSoonDesc": "Payment functionality will be available soon. Stay tuned!",
+    "upgradeSuccess": "Welcome to Plus!",
+    "upgradeSuccessDesc": "Your subscription has been activated. Enjoy unlimited features!",
     "free": {
       "name": "Free",
       "description": "Perfect for getting started with the basics",
