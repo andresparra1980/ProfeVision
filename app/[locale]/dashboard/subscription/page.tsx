@@ -6,22 +6,63 @@ import { UsageIndicator } from "@/components/shared/usage-indicator";
 import { PricingCard } from "@/components/shared/pricing-card";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { SubscriptionPageSkeleton } from "./components/SubscriptionPageSkeleton";
-import { AlertTriangle, Calendar, HelpCircle } from "lucide-react";
+import { AlertTriangle, Calendar, HelpCircle, ExternalLink } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
 import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase/client";
 
 export default function SubscriptionPage() {
   const t = useTranslations('tiers');
   const locale = useLocale();
-  const { usage, loading } = useTierLimits();
+  const { usage, loading, refetch } = useTierLimits();
+  const searchParams = useSearchParams();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Obtener email del usuario para el checkout
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    };
+    getUser();
+  }, []);
+
+  // Mostrar toast si viene de un upgrade exitoso
+  useEffect(() => {
+    if (searchParams.get("upgraded") === "true") {
+      toast.success(t("pricing.upgradeSuccess", { defaultValue: "Welcome to Plus!" }), {
+        description: t("pricing.upgradeSuccessDesc", { defaultValue: "Your subscription has been activated. Enjoy unlimited features!" }),
+      });
+      // Refrescar datos de uso
+      refetch();
+      // Limpiar URL
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [searchParams, t, refetch]);
 
   const handleUpgrade = () => {
-    toast.info(t("pricing.comingSoon", { defaultValue: "Coming Soon" }), {
-      description: t("pricing.comingSoonDesc", { defaultValue: "Payment functionality will be available soon. Stay tuned!" }),
-    });
+    if (!userEmail) {
+      toast.error("Error", { description: "No se pudo obtener tu email" });
+      return;
+    }
+    
+    // Redirigir al checkout de Polar con el producto mensual
+    const productId = process.env.NEXT_PUBLIC_POLAR_PRODUCT_ID_MONTHLY;
+    const checkoutUrl = `/api/polar/checkout?products=${productId}&customerEmail=${encodeURIComponent(userEmail)}`;
+    window.location.href = checkoutUrl;
+  };
+
+  const handleManageSubscription = () => {
+    // Redirigir al portal de cliente de Polar
+    window.location.href = "/api/polar/portal";
   };
 
   const isGrandfathered = usage?.tier.name === "grandfathered";
@@ -50,6 +91,26 @@ export default function SubscriptionPage() {
         </div>
       ) : (
         <>
+
+      {/* Botón gestionar suscripción para usuarios Plus */}
+      {currentTier === "plus" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {t('subscription.manage.title', { defaultValue: 'Manage Subscription' })}
+            </CardTitle>
+            <CardDescription>
+              {t('subscription.manage.description', { defaultValue: 'View invoices, update payment method, or cancel your subscription' })}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleManageSubscription} variant="outline" className="gap-2">
+              <ExternalLink className="h-4 w-4" />
+              {t('subscription.manage.button', { defaultValue: 'Go to Customer Portal' })}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Warning para usuarios grandfathered */}
       {isGrandfathered && (
