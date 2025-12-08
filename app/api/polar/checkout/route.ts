@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getPolarEndpoint } from "@/lib/polar/config";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Crear checkout session via Polar API
-  const response = await fetch("https://sandbox-api.polar.sh/v1/checkouts/custom/", {
+  const response = await fetch(getPolarEndpoint("checkouts"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

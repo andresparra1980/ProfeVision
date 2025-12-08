@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getPolarEndpoint } from "@/lib/polar/config";
 
 export async function GET() {
   // Obtener usuario autenticado
@@ -22,7 +23,7 @@ export async function GET() {
   }
 
   // Crear customer session via Polar API
-  const response = await fetch("https://sandbox-api.polar.sh/v1/customer-sessions/", {
+  const response = await fetch(getPolarEndpoint("customerSessions"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

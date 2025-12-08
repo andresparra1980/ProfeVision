@@ -2,6 +2,11 @@ import { Webhooks } from "@polar-sh/nextjs";
 import { createClient } from "@supabase/supabase-js";
 import logger from "@/lib/utils/logger";
 
+// Validar que el webhook secret está configurado
+if (!process.env.POLAR_WEBHOOK_SECRET) {
+  logger.error("POLAR_WEBHOOK_SECRET no está configurado");
+}
+
 // Cliente admin para bypassear RLS
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -141,7 +146,25 @@ export const POST = Webhooks({
   },
 
   onSubscriptionUpdated: async (payload) => {
-    logger.log("subscription.updated recibido:", payload.data.id);
-    // Manejar cambios de plan si es necesario en el futuro
+    const subscription = payload.data;
+    logger.log("subscription.updated recibido:", {
+      id: subscription.id,
+      status: subscription.status,
+      customerId: subscription.customer?.id,
+      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+    });
+    
+    // Si la suscripción se marcó para cancelar al final del periodo
+    if (subscription.cancelAtPeriodEnd) {
+      const metadata = subscription.metadata as Record<string, string> | undefined;
+      const profesorId = await getProfesorId(metadata, subscription.customer?.id);
+      
+      if (profesorId) {
+        await updateProfesorSubscription(profesorId, {
+          subscription_status: "cancelled",
+        });
+        logger.log(`Suscripción marcada para cancelar: ${profesorId}`);
+      }
+    }
   },
 });
