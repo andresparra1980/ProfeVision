@@ -70,6 +70,16 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Cache opencv.js for 1 year (it's versioned and rarely changes)
+        source: '/opencv.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
         // Prevent caching of HTML or anything else
         source:
           '/((?!_next/static|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)).*)',

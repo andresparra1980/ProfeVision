@@ -1,8 +1,14 @@
-import { useState, useRef } from "react";
+'use client';
+
+import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, ArrowRight, RotateCcw } from "lucide-react";
 import { useTranslations } from 'next-intl';
 import Image from "next/image";
+import { DocumentCapture, type CaptureResult } from '../document-capture';
+
+// Feature flag for experimental auto-capture
+const EXPERIMENTAL_AUTO_CAM = process.env.NEXT_PUBLIC_EXPERIMENTAL_AUTO_CAM === 'true';
 
 interface ImageCaptureProps {
   onCapture: (_file: File) => void;
@@ -15,6 +21,7 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
   const t = useTranslations('wizard-step-image-capture');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [_isLoading, setIsLoading] = useState(false);
+  const [showAutoCapture, setShowAutoCapture] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -29,50 +36,112 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
     fileInputRef.current?.click();
   };
 
+  // Handle auto-capture result (converts Blob to File)
+  const handleAutoCapture = useCallback((result: CaptureResult) => {
+    try {
+      const file = new File([result.blob], `exam-${result.timestamp}.jpg`, {
+        type: 'image/jpeg',
+        lastModified: result.timestamp,
+      });
+      setShowAutoCapture(false);
+      onCapture(file);
+    } catch (err) {
+      console.error('Error creating file from blob:', err);
+      // Fallback: create File without lastModified (Safari compatibility)
+      const file = new File([result.blob], `exam-${result.timestamp}.jpg`, {
+        type: 'image/jpeg',
+      });
+      setShowAutoCapture(false);
+      onCapture(file);
+    }
+  }, [onCapture]);
+
+  const handleAutoCaptureError = useCallback((error: Error) => {
+    console.error('Auto capture error:', error);
+    // Show error in UI for mobile debugging
+    alert(`Capture error: ${error.message}`);
+    setShowAutoCapture(false);
+  }, []);
+
+  const handleAutoCaptureCancel = useCallback(() => {
+    setShowAutoCapture(false);
+  }, []);
+
+  // Start auto-capture mode
+  const startAutoCapture = () => {
+    setShowAutoCapture(true);
+  };
+
   return (
     <div className="space-y-6 p-4">
       <h2 className="text-2xl font-bold text-center">{t('title')}</h2>
       
       {!capturedImage ? (
         <>
-          <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-            <div className="flex flex-col items-center justify-center space-y-2">
-              <Camera className="w-12 h-12 text-gray-400" />
-              <div className="text-gray-500 text-sm">
-                <p className="mb-1">{t('capture.instruction')}</p>
-                <p className="text-xs">{t('capture.subInstruction')}</p>
-              </div>
-              <Button 
-                onClick={triggerFileInput}
-                className="mt-2 bg-primary flex items-center gap-2"
-              >
-                <Camera className="w-4 h-4" />
-                {t('capture.button')}
-              </Button>
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                accept="image/*"
-                capture="environment"
-                onChange={handleFileChange}
-                className="hidden"
+          {/* Auto-capture mode (experimental) */}
+          {EXPERIMENTAL_AUTO_CAM && showAutoCapture ? (
+            <div className="bg-gray-100 border border-gray-200 rounded-lg overflow-hidden">
+              <DocumentCapture
+                onCapture={handleAutoCapture}
+                onError={handleAutoCaptureError}
+                onCancel={handleAutoCaptureCancel}
+                showManualCapture={true}
               />
-              <p className="text-xs text-gray-500 mt-2">
-                {t('capture.description')}
-              </p>
             </div>
-          </div>
-          
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h3 className="font-semibold text-blue-800 mb-2">{t('suggestions.title')}</h3>
-            <ul className="space-y-1 text-blue-700 list-disc pl-5 text-sm">
-              <li>{t('suggestions.tips.0')}</li>
-              <li>{t('suggestions.tips.1')}</li>
-              <li>{t('suggestions.tips.2')}</li>
-              <li>{t('suggestions.tips.3')}</li>
-              <li>{t('suggestions.tips.4')}</li>
-            </ul>
-          </div>
+          ) : (
+            <>
+              <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <div className="flex flex-col items-center justify-center space-y-2">
+                  <Camera className="w-12 h-12 text-gray-400" />
+                  <div className="text-gray-500 text-sm">
+                    <p className="mb-1">{t('capture.instruction')}</p>
+                    <p className="text-xs">{t('capture.subInstruction')}</p>
+                  </div>
+                  
+                  {EXPERIMENTAL_AUTO_CAM ? (
+                    <Button 
+                      onClick={startAutoCapture}
+                      className="mt-2 bg-primary flex items-center gap-2"
+                    >
+                      <Camera className="w-4 h-4" />
+                      {t('capture.button')}
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={triggerFileInput}
+                      className="mt-2 bg-primary flex items-center gap-2"
+                    >
+                      <Camera className="w-4 h-4" />
+                      {t('capture.button')}
+                    </Button>
+                  )}
+                  
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    {t('capture.description')}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h3 className="font-semibold text-blue-800 mb-2">{t('suggestions.title')}</h3>
+                <ul className="space-y-1 text-blue-700 list-disc pl-5 text-sm">
+                  <li>{t('suggestions.tips.0')}</li>
+                  <li>{t('suggestions.tips.1')}</li>
+                  <li>{t('suggestions.tips.2')}</li>
+                  <li>{t('suggestions.tips.3')}</li>
+                  <li>{t('suggestions.tips.4')}</li>
+                </ul>
+              </div>
+            </>
+          )}
         </>
       ) : (
         <div className="space-y-4">
@@ -110,4 +179,4 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
       )}
     </div>
   );
-} 
+}

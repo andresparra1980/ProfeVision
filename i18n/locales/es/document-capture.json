@@ -1,0 +1,14 @@
+{
+  "status": {
+    "loading": "Cargando...",
+    "requestingCamera": "Solicitando cámara...",
+    "searching": "Buscando documento...",
+    "holdStill": "Mantén estable...",
+    "capturing": "Capturando...",
+    "captured": "Capturado"
+  },
+  "buttons": {
+    "capture": "Capturar",
+    "cancel": "Cancelar"
+  }
+}
