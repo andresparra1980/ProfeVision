@@ -6,26 +6,88 @@ import { UsageIndicator } from "@/components/shared/usage-indicator";
 import { PricingCard } from "@/components/shared/pricing-card";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { SubscriptionPageSkeleton } from "./components/SubscriptionPageSkeleton";
-import { AlertTriangle, Calendar, HelpCircle } from "lucide-react";
+import { AlertTriangle, Calendar, HelpCircle, ExternalLink } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
 import { TitleCardWithDepth } from "@/components/shared/title-card-with-depth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase/client";
 
 export default function SubscriptionPage() {
   const t = useTranslations('tiers');
   const locale = useLocale();
-  const { usage, loading } = useTierLimits();
+  const { usage, loading, refetch } = useTierLimits();
+  const searchParams = useSearchParams();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Obtener email del usuario para el checkout
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    };
+    getUser();
+  }, []);
+
+  // Mostrar toast si viene de un upgrade exitoso y hacer polling hasta que se refleje el cambio
+  useEffect(() => {
+    if (searchParams.get("upgraded") === "true") {
+      toast.success(t("pricing.upgradeSuccess", { defaultValue: "Welcome to Plus!" }), {
+        description: t("pricing.upgradeSuccessDesc", { defaultValue: "Your subscription has been activated. Enjoy unlimited features!" }),
+      });
+      
+      // Polling: reintentar refetch hasta que el tier sea "plus" (máx 5 intentos)
+      let attempts = 0;
+      const maxAttempts = 5;
+      const pollInterval = setInterval(() => {
+        attempts++;
+        refetch();
+        if (attempts >= maxAttempts) {
+          clearInterval(pollInterval);
+        }
+      }, 1500);
+      
+      // Limpiar URL
+      window.history.replaceState({}, "", window.location.pathname);
+      
+      return () => clearInterval(pollInterval);
+    }
+  }, [searchParams, t, refetch]);
+  
+
 
   const handleUpgrade = () => {
-    toast.info(t("pricing.comingSoon", { defaultValue: "Coming Soon" }), {
-      description: t("pricing.comingSoonDesc", { defaultValue: "Payment functionality will be available soon. Stay tuned!" }),
-    });
+    if (!userEmail) {
+      toast.error("Error", { description: "No se pudo obtener tu email" });
+      return;
+    }
+    
+    // Redirigir al checkout de Polar con el producto mensual
+    const productId = process.env.NEXT_PUBLIC_POLAR_PRODUCT_ID_MONTHLY;
+    const checkoutUrl = `/api/polar/checkout?products=${productId}&customerEmail=${encodeURIComponent(userEmail)}`;
+    window.location.href = checkoutUrl;
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      const response = await fetch("/api/polar/portal");
+      if (!response.ok) throw new Error("Error al obtener portal");
+      const { url } = await response.json();
+      window.open(url, "_blank");
+    } catch {
+      toast.error("Error", { description: "No se pudo abrir el portal de suscripción" });
+    }
   };
 
   const isGrandfathered = usage?.tier.name === "grandfathered";
   const currentTier = (usage?.tier.name || "free") as SubscriptionTier;
+  const isCancelled = usage?.subscription_status === "cancelled";
 
   return (
     <div className="space-y-6">
@@ -51,6 +113,48 @@ export default function SubscriptionPage() {
       ) : (
         <>
 
+      {/* Aviso de suscripción cancelada */}
+      {isCancelled && currentTier === "plus" && (
+        <Alert className="border-orange-500 bg-orange-50 dark:bg-orange-900/20">
+          <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+          <AlertTitle className="text-orange-800 dark:text-orange-200">
+            {t('subscription.cancelled.title', { defaultValue: 'Subscription Cancelled' })}
+          </AlertTitle>
+          <AlertDescription className="text-orange-700 dark:text-orange-300">
+            {t('subscription.cancelled.description', {
+              defaultValue: 'Your subscription has been cancelled. You will maintain access to Plus features until'
+            })} {new Date(usage.cycle.end).toLocaleDateString(locale, {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            })}.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Botón gestionar suscripción para usuarios Plus */}
+      {currentTier === "plus" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {t('subscription.manage.title', { defaultValue: 'Manage Subscription' })}
+            </CardTitle>
+            <CardDescription>
+              {isCancelled 
+                ? t('subscription.manage.descriptionCancelled', { defaultValue: 'View invoices or reactivate your subscription' })
+                : t('subscription.manage.description', { defaultValue: 'View invoices, update payment method, or cancel your subscription' })
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleManageSubscription} variant="outline" className="gap-2">
+              <ExternalLink className="h-4 w-4" />
+              {t('subscription.manage.button', { defaultValue: 'Go to Customer Portal' })}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Warning para usuarios grandfathered */}
       {isGrandfathered && (
         <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-900/20">
@@ -73,14 +177,24 @@ export default function SubscriptionPage() {
             <Calendar className="h-5 w-5" />
             {t('subscription.usage.title', { defaultValue: 'Current Usage' })}
           </CardTitle>
-          <CardDescription>
-            {t('subscription.usage.description', {
-              defaultValue: 'Your cycle renews on the'
-            })} {new Date(usage.cycle.end).toLocaleDateString(locale, {
-              day: 'numeric',
-              month: 'long'
-            })} ({usage.cycle.daysUntilReset} {usage.cycle.daysUntilReset === 1 ? t('subscription.usage.day', { defaultValue: 'day' }) : t('subscription.usage.days', { defaultValue: 'days' })})
-          </CardDescription>
+          {/* Solo mostrar ciclo de renovación para planes de pago */}
+          {(currentTier === "plus" || currentTier === "admin") && (
+            <CardDescription>
+              {t('subscription.usage.description', {
+                defaultValue: 'Your cycle renews on the'
+              })} {new Date(usage.cycle.end).toLocaleDateString(locale, {
+                day: 'numeric',
+                month: 'long'
+              })} ({usage.cycle.daysUntilReset} {usage.cycle.daysUntilReset === 1 ? t('subscription.usage.day', { defaultValue: 'day' }) : t('subscription.usage.days', { defaultValue: 'days' })})
+            </CardDescription>
+          )}
+          {currentTier === "free" && (
+            <CardDescription>
+              {t('subscription.usage.freeDescription', {
+                defaultValue: 'Your monthly usage limits reset automatically each month'
+              })}
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent className="space-y-6">
           <UsageIndicator
@@ -106,6 +220,7 @@ export default function SubscriptionPage() {
             <PricingCard
               tier="free"
               isCurrentPlan={currentTier === "free"}
+              isDowngrade={currentTier === "plus"}
               onUpgrade={handleUpgrade}
             />
             <PricingCard

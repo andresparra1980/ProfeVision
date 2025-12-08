@@ -27,6 +27,7 @@ export interface TierLimits {
 
 export interface UsageStats {
   tier: SubscriptionTier;
+  subscription_status: SubscriptionStatus;
   ai_generation: {
     used: number;
     limit: number;
@@ -194,6 +195,32 @@ export class TierService {
   }
 
   /**
+   * Get the current subscription status for a professor
+   * @param supabase - Supabase client instance
+   * @param profesorId - The professor's UUID
+   * @returns Promise<SubscriptionStatus>
+   */
+  static async getSubscriptionStatus(supabase: SupabaseClient, profesorId: string): Promise<SubscriptionStatus> {
+    try {
+      const { data, error } = await supabase
+        .from('profesores')
+        .select('subscription_status')
+        .eq('id', profesorId)
+        .single();
+
+      if (error) {
+        logger.error('Error fetching subscription status:', error);
+        throw new Error(`Failed to fetch subscription status: ${error.message}`);
+      }
+
+      return (data?.subscription_status || 'active') as SubscriptionStatus;
+    } catch (error) {
+      logger.error('Error in getSubscriptionStatus:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get comprehensive usage statistics for a professor
    * @param supabase - Supabase client instance
    * @param profesorId - The professor's UUID
@@ -201,8 +228,60 @@ export class TierService {
    */
   static async getUsageStats(supabase: SupabaseClient, profesorId: string): Promise<UsageStats> {
     try {
-      // Get current tier
-      const tier = await this.getCurrentTier(supabase, profesorId);
+      // Get current tier and status
+      let tier = await this.getCurrentTier(supabase, profesorId);
+      let subscriptionStatus = await this.getSubscriptionStatus(supabase, profesorId);
+
+      // Fallback: verificar si suscripción cancelada ya expiró (en caso de webhook fallido)
+      if (subscriptionStatus === 'cancelled' && tier === 'plus') {
+        const { data: profesor } = await supabase
+          .from('profesores')
+          .select('subscription_cycle_start')
+          .eq('id', profesorId)
+          .single();
+
+        if (profesor?.subscription_cycle_start) {
+          const cycleStart = new Date(profesor.subscription_cycle_start);
+          const now = new Date();
+          // Si ya pasó más de ~30 días desde el inicio del ciclo, expiró
+          const daysSinceCycleStart = Math.floor((now.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (daysSinceCycleStart > 32) { // 32 días de gracia
+            logger.warn(`[TierService] Suscripción expirada detectada para profesor ${profesorId}, haciendo downgrade automático`);
+            
+            // Auto-downgrade
+            await supabase
+              .from('profesores')
+              .update({
+                subscription_tier: 'free',
+                subscription_status: 'expired',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', profesorId);
+
+            // Resetear usage para el nuevo ciclo free
+            const newCycleStart = new Date();
+            const newCycleEnd = new Date();
+            newCycleEnd.setMonth(newCycleEnd.getMonth() + 1);
+            
+            await supabase
+              .from('usage_tracking')
+              .upsert({
+                profesor_id: profesorId,
+                month_year: `${newCycleStart.getFullYear()}-${String(newCycleStart.getMonth() + 1).padStart(2, '0')}`,
+                ai_generations_used: 0,
+                scans_used: 0,
+                cycle_start_date: newCycleStart.toISOString().split('T')[0],
+                cycle_end_date: newCycleEnd.toISOString().split('T')[0],
+              }, {
+                onConflict: 'profesor_id,month_year',
+              });
+
+            tier = 'free';
+            subscriptionStatus = 'expired';
+          }
+        }
+      }
 
       // Get tier limits
       const limits = await this.getTierLimits(supabase, tier);
@@ -236,6 +315,7 @@ export class TierService {
 
       return {
         tier,
+        subscription_status: subscriptionStatus,
         ai_generation: {
           used: aiUsed,
           limit: limits.ai_generations_per_month,

@@ -43,7 +43,6 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations('dashboard');
-  const tTiers = useTranslations('tiers');
   const locale = useLocale();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -169,7 +168,7 @@ export default function DashboardLayout({
             </div>
           </main>
         </div>
-        <ScanExamFeature />
+        <ScanExamFeature hideForWelcome={showWelcome} />
 
         {/* Welcome Modal para primer login */}
         <WelcomeTierModal
@@ -177,14 +176,11 @@ export default function DashboardLayout({
           onOpenChange={setShowWelcome}
           onComplete={() => {
             setShowWelcome(false);
-            toast.success(tTiers('welcome.success', { defaultValue: 'Welcome to ProfeVision!' }), {
-              description: tTiers('welcome.successDesc', { defaultValue: 'Your account has been set up successfully.' }),
-            });
           }}
         />
 
-        {/* Onboarding Wizard para nuevos usuarios */}
-        <OnboardingWizard />
+        {/* Onboarding Wizard para nuevos usuarios (espera a que termine Welcome) */}
+        <OnboardingWizard waitForWelcome={showWelcome} />
 
         {/* Checklist para tracking de progreso */}
         <OnboardingChecklist />

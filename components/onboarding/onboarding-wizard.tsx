@@ -57,7 +57,11 @@ export interface WizardData {
 
 const TOTAL_STEPS = 6;
 
-export function OnboardingWizard() {
+interface OnboardingWizardProps {
+  waitForWelcome?: boolean;
+}
+
+export function OnboardingWizard({ waitForWelcome = false }: OnboardingWizardProps) {
   const t = useTranslations("onboarding");
   const { shouldShowWizard, completeWizardStep, onboardingStatus } = useOnboarding();
   
@@ -160,14 +164,15 @@ export function OnboardingWizard() {
     }
   };
 
-  if (!shouldShowWizard) {
+  // No mostrar si welcome modal está activo (esperar a que termine)
+  if (!shouldShowWizard || waitForWelcome) {
     return null;
   }
 
   return (
     <Dialog open={shouldShowWizard}>
       <DialogContent 
-        className="max-w-2xl max-h-[90vh] overflow-hidden p-0 md:max-w-2xl md:max-h-[90vh] max-md:!fixed max-md:!inset-0 max-md:!translate-x-0 max-md:!translate-y-0 max-md:!top-0 max-md:!left-0 max-md:w-screen max-md:h-[100dvh] max-md:max-w-none max-md:max-h-none max-md:rounded-none max-md:border-0 max-md:!z-[10000] max-md:flex max-md:flex-col" 
+        className="max-w-2xl max-h-[90vh] overflow-hidden p-0 md:max-w-2xl md:max-h-[90vh] max-md:!fixed max-md:!inset-0 max-md:!translate-x-0 max-md:!translate-y-0 max-md:!top-0 max-md:!left-0 max-md:w-screen max-md:h-[100dvh] max-md:max-w-none max-md:max-h-none max-md:rounded-none max-md:border-0 max-md:!z-50 max-md:flex max-md:flex-col" 
         hideCloseButton
         onCloseAutoFocus={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}

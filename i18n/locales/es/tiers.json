@@ -12,6 +12,16 @@
       "title": "Plan Fundador",
       "description": "¡Gracias por ser parte de los primeros usuarios de ProfeVision! Tu invaluable apoyo nos ayuda a convertir un sueño en un servicio que ayudará a los profesores a retomar el control de su tiempo y ahorrarles tediosas horas calificando manualmente exámenes. Por ahora, puedes usar todas las funciones sin límites. Para cualquier duda, solicitud o sugerencia, escríbenos a fundadores@profevision.com"
     },
+    "cancelled": {
+      "title": "Suscripción Cancelada",
+      "description": "Tu suscripción ha sido cancelada. Mantendrás acceso a las funciones Plus hasta el"
+    },
+    "manage": {
+      "title": "Gestionar Suscripción",
+      "description": "Ver facturas, actualizar método de pago o cancelar tu suscripción",
+      "descriptionCancelled": "Ver facturas o reactivar tu suscripción",
+      "button": "Ir al Portal de Cliente"
+    },
     "plus": {
       "title": "Plan Plus",
       "description": "Plan premium con acceso ilimitado a todas las funciones de ProfeVision."
@@ -29,6 +39,7 @@
     "usage": {
       "title": "Uso Actual",
       "description": "Tu ciclo se renueva el",
+      "freeDescription": "Tus límites de uso mensual se reinician automáticamente cada mes",
       "day": "día",
       "days": "días",
       "aiGenerations": "Generaciones con IA",
@@ -56,11 +67,13 @@
   "pricing": {
     "comingSoon": "Próximamente disponible",
     "comingSoonDesc": "La funcionalidad de pago estará disponible pronto. ¡Mantente atento!",
+    "upgradeSuccess": "¡Bienvenido a Plus!",
+    "upgradeSuccessDesc": "Tu suscripción ha sido activada. ¡Disfruta de funciones ilimitadas!",
     "free": {
       "name": "Free",
       "description": "Perfecto para empezar con lo básico",
       "features": {
-        "aiGenerations": "1 generación de examen con IA por mes",
+        "aiGenerations": "10 créditos para generación con IA por mes",
         "scans": "50 escaneos de exámenes por mes",
         "students": "Hasta 100 estudiantes",
         "groups": "Hasta 5 grupos",
@@ -97,7 +110,8 @@
     "actions": {
       "startFree": "Comenzar gratis",
       "upgradePlus": "Actualizar a Plus",
-      "currentPlan": "Plan actual"
+      "currentPlan": "Plan actual",
+      "downgradeToFree": "Cambiar a Free"
     }
   },
   "welcome": {

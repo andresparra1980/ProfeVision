@@ -77,8 +77,9 @@ export async function middleware(request: NextRequest) {
   // 🌍 Redirigir cualquier ruta NO localizada al defaultLocale
   const hasLocalePrefix = supportedLocales.some((l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`));
   if (!hasLocalePrefix) {
-    const redirectUrl = new URL(`/${defaultLocale}${pathname}`, request.url);
-    console.log(`[Middleware] Redirecting non-localized path '${pathname}' to default locale: ${redirectUrl.pathname}`);
+    const redirectUrl = new URL(request.url);
+    redirectUrl.pathname = `/${defaultLocale}${pathname}`;
+    console.log(`[Middleware] Redirecting non-localized path '${pathname}' to default locale: ${redirectUrl.pathname}${redirectUrl.search}`);
     return NextResponse.redirect(redirectUrl);
   }
 

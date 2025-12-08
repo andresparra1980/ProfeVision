@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { FloatingActionButton } from '../ui/floating-action-button';
 import { ScanWizard } from './scan-wizard';
 
-export function ScanExamFeature() {
+interface ScanExamFeatureProps {
+  hideForWelcome?: boolean;
+}
+
+export function ScanExamFeature({ hideForWelcome = false }: ScanExamFeatureProps) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const openWizard = () => {
@@ -15,7 +19,7 @@ export function ScanExamFeature() {
 
   return (
     <>
-      {!isWizardOpen && <FloatingActionButton onClick={openWizard} />}
+      {!isWizardOpen && <FloatingActionButton onClick={openWizard} hideForWelcome={hideForWelcome} />}
       <ScanWizard isOpen={isWizardOpen} onClose={closeWizard} />
     </>
   );

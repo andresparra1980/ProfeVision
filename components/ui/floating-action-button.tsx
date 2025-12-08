@@ -3,15 +3,18 @@
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/sidebar-context';
+import { useOnboarding } from '@/lib/contexts/onboarding-context';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 
 interface FloatingActionButtonProps {
   onClick: () => void;
+  hideForWelcome?: boolean;
 }
 
-export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
+export function FloatingActionButton({ onClick, hideForWelcome = false }: FloatingActionButtonProps) {
   const { isOpen } = useSidebar();
+  const { shouldShowWizard } = useOnboarding();
   const t = useTranslations('floating-action-button');
   const pathname = usePathname();
 
@@ -35,9 +38,14 @@ export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
     return null;
   }
 
+  // Ocultar durante onboarding wizard o welcome modal
+  if (shouldShowWizard || hideForWelcome) {
+    return null;
+  }
+
   return (
     // Bottom bar fija para mobile, oculta en desktop
-    <div className="fixed bottom-0 left-0 w-full bg-background/50 backdrop-blur-sm border-t border-border shadow-lg md:hidden z-[9999]">
+    <div className="fixed bottom-0 left-0 w-full bg-background/50 backdrop-blur-sm border-t border-border shadow-lg md:hidden z-40">
       <div className="flex justify-center py-4 px-4 safe-area-pb">
         <Button
           onClick={onClick}
