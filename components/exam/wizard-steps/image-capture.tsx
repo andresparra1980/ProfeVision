@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, ArrowRight, RotateCcw } from "lucide-react";
 import { useTranslations } from 'next-intl';
 import Image from "next/image";
 import { DocumentCapture, type CaptureResult } from '../document-capture';
-import { supabase } from '@/lib/supabase/client';
 
 // Feature flag for experimental auto-capture
 const EXPERIMENTAL_AUTO_CAM = process.env.NEXT_PUBLIC_EXPERIMENTAL_AUTO_CAM === 'true';
@@ -23,38 +22,6 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [_isLoading, setIsLoading] = useState(false);
   const [showAutoCapture, setShowAutoCapture] = useState(false);
-  const [userExamIds, setUserExamIds] = useState<Set<string>>(new Set());
-
-  // Fetch user's exam IDs for QR validation
-  useEffect(() => {
-    if (!EXPERIMENTAL_AUTO_CAM) return;
-    
-    async function fetchUserExamIds() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user?.id) return;
-        
-        const { data, error } = await supabase
-          .from('examenes')
-          .select('id')
-          .eq('user_id', session.user.id);
-        
-        if (error) {
-          console.error('Error fetching exam IDs:', error);
-          return;
-        }
-        
-        if (data) {
-          setUserExamIds(new Set(data.map((e: { id: string }) => e.id)));
-          console.log('[ImageCapture] Loaded', data.length, 'exam IDs for validation');
-        }
-      } catch (err) {
-        console.error('Error fetching exam IDs:', err);
-      }
-    }
-    
-    fetchUserExamIds();
-  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -122,7 +89,6 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
                 onError={handleAutoCaptureError}
                 onCancel={handleAutoCaptureCancel}
                 showManualCapture={true}
-                userExamIds={userExamIds}
               />
             </div>
           ) : (

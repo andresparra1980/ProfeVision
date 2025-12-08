@@ -118,8 +118,6 @@ export function DocumentCapture({
   onCancel,
   className = '',
   showManualCapture = true,
-  userExamIds,
-  skipQrValidation = false,
 }: DocumentCaptureProps) {
   const t = useTranslations('document-capture');
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -141,14 +139,12 @@ export function DocumentCapture({
   const onCaptureRef = useRef(onCapture);
   const onErrorRef = useRef(onError);
   const onStatusChangeRef = useRef(onStatusChange);
-  const userExamIdsRef = useRef(userExamIds);
   
   useEffect(() => {
     onCaptureRef.current = onCapture;
     onErrorRef.current = onError;
     onStatusChangeRef.current = onStatusChange;
-    userExamIdsRef.current = userExamIds;
-  }, [onCapture, onError, onStatusChange, userExamIds]);
+  }, [onCapture, onError, onStatusChange]);
 
   // Update status with callback
   const updateStatus = useCallback((newStatus: CaptureStatus, message: string) => {
@@ -233,18 +229,9 @@ export function DocumentCapture({
       return { valid: false, qrData: null, reason: 'invalid_format' };
     }
     
-    // Skip validation if flag is set or no examIds provided
-    if (skipQrValidation || !userExamIdsRef.current || userExamIdsRef.current.size === 0) {
-      return { valid: true, qrData };
-    }
-    
-    // Validate examId belongs to user
-    if (!userExamIdsRef.current.has(qrData.examId)) {
-      return { valid: false, qrData, reason: 'wrong_exam' };
-    }
-    
+    // Validation disabled - just check QR was parsed correctly
     return { valid: true, qrData };
-  }, [skipQrValidation]);
+  }, []);
 
   // Capture photo (with QR data)
   const capturePhoto = useCallback(async (qrData?: ParsedQRData | null) => {
@@ -356,17 +343,9 @@ export function DocumentCapture({
       return;
     }
     
-    // Validate if we have examIds
-    if (!skipQrValidation && userExamIdsRef.current && userExamIdsRef.current.size > 0) {
-      if (!userExamIdsRef.current.has(qrData.examId)) {
-        alert(t('status.wrongExam'));
-        return;
-      }
-    }
-    
     // Valid - capture
     capturePhoto(qrData);
-  }, [captured, capturePhoto, skipQrValidation, t]);
+  }, [captured, capturePhoto, t]);
 
   // Check stability and QR for auto-capture
   const checkStabilityAndQR = useCallback((contour: { area: number }, sharpness: number) => {
@@ -392,16 +371,12 @@ export function DocumentCapture({
       // Stable enough - try to detect QR
       updateStatus('searching_qr', t('status.searchingQr'));
       
-      const { valid, qrData, reason } = detectAndValidateQR();
+      const { valid, qrData } = detectAndValidateQR();
       
       if (valid && qrData) {
         // Success - capture with QR data
         lastQrDataRef.current = qrData;
         capturePhoto(qrData);
-      } else if (reason === 'wrong_exam') {
-        // QR detected but wrong professor
-        updateStatus('wrong_exam', t('status.wrongExam'));
-        noQrFrameCountRef.current = 0;
       } else {
         // No QR found
         noQrFrameCountRef.current++;
@@ -581,7 +556,6 @@ export function DocumentCapture({
       case 'searching_qr':
         return 'text-green-500';
       case 'error':
-      case 'wrong_exam':
       case 'no_qr':
         return 'text-red-500';
       case 'detecting':
@@ -627,7 +601,7 @@ export function DocumentCapture({
         
         {/* QR indicator in top-left */}
         {(status === 'searching_qr' || status === 'stable') && (
-          <div className="absolute top-4 left-4 w-16 h-16 border-2 border-green-500/70 rounded pointer-events-none animate-pulse" />
+          <div className="absolute top-4 left-4 w-32 h-32 border-2 border-green-500/70 rounded pointer-events-none animate-pulse" />
         )}
       </div>
 

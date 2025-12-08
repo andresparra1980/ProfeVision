@@ -9,7 +9,6 @@ export type CaptureStatus =
   | 'stable'
   | 'searching_qr'
   | 'blurry'
-  | 'wrong_exam'
   | 'no_qr'
   | 'capturing'
   | 'captured'
@@ -38,10 +37,6 @@ export interface DocumentCaptureProps {
   onCancel?: () => void;
   className?: string;
   showManualCapture?: boolean;
-  /** Set of exam IDs owned by current user for validation */
-  userExamIds?: Set<string>;
-  /** Skip QR validation (for testing or fallback) */
-  skipQrValidation?: boolean;
 }
 
 // OpenCV types are declared globally via window.cv
