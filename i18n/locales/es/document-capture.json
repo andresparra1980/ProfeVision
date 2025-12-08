@@ -5,7 +5,11 @@
     "searching": "Buscando documento...",
     "holdStill": "Mantén estable...",
     "capturing": "Capturando...",
-    "captured": "Capturado"
+    "captured": "Capturado",
+    "searchingQr": "Buscando código QR...",
+    "blurry": "Imagen borrosa, mantén estable",
+    "noQr": "No se detecta código QR válido",
+    "wrongExam": "Este examen no corresponde a tu clase"
   },
   "buttons": {
     "capture": "Capturar",

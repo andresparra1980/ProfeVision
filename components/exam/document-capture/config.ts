@@ -30,6 +30,14 @@ export const DOCUMENT_CAPTURE_CONFIG = {
   // Portrait orientation for mobile (3:4 aspect ratio) - height > width
   idealWidth: 2880,
   idealHeight: 2160,
+
+  // QR Detection
+  qrRoiRatio: 0.5,          // 50% of frame for QR ROI (top-left quadrant)
+  qrWarningDelayMs: 2000,   // 2s before showing "no QR" warning
+  qrMaxAttempts: 10,        // 2000ms / 200ms = 10 frames
+
+  // Sharpness (Laplacian variance) - from OMR service calibration
+  sharpnessThreshold: 100,  // variance below this = blurry
 } as const;
 
 export type DocumentCaptureConfig = typeof DOCUMENT_CAPTURE_CONFIG;

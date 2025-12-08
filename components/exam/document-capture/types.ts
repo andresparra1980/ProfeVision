@@ -7,6 +7,10 @@ export type CaptureStatus =
   | 'ready'
   | 'detecting'
   | 'stable'
+  | 'searching_qr'
+  | 'blurry'
+  | 'wrong_exam'
+  | 'no_qr'
   | 'capturing'
   | 'captured'
   | 'error';
@@ -17,6 +21,14 @@ export interface CaptureResult {
   height: number;
   size: number;
   timestamp: number;
+  qrData?: ParsedQRData;
+}
+
+export interface ParsedQRData {
+  examId: string;
+  studentId: string;
+  groupId?: string;
+  hash?: string;
 }
 
 export interface DocumentCaptureProps {
@@ -26,6 +38,10 @@ export interface DocumentCaptureProps {
   onCancel?: () => void;
   className?: string;
   showManualCapture?: boolean;
+  /** Set of exam IDs owned by current user for validation */
+  userExamIds?: Set<string>;
+  /** Skip QR validation (for testing or fallback) */
+  skipQrValidation?: boolean;
 }
 
 // OpenCV types are declared globally via window.cv

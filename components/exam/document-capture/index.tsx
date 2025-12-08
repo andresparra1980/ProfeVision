@@ -4,15 +4,16 @@
  * DocumentCapture Component
  * 
  * Auto document capture using OpenCV.js with adaptive thresholding.
- * Optimized for exam sheets.
+ * Includes QR validation to ensure exam belongs to current user.
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Camera, X, Loader2 } from 'lucide-react';
+import jsQR from 'jsqr';
 import { DOCUMENT_CAPTURE_CONFIG } from './config';
-import type { DocumentCaptureProps, CaptureStatus, CaptureResult } from './types';
+import type { DocumentCaptureProps, CaptureStatus, CaptureResult, ParsedQRData } from './types';
 import { cn } from '@/lib/utils';
 
 // OpenCV.js loader
@@ -28,7 +29,6 @@ function loadOpenCV(): Promise<void> {
     }
     
     const script = document.createElement('script');
-    // Use absolute URL to avoid locale prefix issues
     script.src = `${window.location.origin}/opencv.js`;
     script.async = true;
     
@@ -49,6 +49,68 @@ function loadOpenCV(): Promise<void> {
 
 const CONFIG = DOCUMENT_CAPTURE_CONFIG;
 
+/**
+ * Parse QR data string: examId:studentId:groupId:hash or examId:studentId:hash
+ */
+function parseQRData(qrString: string): ParsedQRData | null {
+  if (!qrString) return null;
+  
+  const parts = qrString.split(':');
+  if (parts.length === 3) {
+    return { examId: parts[0], studentId: parts[1], hash: parts[2] };
+  }
+  if (parts.length === 4) {
+    return { examId: parts[0], studentId: parts[1], groupId: parts[2], hash: parts[3] };
+  }
+  return null;
+}
+
+/**
+ * Try to decode QR from a canvas region
+ */
+function decodeQRFromRegion(
+  canvas: HTMLCanvasElement,
+  x: number, y: number,
+  w: number, h: number
+): string | null {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return null;
+  
+  try {
+    const imageData = ctx.getImageData(x, y, w, h);
+    const qr = jsQR(imageData.data, w, h);
+    return qr?.data || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Search for QR in all quadrants (for manual capture fallback)
+ */
+function searchQRInAllQuadrants(canvas: HTMLCanvasElement): string | null {
+  const w = canvas.width;
+  const h = canvas.height;
+  const halfW = Math.floor(w / 2);
+  const halfH = Math.floor(h / 2);
+  
+  // Order: top-left, top-right, bottom-left, bottom-right, full image
+  const regions = [
+    { x: 0, y: 0, w: halfW, h: halfH },           // top-left
+    { x: halfW, y: 0, w: halfW, h: halfH },       // top-right
+    { x: 0, y: halfH, w: halfW, h: halfH },       // bottom-left
+    { x: halfW, y: halfH, w: halfW, h: halfH },   // bottom-right
+    { x: 0, y: 0, w, h },                          // full image
+  ];
+  
+  for (const region of regions) {
+    const qr = decodeQRFromRegion(canvas, region.x, region.y, region.w, region.h);
+    if (qr) return qr;
+  }
+  
+  return null;
+}
+
 export function DocumentCapture({
   onCapture,
   onError,
@@ -56,10 +118,13 @@ export function DocumentCapture({
   onCancel,
   className = '',
   showManualCapture = true,
+  userExamIds,
+  skipQrValidation = false,
 }: DocumentCaptureProps) {
   const t = useTranslations('document-capture');
   const videoRef = useRef<HTMLVideoElement>(null);
   const processingCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fullResCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
@@ -69,17 +134,21 @@ export function DocumentCapture({
   
   const lastContourRef = useRef<{ area: number } | null>(null);
   const stableStartTimeRef = useRef<number | null>(null);
+  const noQrFrameCountRef = useRef(0);
+  const lastQrDataRef = useRef<ParsedQRData | null>(null);
   
   // Store callbacks in refs to avoid dependency issues
   const onCaptureRef = useRef(onCapture);
   const onErrorRef = useRef(onError);
   const onStatusChangeRef = useRef(onStatusChange);
+  const userExamIdsRef = useRef(userExamIds);
   
   useEffect(() => {
     onCaptureRef.current = onCapture;
     onErrorRef.current = onError;
     onStatusChangeRef.current = onStatusChange;
-  }, [onCapture, onError, onStatusChange]);
+    userExamIdsRef.current = userExamIds;
+  }, [onCapture, onError, onStatusChange, userExamIds]);
 
   // Update status with callback
   const updateStatus = useCallback((newStatus: CaptureStatus, message: string) => {
@@ -100,8 +169,85 @@ export function DocumentCapture({
     }
   }, []);
 
-  // Capture photo
-  const capturePhoto = useCallback(async () => {
+  /**
+   * Check image sharpness using Laplacian variance
+   */
+  const checkSharpness = useCallback((gray: unknown): number => {
+    const cv = window.cv;
+    if (!cv) return 0;
+    
+    try {
+      const laplacian = new cv.Mat();
+      cv.Laplacian(gray, laplacian, cv.CV_64F);
+      
+      const mean = new cv.Mat();
+      const stddev = new cv.Mat();
+      cv.meanStdDev(laplacian, mean, stddev);
+      
+      const variance = Math.pow(stddev.data64F[0], 2);
+      
+      laplacian.delete();
+      mean.delete();
+      stddev.delete();
+      
+      return variance;
+    } catch {
+      return CONFIG.sharpnessThreshold + 1; // Assume sharp on error
+    }
+  }, []);
+
+  /**
+   * Try to detect and validate QR from full resolution frame
+   */
+  const detectAndValidateQR = useCallback((): { valid: boolean; qrData: ParsedQRData | null; reason?: string } => {
+    const video = videoRef.current;
+    if (!video) return { valid: false, qrData: null };
+    
+    // Create or reuse full res canvas
+    if (!fullResCanvasRef.current) {
+      fullResCanvasRef.current = document.createElement('canvas');
+    }
+    const canvas = fullResCanvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return { valid: false, qrData: null };
+    
+    ctx.drawImage(video, 0, 0);
+    
+    // Try top-left quadrant first (expected QR position)
+    const roiW = Math.floor(canvas.width * CONFIG.qrRoiRatio);
+    const roiH = Math.floor(canvas.height * CONFIG.qrRoiRatio);
+    
+    const qrString = decodeQRFromRegion(canvas, 0, 0, roiW, roiH);
+    
+    // If not found in top-left, don't search other quadrants during auto-detection
+    // (manual capture will search all quadrants)
+    if (!qrString) {
+      return { valid: false, qrData: null };
+    }
+    
+    const qrData = parseQRData(qrString);
+    if (!qrData) {
+      return { valid: false, qrData: null, reason: 'invalid_format' };
+    }
+    
+    // Skip validation if flag is set or no examIds provided
+    if (skipQrValidation || !userExamIdsRef.current || userExamIdsRef.current.size === 0) {
+      return { valid: true, qrData };
+    }
+    
+    // Validate examId belongs to user
+    if (!userExamIdsRef.current.has(qrData.examId)) {
+      return { valid: false, qrData, reason: 'wrong_exam' };
+    }
+    
+    return { valid: true, qrData };
+  }, [skipQrValidation]);
+
+  // Capture photo (with QR data)
+  const capturePhoto = useCallback(async (qrData?: ParsedQRData | null) => {
     if (captured) return;
     
     setCaptured(true);
@@ -118,7 +264,7 @@ export function DocumentCapture({
       const width = video.videoWidth;
       const height = video.videoHeight;
       
-      console.log('[DocumentCapture] Capturing photo:', { width, height });
+      console.log('[DocumentCapture] Capturing photo:', { width, height, hasQR: !!qrData });
 
       if (!width || !height) {
         throw new Error('Video dimensions not available');
@@ -132,14 +278,11 @@ export function DocumentCapture({
       if (!ctx) throw new Error('Could not get canvas context');
 
       ctx.drawImage(video, 0, 0, width, height);
-      
-      console.log('[DocumentCapture] Canvas drawn, creating blob...');
 
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
           (b) => {
             if (b) {
-              console.log('[DocumentCapture] Blob created:', b.size, 'bytes');
               resolve(b);
             } else {
               reject(new Error('Failed to create blob'));
@@ -150,7 +293,6 @@ export function DocumentCapture({
         );
       });
 
-      // Cleanup canvas
       canvas.width = 0;
       canvas.height = 0;
 
@@ -160,9 +302,10 @@ export function DocumentCapture({
         height,
         size: blob.size,
         timestamp: Date.now(),
+        qrData: qrData || undefined,
       };
 
-      console.log('[DocumentCapture] Capture complete, calling onCapture');
+      console.log('[DocumentCapture] Capture complete');
       updateStatus('captured', t('status.captured'));
       cleanup();
       onCaptureRef.current(result);
@@ -175,8 +318,67 @@ export function DocumentCapture({
     }
   }, [captured, t, updateStatus, cleanup]);
 
-  // Check stability for auto-capture
-  const checkStability = useCallback((contour: { area: number }) => {
+  /**
+   * Manual capture with QR search in all quadrants
+   */
+  const handleManualCapture = useCallback(async () => {
+    if (captured) return;
+    
+    const video = videoRef.current;
+    if (!video) return;
+    
+    // Create canvas for QR search
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      capturePhoto(null);
+      return;
+    }
+    
+    ctx.drawImage(video, 0, 0);
+    
+    // Search all quadrants
+    const qrString = searchQRInAllQuadrants(canvas);
+    canvas.width = 0;
+    canvas.height = 0;
+    
+    if (!qrString) {
+      // No QR found - show error but don't capture
+      alert(t('status.noQr'));
+      return;
+    }
+    
+    const qrData = parseQRData(qrString);
+    if (!qrData) {
+      alert(t('status.noQr'));
+      return;
+    }
+    
+    // Validate if we have examIds
+    if (!skipQrValidation && userExamIdsRef.current && userExamIdsRef.current.size > 0) {
+      if (!userExamIdsRef.current.has(qrData.examId)) {
+        alert(t('status.wrongExam'));
+        return;
+      }
+    }
+    
+    // Valid - capture
+    capturePhoto(qrData);
+  }, [captured, capturePhoto, skipQrValidation, t]);
+
+  // Check stability and QR for auto-capture
+  const checkStabilityAndQR = useCallback((contour: { area: number }, sharpness: number) => {
+    // Check sharpness first
+    if (sharpness < CONFIG.sharpnessThreshold) {
+      updateStatus('blurry', t('status.blurry'));
+      lastContourRef.current = null;
+      stableStartTimeRef.current = null;
+      noQrFrameCountRef.current = 0;
+      return;
+    }
+    
     if (!lastContourRef.current) {
       lastContourRef.current = contour;
       stableStartTimeRef.current = Date.now();
@@ -187,14 +389,36 @@ export function DocumentCapture({
     const stableTime = Date.now() - (stableStartTimeRef.current || 0);
 
     if (stableTime >= CONFIG.stabilityDuration) {
-      capturePhoto();
+      // Stable enough - try to detect QR
+      updateStatus('searching_qr', t('status.searchingQr'));
+      
+      const { valid, qrData, reason } = detectAndValidateQR();
+      
+      if (valid && qrData) {
+        // Success - capture with QR data
+        lastQrDataRef.current = qrData;
+        capturePhoto(qrData);
+      } else if (reason === 'wrong_exam') {
+        // QR detected but wrong professor
+        updateStatus('wrong_exam', t('status.wrongExam'));
+        noQrFrameCountRef.current = 0;
+      } else {
+        // No QR found
+        noQrFrameCountRef.current++;
+        
+        if (noQrFrameCountRef.current >= CONFIG.qrMaxAttempts) {
+          updateStatus('no_qr', t('status.noQr'));
+        } else {
+          updateStatus('searching_qr', t('status.searchingQr'));
+        }
+      }
     } else {
       const progress = Math.round((stableTime / CONFIG.stabilityDuration) * 100);
       updateStatus('stable', `${t('status.holdStill')} ${progress}%`);
     }
 
     lastContourRef.current = contour;
-  }, [t, updateStatus, capturePhoto]);
+  }, [t, updateStatus, detectAndValidateQR, capturePhoto]);
 
   // Document detection using OpenCV
   const detectDocument = useCallback(() => {
@@ -220,6 +444,10 @@ export function DocumentCapture({
       const hierarchy = new cv.Mat();
 
       cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+      
+      // Check sharpness on grayscale
+      const sharpness = checkSharpness(gray);
+      
       cv.GaussianBlur(gray, blurred, new cv.Size(CONFIG.blurKernel, CONFIG.blurKernel), 0);
       cv.adaptiveThreshold(
         blurred, thresh, 255,
@@ -261,11 +489,12 @@ export function DocumentCapture({
       }
 
       if (bestContour) {
-        checkStability({ area: maxArea / (w * h) });
+        checkStabilityAndQR({ area: maxArea / (w * h) }, sharpness);
         bestContour.delete();
       } else {
         lastContourRef.current = null;
         stableStartTimeRef.current = null;
+        noQrFrameCountRef.current = 0;
         updateStatus('ready', t('status.searching'));
       }
 
@@ -278,7 +507,7 @@ export function DocumentCapture({
     } catch (err) {
       console.error('Detection error:', err);
     }
-  }, [captured, t, updateStatus, checkStability]);
+  }, [captured, t, updateStatus, checkSharpness, checkStabilityAndQR]);
 
   // Start detection loop
   const startDetection = useCallback(() => {
@@ -349,10 +578,14 @@ export function DocumentCapture({
     switch (status) {
       case 'stable':
       case 'captured':
+      case 'searching_qr':
         return 'text-green-500';
       case 'error':
+      case 'wrong_exam':
+      case 'no_qr':
         return 'text-red-500';
       case 'detecting':
+      case 'blurry':
         return 'text-yellow-500';
       default:
         return 'text-white';
@@ -391,13 +624,18 @@ export function DocumentCapture({
           <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white/50 rounded-bl" />
           <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/50 rounded-br" />
         </div>
+        
+        {/* QR indicator in top-left */}
+        {(status === 'searching_qr' || status === 'stable') && (
+          <div className="absolute top-4 left-4 w-16 h-16 border-2 border-green-500/70 rounded pointer-events-none animate-pulse" />
+        )}
       </div>
 
       {/* Controls */}
       <div className="flex gap-3 justify-center mt-4">
         {showManualCapture && (
           <Button
-            onClick={() => capturePhoto()}
+            onClick={handleManualCapture}
             disabled={captured || status === 'loading'}
             className="flex items-center gap-2"
           >
@@ -420,4 +658,4 @@ export function DocumentCapture({
 
 export default DocumentCapture;
 export { DOCUMENT_CAPTURE_CONFIG } from './config';
-export type { DocumentCaptureProps, CaptureResult, CaptureStatus } from './types';
+export type { DocumentCaptureProps, CaptureResult, CaptureStatus, ParsedQRData } from './types';
