@@ -74,7 +74,10 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
 
   return (
     <div className="space-y-6 p-4">
-      <h2 className="text-2xl font-bold text-center">{t('title')}</h2>
+      {/* Title only shown when NOT in auto-capture mode (header already has it) */}
+      {!(EXPERIMENTAL_AUTO_CAM && showAutoCapture) && (
+        <h2 className="text-2xl font-bold text-center">{t('title')}</h2>
+      )}
       
       {!capturedImage ? (
         <>

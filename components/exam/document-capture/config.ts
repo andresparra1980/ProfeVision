@@ -12,13 +12,13 @@ export const DOCUMENT_CAPTURE_CONFIG = {
   processHeight: 480,
 
   // Adaptive threshold
-  adaptiveBlockSize: 23,
-  adaptiveC: 10,
+  adaptiveBlockSize: 21,
+  adaptiveC: 20,  // higher = less sensitive, more stable
   blurKernel: 5,
   dilateIterations: 1,
 
   // Contour detection
-  minAreaRatio: 0.1,
+  minAreaRatio: 0.20,  // 20% min area
   maxAreaRatio: 0.95,
   approxEpsilon: 0.02,
 
