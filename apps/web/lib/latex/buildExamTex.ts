@@ -93,6 +93,10 @@ function escapeLatexOutsideMath(input: string): string {
     .replace(/\^/g, '\\textasciicircum{}');
   // Do NOT escape backslashes so sequences like \% remain valid LaTeX
 
+  // Convert backticks to \texttt{} - backticks are not valid LaTeX
+  // Match `...` patterns and wrap content in \texttt{}
+  s = s.replace(/`([^`]+)`/g, '\\texttt{$1}');
+
   // Restore math segments
   s = s.replace(/MATHPH(\d+)X/g, (_m, i) => segments[Number(i)] || '');
   return s;

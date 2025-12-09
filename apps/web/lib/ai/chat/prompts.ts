@@ -46,6 +46,7 @@ export function buildSystemPrompt(language: string): string {
     "Incluye racionales breves en cada pregunta en el campo 'rationale'.",
     "Usa LaTeX para las fórmulas cuando aplique (por ejemplo: \\int, \\frac{...}{...}, potencias con ^, funciones como \\sin, \\cos).",
     "Formato de fórmulas: inline con $...$ y display con \\[...\\]. No uses Markdown math (ni ``` ni bloques).",
+    "PROHIBIDO usar backticks (`) para código inline. Los backticks no son válidos en LaTeX. Escribe código o comandos como texto plano sin formato especial.",
     "IMPORTANTE: la respuesta debe ser un único objeto JSON. No devuelvas arrays sueltos ni envolturas adicionales.",
     "IMPORTANTE: Escribe los comandos LaTeX con UNA sola barra invertida por comando (\\alpha, \\Delta, \\frac, etc.). No insertes barras extra; el escape necesario del JSON se aplica automáticamente.",
     "Ejemplos correctos en strings JSON: '$\\\\Delta p$', '$E=mc^2$', '\\\\[ \\int_0^1 x^2 \\; dx \\\\]'. Evita escribir 'Deltap' o 'LaTeX en texto plano'.",

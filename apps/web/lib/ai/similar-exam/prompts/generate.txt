@@ -12,6 +12,10 @@ Requirements:
   - Do NOT use Markdown math (no ``` blocks or $$ fences). All content must be plain JSON strings.
   - Write LaTeX commands with a single backslash per command (e.g., \alpha, \Delta, \frac, \sin). The JSON string escaping will handle double backslashes automatically.
   - Correct examples inside JSON strings: "$\\Delta p$", "$E=mc^2$", "\\[ \\int_0^1 x^2 \\; dx \\]".
+- Code formatting requirements (CRITICAL):
+  - Do NOT use backticks (`) for inline code. Backticks are not valid LaTeX.
+  - For code snippets or commands, just write them as plain text without any special formatting.
+  - Example: Write "proxy_pass http://backend;" NOT "`proxy_pass http://backend;`".
 
 Inputs:
 - language: the output language code (e.g., "es", "en").
