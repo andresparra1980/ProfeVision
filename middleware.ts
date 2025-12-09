@@ -254,7 +254,8 @@ export const config = {
      * - .well-known/ (standardized metadata like security.txt)
      * - security.txt (legacy location)
      * - .git/ (ignore probes from browser extensions/scanners)
+     * - opencv.js (OpenCV library for document capture)
      */
-    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/).*)",
+    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/|opencv.js).*)",
   ],
 };

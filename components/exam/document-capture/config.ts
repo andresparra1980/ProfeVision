@@ -1,0 +1,46 @@
+/**
+ * Document Capture - Configuration
+ *
+ * Calibrated for exam sheet detection.
+ * Last calibration: December 2024
+ */
+
+export const DOCUMENT_CAPTURE_CONFIG = {
+  // Processing
+  processIntervalMs: 200,
+  processWidth: 640,
+  processHeight: 480,
+
+  // Adaptive threshold
+  adaptiveBlockSize: 21,
+  adaptiveC: 20,  // higher = less sensitive, more stable
+  blurKernel: 5,
+  dilateIterations: 1,
+
+  // Contour detection
+  minAreaRatio: 0.20,  // 20% min area
+  maxAreaRatio: 0.95,
+  approxEpsilon: 0.02,
+
+  // Stability
+  stabilityDuration: 600,
+  stabilityDecay: 0.2,  // Decrement 20% per failed frame instead of reset to 0
+
+  // Capture quality
+  jpegQuality: 1.0,
+  // Request high resolution from camera (actual aspect depends on device)
+  idealWidth: 2880,
+  idealHeight: 2160,
+
+  // QR Detection
+  qrRoiRatio: 0.5,          // 50% of frame for QR ROI (top-left quadrant)
+  qrMaxAttempts: 5,         // frames without QR before showing warning
+
+  // Sharpness (Laplacian variance) - from OMR service calibration
+  sharpnessThreshold: 70,  // variance below this = blurry (lowered for low-end devices)
+} as const;
+
+// Derived constants
+export const STABILITY_DECAY_PERCENT = DOCUMENT_CAPTURE_CONFIG.stabilityDecay * 100;
+
+export type DocumentCaptureConfig = typeof DOCUMENT_CAPTURE_CONFIG;

@@ -25,6 +25,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
     // 🤖 AI Exams Chat module
     ai_exams_chat: (await import(`./locales/${locale}/ai_exams_chat.json`))
       .default,
+    // 📷 Document capture component (experimental auto-cam)
+    "document-capture": (
+      await import(`./locales/${locale}/document-capture.json`)
+    ).default,
     // 🧙‍♀️ Wizard steps components
     "wizard-step-confirmation": (
       await import(`./locales/${locale}/wizard-step-confirmation.json`)

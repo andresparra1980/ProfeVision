@@ -190,9 +190,14 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
       processingImage.current = false;
     };
     
-    reader.onerror = () => {
+    reader.onerror = (event) => {
+      const errorMsg = `FileReader error: ${reader.error?.message || 'Unknown error'}`;
+      console.error('FileReader error:', reader.error);
+      console.error('FileReader error event:', event);
+      // Show error in UI for mobile debugging
+      alert(errorMsg);
       if (DEBUG) {
-        logger.error('Error reading image file');
+        logger.error('Error reading image file:', reader.error);
       }
       processingImage.current = false;
     };

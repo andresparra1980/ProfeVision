@@ -4,7 +4,9 @@
     "instruction": "Take a clear photo of the complete exam",
     "subInstruction": "Make sure all corners are visible",
     "button": "Take Photo",
-    "description": "By clicking \"Take Photo\", your device's camera will open"
+    "description": "By clicking \"Take Photo\", your device's camera will open",
+    "flashOn": "Flash on",
+    "flashOff": "Flash off"
   },
   "suggestions": {
     "title": "Suggestions for better capture",
