@@ -23,7 +23,8 @@ export const DOCUMENT_CAPTURE_CONFIG = {
   approxEpsilon: 0.02,
 
   // Stability
-  stabilityDuration: 800,
+  stabilityDuration: 500,
+  stabilityDecay: 0.2,  // Decrement 20% per failed frame instead of reset to 0
 
   // Capture quality
   jpegQuality: 1.0,
@@ -37,7 +38,7 @@ export const DOCUMENT_CAPTURE_CONFIG = {
   qrMaxAttempts: 5,         // 1000ms / 200ms = 5 frames
 
   // Sharpness (Laplacian variance) - from OMR service calibration
-  sharpnessThreshold: 100,  // variance below this = blurry
+  sharpnessThreshold: 70,  // variance below this = blurry (lowered for low-end devices)
 } as const;
 
 export type DocumentCaptureConfig = typeof DOCUMENT_CAPTURE_CONFIG;

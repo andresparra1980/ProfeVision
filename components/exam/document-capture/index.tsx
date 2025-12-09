@@ -133,7 +133,7 @@ export function DocumentCapture({
   const [captured, setCaptured] = useState(false);
   
   const lastContourRef = useRef<{ area: number } | null>(null);
-  const stableStartTimeRef = useRef<number | null>(null);
+  const stableProgressRef = useRef(0);  // 0-100 progress percentage
   const noQrFrameCountRef = useRef(0);
   const lastQrDataRef = useRef<ParsedQRData | null>(null);
   
@@ -398,25 +398,25 @@ export function DocumentCapture({
 
   // Check stability and QR for auto-capture
   const checkStabilityAndQR = useCallback((contour: { area: number }, sharpness: number) => {
-    // Check sharpness first
+    // Check sharpness - apply decay instead of full reset
     if (sharpness < CONFIG.sharpnessThreshold) {
       updateStatus('blurry', t('status.blurry'));
-      lastContourRef.current = null;
-      stableStartTimeRef.current = null;
-      noQrFrameCountRef.current = 0;
+      // Decay progress instead of resetting to 0
+      stableProgressRef.current = Math.max(0, stableProgressRef.current - CONFIG.stabilityDecay * 100);
       return;
     }
     
     if (!lastContourRef.current) {
       lastContourRef.current = contour;
-      stableStartTimeRef.current = Date.now();
       updateStatus('detecting', t('status.holdStill'));
       return;
     }
 
-    const stableTime = Date.now() - (stableStartTimeRef.current || 0);
+    // Increment progress based on frame interval vs stability duration
+    const progressIncrement = (CONFIG.processIntervalMs / CONFIG.stabilityDuration) * 100;
+    stableProgressRef.current = Math.min(100, stableProgressRef.current + progressIncrement);
 
-    if (stableTime >= CONFIG.stabilityDuration) {
+    if (stableProgressRef.current >= 100) {
       // Stable enough - try to detect QR
       updateStatus('searching_qr', t('status.searchingQr'));
       
@@ -437,7 +437,7 @@ export function DocumentCapture({
         }
       }
     } else {
-      const progress = Math.round((stableTime / CONFIG.stabilityDuration) * 100);
+      const progress = Math.round(stableProgressRef.current);
       updateStatus('stable', `${t('status.holdStill')} ${progress}%`);
     }
 
@@ -517,7 +517,8 @@ export function DocumentCapture({
         bestContour.delete();
       } else {
         lastContourRef.current = null;
-        stableStartTimeRef.current = null;
+        // Decay progress when no document detected
+        stableProgressRef.current = Math.max(0, stableProgressRef.current - CONFIG.stabilityDecay * 100);
         noQrFrameCountRef.current = 0;
         updateStatus('ready', t('status.searching'));
       }
