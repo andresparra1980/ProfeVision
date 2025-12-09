@@ -119,6 +119,7 @@ export function DocumentCapture({
   className = '',
   showManualCapture = true,
   torchEnabled = false,
+  bwEnabled = false,
 }: DocumentCaptureProps) {
   const t = useTranslations('document-capture');
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -289,6 +290,29 @@ export function DocumentCapture({
       if (!ctx) throw new Error('Could not get canvas context');
 
       ctx.drawImage(video, 0, 0, width, height);
+
+      // Apply B/W threshold if enabled
+      if (bwEnabled && window.cv) {
+        try {
+          const cv = window.cv;
+          const src = cv.imread(canvas);
+          const gray = new cv.Mat();
+          const bw = new cv.Mat();
+          
+          cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+          cv.threshold(gray, bw, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
+          
+          // Convert back to canvas
+          cv.imshow(canvas, bw);
+          
+          src.delete();
+          gray.delete();
+          bw.delete();
+        } catch (err) {
+          console.error('[DocumentCapture] B/W conversion failed:', err);
+          // Continue with color image
+        }
+      }
 
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
