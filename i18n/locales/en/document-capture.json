@@ -2,14 +2,13 @@
   "status": {
     "loading": "Loading...",
     "requestingCamera": "Requesting camera...",
-    "searching": "Searching document...",
+    "searching": "Position the document",
     "holdStill": "Hold still...",
     "capturing": "Capturing...",
     "captured": "Captured",
     "searchingQr": "Searching QR code...",
-    "blurry": "Image blurry, hold still",
-    "noQr": "No valid QR code detected",
-    "wrongExam": "This exam does not belong to your class"
+    "blurry": "Image blurry",
+    "noQr": "No QR code detected"
   },
   "buttons": {
     "capture": "Capture",

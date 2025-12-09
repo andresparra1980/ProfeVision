@@ -23,7 +23,7 @@ export const DOCUMENT_CAPTURE_CONFIG = {
   approxEpsilon: 0.02,
 
   // Stability
-  stabilityDuration: 500,
+  stabilityDuration: 600,
   stabilityDecay: 0.2,  // Decrement 20% per failed frame instead of reset to 0
 
   // Capture quality

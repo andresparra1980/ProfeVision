@@ -437,8 +437,7 @@ export function DocumentCapture({
         }
       }
     } else {
-      const progress = Math.round(stableProgressRef.current);
-      updateStatus('stable', `${t('status.holdStill')} ${progress}%`);
+      updateStatus('stable', t('status.holdStill'));
     }
 
     lastContourRef.current = contour;
