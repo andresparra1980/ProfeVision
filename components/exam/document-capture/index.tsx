@@ -10,7 +10,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { Camera, X, Loader2 } from 'lucide-react';
+import { Camera, X, Loader2, Flashlight, FlashlightOff } from 'lucide-react';
 import jsQR from 'jsqr';
 import { DOCUMENT_CAPTURE_CONFIG } from './config';
 import type { DocumentCaptureProps, CaptureStatus, CaptureResult, ParsedQRData } from './types';
@@ -129,6 +129,8 @@ export function DocumentCapture({
   const [status, setStatus] = useState<CaptureStatus>('loading');
   const [statusMessage, setStatusMessage] = useState('');
   const [captured, setCaptured] = useState(false);
+  const [torchEnabled, setTorchEnabled] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
   
   const lastContourRef = useRef<{ area: number } | null>(null);
   const stableStartTimeRef = useRef<number | null>(null);
@@ -164,6 +166,25 @@ export function DocumentCapture({
       streamRef.current = null;
     }
   }, []);
+
+  // Toggle torch/flash
+  const toggleTorch = useCallback(async () => {
+    const stream = streamRef.current;
+    if (!stream) return;
+    
+    const track = stream.getVideoTracks()[0];
+    if (!track) return;
+    
+    try {
+      const newTorchState = !torchEnabled;
+      await track.applyConstraints({
+        advanced: [{ torch: newTorchState } as MediaTrackConstraintSet]
+      });
+      setTorchEnabled(newTorchState);
+    } catch (err) {
+      console.error('[DocumentCapture] Torch toggle failed:', err);
+    }
+  }, [torchEnabled]);
 
   /**
    * Check image sharpness using Laplacian variance
@@ -524,6 +545,19 @@ export function DocumentCapture({
 
         streamRef.current = stream;
 
+        // Check torch support
+        const track = stream.getVideoTracks()[0];
+        if (track) {
+          try {
+            const capabilities = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean };
+            if (capabilities.torch) {
+              setTorchSupported(true);
+            }
+          } catch {
+            // getCapabilities not supported
+          }
+        }
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           await videoRef.current.play();
@@ -602,6 +636,22 @@ export function DocumentCapture({
         {/* QR indicator in top-left */}
         {(status === 'searching_qr' || status === 'stable') && (
           <div className="absolute top-4 left-4 w-32 h-32 border-2 border-green-500/70 rounded pointer-events-none animate-pulse" />
+        )}
+        
+        {/* Torch toggle button - top right */}
+        {torchSupported && (
+          <button
+            type="button"
+            onClick={toggleTorch}
+            className="absolute top-3 right-3 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+            aria-label={torchEnabled ? 'Apagar flash' : 'Encender flash'}
+          >
+            {torchEnabled ? (
+              <Flashlight className="w-6 h-6 text-accent" />
+            ) : (
+              <FlashlightOff className="w-6 h-6 text-muted-foreground" />
+            )}
+          </button>
         )}
       </div>
 
