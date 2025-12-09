@@ -351,6 +351,7 @@ export function DocumentCapture({
       onErrorRef.current?.(error);
       setCaptured(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- bwEnabled is a prop, not reactive state
   }, [captured, t, updateStatus, cleanup]);
 
   /**

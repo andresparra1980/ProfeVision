@@ -139,19 +139,19 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
                     <div className="flex flex-col items-center gap-3 mt-2">
                       {/* Toggles row */}
                       <div className="flex items-center gap-2">
-                        {/* Torch toggle */}
+                        {/* Flash toggle */}
                         <button
                           type="button"
                           onClick={toggleTorch}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-1 px-2 py-1 rounded border border-gray-300 hover:bg-gray-50 transition-colors"
                         >
                           {torchEnabled ? (
-                            <Flashlight className="w-5 h-5 text-accent" />
+                            <Flashlight className="w-4 h-4 text-accent" />
                           ) : (
-                            <FlashlightOff className="w-5 h-5 text-muted-foreground" />
+                            <FlashlightOff className="w-4 h-4 text-muted-foreground" />
                           )}
-                          <span className="text-sm">
-                            {torchEnabled ? t('capture.flashOn') : t('capture.flashOff')}
+                          <span className={`text-xs ${torchEnabled ? 'text-accent' : 'text-muted-foreground'}`}>
+                            Flash
                           </span>
                         </button>
                         
@@ -159,9 +159,9 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
                         <button
                           type="button"
                           onClick={toggleBw}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors ${bwEnabled ? 'bg-gray-100' : ''}`}
+                          className="flex items-center gap-1 px-2 py-1 rounded border border-gray-300 hover:bg-gray-50 transition-colors"
                         >
-                          <span className={`text-sm font-medium ${bwEnabled ? 'text-accent' : 'text-muted-foreground'}`}>
+                          <span className={`text-xs ${bwEnabled ? 'text-accent' : 'text-muted-foreground'}`}>
                             B/W
                           </span>
                         </button>
@@ -169,9 +169,10 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
                       
                       <Button 
                         onClick={startAutoCapture}
-                        className="bg-primary flex items-center gap-2"
+                        className="bg-primary flex items-center gap-2 px-6 py-3 text-base font-bold"
+                        size="lg"
                       >
-                        <Camera className="w-4 h-4" />
+                        <Camera className="w-5 h-5" />
                         {t('capture.button')}
                       </Button>
                     </div>
