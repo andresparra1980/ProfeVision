@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Camera, ArrowRight, RotateCcw, Flashlight, FlashlightOff } from "lucide-react";
 import { useTranslations } from 'next-intl';
 import Image from "next/image";
+import { toast } from 'sonner';
 import { DocumentCapture, type CaptureResult } from '../document-capture';
 
 // Feature flag for experimental auto-capture
@@ -20,7 +21,6 @@ interface ImageCaptureProps {
 export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: ImageCaptureProps) {
   const t = useTranslations('wizard-step-image-capture');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [_isLoading, setIsLoading] = useState(false);
   const [showAutoCapture, setShowAutoCapture] = useState(false);
   const [torchEnabled, setTorchEnabled] = useState(true); // Default ON for Android
   const [bwEnabled, setBwEnabled] = useState(true); // Default ON - lighter files
@@ -58,9 +58,7 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setIsLoading(true);
       onCapture(file);
-      setIsLoading(false);
     }
   };
 
@@ -90,8 +88,7 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
 
   const handleAutoCaptureError = useCallback((error: Error) => {
     console.error('Auto capture error:', error);
-    // Show error in UI for mobile debugging
-    alert(`Capture error: ${error.message}`);
+    toast.error(error.message);
     setShowAutoCapture(false);
   }, []);
 

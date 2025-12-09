@@ -11,8 +11,9 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Camera, X, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import jsQR from 'jsqr';
-import { DOCUMENT_CAPTURE_CONFIG } from './config';
+import { DOCUMENT_CAPTURE_CONFIG, STABILITY_DECAY_PERCENT } from './config';
 import type { DocumentCaptureProps, CaptureStatus, CaptureResult, ParsedQRData } from './types';
 import { cn } from '@/lib/utils';
 
@@ -131,6 +132,7 @@ export function DocumentCapture({
   const [status, setStatus] = useState<CaptureStatus>('loading');
   const [statusMessage, setStatusMessage] = useState('');
   const [captured, setCaptured] = useState(false);
+  const capturingRef = useRef(false); // Mutex to prevent race condition
   
   const lastContourRef = useRef<{ area: number } | null>(null);
   const stableProgressRef = useRef(0);  // 0-100 progress percentage
@@ -260,7 +262,9 @@ export function DocumentCapture({
 
   // Capture photo (with QR data)
   const capturePhoto = useCallback(async (qrData?: ParsedQRData | null) => {
-    if (captured) return;
+    // Use ref as mutex to prevent race condition (state updates are async)
+    if (capturingRef.current) return;
+    capturingRef.current = true;
     
     setCaptured(true);
     if (intervalRef.current) {
@@ -350,9 +354,10 @@ export function DocumentCapture({
       updateStatus('error', error.message);
       onErrorRef.current?.(error);
       setCaptured(false);
+      capturingRef.current = false;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- bwEnabled is a prop, not reactive state
-  }, [captured, t, updateStatus, cleanup]);
+  }, [t, updateStatus, cleanup]);
 
   /**
    * Manual capture with QR search in all quadrants
@@ -382,13 +387,13 @@ export function DocumentCapture({
     
     if (!qrString) {
       // No QR found - show error but don't capture
-      alert(t('status.noQr'));
+      toast.error(t('status.noQr'));
       return;
     }
     
     const qrData = parseQRData(qrString);
     if (!qrData) {
-      alert(t('status.noQr'));
+      toast.error(t('status.noQr'));
       return;
     }
     
@@ -402,7 +407,7 @@ export function DocumentCapture({
     if (sharpness < CONFIG.sharpnessThreshold) {
       updateStatus('blurry', t('status.blurry'));
       // Decay progress instead of resetting to 0
-      stableProgressRef.current = Math.max(0, stableProgressRef.current - CONFIG.stabilityDecay * 100);
+      stableProgressRef.current = Math.max(0, stableProgressRef.current - STABILITY_DECAY_PERCENT);
       return;
     }
     
@@ -517,7 +522,7 @@ export function DocumentCapture({
       } else {
         lastContourRef.current = null;
         // Decay progress when no document detected
-        stableProgressRef.current = Math.max(0, stableProgressRef.current - CONFIG.stabilityDecay * 100);
+        stableProgressRef.current = Math.max(0, stableProgressRef.current - STABILITY_DECAY_PERCENT);
         noQrFrameCountRef.current = 0;
         updateStatus('ready', t('status.searching'));
       }
