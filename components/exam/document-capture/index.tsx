@@ -10,7 +10,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { Camera, X, Loader2, Flashlight, FlashlightOff } from 'lucide-react';
+import { Camera, X, Loader2 } from 'lucide-react';
 import jsQR from 'jsqr';
 import { DOCUMENT_CAPTURE_CONFIG } from './config';
 import type { DocumentCaptureProps, CaptureStatus, CaptureResult, ParsedQRData } from './types';
@@ -118,6 +118,7 @@ export function DocumentCapture({
   onCancel,
   className = '',
   showManualCapture = true,
+  torchEnabled = false,
 }: DocumentCaptureProps) {
   const t = useTranslations('document-capture');
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -129,8 +130,6 @@ export function DocumentCapture({
   const [status, setStatus] = useState<CaptureStatus>('loading');
   const [statusMessage, setStatusMessage] = useState('');
   const [captured, setCaptured] = useState(false);
-  const [torchEnabled, setTorchEnabled] = useState(false);
-  const [torchSupported, setTorchSupported] = useState(false);
   
   const lastContourRef = useRef<{ area: number } | null>(null);
   const stableStartTimeRef = useRef<number | null>(null);
@@ -167,23 +166,27 @@ export function DocumentCapture({
     }
   }, []);
 
-  // Toggle torch/flash
-  const toggleTorch = useCallback(async () => {
+  // Apply torch state when prop changes
+  useEffect(() => {
     const stream = streamRef.current;
     if (!stream) return;
     
     const track = stream.getVideoTracks()[0];
     if (!track) return;
     
+    // Check if torch is supported
     try {
-      const newTorchState = !torchEnabled;
-      await track.applyConstraints({
-        advanced: [{ torch: newTorchState } as MediaTrackConstraintSet]
-      });
-      setTorchEnabled(newTorchState);
-    } catch (err) {
-      console.error('[DocumentCapture] Torch toggle failed:', err);
+      const capabilities = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean };
+      if (!capabilities.torch) return;
+    } catch {
+      return;
     }
+    
+    track.applyConstraints({
+      advanced: [{ torch: torchEnabled } as MediaTrackConstraintSet]
+    }).catch(err => {
+      console.error('[DocumentCapture] Torch apply failed:', err);
+    });
   }, [torchEnabled]);
 
   /**
@@ -545,16 +548,18 @@ export function DocumentCapture({
 
         streamRef.current = stream;
 
-        // Check torch support
+        // Apply torch if enabled and supported
         const track = stream.getVideoTracks()[0];
-        if (track) {
+        if (track && torchEnabled) {
           try {
             const capabilities = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean };
             if (capabilities.torch) {
-              setTorchSupported(true);
+              await track.applyConstraints({
+                advanced: [{ torch: true } as MediaTrackConstraintSet]
+              });
             }
           } catch {
-            // getCapabilities not supported
+            // Torch not supported or failed
           }
         }
 
@@ -638,22 +643,7 @@ export function DocumentCapture({
           <div className="absolute top-4 left-4 w-32 h-32 border-2 border-green-500/70 rounded pointer-events-none animate-pulse" />
         )}
         
-        {/* Torch toggle button - top right */}
-        {torchSupported && (
-          <button
-            type="button"
-            onClick={toggleTorch}
-            className="absolute top-3 right-3 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
-            aria-label={torchEnabled ? 'Apagar flash' : 'Encender flash'}
-          >
-            {torchEnabled ? (
-              <Flashlight className="w-6 h-6 text-accent" />
-            ) : (
-              <FlashlightOff className="w-6 h-6 text-muted-foreground" />
-            )}
-          </button>
-        )}
-      </div>
+        </div>
 
       {/* Controls */}
       <div className="flex gap-3 justify-center mt-4">

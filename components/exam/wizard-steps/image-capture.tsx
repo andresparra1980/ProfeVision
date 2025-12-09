@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, ArrowRight, RotateCcw } from "lucide-react";
+import { Camera, ArrowRight, RotateCcw, Flashlight, FlashlightOff } from "lucide-react";
 import { useTranslations } from 'next-intl';
 import Image from "next/image";
 import { DocumentCapture, type CaptureResult } from '../document-capture';
@@ -22,6 +22,24 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [_isLoading, setIsLoading] = useState(false);
   const [showAutoCapture, setShowAutoCapture] = useState(false);
+  const [torchEnabled, setTorchEnabled] = useState(true); // Default ON for Android
+
+  // Load torch preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('profevision_torch_enabled');
+    if (saved !== null) {
+      setTorchEnabled(saved === 'true');
+    }
+  }, []);
+
+  // Toggle torch and persist to localStorage
+  const toggleTorch = useCallback(() => {
+    setTorchEnabled(prev => {
+      const newValue = !prev;
+      localStorage.setItem('profevision_torch_enabled', String(newValue));
+      return newValue;
+    });
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,6 +107,7 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
                 onError={handleAutoCaptureError}
                 onCancel={handleAutoCaptureCancel}
                 showManualCapture={true}
+                torchEnabled={torchEnabled}
               />
             </div>
           ) : (
@@ -102,13 +121,31 @@ export function ImageCapture({ onCapture, capturedImage, onNext, onRetake }: Ima
                   </div>
                   
                   {EXPERIMENTAL_AUTO_CAM ? (
-                    <Button 
-                      onClick={startAutoCapture}
-                      className="mt-2 bg-primary flex items-center gap-2"
-                    >
-                      <Camera className="w-4 h-4" />
-                      {t('capture.button')}
-                    </Button>
+                    <div className="flex flex-col items-center gap-3 mt-2">
+                      {/* Torch toggle */}
+                      <button
+                        type="button"
+                        onClick={toggleTorch}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                      >
+                        {torchEnabled ? (
+                          <Flashlight className="w-5 h-5 text-accent" />
+                        ) : (
+                          <FlashlightOff className="w-5 h-5 text-muted-foreground" />
+                        )}
+                        <span className="text-sm">
+                          {torchEnabled ? t('capture.flashOn') : t('capture.flashOff')}
+                        </span>
+                      </button>
+                      
+                      <Button 
+                        onClick={startAutoCapture}
+                        className="bg-primary flex items-center gap-2"
+                      >
+                        <Camera className="w-4 h-4" />
+                        {t('capture.button')}
+                      </Button>
+                    </div>
                   ) : (
                     <Button 
                       onClick={triggerFileInput}

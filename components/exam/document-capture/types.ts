@@ -37,6 +37,7 @@ export interface DocumentCaptureProps {
   onCancel?: () => void;
   className?: string;
   showManualCapture?: boolean;
+  torchEnabled?: boolean;
 }
 
 // OpenCV types are declared globally via window.cv
