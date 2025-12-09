@@ -585,6 +585,7 @@ export function DocumentCapture({
       mounted = false;
       cleanup();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- torchEnabled handled by separate effect
   }, [t, updateStatus, startDetection, cleanup]);
 
   // Status indicator color
