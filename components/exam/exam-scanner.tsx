@@ -266,7 +266,7 @@ export function ExamScanner({
           } else {
             reject(new Error('No se pudo convertir la imagen a blob'));
           }
-        }, 'image/jpeg', 0.95);
+        }, 'image/jpeg', 1.0);
       });
       
       // Creamos un File a partir del Blob

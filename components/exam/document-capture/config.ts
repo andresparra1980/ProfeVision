@@ -26,7 +26,7 @@ export const DOCUMENT_CAPTURE_CONFIG = {
   stabilityDuration: 800,
 
   // Capture quality
-  jpegQuality: 0.95,
+  jpegQuality: 1.0,
   // Portrait orientation for mobile (3:4 aspect ratio) - height > width
   idealWidth: 2880,
   idealHeight: 2160,
