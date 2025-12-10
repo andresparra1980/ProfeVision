@@ -26,12 +26,13 @@ pnpm install
 ```
 profevision/
 ├── apps/
-│   ├── web/      # Next.js app
-│   └── mobile/   # Expo app
+│   └── web/      # Next.js app
 ├── services/     # Python microservices
 ├── supabase/     # DB migrations
 └── mddocs/       # Documentacion
 ```
+
+> **Nota:** La app mobile se movio a un repo separado: `profevision-mobile-app`
 
 ## Comandos
 
@@ -40,7 +41,6 @@ profevision/
 
 pnpm dev          # Dev todos los apps
 pnpm dev:web      # Solo web (Next.js)
-pnpm dev:mobile   # Solo mobile (Expo)
 pnpm build        # Build produccion
 pnpm lint         # Linting
 pnpm typecheck    # TypeScript check
@@ -75,7 +75,7 @@ Pedir archivo `.env` completo a otro dev del equipo.
 ## Notas
 
 - **NO** hacer `npm install` ni `yarn` - solo `pnpm`
-- **NO** instalar deps dentro de `apps/web` o `apps/mobile` directamente
+- **NO** instalar deps dentro de `apps/*` directamente
 - Siempre ejecutar comandos desde la **raiz** del monorepo
 - Los `node_modules` estan en `.gitignore` - nunca commitearlos
 
