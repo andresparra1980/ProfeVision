@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "turbo dev",
     "dev:web": "turbo dev --filter=@profevision/web",
+    "dev:web:clean": "turbo clean --filter=@profevision/web && turbo dev --filter=@profevision/web",
     "dev:mobile": "turbo dev --filter=@profevision/mobile",
     "build": "turbo build",
     "lint": "turbo lint",
