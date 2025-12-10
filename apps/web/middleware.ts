@@ -256,6 +256,6 @@ export const config = {
      * - .git/ (ignore probes from browser extensions/scanners)
      * - opencv.js (OpenCV library for document capture)
      */
-    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/|opencv.js).*)",
+    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/|opencv.js|turnstile.html).*)",
   ],
 };

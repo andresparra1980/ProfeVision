@@ -42,14 +42,12 @@ export const ConversationEmptyState = ({
   description = "Start a conversation to see messages here",
   icon,
   children,
-  ...props
 }: ConversationEmptyStateProps) => (
   <div
     className={cn(
       "flex size-full flex-col items-center justify-center gap-3 p-8 text-center",
       className
     )}
-    {...props}
   >
     {children ?? (
       <>
@@ -98,11 +96,10 @@ export const ConversationScrollButton = ({
 
 export type ConversationTypingProps = ComponentProps<"div">;
 
-export const ConversationTyping = ({ className, ...props }: ConversationTypingProps) => (
+export const ConversationTyping = ({ className }: ConversationTypingProps) => (
   <div
     className={cn("flex items-center gap-1 py-2", className)}
     aria-live="polite"
-    {...props}
   >
     <span
       className="h-2 w-2 rounded-full bg-current opacity-80 animate-bounce"

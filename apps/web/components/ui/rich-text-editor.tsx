@@ -166,7 +166,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
         </div>
       </div>
 
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         /* Base editor styles */
         .ProseMirror {
           min-height: 150px;
@@ -235,7 +235,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
         .prose em {
           color: var(--foreground) !important;
         }
-      `}</style>
+      ` }} />
     </div>
   );
 } 
