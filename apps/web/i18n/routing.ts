@@ -39,6 +39,10 @@ export const pathnames = {
     es: '/cookies',
     en: '/cookies'
   },
+  '/data-deletion': {
+    es: '/data-deletion',
+    en: '/data-deletion'
+  },
   '/institutions-management': {
     es: '/gestion-instituciones',
     en: '/institutions-management'

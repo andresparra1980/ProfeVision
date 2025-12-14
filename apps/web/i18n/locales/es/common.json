@@ -1113,5 +1113,39 @@
   },
   "developmentOverlay": {
     "message": "Estadísticas en desarrollo - Pronto disponible"
+  },
+  "dataDeletion": {
+    "title": "Eliminación de Datos",
+    "intro": "En ProfeVision respetamos tu derecho a controlar tus datos personales. Si deseas eliminar tu cuenta y todos los datos asociados, puedes solicitar la eliminación siguiendo el proceso descrito a continuación.",
+    "howTo": {
+      "title": "Cómo solicitar la eliminación de tu cuenta",
+      "description": "Para solicitar la eliminación de tu cuenta y todos tus datos, envía un correo electrónico a:",
+      "emailNote": "Incluye en el correo la dirección de email asociada a tu cuenta de ProfeVision."
+    },
+    "process": {
+      "title": "Proceso de eliminación",
+      "steps": [
+        "Envía un correo a deletion@profevision.com solicitando la eliminación de tu cuenta.",
+        "Incluye el email asociado a tu cuenta para verificar tu identidad.",
+        "Recibirás una confirmación de recepción de tu solicitud.",
+        "Tu cuenta y datos serán eliminados en un máximo de 30 días."
+      ]
+    },
+    "dataDeleted": {
+      "title": "Datos que serán eliminados",
+      "description": "Al eliminar tu cuenta, se borrarán permanentemente:",
+      "items": [
+        "Tu perfil y datos de cuenta",
+        "Información de tus estudiantes",
+        "Exámenes creados y resultados",
+        "Imágenes de escaneos",
+        "Instituciones, materias y grupos creados",
+        "Historial de uso y preferencias"
+      ]
+    },
+    "note": {
+      "title": "Nota importante",
+      "content": "Una vez eliminados, los datos no podrán ser recuperados. Si tienes una suscripción activa, asegúrate de cancelarla antes de solicitar la eliminación de tu cuenta."
+    }
   }
 }

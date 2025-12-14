@@ -1141,5 +1141,39 @@
   },
   "developmentOverlay": {
     "message": "Statistics in development - Available soon"
+  },
+  "dataDeletion": {
+    "title": "Data Deletion",
+    "intro": "At ProfeVision we respect your right to control your personal data. If you wish to delete your account and all associated data, you can request deletion by following the process described below.",
+    "howTo": {
+      "title": "How to request account deletion",
+      "description": "To request deletion of your account and all your data, send an email to:",
+      "emailNote": "Include in the email the address associated with your ProfeVision account."
+    },
+    "process": {
+      "title": "Deletion process",
+      "steps": [
+        "Send an email to deletion@profevision.com requesting the deletion of your account.",
+        "Include the email associated with your account to verify your identity.",
+        "You will receive a confirmation of receipt of your request.",
+        "Your account and data will be deleted within a maximum of 30 days."
+      ]
+    },
+    "dataDeleted": {
+      "title": "Data that will be deleted",
+      "description": "When deleting your account, the following will be permanently removed:",
+      "items": [
+        "Your profile and account data",
+        "Your students' information",
+        "Created exams and results",
+        "Scan images",
+        "Institutions, subjects and groups created",
+        "Usage history and preferences"
+      ]
+    },
+    "note": {
+      "title": "Important note",
+      "content": "Once deleted, data cannot be recovered. If you have an active subscription, make sure to cancel it before requesting account deletion."
+    }
   }
 }
