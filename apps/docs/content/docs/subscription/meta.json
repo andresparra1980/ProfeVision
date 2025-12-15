@@ -1,4 +1,4 @@
 {
   "title": "Suscripción",
-  "pages": ["index", "free-tier", "plus-tier", "usage-tracking", "upgrade", "manage-subscription"]
+  "pages": ["free-tier", "plus-tier", "usage-tracking", "upgrade", "manage-subscription"]
 }

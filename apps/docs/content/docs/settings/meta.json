@@ -1,4 +1,4 @@
 {
   "title": "Configuración",
-  "pages": ["index", "profile", "password", "language"]
+  "pages": ["profile", "password", "language"]
 }

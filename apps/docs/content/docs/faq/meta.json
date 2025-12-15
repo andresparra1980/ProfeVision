@@ -1,4 +1,4 @@
 {
   "title": "Preguntas frecuentes",
-  "pages": ["index", "account-issues", "scanning-issues", "exam-issues", "billing-issues"]
+  "pages": ["account-issues", "scanning-issues", "exam-issues", "billing-issues"]
 }
