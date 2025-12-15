@@ -355,9 +355,8 @@ Per screenshot, document:
 | 5.2-02 | `scan-03-wizard-start.webp` | Scan wizard instructions | Step 1 |
 | 5.3-01 | `scan-04-camera-view.webp` | Camera capture interface | Capture button |
 | 5.4-01 | YouTube embed | Processing demo video | https://youtube.com/shorts/ZceuTIpAzWk |
-| 5.4-02 | `scan-07-results.webp` | Detected answers review | Answer grid, edit buttons |
-| 5.5-01 | `scan-08-confirm.webp` | Confirmation screen | Save button |
-| 5.5-02 | `scan-09-success.webp` | Success message | Scan another option |
+| 5.4-02 | `scan-05-results.webp` | Detected answers + save button | Answer grid, save button |
+| 5.5-01 | `scan-06-success.webp` | Success with options | Finish, scan another buttons |
 | 5.6-01 | `scan-error-01-qr.webp` | QR not detected error | Error message |
 | 5.6-02 | `scan-error-02-blurry.webp` | Blurry image error | Error message |
 
@@ -402,11 +401,11 @@ Per screenshot, document:
 | 2. Organization Setup | 11 |
 | 3. Exam Creation | 15 |
 | 4. PDF & Printing | 4 |
-| 5. Grading (OMR) | 10 |
+| 5. Grading (OMR) | 9 |
 | 6. Results | 7 |
 | 7. Subscription | 5 |
 | 8. Settings | 4 |
-| **Total** | **71** |
+| **Total** | **70** |
 
 ---
 
