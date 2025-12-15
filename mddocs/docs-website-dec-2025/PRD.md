@@ -373,22 +373,11 @@ Per screenshot, document:
 
 ### 7. Subscription & Limits
 
-| ID | File Name | Description | Highlights |
-|----|-----------|-------------|------------|
-| 7.1-01 | `subscription-01-free-tier.webp` | Free tier info | Limits listed |
-| 7.2-01 | `subscription-02-plus-tier.webp` | Plus tier info | Features listed |
-| 7.3-01 | `subscription-03-usage.webp` | Usage indicators | Progress bars |
-| 7.4-01 | `subscription-04-upgrade.webp` | Upgrade button/modal | CTA button |
-| 7.5-01 | `subscription-05-manage.webp` | Subscription management | Billing portal link |
+*Text-only section - no screenshots needed*
 
 ### 8. Account Settings
 
-| ID | File Name | Description | Highlights |
-|----|-----------|-------------|------------|
-| 8.1-01 | `settings-01-profile.webp` | Profile settings | Form fields |
-| 8.2-01 | `settings-02-password.webp` | Password change | Form fields |
-| 8.3-01 | `settings-03-notifications.webp` | Notification settings | Toggle switches |
-| 8.4-01 | `settings-04-language.webp` | Language selector | Dropdown |
+*Text-only section - no screenshots needed*
 
 ---
 
@@ -402,9 +391,9 @@ Per screenshot, document:
 | 4. PDF & Printing | 4 |
 | 5. Grading (OMR) | 8 |
 | 6. Results | 7 |
-| 7. Subscription | 5 |
-| 8. Settings | 4 |
-| **Total** | **69** |
+| 7. Subscription | 0 |
+| 8. Settings | 0 |
+| **Total** | **60** |
 
 ---
 
