@@ -1,0 +1,62 @@
+---
+title: Grading schemes
+description: Configure how grades are calculated
+---
+
+## Grading schemes
+
+A scheme defines how final grades are calculated for a group.
+
+### Structure
+
+Schemes have 3 levels:
+
+1. **Scheme**: Main container with name and dates
+2. **Periods**: Time divisions (e.g., "First period", "Second period")
+3. **Components**: Individual items (exams, projects, quizzes)
+
+### Access the scheme
+
+1. On the group card, click the **Scheme** icon
+2. Or navigate to **Groups** → select a group → **Grading scheme**
+
+![Grading scheme](/images/organization-setup/grading-scheme-01-overview.webp)
+
+### Configure the scheme
+
+1. **Name the scheme** in the top field
+2. **Add periods** with the corresponding button
+3. For each period configure:
+   - **Name**: Period identifier
+   - **Percentage**: Weight in final grade
+   - **Dates**: Start and end of period
+4. **Add components** to each period:
+   - **Name**: Component name
+   - **Type**: Exam, project, quiz, or work
+   - **Percentage**: Weight within the period
+5. Click **Save changes**
+
+![Configure scheme](/images/organization-setup/grading-scheme-02-config.webp)
+
+### Component types
+
+| Type | Use |
+|------|-----|
+| Exam | Formal evaluations |
+| Project | Long-term work |
+| Quiz | Short evaluations |
+| Work | Tasks and activities |
+
+### Validation rules
+
+- Period percentages must add up to **100%**
+- Components in each period must add up to the period's percentage
+- Start dates must be before end dates
+
+<Callout type="info">
+You can drag periods to reorder them.
+</Callout>
+
+### Next
+
+[Create exams →](/docs/exam-creation)

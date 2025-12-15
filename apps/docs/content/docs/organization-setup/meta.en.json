@@ -1,0 +1,4 @@
+{
+  "title": "Organization Setup",
+  "pages": ["index", "create-institution", "create-subject", "create-group", "add-students", "grading-schemes"]
+}
