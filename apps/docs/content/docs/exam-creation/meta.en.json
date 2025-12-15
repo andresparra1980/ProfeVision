@@ -1,0 +1,4 @@
+{
+  "title": "Exam Creation",
+  "pages": ["index", "manual-creation", "ai-question-generation", "import-from-document", "ai-chat-creation", "edit-exam", "assign-to-groups"]
+}
