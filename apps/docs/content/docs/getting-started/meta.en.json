@@ -1,4 +1,4 @@
 {
   "title": "Getting Started",
-  "pages": ["index", "account-creation", "first-login", "onboarding-wizard", "dashboard-overview"]
+  "pages": ["index", "account-creation", "first-login", "onboarding-wizard", "dashboard-overview", "onboarding-checklist"]
 }

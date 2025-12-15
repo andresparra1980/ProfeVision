@@ -23,6 +23,7 @@ Create user-facing documentation for ProfeVision. Target audience: non-technical
 | 1.2 First Login | Welcome modal, initial setup |
 | 1.3 Onboarding Wizard | 6-step setup walkthrough |
 | 1.4 Dashboard Overview | Main areas, navigation |
+| 1.5 Onboarding Checklist | Floating task list guide |
 
 ### 2. Organization Setup
 
@@ -296,6 +297,9 @@ Per screenshot, document:
 | 1.3-06 | `onboarding-06-complete-step.webp` | Completion step | Success message |
 | 1.4-01 | `dashboard-01-overview.webp` | Full dashboard view | Stats cards, sidebar |
 | 1.4-02 | `dashboard-02-sidebar.webp` | Sidebar navigation expanded | Menu items |
+| 1.5-01 | `checklist-01-floating.webp` | Floating checklist button | Bottom-right corner |
+| 1.5-02 | `checklist-02-tasks.webp` | Checklist expanded with 4 tasks | Task items, checkmarks |
+| 1.5-03 | `checklist-03-create-drawer.webp` | Exam creation drawer options | 3 creation methods |
 
 ### 2. Organization Setup
 
@@ -396,7 +400,7 @@ Per screenshot, document:
 
 | Section | Count |
 |---------|-------|
-| 1. Getting Started | 12 |
+| 1. Getting Started | 15 |
 | 2. Organization Setup | 11 |
 | 3. Exam Creation | 16 |
 | 4. PDF & Printing | 4 |
@@ -404,7 +408,7 @@ Per screenshot, document:
 | 6. Results | 7 |
 | 7. Subscription | 5 |
 | 8. Settings | 4 |
-| **Total** | **71** |
+| **Total** | **74** |
 
 ---
 
