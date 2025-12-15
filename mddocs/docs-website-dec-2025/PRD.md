@@ -405,3 +405,10 @@ Per screenshot, document:
 | 7. Subscription | 5 |
 | 8. Settings | 4 |
 | **Total** | **71** |
+
+---
+
+## Deployment Notes
+
+- `apps/web` and `apps/docs` are separate Vercel projects
+- Enable "Skip deployments when no changes" to avoid unnecessary builds
