@@ -9,13 +9,11 @@ export default async function HomePage({
 
   const content = {
     es: {
-      title: 'ProfeVision Docs',
       description:
         'Documentación completa para profesores usando ProfeVision.',
       getStarted: 'Comenzar',
     },
     en: {
-      title: 'ProfeVision Docs',
       description:
         'Complete documentation for teachers using ProfeVision.',
       getStarted: 'Get Started',
@@ -26,7 +24,11 @@ export default async function HomePage({
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center text-center px-4">
-      <h1 className="mb-4 text-4xl font-bold md:text-5xl">{t.title}</h1>
+      <h1 className="pt-16 mb-4 text-4xl font-bold md:text-5xl pv-logo">
+        <span className="profe">Profe</span>
+        <span className="vision">Vision</span>
+        <span className="text-fd-foreground"> Docs</span>
+      </h1>
       <p className="mb-8 text-fd-muted-foreground max-w-lg">{t.description}</p>
       <Link
         href={`/${lang}/docs`}

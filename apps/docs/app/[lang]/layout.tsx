@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 
 const translations = {
   es: {
-    search: 'Buscar documentacion',
+    search: 'Buscar',
     searchNoResult: 'No se encontraron resultados',
     toc: 'En esta pagina',
     tocNoHeadings: 'Sin encabezados',
@@ -17,7 +17,7 @@ const translations = {
     chooseTheme: 'Tema',
   },
   en: {
-    search: 'Search documentation',
+    search: 'Search',
     searchNoResult: 'No results found',
     toc: 'On this page',
     tocNoHeadings: 'No headings',
