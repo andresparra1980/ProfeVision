@@ -329,8 +329,7 @@ Per screenshot, document:
 | 3.2-02 | `chat-02-interface.webp` | AI chat interface | Chat input, messages |
 | 3.2-03 | `chat-03-options.webp` | Chat options (language, clear, save) | Options buttons |
 | 3.3-01 | `similar-01-button.webp` | Similar exam button on exam card | Wand icon |
-| 3.3-02 | `similar-02-config.webp` | Similar exam config dialog | Title, subject fields |
-| 3.3-03 | `similar-03-progress.webp` | Generation progress stepper | 6 steps |
+| 3.3-02 | `similar-02-progress.webp` | Generation progress stepper | 6 steps |
 | 3.4-01 | `edit-01-access.webp` | Edit exam access | Edit button |
 | 3.4-02 | `edit-02-draft.webp` | Edit draft exam page | Question editor |
 | 3.4-03 | `edit-03-published.webp` | Published exam (limited edit) | Toggle/answer buttons |
@@ -402,13 +401,13 @@ Per screenshot, document:
 |---------|-------|
 | 1. Getting Started | 15 |
 | 2. Organization Setup | 11 |
-| 3. Exam Creation | 16 |
+| 3. Exam Creation | 15 |
 | 4. PDF & Printing | 4 |
 | 5. Grading (OMR) | 12 |
 | 6. Results | 7 |
 | 7. Subscription | 5 |
 | 8. Settings | 4 |
-| **Total** | **74** |
+| **Total** | **73** |
 
 ---
 
