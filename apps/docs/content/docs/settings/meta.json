@@ -1,0 +1,4 @@
+{
+  "title": "Configuración",
+  "pages": ["index", "profile", "password", "language"]
+}
