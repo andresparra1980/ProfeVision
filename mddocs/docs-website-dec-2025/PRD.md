@@ -358,7 +358,6 @@ Per screenshot, document:
 | 5.4-02 | `scan-05-results.webp` | Detected answers + save button | Answer grid, save button |
 | 5.5-01 | `scan-06-success.webp` | Success with options | Finish, scan another buttons |
 | 5.6-01 | `scan-error-01-qr.webp` | QR not detected error | Error message |
-| 5.6-02 | `scan-error-02-blurry.webp` | Blurry image error | Error message |
 
 ### 6. Results & Analytics
 
@@ -401,11 +400,11 @@ Per screenshot, document:
 | 2. Organization Setup | 11 |
 | 3. Exam Creation | 15 |
 | 4. PDF & Printing | 4 |
-| 5. Grading (OMR) | 9 |
+| 5. Grading (OMR) | 8 |
 | 6. Results | 7 |
 | 7. Subscription | 5 |
 | 8. Settings | 4 |
-| **Total** | **70** |
+| **Total** | **69** |
 
 ---
 
