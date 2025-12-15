@@ -38,12 +38,11 @@ Create user-facing documentation for ProfeVision. Target audience: non-technical
 
 | Section | Content |
 |---------|---------|
-| 3.1 Manual Creation | Step-by-step form |
-| 3.2 AI Question Generation | Generate questions with AI |
-| 3.3 Import from Document | PDF/text extraction |
-| 3.4 AI Chat Creation | Conversational builder |
-| 3.5 Edit Exam | Modify existing exams |
-| 3.6 Assign to Groups | Link exam to classes |
+| 3.1 Import from Document | PDF/text extraction |
+| 3.2 AI Chat Creation | Conversational builder |
+| 3.3 Similar Exam | Generate variants with AI |
+| 3.4 Edit Exam | Modify existing exams |
+| 3.5 Assign to Groups | Link exam to classes |
 
 ### 4. Exam PDF & Printing
 
@@ -318,18 +317,22 @@ Per screenshot, document:
 
 | ID | File Name | Description | Highlights |
 |----|-----------|-------------|------------|
-| 3.1-01 | `exam-create-01-form.webp` | Exam creation form | Title, subject, group fields |
-| 3.1-02 | `exam-create-02-add-question.webp` | Add question interface | Question editor |
-| 3.1-03 | `exam-create-03-options.webp` | Multiple choice options | Option fields, correct answer |
-| 3.2-01 | `exam-ai-01-generate-button.webp` | AI generate button | Button highlight |
-| 3.2-02 | `exam-ai-02-modal.webp` | AI generation modal | Topic input, generate button |
-| 3.2-03 | `exam-ai-03-result.webp` | Generated question preview | Accept/reject buttons |
-| 3.3-01 | `exam-import-01-dialog.webp` | Import exam dialog | Upload area |
-| 3.3-02 | `exam-import-02-preview.webp` | Extracted questions preview | Edit buttons |
-| 3.4-01 | `exam-chat-01-interface.webp` | AI chat interface | Chat input, messages |
-| 3.4-02 | `exam-chat-02-result.webp` | Generated exam from chat | Exam preview |
-| 3.5-01 | `exam-edit-01-page.webp` | Edit exam page | Edit buttons per question |
-| 3.6-01 | `exam-assign-01-dialog.webp` | Assign to groups dialog | Group checkboxes |
+| 3.1-01 | `import-01-button.webp` | Import button on exams list | Button highlight |
+| 3.1-02 | `import-02-upload.webp` | Import dialog with dropzone | Upload area |
+| 3.1-03 | `import-03-progress.webp` | Extraction progress | Stage indicators |
+| 3.1-04 | `import-04-preview.webp` | Extracted questions preview | Question cards |
+| 3.2-01 | `chat-01-access.webp` | AI chat access button | Button highlight |
+| 3.2-02 | `chat-02-interface.webp` | AI chat interface | Chat input, messages |
+| 3.2-03 | `chat-03-options.webp` | Chat options (language, clear, save) | Options buttons |
+| 3.3-01 | `similar-01-button.webp` | Similar exam button on exam card | Wand icon |
+| 3.3-02 | `similar-02-config.webp` | Similar exam config dialog | Title, subject fields |
+| 3.3-03 | `similar-03-progress.webp` | Generation progress stepper | 6 steps |
+| 3.4-01 | `edit-01-access.webp` | Edit exam access | Edit button |
+| 3.4-02 | `edit-02-draft.webp` | Edit draft exam page | Question editor |
+| 3.4-03 | `edit-03-published.webp` | Published exam (limited edit) | Toggle/answer buttons |
+| 3.5-01 | `assign-01-access.webp` | Assign to groups access | Assign button |
+| 3.5-02 | `assign-02-select.webp` | Group selection | Checkboxes |
+| 3.5-03 | `assign-03-config.webp` | Per-group config | Date, duration fields |
 
 ### 4. Exam PDF & Printing
 
@@ -395,10 +398,10 @@ Per screenshot, document:
 |---------|-------|
 | 1. Getting Started | 12 |
 | 2. Organization Setup | 11 |
-| 3. Exam Creation | 12 |
+| 3. Exam Creation | 16 |
 | 4. PDF & Printing | 4 |
 | 5. Grading (OMR) | 12 |
 | 6. Results | 7 |
 | 7. Subscription | 5 |
 | 8. Settings | 4 |
-| **Total** | **67** |
+| **Total** | **71** |
