@@ -1,0 +1,52 @@
+---
+title: Sync grades
+description: Connect exams with the gradebook
+---
+
+## Sync grades
+
+Send exam grades to the group's grading components.
+
+### Prerequisites
+
+1. Have a grading scheme configured
+2. Exam must be linked to a component
+3. Exam must have graded results
+
+### Link exam to component
+
+1. Go to the exam page
+2. Click **Link to component**
+3. Select the component (e.g., "Midterm exam 1")
+4. Save
+
+![Sync grades](/images/results/results-07-sync-grades.webp)
+
+### Sync
+
+1. In the group's grades table
+2. Click **Sync**
+3. Grades update automatically
+
+### How it works
+
+The system:
+1. Takes the exam percentage
+2. Converts it to 0-5 scale
+3. Saves it to the linked component
+
+**Formula**: `Grade = Percentage / 20`
+
+### Example
+
+| Percentage | Grade |
+|------------|-------|
+| 100% | 5.0 |
+| 80% | 4.0 |
+| 60% | 3.0 |
+| 40% | 2.0 |
+
+<Callout type="info">
+Manual grades also sync automatically.
+</Callout>
+

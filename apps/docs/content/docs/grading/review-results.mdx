@@ -1,0 +1,50 @@
+---
+title: Revisar resultados
+description: Verifica las respuestas detectadas
+---
+
+## Revisar resultados
+
+Después del procesamiento, verifica que las respuestas se detectaron correctamente.
+
+### Información mostrada
+
+Verás los datos del escaneo:
+
+- **Estudiante**: Nombre e identificación
+- **Examen**: Título y materia
+- **Grupo**: Grupo del estudiante
+- **Calificación**: Puntaje obtenido
+
+![Información del escaneo](/images/grading/scan-05-results.webp)
+
+### Respuestas detectadas
+
+Las burbujas muestran las respuestas detectadas:
+
+- **Azul**: Respuesta marcada por el estudiante
+- **Verde**: Respuesta correcta
+- **Rojo**: Respuesta incorrecta
+
+
+### Corregir respuestas
+
+Si una respuesta se detectó incorrectamente:
+
+1. Haz clic en la burbuja correcta
+2. La respuesta se actualiza
+3. La calificación se recalcula
+
+<Callout type="info">
+Es raro necesitar correcciones manuales. Si ocurre frecuentemente, revisa la calidad de impresión y las condiciones de iluminación.
+</Callout>
+
+### Verificar calificación
+
+La calificación se calcula automáticamente:
+
+```
+Calificación = (Respuestas correctas / Total de preguntas) × Puntaje máximo
+```
+
+

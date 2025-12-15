@@ -1,0 +1,4 @@
+{
+  "title": "Calificación con cámara",
+  "pages": ["scan-overview", "start-scanning", "capture-image", "review-results", "save-continue", "troubleshooting"]
+}

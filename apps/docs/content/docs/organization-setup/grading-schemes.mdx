@@ -1,0 +1,59 @@
+---
+title: Esquemas de calificación
+description: Configura cómo se calculan las calificaciones
+---
+
+## Esquemas de calificación
+
+Un esquema define cómo se calculan las calificaciones finales de un grupo.
+
+### Estructura
+
+Los esquemas tienen 3 niveles:
+
+1. **Esquema**: Contenedor principal con nombre y fechas
+2. **Periodos**: Divisiones de tiempo (ej: "Primer periodo", "Segundo periodo")
+3. **Componentes**: Elementos individuales (exámenes, proyectos, quizzes)
+
+### Acceder al esquema
+
+1. En la tarjeta del grupo, haz clic en el ícono de **Esquema**
+2. O navega a **Grupos** → selecciona un grupo → **Esquema de calificación**
+
+![Esquema de calificación](/images/organization-setup/grading-scheme-01-view.webp)
+
+### Configurar el esquema
+
+1. **Nombra el esquema** en el campo superior
+2. **Agrega periodos** con el botón correspondiente
+3. Para cada periodo configura:
+   - **Nombre**: Identificador del periodo
+   - **Porcentaje**: Peso en la calificación final
+   - **Fechas**: Inicio y fin del periodo
+4. **Agrega componentes** a cada periodo:
+   - **Nombre**: Nombre del componente
+   - **Tipo**: Examen, proyecto, quiz o trabajo
+   - **Porcentaje**: Peso dentro del periodo
+5. Haz clic en **Guardar cambios**
+
+![Configurar esquema](/images/organization-setup/grading-scheme-02-edit.webp)
+
+### Tipos de componentes
+
+| Tipo | Uso |
+|------|-----|
+| Examen | Evaluaciones formales |
+| Proyecto | Trabajos largos |
+| Quiz | Evaluaciones cortas |
+| Trabajo | Tareas y actividades |
+
+### Reglas de validación
+
+- Los porcentajes de periodos deben sumar **100%**
+- Los componentes de cada periodo deben sumar el porcentaje del periodo
+- Las fechas de inicio deben ser anteriores a las de fin
+
+<Callout type="info">
+Puedes arrastrar los periodos para reordenarlos.
+</Callout>
+

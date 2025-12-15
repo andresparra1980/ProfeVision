@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --pv-primary: #0b890f;
+    --pv-secondary: #bc152b;
+    --pv-accent: #ffd60a;
+  }
+  .dark {
+    --pv-primary: #76f47a;
+    --pv-secondary: #ea4359;
+    --pv-accent: #f5cc00;
+  }
+}
+
+/* ProfeVision brand text */
+.pv-logo {
+  font-weight: 700;
+}
+.pv-logo .profe {
+  color: var(--pv-primary);
+}
+.pv-logo .vision {
+  color: var(--pv-secondary);
+}

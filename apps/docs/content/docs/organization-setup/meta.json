@@ -1,0 +1,4 @@
+{
+  "title": "Configuración organizacional",
+  "pages": ["create-institution", "create-subject", "create-group", "add-students", "grading-schemes"]
+}

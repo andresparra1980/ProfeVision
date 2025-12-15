@@ -1,0 +1,52 @@
+---
+title: Sincronizar calificaciones
+description: Conecta exámenes con el libro de calificaciones
+---
+
+## Sincronizar calificaciones
+
+Envía las calificaciones del examen a los componentes de calificación del grupo.
+
+### Prerrequisitos
+
+1. Tener un esquema de calificación configurado
+2. El examen debe estar vinculado a un componente
+3. El examen debe tener resultados calificados
+
+### Vincular examen a componente
+
+1. Ve a la página del examen
+2. Haz clic en **Vincular a componente**
+3. Selecciona el componente (ej: "Examen parcial 1")
+4. Guarda
+
+![Sincronizar calificaciones](/images/results/results-07-sync-grades.webp)
+
+### Sincronizar
+
+1. En la tabla de calificaciones del grupo
+2. Haz clic en **Sincronizar**
+3. Las calificaciones se actualizan automáticamente
+
+### Cómo funciona
+
+El sistema:
+1. Toma el porcentaje del examen
+2. Lo convierte a escala de 0-5
+3. Lo guarda en el componente vinculado
+
+**Fórmula**: `Calificación = Porcentaje / 20`
+
+### Ejemplo
+
+| Porcentaje | Calificación |
+|------------|--------------|
+| 100% | 5.0 |
+| 80% | 4.0 |
+| 60% | 3.0 |
+| 40% | 2.0 |
+
+<Callout type="info">
+Las calificaciones manuales también se sincronizan automáticamente.
+</Callout>
+
