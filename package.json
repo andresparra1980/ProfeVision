@@ -6,6 +6,8 @@
     "dev": "turbo dev",
     "dev:web": "turbo dev --filter=@profevision/web",
     "dev:web:clean": "turbo clean --filter=@profevision/web && turbo dev --filter=@profevision/web",
+    "dev:docs": "turbo dev --filter=@profevision/docs",
+    "dev:docs:clean": "turbo clean --filter=@profevision/docs && turbo dev --filter=@profevision/docs",
     "build": "turbo build",
     "lint": "turbo lint",
     "clean": "turbo clean",
