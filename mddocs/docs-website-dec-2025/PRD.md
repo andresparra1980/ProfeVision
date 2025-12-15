@@ -354,7 +354,6 @@ Per screenshot, document:
 | 5.2-01 | `scan-02-fab-button.webp` | Floating scan button | FAB button |
 | 5.2-02 | `scan-03-wizard-start.webp` | Scan wizard instructions | Step 1 |
 | 5.3-01 | `scan-04-camera-view.webp` | Camera capture interface | Capture button |
-| 5.3-02 | `scan-05-file-upload.webp` | File upload option | Upload area |
 | 5.4-01 | `scan-06-processing.webp` | Processing indicator | Loading state |
 | 5.4-02 | `scan-07-results.webp` | Detected answers review | Answer grid, edit buttons |
 | 5.5-01 | `scan-08-confirm.webp` | Confirmation screen | Save button |
@@ -403,11 +402,11 @@ Per screenshot, document:
 | 2. Organization Setup | 11 |
 | 3. Exam Creation | 15 |
 | 4. PDF & Printing | 4 |
-| 5. Grading (OMR) | 12 |
+| 5. Grading (OMR) | 11 |
 | 6. Results | 7 |
 | 7. Subscription | 5 |
 | 8. Settings | 4 |
-| **Total** | **73** |
+| **Total** | **72** |
 
 ---
 
