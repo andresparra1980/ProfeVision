@@ -1,4 +1,4 @@
 {
   "title": "Primeros pasos",
-  "pages": ["index"]
+  "pages": ["index", "account-creation", "first-login", "onboarding-wizard", "dashboard-overview"]
 }
