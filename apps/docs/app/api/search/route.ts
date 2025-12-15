@@ -1,7 +1,7 @@
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 
-export const { GET } = createFromSource(source, {
+export const { GET } = createFromSource(source, undefined, {
   localeMap: {
     es: { language: 'spanish' },
     en: { language: 'english' },
