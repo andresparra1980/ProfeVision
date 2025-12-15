@@ -11,13 +11,13 @@ export default async function HomePage({
     es: {
       title: 'ProfeVision Docs',
       description:
-        'Documentacion completa para profesores y desarrolladores usando ProfeVision.',
+        'Documentación completa para profesores usando ProfeVision.',
       getStarted: 'Comenzar',
     },
     en: {
       title: 'ProfeVision Docs',
       description:
-        'Complete documentation for teachers and developers using ProfeVision.',
+        'Complete documentation for teachers using ProfeVision.',
       getStarted: 'Get Started',
     },
   };
