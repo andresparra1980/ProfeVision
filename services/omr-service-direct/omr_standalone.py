@@ -45,8 +45,8 @@ class StandaloneOMRProcessor:
         safe_suffix = suffix if suffix.startswith('_') or '.' in suffix else f"_{suffix}"
         
         # If it's the final questions detected image, save it alongside the original
-        if safe_suffix == "questions_detected.jpeg":
-            return str(base.parent / f"{base.stem}{safe_suffix}")
+        if safe_suffix in ("questions_detected.jpeg", "_questions_detected.jpeg"):
+            return str(base.parent / f"{base.stem}questions_detected.jpeg")
             
         # For all other debug images, use the debug directory
         if self.debug:
