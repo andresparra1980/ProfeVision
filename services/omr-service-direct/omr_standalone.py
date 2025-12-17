@@ -1674,41 +1674,56 @@ class StandaloneOMRProcessor:
         if self.debug:
             print(f"Saved warped debug overlay to {output_path}")
     
-    def process_image(self, image_path: str) -> Dict[str, Any]:
-        """Process the OMR image and return results."""
+    def process_image(self, image_path: str, already_warped: bool = False) -> Dict[str, Any]:
+        """Process the OMR image and return results.
+        
+        Args:
+            image_path: Path to the image file
+            already_warped: If True, skip paper extraction and form detection (for pre-processed images from ML Kit)
+        """
         try:
             original_image = cv2.imread(image_path)
             if original_image is None:
                 return {"success": False, "error": f"Could not load image: {image_path}"}
 
-            warped = self._extract_paper(original_image)
-            if warped is None:
-                # If paper extraction failed, try to use the original image directly
-                # This might happen for already well-cropped images or very damaged ones
-                warped = original_image
-                # Ensure self.warped_image is set for QR detection if _extract_paper didn't set it
-                if self.warped_image is None:
-                    self.warped_image = warped
-                if self.debug:
-                    cv2.imwrite(self._get_debug_path("00_original_as_warped", ".png"), warped)
+            bubble_warped_source_image: Optional[np.ndarray] = None
             
-            # QR detection - use the original warped paper image (self.warped_image is set by _extract_paper)
+            if already_warped:
+                # Image is already pre-processed (e.g., from ML Kit scanner)
+                # Skip paper extraction and form detection, go directly to bubble detection
+                if self.debug:
+                    print("already_warped=True: Skipping paper extraction and form detection")
+                self.warped_image = original_image
+                bubble_warped_source_image = original_image
+            else:
+                # Normal flow: extract paper and detect form rectangle
+                warped = self._extract_paper(original_image)
+                if warped is None:
+                    # If paper extraction failed, try to use the original image directly
+                    # This might happen for already well-cropped images or very damaged ones
+                    warped = original_image
+                    # Ensure self.warped_image is set for QR detection if _extract_paper didn't set it
+                    if self.warped_image is None:
+                        self.warped_image = warped
+                    if self.debug:
+                        cv2.imwrite(self._get_debug_path("00_original_as_warped", ".png"), warped)
+                
+                # Detect inner rectangle for bubble detection
+                # Try to find the form rectangle first
+                form_warped = self._detect_form_rectangle(warped) # 'warped' is from _extract_paper or original
+                
+                if form_warped is not None:
+                    if self.debug:
+                        print("Using detected form rectangle as base for bubble detection")
+                    bubble_warped_source_image = form_warped
+                else:
+                    if self.debug:
+                        print("No form rectangle detected, using extracted paper (or original) as base for bubble detection")
+                    bubble_warped_source_image = warped # This is the fallback
+            
+            # QR detection - use the warped image
             raw_qr_data = self._extract_qr_data(self.warped_image)
             qr_output = raw_qr_data if raw_qr_data else ""
-            
-            # Detect inner rectangle for bubble detection
-            # Try to find the form rectangle first
-            form_warped = self._detect_form_rectangle(warped) # 'warped' is from _extract_paper or original
-            
-            bubble_warped_source_image: Optional[np.ndarray] = None
-            if form_warped is not None:
-                if self.debug:
-                    print("Using detected form rectangle as base for bubble detection")
-                bubble_warped_source_image = form_warped
-            else:
-                if self.debug:
-                    print("No form rectangle detected, using extracted paper (or original) as base for bubble detection")
-                bubble_warped_source_image = warped # This is the fallback
 
             # Bubble detection using the appropriate image
             # _detect_bubbles might further refine the ROI, e.g., by perspective warping

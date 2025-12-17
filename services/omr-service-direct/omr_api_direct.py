@@ -14,7 +14,7 @@ import io
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Request, Depends
+from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Request, Depends, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -254,6 +254,7 @@ async def health_check():
 @app.post("/process", response_model=OMRResult)
 async def process_omr(
     file: UploadFile = File(..., description="Exam image file (JPEG or PNG)"),
+    already_warped: bool = Form(False, description="Set to true if image was pre-processed (e.g., by ML Kit scanner)"),
     user: dict = Depends(verify_supabase_jwt),
 ):
     """
@@ -261,6 +262,7 @@ async def process_omr(
 
     Args:
         file: Uploaded image file
+        already_warped: Skip paper extraction/warping if image is already preprocessed
         user: JWT payload (injected by dependency)
 
     Returns:
@@ -304,7 +306,7 @@ async def process_omr(
         processor = StandaloneOMRProcessor(debug_mode=False)
 
         # Process image
-        result = processor.process_image(temp_file_path)
+        result = processor.process_image(temp_file_path, already_warped=already_warped)
 
         # Parse result
         if not result:
