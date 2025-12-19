@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PricingCardV2 } from "./pricing-card-v2";
-import { BillingPeriodToggle, BillingPeriod } from "./billing-period-toggle";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
 import { toast } from "sonner";
@@ -31,8 +30,8 @@ export function WelcomeTierModal({
   onComplete,
 }: WelcomeTierModalProps) {
   const t = useTranslations("tiers");
-  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly");
   const [completing, setCompleting] = useState(false);
+  const billingPeriod = "monthly";
 
   const handleContinueFree = async () => {
     try {
