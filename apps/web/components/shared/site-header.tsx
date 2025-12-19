@@ -18,6 +18,7 @@ import {
 import { AppPathnames } from "@/i18n/routing"
 import { useAuth } from "./auth-provider"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function SiteHeader() {
   const t = useTranslations('common')
@@ -120,13 +121,22 @@ export function SiteHeader() {
                   <Skeleton className="h-9 w-20" />
                   <Skeleton className="h-9 w-20" />
                 </div>
-              ) : session ? (
-                <Button asChild size="sm" variant="secondary" className="text-background dark:text-foreground">
-                  <Link href="/dashboard" title={`${t('buttons.goToDashboard')} - ProfeVision`}>
-                    {t('buttons.goToDashboard')}
-                  </Link>
-                </Button>
-              ) : (
+               ) : session ? (
+                 <TooltipProvider>
+                   <Tooltip>
+                     <TooltipTrigger asChild>
+                       <Button asChild size="sm" variant="secondary" className="text-background dark:text-foreground">
+                         <Link href="/dashboard">
+                           {t('buttons.goToDashboard')}
+                         </Link>
+                       </Button>
+                     </TooltipTrigger>
+                     <TooltipContent side="bottom">
+                       {`${t('buttons.goToDashboard')} - ProfeVision`}
+                     </TooltipContent>
+                   </Tooltip>
+                 </TooltipProvider>
+               ) : (
                 <>
                   <Button asChild size="sm" className="bg-accent text-black dark:text-black">
                     <Link href="/auth/login" title={`${t('buttons.login')} - ProfeVision`}>
@@ -141,7 +151,9 @@ export function SiteHeader() {
                 </>
               )}
             </div>
-            <LanguageSwitcher />
+            <TooltipProvider>
+              <LanguageSwitcher />
+            </TooltipProvider>
             <ModeToggle />
             <button 
               onClick={toggleMenu}

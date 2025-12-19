@@ -11,6 +11,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Progress } from "@/components/ui/progress";
 import { useOnboarding } from "@/lib/contexts/onboarding-context";
 import { useTranslations } from "next-intl";
+import { LanguageSwitcherDropdown } from "@/components/shared/language-switcher-dropdown";
 
 // Steps
 import { 
@@ -181,12 +182,17 @@ export function OnboardingWizard({ waitForWelcome = false }: OnboardingWizardPro
           <DialogTitle>{t("wizard.title")}</DialogTitle>
           <DialogDescription>{t("wizard.subtitle")}</DialogDescription>
         </VisuallyHidden>
-        {/* Header with progress - fixed height, never scrolls */}
-        <div className="p-4 md:p-6 pb-4 border-b flex-shrink-0">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold">{t("wizard.title")}</h2>
-            <p className="text-sm text-muted-foreground">{t("wizard.subtitle")}</p>
-          </div>
+         {/* Header with progress - fixed height, never scrolls */}
+         <div className="p-4 md:p-6 pb-4 border-b flex-shrink-0">
+           <div className="mb-4 flex items-start justify-between gap-4">
+             <div>
+               <h2 className="text-xl font-semibold">{t("wizard.title")}</h2>
+               <p className="text-sm text-muted-foreground">{t("wizard.subtitle")}</p>
+             </div>
+             <div className="flex-shrink-0">
+               <LanguageSwitcherDropdown variant="outline" size="sm" withTooltip tooltipSide="left" />
+             </div>
+           </div>
           
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
