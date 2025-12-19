@@ -329,9 +329,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
           ) : (
             <>
               {/* Language Switcher - Collapsed Version */}
-              <div className="py-3 px-2">
-                <LanguageSwitcherDashboard collapsed />
-              </div>
+              <LanguageSwitcherDashboard collapsed />
 
               <div className="border-t py-4 flex flex-col items-center gap-2">
                 <Tooltip>

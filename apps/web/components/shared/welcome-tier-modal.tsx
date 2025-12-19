@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PricingCardV2 } from "./pricing-card-v2";
-import { BillingPeriodToggle, BillingPeriod } from "./billing-period-toggle";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { logoFont } from "@/lib/fonts";
+import { LanguageSwitcherDropdown } from "./language-switcher-dropdown";
 
 interface WelcomeTierModalProps {
   open: boolean;
@@ -30,8 +30,8 @@ export function WelcomeTierModal({
   onComplete,
 }: WelcomeTierModalProps) {
   const t = useTranslations("tiers");
-  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("annual");
   const [completing, setCompleting] = useState(false);
+  const billingPeriod = "monthly";
 
   const handleContinueFree = async () => {
     try {
@@ -114,6 +114,9 @@ export function WelcomeTierModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div className="absolute top-4 right-4 z-50">
+          <LanguageSwitcherDropdown variant="outline" size="sm" withTooltip tooltipSide="left" />
+        </div>
         <DialogHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
@@ -129,12 +132,6 @@ export function WelcomeTierModal({
         </DialogHeader>
 
         <div className="space-y-6 mt-6">
-          {/* Toggle de periodo de facturación */}
-          <BillingPeriodToggle
-            period={billingPeriod}
-            onChange={setBillingPeriod}
-          />
-
           {/* Pricing Cards */}
           <div className="grid gap-6 md:grid-cols-2">
             <PricingCardV2

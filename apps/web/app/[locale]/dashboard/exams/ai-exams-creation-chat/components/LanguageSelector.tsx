@@ -2,13 +2,14 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
+import { Globe } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -21,34 +22,43 @@ interface LanguageSelectorProps {
   onValueChange: (_value: 'auto' | 'es' | 'en') => void;
 }
 
+const languageOptions = [
+  { value: 'auto', label: '🌐', fullLabel: 'Auto' },
+  { value: 'es', label: '🇪🇸', fullLabel: 'Español' },
+  { value: 'en', label: '🇬🇧', fullLabel: 'English' },
+] as const;
+
 export function LanguageSelector({ value, onValueChange }: LanguageSelectorProps) {
   const t = useTranslations("ai_exams_chat");
 
-  const selectComponent = (
+  const dropdownComponent = (
     <div className="hidden sm:flex sm:items-center sm:gap-2">
       <span className="text-sm font-medium">{t("header.examLanguageLabel")}</span>
-      <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder={t('language.label')} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="auto">
-            <span className="flex items-center gap-2">
-              🌐 {t('language.auto')}
-            </span>
-          </SelectItem>
-          <SelectItem value="es">
-            <span className="flex items-center gap-2">
-              🇪🇸 Español
-            </span>
-          </SelectItem>
-          <SelectItem value="en">
-            <span className="flex items-center gap-2">
-              🇬🇧 English
-            </span>
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 w-[120px]"
+          >
+            <Globe className="h-4 w-4" />
+            <span>{languageOptions.find(opt => opt.value === value)?.fullLabel}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {languageOptions.map((option) => (
+            <DropdownMenuItem
+              key={option.value}
+              onClick={() => onValueChange(option.value)}
+              className="cursor-pointer"
+            >
+              <span className="mr-2">{option.label}</span>
+              {option.fullLabel}
+              {option.value === value && <span className="ml-auto text-xs">✓</span>}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 
@@ -57,18 +67,17 @@ export function LanguageSelector({ value, onValueChange }: LanguageSelectorProps
       {value === 'auto' ? (
         <Tooltip>
           <TooltipTrigger asChild>
-            {selectComponent}
+            {dropdownComponent}
           </TooltipTrigger>
           <TooltipContent
-            side="bottom"
-            align="start"
+            side="right"
             className="max-w-[280px] whitespace-pre-line text-sm"
           >
             {t('language.tooltip')}
           </TooltipContent>
         </Tooltip>
       ) : (
-        selectComponent
+        dropdownComponent
       )}
     </TooltipProvider>
   );

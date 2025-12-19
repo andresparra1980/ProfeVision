@@ -1,27 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Zap } from "lucide-react";
 import { PricingCardV2 } from "@/components/shared/pricing-card-v2";
-import {
-  BillingPeriodToggle,
-  BillingPeriod,
-} from "@/components/shared/billing-period-toggle";
-import { toast } from "sonner";
 
 export default function PricingPage() {
   const t = useTranslations("common");
-  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("annual");
+  const billingPeriod = "monthly" as const;
 
   const handleUpgrade = () => {
-    toast.info("Próximamente disponible", {
-      description:
-        "La funcionalidad de pago estará disponible pronto. ¡Mantente atento!",
-    });
+    window.location.href = "/dashboard";
   };
 
   return (
@@ -71,16 +62,10 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className="py-8 md:py-12">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-8">
-            {/* Toggle de facturación */}
-            <BillingPeriodToggle
-              period={billingPeriod}
-              onChange={setBillingPeriod}
-            />
-
-            {/* Cards */}
+       <section className="py-8 md:py-12">
+         <div className="container px-4 md:px-6">
+           <div className="flex flex-col items-center justify-center space-y-8">
+             {/* Cards */}
             <div className="grid gap-8 md:grid-cols-2 max-w-5xl w-full">
               <PricingCardV2
                 tier="free"
