@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.nextUrl.hostname;
   const defaultLocale = "es";
-  const supportedLocales = ["es", "en"] as const;
+  const supportedLocales = ["es", "en", "fr", "pt"] as const;
 
   // 🚫 Handle OPTIONS requests (CORS preflight) early
   if (request.method === "OPTIONS") {
@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
     return baseResponse;
   }
   // Redirigir sitemap localizado a raíz
-  if (/^\/(es|en)\/sitemap\.xml$/.test(pathname)) {
+  if (/^\/(es|en|fr|pt)\/sitemap\.xml$/.test(pathname)) {
     const url = new URL(request.url);
     url.pathname = "/sitemap.xml";
     return NextResponse.redirect(url, 308);
