@@ -1,7 +1,7 @@
 {
-  "title": "404 • Página no encontrada",
-  "description": "Ocurrió un error y no pudimos encontrar este recurso. Si llegaste aquí por error o aparece ocasionalmente, intenta forzar un refresco.",
-  "forceRefresh": "Hacer click acá (forzar refresco)",
-  "goHome": "Ir al inicio",
-  "tip": "Consejo: si este 404 aparece luego de un tiempo, puede ser por caché del navegador o del CDN."
+  "title": "404 • Page non trouvée",
+  "description": "Une erreur s'est produite et nous n'avons pas pu trouver cette ressource. Si vous êtes arrivé ici par erreur ou si cela apparaît occasionnellement, essayez de forcer le rafraîchissement.",
+  "forceRefresh": "Cliquez ici (forcer le rafraîchissement)",
+  "goHome": "Aller à l'accueil",
+  "tip": "Conseil : si cette erreur 404 apparaît après un certain temps, cela peut être dû au cache du navigateur ou du CDN."
 }

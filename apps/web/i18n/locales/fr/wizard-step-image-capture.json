@@ -1,26 +1,26 @@
 {
-  "title": "Captura del Examen",
+  "title": "Capture de l'Examen",
   "capture": {
-    "instruction": "Toma una foto clara del examen completo",
-    "subInstruction": "Asegúrate de que todas las esquinas sean visibles",
-    "button": "Tomar Foto",
-    "description": "Al hacer clic en \"Tomar Foto\", se abrirá la cámara de tu dispositivo",
-    "flashOn": "Flash encendido",
-    "flashOff": "Flash apagado"
+    "instruction": "Prenez une photo claire de l'examen complet",
+    "subInstruction": "Assurez-vous que tous les coins sont visibles",
+    "button": "Prendre une Photo",
+    "description": "En cliquant sur \"Prendre une Photo\", l'appareil photo de votre appareil s'ouvrira",
+    "flashOn": "Flash activé",
+    "flashOff": "Flash désactivé"
   },
   "suggestions": {
-    "title": "Sugerencias para una mejor captura",
+    "title": "Suggestions pour une meilleure capture",
     "tips": [
-      "Buena iluminación, preferiblemente luz natural",
-      "Superficie plana sin sombras",
-      "Toda la hoja visible en el encuadre",
-      "Cámara paralela al documento",
-      "Evita movimientos bruscos"
+      "Bon éclairage, de préférence lumière naturelle",
+      "Surface plane sans ombres",
+      "Toute la feuille visible dans le cadre",
+      "Appareil photo parallèle au document",
+      "Évitez les mouvements brusques"
     ]
   },
   "preview": {
-    "altText": "Examen capturado",
-    "retakeButton": "Retour a capturar",
+    "altText": "Examen capturé",
+    "retakeButton": "Reprendre la capture",
     "continueButton": "Continuer"
   }
 }

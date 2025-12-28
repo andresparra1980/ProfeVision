@@ -12,17 +12,17 @@
     "close": "Fermer",
     "continue": "Continuer",
     "confirm": "Confirmer",
-    "startFree": "Commencer gratuitement !",
+    "startFree": "Commencer Gratuitement !",
     "learnMore": "En savoir plus",
-    "startTrial": "Commencer l'essai gratuit",
+    "startTrial": "Démarrer l'essai gratuit",
     "exportGrades": "Exporter les notes",
-    "login": "Connexion",
+    "login": "Se connecter",
     "register": "S'inscrire",
     "goToDashboard": "Aller au tableau de bord"
   },
   "labels": {
     "name": "Nom",
-    "email": "Adresse email",
+    "email": "E-mail",
     "password": "Mot de passe",
     "description": "Description",
     "date": "Date",
@@ -39,38 +39,38 @@
   "messages": {
     "loading": "Chargement...",
     "success": "Opération réussie",
-    "error": "Une erreur s'est produite",
+    "error": "Une erreur est survenue",
     "noData": "Aucune donnée disponible",
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet élément?",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet élément ?",
     "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
   },
   "language": {
-    "switch": "Changer la langue",
+    "switch": "Changer de langue",
     "spanish": "Espagnol",
     "english": "Anglais",
     "label": "Langue"
   },
   "navigation": {
     "home": "Accueil",
-    "howItWorks": "Comment ça marche?",
-    "howItWorksDescription": "Découvrez comment transformer votre façon de créer, gérer et évaluer les examens",
+    "howItWorks": "Comment ça marche ?",
+    "howItWorksDescription": "Découvrez comment transformer votre façon de créer, d'administrer et de noter les examens",
     "exams": "Examens",
-    "examsDescription": "Créez et gérez des examens de plusieurs façons",
-    "manualGenerator": "Générateur manuel",
+    "examsDescription": "Créez et gérez des examens de multiples façons",
+    "manualGenerator": "Générateur Manuel",
     "aiGenerator": "Générateur avec IA",
     "aiGeneratorDescription": "Générez des examens automatiquement avec l'intelligence artificielle",
-    "paperExams": "Examens sur Papier",
-    "paperExamsDescription": "Numérisez et évaluez automatiquement les examens papier",
-    "functions": "Fonctionnalités",
-    "institutionsManagement": "Gestion des institutions",
-    "subjectsManagement": "Gestion des matières",
-    "groupsManagement": "Gestion des groupes",
-    "studentsManagement": "Gestion des étudiants",
-    "reportsManagement": "Gestion des rapports",
+    "paperExams": "Examens Papier",
+    "paperExamsDescription": "Scannez et notez des examens physiques automatiquement",
+    "functions": "Fonctions",
+    "institutionsManagement": "Gestion des Institutions",
+    "subjectsManagement": "Gestion des Matières",
+    "groupsManagement": "Gestion des Groupes",
+    "studentsManagement": "Gestion des Étudiants",
+    "reportsManagement": "Gestion des Rapports",
     "reports": "Rapports",
-    "mobileApp": "Application mobile",
+    "mobileApp": "Application Mobile",
     "mobileAppDescription": "En développement - Bientôt disponible",
-    "pricing": "Tarification",
+    "pricing": "Tarifs",
     "blog": "Blog",
     "contact": "Contact",
     "about": "À propos",
@@ -80,24 +80,24 @@
     "cookies": "Cookies"
   },
   "footer": {
-    "description": "ProfeVision est la plateforme intégrale pour les éducateurs. Automatisez la création et la notation des examens avec l'IA et la technologie OMR, ce qui vous permet de numériser et corriger les tests papier instantanément avec votre téléphone. En outre, centralisez la gestion complète des institutions, des matières, des groupes et des étudiants. Économisez du temps, optimisez l'évaluation pédagogique et obtenez des insights précis pour un enseignement plus efficace. C'est votre outil ultime pour transformer la gestion académique.",
+    "description": "ProfeVisión est la plateforme intégrale pour les éducateurs. Automatisez la création et la notation des examens avec l'IA et la technologie OMR, vous permettant de scanner et de corriger des tests sur papier instantanément avec votre mobile. De plus, elle centralise la gestion complète des institutions, des matières, des groupes et des étudiants. Gagnez du temps, optimisez l'évaluation éducative et obtenez des informations précises pour un enseignement plus efficace. C'est votre outil définitif pour transformer la gestion académique.",
     "sections": {
       "product": "Produit",
       "company": "Entreprise",
-      "legal": "Légal"
+      "legal": "Juridique"
     },
     "links": {
-      "howItWorks": "Comment ça marche?",
-      "pricing": "Tarification",
+      "howItWorks": "Comment ça marche ?",
+      "pricing": "Tarifs",
       "aiGenerator": "Générateur IA",
-      "mobileApp": "Application mobile",
+      "mobileApp": "App Mobile",
       "about": "À propos",
       "blog": "Blog",
       "contact": "Contact",
       "terms": "Conditions",
       "privacy": "Confidentialité",
       "cookies": "Cookies",
-      "termsOfService": "Conditions de service",
+      "termsOfService": "Conditions d'utilisation",
       "privacyPolicy": "Politique de confidentialité",
       "cookiesPolicy": "Politique relative aux cookies"
     },
@@ -105,514 +105,514 @@
   },
   "homepage": {
     "hero": {
-      "badge": "Nouveau! Notation avec Vision Artificielle (OMR)",
-      "title": "La meilleure application",
-      "titleHighlight": "para Escanear y Calificar Examens sur Papier",
-      "description": "Chez ProfeVision, nous comprenons les défis de l'éducation moderne. Nous avons développé la solution tout-en-un qui automatise la création, la notation et la gestion des examens avec l'IA, libérant votre temps précieux pour vous concentrer sur ce qui compte vraiment: enseigner et promouvoir l'apprentissage de vos élèves.",
-      "startFree": "Commencer gratuitement !",
+      "badge": "Nouveau ! Notation par Vision par Ordinateur (OMR)",
+      "title": "La Meilleure Application",
+      "titleHighlight": "pour Scanner et Noter les Examens sur Papier",
+      "description": "Chez ProfeVisión, nous comprenons les défis de l'éducation moderne. Nous avons développé la solution tout-en-un qui automatise la création, la notation et la gestion des examens avec l'IA, libérant ainsi votre temps précieux pour que vous puissiez vous concentrer sur ce qui compte vraiment : enseigner et stimuler l'apprentissage de vos étudiants.",
+      "startFree": "Commencer Gratuitement !",
       "learnMore": "En savoir plus",
-      "registerTitle": "Registrarse gratis en ProfeVisión - Créer cuenta sin costo",
-      "learnMoreTitle": "En savoir plus sur les fonctionnalités de ProfeVision",
-      "avatarAlt": "Avatar du professeur {number} utilisant ProfeVision",
-      "avatarTitle": "Professeur qui fait confiance à ProfeVision pour automatiser la notation des examens",
+      "registerTitle": "S'inscrire gratuitement sur ProfeVisión - Créer un compte sans frais",
+      "learnMoreTitle": "En savoir plus sur les fonctionnalités de ProfeVisión",
+      "avatarAlt": "Avatar de l'enseignant {number} qui utilise ProfeVisión",
+      "avatarTitle": "Enseignant qui fait confiance à ProfeVisión pour automatiser la notation des examens",
       "trustText": "Plus de",
-      "trustNumber": "1,000+",
-      "trustSuffix": "professeurs nous font confiance"
+      "trustNumber": "1 000+",
+      "trustSuffix": "enseignants nous font confiance"
     },
     "features": {
-      "badge": "Caractéristiques principales",
-      "title": "Tout ce dont vous avez besoin en une seule plateforme",
+      "badge": "Caractéristiques Principales",
+      "title": "Tout ce dont vous avez besoin sur une seule plateforme",
       "description": "ProfeVision simplifie votre travail d'éducateur avec des outils puissants et intuitifs",
       "examCreation": {
-        "title": "Création intelligente d'examens",
-        "description": "Générez des tests éducatifs personnalisés avec l'assistance de l'IA. Profitez de multiples formats (choix multiples, vrai/faux, etc.), de questions de qualité et de modèles réutilisables. Économisez du temps et assurez des évaluations précises et pertinentes."
+        "title": "Création d'Examens Intelligente",
+        "description": "Générez des tests éducatifs personnalisés avec l'assistance de l'IA. Profitez de multiples formats (choix multiple, vrai/faux, etc.), de questions de qualité et de modèles réutilisables. Gagnez du temps et assurez des évaluations précises et pertinentes."
       },
       "aiGrading": {
-        "title": "Calificación con IA y Visión Artificial (OMR)",
-        "description": "Transformez votre processus de correction. Notre plateforme d'évaluation vous permet de noter les examens avec votre téléphone en quelques minutes avec notre technologie OMR avancée. Scannez et traitez simplement les feuilles de réponses automatiquement avec votre smartphone ou tablette. L'IA gère la correction instantanée des tests en ligne et la lecture précise du papier."
+        "title": "Notation avec IA et Vision Artificielle (OMR)",
+        "description": "Transformez votre processus de correction. Notre plateforme d'évaluation vous permet de noter des examens avec votre téléphone en quelques minutes grâce à notre technologie OMR avancée. Scannez et traitez simplement les feuilles de réponses automatiquement avec votre smartphone ou tablette. L'IA se charge de la correction instantanée des tests en ligne et de la lecture précise du papier."
       },
       "resultAnalysis": {
-        "title": "Análisis de Resultados Detallado",
-        "description": "Obtenez des insights précieux sur les performances de vos élèves. Identifiez les domaines d'amélioration, les forces et les tendances avec nos rapports graphiques et détaillés. Prenez des décisions pédagogiques éclairées pour promouvoir l'apprentissage adaptatif."
+        "title": "Analyse de Résultats Détaillée",
+        "description": "Obtenez des insights précieux sur la performance de vos étudiants. Identifiez les domaines d'amélioration, les forces et les tendances avec nos rapports graphiques et détaillés. Prenez des décisions pédagogiques éclairées pour renforcer l'apprentissage adaptatif."
       }
     },
     "modules": {
-      "badge": "Modules principaux",
+      "badge": "Modules Principaux",
       "title": "Gestion éducative complète",
       "description": "Organisez tous les aspects de votre environnement éducatif en un seul endroit",
       "moreInfo": "Plus d'informations",
       "institutions": {
-        "title": "Gestion des institutions",
+        "title": "Gestion des Institutions",
         "feature1": "Créez et gérez plusieurs institutions",
-        "feature2": "Configurez les paramètres spécifiques par institution",
+        "feature2": "Configurez des paramètres spécifiques par institution",
         "feature3": "Analyses par institution",
-        "linkTitle": "Voir la documentation sur la gestion des entités dans ProfeVision"
+        "linkTitle": "Voir la documentation sur la gestion des entités dans ProfeVisión"
       },
       "subjects": {
-        "title": "Gestion des matières",
-        "feature1": "Créez et organisez les matières par institution",
+        "title": "Gestion des Matières",
+        "feature1": "Créez et organisez des matières par institution",
         "feature2": "Ajoutez des descriptions et des détails",
-        "feature3": "Structurez votre curriculum",
-        "linkTitle": "Voir la documentation sur la gestion des matières dans ProfeVision"
+        "feature3": "Structurez votre plan d'études",
+        "linkTitle": "Voir la documentation sur la gestion des matières dans ProfeVisión"
       },
       "groups": {
-        "title": "Gestion des groupes",
+        "title": "Gestion des Groupes",
         "feature1": "Créez et gérez des groupes d'étudiants",
-        "feature2": "Définissez les périodes académiques",
-        "feature3": "Importation en masse des étudiants",
-        "linkTitle": "Voir la documentation sur la gestion des groupes d'étudiants dans ProfeVision"
+        "feature2": "Définissez des périodes académiques",
+        "feature3": "Importation massive d'étudiants",
+        "linkTitle": "Voir la documentation sur la gestion des groupes d'étudiants dans ProfeVisión"
       },
       "grading": {
-        "title": "Schéma de notation",
-        "feature1": "Définissez les schémas détaillés par groupe",
+        "title": "Schéma de Notes",
+        "feature1": "Définissez des schémas détaillés par groupe",
         "feature2": "Configurez les périodes et les composantes",
-        "feature3": "Attribuez les pondérations en pourcentage",
-        "linkTitle": "Voir la documentation sur le système de notation dans ProfeVision"
+        "feature3": "Attribuez des poids en pourcentage",
+        "linkTitle": "Voir la documentation sur le système de notes dans ProfeVisión"
       },
       "exams": {
-        "title": "Gestion des examens",
+        "title": "Gestion des Examens",
         "feature1": "Créez des examens avec l'assistance de l'IA",
-        "feature2": "Générez des feuilles de réponses avec code QR",
-        "feature3": "Calificación automática con Visión Artificial (OMR)",
-        "linkTitle": "Voir la documentation sur la gestion des examens dans ProfeVision"
+        "feature2": "Générez des feuilles de réponses avec QR",
+        "feature3": "Correction automatique avec Vision Artificielle (OMR)",
+        "linkTitle": "Voir la documentation sur la gestion des examens dans ProfeVisión"
       },
       "analysis": {
-        "title": "Analyse et résultats",
+        "title": "Analyse et Résultats",
         "feature1": "Statistiques détaillées des examens",
         "feature2": "Rapports en Excel et PDF",
         "feature3": "Vue détaillée par étudiant",
-        "linkTitle": "Voir la documentation sur l'analyse et les résultats des examens dans ProfeVision"
+        "linkTitle": "Voir la documentation sur l'analyse et les résultats d'examens dans ProfeVisión"
       }
     },
     "benefits": {
-      "badge": "Beneficios Clave",
-      "title": "Ahorra tiempo y mejora la calidad educativa",
-      "description": "ProfeVision te permite enfocarte en lo que realmente importa: la enseñanza y el aprendizaje de tus estudiantes, impulsando la transformación digital en educación. Somos la plataforma para profesores que estabas buscando.",
-      "startFree": "Comenzar Gratis",
-      "startFreeTitle": "Comenzar gratis con ProfeVisión - Registro sin costo",
+      "badge": "Avantages Clés",
+      "title": "Gagnez du temps et améliorez la qualité éducative",
+      "description": "ProfeVision vous permet de vous concentrer sur ce qui compte vraiment : l'enseignement et l'apprentissage de vos étudiants, en stimulant la transformation numérique dans l'éducation. Nous sommes la plateforme pour professeurs que vous recherchiez.",
+      "startFree": "Commencer Gratuitement",
+      "startFreeTitle": "Commencer gratuitement avec ProfeVision - Inscription gratuite",
       "automation": {
-        "title": "Automatización Inteligente",
-        "description": "Reduce drásticamente el tiempo dedicado a tareas administrativas y de calificación gracias a la IA y nuestra aplicación para escanear exámenes."
+        "title": "Automatisation Intelligente",
+        "description": "Réduisez considérablement le temps consacré aux tâches administratives et de correction grâce à l'IA et à notre application pour scanner les examens."
       },
       "organization": {
-        "title": "Organización Centralizada",
-        "description": "Ten toda la información educativa en un solo lugar, accesible cuando la necesites, mejorando la gestión de evaluaciones académicas."
+        "title": "Organisation Centralisée",
+        "description": "Regroupez toutes les informations éducatives en un seul endroit, accessibles dès que vous en avez besoin, améliorant ainsi la gestion des évaluations académiques."
       },
       "insights": {
-        "title": "Insights Valiosos",
-        "description": "Toma decisiones pedagógicas basadas en datos confiables para mejorar el rendimiento estudiantil y adaptar tus estrategias."
+        "title": "Insights Précieux",
+        "description": "Prenez des décisions pédagogiques basées sur des données fiables pour améliorer le rendement des étudiants et adapter vos stratégies."
       },
       "flexibility": {
-        "title": "Flexibilidad Total",
-        "description": "Adapta esta plataforma de exámenes a tus necesidades específicas y flujo de trabajo, desde primaria hasta la universidad."
+        "title": "Flexibilité Totale",
+        "description": "Adaptez cette plateforme d'examens à vos besoins spécifiques et à votre flux de travail, du primaire à l'université."
       },
       "gradingSpeed": {
-        "title": "Calificación en Minutos, No en Horas",
-        "description": "La tecnología OMR (Optical Mark Recognition) convierte horas de calificación manual en minutos, permitiéndote enfocarte en la enseñanza y el feedback automático. ProfeVisión es una de las mejores herramientas digitales para docentes."
+        "title": "Notation en Minutes, Non en Heures",
+        "description": "La technologie OMR (Optical Mark Recognition) transforme des heures de correction manuelle en minutes, vous permettant de vous concentrer sur l'enseignement et le feedback automatique. ProfeVisión est l'un des meilleurs outils numériques pour les enseignants."
       },
       "gradingTable": {
-        "title": "Tabulado de Notas",
-        "subject": "Matemáticas - Grupo A",
-        "period": "Período 2",
-        "stats": "25 estudiantes · Promedio: 4.2",
-        "student": "Estudiante",
+        "title": "Tableau des Notes",
+        "subject": "Matemáticas - Groupe A",
+        "period": "Période 2",
+        "stats": "25 étudiants · Moyenne : 4.2",
+        "student": "Étudiant",
         "exam1": "Examen 1",
         "exam2": "Examen 2",
         "final": "Final",
-        "export": "Exporter les notes"
+        "export": "Exporter les Notes"
       }
     },
     "cta": {
-      "title": "Transforma tu experiencia educativa con ProfeVision",
-      "description": "Únete a miles de educadores que ya están optimizando su trabajo y mejorando los resultados de sus estudiantes.",
+      "title": "Transformez votre expérience éducative avec ProfeVision",
+      "description": "Rejoignez des milliers d'éducateurs qui optimisent déjà leur travail et améliorent les résultats de leurs étudiants.",
       "startTrial": "Commencer l'essai gratuit",
-      "startTrialTitle": "Iniciar prueba gratuita de ProfeVisión - Sin compromisos",
+      "startTrialTitle": "Démarrer l'essai gratuit de ProfeVision - Sans engagement",
       "learnMore": "En savoir plus",
       "stats": {
         "teachers": "1000+",
-        "teachersLabel": "Enseignants actifs",
-        "institutions": "50+",
-        "institutionsLabel": "Instituciones",
+        "teachersLabel": "Enseignants Actifs",
+        "institutions": "50+ {x}",
+        "institutionsLabel": "Établissements",
         "exams": "100K+",
-        "examsLabel": "Examens évalués",
+        "examsLabel": "Examens Corrigés",
         "satisfaction": "98%",
-        "satisfactionLabel": "Satisfacción"
+        "satisfactionLabel": "Satisfaction"
       }
     }
   },
   "pricing": {
     "hero": {
-      "badge": "Lanzamiento Especial",
-      "title": "¡Gratis Durante el",
-      "titleHighlight": "Lanzamiento",
-      "description": "Aprovecha el acceso gratuito a ProfeVisión mientras estamos en fase de lanzamiento. Todas las funciones disponibles sin costo.",
-      "foundersButton": "Iniciar ahora en nuestro Plan Fundador",
-      "foundersNote": "Plan gratuito con generación de IA y escaneos ilimitados por tiempo limitado. No se requiere tarjeta de crédito."
+      "badge": "Lancement Spécial",
+      "title": "Gratuit Pendant le",
+      "titleHighlight": "Lancement",
+      "description": "Profitez de l'accès gratuit à ProfeVisión pendant notre phase de lancement. Toutes les fonctionnalités sont disponibles sans frais.",
+      "foundersButton": "Commencer maintenant avec notre Plan Fondateur",
+      "foundersNote": "Plan gratuit avec génération IA et scans illimités pour une durée limitée. Aucune carte de crédit requise."
     },
     "launch": {
-      "title": "Plan de Lanzamiento",
-      "price": "GRATIS",
-      "subtitle": "Acceso completo durante la fase de lanzamiento",
+      "title": "Plan de Lancement",
+      "price": "GRATUIT",
+      "subtitle": "Accès complet pendant la phase de lancement",
       "features": {
-        "unlimitedStudents": "Estudiantes ilimitados",
+        "unlimitedStudents": "Étudiants illimités",
         "unlimitedExams": "Examens illimités",
-        "aiGeneration": "Generación con IA",
-        "omrGrading": "Calificación automática OMR",
-        "advancedReports": "Reportes avanzados",
-        "institutionManagement": "Gestión de instituciones",
+        "aiGeneration": "Génération avec IA",
+        "omrGrading": "Correction automatique OMR",
+        "advancedReports": "Rapports avancés",
+        "institutionManagement": "Gestion d'institutions",
         "mobileApp": "Application mobile",
-        "prioritySupport": "Soporte prioritario"
+        "prioritySupport": "Support prioritaire"
       },
-      "cta": "¡Regístrate Gratis Ahora!"
+      "cta": "Inscrivez-vous Gratuitement Maintenant !"
     },
     "future": {
-      "title": "Planes Futuros",
-      "description": "Cuando finalice el período de lanzamiento, ofreceremos planes flexibles para docentes e instituciones de todos los tamaños.",
+      "title": "Plans Futurs",
+      "description": "Lorsque la période de lancement sera terminée, nous proposerons des plans flexibles pour les enseignants et les institutions de toutes tailles.",
       "basic": {
-        "title": "Plan Básico",
-        "price": "À venir",
+        "title": "Plan Basique",
+        "price": "Bientôt disponible",
         "features": {
-          "students": "Hasta 500 estudiantes",
+          "students": "Jusqu'à 500 étudiants",
           "exams": "Examens illimités",
-          "reports": "Reportes básicos",
-          "support": "Soporte por email"
+          "reports": "Rapports de base",
+          "support": "Support par e-mail"
         }
       },
       "institutional": {
-        "title": "Plan Institucional",
+        "title": "Plan Institutionnel",
         "price": "À venir",
         "features": {
-          "students": "Estudiantes ilimitados",
-          "institutions": "Múltiples instituciones",
-          "reports": "Reportes avanzados",
-          "support": "Soporte dedicado"
+          "students": "Étudiants illimités",
+          "institutions": "Plusieurs institutions",
+          "reports": "Rapports avancés",
+          "support": "Support dédié"
         }
       }
     },
     "comparison": {
-      "title": "Todas las funciones que necesitas",
-      "description": "Ambos planes incluyen acceso completo a la plataforma"
+      "title": "Toutes les fonctionnalités dont vous avez besoin",
+      "description": "Les deux forfaits incluent un accès complet à la plateforme"
     },
     "cta": {
-      "title": "¿Listo para Revolucionar tus Evaluaciones?",
-      "description": "Únete ahora y obtén acceso gratuito a todas las funciones de ProfeVisión durante nuestro período de lanzamiento.",
-      "startFree": "Comenzar Gratis",
+      "title": "Prêt à révolutionner vos évaluations ?",
+      "description": "Rejoignez-nous maintenant et profitez d'un accès gratuit à toutes les fonctionnalités de ProfeVisión pendant notre période de lancement.",
+      "startFree": "Commencer gratuitement",
       "learnMore": "En savoir plus"
     }
   },
   "howItWorks": {
     "hero": {
-      "badge": "¿Cómo Funciona?",
-      "title": "Crea y califica exámenes en",
-      "titleHighlight": "segundos",
-      "titleEnd": "con ProfeVision",
-      "subtitle": "La forma más rápida y moderna de evaluar a tus estudiantes",
-      "description": "¿Te gustaría crear exámenes en minutos y calificarlos en segundos? Con ProfeVision puedes hacerlo. Nuestra plataforma está diseñada para profesores y escuelas que buscan ahorrar tiempo y obtener resultados precisos. Crea exámenes con inteligencia artificial, sube tus pruebas en PDF y califica automáticamente escaneando las hojas de respuesta impresas con tu celular. Además, organiza todo por instituciones, materias y clases, y accede a un dashboard con métricas detalladas de los resultados.",
-      "cta": "Empieza ahora gratis"
+      "badge": "Comment ça marche ?",
+      "title": "Créez et notez des examens en",
+      "titleHighlight": "quelques secondes",
+      "titleEnd": "avec ProfeVision",
+      "subtitle": "La méthode la plus rapide et moderne pour évaluer vos étudiants",
+      "description": "Souhaitez-vous créer des examens en quelques minutes et les noter en quelques secondes ? Avec ProfeVision, c'est possible. Notre plateforme est conçue pour les professeurs et les écoles qui cherchent à gagner du temps et à obtenir des résultats précis. Créez des examens grâce à l'intelligence artificielle, téléchargez vos épreuves en PDF et notez automatiquement en scannant les feuilles de réponses imprimées avec votre téléphone. De plus, organisez tout par établissements, matières et classes, et accédez à un tableau de bord avec des indicateurs détaillés des résultats.",
+      "cta": "Commencez maintenant gratuitement"
     },
     "features": {
-      "badge": "Funcionalidades Principales",
-      "title": "¿Qué puedes hacer con ProfeVision?",
+      "badge": "Fonctionnalités Principales",
+      "title": "Que pouvez-vous faire avec ProfeVision ?",
       "feature1": {
-        "title": "1. Crea exámenes con IA o sube tus pruebas en PDF",
+        "title": "1. Créez des examens avec l'IA ou téléchargez vos épreuves en PDF",
         "item1": {
-          "title": "Genera exámenes automáticamente:",
-          "description": "Usa nuestra inteligencia artificial para crear exámenes personalizados en segundos. Elige entre preguntas de opción múltiple, abiertas o mixtas."
+          "title": "Générez des examens automatiquement :",
+          "description": "Utilisez notre intelligence artificielle pour créer des examens personnalisés en quelques secondes. Choisissez entre des questions à choix multiples, ouvertes ou mixtes."
         },
         "item2": {
-          "title": "Sube tus exámenes en PDF:",
-          "description": "Si ya tienes tus pruebas listas, simplemente súbelas a la plataforma. No necesitas transcribir nada."
+          "title": "Téléchargez vos examens en PDF :",
+          "description": "Si vous avez déjà vos tests prêts, téléchargez-les simplement sur la plateforme. Vous n'avez rien à transcrire."
         }
       },
       "feature2": {
-        "title": "2. Califica más rápido con tu celular",
+        "title": "2. Notez plus rapidement avec votre téléphone portable",
         "item1": {
-          "title": "Escanea hojas de respuesta impresas:",
-          "description": "Imprime las hojas de respuesta, aplícalas en clase y luego escanéalas con tu celular usando nuestra tecnología de Visión Artificial (OMR). Obtén las calificaciones al instante, sin errores y sin esfuerzo manual."
+          "title": "Scannez les feuilles de réponses imprimées :",
+          "description": "Imprimez les feuilles de réponses, utilisez-les en classe, puis scannez-les avec votre téléphone en utilisant notre technologie de Vision Artificielle (OMR). Obtenez les notes instantanément, sans erreurs et sans effort manuel."
         },
         "item2": {
-          "title": "Resultados automáticos y precisos:",
-          "description": "Olvídate de revisar hoja por hoja. ProfeVision te entrega los resultados en segundos y los organiza automáticamente."
+          "title": "Résultats automatiques et précis :",
+          "description": "Oubliez la révision feuille par feuille. ProfeVision vous livre les résultats en quelques secondes et les organise automatiquement."
         }
       },
       "feature3": {
-        "title": "3. Organiza todo por instituciones, materias y clases",
+        "title": "3. Organisez tout par institutions, matières et classes",
         "item1": {
-          "title": "Crea tu institución:",
-          "description": "Registra tu escuela, academia o centro educativo en pocos pasos."
+          "title": "Créez votre institution :",
+          "description": "Enregistrez votre école, académie ou centre éducatif en quelques étapes."
         },
         "item2": {
-          "title": "Agrega materias y clases:",
-          "description": "Organiza tus exámenes y resultados por materia y grupo. Así tendrás todo ordenado y fácil de encontrar."
+          "title": "Ajoutez des matières et des classes :",
+          "description": "Organisez vos examens et vos résultats par matière et par groupe. Ainsi, vous aurez tout ordonné et facile à trouver."
         },
         "item3": {
           "title": "Tableau de bord avec métriques :",
-          "description": "Visualiza el rendimiento de tus estudiantes con gráficos y reportes claros. Analiza resultados por clase, materia o período y toma mejores decisiones."
+          "description": "Visualisez la performance de vos étudiants avec des graphiques et des rapports clairs. Analysez les résultats par classe, matière ou période et prenez de meilleures décisions."
         }
       }
     },
     "benefits": {
-      "badge": "Ventajas",
-      "title": "Beneficios de usar ProfeVision",
+      "badge": "Avantages",
+      "title": "Avantages d'utiliser ProfeVision",
       "timeSaving": {
-        "title": "Ahorra tiempo",
-        "description": "Crea y califica exámenes en minutos."
+        "title": "Gagnez du temps",
+        "description": "Créez et notez des examens en quelques minutes."
       },
       "accuracy": {
-        "title": "Resultados precisos",
-        "description": "Elimina errores humanos con la calificación automática."
+        "title": "Résultats précis",
+        "description": "Éliminez les erreurs humaines avec la notation automatique."
       },
       "organization": {
-        "title": "Organización total",
-        "description": "Mantén tus exámenes y resultados ordenados por institución, materia y clase."
+        "title": "Organisation totale",
+        "description": "Gardez vos examens et vos résultats organisés par institution, matière et classe."
       },
       "accessibility": {
-        "title": "Acceso desde cualquier dispositivo",
-        "description": "Trabaja desde tu computadora o celular."
+        "title": "Accès depuis n'importe quel appareil",
+        "description": "Travaillez depuis votre ordinateur ou votre téléphone portable."
       },
       "analytics": {
-        "title": "Análisis avanzado",
-        "description": "Visualiza el progreso de tus estudiantes con métricas claras y útiles."
+        "title": "Analyses avancées",
+        "description": "Visualisez les progrès de vos étudiants avec des indicateurs clairs et utiles."
       }
     },
     "comparison": {
-      "badge": "Comparación",
-      "title": "ProfeVision vs. Métodos tradicionales",
+      "badge": "Comparaison",
+      "title": "ProfeVision vs. Méthodes traditionnelles",
       "table": {
-        "feature": "Característica",
+        "feature": "Fonctionnalité",
         "profevision": "ProfeVision",
-        "traditional": "Métodos tradicionales",
+        "traditional": "Méthodes traditionnelles",
         "yes": "Oui",
         "no": "Non",
         "rows": {
-          "aiCreation": "Creación de exámenes con IA",
-          "pdfUpload": "Subida de exámenes en PDF",
-          "omrGrading": "Calificación automática (OMR)",
-          "omrGradingYes": "Sí, con escaneo desde el celular",
-          "omrGradingNo": "No, manual",
-          "organization": "Organización por institución/materia",
-          "organizationYes": "Sí, todo centralizado",
-          "organizationNo": "Limitada, dispersa",
-          "dashboard": "Tableau de bord des métriques et rapports",
-          "dashboardYes": "Sí, en tiempo real",
-          "dashboardNo": "No, requiere trabajo manual",
-          "errorReduction": "Reducción de errores humanos",
-          "deviceAccess": "Acceso desde cualquier dispositivo",
-          "deviceAccessNo": "No siempre",
-          "timeSaving": "Ahorro de tiempo",
-          "timeSavingMax": "Máximo",
-          "timeSavingMin": "Mínimo"
+          "aiCreation": "Création d'examens avec IA",
+          "pdfUpload": "Téléchargement d'examens en PDF",
+          "omrGrading": "Correction automatique (OMR)",
+          "omrGradingYes": "Oui, avec numérisation par mobile",
+          "omrGradingNo": "Non, manuelle",
+          "organization": "Organisation par institution/matière",
+          "organizationYes": "Oui, tout centralisé",
+          "organizationNo": "Limitée, dispersée",
+          "dashboard": "Tableau de bord de métriques et rapports",
+          "dashboardYes": "Oui, en temps réel",
+          "dashboardNo": "Non, nécessite un travail manuel",
+          "errorReduction": "Réduction des erreurs humaines",
+          "deviceAccess": "Accès depuis n'importe quel appareil",
+          "deviceAccessNo": "Pas toujours",
+          "timeSaving": "Gain de temps",
+          "timeSavingMax": "Maximum",
+          "timeSavingMin": "Minimum"
         }
       }
     },
     "whyChoose": {
-      "badge": "La Mejor Elección",
-      "title": "¿Por qué elegir ProfeVision?",
-      "description": "ProfeVision es la herramienta ideal para profesores y escuelas que quieren modernizar la evaluación escolar digital. Nuestra plataforma es fácil de usar, rápida y confiable. Olvídate de procesos manuales y lleva tus exámenes al siguiente nivel con inteligencia artificial y tecnología de escaneo."
+      "badge": "Le Meilleur Choix",
+      "title": "Pourquoi choisir ProfeVision ?",
+      "description": "ProfeVision est l'outil idéal pour les professeurs et les écoles qui souhaitent moderniser l'évaluation scolaire numérique. Notre plateforme est facile à utiliser, rapide et fiable. Oubliez les processus manuels et faites passer vos examens au niveau supérieur grâce à l'intelligence artificielle et à la technologie de numérisation."
     },
     "faq": {
       "badge": "Foire aux questions",
-      "title": "Questions frecuentes (FAQ)",
+      "title": "Questions fréquemment posées (FAQ)",
       "questions": {
         "q1": {
-          "question": "¿Puedo usar ProfeVision en cualquier tipo de escuela?",
-          "answer": "Sí, la plataforma se adapta a escuelas, academias y centros de formación de cualquier tamaño."
+          "question": "Puis-je utiliser ProfeVision dans n'importe quel type d'école ?",
+          "answer": "Oui, la plateforme s'adapte aux écoles, académies et centres de formation de toutes tailles."
         },
         "q2": {
-          "question": "¿La calificación automática es confiable?",
-          "answer": "Sí, nuestra tecnología de Visión Artificial (OMR) garantiza resultados rápidos y precisos."
+          "question": "L'évaluation automatique est-elle fiable ?",
+          "answer": "Oui, notre technologie de Vision Artificielle (OMR) garantit des résultats rapides et précis."
         },
         "q3": {
-          "question": "¿Puedo subir exámenes en PDF?",
-          "answer": "Por supuesto. Solo súbelos a la plataforma y comienza a calificar."
+          "question": "Puis-je télécharger des examens en PDF ?",
+          "answer": "Bien sûr. Téléchargez-les simplement sur la plateforme et commencez à noter."
         },
         "q4": {
-          "question": "¿Necesito equipo especial para escanear las hojas de respuesta?",
-          "answer": "No, solo necesitas tu celular con la app de ProfeVisión."
+          "question": "Ai-je besoin d'un équipement spécial pour scanner les feuilles de réponses ?",
+          "answer": "Non, vous avez seulement besoin de votre téléphone portable avec l'application ProfeVisión."
         },
         "q5": {
-          "question": "¿La plataforma es segura?",
-          "answer": "Sí, protegemos toda tu información con los más altos estándares de seguridad."
+          "question": "La plateforme est-elle sécurisée ?",
+          "answer": "Oui, nous protégeons toutes vos informations avec les normes de sécurité les plus élevées."
         }
       }
     },
     "cta": {
-      "title": "ProfeVision es la herramienta ideal para modernizar la evaluación escolar digital",
-      "description": "Únete a miles de profesores y escuelas que ya están transformando sus procesos de evaluación con tecnología avanzada.",
-      "startFree": "Prueba ProfeVision gratis",
+      "title": "ProfeVision est l'outil idéal pour moderniser l'évaluation scolaire numérique",
+      "description": "Rejoignez des milliers de professeurs et d'écoles qui transforment déjà leurs processus d'évaluation grâce à une technologie avancée.",
+      "startFree": "Essayer ProfeVision gratuitement",
       "viewPricing": "Voir les tarifs"
     }
   },
   "paperExams": {
     "hero": {
-      "badge": "Calificación Instantánea",
-      "title": "Notez rapidement les examens avec les",
-      "titleHighlight": "Hojas de Respuesta",
+      "badge": "Correction Instantanée",
+      "title": "Corrigez vos Examens Rapidement avec les",
+      "titleHighlight": "Feuilles de Réponse",
       "titleEnd": "de ProfeVisión",
-      "description": "Transforma la evaluación de tus estudiantes con tecnología de vanguardia.",
-      "descriptionHighlight": "Califica exámenes en segundos",
-      "descriptionEnd": "usando solo tu smartphone o tablet.",
-      "cta": "Commencer maintenant"
+      "description": "Transformez l'évaluation de vos étudiants avec une technologie de pointe.",
+      "descriptionHighlight": "Corrigez des examens en quelques secondes",
+      "descriptionEnd": "en utilisant seulement votre smartphone ou tablette.",
+      "cta": "Commencer Maintenant"
     },
     "features": {
-      "badge": "Hojas de Respuesta",
-      "title": "Características y Uso",
-      "imageAlt": "Hoja de respuesta ProfeVisión con código QR y campos de respuesta",
+      "badge": "Feuilles de Réponses",
+      "title": "Caractéristiques et Utilisation",
+      "imageAlt": "Feuille de réponse ProfeVisión avec code QR et champs de réponse",
       "customFormat": {
-        "title": "Formato Personalizado",
+        "title": "Format Personnalisé",
         "uniqueId": {
-          "title": "Identificación única",
-          "description": "Cada hoja incluye el nombre e identificación del estudiante"
+          "title": "Identification unique",
+          "description": "Chaque feuille inclut le nom et l'identification de l'étudiant"
         },
         "qrCode": {
-          "title": "Código QR inteligente",
-          "description": "Ubicado en la esquina superior izquierda, contiene toda la información del examen"
+          "title": "Code QR intelligent",
+          "description": "Situé dans le coin supérieur gauche, il contient toutes les informations de l'examen"
         },
         "adaptableFormat": {
-          "title": "Formato adaptable",
-          "description": "Entre 1 y 40 campos de respuesta según la configuración del examen"
+          "title": "Format adaptable",
+          "description": "Entre 1 et 40 champs de réponse selon la configuration de l'examen"
         }
       }
     },
     "instructions": {
-      "title": "Instrucciones de Llenado",
+      "title": "Instructions de Remplissage",
       "penUse": {
-        "title": "Usar bolígrafo negro o azul",
-        "description": "para rellenar completamente las burbujas"
+        "title": "Utiliser un stylo noir ou bleu",
+        "description": "pour remplir complètement les bulles"
       },
       "avoidPencil": {
-        "title": "Evitar lápiz",
-        "description": "puede generar brillos y causar errores en la calificación"
+        "title": "Éviter le crayon",
+        "description": "peut générer des reflets et causer des erreurs de notation"
       },
       "correction": {
-        "title": "Para corregir",
-        "description": "Borrar completamente el interior de la burbuja incorrecta"
+        "title": "À corriger",
+        "description": "Effacer complètement l'intérieur de la bulle incorrecte"
       }
     },
     "restrictedAreas": {
-      "title": "Áreas Restringidas - No Escribir",
-      "qrCode": "Sobre el código QR",
-      "borders": "En los bordes del formato",
-      "answersSection": "Dentro de la sección de respuestas",
+      "title": "Zones Restreintes - Ne pas Écrire",
+      "qrCode": "Sur le code QR",
+      "borders": "Sur les bords du formulaire",
+      "answersSection": "À l'intérieur de la section des réponses",
       "tip": {
-        "title": "Tip",
-        "description": "Para notas adicionales, utiliza una hoja separada"
+        "title": "Conseil",
+        "description": "Pour des notes supplémentaires, utilisez une feuille séparée"
       }
     },
     "autoGrading": {
-      "badge": "Tecnología Avanzada",
-      "title": "Calificación Automática",
-      "imageAlt": "Proceso de calificación automática con smartphone",
-      "processTitle": "Proceso Simple en 3 Pasos",
+      "badge": "Technologie Avancée",
+      "title": "Évaluation Automatique",
+      "imageAlt": "Processus d'évaluation automatique avec smartphone",
+      "processTitle": "Processus Simple en 3 Étapes",
       "step1": {
-        "title": "Escanea las Hojas",
-        "item1": "Ingresa a la plataforma desde tu smartphone",
-        "item2": "Haz clic en el botón \"Califica Ya!\"",
-        "item3": "Escanea cada hoja de respuesta con la cámara"
+        "title": "Scannez les Feuilles",
+        "item1": "Accédez à la plateforme depuis votre smartphone",
+        "item2": "Cliquez sur le bouton \"Califica Ya!\"",
+        "item3": "Scannez chaque feuille de réponses avec la caméra"
       },
       "step2": {
-        "title": "Detección Automática",
-        "description": "El sistema identifica instantáneamente:",
-        "item1": "Versión del examen",
-        "item2": "Respuestas marcadas por el estudiante",
-        "item3": "Identificación del estudiante"
+        "title": "Détection Automatique",
+        "description": "Le système identifie instantanément :",
+        "item1": "Version de l'examen",
+        "item2": "Réponses marquées par l'étudiant",
+        "item3": "Identification de l'étudiant"
       },
       "step3": {
-        "title": "Confirma y Guarda",
-        "item1": "Revisa las calificaciones detectadas",
-        "item2": "Opciones disponibles:",
-        "item3": "Atrás: Para volver a escanear si es necesario",
-        "item4": "Enregistrer Resultados: Para confirmar y almacenar"
+        "title": "Confirmez et Enregistrez",
+        "item1": "Vérifiez les notes détectées",
+        "item2": "Options disponibles :",
+        "item3": "Retour : Pour scanner à nouveau si nécessaire",
+        "item4": "Enregistrer les Résultats : Pour confirmer et stocker"
       }
     },
     "benefits": {
-      "badge": "Resultado Final",
-      "title": "Ahorra tiempo y esfuerzo",
-      "description": "Repite este proceso con cada examen y tendrás",
-      "descriptionHighlight": "todos los resultados calificados e ingresados automáticamente",
-      "descriptionEnd": "en el sistema de manera rápida y eficiente.",
+      "badge": "Résultat Final",
+      "title": "Gagnez du temps et de l'effort",
+      "description": "Répétez ce processus avec chaque examen et vous aurez",
+      "descriptionHighlight": "tous les résultats notés et saisis automatiquement",
+      "descriptionEnd": "dans le système de manière rapide et efficace.",
       "advantage": {
-        "title": "Ventaja",
-        "description": "Sin necesidad de calificación manual - todo el proceso es automático y preciso."
+        "title": "Avantage",
+        "description": "Pas besoin de notation manuelle - tout le processus est automatique et précis."
       }
     },
     "cta": {
-      "title": "Califica exámenes en segundos con las hojas de respuesta de ProfeVisión",
-      "description": "Digitaliza tu proceso de evaluación con tecnología de escaneo automático y obtén resultados precisos al instante.",
-      "startNow": "Commencer maintenant",
-      "moreDetails": "Ver Más Detalles"
+      "title": "Notez les examens en quelques secondes avec les feuilles de réponses de ProfeVisión",
+      "description": "Numérisez votre processus d'évaluation grâce à la technologie de balayage automatique et obtenez des résultats précis instantanément.",
+      "startNow": "Commencer Maintenant",
+      "moreDetails": "Voir Plus de Détails"
     }
   },
   "exams": {
     "hero": {
-      "badge": "Générateur d'examens",
-      "title": "Créez des examens avec",
-      "titleHighlight": "Inteligencia Artificial",
-      "titleEnd": "en segundos",
-      "description": "Transforma cualquier contenido educativo en evaluaciones completas y personalizadas. ProfeVisión utiliza IA avanzada para generar preguntas de opción múltiple, verdadero/falso y abiertas desde tus materiales de clase.",
-      "cta": "Commencer maintenant"
+      "badge": "Générateur d'Examens",
+      "title": "Créez des Examens avec l'",
+      "titleHighlight": "Intelligence Artificielle",
+      "titleEnd": "en quelques secondes",
+      "description": "Transformez n'importe quel contenu éducatif en évaluations complètes et personnalisées. ProfeVisión utilise une IA avancée pour générer des questions à choix multiples, vrai/faux et ouvertes à partir de vos supports de cours.",
+      "cta": "Commencer Maintenant"
     },
     "features": {
-      "badge": "Métodos de Creación",
-      "title": "Caractéristiques principales",
+      "badge": "Méthodes de Création",
+      "title": "Caractéristiques Principales",
       "aiCreation": {
-        "title": "Creación con IA",
-        "description": "Utiliza inteligencia artificial avanzada para generar preguntas personalizadas automáticamente.",
-        "item1": "Genera preguntas de opción múltiple, verdadero/falso y abiertas",
-        "item2": "Personaliza tema, dificultad y estilo",
-        "item3": "Selecciona número de opciones de respuesta",
-        "item4": "Ajusta según sección del plan de estudios",
-        "item5": "Ahorra tiempo y mejora la calidad"
+        "title": "Création avec IA",
+        "description": "Utilise l'intelligence artificielle avancée pour générer automatiquement des questions personnalisées.",
+        "item1": "Génère des questions à choix multiples, vrai/faux et ouvertes",
+        "item2": "Personnalise le thème, la difficulté et le style",
+        "item3": "Sélectionne le nombre d'options de réponse",
+        "item4": "Ajuste selon la section du programme d'études",
+        "item5": "Gagne du temps et améliore la qualité"
       },
       "manualCreation": {
-        "title": "Creación Manual",
-        "description": "Plataforma amigable e intuitiva para crear exámenes completamente personalizados.",
-        "item1": "Interfaz fácil de usar y navegable",
-        "item2": "Control total sobre cada pregunta",
-        "item3": "Configura título, materia y grupo",
-        "item4": "Establece duración y puntaje total",
-        "item5": "Añade instrucciones personalizadas"
+        "title": "Création Manuelle",
+        "description": "Plateforme conviviale et intuitive pour créer des examens entièrement personnalisés.",
+        "item1": "Interface facile à utiliser et navigable",
+        "item2": "Contrôle total sur chaque question",
+        "item3": "Configurez le titre, la matière et le groupe",
+        "item4": "Établissez la durée et le score total",
+        "item5": "Ajoutez des instructions personnalisées"
       },
       "fileImport": {
-        "title": "Importación de Archivos",
-        "description": "Sube y convierte tus exámenes existentes desde múltiples formatos de archivo.",
-        "item1": "Compatible con PDF, DOC y DOCX",
-        "item2": "Procesa apuntes de conferencias",
-        "item3": "Convierte libros de texto",
-        "item4": "Importa presentaciones existentes",
-        "item5": "Reutiliza contenido académico previo"
+        "title": "Importation de Fichiers",
+        "description": "Téléchargez et convertissez vos examens existants à partir de multiples formats de fichiers.",
+        "item1": "Compatible avec PDF, DOC et DOCX",
+        "item2": "Traite les notes de conférences",
+        "item3": "Convertit des manuels scolaires",
+        "item4": "Importez des présentations existantes",
+        "item5": "Réutilisez du contenu académique précédent"
       }
     },
     "process": {
-      "badge": "Proceso Paso a Paso",
-      "title": "¿Cómo Funciona?",
+      "badge": "Processus Étape par Étape",
+      "title": "Comment ça Marche ?",
       "step1": {
-        "title": "Elige tu Método",
-        "description": "Selecciona entre crear con IA, manual o importar archivos existentes según tus necesidades específicas."
+        "title": "Choisissez votre Méthode",
+        "description": "Sélectionnez entre créer avec IA, manuel ou importer des fichiers existants selon vos besoins spécifiques."
       },
       "step2": {
-        "title": "Configura tu Examen",
-        "description": "Define parámetros como tema, dificultad, número de preguntas y tipo de evaluación deseada."
+        "title": "Configurez votre Examen",
+        "description": "Définissez des paramètres tels que le sujet, la difficulté, le nombre de questions et le type d'évaluation souhaité."
       },
       "step3": {
-        "title": "Genera y Descarga",
-        "description": "Obtén tu examen listo para usar con hojas de respuesta en PDF personalizadas para cada estudiante."
+        "title": "Générer et Télécharger",
+        "description": "Obtenez votre examen prêt à l'emploi avec des feuilles de réponses en PDF personnalisées pour chaque étudiant."
       }
     },
     "benefits": {
-      "badge": "Ventajas Clave",
-      "title": "Avantages pour les éducateurs",
+      "badge": "Avantages Clés",
+      "title": "Avantages pour les Éducateurs",
       "timeSaving": {
-        "title": "Économisez du temps",
-        "description": "Réduisez le temps de création d'examens de heures à minutes"
+        "title": "Gagnez du Temps",
+        "description": "Réduisez le temps de création d'examens de quelques heures à quelques minutes"
       },
       "precision": {
-        "title": "Haute précision",
+        "title": "Haute Précision",
         "description": "IA entraînée pour générer des questions pertinentes et bien structurées"
       },
       "formats": {
-        "title": "Formats multiples",
-        "description": "Support pour différents types de questions et styles d'évaluation"
+        "title": "Formats Multiples",
+        "description": "Prise en charge de différents types de questions et styles d'évaluation"
       },
       "reusable": {
         "title": "Réutilisable",
@@ -620,69 +620,69 @@
       }
     },
     "cta": {
-      "title": "Transformez votre contenu en tests intéressants en quelques secondes",
-      "description": "Générez plusieurs types de questions à partir de texte ou de fichiers téléchargés de manière intelligente et efficace.",
+      "title": "Transformez votre contenu en quiz captivants en quelques secondes",
+      "description": "Générez plusieurs types de questions à partir de textes ou de fichiers téléchargés de manière intelligente et efficace.",
       "startNow": "Commencer maintenant",
       "learnMore": "En savoir plus"
     }
   },
   "contact": {
     "title": "Contact",
-    "subtitle": "Avez-vous des questions? Nous sommes ici pour vous aider.",
+    "subtitle": "Vous avez des questions ? Nous sommes là pour vous aider.",
     "info": {
-      "title": "Informations de contact",
-      "email": "Email:",
-      "phone": "Téléphone:",
-      "schedule": "Horaire:",
-      "scheduleHours": "Lundi à vendredi, 9h00 - 18h00"
+      "title": "Coordonnées de contact",
+      "email": "Email :",
+      "phone": "Téléphone :",
+      "schedule": "Horaire :",
+      "scheduleHours": "Lundi au Vendredi, 9:00 AM - 6:00 PM"
     },
     "support": {
       "title": "Support technique",
-      "email": "Email:",
-      "liveChat": "Chat en direct:",
+      "email": "E-mail :",
+      "liveChat": "Chat en direct :",
       "liveChatAvailable": "Disponible sur la plateforme",
-      "knowledge": "Base de connaissances:",
+      "knowledge": "Base de connaissances :",
       "knowledgeBase": "FAQ et guides"
     }
   },
   "studentsManagement": {
-    "title": "Gestion des étudiants",
-    "subtitle": "Contrôle complet des informations étudiantes.",
+    "title": "Gestion des Étudiants",
+    "subtitle": "Contrôle complet de l'information étudiante.",
     "mainFeatures": {
-      "title": "Fonctionnalités principales",
-      "item1": "Enregistrement et maintenance des données étudiantes",
+      "title": "Fonctions principales",
+      "item1": "Enregistrement et maintenance des données des étudiants",
       "item2": "Historique académique complet",
-      "item3": "Importation en masse depuis Excel",
+      "item3": "Importation massive depuis Excel",
       "item4": "Génération de rapports personnalisés"
     }
   },
   "subjectsManagement": {
-    "title": "Gestion des matières",
+    "title": "Gestion des Matières",
     "subtitle": "Organisez et gérez toutes les matières académiques.",
     "mainFeatures": {
-      "title": "Fonctionnalités principales",
-      "item1": "Création et organisation des matières",
-      "item2": "Attribution des enseignants",
+      "title": "Fonctions principales",
+      "item1": "Création et organisation de matières",
+      "item2": "Affectation des professeurs",
       "item3": "Configuration des horaires",
       "item4": "Gestion des contenus curriculaires"
     }
   },
   "reports": {
-    "title": "Reportes y Análisis",
+    "title": "Rapports et Analyses",
     "subtitle": "Analyse détaillée de la performance académique.",
     "mainFeatures": {
-      "title": "Características principales",
+      "title": "Caractéristiques principales",
       "item1": "Rapports de performance par étudiant",
       "item2": "Analyse statistique par matière",
       "item3": "Comparaisons de groupe",
-      "item4": "Exportation en Excel et PDF"
+      "item4": "Exportation vers Excel et PDF"
     }
   },
   "institutionsManagement": {
-    "title": "Gestion des institutions",
-    "subtitle": "Gérez plusieurs institutions éducatives.",
+    "title": "Gestion des Institutions",
+    "subtitle": "Gérez plusieurs établissements d'enseignement.",
     "mainFeatures": {
-      "title": "Fonctionnalités principales",
+      "title": "Fonctions principales",
       "item1": "Enregistrement de plusieurs institutions",
       "item2": "Gestion des campus et des sites",
       "item3": "Configuration des permissions",
@@ -690,100 +690,100 @@
     }
   },
   "mobileApp": {
-    "title": "Application mobile",
-    "subtitle": "Emportez ProfeVision n'importe où.",
+    "title": "Application Mobile",
+    "subtitle": "Emportez ProfeVision avec vous n'importe où.",
     "mainFeatures": {
-      "title": "Características principales",
-      "item1": "Numérisation des feuilles de réponse",
+      "title": "Caractéristiques principales",
+      "item1": "Numérisation des feuilles de réponses",
       "item2": "Notation en temps réel",
       "item3": "Accès aux rapports",
       "item4": "Synchronisation automatique"
     }
   },
   "privacy": {
-    "title": "Politique de confidentialité de ProfeVision",
-    "effective": "Vigente desde el 27 de junio de 2025",
-    "intro": "En ProfeVisión (www.profevision.com), nos tomamos muy en serio tu privacidad y la de tus estudiantes. Queremos que sepas cómo usamos y protegemos tu información cuando usas nuestra aplicación o nuestro sitio web. Aquí te explicamos, de manera sencilla y clara, todo lo que necesitas saber.",
+    "title": "Politique de Confidentialité de ProfeVision",
+    "effective": "En vigueur depuis le 27 juin 2025",
+    "intro": "Chez ProfeVisión (www.profevision.com), nous prenons votre vie privée et celle de vos élèves très au sérieux. Nous souhaitons que vous sachiez comment nous utilisons et protégeons vos informations lorsque vous utilisez notre application ou notre site web. Nous vous expliquons ici, de manière simple et claire, tout ce que vous devez savoir.",
     "section1": {
-      "title": "1. ¿Quiénes somos?",
-      "content": "Somos ProfeVisión, una plataforma que ayuda a los profesores a calificar exámenes de opción múltiple y analizar los resultados de sus estudiantes de forma rápida y sencilla. Puedes usar nuestra app o nuestro sitio web para gestionar tus clases y exámenes."
+      "title": "1. Qui sommes-nous ?",
+      "content": "Nous sommes ProfeVisión, une plateforme qui aide les enseignants à corriger les examens à choix multiples et à analyser les résultats de leurs élèves de manière rapide et simple. Vous pouvez utiliser notre application ou notre site web pour gérer vos classes et vos examens."
     },
     "section2": {
-      "title": "2. ¿Qué información recopilamos?",
-      "intro": "Recopilamos dos tipos de información:",
+      "title": "2. Quelles informations collectons-nous ?",
+      "intro": "Nous collectons deux types d'informations :",
       "accountInfo": {
-        "title": "a) Información de tu cuenta y uso",
+        "title": "a) Informations sur votre compte et utilisation",
         "items": [
-          "Adresse email y contraseña: Para crear tu cuenta y poder identificarte.",
-          "Datos de tu suscripción: Si tienes una suscripción paga, guardamos la información necesaria para gestionarla.",
-          "Datos de uso: Recopilamos información sobre cómo usas ProfeVision, como la frecuencia con la que entras, desde qué dispositivos, tu dirección IP, tipo de navegador, etc.",
-          "Cookies y tecnologías similares: Usamos cookies para que la plataforma funcione correctamente y para mejorar tu experiencia. No las usamos para publicidad."
+          "Adresse e-mail et mot de passe : pour créer votre compte et pouvoir vous identifier.",
+          "Données de votre abonnement : si vous avez un abonnement payant, nous conservons les informations nécessaires pour le gérer.",
+          "Données d'utilisation : Nous recueillons des informations sur la manière dont vous utilisez ProfeVision, telles que la fréquence de vos visites, les appareils utilisés, votre adresse IP, le type de navigateur, etc.",
+          "Cookies et technologies similaires : Nous utilisons des cookies pour que la plateforme fonctionne correctement et pour améliorer votre expérience. Nous ne les utilisons pas à des fins publicitaires."
         ]
       },
       "userInfo": {
-        "title": "b) Información que tú decides ingresar",
+        "title": "b) Informations que vous décidez de saisir",
         "items": [
-          "Datos de tus estudiantes: Si quieres, puedes ingresar nombres, apellidos, números de identificación y clases de tus estudiantes.",
-          "Examens et résultats : Quand vous notez des examens, vous pouvez enregistrer des images et des résultats pour les analyser plus tard.",
-          "Información de tus clases: Puedes crear registros de tus clases y vincularlos con tus estudiantes."
+          "Données de vos élèves : Si vous le souhaitez, vous pouvez saisir les prénoms, noms de famille, numéros d'identification et classes de vos élèves.",
+          "Examens et résultats : Lorsque vous notez des examens, vous pouvez enregistrer les images et les résultats pour les analyser plus tard.",
+          "Informations sur vos cours : Vous pouvez créer des registres de vos cours et les lier à vos étudiants."
         ]
       }
     },
     "section3": {
-      "title": "3. ¿Para qué usamos tu información?",
-      "intro": "Usamos tu información para:",
+      "title": "3. Pourquoi utilisons-nous vos informations ?",
+      "intro": "Nous utilisons vos informations pour :",
       "items": [
-        "Ofrecerte el servicio de ProfeVision y mejorarlo constantemente.",
-        "Responder a tus dudas o consultas.",
-        "Personalizar la plataforma para ti.",
-        "Envoyerte avisos importantes sobre tu cuenta, suscripción o novedades de ProfeVision."
+        "Vous offrir le service de ProfeVision et l'améliorer constamment.",
+        "Répondre à vos doutes ou questions.",
+        "Personnaliser la plateforme pour vous.",
+        "Vous envoyer des notifications importantes concernant votre compte, votre abonnement ou les nouveautés de ProfeVision."
       ],
-      "note": "Nunca vendemos tu información ni la usamos para mostrarte publicidad."
+      "note": "Nous ne vendons jamais vos informations et nous ne les utilisons pas pour vous montrer de la publicité."
     },
     "section4": {
-      "title": "4. ¿Con quién compartimos tu información?",
-      "intro": "Solo compartimos tu información en estos casos:",
+      "title": "4. Avec qui partageons-nous vos informations ?",
+      "intro": "Nous partageons vos informations uniquement dans les cas suivants :",
       "items": [
-        "Cuando tú lo decides: Por ejemplo, si exportas resultados a otro sistema.",
-        "Con proveedores de servicios: Trabajamos con empresas que nos ayudan a enviar correos, alojar nuestros servidores o dar soporte técnico. Estas empresas solo usan tu información para ayudarnos y están obligadas a protegerla.",
-        "Por obligación legal: Si una autoridad lo exige, podemos compartir información para cumplir con la ley o proteger los derechos de ProfeVision y sus usuarios.",
-        "En caso de cambios en la empresa: Si ProfeVision es adquirida o se fusiona con otra empresa, te avisaremos y tu información seguirá protegida bajo esta política.",
-        "Con tu consentimiento: Nunca compartiremos tu información con terceros para otros fines sin tu permiso."
+        "Quand vous le décidez : Par exemple, si vous exportez des résultats vers un autre système.",
+        "Avec des prestataires de services : nous travaillons avec des entreprises qui nous aident à envoyer des courriels, à héberger nos serveurs ou à fournir une assistance technique. Ces entreprises utilisent uniquement vos informations pour nous aider et sont tenues de les protéger.",
+        "Par obligation légale : Si une autorité l'exige, nous pouvons partager des informations pour nous conformer à la loi ou protéger les droits de ProfeVision et de ses utilisateurs.",
+        "En cas de changements au sein de l'entreprise : Si ProfeVision est acquise ou fusionne avec une autre entreprise, nous vous en informerons et vos informations resteront protégées au titre de cette politique.",
+        "Avec votre consentement : nous ne partagerons jamais vos informations avec des tiers à d'autres fins sans votre permission."
       ]
     },
     "section5": {
-      "title": "5. ¿Cómo protegemos tu información?",
+      "title": "5. Comment protégeons-nous vos informations ?",
       "items": [
-        "Tu cuenta está protegida con tu correo y una contraseña que solo tú conoces.",
-        "Toda la información se transmite y almacena de forma cifrada.",
-        "Revisamos y mejoramos constantemente nuestras medidas de seguridad.",
-        "Si alguna vez ocurre una brecha de seguridad, te avisaremos lo antes posible."
+        "Votre compte est protégé par votre adresse e-mail et un mot de passe que vous seul connaissez.",
+        "Toutes les informations sont transmises et stockées de manière cryptée.",
+        "Nous révisons et améliorons constamment nos mesures de sécurité.",
+        "Si une faille de sécurité survient un jour, nous vous en informerons dès que possible."
       ]
     },
     "section6": {
-      "title": "6. ¿Puedo decidir qué información compartir?",
-      "answer": "¡Por supuesto!",
+      "title": "6. Puis-je décider des informations à partager ?",
+      "answer": "Bien sûr !",
       "items": [
-        "Puedes usar ProfeVision sin sincronizar tus datos con nuestros servidores.",
-        "Puedes eliminar o editar la información de tus estudiantes, clases y exámenes en cualquier momento.",
-        "Si quieres eliminar tu cuenta y todos tus datos, puedes hacerlo desde la sección \"Mi cuenta\"."
+        "Vous pouvez utiliser ProfeVision sans synchroniser vos données avec nos serveurs.",
+        "Vous pouvez supprimer ou modifier les informations de vos élèves, classes et examens à tout moment.",
+        "Si vous souhaitez supprimer votre compte et toutes vos données, vous pouvez le faire depuis la section « Mon compte »."
       ]
     },
     "section7": {
-      "title": "7. ¿Cuánto tiempo guardamos tu información?",
-      "content": "Si eliminas datos o tu cuenta, los borraremos de todos nuestros sistemas en un máximo de 60 días. Si tu cuenta está inactiva por mucho tiempo, también eliminaremos tus datos para proteger tu privacidad."
+      "title": "7. Combien de temps conservons-nous vos informations ?",
+      "content": "Si vous supprimez des données ou votre compte, nous les effacerons de tous nos systèmes dans un délai maximum de 60 jours. Si votre compte est inactif pendant une longue période, nous supprimerons également vos données pour protéger votre vie privée."
     },
     "section8": {
-      "title": "8. ¿Qué comunicaciones recibiré?",
-      "content": "Te enviaremos correos solo para temas importantes: avisos de seguridad, información sobre tu cuenta, novedades o soporte. Si no quieres recibir ciertos correos, puedes avisarnos en cualquier momento."
+      "title": "8. Quelles communications vais-je recevoir ?",
+      "content": "Nous vous enverrons des e-mails uniquement pour des sujets importants : avis de sécurité, informations sur votre compte, nouveautés ou assistance. Si vous ne souhaitez pas recevoir certains e-mails, vous pouvez nous en informer à tout moment."
     },
     "section9": {
-      "title": "9. Cambios en esta política",
-      "content": "Si cambiamos algo importante en esta política, te lo haremos saber por correo y cuando entres a la app o al sitio web. Siempre podrás consultar la versión más actualizada en nuestro sitio."
+      "title": "9. Changements à cette politique",
+      "content": "Si nous changeons quelque chose d'important dans cette politique, nous vous en informerons par e-mail et lorsque vous accéderez à l'application ou au site web. Vous pourrez toujours consulter la version la plus à jour sur notre site."
     },
     "section10": {
-      "title": "10. ¿Tienes dudas o necesitas ayuda?",
-      "content": "Si tienes preguntas sobre tu privacidad o sobre cómo manejamos tus datos, escríbenos a info@profevision.com. Estamos aquí para ayudarte.",
+      "title": "10. Vous avez des doutes ou besoin d'aide ?",
+      "content": "Si vous avez des questions sur votre confidentialité ou sur la manière dont nous traitons vos données, écrivez-nous à info@profevision.com. Nous sommes là pour vous aider.",
       "address": {
         "name": "ProfeVision",
         "line1": "647 Santino Meadows Apt. 525",
@@ -792,136 +792,136 @@
     }
   },
   "cookies": {
-    "title": "Política de Cookies",
-    "effective": "Vigente desde el 27 de junio de 2025",
-    "intro": "Esta política explica cómo utilizamos las cookies en www.profevision.com para mejorar tu experiencia de navegación y el funcionamiento de nuestro sitio web.",
+    "title": "Politique de Cookies",
+    "effective": "En vigueur depuis le 27 juin 2025",
+    "intro": "Cette politique explique comment nous utilisons les cookies sur www.profevision.com pour améliorer votre expérience de navigation et le fonctionnement de notre site web.",
     "section1": {
-      "title": "Consideraciones Previas",
+      "title": "Considérations Préalables",
       "content": {
-        "paragraph1": "Se entenderá por usuario toda persona que navegue en el sitio web www.profevision.com. Se entenderá por editor al dueño del sitio web, quien es ProfeVision y está identificado en los términos y condiciones.",
-        "paragraph2": "Las cookies utilizadas en el navegador del usuario se han instalado con su autorización. Si en algún momento desea revocar esta autorización, podrá hacerlo sin obstáculo alguno consultando la sección \"Desactivación o eliminación de cookies\".",
-        "paragraph3": "El Editor está en total libertad de realizar cambios en el sitio web, por lo que se aconseja al usuario verificar esta política cada vez que acceda al sitio web."
+        "paragraph1": "On entendra par utilisateur toute personne qui navigue sur le site web www.profevision.com. On entendra par éditeur le propriétaire du site web, qui est ProfeVision et qui est identifié dans les termes et conditions.",
+        "paragraph2": "Les cookies utilisés dans le navigateur de l'utilisateur ont été installés avec son autorisation. Si à tout moment il souhaite révoquer cette autorisation, il pourra le faire sans aucun obstacle en consultant la section « Désactivation ou élimination des cookies ».",
+        "paragraph3": "L'Éditeur est en totale liberté d'apporter des modifications au site web, il est donc conseillé à l'utilisateur de vérifier cette politique chaque fois qu'il accède au site web."
       }
     },
     "section2": {
-      "title": "Definición y Función de las Cookies",
-      "intro": "Las cookies son informaciones que se almacenan en el navegador del usuario para consultar la actividad previa y recordar ciertos datos para próximas visitas. También pueden ser llamadas web beacons, píxel, bugs o rastreadores.",
+      "title": "Définition et Fonction des Cookies",
+      "intro": "Les cookies sont des informations qui sont stockées dans le navigateur de l'utilisateur pour consulter l'activité précédente et mémoriser certaines données pour les prochaines visites. Ils peuvent également être appelés web beacons, pixels, bugs ou traceurs.",
       "functions": {
-        "title": "Funciones principales:",
+        "title": "Fonctions principales :",
         "items": [
-          "Datos técnicos y estadísticas",
-          "Personalización de perfiles",
-          "Enlaces a redes sociales",
-          "Preferencias personales"
+          "Données techniques et statistiques",
+          "Personnalisation des profils",
+          "Liens vers les réseaux sociaux",
+          "Préférences personnelles"
         ]
       },
       "notWhat": {
-        "title": "Lo que NO son:",
+        "title": "Ce qu'ils ne sont PAS :",
         "items": [
-          "Virus o malware",
-          "Spam o troyanos",
-          "Spyware",
-          "Publicidad emergente"
+          "Virus ou malware",
+          "Spam ou chevaux de Troie",
+          "Logiciel espion",
+          "Publicité surgissante"
         ]
       }
     },
     "section3": {
-      "title": "Tipos de Cookies",
+      "title": "Types de Cookies",
       "byEntity": {
-        "title": "Según la Entidad que las Gestiona",
-        "own": "Propias",
-        "ownDescription": "Gestionadas por ProfeVision desde nuestro propio dominio",
-        "thirdParty": "De terceros",
-        "thirdPartyDescription": "Gestionadas por entidades diferentes a ProfeVision",
-        "note": "Este sitio web utiliza cookies propias y de terceros."
+        "title": "Selon l'entité qui les gère",
+        "own": "Propres",
+        "ownDescription": "Gérées par ProfeVision depuis notre propre domaine",
+        "thirdParty": "Tiers",
+        "thirdPartyDescription": "Gérées par des entités autres que ProfeVision",
+        "note": "Ce site Web utilise des cookies propres et de tiers."
       },
       "byPurpose": {
-        "title": "Según su Finalidad",
-        "technical": "Técnicas",
-        "technicalDescription": "Permiten la gestión operativa del sitio web",
-        "personalization": "De personalización",
-        "personalizationDescription": "Recordar características personalizadas de navegación",
-        "analysis": "De análisis",
-        "analysisDescription": "Seguimiento y análisis del comportamiento de usuarios",
-        "advertising": "Publicitarias",
-        "advertisingDescription": "Gestión eficaz de espacios publicitarios",
-        "behavioral": "De publicidad comportamental",
-        "behavioralDescription": "Información basada en hábitos de navegación"
+        "title": "Selon sa finalité",
+        "technical": "Techniques",
+        "technicalDescription": "Ils permettent la gestion opérationnelle du site Web",
+        "personalization": "De personnalisation",
+        "personalizationDescription": "Se souvenir des caractéristiques de navigation personnalisées",
+        "analysis": "D'analyse",
+        "analysisDescription": "Suivi et analyse du comportement des utilisateurs",
+        "advertising": "Publicitaires",
+        "advertisingDescription": "Gestion efficace des espaces publicitaires",
+        "behavioral": "De publicité comportementale",
+        "behavioralDescription": "Informations basées sur les habitudes de navigation"
       },
       "byDuration": {
-        "title": "Según su Duración",
-        "session": "De sesión",
-        "sessionDescription": "Desaparecen al terminar la sesión de navegación",
-        "persistent": "Persistentes",
-        "persistentDescription": "Se mantienen por un período definido"
+        "title": "Selon leur Durée",
+        "session": "De session",
+        "sessionDescription": "Elles disparaissent à la fin de la session de navigation",
+        "persistent": "Persistantes",
+        "persistentDescription": "Elles sont conservées pendant une période définie"
       }
     },
     "section4": {
-      "title": "Cookies Utilizadas en Este Sitio Web",
+      "title": "Cookies Utilisées sur Ce Site Web",
       "table": {
         "name": "Nom",
-        "provider": "Proveedor",
+        "provider": "Fournisseur",
         "description": "Description",
         "duration": "Durée",
         "type": "Type"
       },
       "cookies": [
         {
-          "name": "_Georgia_*",
+          "name": "_Géorgie_*",
           "provider": ".profevision.com",
-          "description": "Google Analytics para almacenar y contar visitas",
-          "duration": "1 año 1 mes 4 días",
-          "type": "Analítica"
+          "description": "Google Analytics pour stocker et compter les visites",
+          "duration": "1 an 1 mois 4 jours",
+          "type": "Analyse"
         },
         {
-          "name": "_Georgia",
+          "name": "_Géorgie",
           "provider": ".profevision.com",
-          "description": "Calcula datos de visitantes, sesiones y campañas",
-          "duration": "1 año 1 mes 4 días",
-          "type": "Analítica"
+          "description": "Calcule les données relatives aux visiteurs, aux sessions et aux campagnes",
+          "duration": "1 an 1 mois 4 jours",
+          "type": "Analyse"
         },
         {
-          "name": "tema",
+          "name": "sujet",
           "provider": ".profevision.com",
-          "description": "Preferencias de tema del usuario",
-          "duration": "nunca",
-          "type": "Otro"
+          "description": "Préférences de thème de l'utilisateur",
+          "duration": "jamais",
+          "type": "Autre"
         }
       ]
     },
     "section5": {
-      "title": "Consecuencias de Desactivar las Cookies",
-      "warning": "Al desactivar las cookies, podrías experimentar las siguientes limitaciones:",
+      "title": "Conséquences de la Désactivation des Cookies",
+      "warning": "En désactivant les cookies, vous pourriez rencontrer les limitations suivantes :",
       "consequences": [
-        "No se cargarán productos en la tienda, impidiendo finalizar compras",
-        "No podrás acceder al área de cliente o áreas que requieran confirmación",
-        "No se podrán recoger datos para analizar y mejorar el sitio web",
-        "No podrás compartir contenido en redes sociales",
-        "No podrás realizar comentarios en el blog",
-        "Limitaciones en el uso de redes sociales",
-        "No se mostrará publicidad de terceros",
-        "Tu navegación podría considerarse como spam"
+        "Aucun produit ne sera chargé dans la boutique, empêchant ainsi de finaliser les achats",
+        "Vous ne pourrez pas accéder à l'espace client ou aux zones nécessitant une confirmation",
+        "Aucune donnée ne pourra être collectée pour analyser et améliorer le site web",
+        "Vous ne pourrez pas partager de contenu sur les réseaux sociaux",
+        "Vous ne pourrez pas laisser de commentaires sur le blog",
+        "Limitations dans l'utilisation des réseaux sociaux",
+        "Aucune publicité de tiers ne sera affichée",
+        "Votre navigation pourrait être considérée comme du spam"
       ]
     },
     "section6": {
-      "title": "Desactivación o Eliminación de Cookies",
-      "intro": "Puedes desactivar o eliminar las cookies en cualquier momento, salvo aquellas necesarias para el funcionamiento del sitio web. Esta configuración debe realizarse en cada navegador.",
+      "title": "Désactivation ou Suppression de Cookies",
+      "intro": "Vous pouvez désactiver ou supprimer les cookies à tout moment, à l'exception de ceux nécessaires au fonctionnement du site web. Cette configuration doit être effectuée sur chaque navigateur.",
       "browsers": {
-        "chrome": "Ayuda de Chrome",
-        "firefox": "Ayuda de Firefox",
-        "safari": "Ayuda de Safari",
-        "edge": "Ayuda de IE"
+        "chrome": "Aide de Chrome",
+        "firefox": "Aide de Firefox",
+        "safari": "Aide de Safari",
+        "edge": "Aide de IE"
       }
     },
     "section7": {
-      "title": "Avisos Relacionados con las Cookies",
-      "important": "Importante:",
-      "warning": "El Editor no se hace responsable por fallos técnicos que puedas encontrar en el sitio web o navegador por manipular incorrectamente la desactivación o eliminación de cookies.",
-      "responsibility": "Debes verificar la información sobre desactivación en la sección de ayuda de tu navegador. Asumes la responsabilidad de eliminar o desactivar las cookies y las consecuencias que se deriven."
+      "title": "Avis relatifs aux Cookies",
+      "important": "Important :",
+      "warning": "L'Éditeur n'est pas responsable des défaillances techniques que vous pourriez rencontrer sur le site web ou le navigateur en raison d'une mauvaise manipulation lors de la désactivation ou de la suppression des cookies.",
+      "responsibility": "Vous devez vérifier les informations de désactivation dans la section d'aide de votre navigateur. Vous assumez la responsabilité de la suppression ou de la désactivation des cookies ainsi que les conséquences qui en découlent."
     },
     "section8": {
       "title": "Contact",
-      "content": "En todo momento puedes comunicarte con el Editor a través del correo electrónico: info@profevision.com",
+      "content": "À tout moment, vous pouvez contacter l'Éditeur via l'e-mail : info@profevision.com",
       "address": {
         "name": "ProfeVision",
         "line1": "647 Santino Meadows Apt. 525",
@@ -930,111 +930,111 @@
     }
   },
   "terms": {
-    "title": "Términos y Condiciones de ProfeVision",
-    "effective": "Vigente desde el 27 de junio de 2025",
-    "intro": "Gracias por tu interés en ProfeVision (\"ProfeVision\", \"nosotros\", \"nuestro\"), que ofrece los servicios disponibles en www.profevision.com y en nuestras aplicaciones móviles. Al usar ProfeVision, aceptas estos Términos y nuestra Política de Privacidad. Por favor, léelos con atención.",
-    "noteLabel": "Nota:",
+    "title": "Conditions Générales de ProfeVision",
+    "effective": "En vigueur à partir du 27 juin 2025",
+    "intro": "Merci de votre intérêt pour ProfeVision (\"ProfeVision\", \"nous\", \"notre\"), qui propose les services disponibles sur www.profevision.com et sur nos applications mobiles. En utilisant ProfeVision, vous acceptez ces Conditions et notre Politique de Confidentialité. Veuillez les lire attentivement.",
+    "noteLabel": "Note :",
     "section1": {
-      "title": "1. Aceptación de los Términos",
-      "content": "Al crear una cuenta, acceder o usar ProfeVision, aceptas cumplir con estos Términos y nuestra Política de Privacidad. Si usas ProfeVision en nombre de una institución educativa o empresa, asegúrate de tener la autoridad para aceptar estos Términos en su nombre."
+      "title": "1. Acceptation des Conditions",
+      "content": "En créant un compte, en accédant ou en utilisant ProfeVision, vous acceptez de vous conformer à ces Conditions et à notre Politique de Confidentialité. Si vous utilisez ProfeVision au nom d'une institution éducative ou d'une entreprise, assurez-vous d'avoir l'autorité nécessaire pour accepter ces Conditions en leur nom."
     },
     "section2": {
-      "title": "2. Quién puede usar ProfeVision",
+      "title": "2. Qui peut utiliser ProfeVision",
       "items": [
-        "Debes ser mayor de 18 años o contar con la autorización de tus padres/tutores y tu institución educativa.",
-        "Si representas a una institución, garantizas que tienes permiso para aceptar estos Términos en su nombre."
+        "Vous devez être âgé de plus de 18 ans ou avoir l'autorisation de vos parents/tuteurs et de votre établissement d'enseignement.",
+        "Si vous représentez une institution, vous garantissez que vous avez l'autorisation d'accepter ces Conditions en son nom."
       ]
     },
     "section3": {
-      "title": "3. Uso adecuado del servicio",
-      "intro": "Al usar ProfeVision, te comprometes a:",
+      "title": "3. Utilisation appropriée du service",
+      "intro": "En utilisant ProfeVision, vous vous engagez à :",
       "items": [
-        "Proporcionar información real y actualizada sobre ti y tu institución.",
-        "No usar ProfeVision para actividades ilegales, dañinas, fraudulentas, abusivas o que violen derechos de otras personas.",
-        "No intentar acceder a cuentas de otros usuarios ni compartir tu contraseña.",
-        "No usar robots, scrapers u otros medios automáticos para recopilar información sin permiso.",
-        "No sobrecargar, dañar o interferir con el funcionamiento de ProfeVision.",
-        "No suplantar a otras personas ni falsear tu identidad.",
-        "No facilitar ni fomentar el incumplimiento de estos Términos."
+        "Fournir des informations réelles et à jour sur vous et votre institution.",
+        "Ne pas utiliser ProfeVision pour des activités illégales, nuisibles, frauduleuses, abusives ou qui violent les droits d'autrui.",
+        "Ne pas tenter d'accéder aux comptes d'autres utilisateurs ni partager votre mot de passe.",
+        "Ne pas utiliser de robots, de scrapers ou d'autres moyens automatiques pour collecter des informations sans autorisation.",
+        "Ne pas surcharger, endommager ou interférer avec le fonctionnement de ProfeVision.",
+        "Ne pas usurper l'identité d'autres personnes ni falsifier votre identité.",
+        "Ne pas faciliter ni encourager la violation de ces Conditions."
       ],
-      "warning": "Si incumples alguna de estas reglas, podemos suspender o cancelar tu cuenta."
+      "warning": "Si vous ne respectez pas l'une de ces règles, nous pourrons suspendre ou résilier votre compte."
     },
     "section4": {
-      "title": "4. Tu información y privacidad",
+      "title": "4. Vos informations et confidentialité",
       "items": [
-        "Al usar ProfeVision, puedes ingresar información personal y de tus estudiantes.",
-        "Tú eres el dueño de esa información.",
-        "Nos das permiso para usar, almacenar y procesar esa información solo para brindarte el servicio.",
-        "Puedes eliminar tu información y tu cuenta en cualquier momento."
+        "En utilisant ProfeVision, vous pouvez saisir des informations personnelles et celles de vos étudiants.",
+        "C'est vous qui êtes le propriétaire de cette information.",
+        "Vous nous autorisez à utiliser, stocker et traiter ces informations uniquement pour vous fournir le service.",
+        "Vous pouvez supprimer vos informations et votre compte à tout moment."
       ],
-      "privacyLink": "Consulta nuestra Política de Privacidad para saber más sobre cómo protegemos tus datos."
+      "privacyLink": "Consultez notre Politique de Confidentialité pour en savoir plus sur la manière dont nous protégeons vos données."
     },
     "section5": {
-      "title": "5. Uso de ProfeVision en instituciones educativas",
-      "intro": "Si eres profesor o personal de una institución educativa:",
+      "title": "5. Utilisation de ProfeVision dans les établissements d'enseignement",
+      "intro": "Si vous êtes enseignant ou membre du personnel d'un établissement d'enseignement :",
       "items": [
-        "Garantizas que tienes autorización para usar ProfeVision con tus estudiantes.",
-        "Cumples con las leyes de privacidad y protección de datos aplicables (como la FERPA en EE. UU. o la LOPI en otros países)."
+        "Vous garantissez que vous avez l'autorisation d'utiliser ProfeVision avec vos étudiants.",
+        "Vous respectez les lois applicables en matière de confidentialité et de protection des données (telles que la FERPA aux États-Unis ou la LOPI dans d'autres pays)."
       ],
-      "note": "Si tu institución no quiere que los datos de los estudiantes se almacenen en nuestros servidores, puedes desactivar la sincronización desde tu cuenta."
+      "note": "Si votre établissement ne souhaite pas que les données des étudiants soient stockées sur nos serveurs, vous pouvez désactiver la synchronisation depuis votre compte."
     },
     "section6": {
-      "title": "6. Propiedad intelectual",
+      "title": "6. Propriété intellectuelle",
       "items": [
-        "ProfeVision y su tecnología están protegidos por derechos de autor y otras leyes.",
-        "No puedes copiar, modificar, distribuir, vender, descompilar ni usar nuestra tecnología o marca para otros fines sin nuestro permiso.",
-        "El uso de ProfeVision no te da derechos sobre nuestra propiedad intelectual."
+        "ProfeVision et sa technologie sont protégées par le droit d'auteur et d'autres lois.",
+        "Vous ne pouvez pas copier, modifier, distribuer, vendre, décompiler ni utiliser notre technologie ou notre marque à d'autres fins sans notre autorisation.",
+        "L'utilisation de ProfeVision ne vous confère aucun droit sur notre propriété intellectuelle."
       ]
     },
     "section7": {
-      "title": "7. Cambios en los Términos",
-      "content": "Podemos actualizar estos Términos para reflejar cambios en la ley o en nuestros servicios. Te avisaremos de los cambios importantes. Si sigues usando ProfeVision después de los cambios, se considerará que los aceptas. Si no estás de acuerdo, puedes dejar de usar el servicio y eliminar tu cuenta."
+      "title": "7. Modifications des Conditions",
+      "content": "Nous pouvons mettre à jour ces Conditions pour refléter des changements dans la loi ou dans nos services. Nous vous informerons des changements importants. Si vous continuez à utiliser ProfeVision après les modifications, cela sera considéré comme une acceptation de celles-ci. Si vous n'êtes pas d'accord, vous pouvez cesser d'utiliser le service et supprimer votre compte."
     },
     "section8": {
-      "title": "8. Funciones experimentales",
-      "content": "A veces probamos nuevas funciones que pueden cambiar o desaparecer sin previo aviso. No garantizamos que funcionen siempre."
+      "title": "8. Fonctions expérimentales",
+      "content": "Parfois, nous testons de nouvelles fonctions qui peuvent changer ou disparaître sans préavis. Nous ne garantissons pas qu'elles fonctionneront toujours."
     },
     "section9": {
-      "title": "9. Limitación de responsabilidad",
+      "title": "9. Limitation de responsabilité",
       "items": [
-        "ProfeVision se ofrece \"tal cual\", sin garantías de que siempre estará disponible o libre de errores.",
-        "No somos responsables de daños indirectos, pérdidas de datos o cualquier daño que surja del uso o la imposibilidad de usar ProfeVision.",
-        "Nuestra responsabilidad máxima hacia ti no superará el monto que hayas pagado por el servicio en los últimos 12 meses o $100 USD, lo que sea mayor."
+        "ProfeVision est offert « tel quel », sans garantie qu'il sera toujours disponible ou exempt d'erreurs.",
+        "Nous ne sommes pas responsables des dommages indirects, des pertes de données ou de tout dommage découlant de l'utilisation ou de l'impossibilité d'utiliser ProfeVision.",
+        "Notre responsabilité maximale envers vous ne dépassera pas le montant que vous avez payé pour le service au cours des 12 derniers mois ou 100 $ USD, le montant le plus élevé étant retenu."
       ]
     },
     "section10": {
-      "title": "10. Seguridad y registro",
+      "title": "10. Sécurité et enregistrement",
       "items": [
-        "Debes mantener tu contraseña segura y no compartir tu cuenta.",
-        "Si detectas un uso no autorizado de tu cuenta, avísanos de inmediato a info@profevision.com."
+        "Vous devez garder votre mot de passe en sécurité et ne pas partager votre compte.",
+        "Si vous détectez une utilisation non autorisée de votre compte, prévenez-nous immédiatement à info@profevision.com."
       ]
     },
     "section11": {
-      "title": "11. Indemnización",
-      "content": "Si alguien hace un reclamo contra ProfeVision relacionado con tu uso del servicio, aceptas defendernos y cubrir cualquier gasto o daño que esto cause."
+      "title": "11. Indemnisation",
+      "content": "Si quelqu'un formule une réclamation contre ProfeVision en lien avec votre utilisation du service, vous acceptez de nous défendre et de couvrir tous les frais ou dommages que cela pourrait causer."
     },
     "section12": {
-      "title": "12. Cancelación de la cuenta",
-      "content": "Puedes cancelar tu cuenta en cualquier momento desde la sección \"Mi cuenta\" o escribiéndonos a info@profevision.com. Nosotros también podemos suspender o cancelar tu cuenta si incumples estos Términos."
+      "title": "12. Résiliation du compte",
+      "content": "Vous pouvez résilier votre compte à tout moment depuis la section « Mon compte » ou en nous écrivant à info@profevision.com. Nous pouvons également suspendre ou résilier votre compte si vous ne respectez pas ces Conditions."
     },
     "section13": {
-      "title": "13. Resolución de disputas",
-      "content": "Si surge un conflicto entre tú y ProfeVision, intentaremos resolverlo de buena fe. Si no es posible, cualquier disputa se resolverá mediante arbitraje en Chicago, Illinois, bajo las reglas de la Asociación Americana de Arbitraje (AAA).",
-      "waiver": "Al aceptar estos Términos, renuncias al derecho a un juicio por jurado o a participar en demandas colectivas.",
-      "note": "Al aceptar estos Términos, renuncias al derecho a un juicio por jurado o a participar en demandas colectivas."
+      "title": "13. Résolution des litiges",
+      "content": "Si un conflit survient entre vous et ProfeVision, nous tenterons de le résoudre de bonne foi. Si cela n'est pas possible, tout litige sera résolu par arbitrage à Chicago, Illinois, selon les règles de l'Association américaine d'arbitrage (AAA).",
+      "waiver": "En acceptant ces Conditions, vous renoncez au droit à un procès devant jury ou à participer à des recours collectifs.",
+      "note": "En acceptant ces Conditions, vous renoncez au droit à un procès devant jury ou à participer à des recours collectifs."
     },
     "section14": {
-      "title": "14. Misceláneas",
+      "title": "14. Divers",
       "items": [
-        "Si alguna parte de estos Términos no es válida, el resto sigue vigente.",
-        "No puedes transferir tu cuenta sin nuestro permiso.",
-        "Estos Términos constituyen el acuerdo completo entre tú y ProfeVision."
+        "Si une partie de ces Conditions n'est pas valide, le reste demeure en vigueur.",
+        "Vous ne pouvez pas transférer votre compte sans notre permission.",
+        "Ces Conditions constituent l'intégralité de l'accord entre vous et ProfeVision."
       ]
     },
     "section15": {
       "title": "15. Contact",
-      "intro": "Si tienes dudas o necesitas ayuda, escríbenos a:",
-      "orAddress": "O a la dirección:",
+      "intro": "Si vous avez des questions ou si vous avez besoin d'aide, écrivez-nous à :",
+      "orAddress": "Ou à l'adresse :",
       "address": {
         "name": "ProfeVision",
         "line1": "647 Santino Meadows Apt. 525",
@@ -1045,107 +1045,107 @@
   "components": {
     "excelImport": {
       "options": {
-        "title": "Opciones de importación",
-        "separateNames": "Los apellidos y nombres están en campos separados",
-        "includeEmails": "Incluir correos electrónicos"
+        "title": "Options d'importation",
+        "separateNames": "Les noms et prénoms sont dans des champs séparés",
+        "includeEmails": "Inclure les e-mails"
       },
       "columns": {
         "names": "Prénoms",
-        "surnames": "Noms de famille",
-        "fullName": "Apellidos y Noms",
-        "identification": "Identificación",
-        "email": "Email"
+        "surnames": "Noms",
+        "fullName": "Noms et Prénoms",
+        "identification": "Identification",
+        "email": "E-mail"
       },
       "example": {
         "student1": {
-          "firstName": "Juan Carlos",
+          "firstName": "Jean-Charles",
           "lastName": "Pérez González",
           "id": "12345678",
-          "email": "estudiante1@ejemplo.com"
+          "email": "étudiant1@exemple.com"
         },
         "student2": {
-          "firstName": "María José",
+          "firstName": "Marie-Josée",
           "lastName": "López Ramírez",
           "id": "87654321",
-          "email": "estudiante2@ejemplo.com"
+          "email": "étudiant2@exemple.com"
         }
       },
       "sheetName": "Étudiants",
-      "downloadTemplate": "Descargar formato",
-      "downloadDescription": "Descarga el formato según las opciones seleccionadas",
-      "selectFile": "Seleccionar archivo Excel",
-      "errorsFound": "Se encontraron los siguientes errores:",
+      "downloadTemplate": "Télécharger le modèle",
+      "downloadDescription": "Téléchargez le format selon les options sélectionnées",
+      "selectFile": "Sélectionner le fichier Excel",
+      "errorsFound": "Les erreurs suivantes ont été trouvées :",
       "preview": {
-        "title": "Vista previa ({count} estudiantes)",
+        "title": "Aperçu ({count} étudiants)",
         "table": {
           "names": "Prénoms",
-          "surnames": "Noms de famille",
-          "fullName": "Apellidos y Noms",
-          "identification": "Identificación",
-          "email": "Email",
-          "andMore": "Y {count} más..."
+          "surnames": "Noms",
+          "fullName": "Noms et Prénoms",
+          "identification": "Identification",
+          "email": "Courriel",
+          "andMore": "Et {count} plus..."
         },
-        "validStudents": "{count} estudiantes válidos",
-        "errors": "{count} errores"
+        "validStudents": "{count} étudiants valides",
+        "errors": "{count} erreurs"
       },
-      "importing": "Importando...",
-      "importStudents": "Importar estudiantes",
+      "importing": "Importation en cours...",
+      "importStudents": "Importer des étudiants",
       "validation": {
-        "emptyFile": "El archivo no contiene datos",
-        "missingColumns": "Faltan columnas requeridas",
-        "row": "Fila",
-        "missingNames": "Faltan los nombres",
-        "missingSurnames": "Faltan los apellidos",
-        "missingIdentification": "Falta la identificación",
-        "invalidEmail": "El correo electrónico no es válido"
+        "emptyFile": "Le fichier ne contient pas de données",
+        "missingColumns": "Colonnes requises manquantes",
+        "row": "Ligne",
+        "missingNames": "Les prénoms sont manquants",
+        "missingSurnames": "Les noms de famille sont manquants",
+        "missingIdentification": "L'identification est manquante",
+        "invalidEmail": "L'e-mail n'est pas valide"
       },
       "error": {
         "title": "Erreur",
-        "readingFile": "No se pudo leer el archivo. Asegúrate de que sea un archivo Excel válido.",
-        "noDataToImport": "No hay datos válidos para importar",
-        "invalidHeaders": "Los encabezados del archivo no son válidos. No borres la primera fila del formato.",
-        "expectedHeaders": "Los encabezados esperados son:",
-        "expectedHeadersSeparate": "{names}, {surnames}, {id}{email}",
+        "readingFile": "Impossible de lire le fichier. Assurez-vous qu'il s'agit d'un fichier Excel valide.",
+        "noDataToImport": "Il n'y a pas de données valides à importer",
+        "invalidHeaders": "Les en-têtes du fichier ne sont pas valides. Ne supprimez pas la première ligne du format.",
+        "expectedHeaders": "Les en-têtes attendus sont :",
+        "expectedHeadersSeparate": "{noms}, {noms de famille}, {id}{email}",
         "expectedHeadersCombined": "{fullName}, {id}{email}"
       },
-      "headerWarning": "No borrar los nombres de las columnas en la primera fila del archivo."
+      "headerWarning": "Ne pas supprimer les noms des colonnes dans la première ligne du fichier."
     }
   },
   "developmentOverlay": {
-    "message": "Estadísticas en desarrollo - Pronto disponible"
+    "message": "Statistiques en développement - Bientôt disponible"
   },
   "dataDeletion": {
-    "title": "Eliminación de Datos",
-    "intro": "En ProfeVision respetamos tu derecho a controlar tus datos personales. Si deseas eliminar tu cuenta y todos los datos asociados, puedes solicitar la eliminación siguiendo el proceso descrito a continuación.",
+    "title": "Suppression des Données",
+    "intro": "Chez ProfeVision, nous respectons votre droit de contrôler vos données personnelles. Si vous souhaitez supprimer votre compte et toutes les données associées, vous pouvez demander la suppression en suivant le processus décrit ci-dessous.",
     "howTo": {
-      "title": "Cómo solicitar la eliminación de tu cuenta",
-      "description": "Para solicitar la eliminación de tu cuenta y todos tus datos, envía un correo electrónico a:",
-      "emailNote": "Incluye en el correo la dirección de email asociada a tu cuenta de ProfeVision."
+      "title": "Comment demander la suppression de votre compte",
+      "description": "Pour demander la suppression de votre compte et de toutes vos données, envoyez un e-mail à :",
+      "emailNote": "Incluez dans l'e-mail l'adresse e-mail associée à votre compte ProfeVision."
     },
     "process": {
-      "title": "Proceso de eliminación",
+      "title": "Processus de suppression",
       "steps": [
-        "Envía un correo a deletion@profevision.com solicitando la eliminación de tu cuenta.",
-        "Incluye el email asociado a tu cuenta para verificar tu identidad.",
-        "Recibirás una confirmación de recepción de tu solicitud.",
-        "Tu cuenta y datos serán eliminados en un máximo de 30 días."
+        "Envoyez un e-mail à deletion@profevision.com pour demander la suppression de votre compte.",
+        "Veuillez inclure l'e-mail associé à votre compte pour vérifier votre identité.",
+        "Vous recevrez un accusé de réception de votre demande.",
+        "Votre compte et vos données seront supprimés dans un délai maximum de 30 jours."
       ]
     },
     "dataDeleted": {
-      "title": "Datos que serán eliminados",
-      "description": "Al eliminar tu cuenta, se borrarán permanentemente:",
+      "title": "Données qui seront supprimées",
+      "description": "En supprimant votre compte, les éléments suivants seront définitivement effacés :",
       "items": [
-        "Tu perfil y datos de cuenta",
-        "Información de tus estudiantes",
+        "Votre profil et vos données de compte",
+        "Informations de vos étudiants",
         "Examens créés et résultats",
-        "Imágenes de escaneos",
-        "Instituciones, materias y grupos creados",
-        "Historial de uso y preferencias"
+        "Images de scans",
+        "Institutions, matières et groupes créés",
+        "Historique d'utilisation et préférences"
       ]
     },
     "note": {
-      "title": "Nota importante",
-      "content": "Una vez eliminados, los datos no podrán ser recuperados. Si tienes una suscripción activa, asegúrate de cancelarla antes de solicitar la eliminación de tu cuenta."
+      "title": "Note importante",
+      "content": "Une fois supprimées, les données ne pourront plus être récupérées. Si vous avez un abonnement actif, assurez-vous de l'annuler avant de demander la suppression de votre compte."
     }
   }
 }

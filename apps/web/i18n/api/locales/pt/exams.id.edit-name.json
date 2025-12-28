@@ -1,13 +1,13 @@
 {
   "errors": {
-    "missingId": "ID de examen no proporcionado en la URL",
-    "invalidBody": "Cuerpo de la solicitud inválido",
-    "missingTitle": "Nuevo título no proporcionado o inválido en el cuerpo de la solicitud",
-    "updateTitle": "Error al actualizar el título del examen",
-    "notFound": "Examen no encontrado",
-    "unexpected": "Error inesperado en el servidor"
+    "missingId": "ID do exame não fornecido na URL",
+    "invalidBody": "Corpo da solicitação inválido",
+    "missingTitle": "Novo título não fornecido ou inválido no corpo da solicitação",
+    "updateTitle": "Erro ao atualizar o título do exame",
+    "notFound": "Exame não encontrado",
+    "unexpected": "Erro inesperado no servidor"
   },
   "success": {
-    "titleUpdated": "Título del examen actualizado correctamente"
+    "titleUpdated": "Título do exame atualizado com sucesso"
   }
 }

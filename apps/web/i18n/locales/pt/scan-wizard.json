@@ -1,15 +1,15 @@
 {
   "titles": {
     "instructions": "Instruções",
-    "imageCapture": "Captura del Examen",
-    "processing": "Procesando Imagen",
-    "results": "Resultados del Escaneo",
-    "saved": "Examen Guardado",
-    "default": "Asistente de Calificación"
+    "imageCapture": "Captura do Exame",
+    "processing": "Processando Imagem",
+    "results": "Resultados da Digitalização",
+    "saved": "Exame Salvo",
+    "default": "Assistente de Correção"
   },
-  "description": "Asistente para calificar exámenes escaneados",
+  "description": "Assistente para corrigir exames digitalizados",
   "buttons": {
-    "close": "Datar",
-    "back": "Atrás"
+    "close": "Fechar",
+    "back": "Voltar"
   }
 }

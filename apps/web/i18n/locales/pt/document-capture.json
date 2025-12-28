@@ -1,14 +1,14 @@
 {
   "status": {
     "loading": "Carregando...",
-    "requestingCamera": "Solicitando cámara...",
-    "searching": "Posiciona el documento",
-    "holdStill": "Mantén firme...",
+    "requestingCamera": "Solicitando câmera...",
+    "searching": "Posicione o documento",
+    "holdStill": "Mantenha firme...",
     "capturing": "Capturando...",
     "captured": "Capturado",
     "searchingQr": "Buscando código QR...",
-    "blurry": "Imagen borrosa",
-    "noQr": "No se detecta código QR"
+    "blurry": "Imagem embaçada",
+    "noQr": "Nenhum código QR detectado"
   },
   "buttons": {
     "capture": "Capturar",

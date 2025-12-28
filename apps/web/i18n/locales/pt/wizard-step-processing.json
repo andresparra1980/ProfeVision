@@ -1,26 +1,26 @@
 {
   "states": {
-    "processing": "Procesando imagen...",
+    "processing": "Processando imagem...",
     "checkingDuplicates": "Verificando duplicados...",
-    "complete": "Procesamiento exitoso",
-    "duplicate": "Examen ya calificado",
-    "examNotDetected": "Examen no detectado",
-    "error": "Error de procesamiento"
+    "complete": "Processamento concluído",
+    "duplicate": "Exame já avaliado",
+    "examNotDetected": "Exame não detectado",
+    "error": "Erro de processamento"
   },
   "messages": {
-    "processingSuccess": "¡Procesado correctamente!",
-    "duplicateWithDate": "Examen ya calificado el {date}",
-    "duplicateGeneric": "Examen ya calificado.",
-    "noExamDetected": "Examen no detectado. Intente de nuevo.",
-    "invalidExamDetected": "No se pudo detectar un examen válido en la imagen. Por favor, asegúrese de que el código QR y las marcas de respuesta sean claramente visibles e intente de nuevo.",
-    "genericProcessingError": "Error al procesar. Intente de nuevo.",
-    "processedImageAlt": "Imagen procesada"
+    "processingSuccess": "Processado com sucesso!",
+    "duplicateWithDate": "Exame já avaliado em {date}",
+    "duplicateGeneric": "Exame já avaliado.",
+    "noExamDetected": "Exame não detectado. Tente novamente.",
+    "invalidExamDetected": "Não foi possível detectar um exame válido na imagem. Certifique-se de que o código QR e as marcações de resposta estejam claramente visíveis e tente novamente.",
+    "genericProcessingError": "Erro ao processar. Tente novamente.",
+    "processedImageAlt": "Imagem processada"
   },
   "buttons": {
-    "retakePhoto": "Tomar otra foto",
-    "retry": "Reintentar",
+    "retakePhoto": "Tirar outra foto",
+    "retry": "Repetir",
     "continueAnyway": "Continuar mesmo assim",
     "continue": "Continuar"
   },
-  "locale": "es-ES"
+  "locale": "pt-BR"
 }

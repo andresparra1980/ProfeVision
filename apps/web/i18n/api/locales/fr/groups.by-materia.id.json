@@ -1,6 +1,6 @@
 {
   "errors": {
     "unauthorized": "Non autorisé",
-    "internal": "Error al obtener el grupo"
+    "internal": "Erreur lors de la récupération du groupe"
   }
 }

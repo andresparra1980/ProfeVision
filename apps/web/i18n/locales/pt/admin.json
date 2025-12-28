@@ -1,61 +1,61 @@
 {
-  "title": "Painel de administração",
-  "description": "Observabilidad global de la plataforma",
+  "title": "Admin Dashboard",
+  "description": "Observabilidade global da plataforma",
   "loading": "Carregando estatísticas...",
-  "error": "Error al cargar datos",
-  "retry": "Reintentar",
-  "refresh": "Actualizar",
-  "viewUsers": "Ver usuarios",
+  "error": "Erro ao carregar dados",
+  "retry": "Repetir",
+  "refresh": "Atualizar",
+  "viewUsers": "Ver usuários",
   "stats": {
-    "users": "Usuarios",
-    "usersNew": "+{count} este mes",
+    "users": "Usuários",
+    "usersNew": "+{count} este mês",
     "exams": "Exames",
-    "examsGraded": "{count} calificados",
-    "scans": "Escaneos",
-    "scansNew": "+{count} este mes",
-    "institutions": "Instituciones",
+    "examsGraded": "{count} corrigidos",
+    "scans": "Escaneamentos",
+    "scansNew": "+{count} este mês",
+    "institutions": "Instituições",
     "groups": "Grupos",
-    "groupsActive": "{count} activos",
+    "groupsActive": "{count} ativos",
     "students": "Estudantes",
     "aiJobs": "Jobs IA",
-    "aiJobsSuccess": "{count} exitosos"
+    "aiJobsSuccess": "{count} bem-sucedidos"
   },
   "tiers": {
-    "title": "Distribución por Tier",
+    "title": "Distribuição por Tier",
     "free": "Free",
     "plus": "Plus",
     "admin": "Admin",
     "grandfathered": "Grandfathered",
-    "total": "Total usuarios"
+    "total": "Total de usuários"
   },
   "trends": {
-    "title": "Tendencias (Últimos 6 meses)",
-    "users": "Usuarios",
+    "title": "Tendências (Últimos 6 meses)",
+    "users": "Usuários",
     "exams": "Exames",
-    "scans": "Escaneos"
+    "scans": "Escaneamentos"
   },
   "users": {
-    "title": "Usuarios",
-    "description": "Lista de todos los usuarios registrados",
-    "search": "Buscar por nombre...",
+    "title": "Usuários",
+    "description": "Lista de todos os usuários registrados",
+    "search": "Buscar por nome...",
     "filterTier": "Filtrar por tier",
-    "allTiers": "Todos los tiers",
+    "allTiers": "Todos os tiers",
     "table": {
       "user": "Usuário",
       "email": "Email",
       "tier": "Tier",
       "entities": "Entidades",
-      "subjects": "Disciplinas",
+      "subjects": "Matérias",
       "groups": "Grupos",
       "exams": "Exames",
-      "scans": "Escaneos",
+      "scans": "Escaneamentos",
       "created": "Registrado"
     },
     "pagination": {
-      "showing": "Mostrando {from}-{to} de {total}",
+      "showing": "Exibindo {from}-{to} de {total}",
       "previous": "Anterior",
       "next": "Próximo"
     },
-    "empty": "No se encontraron usuarios"
+    "empty": "Nenhum usuário encontrado"
   }
 }

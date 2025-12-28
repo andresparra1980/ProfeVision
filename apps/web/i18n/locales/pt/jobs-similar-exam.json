@@ -1,34 +1,34 @@
 {
   "jobs": {
     "similarExam": {
-      "title": "Criar examen similar",
+      "title": "Criar exame semelhante",
       "steps": {
-        "loadBlueprint": "Analizar examen fuente y construir plan (blueprint)",
-        "generate": "Generar borrador de examen similar",
-        "validate": "Validar borrador y producir recomendaciones",
-        "apply": "Aplicar recomendaciones",
-        "randomize": "Aleatorizar orden (determinista)",
-        "finalize": "Validación final y cierre"
+        "loadBlueprint": "Analisar exame de origem e construir plano (blueprint)",
+        "generate": "Gerar rascunho de exame semelhante",
+        "validate": "Validar rascunho e produzir recomendações",
+        "apply": "Aplicar recomendações",
+        "randomize": "Aleatorizar ordem (determinista)",
+        "finalize": "Validação final e encerramento"
       },
       "status": {
-        "idle": "No iniciado",
-        "started": "En progreso",
+        "idle": "Não iniciado",
+        "started": "Em progresso",
         "succeeded": "Concluído",
-        "failed": "Falló"
+        "failed": "Falhou"
       },
       "errors": {
-        "schemaInvalid": "El examen generado no cumple con el esquema requerido.",
-        "parseFailed": "La respuesta de IA no se pudo parsear como JSON válido.",
-        "timeout": "La operación excedió el tiempo límite. Inténtalo de nuevo.",
-        "sourceNotFound": "No se encontró el examen fuente.",
-        "tooLarge": "El examen fuente es demasiado grande para procesar.",
-        "loadBlueprint": "Fallo al analizar el examen fuente y construir el blueprint.",
-        "generate": "Fallo al generar el borrador del examen similar.",
-        "validate": "Fallo durante la validación del borrador.",
-        "apply": "Fallo al aplicar las recomendaciones al borrador.",
-        "randomize": "Fallo al aleatorizar el orden de preguntas/opciones.",
-        "finalize": "Fallo durante la validación final y el cierre.",
-        "unknown": "Ocurrió un error desconocido."
+        "schemaInvalid": "O exame gerado não cumpre o esquema exigido.",
+        "parseFailed": "A resposta da IA não pôde ser analisada como JSON válido.",
+        "timeout": "A operação excedeu o tempo limite. Tente novamente.",
+        "sourceNotFound": "Exame de origem não encontrado.",
+        "tooLarge": "O exame de origem é grande demais para ser processado.",
+        "loadBlueprint": "Falha ao analisar o exame de origem e construir o blueprint.",
+        "generate": "Falha ao gerar o rascunho do exame semelhante.",
+        "validate": "Falha durante a validação do rascunho.",
+        "apply": "Falha ao aplicar as recomendações ao rascunho.",
+        "randomize": "Falha ao aleatorizar a ordem das perguntas/opções.",
+        "finalize": "Falha durante a validação final e o encerramento.",
+        "unknown": "Ocorreu um erro desconhecido."
       }
     }
   }

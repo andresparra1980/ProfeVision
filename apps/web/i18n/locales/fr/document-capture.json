@@ -1,17 +1,17 @@
 {
   "status": {
     "loading": "Chargement...",
-    "requestingCamera": "Solicitando cámara...",
-    "searching": "Posiciona el documento",
-    "holdStill": "Mantén firme...",
-    "capturing": "Capturando...",
-    "captured": "Capturado",
-    "searchingQr": "Buscando código QR...",
-    "blurry": "Imagen borrosa",
-    "noQr": "No se detecta código QR"
+    "requestingCamera": "Demande d'accès à la caméra...",
+    "searching": "Positionnez le document",
+    "holdStill": "Maintenez immobile...",
+    "capturing": "Capture en cours...",
+    "captured": "Capturé",
+    "searchingQr": "Recherche du code QR...",
+    "blurry": "Image floue",
+    "noQr": "Aucun code QR détecté"
   },
   "buttons": {
-    "capture": "Capturar",
+    "capture": "Capturer",
     "cancel": "Annuler"
   }
 }

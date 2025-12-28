@@ -1,8 +1,8 @@
 {
-  "title": "¡Examen guardado correctamente!",
-  "description": "Los resultados del examen han sido registrados en el sistema.",
+  "title": "Examen enregistré avec succès !",
+  "description": "Les résultats de l'examen ont été enregistrés dans le système.",
   "buttons": {
-    "scanAnother": "Escanear otro examen",
-    "finish": "Finalizar"
+    "scanAnother": "Scanner un autre examen",
+    "finish": "Finaliser"
   }
 }

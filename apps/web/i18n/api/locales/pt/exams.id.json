@@ -1,17 +1,17 @@
 {
   "errors": {
     "unauthorized": "Não autorizado",
-    "internal": "Error al procesar la solicitud",
-    "notFound": "Examen no encontrado",
-    "onlyDraftDelete": "Solo se pueden eliminar exámenes en estado borrador",
+    "internal": "Erro ao processar a solicitação",
+    "notFound": "Exame não encontrado",
+    "onlyDraftDelete": "Apenas exames em estado de rascunho podem ser excluídos",
     "serverConfig": "Erro de configuração do servidor",
-    "missingFields": "Faltan campos requeridos",
-    "updateExam": "Error al actualizar examen",
-    "updateState": "Error al actualizar el estado del examen"
+    "missingFields": "Campos obrigatórios ausentes",
+    "updateExam": "Erro ao atualizar exame",
+    "updateState": "Erro ao atualizar o estado do exame"
   },
   "success": {
-    "deleted": "Examen y elementos relacionados eliminados correctamente",
-    "stateUpdated": "Status del examen actualizado correctamente",
-    "updated": "Examen actualizado correctamente"
+    "deleted": "Exame e elementos relacionados excluídos com sucesso",
+    "stateUpdated": "Estado do exame atualizado com sucesso",
+    "updated": "Exame atualizado com sucesso"
   }
 }

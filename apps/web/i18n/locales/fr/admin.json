@@ -1,61 +1,61 @@
 {
-  "title": "Tableau de bord administrateur",
-  "description": "Observabilidad global de la plataforma",
+  "title": "Admin Dashboard",
+  "description": "Observabilité globale de la plateforme",
   "loading": "Chargement des statistiques...",
-  "error": "Error al cargar datos",
-  "retry": "Reintentar",
-  "refresh": "Actualizar",
-  "viewUsers": "Ver usuarios",
+  "error": "Erreur lors du chargement des données",
+  "retry": "Réessayer",
+  "refresh": "Actualiser",
+  "viewUsers": "Voir les utilisateurs",
   "stats": {
-    "users": "Usuarios",
-    "usersNew": "+{count} este mes",
+    "users": "Utilisateurs",
+    "usersNew": "+{count} ce mois-ci",
     "exams": "Examens",
-    "examsGraded": "{count} calificados",
-    "scans": "Escaneos",
-    "scansNew": "+{count} este mes",
-    "institutions": "Instituciones",
+    "examsGraded": "{count} corrigés",
+    "scans": "Scans",
+    "scansNew": "+{count} ce mois-ci",
+    "institutions": "Institutions",
     "groups": "Groupes",
-    "groupsActive": "{count} activos",
+    "groupsActive": "{count} actifs",
     "students": "Étudiants",
     "aiJobs": "Jobs IA",
-    "aiJobsSuccess": "{count} exitosos"
+    "aiJobsSuccess": "{count} réussis"
   },
   "tiers": {
-    "title": "Distribución por Tier",
+    "title": "Distribution par Tier",
     "free": "Free",
     "plus": "Plus",
     "admin": "Admin",
     "grandfathered": "Grandfathered",
-    "total": "Total usuarios"
+    "total": "Total utilisateurs"
   },
   "trends": {
-    "title": "Tendencias (Últimos 6 meses)",
-    "users": "Usuarios",
+    "title": "Tendances (6 derniers mois)",
+    "users": "Utilisateurs",
     "exams": "Examens",
-    "scans": "Escaneos"
+    "scans": "Scans"
   },
   "users": {
-    "title": "Usuarios",
-    "description": "Lista de todos los usuarios registrados",
-    "search": "Buscar por nombre...",
-    "filterTier": "Filtrar por tier",
-    "allTiers": "Todos los tiers",
+    "title": "Utilisateurs",
+    "description": "Liste de tous les utilisateurs enregistrés",
+    "search": "Rechercher par nom...",
+    "filterTier": "Filtrer par tier",
+    "allTiers": "Tous les tiers",
     "table": {
       "user": "Utilisateur",
       "email": "Email",
       "tier": "Tier",
-      "entities": "Entidades",
+      "entities": "Entités",
       "subjects": "Matières",
       "groups": "Groupes",
       "exams": "Examens",
-      "scans": "Escaneos",
-      "created": "Registrado"
+      "scans": "Scans",
+      "created": "Enregistré"
     },
     "pagination": {
-      "showing": "Mostrando {from}-{to} de {total}",
+      "showing": "Affichage de {from}-{to} sur {total}",
       "previous": "Précédent",
       "next": "Suivant"
     },
-    "empty": "No se encontraron usuarios"
+    "empty": "Aucun utilisateur trouvé"
   }
 }

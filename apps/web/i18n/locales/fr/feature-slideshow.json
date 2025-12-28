@@ -1,33 +1,33 @@
 {
   "slides": [
     {
-      "title": "Calificación en Minutos",
-      "subtitle": "Tecnología OMR + IA",
-      "description": "Nuestra aplicación para escanear exámenes con tecnología OMR (Visión Artificial) para papel y la IA para online te dan resultados instantáneos."
+      "title": "Notation en Quelques Minutes",
+      "subtitle": "Technologie OMR + IA",
+      "description": "Notre application pour scanner les examens avec la technologie OMR (Vision Artificielle) pour le papier et l'IA pour le format en ligne vous donne des résultats instantanés."
     },
     {
-      "title": "Gestión Educativa Completa",
-      "subtitle": "Todo Centralizado",
-      "description": "Centraliza instituciones, materias, grupos y estudiantes sin esfuerzo."
+      "title": "Gestion Éducative Complète",
+      "subtitle": "Tout Centralisé",
+      "description": "Centralisez les institutions, les matières, les groupes et les étudiants sans effort."
     },
     {
-      "title": "Création d'examens avec l'IA",
-      "subtitle": "Generación Inteligente",
-      "description": "Genera pruebas de calidad rápidamente, adaptadas a tus necesidades."
+      "title": "Création d'Examens avec l'IA",
+      "subtitle": "Génération Intelligente",
+      "description": "Générez rapidement des épreuves de qualité, adaptées à vos besoins."
     },
     {
-      "title": "Análisis Detallado de Rendimiento",
-      "subtitle": "Insights Clave",
-      "description": "Obtén insights clave para mejorar la enseñanza y el aprendizaje de tus estudiantes."
+      "title": "Analyse Détaillée de la Performance",
+      "subtitle": "Insights Clés",
+      "description": "Obtenez des informations clés pour améliorer l'enseignement et l'apprentissage de vos étudiants."
     },
     {
-      "title": "Plataforma Intuitiva",
-      "subtitle": "Fácil de Usar",
-      "description": "Diseñada para educadores, fácil de usar desde el primer momento."
+      "title": "Plateforme Intuitive",
+      "subtitle": "Facile à Utiliser",
+      "description": "Conçue pour les éducateurs, facile à utiliser dès le premier instant."
     }
   ],
   "metrics": {
-    "timeSaved": "Tiempo Ahorrado",
-    "accuracy": "Precisión"
+    "timeSaved": "Temps Gagné",
+    "accuracy": "Précision"
   }
 }

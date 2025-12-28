@@ -1,50 +1,50 @@
 {
-  "description": "Revisa los resultados del escaneo. Puedes volver atrás para escanear nuevamente si es necesario.",
+  "description": "Examinez les résultats de l'analyse. Vous pouvez revenir en arrière pour scanner à nouveau si nécessaire.",
   "examInfo": {
-    "title": "Información del Examen",
+    "title": "Informations de l'examen",
     "loading": "Chargement des informations...",
     "fields": {
-      "subject": "Materia:",
-      "exam": "Examen:",
-      "student": "Estudiante:",
-      "group": "Grupo:"
+      "subject": "Matière :",
+      "exam": "Examen :",
+      "student": "Étudiant :",
+      "group": "Groupe :"
     },
-    "notAvailable": "Pas disponible"
+    "notAvailable": "Non disponible"
   },
   "answers": {
-    "title": "Respuestas"
+    "title": "Réponses"
   },
   "grading": {
-    "calculating": "Calculando calificación...",
-    "error": "Error al calcular calificación:",
-    "label": "Calificación:",
-    "correctAnswers": "correctas",
-    "scoreFormat": "{obtained}/{total} ({correct}/{totalQuestions} correctas)"
+    "calculating": "Calcul de la note...",
+    "error": "Erreur lors du calcul de la note :",
+    "label": "Note :",
+    "correctAnswers": "correctes",
+    "scoreFormat": "{obtained}/{total} ({correct}/{totalQuestions} correctes)"
   },
   "buttons": {
-    "back": "Atrás",
-    "saving": "Guardando...",
+    "back": "Retour",
+    "saving": "Enregistrement...",
     "saveResults": "Enregistrer les résultats",
-    "savedSuccessfully": "Guardado exitosamente",
-    "scanAnother": "Escanear Otro",
-    "finish": "Finalizar"
+    "savedSuccessfully": "Enregistré avec succès",
+    "scanAnother": "Scanner un autre",
+    "finish": "Terminer"
   },
   "toasts": {
-    "resultsUpdated": "Resultados actualizados",
-    "resultsSaved": "Resultados guardados",
-    "saveError": "Error al guardar",
-    "saveErrorDescription": "Ha ocurrido un error al guardar los resultados"
+    "resultsUpdated": "Résultats mis à jour",
+    "resultsSaved": "Résultats enregistrés",
+    "saveError": "Erreur lors de l'enregistrement",
+    "saveErrorDescription": "Une erreur est survenue lors de l'enregistrement des résultats"
   },
   "errors": {
-    "calculatingGrade": "Error al calcular la calificación",
-    "noQRData": "No se detectaron datos del código QR.",
-    "saveResults": "Error al guardar los resultados",
-    "loadingEntities": "Error desconocido al cargar datos de las entidades",
-    "serverEmptyResponse": "El servidor respondió con un cuerpo vacío",
-    "timeoutError": "La solicitud excedió el tiempo máximo de espera (60 segundos)",
-    "formatError": "Error de formato",
-    "unknownError": "Error desconocido",
-    "unauthorized": "Non autorisé. Veuillez vous connecter pour continuer.",
-    "notOwner": "Este examen pertenece a otra cuenta. No puedes guardar resultados para exámenes que no son tuyos."
+    "calculatingGrade": "Erreur lors du calcul de la note",
+    "noQRData": "Aucune donnée de code QR détectée.",
+    "saveResults": "Erreur lors de l'enregistrement des résultats",
+    "loadingEntities": "Erreur inconnue lors du chargement des données des entités",
+    "serverEmptyResponse": "Le serveur a répondu avec un corps vide",
+    "timeoutError": "La demande a dépassé le délai d'attente maximum (60 secondes)",
+    "formatError": "Erreur de format",
+    "unknownError": "Erreur inconnue",
+    "unauthorized": "Non autorisé. Connectez-vous pour continuer.",
+    "notOwner": "Cet examen appartient à un autre compte. Vous ne pouvez pas enregistrer de résultats pour des examens qui ne vous appartiennent pas."
   }
 }

@@ -3,8 +3,8 @@
     "serverConfig": "Erro de configuração do servidor",
     "unauthorizedMissing": "Não autorizado - Token não encontrado",
     "unauthorized": "Não autorizado",
-    "createEntity": "Erro ao criar a entidade educacional",
-    "relateEntity": "Erro ao associar a entidade com o professor",
+    "createEntity": "Erro ao criar a entidade educativa",
+    "relateEntity": "Erro ao associar a entidade ao professor",
     "internal": "Erro interno do servidor"
   }
 }

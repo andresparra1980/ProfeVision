@@ -1,6 +1,6 @@
 {
   "errors": {
-    "missingImage": "Nenhuma imagem fornecida",
+    "missingImage": "Nenhuma imagem foi fornecida",
     "invalidImage": "O arquivo não é uma imagem válida",
     "process": "Erro ao processar a imagem"
   }

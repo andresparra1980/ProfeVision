@@ -1,14 +1,14 @@
 {
   "title": "Blog",
-  "description": "Últimas noticias, consejos y actualizaciones sobre ProfeVision.",
+  "description": "Últimas notícias, dicas e atualizações sobre ProfeVision.",
   "comingSoon": {
     "title": "Em breve",
-    "description": "Estamos preparando contenido valioso para educadores. Aquí encontrarás:",
+    "description": "Estamos preparando conteúdo valioso para educadores. Aqui você encontrará:",
     "items": [
-      "Mejores prácticas en evaluación digital",
-      "Consejos para optimizar el tiempo de calificación",
-      "Casos de éxito de instituciones educativas",
-      "Novedades y actualizaciones de la plataforma"
+      "Melhores práticas em avaliação digital",
+      "Dicas para otimizar o tempo de correção",
+      "Casos de sucesso de instituições de ensino",
+      "Novidades e atualizações da plataforma"
     ]
   }
 }

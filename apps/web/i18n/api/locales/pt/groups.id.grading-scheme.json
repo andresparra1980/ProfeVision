@@ -1,17 +1,17 @@
 {
   "errors": {
     "serverConfig": "Erro de configuração do servidor",
-    "forbidden": "No se pudo verificar el acceso al grupo",
-    "groupNotFound": "Grupo no encontrado",
-    "missingPeriodDates": "Las fechas de inicio y fin son requeridas",
-    "invalidPeriodRange": "La fecha de fin debe ser posterior a la fecha de inicio",
-    "createScheme": "No se pudo crear el esquema",
-    "createPeriod": "No se pudo crear el periodo",
-    "createComponent": "No se pudo crear el componente",
-    "updatePeriod": "Error al actualizar periodo",
-    "deleteComponents": "Error al eliminar componentes",
-    "deletePeriods": "Error al eliminar periodos",
-    "loadScheme": "Error al cargar esquema actualizado",
-    "internal": "Error al guardar el esquema de calificaciones"
+    "forbidden": "Não foi possível verificar o acesso ao grupo",
+    "groupNotFound": "Grupo não encontrado",
+    "missingPeriodDates": "As datas de início e fim são obrigatórias",
+    "invalidPeriodRange": "A data de fim deve ser posterior à data de início",
+    "createScheme": "Não foi possível criar o esquema",
+    "createPeriod": "Não foi possível criar o período",
+    "createComponent": "Não foi possível criar o componente",
+    "updatePeriod": "Erro ao atualizar período",
+    "deleteComponents": "Erro ao excluir componentes",
+    "deletePeriods": "Erro ao excluir períodos",
+    "loadScheme": "Erro ao carregar esquema atualizado",
+    "internal": "Erro ao salvar o esquema de notas"
   }
 }

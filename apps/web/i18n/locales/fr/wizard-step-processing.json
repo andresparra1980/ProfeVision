@@ -1,26 +1,26 @@
 {
   "states": {
-    "processing": "Procesando imagen...",
-    "checkingDuplicates": "Verificando duplicados...",
-    "complete": "Procesamiento exitoso",
-    "duplicate": "Examen ya calificado",
-    "examNotDetected": "Examen no detectado",
-    "error": "Error de procesamiento"
+    "processing": "Traitement de l'image...",
+    "checkingDuplicates": "Vérification des doublons...",
+    "complete": "Traitement réussi",
+    "duplicate": "Examen déjà noté",
+    "examNotDetected": "Examen non détecté",
+    "error": "Erreur de traitement"
   },
   "messages": {
-    "processingSuccess": "¡Procesado correctamente!",
-    "duplicateWithDate": "Examen ya calificado el {date}",
-    "duplicateGeneric": "Examen ya calificado.",
-    "noExamDetected": "Examen no detectado. Intente de nuevo.",
-    "invalidExamDetected": "No se pudo detectar un examen válido en la imagen. Por favor, asegúrese de que el código QR y las marcas de respuesta sean claramente visibles e intente de nuevo.",
-    "genericProcessingError": "Error al procesar. Intente de nuevo.",
-    "processedImageAlt": "Imagen procesada"
+    "processingSuccess": "Traité avec succès !",
+    "duplicateWithDate": "Examen déjà noté le {date}",
+    "duplicateGeneric": "Examen déjà noté.",
+    "noExamDetected": "Examen non détecté. Veuillez réessayer.",
+    "invalidExamDetected": "Impossible de détecter un examen valide sur l'image. Veuillez vous assurer que le code QR et les marques de réponse sont bien visibles et réessayez.",
+    "genericProcessingError": "Erreur lors du traitement. Veuillez réessayer.",
+    "processedImageAlt": "Image traitée"
   },
   "buttons": {
-    "retakePhoto": "Tomar otra foto",
-    "retry": "Reintentar",
-    "continueAnyway": "Continuer de todas formas",
+    "retakePhoto": "Prendre une autre photo",
+    "retry": "Réessayer",
+    "continueAnyway": "Continuer quand même",
     "continue": "Continuer"
   },
-  "locale": "es-ES"
+  "locale": "fr-FR"
 }

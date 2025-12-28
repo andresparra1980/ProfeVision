@@ -2,7 +2,7 @@
 """
 Translation script for ProfeVision UI and API localization.
 Translates Spanish JSON files to French and Portuguese (Brazilian).
-Uses Claude API for accurate translations.
+Uses OpenRouter API with Google Gemini 2.5 Flash Lite for translations.
 """
 
 import json
@@ -12,6 +12,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict
 from datetime import datetime
+import time
 
 # Directories to translate
 LOCALES_DIR = Path("apps/web/i18n/locales")
@@ -23,7 +24,7 @@ TARGET_LANGUAGES = ["fr", "pt"]  # French and Portuguese (Brazilian)
 
 def translate_json_content(spanish_json: str, target_lang: str, file_name: str) -> str:
     """
-    Translate a JSON file content to target language using Claude API via curl.
+    Translate a JSON file content to target language using OpenRouter API with Gemini 2.5 Flash Lite.
     
     Args:
         spanish_json: Spanish JSON content as string
@@ -38,9 +39,9 @@ def translate_json_content(spanish_json: str, target_lang: str, file_name: str) 
         "pt": "Brazilian Portuguese"
     }
     
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
-        raise ValueError("ANTHROPIC_API_KEY environment variable not set")
+        raise ValueError("OPENROUTER_API_KEY environment variable not set")
     
     prompt = f"""You are a professional translator specializing in translating user interface text for educational software.
 
@@ -64,34 +65,33 @@ Spanish JSON to translate:
 
 Respond with ONLY the translated JSON (no markdown, no code blocks, just the raw JSON):"""
 
-    # Create request body
+    # Create request body for OpenRouter
     request_body = {
-        "model": "claude-3-5-sonnet-20241022",
-        "max_tokens": 4096,
+        "model": "google/gemini-3-flash-preview",
         "messages": [
             {"role": "user", "content": prompt}
         ]
     }
     
-    # Call Claude API via curl
+    # Call OpenRouter API via curl
     curl_cmd = [
         "curl",
         "-s",
         "-X", "POST",
-        "https://api.anthropic.com/v1/messages",
-        "-H", f"x-api-key: {api_key}",
+        "https://openrouter.ai/api/v1/chat/completions",
+        "-H", f"Authorization: Bearer {api_key}",
         "-H", "content-type: application/json",
         "-d", json.dumps(request_body)
     ]
     
     try:
-        result = subprocess.run(curl_cmd, capture_output=True, text=True, check=True)
+        result = subprocess.run(curl_cmd, capture_output=True, text=True, check=True, timeout=60)
         response = json.loads(result.stdout)
         
         if "error" in response:
             raise ValueError(f"API error: {response['error']['message']}")
         
-        translated_content = response["content"][0]["text"].strip()
+        translated_content = response["choices"][0]["message"]["content"].strip()
         
         # Clean up if wrapped in markdown code blocks
         if translated_content.startswith("```json"):
@@ -107,6 +107,8 @@ Respond with ONLY the translated JSON (no markdown, no code blocks, just the raw
         
     except subprocess.CalledProcessError as e:
         raise ValueError(f"Curl error: {e.stderr}")
+    except Exception as e:
+        raise ValueError(f"Translation error: {str(e)}")
 
 
 def validate_json_structure(original: Dict[str, Any], translated: Dict[str, Any], path: str = "") -> bool:
@@ -259,7 +261,8 @@ def process_directory(source_dir: Path, name: str) -> tuple[int, int]:
 def main():
     """Main entry point."""
     print("\n🌍 ProfeVision Translation Script")
-    print(f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+    print(f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("📡 Using OpenRouter API with Google Gemini 3 Flash Preview\n")
     
     # Check if running from project root
     if not LOCALES_DIR.exists() or not API_DIR.exists():

@@ -1,17 +1,17 @@
 {
   "errors": {
     "serverConfig": "Erreur de configuration du serveur",
-    "forbidden": "No se pudo verificar el acceso al grupo",
-    "groupNotFound": "Grupo no encontrado",
-    "missingPeriodDates": "Las fechas de inicio y fin son requeridas",
-    "invalidPeriodRange": "La fecha de fin debe ser posterior a la fecha de inicio",
-    "createScheme": "No se pudo crear el esquema",
-    "createPeriod": "No se pudo crear el periodo",
-    "createComponent": "No se pudo crear el componente",
-    "updatePeriod": "Error al actualizar periodo",
-    "deleteComponents": "Error al eliminar componentes",
-    "deletePeriods": "Error al eliminar periodos",
-    "loadScheme": "Error al cargar esquema actualizado",
-    "internal": "Error al guardar el esquema de calificaciones"
+    "forbidden": "Impossible de vérifier l'accès au groupe",
+    "groupNotFound": "Groupe non trouvé",
+    "missingPeriodDates": "Les dates de début et de fin sont requises",
+    "invalidPeriodRange": "La date de fin doit être postérieure à la date de début",
+    "createScheme": "Impossible de créer le schéma",
+    "createPeriod": "Impossible de créer la période",
+    "createComponent": "Impossible de créer le composant",
+    "updatePeriod": "Erreur lors de la mise à jour de la période",
+    "deleteComponents": "Erreur lors de la suppression des composants",
+    "deletePeriods": "Erreur lors de la suppression des périodes",
+    "loadScheme": "Erreur lors du chargement du schéma mis à jour",
+    "internal": "Erreur lors de l'enregistrement du schéma de notation"
   }
 }

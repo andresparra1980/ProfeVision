@@ -1,7 +1,7 @@
 {
   "errors": {
-    "serverConfig": "Faltan credenciales de Supabase",
-    "missingIds": "Se requiere al menos un ID (examen, estudiante o grupo)",
-    "internal": "Error en traducción de datos de QR"
+    "serverConfig": "Faltam credenciais do Supabase",
+    "missingIds": "É necessário pelo menos um ID (exame, estudante ou grupo)",
+    "internal": "Erro na tradução de dados do QR"
   }
 }

@@ -1,9 +1,9 @@
 {
   "errors": {
-    "missingId": "ID de grupo no proporcionado",
+    "missingId": "ID de grupo não fornecido",
     "serverConfig": "Erro de configuração do servidor",
-    "fetch": "Error al obtener detalles del grupo",
-    "notFound": "Grupo no encontrado",
+    "fetch": "Erro ao obter detalhes do grupo",
+    "notFound": "Grupo não encontrado",
     "internal": "Erro interno do servidor"
   }
 }

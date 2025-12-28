@@ -1,15 +1,15 @@
 {
   "errors": {
-    "parse": "Error al procesar datos de entrada",
-    "missingQr": "Datos de QR incompletos",
-    "fetchQuestions": "Error al obtener preguntas del examen",
-    "uploadOriginal": "Error al guardar imagen original",
-    "uploadProcessed": "Error al guardar imagen procesada",
-    "saveResults": "Error al guardar resultados",
-    "saveScans": "Error al guardar imágenes escaneadas",
+    "parse": "Erreur lors du traitement des données d'entrée",
+    "missingQr": "Données QR incomplètes",
+    "fetchQuestions": "Erreur lors de la récupération des questions de l'examen",
+    "uploadOriginal": "Erreur lors de l'enregistrement de l'image originale",
+    "uploadProcessed": "Erreur lors de l'enregistrement de l'image traitée",
+    "saveResults": "Erreur lors de l'enregistrement des résultats",
+    "saveScans": "Erreur lors de l'enregistrement des images scannées",
     "internal": "Erreur interne du serveur",
-    "unauthorized": "Non autorisé. Veuillez vous connecter pour continuer.",
-    "examNotFound": "Examen no encontrado",
-    "notOwner": "Este examen pertenece a otra cuenta"
+    "unauthorized": "Non autorisé. Connectez-vous pour continuer.",
+    "examNotFound": "Examen non trouvé",
+    "notOwner": "Cet examen appartient à un autre compte"
   }
 }

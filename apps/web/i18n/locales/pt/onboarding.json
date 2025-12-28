@@ -1,183 +1,183 @@
 {
   "wizard": {
-    "title": "Configura tu cuenta",
-    "subtitle": "Te guiaremos paso a paso",
-    "skip": "Omitir",
-    "skipConfirm": "Puedes completar esto despues desde el panel",
-    "back": "Atras",
+    "title": "Configure sua conta",
+    "subtitle": "Nós guiaremos você passo a passo",
+    "skip": "Pular",
+    "skipConfirm": "Você pode completar isso depois pelo painel",
+    "back": "Voltar",
     "next": "Próximo",
     "continue": "Continuar",
-    "saving": "Guardando...",
+    "saving": "Salvando...",
     "finish": "Finalizar",
-    "step": "Paso {current} de {total}",
-    "progress": "{percent}% completado"
+    "step": "Passo {current} de {total}",
+    "progress": "{percent}% concluído"
   },
   "welcome": {
     "title": "Bem-vindo ao ProfeVision",
-    "greeting": "Hola{name}",
-    "description": "Vamos a configurar tu cuenta en unos minutos. Criaremos tu primera institucion, materia, grupo y estudiantes.",
+    "greeting": "Olá {name}",
+    "description": "Vamos configurar sua conta em alguns minutos. Criaremos sua primeira instituição, matéria, turma e alunos.",
     "duration": "Aproximadamente 3 minutos",
-    "steps": "5 pasos sencillos",
-    "start": "Comenzar"
+    "steps": "5 passos simples",
+    "start": "Começar"
   },
   "institution": {
-    "title": "Tu institucion",
-    "description": "Donde enseñas?",
-    "nameLabel": "Nome de la institucion",
-    "namePlaceholder": "Ej: Colegio San Jose",
-    "typeLabel": "Tipo de institucion",
+    "title": "Sua instituição",
+    "description": "Onde você leciona?",
+    "nameLabel": "Nome da instituição",
+    "namePlaceholder": "Ex: Colégio São José",
+    "typeLabel": "Tipo de instituição",
     "typePlaceholder": "Selecione o tipo",
     "types": {
-      "school": "Colegio",
-      "university": "Universidad",
+      "school": "Escola",
+      "university": "Universidade",
       "institute": "Instituto",
       "academy": "Academia",
-      "other": "Otro"
+      "other": "Outro"
     },
     "logoLabel": "Logo (opcional)",
-    "logoHint": "Arrastra o haz clic para subir",
-    "skipLogo": "Agregar despues"
+    "logoHint": "Arraste ou clique para enviar",
+    "skipLogo": "Adicionar depois"
   },
   "subject": {
-    "title": "Tu materia",
-    "description": "Que enseñas?",
-    "institutionLabel": "Institucion",
-    "selectInstitution": "Selecciona una institucion",
-    "noInstitutions": "No hay instituciones. Vuelve al paso anterior.",
-    "nameLabel": "Nome de la materia",
-    "namePlaceholder": "Ej: Matematicas",
-    "levelLabel": "Nivel educativo (opcional)",
-    "levelPlaceholder": "Ej: Secundaria, Preparatoria",
-    "descriptionLabel": "Descripcion (opcional)",
-    "descriptionPlaceholder": "Breve descripcion de la materia"
+    "title": "Sua matéria",
+    "description": "O que você ensina?",
+    "institutionLabel": "Instituição",
+    "selectInstitution": "Selecione uma instituição",
+    "noInstitutions": "Não há instituições. Volte ao passo anterior.",
+    "nameLabel": "Nome da matéria",
+    "namePlaceholder": "Ex: Matemática",
+    "levelLabel": "Nível educacional (opcional)",
+    "levelPlaceholder": "Ex: Ensino Médio, Preparatório",
+    "descriptionLabel": "Descrição (opcional)",
+    "descriptionPlaceholder": "Breve descrição da matéria"
   },
   "group": {
-    "title": "Tu grupo",
-    "description": "A quienes enseñas?",
-    "subjectLabel": "Disciplina",
-    "selectSubject": "Selecione uma disciplina",
-    "noSubjects": "No hay materias. Vuelve al paso anterior.",
-    "nameLabel": "Nome del grupo",
-    "namePlaceholder": "Ej: 3ro A, Seccion 101",
-    "yearLabel": "Año escolar (opcional)",
-    "yearPlaceholder": "Ej: 2024-2025",
-    "periodLabel": "Periodo (opcional)",
-    "periodPlaceholder": "Ej: Primer semestre"
+    "title": "Sua turma",
+    "description": "Para quem você ensina?",
+    "subjectLabel": "Matéria",
+    "selectSubject": "Selecione uma matéria",
+    "noSubjects": "Não há matérias. Volte ao passo anterior.",
+    "nameLabel": "Nome da turma",
+    "namePlaceholder": "Ex: 3º A, Turma 101",
+    "yearLabel": "Ano letivo (opcional)",
+    "yearPlaceholder": "Ex: 2024-2025",
+    "periodLabel": "Período (opcional)",
+    "periodPlaceholder": "Ex: Primeiro semestre"
   },
   "students": {
-    "title": "Tus estudiantes",
-    "description": "Agrega estudiantes a tu grupo",
-    "groupLabel": "Grupo",
-    "selectGroup": "Selecione um grupo",
-    "noGroups": "No hay grupos. Vuelve al paso anterior.",
+    "title": "Seus alunos",
+    "description": "Adicione alunos à sua turma",
+    "groupLabel": "Turma",
+    "selectGroup": "Selecione uma turma",
+    "noGroups": "Não há turmas. Volte ao passo anterior.",
     "importTab": "Importar Excel",
-    "manualTab": "Agregar manual",
-    "importHint": "Sube un archivo Excel con tus estudiantes",
-    "importButton": "Seleccionar archivo",
-    "separateNamesOption": "Los apellidos y nombres estan en campos separados",
-    "fullNameLabel": "Apellidos y Nomes",
-    "fullNamePlaceholder": "Ej: Perez Gonzalez Juan Carlos",
+    "manualTab": "Adicionar manual",
+    "importHint": "Envie um arquivo Excel com seus alunos",
+    "importButton": "Selecionar arquivo",
+    "separateNamesOption": "Os sobrenomes e nomes estão em campos separados",
+    "fullNameLabel": "Nomes e Sobrenomes",
+    "fullNamePlaceholder": "Ex: João Carlos Perez Gonzalez",
     "firstNameLabel": "Nomes",
-    "firstNamePlaceholder": "Nomes del estudiante",
+    "firstNamePlaceholder": "Nomes do aluno",
     "lastNameLabel": "Sobrenomes",
-    "lastNamePlaceholder": "Apellidos del estudiante",
-    "idLabel": "Identificacion",
-    "idPlaceholder": "Codigo o documento",
-    "addStudent": "Agregar estudiante",
-    "studentCount": "{count} estudiante(s) agregado(s)",
-    "noStudents": "Aun no has agregado estudiantes",
-    "noGroupForImport": "No se puede importar sin un grupo creado",
-    "importSuccess": "Estudiantes importados correctamente",
-    "skipStudents": "Agregar despues",
-    "skipWarning": "Podras agregar estudiantes despues, pero necesitaras al menos uno para crear examenes",
-    "removeStudent": "Excluir"
+    "lastNamePlaceholder": "Sobrenomes do aluno",
+    "idLabel": "Identificação",
+    "idPlaceholder": "Código ou documento",
+    "addStudent": "Adicionar aluno",
+    "studentCount": "{count} aluno(s) adicionado(s)",
+    "noStudents": "Você ainda não adicionou alunos",
+    "noGroupForImport": "Não é possível importar sem uma turma criada",
+    "importSuccess": "Alunos importados com sucesso",
+    "skipStudents": "Adicionar depois",
+    "skipWarning": "Você poderá adicionar alunos depois, mas precisará de pelo menos um para criar exames",
+    "removeStudent": "Remover"
   },
   "examOptions": {
-    "title": "Crea tu primer examen",
-    "description": "Como quieres empezar?",
+    "title": "Crie seu primeiro exame",
+    "description": "Como você quer começar?",
     "aiOption": {
       "title": "Criar com IA",
-      "description": "Genera preguntas automaticamente con inteligencia artificial",
+      "description": "Gere questões automaticamente com inteligência artificial",
       "badge": "Recomendado"
     },
     "importOption": {
       "title": "Importar existente",
-      "description": "Sube un documento PDF o Word con tus preguntas"
+      "description": "Envie um documento PDF ou Word com suas questões"
     },
     "manualOption": {
       "title": "Criar manualmente",
-      "description": "Escribe tus propias preguntas desde cero"
+      "description": "Escreva suas próprias questões do zero"
     },
     "exploreOption": {
-      "title": "Explorar primero",
-      "description": "Ver el panel y crear examen despues"
+      "title": "Explorar primeiro",
+      "description": "Ver o painel e criar o exame depois"
     }
   },
   "complete": {
-    "title": "Todo listo!",
-    "description": "Tu cuenta esta configurada y lista para usar",
-    "goToDashboard": "Ir al panel"
+    "title": "Tudo pronto!",
+    "description": "Sua conta está configurada e pronta para usar",
+    "goToDashboard": "Ir para o painel"
   },
   "completion": {
-    "title": "Felicitaciones!",
-    "description": "Has configurado tu cuenta ProfeVision exitosamente. Estas a unos pocos pasos de aprovecharlo al maximo.",
-    "nextStepsTitle": "Proximos Pasos",
+    "title": "Parabéns!",
+    "description": "Você configurou sua conta ProfeVision com sucesso. Você está a poucos passos de aproveitar ao máximo.",
+    "nextStepsTitle": "Próximos Passos",
     "steps": {
-      "createExam": "Crea tu primer examen",
-      "publishExam": "Publicalo",
-      "printSheets": "Imprime las hojas de respuestas",
-      "scanExam": "Escanealo con tu celular para calificarlo al instante"
+      "createExam": "Crie seu primeiro exame",
+      "publishExam": "Publique-o",
+      "printSheets": "Imprima as folhas de respostas",
+      "scanExam": "Escaneie com seu celular para corrigir instantaneamente"
     },
-    "progressTrackerHint": "Encontraras un rastreador de progreso en tu panel para guiarte en estos pasos.",
-    "startButton": "Empezar a usar ProfeVision",
+    "progressTrackerHint": "Você encontrará um rastreador de progresso no seu painel para guiar você nestes passos.",
+    "startButton": "Começar a usar ProfeVision",
     "finishing": "Finalizando..."
   },
   "examCreationDrawer": {
-    "title": "Crea tu primer examen",
-    "subtitle": "Elige como quieres empezar",
+    "title": "Crie seu primeiro exame",
+    "subtitle": "Escolha como quer começar",
     "import": {
-      "title": "Importar examen",
-      "description": "Sube un PDF o Word con tus preguntas. La IA extraera automaticamente las preguntas y opciones. Marca la respuesta correcta con un asterisco (*) al final.",
-      "showExample": "Ver ejemplo de formato",
-      "exampleTitle": "Ejemplo de formato para importar",
-      "exampleAlt": "Ejemplo de documento con preguntas formateadas",
-      "exampleCaption": "Marca la respuesta correcta agregando un asterisco (*) al final de la opcion."
+      "title": "Importar exame",
+      "description": "Envie um PDF ou Word com suas questões. A IA extrairá automaticamente as perguntas e opções. Marque a resposta correta com um asterisco (*) ao final.",
+      "showExample": "Ver exemplo de formato",
+      "exampleTitle": "Exemplo de formato para importar",
+      "exampleAlt": "Exemplo de documento com questões formatadas",
+      "exampleCaption": "Marque a resposta correta adicionando um asterisco (*) ao final da opção."
     },
     "ai": {
-      "title": "Generar con IA",
-      "description": "Describe el tema y la IA generara preguntas de opcion multiple. Puedes subir documentos de referencia para mayor precision.",
+      "title": "Gerar com IA",
+      "description": "Descreva o tema e a IA gerará questões de múltipla escolha. Você pode enviar documentos de referência para maior precisão.",
       "badge": "Recomendado",
-      "chatHint": "Chat interactivo"
+      "chatHint": "Chat interativo"
     }
   },
   "checklist": {
-    "title": "Primeros pasos",
-    "subtitle": "Completa estos pasos para aprovechar ProfeVision al maximo",
-    "progress": "{completed} de {total} completados",
+    "title": "Primeiros passos",
+    "subtitle": "Complete estes passos para aproveitar o ProfeVision ao máximo",
+    "progress": "{completed} de {total} concluídos",
     "minimize": "Minimizar",
     "expand": "Expandir",
-    "dismiss": "No mostrar mas",
-    "dismissConfirm": "Puedes acceder a esta guia desde tu perfil",
-    "allComplete": "Has completado todos los pasos!",
+    "dismiss": "Não mostrar mais",
+    "dismissConfirm": "Você pode acessar este guia pelo seu perfil",
+    "allComplete": "Você completou todos os passos!",
     "items": {
       "createExam": {
-        "title": "Crea tu primer examen",
-        "description": "Usa IA, importa o crea manualmente",
-        "cta": "Criar examen"
+        "title": "Crie seu primeiro exame",
+        "description": "Use IA, importe ou crie manualmente",
+        "cta": "Criar exame"
       },
       "publishExam": {
-        "title": "Publica el examen",
-        "description": "Finaliza el examen para imprimir y calificar. Haz click en 'Publicar' en las opciones del examen.",
+        "title": "Publique o exame",
+        "description": "Finalize o exame para imprimir e corrigir. Clique em 'Publicar' nas opções do exame.",
         "cta": "Publicar"
       },
       "exportPdf": {
-        "title": "Exporta las hojas de respuestas",
-        "description": "Descarga los PDFs para imprimir",
+        "title": "Exporte as folhas de respostas",
+        "description": "Baixe os PDFs para imprimir",
         "cta": "Exportar PDF"
       },
       "scanExam": {
-        "title": "Escanea tu primer examen",
-        "description": "Usa la cámara de tu celular para calificar automaticamente",
+        "title": "Escaneie seu primeiro exame",
+        "description": "Use a câmera do seu celular para corrigir automaticamente",
         "cta": "Escanear"
       }
     }

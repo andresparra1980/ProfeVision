@@ -1,9 +1,9 @@
 {
   "errors": {
-    "serverConfig": "Configuración de servidor incompleta",
-    "missingScan": "No se proporcionó archivo de escaneo",
-    "processedNotFound": "Error al procesar el escaneo - imagen procesada no encontrada",
-    "processError": "Error al procesar el escaneo",
+    "serverConfig": "Configuration du serveur incomplète",
+    "missingScan": "Aucun fichier de scan n'a été fourni",
+    "processedNotFound": "Erreur lors du traitement du scan - image traitée introuvable",
+    "processError": "Erreur lors du traitement du scan",
     "internal": "Erreur interne du serveur"
   }
 }

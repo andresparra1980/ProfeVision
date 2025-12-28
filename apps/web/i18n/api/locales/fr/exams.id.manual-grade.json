@@ -1,12 +1,12 @@
 {
   "errors": {
-    "missingFields": "Se requiere estudianteId y puntaje",
-    "updateGrade": "Error al actualizar la calificación",
-    "insertGrade": "Error al insertar la calificación",
-    "sync": "Error al sincronizar calificaciones",
+    "missingFields": "estudianteId et puntaje sont requis",
+    "updateGrade": "Erreur lors de la mise à jour de la note",
+    "insertGrade": "Erreur lors de l'insertion de la note",
+    "sync": "Erreur lors de la synchronisation des notes",
     "internal": "Erreur interne du serveur"
   },
   "success": {
-    "ok": "Calificación procesada"
+    "ok": "Note traitée"
   }
 }

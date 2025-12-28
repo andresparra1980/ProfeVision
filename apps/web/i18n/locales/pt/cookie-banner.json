@@ -1,7 +1,7 @@
 {
   "main": {
-    "title": "🍪 Respetamos tu privacidad",
-    "description": "Utilizamos cookies para mejorar tu experiencia en ProfeVision, analizar el tráfico y personalizar el contenido. Puedes gestionar tus preferencias en cualquier momento.",
+    "title": "🍪 Respeitamos sua privacidade",
+    "description": "Utilizamos cookies para melhorar sua experiência no ProfeVision, analisar o tráfego e personalizar o conteúdo. Você pode gerenciar suas preferências a qualquer momento.",
     "moreInfo": "Mais informações",
     "configure": "Configurar",
     "rejectAll": "Rejeitar tudo",
@@ -10,20 +10,20 @@
   "preferences": {
     "title": "Preferências de cookies",
     "necessary": {
-      "title": "Cookies necesarias",
-      "description": "Esenciales para el funcionamiento"
+      "title": "Cookies necessários",
+      "description": "Essenciais para o funcionamento"
     },
     "analytics": {
-      "title": "Cookies analíticas",
-      "description": "Nos ayudan a mejorar el sitio"
+      "title": "Cookies analíticos",
+      "description": "Ajudam-nos a melhorar o site"
     },
     "functional": {
-      "title": "Cookies funcionales",
-      "description": "Mejoran la funcionalidad"
+      "title": "Cookies funcionais",
+      "description": "Melhoram a funcionalidade"
     },
     "marketing": {
       "title": "Cookies de marketing",
-      "description": "Personalización de anuncios"
+      "description": "Personalização de anúncios"
     },
     "savePreferences": "Salvar preferências"
   }

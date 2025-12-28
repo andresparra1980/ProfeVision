@@ -1,17 +1,17 @@
 {
   "errors": {
-    "missingId": "ID de examen no proporcionado",
-    "missingFields": "Se requiere questionId y optionId",
-    "verifyQuestion": "Error al verificar la pregunta o no pertenece a este examen",
-    "fetchOptions": "Error al obtener opciones de la pregunta",
-    "updateOptions": "Error al actualizar opciones de respuesta",
-    "updateCorrect": "Error al actualizar opción correcta",
-    "fetchResults": "Error al obtener resultados para recalcular",
-    "updateResult": "Error al actualizar resultado",
-    "updateStudentAnswer": "Error al actualizar respuesta de estudiante",
+    "missingId": "ID do exame não fornecido",
+    "missingFields": "É necessário questionId e optionId",
+    "verifyQuestion": "Erro ao verificar a pergunta ou ela não pertence a este exame",
+    "fetchOptions": "Erro ao obter opções da pergunta",
+    "updateOptions": "Erro ao atualizar opções de resposta",
+    "updateCorrect": "Erro ao atualizar opção correta",
+    "fetchResults": "Erro ao obter resultados para recalcular",
+    "updateResult": "Erro ao atualizar resultado",
+    "updateStudentAnswer": "Erro ao atualizar resposta do estudante",
     "internal": "Erro interno do servidor"
   },
   "success": {
-    "ok": "Respuesta correcta actualizada y calificaciones recalculadas"
+    "ok": "Resposta correta atualizada e notas recalculadas"
   }
 }
