@@ -77,7 +77,9 @@
     "dashboard": "Painel",
     "terms": "Termos",
     "privacy": "Privacidade",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "groups": "Grupos",
+    "admin": "Admin"
   },
   "footer": {
     "description": "ProfeVisión é a plataforma integral para educadores. Automatiza a criação e correção de exames com IA e tecnologia OMR, permitindo que você escaneie e corrija provas em papel instantaneamente com o seu celular. Além disso, centraliza a gestão completa de instituições, matérias, grupos e estudantes. Economize tempo, otimize a avaliação educativa e obtenha insights precisos para um ensino mais eficaz. É a sua ferramenta definitiva para transformar a gestão acadêmica.",
@@ -624,6 +626,15 @@
       "description": "Gere múltiplos tipos de perguntas a partir de texto ou arquivos carregados de maneira inteligente e eficiente.",
       "startNow": "Começar Agora",
       "learnMore": "Saiba Mais"
+    },
+    "results": {
+      "na": "N/D"
+    },
+    "export": {
+      "a4": "A4 (210mm x 297mm)"
+    },
+    "linkGradeComponent": {
+      "exam": "Exame"
     }
   },
   "contact": {

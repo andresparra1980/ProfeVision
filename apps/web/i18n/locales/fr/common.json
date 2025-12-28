@@ -77,7 +77,9 @@
     "dashboard": "Tableau de bord",
     "terms": "Conditions",
     "privacy": "Confidentialité",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "groups": "Groupes",
+    "admin": "Admin"
   },
   "footer": {
     "description": "ProfeVisión est la plateforme intégrale pour les éducateurs. Automatisez la création et la notation des examens avec l'IA et la technologie OMR, vous permettant de scanner et de corriger des tests sur papier instantanément avec votre mobile. De plus, elle centralise la gestion complète des institutions, des matières, des groupes et des étudiants. Gagnez du temps, optimisez l'évaluation éducative et obtenez des informations précises pour un enseignement plus efficace. C'est votre outil définitif pour transformer la gestion académique.",
@@ -624,6 +626,15 @@
       "description": "Générez plusieurs types de questions à partir de textes ou de fichiers téléchargés de manière intelligente et efficace.",
       "startNow": "Commencer maintenant",
       "learnMore": "En savoir plus"
+    },
+    "results": {
+      "na": "S/O"
+    },
+    "export": {
+      "a4": "A4 (210mm x 297mm)"
+    },
+    "linkGradeComponent": {
+      "exam": "Examen"
     }
   },
   "contact": {
