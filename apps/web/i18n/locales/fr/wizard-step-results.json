@@ -2,14 +2,14 @@
   "description": "Revisa los resultados del escaneo. Puedes volver atrás para escanear nuevamente si es necesario.",
   "examInfo": {
     "title": "Información del Examen",
-    "loading": "Cargando información...",
+    "loading": "Chargement des informations...",
     "fields": {
       "subject": "Materia:",
       "exam": "Examen:",
       "student": "Estudiante:",
       "group": "Grupo:"
     },
-    "notAvailable": "No disponible"
+    "notAvailable": "Pas disponible"
   },
   "answers": {
     "title": "Respuestas"
@@ -24,7 +24,7 @@
   "buttons": {
     "back": "Atrás",
     "saving": "Guardando...",
-    "saveResults": "Guardar Resultados",
+    "saveResults": "Enregistrer les résultats",
     "savedSuccessfully": "Guardado exitosamente",
     "scanAnother": "Escanear Otro",
     "finish": "Finalizar"
@@ -44,7 +44,7 @@
     "timeoutError": "La solicitud excedió el tiempo máximo de espera (60 segundos)",
     "formatError": "Error de formato",
     "unknownError": "Error desconocido",
-    "unauthorized": "No autorizado. Inicia sesión para continuar.",
+    "unauthorized": "Non autorisé. Veuillez vous connecter pour continuer.",
     "notOwner": "Este examen pertenece a otra cuenta. No puedes guardar resultados para exámenes que no son tuyos."
   }
 }

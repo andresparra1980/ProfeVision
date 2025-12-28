@@ -9,7 +9,7 @@
   },
   "description": "Asistente para calificar exámenes escaneados",
   "buttons": {
-    "close": "Fechar",
+    "close": "Datar",
     "back": "Atrás"
   }
 }

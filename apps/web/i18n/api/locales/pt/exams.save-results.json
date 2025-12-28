@@ -8,7 +8,7 @@
     "saveResults": "Error al guardar resultados",
     "saveScans": "Error al guardar imágenes escaneadas",
     "internal": "Erro interno do servidor",
-    "unauthorized": "No autorizado. Inicia sesión para continuar.",
+    "unauthorized": "Não autorizado. Faça login para continuar.",
     "examNotFound": "Examen no encontrado",
     "notOwner": "Este examen pertenece a otra cuenta"
   }

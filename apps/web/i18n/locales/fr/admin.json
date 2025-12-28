@@ -1,7 +1,7 @@
 {
-  "title": "Admin Dashboard",
+  "title": "Tableau de bord administrateur",
   "description": "Observabilidad global de la plataforma",
-  "loading": "Cargando estadísticas...",
+  "loading": "Chargement des statistiques...",
   "error": "Error al cargar datos",
   "retry": "Reintentar",
   "refresh": "Actualizar",

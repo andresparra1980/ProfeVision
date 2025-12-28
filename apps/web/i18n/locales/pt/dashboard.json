@@ -46,7 +46,7 @@
       "reminder": "Lembrete",
       "message": "Para classificar exames em papel, acesse",
       "fromPhone": "do seu celular",
-      "close": "Fechar notificação"
+      "close": "Datar notificação"
     }
   },
   "exams": {
@@ -99,7 +99,7 @@
       "createGroup": "Criar grupo",
       "instructions": "Instrucciones (opcional)",
       "instructionsPlaceholder": "Instrucciones específicas para los estudiantes",
-      "questionNumber": "Pregunta {current} de {total}",
+      "questionNumber": "Pergunta {current} de {total}",
       "questionText": "Texto de la pregunta",
       "options": "Opções",
       "questionPlaceholder": "Escribe aquí tu pregunta",
@@ -116,12 +116,12 @@
       "group": "Grupo",
       "students": "Estudantes",
       "createdAt": "Creado",
-      "actions": "Acciones",
+      "actions": "Ações",
       "duration": "Duração",
-      "status": "Estado",
+      "status": "Status",
       "search": "Buscar exámenes...",
       "title": "Título",
-      "allExams": "Todos los Exámenes",
+      "allExams": "Todos os exames",
       "allExamsDesc": "Lista de todos los exámenes creados.",
       "assignedGroups": "Grupos Asignados",
       "noGroups": "Sin grupos asignados"
@@ -130,14 +130,14 @@
       "showArchivedGroups": "Mostrar exámenes de grupos archivados"
     },
     "status": {
-      "draft": "Borrador",
+      "draft": "Rascunho",
       "published": "Publicado",
       "active": "Ativo",
-      "completed": "Completado",
+      "completed": "Concluído",
       "archived": "Archivado"
     },
     "delete": {
-      "title": "¿Confirmar Eliminación?",
+      "title": "Confirmar exclusão?",
       "description": "Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este examen?",
       "confirm": "Excluir",
       "cancel": "Cancelar",
@@ -197,12 +197,12 @@
       }
     },
     "createWithAI": {
-      "title": "Crear Examen con IA",
+      "title": "Criar Examen con IA",
       "description": "Diseña un nuevo examen para tus estudiantes. Puedes crear un examen desde cero agregando tus propias preguntas, o bien utilizar el botón",
       "generateWithAI": "Generar con IA",
       "descriptionContinued": "para obtener preguntas sugeridas automáticamente por un modelo de lenguaje avanzado (LLM). Esta opción te permite ahorrar tiempo y personalizar el contenido según tus necesidades.",
-      "createWithAI": "Crear con Inteligencia Artificial",
-      "questionNumber": "Pregunta {current} de {total}",
+      "createWithAI": "Criar con Inteligencia Artificial",
+      "questionNumber": "Pergunta {current} de {total}",
       "questionText": "Texto de la pregunta",
       "questionPlaceholder": "Escribe aquí tu pregunta",
       "options": "Opções",
@@ -215,7 +215,7 @@
       "entityRequired": "Entidad Educativa Requerida",
       "entityRequiredDescription": "Debes crear o unirte a al menos una entidad educativa antes de poder crear exámenes. Los exámenes deben estar asociados a una materia, y las materias a una entidad educativa.",
       "entityRequiredDesc": "Debes crear o unirte a al menos una entidad educativa antes de poder crear exámenes. Los exámenes deben estar asociados a una materia, y las materias a una entidad educativa.",
-      "createEntity": "Crear Entidad Educativa",
+      "createEntity": "Criar Entidad Educativa",
       "subjectRequired": "Disciplina obrigatória",
       "subjectRequiredDescription": "Você deve criar pelo menos uma disciplina antes de poder criar exames. Os exames devem estar associados a uma disciplina.",
       "subjectRequiredDesc": "Você deve criar pelo menos uma disciplina antes de poder criar exames. Os exames devem estar associados a uma disciplina.",
@@ -259,10 +259,10 @@
       "backToExams": "Voltar para Exames",
       "selectGroup": "Grupos Disponibles",
       "selectGroupDescription": "Marca los grupos a los que deseas asignar este examen",
-      "assignDate": "Fecha de aplicación",
+      "assignDate": "Data de aplicación",
       "duration": "Duração (minutos)",
-      "dueDate": "Fecha límite",
-      "assign": "Guardar Asignaciones",
+      "dueDate": "Data límite",
+      "assign": "Salvar atribuições",
       "assigning": "Asignando...",
       "success": "Grupos asignados correctamente",
       "error": "Error al guardar las asignaciones",
@@ -270,29 +270,29 @@
       "loadingGroupsError": "Error al cargar los grupos"
     },
     "edit": {
-      "title": "Editar Examen",
+      "title": "Editar exame",
       "description": "Modifica las preguntas y configuración del examen",
-      "addQuestion": "Agregar Pregunta",
-      "questionTitle": "Pregunta",
+      "addQuestion": "Agregar Pergunta",
+      "questionTitle": "Pergunta",
       "questionPlaceholder": "Escribe tu pregunta aquí...",
       "addOption": "Agregar Opción",
       "correctAnswer": "Respuesta Correcta",
       "points": "Puntos",
-      "deleteQuestion": "Eliminar Pregunta",
-      "save": "Guardar Cambios",
+      "deleteQuestion": "Excluir pergunta",
+      "save": "Salvar alterações",
       "saving": "Guardando...",
       "success": "Examen actualizado exitosamente",
       "error": "Error al actualizar el examen",
       "backToExams": "Voltar para Exames",
       "publishExam": "Publicar Examen",
-      "editWithAI": "Editar en Chat IA",
+      "editWithAI": "Editar no Chat de IA",
       "questions": "Perguntas",
-      "questionsCount": "Preguntas ({count})",
+      "questionsCount": "Perguntas ({count})",
       "noQuestions": "Este examen aún no tiene preguntas.",
-      "addNewQuestion": "Agregar Nueva Pregunta",
+      "addNewQuestion": "Agregar Nueva Pergunta",
       "addNewQuestionDesc": "Define el contenido y opciones de respuesta para la pregunta",
-      "questionText": "Texto de la Pregunta",
-      "questionTextRequired": "Texto de la Pregunta*",
+      "questionText": "Texto de la Pergunta",
+      "questionTextRequired": "Texto de la Pergunta*",
       "questionTextPlaceholder": "Escribe aquí tu pregunta",
       "responseOptions": "Opciones de Respuesta",
       "optionPlaceholder": "Opción {number}",
@@ -310,11 +310,11 @@
       "confirmToggleEnableEffect": "volverá a considerar",
       "confirmToggleDisableEffect": "recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen, excluyendo esta pregunta del cálculo",
       "confirmUpdateAnswer": "¿Actualizar respuesta correcta?",
-      "confirmUpdateAnswerDesc": "Al hacer click en Confirmar se recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen.",
+      "confirmUpdateAnswerDesc": "Ao clicar em Confirmar, as notas de todos os alunos que já realizaram este exame serão recalculadas.",
       "cancel": "Cancelar",
       "confirm": "Confirmar",
       "status": {
-        "draft": "Borrador",
+        "draft": "Rascunho",
         "published": "Publicado"
       },
       "validation": {
@@ -323,10 +323,10 @@
         "cantPublishNoQuestions": "No puedes publicar un examen sin preguntas"
       },
       "messages": {
-        "questionAdded": "Pregunta agregada correctamente",
-        "questionDeleted": "Pregunta eliminada correctamente",
-        "questionEnabled": "Pregunta habilitada correctamente",
-        "questionDisabled": "Pregunta deshabilitada correctamente",
+        "questionAdded": "Pergunta agregada correctamente",
+        "questionDeleted": "Pergunta eliminada correctamente",
+        "questionEnabled": "Pergunta habilitada correctamente",
+        "questionDisabled": "Pergunta deshabilitada correctamente",
         "answerUpdated": "Respuesta correcta actualizada y calificaciones recalculadas",
         "examPublished": "Examen publicado correctamente",
         "loadError": "No se pudo cargar la información del examen",
@@ -354,10 +354,10 @@
       "subject": "Disciplina",
       "totalScore": "Puntaje Total",
       "group": "Grupo",
-      "creationDate": "Fecha de Creación",
+      "creationDate": "Data de Creación",
       "noSubject": "Sin materia",
       "noGroup": "Sin grupo",
-      "notAvailable": "No disponible",
+      "notAvailable": "Não disponível",
       "statisticsTitle": "Estadísticas",
       "studentsWithExam": "Estudiantes con examen",
       "of": "de",
@@ -367,23 +367,23 @@
       "na": "N/A",
       "statistics": {
         "totalStudents": "Total de estudiantes",
-        "completed": "Completados",
-        "pending": "Pendientes",
+        "completed": "Concluídos",
+        "pending": "Pendentes",
         "averageScore": "Promedio",
         "highestScore": "Puntaje más alto",
         "lowestScore": "Puntaje más bajo"
       },
       "questionAnalysis": {
-        "title": "Análisis de Preguntas",
+        "title": "Análisis de Perguntas",
         "description": "Porcentaje de respuestas correctas por pregunta",
-        "question": "Pregunta",
+        "question": "Pergunta",
         "correctPercentage": "% Correctas",
-        "chartTitle": "Dificultad de las Preguntas",
+        "chartTitle": "Dificultad de las Perguntas",
         "noData": "No hay datos suficientes para análisis",
         "average": "Promedio",
         "highest": "Más alto",
         "lowest": "Más bajo",
-        "questionsAnalyzed": "Preguntas analizadas",
+        "questionsAnalyzed": "Perguntas analizadas",
         "of": "de",
         "totalResponses": "Respuestas totales",
         "correctResponses": "Respuestas correctas",
@@ -391,7 +391,7 @@
           "questionPrefix": "P"
         },
         "tooltip": {
-          "question": "Pregunta",
+          "question": "Pergunta",
           "disabled": "Deshabilitada"
         },
         "legend": {
@@ -402,7 +402,7 @@
         }
       },
       "answerAnalysis": {
-        "title": "Distribución de Respuestas por Pregunta",
+        "title": "Distribución de Respuestas por Pergunta",
         "description": "Patrón de respuestas elegidas por los estudiantes en cada pregunta",
         "noData": "No hay datos suficientes para análisis",
         "hint": "Pasa el cursor sobre cada barra para ver el detalle de respuestas. La respuesta correcta se muestra en negrita con ✓",
@@ -410,7 +410,7 @@
           "questionPrefix": "P"
         },
         "tooltip": {
-          "question": "Pregunta",
+          "question": "Pergunta",
           "responses": "respuestas",
           "noAnswer": "Sin respuesta"
         }
@@ -421,7 +421,7 @@
       "student": "Estudiante",
       "score": "Puntaje",
       "percentage": "Porcentaje",
-      "completedAt": "Completado",
+      "completedAt": "Concluído",
       "viewDetails": "Ver Detalles",
       "viewDetailsButton": "Ver detalles",
       "downloadResults": "Descargar Resultados",
@@ -439,16 +439,16 @@
         "exportSuccess": "Resultados exportados correctamente",
         "exportError": "No se pudieron exportar los resultados",
         "preparingPDF": "Preparando PDF",
-        "preparingPDFDesc": "Cargando imágenes y preparando el reporte...",
+        "preparingPDFDesc": "Carregando imagens e preparando o relatório...",
         "pdfGenerated": "PDF Generado",
         "pdfGeneratedDesc": "El reporte PDF se ha generado correctamente.",
         "pdfError": "No se pudo generar el PDF",
         "gradeValidationError": "La calificación debe ser un número entre 0 y 5"
       },
       "dialogs": {
-        "confirmChangeTitle": "Confirmar cambio de respuesta",
+        "confirmChangeTitle": "Confirmar alteração de resposta",
         "confirmChangeDescription": "¿Estás seguro de que deseas cambiar la respuesta de la pregunta {question} a la opción {option}?\n\nEsta acción recalculará automáticamente la calificación del examen.",
-        "confirmChangeButton": "Confirmar cambio",
+        "confirmChangeButton": "Confirmar alteração",
         "updating": "Atualizando...",
         "manualGradeTitle": "Ingresar calificación manual",
         "manualGradeDescription": "Esta funcionalidad está diseñada para casos especiales donde el estudiante no realizó el examen general, como recuperaciones o supletorios.",
@@ -456,10 +456,10 @@
         "studentLabel": "Estudiante",
         "gradeLabel": "Calificación (0-5)",
         "saving": "Guardando...",
-        "saveGrade": "Guardar calificación",
+        "saveGrade": "Salvar calificación",
         "groupSelectionTitle": "Seleccionar Grupo",
         "groupSelectionDescription": "Este examen está asignado a múltiples grupos. Seleccione el grupo para ver sus resultados.",
-        "close": "Fechar",
+        "close": "Datar",
         "enterGrade": "Ingresar Nota",
         "imageLoadError": "Error al cargar la imagen",
         "noOriginalImage": "No hay imagen original disponible",
@@ -470,8 +470,8 @@
         "identification": "Identificación",
         "score": "Nota",
         "percentage": "Porcentaje",
-        "status": "Estado",
-        "actions": "Acciones"
+        "status": "Status",
+        "actions": "Ações"
       },
       "status": {
         "graded": "Calificado",
@@ -480,11 +480,11 @@
       "excel": {
         "lastName": "Sobrenomes",
         "firstName": "Nomes",
-        "fullName": "Apellidos y Nombres",
+        "fullName": "Apellidos y Nomes",
         "identification": "Identificación",
         "score": "Nota",
         "percentage": "Porcentaje",
-        "gradedDate": "Fecha de Calificación",
+        "gradedDate": "Data de Calificación",
         "notPresented": "No presentado",
         "sheetName": "Resultados",
         "examDetailsHeader": "DETALLES DEL EXAMEN",
@@ -492,10 +492,10 @@
         "subjectLabel": "Disciplina",
         "totalScoreLabel": "Puntaje Total",
         "groupLabel": "Grupo",
-        "creationDateLabel": "Fecha de Creación",
+        "creationDateLabel": "Data de Creación",
         "noSubjectAvailable": "Sin materia",
         "noGroupAvailable": "Sin grupo",
-        "noDateAvailable": "No disponible",
+        "noDateAvailable": "Não disponível",
         "statisticsHeader": "ESTADÍSTICAS",
         "studentsWithExamLabel": "Estudiantes con examen",
         "of": "de",
@@ -542,12 +542,12 @@
         "pdfGeneratedSuccess": "El PDF ha sido generado correctamente y está listo para descargar.",
         "errorOccurred": "Ocurrió un error al preparar el PDF. Por favor, intente nuevamente.",
         "preparingDocument": "Preparando documento PDF...",
-        "loadingImages": "Cargando imágenes...",
+        "loadingImages": "Carregando imagens...",
         "pdfGeneratedCorrectly": "PDF generado correctamente",
         "preparingPDF": "Preparando PDF...",
         "downloadPDF": "Descargar PDF",
         "couldNotGenerate": "No se pudo generar el PDF",
-        "close": "Fechar",
+        "close": "Datar",
         "retry": "Reintentar",
         "noQuestions": "No hay preguntas",
         "content": {
@@ -574,7 +574,7 @@
       "generatePDF": "Generar PDF",
       "loadingError": "Error al cargar el examen",
       "selectStudent": "Seleccionar Estudiante",
-      "question": "Pregunta",
+      "question": "Pergunta",
       "studentAnswer": "Respuesta del Estudiante",
       "correctAnswer": "Respuesta Correcta",
       "points": "Puntos",
@@ -608,7 +608,7 @@
         "noGroups": "No hay grupos asignados a este examen. Asigna un grupo primero."
       },
       "questionSheet": {
-        "title": "Hoja de Preguntas",
+        "title": "Hoja de Perguntas",
         "optional": "opcional",
         "description": "Una sola copia con todas las preguntas del examen para entregar a los estudiantes o proyectar."
       },
@@ -642,7 +642,7 @@
       "answerSheetLabels": {
         "title": "HOJA DE RESPUESTAS",
         "studentInfo": "Información del Estudiante",
-        "name": "Nombre:",
+        "name": "Nome:",
         "identification": "Identificación:",
         "group": "Grupo:",
         "subject": "Materia:",
@@ -670,7 +670,7 @@
         "copyAll": "Copiar todo"
       },
       "actions": {
-        "close": "Fechar",
+        "close": "Datar",
         "copy": "Copiar"
       },
       "statuses": {
@@ -685,7 +685,7 @@
     },
     "linkGradeComponent": {
       "title": "Vincular Examen a Componentes de Calificación",
-      "loading": "Cargando componentes de calificación...",
+      "loading": "Carregando componentes de avaliação...",
       "back": "Voltar",
       "backToExams": "Voltar para Exames",
       "noGroupsAssigned": "No hay grupos asignados",
@@ -701,7 +701,7 @@
       "group": "Grupo:",
       "scheme": "Esquema:",
       "period": "Período:",
-      "save": "Guardar Vinculaciones",
+      "save": "Salvar Vinculaciones",
       "saving": "Guardando...",
       "cancel": "Cancelar",
       "success": "Vinculaciones guardadas exitosamente",
@@ -757,7 +757,7 @@
         "button": "Ver ejemplo",
         "toggle": "Ver ejemplo de formato",
         "title": "Ejemplo de formato correcto",
-        "close": "Fechar",
+        "close": "Datar",
         "imageAlt": "Ejemplo de documento con preguntas formateadas correctamente",
         "caption": "Marca la respuesta correcta agregando un asterisco (*) al final de la opcion. Ejemplo: 'b. Lorem ipsum dolor *'"
       }
@@ -777,7 +777,7 @@
     "form": {
       "addTitle": "Añadir Institución Educativa",
       "addDescription": "Ingresa el nombre y tipo de la institución donde impartes clases",
-      "nameLabel": "Nombre de la Institución *",
+      "nameLabel": "Nome de la Institución *",
       "namePlaceholder": "Ej. Universidad Nacional, Colegio San José",
       "typeLabel": "Tipo de Institución",
       "typePlaceholder": "Selecciona un tipo de institución",
@@ -810,10 +810,10 @@
     "noEntitiesMessage": "No hay entidades educativas registradas.",
     "form": {
       "newTitle": "Nueva entidad educativa",
-      "editTitle": "Editar entidad",
+      "editTitle": "Editar entidade",
       "newDescription": "Ingresa los datos de la nueva entidad educativa.",
       "editDescription": "Actualiza la información de la entidad educativa.",
-      "nameLabel": "Nombre*",
+      "nameLabel": "Nome*",
       "typeLabel": "Tipo de institución",
       "cityLabel": "Ciudad",
       "cityPlaceholder": "Ciudad",
@@ -838,11 +838,11 @@
       "location": "Ubicación:",
       "address": "Dirección:",
       "phone": "Teléfono:",
-      "email": "Correo:",
+      "email": "Email:",
       "website": "Web:"
     },
     "deleteDialog": {
-      "title": "Confirmar eliminación",
+      "title": "Confirmar exclusão",
       "description": "¿Estás seguro de que deseas eliminar esta entidad educativa? Esta acción no se puede deshacer.",
       "cancel": "Cancelar",
       "delete": "Excluir"
@@ -873,11 +873,11 @@
     },
     "form": {
       "newSubject": "Nueva materia",
-      "editTitle": "Editar materia",
+      "editTitle": "Editar disciplina",
       "newTitle": "Nueva materia",
       "newDescription": "Ingresa los datos de la nueva materia.",
       "editDescription": "Actualiza la información de la materia.",
-      "nameLabel": "Nombre*",
+      "nameLabel": "Nome*",
       "nameError": "O nome deve ter pelo menos 2 caracteres",
       "descriptionLabel": "Descrição",
       "descriptionPlaceholder": "Breve descripción de la materia",
@@ -908,7 +908,7 @@
       "confirmationInstruction": "Para confirmar esta acción y proceder con la eliminación, por favor escriba el nombre exacto de la materia en el campo de abajo.",
       "typeLabel": "Escriba",
       "toConfirm": "para confirmar:",
-      "placeholder": "Nombre exacto de la materia",
+      "placeholder": "Nome exacto de la materia",
       "cancel": "Cancelar",
       "confirmDelete": "Sí, eliminar esta materia y sus datos"
     }
@@ -920,7 +920,7 @@
     "noSubjectsMessage": "Debes crear al menos una materia antes de crear un grupo.",
     "goToSubjects": "Ir a crear materia",
     "buttons": {
-      "showActive": "Ver Grupos Activos",
+      "showActive": "Ver grupos ativos",
       "showArchived": "Ver Grupos Archivados"
     },
     "error": {
@@ -965,7 +965,7 @@
       "archiveReason": "el grupo para evitar la eliminación permanente.",
       "typePrompt": "Escriba",
       "typeConfirm": "para confirmar",
-      "placeholder": "Nombre exacto del grupo",
+      "placeholder": "Nome exacto del grupo",
       "cancel": "Cancelar",
       "confirm": "Sí, eliminar este grupo y sus datos"
     },
@@ -975,7 +975,7 @@
       "period": "Periodo",
       "notAssigned": "No asignada",
       "openMenu": "Abrir menú",
-      "actions": "Acciones",
+      "actions": "Ações",
       "editGroup": "Editar grupo",
       "manageStudents": "Gestión de Estudiantes",
       "gradeTable": "Tabulado de Notas",
@@ -985,7 +985,7 @@
       "delete": "Excluir",
       "students": "estudiantes",
       "tooltips": {
-        "editGroup": "Editar nombre del grupo, materia u otros detalles",
+        "editGroup": "Editar nome do grupo, disciplina ou outros detalhes",
         "manageStudents": "Agregar, eliminar o importar estudiantes en este grupo",
         "gradeTable": "Ver y gestionar las calificaciones de los estudiantes de este grupo",
         "gradingScheme": "Configurar componentes y pesos de calificación para este grupo",
@@ -999,7 +999,7 @@
       "newTitle": "Nuevo grupo",
       "editDescription": "Actualiza la información del grupo.",
       "newDescription": "Ingresa los datos del nuevo grupo.",
-      "nameLabel": "Nombre del grupo (Ej: 10-A, Grupo Mañana, etc.)*",
+      "nameLabel": "Nome del grupo (Ej: 10-A, Grupo Mañana, etc.)*",
       "namePlaceholder": "Ej: 10-A, Grupo Mañana, etc.",
       "nameError": "O nome deve ter pelo menos 2 caracteres",
       "entityLabel": "Entidad Educativa*",
@@ -1007,17 +1007,17 @@
       "entityError": "Selecciona una entidad educativa",
       "noEntities": "No hay entidades educativas registradas",
       "noEntitiesMessage": "Debes crear al menos una entidad educativa antes de crear un grupo.",
-      "createEntity": "Crear entidad educativa",
+      "createEntity": "Criar entidad educativa",
       "subjectLabel": "Materia*",
       "subjectPlaceholder": "Selecione uma disciplina",
       "subjectError": "Selecione uma disciplina",
       "selectEntityFirst": "Primero selecciona una entidad educativa",
       "noSubjectsForEntity": "No hay materias para esta entidad educativa",
       "noSubjectsMessage": "No hay materias registradas para esta entidad educativa.",
-      "createSubject": "Crear materia",
+      "createSubject": "Criar materia",
       "schoolPeriod": "Periodo Escolar",
-      "startDate": "Fecha Inicio",
-      "endDate": "Fecha Fin",
+      "startDate": "Data de início",
+      "endDate": "Data Fin",
       "month": "Mês",
       "year": "Ano",
       "interpretedPeriod": "Periodo interpretado",
@@ -1029,7 +1029,7 @@
     },
     "grades": {
       "title": "Calificaciones",
-      "backToGroups": "Volver a Grupos",
+      "backToGroups": "Voltar a Grupos",
       "subjectLabel": "Disciplina",
       "groupLabel": "Grupo",
       "defaultInstitution": "INSTITUCIÓN EDUCATIVA",
@@ -1051,7 +1051,7 @@
       },
       "modal": {
         "importTitle": "Importar Calificaciones",
-        "exportTitle": "Exportar Calificaciones",
+        "exportTitle": "Exportar notas",
         "importDescription": "Importa calificaciones desde un archivo Excel",
         "exportDescription": "Exporta calificaciones a un archivo Excel",
         "exportPeriod": "Exportar calificaciones del",
@@ -1059,7 +1059,7 @@
       }
     },
     "students": {
-      "backToGroups": "Volver a Grupos",
+      "backToGroups": "Voltar a Grupos",
       "noSchoolPeriod": "Sin período escolar",
       "groupStudents": "Estudiantes del Grupo",
       "studentsRegistered": "estudiantes registrados en este grupo",
@@ -1093,14 +1093,14 @@
         "identification": "Identificación",
         "names": "Nomes",
         "surnames": "Sobrenomes",
-        "fullName": "Apellidos y Nombres",
+        "fullName": "Apellidos y Nomes",
         "email": "Email",
-        "actions": "Acciones"
+        "actions": "Ações"
       }
     },
     "gradingScheme": {
       "title": "Esquema de Calificación",
-      "backToGroups": "Volver a Grupos",
+      "backToGroups": "Voltar a Grupos",
       "defaultInstitution": "INSTITUCIÓN EDUCATIVA",
       "error": {
         "loadingData": "Error al cargar datos",
@@ -1119,16 +1119,16 @@
     "stats": {
       "totalInstitutions": "Instituciones",
       "totalSubjects": "Disciplinas",
-      "activeGroups": "Grupos Activos",
+      "activeGroups": "Grupos ativos",
       "archivedGroups": "Grupos Archivados",
       "totalStudents": "Estudantes",
-      "recentExams": "Exámenes Recientes",
-      "gradedExams": "Exámenes Calificados",
+      "recentExams": "Exames recentes",
+      "gradedExams": "Exames avaliados",
       "timeSaved": "Tiempo Ahorrado",
       "timeSavedContext": "Sin ProfeVision: 5 min/examen • Con ProfeVision: 5 s/examen",
       "noExams": "No hay exámenes recientes",
       "examStatus": {
-        "borrador": "Borrador",
+        "borrador": "Rascunho",
         "publicado": "Publicado",
         "archivado": "Archivado"
       },
@@ -1138,7 +1138,7 @@
       }
     },
     "metrics": {
-      "examsCreated": "Exámenes creados",
+      "examsCreated": "Exames criados",
       "studentsEvaluated": "Estudiantes evaluados",
       "averageScore": "Promedio general",
       "completionRate": "Tasa de finalización",
@@ -1159,7 +1159,7 @@
       "ago3d": "Hace 3 días"
     },
     "upcomingExams": "Próximos exámenes",
-    "upcomingExamsDesc": "Exámenes programados para los próximos días",
+    "upcomingExamsDesc": "Exames agendados para os próximos dias",
     "upcoming": {
       "chemistry": "Química - 10° Grado",
       "chemistryDate": "22 de Mayo, 2024",
@@ -1177,7 +1177,7 @@
       "exportFinalGrades": "Exportar notas finales",
       "surnames": "Sobrenomes",
       "names": "Nomes",
-      "fullName": "Apellidos y Nombres",
+      "fullName": "Apellidos y Nomes",
       "identification": "Identificación",
       "exam": "Examen",
       "linkedToExam": "Vinculado al examen",
@@ -1205,14 +1205,14 @@
       "defaultComponentName": "Tareas",
       "newComponent": "Nuevo Componente",
       "period": "Periodo",
-      "schemeName": "Nombre del Esquema",
-      "startDate": "Fecha inicio",
-      "endDate": "Fecha fin",
+      "schemeName": "Nome del Esquema",
+      "startDate": "Data inicio",
+      "endDate": "Data fin",
       "type": "Tipo",
       "addComponent": "Agregar Componente",
       "addPeriod": "Agregar Periodo",
       "saving": "Guardando...",
-      "saveChanges": "Guardar Cambios",
+      "saveChanges": "Salvar alterações",
       "componentTypes": {
         "exam": "Examen",
         "project": "Proyecto",
@@ -1240,7 +1240,7 @@
     "description": "Administra estudiantes asignados a tus grupos",
     "actions": {
       "manageGroups": "Gestionar Grupos",
-      "createStudent": "Crear Estudiante"
+      "createStudent": "Criar Estudiante"
     },
     "form": {
       "title": "Agregar Estudiante",
@@ -1251,15 +1251,15 @@
       "email": "Endereço de email",
       "group": "Grupo",
       "placeholders": {
-        "names": "Nombres del estudiante",
+        "names": "Nomes del estudiante",
         "surnames": "Apellidos del estudiante",
         "identification": "Número de identificación",
-        "email": "Correo electrónico del estudiante",
+        "email": "Email del estudiante",
         "selectGroup": "Selecione um grupo"
       },
       "actions": {
         "cancel": "Cancelar",
-        "create": "Crear Estudiante",
+        "create": "Criar Estudiante",
         "creating": "Creando..."
       }
     },
@@ -1272,10 +1272,10 @@
       "headers": {
         "surnames": "Sobrenomes",
         "names": "Nomes",
-        "fullName": "Apellidos y Nombres",
+        "fullName": "Apellidos y Nomes",
         "identification": "Identificación",
         "email": "Email",
-        "actions": "Acciones"
+        "actions": "Ações"
       },
       "actions": {
         "viewDetails": "Ver Detalles"
@@ -1293,18 +1293,18 @@
       "title": "Detalles del Estudiante",
       "description": "Grupos y materias a los que está asignado el estudiante",
       "subject": "Disciplina",
-      "close": "Fechar"
+      "close": "Datar"
     },
     "empty": {
       "noGroups": {
         "title": "Necesitas crear grupos primero",
         "description": "Para gestionar estudiantes, primero debes crear al menos un grupo asociado a una de tus materias. Los estudiantes en ProfeVision están siempre asociados a grupos específicos.",
-        "createGroup": "Crear Grupo"
+        "createGroup": "Criar Grupo"
       },
       "noStudents": {
         "title": "Aún no tienes estudiantes",
         "description": "No hay estudiantes asignados a tus grupos. Puedes crear estudiantes y luego asignarlos a grupos, o ir directamente a un grupo específico para añadir estudiantes.",
-        "createStudent": "Crear Estudiante",
+        "createStudent": "Criar Estudiante",
         "manageGroups": "Gestionar Grupos"
       }
     },
@@ -1319,14 +1319,14 @@
     "title": "Reportes",
     "description": "Visualiza estadísticas y análisis del desempeño de tus estudiantes",
     "stats": {
-      "totalExams": "Total Exámenes",
-      "examsCreated": "Exámenes creados",
+      "totalExams": "Total de exames",
+      "examsCreated": "Exames criados",
       "totalStudents": "Total Estudiantes",
       "studentsRegistered": "Estudiantes registrados",
       "totalSubjects": "Total Materias",
       "subjectsCreated": "Materias creadas",
       "applications": "Aplicaciones",
-      "examsApplied": "Exámenes aplicados"
+      "examsApplied": "Exames aplicados"
     },
     "charts": {
       "examPerformance": {
@@ -1361,7 +1361,7 @@
       "positionPlaceholder": "Ej: Profesor de Matemáticas",
       "biography": "Biografía",
       "biographyPlaceholder": "Breve descripción sobre ti",
-      "saveChanges": "Guardar cambios",
+      "saveChanges": "Salvar alterações",
       "saving": "Guardando..."
     },
     "validation": {
@@ -1386,18 +1386,18 @@
       "form": {
         "firstName": "Nomes",
         "lastName": "Sobrenomes",
-        "email": "Correo Electrónico",
+        "email": "Email",
         "phone": "Teléfono",
         "biography": "Biografía",
         "emailNotChangeable": "El correo electrónico no se puede cambiar",
-        "saveChanges": "Guardar cambios",
+        "saveChanges": "Salvar alterações",
         "saving": "Guardando..."
       }
     },
     "password": {
-      "title": "Cambiar Contraseña",
+      "title": "Cambiar Senha",
       "description": "Actualiza tu contraseña para mantener tu cuenta segura",
-      "button": "Cambiar Contraseña"
+      "button": "Cambiar Senha"
     },
     "notifications": {
       "title": "Preferencias de Notificaciones",
@@ -1413,7 +1413,7 @@
       "fetchProfile": "No se pudo cargar la información del perfil",
       "noSession": "No hay sesión activa",
       "saveChanges": "No se pudieron guardar los cambios",
-      "serverConfig": "Error de configuración del servidor",
+      "serverConfig": "Erro de configuração do servidor",
       "unauthorizedMissing": "Token de autenticación requerido",
       "unauthorized": "Não autorizado",
       "fetchData": "Error al obtener datos",
@@ -1427,9 +1427,9 @@
     "days": "dias"
   },
   "admin": {
-    "title": "Admin Dashboard",
+    "title": "Painel de administração",
     "description": "Observabilidad global de la plataforma",
-    "loading": "Cargando estadísticas...",
+    "loading": "Carregando estatísticas...",
     "errorLoading": "Error al cargar datos",
     "retry": "Reintentar",
     "refresh": "Actualizar",
@@ -1443,7 +1443,7 @@
     "stats": {
       "totalUsers": "Usuarios Totales",
       "newThisMonth": "Nuevos este mes",
-      "totalExams": "Exámenes Totales",
+      "totalExams": "Total de exames",
       "createdThisMonth": "Creados este mes",
       "withResults": "Con resultados",
       "totalScans": "Escaneos Totales",

@@ -4,7 +4,7 @@
     "scans": "Scans d'examens"
   },
   "subscription": {
-    "loading": "Cargando información de suscripción...",
+    "loading": "Chargement des informations d'abonnement...",
     "error": "No se pudo cargar la información de suscripción",
     "title": "Mon Plan",
     "description": "Gestiona tu suscripción y revisa tu uso actual",

@@ -1,6 +1,6 @@
 {
   "title": "Aplicación Móvil",
-  "description": "Próximamente disponible - Accede a ProfeVision desde tu dispositivo móvil.",
+  "description": "Bientôt disponible - Accédez à ProfeVision depuis votre appareil mobile.",
   "plannedFeatures": {
     "title": "Funcionalidades planeadas",
     "items": {
@@ -10,5 +10,5 @@
       "3": "Interfaz optimizada para dispositivos móviles"
     }
   },
-  "inDevelopment": "🚧 En desarrollo - Mantente atento a las actualizaciones"
+  "inDevelopment": "🚧 En développement - Restez attentif aux mises à jour"
 }

@@ -1,7 +1,7 @@
 {
   "jobs": {
     "similarExam": {
-      "title": "Crear examen similar",
+      "title": "Criar examen similar",
       "steps": {
         "loadBlueprint": "Analizar examen fuente y construir plan (blueprint)",
         "generate": "Generar borrador de examen similar",
@@ -13,7 +13,7 @@
       "status": {
         "idle": "No iniciado",
         "started": "En progreso",
-        "succeeded": "Completado",
+        "succeeded": "Concluído",
         "failed": "Falló"
       },
       "errors": {

@@ -4,7 +4,7 @@
     "scans": "Varreduras de exames"
   },
   "subscription": {
-    "loading": "Cargando información de suscripción...",
+    "loading": "Carregando informações de assinatura...",
     "error": "No se pudo cargar la información de suscripción",
     "title": "Meu Plano",
     "description": "Gestiona tu suscripción y revisa tu uso actual",
@@ -115,7 +115,7 @@
   "welcome": {
     "title": "¡Bienvenido a ProfeVision!",
     "description": "Elige el plan que mejor se adapte a tus necesidades. Puedes actualizar en cualquier momento.",
-    "continueFree": "Continuar com o plano Gratuito",
+    "continueFree": "Continuar com o plano gratuito",
     "configuringAccount": "Configurando sua conta...",
     "upgradeAnytime": "Puedes actualizar a Plus en cualquier momento desde tu perfil",
     "success": "¡Bienvenido a ProfeVision!",

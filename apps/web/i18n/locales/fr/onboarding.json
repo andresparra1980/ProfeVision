@@ -15,7 +15,7 @@
   "welcome": {
     "title": "Bienvenue à ProfeVision",
     "greeting": "Hola{name}",
-    "description": "Vamos a configurar tu cuenta en unos minutos. Crearemos tu primera institucion, materia, grupo y estudiantes.",
+    "description": "Vamos a configurar tu cuenta en unos minutos. Créeremos tu primera institucion, materia, grupo y estudiantes.",
     "duration": "Aproximadamente 3 minutos",
     "steps": "5 pasos sencillos",
     "start": "Comenzar"
@@ -23,7 +23,7 @@
   "institution": {
     "title": "Tu institucion",
     "description": "Donde enseñas?",
-    "nameLabel": "Nombre de la institucion",
+    "nameLabel": "Nom de la institucion",
     "namePlaceholder": "Ej: Colegio San Jose",
     "typeLabel": "Tipo de institucion",
     "typePlaceholder": "Sélectionnez le type",
@@ -44,7 +44,7 @@
     "institutionLabel": "Institucion",
     "selectInstitution": "Selecciona una institucion",
     "noInstitutions": "No hay instituciones. Vuelve al paso anterior.",
-    "nameLabel": "Nombre de la materia",
+    "nameLabel": "Nom de la materia",
     "namePlaceholder": "Ej: Matematicas",
     "levelLabel": "Nivel educativo (opcional)",
     "levelPlaceholder": "Ej: Secundaria, Preparatoria",
@@ -57,7 +57,7 @@
     "subjectLabel": "Matière",
     "selectSubject": "Sélectionnez une matière",
     "noSubjects": "No hay materias. Vuelve al paso anterior.",
-    "nameLabel": "Nombre del grupo",
+    "nameLabel": "Nom del grupo",
     "namePlaceholder": "Ej: 3ro A, Seccion 101",
     "yearLabel": "Año escolar (opcional)",
     "yearPlaceholder": "Ej: 2024-2025",
@@ -75,10 +75,10 @@
     "importHint": "Sube un archivo Excel con tus estudiantes",
     "importButton": "Seleccionar archivo",
     "separateNamesOption": "Los apellidos y nombres estan en campos separados",
-    "fullNameLabel": "Apellidos y Nombres",
+    "fullNameLabel": "Apellidos y Noms",
     "fullNamePlaceholder": "Ej: Perez Gonzalez Juan Carlos",
     "firstNameLabel": "Prénoms",
-    "firstNamePlaceholder": "Nombres del estudiante",
+    "firstNamePlaceholder": "Noms del estudiante",
     "lastNameLabel": "Noms de famille",
     "lastNamePlaceholder": "Apellidos del estudiante",
     "idLabel": "Identificacion",
@@ -105,7 +105,7 @@
       "description": "Sube un documento PDF o Word con tus preguntas"
     },
     "manualOption": {
-      "title": "Crear manualmente",
+      "title": "Créer manualmente",
       "description": "Escribe tus propias preguntas desde cero"
     },
     "exploreOption": {
@@ -163,7 +163,7 @@
       "createExam": {
         "title": "Crea tu primer examen",
         "description": "Usa IA, importa o crea manualmente",
-        "cta": "Crear examen"
+        "cta": "Créer examen"
       },
       "publishExam": {
         "title": "Publica el examen",

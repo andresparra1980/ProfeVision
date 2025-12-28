@@ -11,7 +11,7 @@
     "label": "Generar en:",
     "auto": "Automatique",
     "spanish": "Espagnol",
-    "english": "English",
+    "english": "Anglais",
     "tooltip": "Automático: El agente detecta el idioma\nautomáticamente según el contexto,\nel tema y tipo de examen.\nRecomendado para mejores resultados."
   },
   "context": {
@@ -39,7 +39,7 @@
     "generatedSoFar": "generadas",
     "randomizeOptions": "Randomiser les options",
     "edit": "Modifier",
-    "delete": "Eliminar pregunta",
+    "delete": "Supprimer la question",
     "selectCorrect": "Selecciona la respuesta correcta:",
     "true": "Vrai",
     "false": "Faux",
@@ -47,7 +47,7 @@
     "hint": "Haz clic para ver las preguntas generadas.",
     "hintTooltip": "Haz clic en el botón para ver las preguntas generadas.",
     "deleteDialog": {
-      "title": "¿Eliminar pregunta?",
+      "title": "Supprimer la question?",
       "description": "Esta pregunta se eliminará del examen generado. Esta acción no se puede deshacer.",
       "cancel": "Annuler",
       "confirm": "Supprimer"
@@ -82,9 +82,9 @@
     "discardDialog": {
       "title": "¿Descartar cambios?",
       "description": "Tienes cambios sin guardar. Si cierras el editor, estos cambios se perderán.",
-      "cancel": "Continuar editando",
+      "cancel": "Continuer editando",
       "discard": "Descartar cambios",
-      "save": "Guardar cambios"
+      "save": "Enregistrer les modifications"
     }
   },
   "clearDialog": {
@@ -100,21 +100,21 @@
     "errorDesc": "No se pudo limpiar completamente el almacenamiento local."
   },
   "loadDraft": {
-    "successTitle": "Borrador cargado",
+    "successTitle": "Brouillon chargé",
     "successDesc": "Puedes editar las preguntas en el chat.",
     "errorTitle": "Erreur",
     "errorDesc": "No se pudo cargar el borrador"
   },
   "saveDraftDialog": {
     "create": {
-      "title": "Guardar borrador de examen",
+      "title": "Enregistrer le brouillon de l'examen",
       "description": "Completa la información general para guardar este examen como borrador.",
-      "submit": "Guardar borrador"
+      "submit": "Enregistrer borrador"
     },
     "edit": {
-      "title": "Guardar cambios del examen",
+      "title": "Enregistrer les modifications del examen",
       "description": "Se actualizarán las preguntas del examen con los cambios realizados. No se modifican materia ni grupo.",
-      "submit": "Guardar cambios"
+      "submit": "Enregistrer les modifications"
     },
     "form": {
       "title": "Titre",
@@ -130,9 +130,9 @@
       "cancel": "Annuler"
     },
     "toasts": {
-      "saved": "Borrador guardado",
+      "saved": "Brouillon enregistré",
       "savedDesc": "El examen se guardó como borrador.",
-      "updated": "Borrador actualizado",
+      "updated": "Brouillon mis à jour",
       "updatedDesc": "El borrador fue actualizado.",
       "error": "Erreur",
       "saveError": "No se pudo guardar el borrador",

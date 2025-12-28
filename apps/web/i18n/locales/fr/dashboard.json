@@ -99,7 +99,7 @@
       "createGroup": "Créer un groupe",
       "instructions": "Instrucciones (opcional)",
       "instructionsPlaceholder": "Instrucciones específicas para los estudiantes",
-      "questionNumber": "Pregunta {current} de {total}",
+      "questionNumber": "Question {current} de {total}",
       "questionText": "Texto de la pregunta",
       "options": "Options",
       "questionPlaceholder": "Escribe aquí tu pregunta",
@@ -116,12 +116,12 @@
       "group": "Groupe",
       "students": "Étudiants",
       "createdAt": "Creado",
-      "actions": "Acciones",
+      "actions": "Actions",
       "duration": "Durée",
-      "status": "Estado",
+      "status": "Statut",
       "search": "Buscar exámenes...",
       "title": "Titre",
-      "allExams": "Todos los Exámenes",
+      "allExams": "Tous les examens",
       "allExamsDesc": "Lista de todos los exámenes creados.",
       "assignedGroups": "Grupos Asignados",
       "noGroups": "Sin grupos asignados"
@@ -130,14 +130,14 @@
       "showArchivedGroups": "Mostrar exámenes de grupos archivados"
     },
     "status": {
-      "draft": "Borrador",
+      "draft": "Brouillon",
       "published": "Publicado",
       "active": "Actif",
-      "completed": "Completado",
+      "completed": "Terminé",
       "archived": "Archivado"
     },
     "delete": {
-      "title": "¿Confirmar Eliminación?",
+      "title": "¿Confirmer Eliminación?",
       "description": "Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este examen?",
       "confirm": "Supprimer",
       "cancel": "Annuler",
@@ -197,12 +197,12 @@
       }
     },
     "createWithAI": {
-      "title": "Crear Examen con IA",
+      "title": "Créer Examen con IA",
       "description": "Diseña un nuevo examen para tus estudiantes. Puedes crear un examen desde cero agregando tus propias preguntas, o bien utilizar el botón",
       "generateWithAI": "Generar con IA",
       "descriptionContinued": "para obtener preguntas sugeridas automáticamente por un modelo de lenguaje avanzado (LLM). Esta opción te permite ahorrar tiempo y personalizar el contenido según tus necesidades.",
-      "createWithAI": "Crear con Inteligencia Artificial",
-      "questionNumber": "Pregunta {current} de {total}",
+      "createWithAI": "Créer con Inteligencia Artificial",
+      "questionNumber": "Question {current} de {total}",
       "questionText": "Texto de la pregunta",
       "questionPlaceholder": "Escribe aquí tu pregunta",
       "options": "Options",
@@ -215,7 +215,7 @@
       "entityRequired": "Entidad Educativa Requerida",
       "entityRequiredDescription": "Debes crear o unirte a al menos una entidad educativa antes de poder crear exámenes. Los exámenes deben estar asociados a una materia, y las materias a una entidad educativa.",
       "entityRequiredDesc": "Debes crear o unirte a al menos una entidad educativa antes de poder crear exámenes. Los exámenes deben estar asociados a una materia, y las materias a una entidad educativa.",
-      "createEntity": "Crear Entidad Educativa",
+      "createEntity": "Créer Entidad Educativa",
       "subjectRequired": "Matière requise",
       "subjectRequiredDescription": "Vous devez créer au moins une matière avant de pouvoir créer des examens. Les examens doivent être associés à une matière.",
       "subjectRequiredDesc": "Vous devez créer au moins une matière avant de pouvoir créer des examens. Les examens doivent être associés à une matière.",
@@ -259,10 +259,10 @@
       "backToExams": "Retour aux examens",
       "selectGroup": "Grupos Disponibles",
       "selectGroupDescription": "Marca los grupos a los que deseas asignar este examen",
-      "assignDate": "Fecha de aplicación",
+      "assignDate": "Date de aplicación",
       "duration": "Durée (minutes)",
-      "dueDate": "Fecha límite",
-      "assign": "Guardar Asignaciones",
+      "dueDate": "Date límite",
+      "assign": "Enregistrer les attributions",
       "assigning": "Asignando...",
       "success": "Grupos asignados correctamente",
       "error": "Error al guardar las asignaciones",
@@ -270,29 +270,29 @@
       "loadingGroupsError": "Error al cargar los grupos"
     },
     "edit": {
-      "title": "Editar Examen",
+      "title": "Modifier Examen",
       "description": "Modifica las preguntas y configuración del examen",
-      "addQuestion": "Agregar Pregunta",
-      "questionTitle": "Pregunta",
+      "addQuestion": "Agregar Question",
+      "questionTitle": "Question",
       "questionPlaceholder": "Escribe tu pregunta aquí...",
       "addOption": "Agregar Opción",
       "correctAnswer": "Respuesta Correcta",
       "points": "Puntos",
-      "deleteQuestion": "Eliminar Pregunta",
-      "save": "Guardar Cambios",
+      "deleteQuestion": "Supprimer la question",
+      "save": "Enregistrer les modifications",
       "saving": "Guardando...",
       "success": "Examen actualizado exitosamente",
       "error": "Error al actualizar el examen",
       "backToExams": "Retour aux examens",
       "publishExam": "Publicar Examen",
-      "editWithAI": "Editar en Chat IA",
+      "editWithAI": "Modifier en Chat IA",
       "questions": "Questions",
-      "questionsCount": "Preguntas ({count})",
+      "questionsCount": "Questions ({count})",
       "noQuestions": "Este examen aún no tiene preguntas.",
-      "addNewQuestion": "Agregar Nueva Pregunta",
+      "addNewQuestion": "Agregar Nueva Question",
       "addNewQuestionDesc": "Define el contenido y opciones de respuesta para la pregunta",
-      "questionText": "Texto de la Pregunta",
-      "questionTextRequired": "Texto de la Pregunta*",
+      "questionText": "Texto de la Question",
+      "questionTextRequired": "Texto de la Question*",
       "questionTextPlaceholder": "Escribe aquí tu pregunta",
       "responseOptions": "Opciones de Respuesta",
       "optionPlaceholder": "Opción {number}",
@@ -310,11 +310,11 @@
       "confirmToggleEnableEffect": "volverá a considerar",
       "confirmToggleDisableEffect": "recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen, excluyendo esta pregunta del cálculo",
       "confirmUpdateAnswer": "¿Actualizar respuesta correcta?",
-      "confirmUpdateAnswerDesc": "Al hacer click en Confirmar se recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen.",
+      "confirmUpdateAnswerDesc": "Al hacer click en Confirmer se recalcularán las calificaciones de todos los estudiantes que ya tomaron este examen.",
       "cancel": "Annuler",
       "confirm": "Confirmer",
       "status": {
-        "draft": "Borrador",
+        "draft": "Brouillon",
         "published": "Publicado"
       },
       "validation": {
@@ -323,10 +323,10 @@
         "cantPublishNoQuestions": "No puedes publicar un examen sin preguntas"
       },
       "messages": {
-        "questionAdded": "Pregunta agregada correctamente",
-        "questionDeleted": "Pregunta eliminada correctamente",
-        "questionEnabled": "Pregunta habilitada correctamente",
-        "questionDisabled": "Pregunta deshabilitada correctamente",
+        "questionAdded": "Question agregada correctamente",
+        "questionDeleted": "Question eliminada correctamente",
+        "questionEnabled": "Question habilitada correctamente",
+        "questionDisabled": "Question deshabilitada correctamente",
         "answerUpdated": "Respuesta correcta actualizada y calificaciones recalculadas",
         "examPublished": "Examen publicado correctamente",
         "loadError": "No se pudo cargar la información del examen",
@@ -354,10 +354,10 @@
       "subject": "Matière",
       "totalScore": "Puntaje Total",
       "group": "Groupe",
-      "creationDate": "Fecha de Creación",
+      "creationDate": "Date de Creación",
       "noSubject": "Sin materia",
       "noGroup": "Sin grupo",
-      "notAvailable": "No disponible",
+      "notAvailable": "Pas disponible",
       "statisticsTitle": "Estadísticas",
       "studentsWithExam": "Estudiantes con examen",
       "of": "de",
@@ -367,23 +367,23 @@
       "na": "N/A",
       "statistics": {
         "totalStudents": "Total de estudiantes",
-        "completed": "Completados",
-        "pending": "Pendientes",
+        "completed": "Terminés",
+        "pending": "En attente",
         "averageScore": "Promedio",
         "highestScore": "Puntaje más alto",
         "lowestScore": "Puntaje más bajo"
       },
       "questionAnalysis": {
-        "title": "Análisis de Preguntas",
+        "title": "Análisis de Questions",
         "description": "Porcentaje de respuestas correctas por pregunta",
-        "question": "Pregunta",
+        "question": "Question",
         "correctPercentage": "% Correctas",
-        "chartTitle": "Dificultad de las Preguntas",
+        "chartTitle": "Dificultad de las Questions",
         "noData": "No hay datos suficientes para análisis",
         "average": "Promedio",
         "highest": "Más alto",
         "lowest": "Más bajo",
-        "questionsAnalyzed": "Preguntas analizadas",
+        "questionsAnalyzed": "Questions analizadas",
         "of": "de",
         "totalResponses": "Respuestas totales",
         "correctResponses": "Respuestas correctas",
@@ -391,7 +391,7 @@
           "questionPrefix": "P"
         },
         "tooltip": {
-          "question": "Pregunta",
+          "question": "Question",
           "disabled": "Deshabilitada"
         },
         "legend": {
@@ -402,7 +402,7 @@
         }
       },
       "answerAnalysis": {
-        "title": "Distribución de Respuestas por Pregunta",
+        "title": "Distribución de Respuestas por Question",
         "description": "Patrón de respuestas elegidas por los estudiantes en cada pregunta",
         "noData": "No hay datos suficientes para análisis",
         "hint": "Pasa el cursor sobre cada barra para ver el detalle de respuestas. La respuesta correcta se muestra en negrita con ✓",
@@ -410,7 +410,7 @@
           "questionPrefix": "P"
         },
         "tooltip": {
-          "question": "Pregunta",
+          "question": "Question",
           "responses": "respuestas",
           "noAnswer": "Sin respuesta"
         }
@@ -421,7 +421,7 @@
       "student": "Estudiante",
       "score": "Puntaje",
       "percentage": "Porcentaje",
-      "completedAt": "Completado",
+      "completedAt": "Terminé",
       "viewDetails": "Ver Detalles",
       "viewDetailsButton": "Ver detalles",
       "downloadResults": "Descargar Resultados",
@@ -439,16 +439,16 @@
         "exportSuccess": "Resultados exportados correctamente",
         "exportError": "No se pudieron exportar los resultados",
         "preparingPDF": "Preparando PDF",
-        "preparingPDFDesc": "Cargando imágenes y preparando el reporte...",
+        "preparingPDFDesc": "Chargement des images et préparation du rapport...",
         "pdfGenerated": "PDF Generado",
         "pdfGeneratedDesc": "El reporte PDF se ha generado correctamente.",
         "pdfError": "No se pudo generar el PDF",
         "gradeValidationError": "La calificación debe ser un número entre 0 y 5"
       },
       "dialogs": {
-        "confirmChangeTitle": "Confirmar cambio de respuesta",
+        "confirmChangeTitle": "Confirmer cambio de respuesta",
         "confirmChangeDescription": "¿Estás seguro de que deseas cambiar la respuesta de la pregunta {question} a la opción {option}?\n\nEsta acción recalculará automáticamente la calificación del examen.",
-        "confirmChangeButton": "Confirmar cambio",
+        "confirmChangeButton": "Confirmer cambio",
         "updating": "Mise à jour en cours...",
         "manualGradeTitle": "Ingresar calificación manual",
         "manualGradeDescription": "Esta funcionalidad está diseñada para casos especiales donde el estudiante no realizó el examen general, como recuperaciones o supletorios.",
@@ -456,7 +456,7 @@
         "studentLabel": "Estudiante",
         "gradeLabel": "Calificación (0-5)",
         "saving": "Guardando...",
-        "saveGrade": "Guardar calificación",
+        "saveGrade": "Enregistrer calificación",
         "groupSelectionTitle": "Seleccionar Grupo",
         "groupSelectionDescription": "Este examen está asignado a múltiples grupos. Seleccione el grupo para ver sus resultados.",
         "close": "Fermer",
@@ -470,8 +470,8 @@
         "identification": "Identificación",
         "score": "Nota",
         "percentage": "Porcentaje",
-        "status": "Estado",
-        "actions": "Acciones"
+        "status": "Statut",
+        "actions": "Actions"
       },
       "status": {
         "graded": "Calificado",
@@ -480,11 +480,11 @@
       "excel": {
         "lastName": "Noms de famille",
         "firstName": "Prénoms",
-        "fullName": "Apellidos y Nombres",
+        "fullName": "Apellidos y Noms",
         "identification": "Identificación",
         "score": "Nota",
         "percentage": "Porcentaje",
-        "gradedDate": "Fecha de Calificación",
+        "gradedDate": "Date de Calificación",
         "notPresented": "No presentado",
         "sheetName": "Résultats",
         "examDetailsHeader": "DETALLES DEL EXAMEN",
@@ -492,10 +492,10 @@
         "subjectLabel": "Matière",
         "totalScoreLabel": "Puntaje Total",
         "groupLabel": "Groupe",
-        "creationDateLabel": "Fecha de Creación",
+        "creationDateLabel": "Date de Creación",
         "noSubjectAvailable": "Sin materia",
         "noGroupAvailable": "Sin grupo",
-        "noDateAvailable": "No disponible",
+        "noDateAvailable": "Pas disponible",
         "statisticsHeader": "ESTADÍSTICAS",
         "studentsWithExamLabel": "Estudiantes con examen",
         "of": "de",
@@ -542,7 +542,7 @@
         "pdfGeneratedSuccess": "El PDF ha sido generado correctamente y está listo para descargar.",
         "errorOccurred": "Ocurrió un error al preparar el PDF. Por favor, intente nuevamente.",
         "preparingDocument": "Preparando documento PDF...",
-        "loadingImages": "Cargando imágenes...",
+        "loadingImages": "Chargement des images...",
         "pdfGeneratedCorrectly": "PDF generado correctamente",
         "preparingPDF": "Preparando PDF...",
         "downloadPDF": "Descargar PDF",
@@ -574,7 +574,7 @@
       "generatePDF": "Generar PDF",
       "loadingError": "Error al cargar el examen",
       "selectStudent": "Seleccionar Estudiante",
-      "question": "Pregunta",
+      "question": "Question",
       "studentAnswer": "Respuesta del Estudiante",
       "correctAnswer": "Respuesta Correcta",
       "points": "Puntos",
@@ -608,7 +608,7 @@
         "noGroups": "No hay grupos asignados a este examen. Asigna un grupo primero."
       },
       "questionSheet": {
-        "title": "Hoja de Preguntas",
+        "title": "Hoja de Questions",
         "optional": "opcional",
         "description": "Una sola copia con todas las preguntas del examen para entregar a los estudiantes o proyectar."
       },
@@ -642,7 +642,7 @@
       "answerSheetLabels": {
         "title": "HOJA DE RESPUESTAS",
         "studentInfo": "Información del Estudiante",
-        "name": "Nombre:",
+        "name": "Nom:",
         "identification": "Identificación:",
         "group": "Grupo:",
         "subject": "Materia:",
@@ -685,7 +685,7 @@
     },
     "linkGradeComponent": {
       "title": "Vincular Examen a Componentes de Calificación",
-      "loading": "Cargando componentes de calificación...",
+      "loading": "Chargement des composants d'évaluation...",
       "back": "Retour",
       "backToExams": "Retour aux examens",
       "noGroupsAssigned": "No hay grupos asignados",
@@ -701,7 +701,7 @@
       "group": "Grupo:",
       "scheme": "Esquema:",
       "period": "Período:",
-      "save": "Guardar Vinculaciones",
+      "save": "Enregistrer Vinculaciones",
       "saving": "Guardando...",
       "cancel": "Annuler",
       "success": "Vinculaciones guardadas exitosamente",
@@ -777,7 +777,7 @@
     "form": {
       "addTitle": "Añadir Institución Educativa",
       "addDescription": "Ingresa el nombre y tipo de la institución donde impartes clases",
-      "nameLabel": "Nombre de la Institución *",
+      "nameLabel": "Nom de la Institución *",
       "namePlaceholder": "Ej. Universidad Nacional, Colegio San José",
       "typeLabel": "Tipo de Institución",
       "typePlaceholder": "Selecciona un tipo de institución",
@@ -810,10 +810,10 @@
     "noEntitiesMessage": "No hay entidades educativas registradas.",
     "form": {
       "newTitle": "Nueva entidad educativa",
-      "editTitle": "Editar entidad",
+      "editTitle": "Modifier entidad",
       "newDescription": "Ingresa los datos de la nueva entidad educativa.",
       "editDescription": "Actualiza la información de la entidad educativa.",
-      "nameLabel": "Nombre*",
+      "nameLabel": "Nom*",
       "typeLabel": "Tipo de institución",
       "cityLabel": "Ciudad",
       "cityPlaceholder": "Ciudad",
@@ -838,11 +838,11 @@
       "location": "Ubicación:",
       "address": "Dirección:",
       "phone": "Teléfono:",
-      "email": "Correo:",
+      "email": "Email :",
       "website": "Web:"
     },
     "deleteDialog": {
-      "title": "Confirmar eliminación",
+      "title": "Confirmer eliminación",
       "description": "¿Estás seguro de que deseas eliminar esta entidad educativa? Esta acción no se puede deshacer.",
       "cancel": "Annuler",
       "delete": "Supprimer"
@@ -873,11 +873,11 @@
     },
     "form": {
       "newSubject": "Nueva materia",
-      "editTitle": "Editar materia",
+      "editTitle": "Modifier materia",
       "newTitle": "Nueva materia",
       "newDescription": "Ingresa los datos de la nueva materia.",
       "editDescription": "Actualiza la información de la materia.",
-      "nameLabel": "Nombre*",
+      "nameLabel": "Nom*",
       "nameError": "Le nom doit avoir au moins 2 caractères",
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Breve descripción de la materia",
@@ -908,7 +908,7 @@
       "confirmationInstruction": "Para confirmar esta acción y proceder con la eliminación, por favor escriba el nombre exacto de la materia en el campo de abajo.",
       "typeLabel": "Escriba",
       "toConfirm": "para confirmar:",
-      "placeholder": "Nombre exacto de la materia",
+      "placeholder": "Nom exacto de la materia",
       "cancel": "Annuler",
       "confirmDelete": "Sí, eliminar esta materia y sus datos"
     }
@@ -920,7 +920,7 @@
     "noSubjectsMessage": "Debes crear al menos una materia antes de crear un grupo.",
     "goToSubjects": "Ir a crear materia",
     "buttons": {
-      "showActive": "Ver Grupos Activos",
+      "showActive": "Voir les groupes actifs",
       "showArchived": "Ver Grupos Archivados"
     },
     "error": {
@@ -965,7 +965,7 @@
       "archiveReason": "el grupo para evitar la eliminación permanente.",
       "typePrompt": "Escriba",
       "typeConfirm": "para confirmar",
-      "placeholder": "Nombre exacto del grupo",
+      "placeholder": "Nom exacto del grupo",
       "cancel": "Annuler",
       "confirm": "Sí, eliminar este grupo y sus datos"
     },
@@ -975,8 +975,8 @@
       "period": "Periodo",
       "notAssigned": "No asignada",
       "openMenu": "Abrir menú",
-      "actions": "Acciones",
-      "editGroup": "Editar grupo",
+      "actions": "Actions",
+      "editGroup": "Modifier grupo",
       "manageStudents": "Gestión de Estudiantes",
       "gradeTable": "Tabulado de Notas",
       "gradingScheme": "Esquema de Calificaciones",
@@ -985,7 +985,7 @@
       "delete": "Supprimer",
       "students": "estudiantes",
       "tooltips": {
-        "editGroup": "Editar nombre del grupo, materia u otros detalles",
+        "editGroup": "Modifier nombre del grupo, materia u otros detalles",
         "manageStudents": "Agregar, eliminar o importar estudiantes en este grupo",
         "gradeTable": "Ver y gestionar las calificaciones de los estudiantes de este grupo",
         "gradingScheme": "Configurar componentes y pesos de calificación para este grupo",
@@ -995,11 +995,11 @@
     },
     "form": {
       "newGroup": "Nuevo grupo",
-      "editTitle": "Editar grupo",
+      "editTitle": "Modifier grupo",
       "newTitle": "Nuevo grupo",
       "editDescription": "Actualiza la información del grupo.",
       "newDescription": "Ingresa los datos del nuevo grupo.",
-      "nameLabel": "Nombre del grupo (Ej: 10-A, Grupo Mañana, etc.)*",
+      "nameLabel": "Nom del grupo (Ej: 10-A, Grupo Mañana, etc.)*",
       "namePlaceholder": "Ej: 10-A, Grupo Mañana, etc.",
       "nameError": "Le nom doit avoir au moins 2 caractères",
       "entityLabel": "Entidad Educativa*",
@@ -1007,17 +1007,17 @@
       "entityError": "Selecciona una entidad educativa",
       "noEntities": "No hay entidades educativas registradas",
       "noEntitiesMessage": "Debes crear al menos una entidad educativa antes de crear un grupo.",
-      "createEntity": "Crear entidad educativa",
+      "createEntity": "Créer entidad educativa",
       "subjectLabel": "Materia*",
       "subjectPlaceholder": "Sélectionnez une matière",
       "subjectError": "Sélectionnez une matière",
       "selectEntityFirst": "Primero selecciona una entidad educativa",
       "noSubjectsForEntity": "No hay materias para esta entidad educativa",
       "noSubjectsMessage": "No hay materias registradas para esta entidad educativa.",
-      "createSubject": "Crear materia",
+      "createSubject": "Créer materia",
       "schoolPeriod": "Periodo Escolar",
-      "startDate": "Fecha Inicio",
-      "endDate": "Fecha Fin",
+      "startDate": "Date de début",
+      "endDate": "Date Fin",
       "month": "Mois",
       "year": "Année",
       "interpretedPeriod": "Periodo interpretado",
@@ -1029,7 +1029,7 @@
     },
     "grades": {
       "title": "Calificaciones",
-      "backToGroups": "Volver a Grupos",
+      "backToGroups": "Retour a Grupos",
       "subjectLabel": "Matière",
       "groupLabel": "Groupe",
       "defaultInstitution": "INSTITUCIÓN EDUCATIVA",
@@ -1051,7 +1051,7 @@
       },
       "modal": {
         "importTitle": "Importar Calificaciones",
-        "exportTitle": "Exportar Calificaciones",
+        "exportTitle": "Exporter les notes",
         "importDescription": "Importa calificaciones desde un archivo Excel",
         "exportDescription": "Exporta calificaciones a un archivo Excel",
         "exportPeriod": "Exportar calificaciones del",
@@ -1059,7 +1059,7 @@
       }
     },
     "students": {
-      "backToGroups": "Volver a Grupos",
+      "backToGroups": "Retour a Grupos",
       "noSchoolPeriod": "Sin período escolar",
       "groupStudents": "Estudiantes del Grupo",
       "studentsRegistered": "estudiantes registrados en este grupo",
@@ -1093,14 +1093,14 @@
         "identification": "Identificación",
         "names": "Prénoms",
         "surnames": "Noms de famille",
-        "fullName": "Apellidos y Nombres",
+        "fullName": "Apellidos y Noms",
         "email": "Email",
-        "actions": "Acciones"
+        "actions": "Actions"
       }
     },
     "gradingScheme": {
       "title": "Esquema de Calificación",
-      "backToGroups": "Volver a Grupos",
+      "backToGroups": "Retour a Grupos",
       "defaultInstitution": "INSTITUCIÓN EDUCATIVA",
       "error": {
         "loadingData": "Error al cargar datos",
@@ -1119,16 +1119,16 @@
     "stats": {
       "totalInstitutions": "Instituciones",
       "totalSubjects": "Matières",
-      "activeGroups": "Grupos Activos",
+      "activeGroups": "Groupes actifs",
       "archivedGroups": "Grupos Archivados",
       "totalStudents": "Étudiants",
-      "recentExams": "Exámenes Recientes",
-      "gradedExams": "Exámenes Calificados",
+      "recentExams": "Examens récents",
+      "gradedExams": "Examens évalués",
       "timeSaved": "Tiempo Ahorrado",
       "timeSavedContext": "Sin ProfeVision: 5 min/examen • Con ProfeVision: 5 s/examen",
       "noExams": "No hay exámenes recientes",
       "examStatus": {
-        "borrador": "Borrador",
+        "borrador": "Brouillon",
         "publicado": "Publicado",
         "archivado": "Archivado"
       },
@@ -1138,7 +1138,7 @@
       }
     },
     "metrics": {
-      "examsCreated": "Exámenes creados",
+      "examsCreated": "Examens créés",
       "studentsEvaluated": "Estudiantes evaluados",
       "averageScore": "Promedio general",
       "completionRate": "Tasa de finalización",
@@ -1159,7 +1159,7 @@
       "ago3d": "Hace 3 días"
     },
     "upcomingExams": "Próximos exámenes",
-    "upcomingExamsDesc": "Exámenes programados para los próximos días",
+    "upcomingExamsDesc": "Examens prévus pour les jours à venir",
     "upcoming": {
       "chemistry": "Química - 10° Grado",
       "chemistryDate": "22 de Mayo, 2024",
@@ -1177,7 +1177,7 @@
       "exportFinalGrades": "Exportar notas finales",
       "surnames": "Noms de famille",
       "names": "Prénoms",
-      "fullName": "Apellidos y Nombres",
+      "fullName": "Apellidos y Noms",
       "identification": "Identificación",
       "exam": "Examen",
       "linkedToExam": "Vinculado al examen",
@@ -1205,14 +1205,14 @@
       "defaultComponentName": "Tareas",
       "newComponent": "Nuevo Componente",
       "period": "Periodo",
-      "schemeName": "Nombre del Esquema",
-      "startDate": "Fecha inicio",
-      "endDate": "Fecha fin",
+      "schemeName": "Nom del Esquema",
+      "startDate": "Date inicio",
+      "endDate": "Date fin",
       "type": "Type",
       "addComponent": "Agregar Componente",
       "addPeriod": "Agregar Periodo",
       "saving": "Guardando...",
-      "saveChanges": "Guardar Cambios",
+      "saveChanges": "Enregistrer les modifications",
       "componentTypes": {
         "exam": "Examen",
         "project": "Proyecto",
@@ -1240,7 +1240,7 @@
     "description": "Administra estudiantes asignados a tus grupos",
     "actions": {
       "manageGroups": "Gestionar Grupos",
-      "createStudent": "Crear Estudiante"
+      "createStudent": "Créer Estudiante"
     },
     "form": {
       "title": "Agregar Estudiante",
@@ -1251,15 +1251,15 @@
       "email": "Adresse email",
       "group": "Groupe",
       "placeholders": {
-        "names": "Nombres del estudiante",
+        "names": "Noms del estudiante",
         "surnames": "Apellidos del estudiante",
         "identification": "Número de identificación",
-        "email": "Correo electrónico del estudiante",
+        "email": "Adresse email del estudiante",
         "selectGroup": "Sélectionnez un groupe"
       },
       "actions": {
         "cancel": "Annuler",
-        "create": "Crear Estudiante",
+        "create": "Créer Estudiante",
         "creating": "Creando..."
       }
     },
@@ -1272,10 +1272,10 @@
       "headers": {
         "surnames": "Noms de famille",
         "names": "Prénoms",
-        "fullName": "Apellidos y Nombres",
+        "fullName": "Apellidos y Noms",
         "identification": "Identificación",
         "email": "Email",
-        "actions": "Acciones"
+        "actions": "Actions"
       },
       "actions": {
         "viewDetails": "Ver Detalles"
@@ -1299,12 +1299,12 @@
       "noGroups": {
         "title": "Necesitas crear grupos primero",
         "description": "Para gestionar estudiantes, primero debes crear al menos un grupo asociado a una de tus materias. Los estudiantes en ProfeVision están siempre asociados a grupos específicos.",
-        "createGroup": "Crear Grupo"
+        "createGroup": "Créer Grupo"
       },
       "noStudents": {
         "title": "Aún no tienes estudiantes",
         "description": "No hay estudiantes asignados a tus grupos. Puedes crear estudiantes y luego asignarlos a grupos, o ir directamente a un grupo específico para añadir estudiantes.",
-        "createStudent": "Crear Estudiante",
+        "createStudent": "Créer Estudiante",
         "manageGroups": "Gestionar Grupos"
       }
     },
@@ -1319,14 +1319,14 @@
     "title": "Reportes",
     "description": "Visualiza estadísticas y análisis del desempeño de tus estudiantes",
     "stats": {
-      "totalExams": "Total Exámenes",
-      "examsCreated": "Exámenes creados",
+      "totalExams": "Total des examens",
+      "examsCreated": "Examens créés",
       "totalStudents": "Total Estudiantes",
       "studentsRegistered": "Estudiantes registrados",
       "totalSubjects": "Total Materias",
       "subjectsCreated": "Materias creadas",
       "applications": "Aplicaciones",
-      "examsApplied": "Exámenes aplicados"
+      "examsApplied": "Examens appliqués"
     },
     "charts": {
       "examPerformance": {
@@ -1361,7 +1361,7 @@
       "positionPlaceholder": "Ej: Profesor de Matemáticas",
       "biography": "Biografía",
       "biographyPlaceholder": "Breve descripción sobre ti",
-      "saveChanges": "Guardar cambios",
+      "saveChanges": "Enregistrer les modifications",
       "saving": "Guardando..."
     },
     "validation": {
@@ -1386,18 +1386,18 @@
       "form": {
         "firstName": "Prénoms",
         "lastName": "Noms de famille",
-        "email": "Correo Electrónico",
+        "email": "Adresse email",
         "phone": "Teléfono",
         "biography": "Biografía",
         "emailNotChangeable": "El correo electrónico no se puede cambiar",
-        "saveChanges": "Guardar cambios",
+        "saveChanges": "Enregistrer les modifications",
         "saving": "Guardando..."
       }
     },
     "password": {
-      "title": "Cambiar Contraseña",
+      "title": "Cambiar Mot de passe",
       "description": "Actualiza tu contraseña para mantener tu cuenta segura",
-      "button": "Cambiar Contraseña"
+      "button": "Cambiar Mot de passe"
     },
     "notifications": {
       "title": "Preferencias de Notificaciones",
@@ -1413,7 +1413,7 @@
       "fetchProfile": "No se pudo cargar la información del perfil",
       "noSession": "No hay sesión activa",
       "saveChanges": "No se pudieron guardar los cambios",
-      "serverConfig": "Error de configuración del servidor",
+      "serverConfig": "Erreur de configuration du serveur",
       "unauthorizedMissing": "Token de autenticación requerido",
       "unauthorized": "Non autorisé",
       "fetchData": "Error al obtener datos",
@@ -1427,9 +1427,9 @@
     "days": "jours"
   },
   "admin": {
-    "title": "Admin Dashboard",
+    "title": "Tableau de bord administrateur",
     "description": "Observabilidad global de la plataforma",
-    "loading": "Cargando estadísticas...",
+    "loading": "Chargement des statistiques...",
     "errorLoading": "Error al cargar datos",
     "retry": "Reintentar",
     "refresh": "Actualizar",
@@ -1443,7 +1443,7 @@
     "stats": {
       "totalUsers": "Usuarios Totales",
       "newThisMonth": "Nuevos este mes",
-      "totalExams": "Exámenes Totales",
+      "totalExams": "Total des examens",
       "createdThisMonth": "Creados este mes",
       "withResults": "Con resultados",
       "totalScans": "Escaneos Totales",

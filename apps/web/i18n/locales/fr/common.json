@@ -12,33 +12,33 @@
     "close": "Fermer",
     "continue": "Continuer",
     "confirm": "Confirmer",
-    "startFree": "Comenzar Gratis!",
-    "learnMore": "Conocer Más",
-    "startTrial": "Inicia Prueba Gratis",
-    "exportGrades": "Exportar Calificaciones",
+    "startFree": "Commencer gratuitement !",
+    "learnMore": "En savoir plus",
+    "startTrial": "Commencer l'essai gratuit",
+    "exportGrades": "Exporter les notes",
     "login": "Connexion",
-    "register": "Registrarse",
-    "goToDashboard": "Ir al Panel"
+    "register": "S'inscrire",
+    "goToDashboard": "Aller au tableau de bord"
   },
   "labels": {
     "name": "Nom",
     "email": "Adresse email",
     "password": "Mot de passe",
     "description": "Description",
-    "date": "Fecha",
-    "status": "Estado",
-    "actions": "Acciones"
+    "date": "Date",
+    "status": "Statut",
+    "actions": "Actions"
   },
   "status": {
     "active": "Actif",
     "inactive": "Inactif",
-    "pending": "Pendiente",
-    "completed": "Completado",
-    "draft": "Borrador"
+    "pending": "En attente",
+    "completed": "Terminé",
+    "draft": "Brouillon"
   },
   "messages": {
     "loading": "Chargement...",
-    "success": "Operación exitosa",
+    "success": "Opération réussie",
     "error": "Ha ocurrido un error",
     "noData": "No hay datos disponibles",
     "confirmDelete": "¿Estás seguro de que quieres eliminar este elemento?",
@@ -47,11 +47,11 @@
   "language": {
     "switch": "Cambiar idioma",
     "spanish": "Espagnol",
-    "english": "English",
+    "english": "Anglais",
     "label": "Langue"
   },
   "navigation": {
-    "home": "Inicio",
+    "home": "Accueil",
     "howItWorks": "¿Cómo funciona?",
     "howItWorksDescription": "Descubre cómo transformar tu forma de crear, administrar y calificar exámenes",
     "exams": "Examens",
@@ -59,7 +59,7 @@
     "manualGenerator": "Generador Manual",
     "aiGenerator": "Generador con IA",
     "aiGeneratorDescription": "Genera exámenes automáticamente con inteligencia artificial",
-    "paperExams": "Exámenes en Papel",
+    "paperExams": "Examens sur Papier",
     "paperExamsDescription": "Escanea y califica exámenes físicos automáticamente",
     "functions": "Funciones",
     "institutionsManagement": "Gestión de Instituciones",
@@ -69,12 +69,12 @@
     "reportsManagement": "Gestión de Reportes",
     "reports": "Reportes",
     "mobileApp": "Aplicación Móvil",
-    "mobileAppDescription": "En desarrollo - Próximamente disponible",
-    "pricing": "Precios",
+    "mobileAppDescription": "En développement - Bientôt disponible",
+    "pricing": "Tarification",
     "blog": "Blog",
-    "contact": "Contacto",
+    "contact": "Contact",
     "about": "Acerca de",
-    "dashboard": "Panel",
+    "dashboard": "Tableau de bord",
     "terms": "Términos",
     "privacy": "Privacidad",
     "cookies": "Cookies"
@@ -88,12 +88,12 @@
     },
     "links": {
       "howItWorks": "¿Cómo funciona?",
-      "pricing": "Precios",
+      "pricing": "Tarification",
       "aiGenerator": "Generador IA",
       "mobileApp": "App Móvil",
       "about": "Acerca de",
       "blog": "Blog",
-      "contact": "Contacto",
+      "contact": "Contact",
       "terms": "Términos",
       "privacy": "Privacidad",
       "cookies": "Cookies",
@@ -107,11 +107,11 @@
     "hero": {
       "badge": "¡Nuevo! Calificación con Visión Artificial (OMR)",
       "title": "La Mejor Aplicación",
-      "titleHighlight": "para Escanear y Calificar Exámenes en Papel",
+      "titleHighlight": "para Escanear y Calificar Examens sur Papier",
       "description": "En ProfeVisión, entendemos los desafíos de la educación moderna. Hemos desarrollado la solución todo en uno que automatiza la creación, calificación y gestión de exámenes con IA, liberando tu valioso tiempo para que te concentres en lo que realmente importa: enseñar y potenciar el aprendizaje de tus estudiantes.",
-      "startFree": "Comenzar Gratis!",
-      "learnMore": "Conocer Más",
-      "registerTitle": "Registrarse gratis en ProfeVisión - Crear cuenta sin costo",
+      "startFree": "Commencer gratuitement !",
+      "learnMore": "En savoir plus",
+      "registerTitle": "Registrarse gratis en ProfeVisión - Créer cuenta sin costo",
       "learnMoreTitle": "Conocer más sobre las características de ProfeVisión",
       "avatarAlt": "Avatar de profesor {number} que usa ProfeVisión",
       "avatarTitle": "Profesor que confía en ProfeVisión para automatizar la calificación de exámenes",
@@ -124,7 +124,7 @@
       "title": "Todo lo que necesitas en una sola plataforma",
       "description": "ProfeVision simplifica tu trabajo como educador con herramientas potentes e intuitivas",
       "examCreation": {
-        "title": "Creación de Exámenes Inteligente",
+        "title": "Création intelligente d'examens",
         "description": "Genera pruebas educativas personalizadas con asistencia de IA. Disfruta de múltiples formatos (selección múltiple, verdadero/falso, etc.), preguntas de calidad y plantillas reutilizables. Ahorra tiempo y asegura evaluaciones precisas y relevantes."
       },
       "aiGrading": {
@@ -170,7 +170,7 @@
         "linkTitle": "Ver documentación sobre sistema de calificaciones en ProfeVisión"
       },
       "exams": {
-        "title": "Gestión de Exámenes",
+        "title": "Gestion des examens",
         "feature1": "Crea exámenes con asistencia de IA",
         "feature2": "Genera hojas de respuesta con QR",
         "feature3": "Calificación automática con Visión Artificial (OMR)",
@@ -219,22 +219,22 @@
         "exam1": "Examen 1",
         "exam2": "Examen 2",
         "final": "Final",
-        "export": "Exportar Calificaciones"
+        "export": "Exporter les notes"
       }
     },
     "cta": {
       "title": "Transforma tu experiencia educativa con ProfeVision",
       "description": "Únete a miles de educadores que ya están optimizando su trabajo y mejorando los resultados de sus estudiantes.",
-      "startTrial": "Inicia Prueba Gratis",
+      "startTrial": "Commencer l'essai gratuit",
       "startTrialTitle": "Iniciar prueba gratuita de ProfeVisión - Sin compromisos",
-      "learnMore": "Conocer Más",
+      "learnMore": "En savoir plus",
       "stats": {
         "teachers": "1000+",
-        "teachersLabel": "Profesores Activos",
+        "teachersLabel": "Enseignants actifs",
         "institutions": "50+",
         "institutionsLabel": "Instituciones",
         "exams": "100K+",
-        "examsLabel": "Exámenes Calificados",
+        "examsLabel": "Examens évalués",
         "satisfaction": "98%",
         "satisfactionLabel": "Satisfacción"
       }
@@ -255,7 +255,7 @@
       "subtitle": "Acceso completo durante la fase de lanzamiento",
       "features": {
         "unlimitedStudents": "Estudiantes ilimitados",
-        "unlimitedExams": "Exámenes ilimitados",
+        "unlimitedExams": "Examens illimités",
         "aiGeneration": "Generación con IA",
         "omrGrading": "Calificación automática OMR",
         "advancedReports": "Reportes avanzados",
@@ -270,17 +270,17 @@
       "description": "Cuando finalice el período de lanzamiento, ofreceremos planes flexibles para docentes e instituciones de todos los tamaños.",
       "basic": {
         "title": "Plan Básico",
-        "price": "Próximamente",
+        "price": "À venir",
         "features": {
           "students": "Hasta 500 estudiantes",
-          "exams": "Exámenes ilimitados",
+          "exams": "Examens illimités",
           "reports": "Reportes básicos",
           "support": "Soporte por email"
         }
       },
       "institutional": {
         "title": "Plan Institucional",
-        "price": "Próximamente",
+        "price": "À venir",
         "features": {
           "students": "Estudiantes ilimitados",
           "institutions": "Múltiples instituciones",
@@ -297,7 +297,7 @@
       "title": "¿Listo para Revolucionar tus Evaluaciones?",
       "description": "Únete ahora y obtén acceso gratuito a todas las funciones de ProfeVisión durante nuestro período de lanzamiento.",
       "startFree": "Comenzar Gratis",
-      "learnMore": "Conocer Más"
+      "learnMore": "En savoir plus"
     }
   },
   "howItWorks": {
@@ -346,7 +346,7 @@
           "description": "Organiza tus exámenes y resultados por materia y grupo. Así tendrás todo ordenado y fácil de encontrar."
         },
         "item3": {
-          "title": "Dashboard con métricas:",
+          "title": "Tableau de bord avec métriques :",
           "description": "Visualiza el rendimiento de tus estudiantes con gráficos y reportes claros. Analiza resultados por clase, materia o período y toma mejores decisiones."
         }
       }
@@ -393,7 +393,7 @@
           "organization": "Organización por institución/materia",
           "organizationYes": "Sí, todo centralizado",
           "organizationNo": "Limitada, dispersa",
-          "dashboard": "Dashboard de métricas y reportes",
+          "dashboard": "Tableau de bord des métriques et rapports",
           "dashboardYes": "Sí, en tiempo real",
           "dashboardNo": "No, requiere trabajo manual",
           "errorReduction": "Reducción de errores humanos",
@@ -412,7 +412,7 @@
     },
     "faq": {
       "badge": "Foire aux questions",
-      "title": "Preguntas frecuentes (FAQ)",
+      "title": "Questions frecuentes (FAQ)",
       "questions": {
         "q1": {
           "question": "¿Puedo usar ProfeVision en cualquier tipo de escuela?",
@@ -440,13 +440,13 @@
       "title": "ProfeVision es la herramienta ideal para modernizar la evaluación escolar digital",
       "description": "Únete a miles de profesores y escuelas que ya están transformando sus procesos de evaluación con tecnología avanzada.",
       "startFree": "Prueba ProfeVision gratis",
-      "viewPricing": "Ver Precios"
+      "viewPricing": "Voir les tarifs"
     }
   },
   "paperExams": {
     "hero": {
       "badge": "Calificación Instantánea",
-      "title": "Califica Exámenes Rápido con las",
+      "title": "Notez rapidement les examens avec les",
       "titleHighlight": "Hojas de Respuesta",
       "titleEnd": "de ProfeVisión",
       "description": "Transforma la evaluación de tus estudiantes con tecnología de vanguardia.",
@@ -522,7 +522,7 @@
         "item1": "Revisa las calificaciones detectadas",
         "item2": "Opciones disponibles:",
         "item3": "Atrás: Para volver a escanear si es necesario",
-        "item4": "Guardar Resultados: Para confirmar y almacenar"
+        "item4": "Enregistrer Resultados: Para confirmar y almacenar"
       }
     },
     "benefits": {
@@ -545,8 +545,8 @@
   },
   "exams": {
     "hero": {
-      "badge": "Generador de Exámenes",
-      "title": "Crea Exámenes con",
+      "badge": "Générateur d'examens",
+      "title": "Créez des examens avec",
       "titleHighlight": "Inteligencia Artificial",
       "titleEnd": "en segundos",
       "description": "Transforma cualquier contenido educativo en evaluaciones completas y personalizadas. ProfeVisión utiliza IA avanzada para generar preguntas de opción múltiple, verdadero/falso y abiertas desde tus materiales de clase.",
@@ -623,11 +623,11 @@
       "title": "Transforma tu contenido en pruebas interesantes en segundos",
       "description": "Genera múltiples tipos de preguntas a partir de texto o archivos cargados de manera inteligente y eficiente.",
       "startNow": "Comenzar Ahora",
-      "learnMore": "Conocer Más"
+      "learnMore": "En savoir plus"
     }
   },
   "contact": {
-    "title": "Contacto",
+    "title": "Contact",
     "subtitle": "¿Tienes preguntas? Estamos aquí para ayudarte.",
     "info": {
       "title": "Información de contacto",
@@ -714,7 +714,7 @@
       "accountInfo": {
         "title": "a) Información de tu cuenta y uso",
         "items": [
-          "Correo electrónico y contraseña: Para crear tu cuenta y poder identificarte.",
+          "Adresse email y contraseña: Para crear tu cuenta y poder identificarte.",
           "Datos de tu suscripción: Si tienes una suscripción paga, guardamos la información necesaria para gestionarla.",
           "Datos de uso: Recopilamos información sobre cómo usas ProfeVision, como la frecuencia con la que entras, desde qué dispositivos, tu dirección IP, tipo de navegador, etc.",
           "Cookies y tecnologías similares: Usamos cookies para que la plataforma funcione correctamente y para mejorar tu experiencia. No las usamos para publicidad."
@@ -724,7 +724,7 @@
         "title": "b) Información que tú decides ingresar",
         "items": [
           "Datos de tus estudiantes: Si quieres, puedes ingresar nombres, apellidos, números de identificación y clases de tus estudiantes.",
-          "Exámenes y resultados: Cuando calificas exámenes, puedes guardar imágenes y resultados para analizarlos después.",
+          "Examens et résultats : Quand vous notez des examens, vous pouvez enregistrer des images et des résultats pour les analyser plus tard.",
           "Información de tus clases: Puedes crear registros de tus clases y vincularlos con tus estudiantes."
         ]
       }
@@ -736,7 +736,7 @@
         "Ofrecerte el servicio de ProfeVision y mejorarlo constantemente.",
         "Responder a tus dudas o consultas.",
         "Personalizar la plataforma para ti.",
-        "Enviarte avisos importantes sobre tu cuenta, suscripción o novedades de ProfeVision."
+        "Envoyerte avisos importantes sobre tu cuenta, suscripción o novedades de ProfeVision."
       ],
       "note": "Nunca vendemos tu información ni la usamos para mostrarte publicidad."
     },
@@ -920,7 +920,7 @@
       "responsibility": "Debes verificar la información sobre desactivación en la sección de ayuda de tu navegador. Asumes la responsabilidad de eliminar o desactivar las cookies y las consecuencias que se deriven."
     },
     "section8": {
-      "title": "Contacto",
+      "title": "Contact",
       "content": "En todo momento puedes comunicarte con el Editor a través del correo electrónico: info@profevision.com",
       "address": {
         "name": "ProfeVision",
@@ -1032,7 +1032,7 @@
       ]
     },
     "section15": {
-      "title": "15. Contacto",
+      "title": "15. Contact",
       "intro": "Si tienes dudas o necesitas ayuda, escríbenos a:",
       "orAddress": "O a la dirección:",
       "address": {
@@ -1052,7 +1052,7 @@
       "columns": {
         "names": "Prénoms",
         "surnames": "Noms de famille",
-        "fullName": "Apellidos y Nombres",
+        "fullName": "Apellidos y Noms",
         "identification": "Identificación",
         "email": "Email"
       },
@@ -1080,7 +1080,7 @@
         "table": {
           "names": "Prénoms",
           "surnames": "Noms de famille",
-          "fullName": "Apellidos y Nombres",
+          "fullName": "Apellidos y Noms",
           "identification": "Identificación",
           "email": "Email",
           "andMore": "Y {count} más..."
@@ -1137,7 +1137,7 @@
       "items": [
         "Tu perfil y datos de cuenta",
         "Información de tus estudiantes",
-        "Exámenes creados y resultados",
+        "Examens créés et résultats",
         "Imágenes de escaneos",
         "Instituciones, materias y grupos creados",
         "Historial de uso y preferencias"

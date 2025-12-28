@@ -11,7 +11,7 @@
   },
   "success": {
     "deleted": "Examen y elementos relacionados eliminados correctamente",
-    "stateUpdated": "Estado del examen actualizado correctamente",
+    "stateUpdated": "Statut del examen actualizado correctamente",
     "updated": "Examen actualizado correctamente"
   }
 }
