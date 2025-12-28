@@ -1,10 +1,12 @@
 export const defaultLocale = 'es';
-export const locales = ['es', 'en'] as const;
+export const locales = ['es', 'en', 'fr', 'pt'] as const;
 export type Locale = (typeof locales)[number];
 
 export const localeNames = {
   es: 'Español',
   en: 'English',
+  fr: 'Français',
+  pt: 'Português (Brasil)',
 } as const;
 
 // Configuración para detección de idioma del navegador

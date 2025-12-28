@@ -1,14 +1,14 @@
 //import { notFound } from 'next/navigation';
 import { getRequestConfig } from "next-intl/server";
 import { routing } from "./routing";
-import { Locale } from "./config";
+import { Locale, locales } from "./config";
 
 export default getRequestConfig(async ({ requestLocale }) => {
   // Typically corresponds to the `[locale]` segment
   const requested = await requestLocale;
   const locale =
-    requested && routing.locales.includes(requested as Locale)
-      ? requested
+    requested && (locales as readonly string[]).includes(requested)
+      ? (requested as Locale)
       : routing.defaultLocale;
 
   // 🌍 Importar todos los archivos de traducción
