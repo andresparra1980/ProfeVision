@@ -39,149 +39,149 @@
   "messages": {
     "loading": "Carregando...",
     "success": "Operação realizada com sucesso",
-    "error": "Ha ocurrido un error",
-    "noData": "No hay datos disponibles",
-    "confirmDelete": "¿Estás seguro de que quieres eliminar este elemento?",
+    "error": "Ocorreu um erro",
+    "noData": "Nenhum dado disponível",
+    "confirmDelete": "Tem certeza de que deseja excluir este item?",
     "sessionExpired": "Sua sessão expirou. Por favor, faça login novamente."
   },
   "language": {
-    "switch": "Cambiar idioma",
+    "switch": "Mudar idioma",
     "spanish": "Espanhol",
     "english": "Inglês",
     "label": "Idioma"
   },
   "navigation": {
     "home": "Início",
-    "howItWorks": "¿Cómo funciona?",
-    "howItWorksDescription": "Descubre cómo transformar tu forma de crear, administrar y calificar exámenes",
+    "howItWorks": "Como funciona?",
+    "howItWorksDescription": "Descubra como transformar sua forma de criar, gerenciar e avaliar exames",
     "exams": "Exames",
-    "examsDescription": "Crea y administra exámenes de múltiples formas",
-    "manualGenerator": "Generador Manual",
-    "aiGenerator": "Generador con IA",
-    "aiGeneratorDescription": "Genera exámenes automáticamente con inteligencia artificial",
+    "examsDescription": "Crie e gerencie exames de várias maneiras",
+    "manualGenerator": "Gerador manual",
+    "aiGenerator": "Gerador com IA",
+    "aiGeneratorDescription": "Gere exames automaticamente com inteligência artificial",
     "paperExams": "Exames em Papel",
-    "paperExamsDescription": "Escanea y califica exámenes físicos automáticamente",
-    "functions": "Funciones",
-    "institutionsManagement": "Gestión de Instituciones",
-    "subjectsManagement": "Gestión de Materias",
-    "groupsManagement": "Gestión de Grupos",
-    "studentsManagement": "Gestión de Estudiantes",
-    "reportsManagement": "Gestión de Reportes",
-    "reports": "Reportes",
-    "mobileApp": "Aplicación Móvil",
+    "paperExamsDescription": "Digitalize e avalie automaticamente exames em papel",
+    "functions": "Características",
+    "institutionsManagement": "Gestão de instituições",
+    "subjectsManagement": "Gestão de disciplinas",
+    "groupsManagement": "Gestão de grupos",
+    "studentsManagement": "Gestão de alunos",
+    "reportsManagement": "Gestão de relatórios",
+    "reports": "Relatórios",
+    "mobileApp": "Aplicativo móvel",
     "mobileAppDescription": "Em desenvolvimento - Em breve disponível",
     "pricing": "Preços",
     "blog": "Blog",
     "contact": "Contato",
-    "about": "Acerca de",
+    "about": "Sobre nós",
     "dashboard": "Painel",
-    "terms": "Términos",
-    "privacy": "Privacidad",
+    "terms": "Termos",
+    "privacy": "Privacidade",
     "cookies": "Cookies"
   },
   "footer": {
-    "description": "ProfeVisión es la plataforma integral para educadores. Automatiza la creación y calificación de exámenes con IA y tecnología OMR, permitiéndote escanear y corregir pruebas en papel al instante con tu móvil. Además, centraliza la gestión completa de instituciones, materias, grupos y estudiantes. Ahorra tiempo, optimiza la evaluación educativa y obtén insights precisos para una enseñanza más efectiva. Es tu herramienta definitiva para transformar la gestión académica.",
+    "description": "ProfeVision é a plataforma integral para educadores. Automatize a criação e avaliação de exames com IA e tecnologia OMR, permitindo que você digitalize e corrija testes em papel instantaneamente com seu celular. Além disso, centralize a gestão completa de instituições, disciplinas, grupos e alunos. Economize tempo, otimize a avaliação educacional e obtenha insights precisos para um ensino mais eficaz. É sua ferramenta definitiva para transformar o gerenciamento acadêmico.",
     "sections": {
-      "product": "Producto",
+      "product": "Produto",
       "company": "Empresa",
       "legal": "Legal"
     },
     "links": {
-      "howItWorks": "¿Cómo funciona?",
+      "howItWorks": "Como funciona?",
       "pricing": "Preços",
-      "aiGenerator": "Generador IA",
-      "mobileApp": "App Móvil",
-      "about": "Acerca de",
+      "aiGenerator": "Gerador IA",
+      "mobileApp": "Aplicativo móvel",
+      "about": "Sobre nós",
       "blog": "Blog",
       "contact": "Contato",
-      "terms": "Términos",
-      "privacy": "Privacidad",
+      "terms": "Termos",
+      "privacy": "Privacidade",
       "cookies": "Cookies",
-      "termsOfService": "Términos de Servicio",
-      "privacyPolicy": "Política de Privacidad",
+      "termsOfService": "Termos de serviço",
+      "privacyPolicy": "Política de privacidade",
       "cookiesPolicy": "Política de cookies"
     },
-    "copyright": "Todos los derechos reservados."
+    "copyright": "Todos os direitos reservados."
   },
   "homepage": {
     "hero": {
-      "badge": "¡Nuevo! Calificación con Visión Artificial (OMR)",
-      "title": "La Mejor Aplicación",
+      "badge": "Novo! Avaliação com Visão Artificial (OMR)",
+      "title": "O melhor aplicativo",
       "titleHighlight": "para Escanear y Calificar Exames em Papel",
-      "description": "En ProfeVisión, entendemos los desafíos de la educación moderna. Hemos desarrollado la solución todo en uno que automatiza la creación, calificación y gestión de exámenes con IA, liberando tu valioso tiempo para que te concentres en lo que realmente importa: enseñar y potenciar el aprendizaje de tus estudiantes.",
+      "description": "Na ProfeVision, entendemos os desafios da educação moderna. Desenvolvemos a solução tudo em um que automatiza a criação, avaliação e gerenciamento de exames com IA, liberando seu tempo precioso para que você se concentre no que realmente importa: ensinar e promover o aprendizado de seus alunos.",
       "startFree": "Começar gratuitamente!",
       "learnMore": "Saiba mais",
       "registerTitle": "Registrarse gratis en ProfeVisión - Criar cuenta sin costo",
-      "learnMoreTitle": "Conocer más sobre las características de ProfeVisión",
-      "avatarAlt": "Avatar de profesor {number} que usa ProfeVisión",
-      "avatarTitle": "Profesor que confía en ProfeVisión para automatizar la calificación de exámenes",
-      "trustText": "Más de",
+      "learnMoreTitle": "Saiba mais sobre os recursos do ProfeVision",
+      "avatarAlt": "Avatar do professor {number} usando ProfeVision",
+      "avatarTitle": "Professor que confia em ProfeVision para automatizar a avaliação de exames",
+      "trustText": "Mais de",
       "trustNumber": "1,000+",
-      "trustSuffix": "profesores confían en nosotros"
+      "trustSuffix": "professores confiam em nós"
     },
     "features": {
-      "badge": "Características Principales",
-      "title": "Todo lo que necesitas en una sola plataforma",
-      "description": "ProfeVision simplifica tu trabajo como educador con herramientas potentes e intuitivas",
+      "badge": "Características principais",
+      "title": "Tudo que você precisa em uma única plataforma",
+      "description": "ProfeVision simplifica seu trabalho como educador com ferramentas poderosas e intuitivas",
       "examCreation": {
         "title": "Criação inteligente de exames",
-        "description": "Genera pruebas educativas personalizadas con asistencia de IA. Disfruta de múltiples formatos (selección múltiple, verdadero/falso, etc.), preguntas de calidad y plantillas reutilizables. Ahorra tiempo y asegura evaluaciones precisas y relevantes."
+        "description": "Gere testes educacionais personalizados com assistência de IA. Aproveite múltiplos formatos (múltipla escolha, verdadeiro/falso, etc.), perguntas de qualidade e modelos reutilizáveis. Economize tempo e garanta avaliações precisas e relevantes."
       },
       "aiGrading": {
         "title": "Calificación con IA y Visión Artificial (OMR)",
-        "description": "Transforma tu proceso de corrección. Nuestra plataforma de evaluación te permite calificar exámenes con celular en minutos con nuestra tecnología OMR avanzada. Simplemente escanea y procesa hojas de respuestas automáticamente con tu smartphone o tablet. La IA se encarga de la corrección instantánea de pruebas online y la lectura precisa del papel."
+        "description": "Transforme seu processo de avaliação. Nossa plataforma de avaliação permite que você avalie exames com seu celular em minutos com nossa tecnologia OMR avançada. Simplesmente digitalize e processe folhas de resposta automaticamente com seu smartphone ou tablet. A IA cuida da correção instantânea de testes online e da leitura precisa do papel."
       },
       "resultAnalysis": {
         "title": "Análisis de Resultados Detallado",
-        "description": "Obtén insights valiosos sobre el desempeño de tus estudiantes. Identifica áreas de mejora, fortalezas y tendencias con nuestros reportes gráficos y detallados. Toma decisiones pedagógicas informadas para potenciar el aprendizaje adaptativo."
+        "description": "Obtenha insights valiosos sobre o desempenho de seus alunos. Identifique áreas de melhoria, pontos fortes e tendências com nossos relatórios gráficos e detalhados. Tome decisões pedagógicas informadas para promover o aprendizado adaptativo."
       }
     },
     "modules": {
-      "badge": "Módulos Principales",
-      "title": "Gestión educativa completa",
-      "description": "Organiza todos los aspectos de tu entorno educativo en un solo lugar",
-      "moreInfo": "Más información",
+      "badge": "Módulos principais",
+      "title": "Gestão educacional completa",
+      "description": "Organize todos os aspectos do seu ambiente educacional em um único lugar",
+      "moreInfo": "Mais informações",
       "institutions": {
-        "title": "Gestión de Instituciones",
-        "feature1": "Crea y administra múltiples instituciones",
-        "feature2": "Configura ajustes específicos por institución",
-        "feature3": "Analíticas por institución",
-        "linkTitle": "Ver documentación sobre gestión de entidades en ProfeVisión"
+        "title": "Gestão de instituições",
+        "feature1": "Crie e gerencie múltiplas instituições",
+        "feature2": "Configure ajustes específicos por instituição",
+        "feature3": "Análises por instituição",
+        "linkTitle": "Ver documentação sobre gerenciamento de entidades em ProfeVision"
       },
       "subjects": {
-        "title": "Gestión de Materias",
-        "feature1": "Crea y organiza materias por institución",
-        "feature2": "Añade descripciones y detalles",
-        "feature3": "Estructura tu plan de estudios",
-        "linkTitle": "Ver documentación sobre gestión de materias en ProfeVisión"
+        "title": "Gestão de disciplinas",
+        "feature1": "Crie e organize disciplinas por instituição",
+        "feature2": "Adicione descrições e detalhes",
+        "feature3": "Estruture seu currículo",
+        "linkTitle": "Ver documentação sobre gerenciamento de disciplinas em ProfeVision"
       },
       "groups": {
-        "title": "Gestión de Grupos",
-        "feature1": "Crea y administra grupos de estudiantes",
-        "feature2": "Define períodos académicos",
-        "feature3": "Importación masiva de estudiantes",
-        "linkTitle": "Ver documentación sobre gestión de grupos de estudiantes en ProfeVisión"
+        "title": "Gestão de grupos",
+        "feature1": "Crie e gerencie grupos de alunos",
+        "feature2": "Defina períodos acadêmicos",
+        "feature3": "Importação em massa de alunos",
+        "linkTitle": "Ver documentação sobre gerenciamento de grupos de alunos em ProfeVision"
       },
       "grading": {
-        "title": "Esquema de Calificaciones",
-        "feature1": "Define esquemas detallados por grupo",
-        "feature2": "Configura períodos y componentes",
-        "feature3": "Asigna pesos porcentuales",
-        "linkTitle": "Ver documentación sobre sistema de calificaciones en ProfeVisión"
+        "title": "Esquema de avaliação",
+        "feature1": "Defina esquemas detalhados por grupo",
+        "feature2": "Configure períodos e componentes",
+        "feature3": "Atribua pesos percentuais",
+        "linkTitle": "Ver documentação sobre sistema de avaliação em ProfeVision"
       },
       "exams": {
         "title": "Gerenciamento de exames",
-        "feature1": "Crea exámenes con asistencia de IA",
-        "feature2": "Genera hojas de respuesta con QR",
+        "feature1": "Crie exames com assistência de IA",
+        "feature2": "Gere folhas de resposta com código QR",
         "feature3": "Calificación automática con Visión Artificial (OMR)",
-        "linkTitle": "Ver documentación sobre gestión de exámenes en ProfeVisión"
+        "linkTitle": "Ver documentação sobre gerenciamento de exames em ProfeVision"
       },
       "analysis": {
-        "title": "Análisis y Resultados",
-        "feature1": "Estadísticas detalladas de exámenes",
-        "feature2": "Reportes en Excel y PDF",
-        "feature3": "Vista detallada por estudiante",
-        "linkTitle": "Ver documentación sobre análisis y resultados de exámenes en ProfeVisión"
+        "title": "Análise e resultados",
+        "feature1": "Estatísticas detalhadas de exames",
+        "feature2": "Relatórios em Excel e PDF",
+        "feature3": "Visualização detalhada por aluno",
+        "linkTitle": "Ver documentação sobre análise e resultados de exames em ProfeVision"
       }
     },
     "benefits": {
@@ -452,7 +452,7 @@
       "description": "Transforma la evaluación de tus estudiantes con tecnología de vanguardia.",
       "descriptionHighlight": "Califica exámenes en segundos",
       "descriptionEnd": "usando solo tu smartphone o tablet.",
-      "cta": "Comenzar Ahora"
+      "cta": "Começar agora"
     },
     "features": {
       "badge": "Hojas de Respuesta",
@@ -539,7 +539,7 @@
     "cta": {
       "title": "Califica exámenes en segundos con las hojas de respuesta de ProfeVisión",
       "description": "Digitaliza tu proceso de evaluación con tecnología de escaneo automático y obtén resultados precisos al instante.",
-      "startNow": "Comenzar Ahora",
+      "startNow": "Começar agora",
       "moreDetails": "Ver Más Detalles"
     }
   },
@@ -550,11 +550,11 @@
       "titleHighlight": "Inteligencia Artificial",
       "titleEnd": "en segundos",
       "description": "Transforma cualquier contenido educativo en evaluaciones completas y personalizadas. ProfeVisión utiliza IA avanzada para generar preguntas de opción múltiple, verdadero/falso y abiertas desde tus materiales de clase.",
-      "cta": "Comenzar Ahora"
+      "cta": "Começar agora"
     },
     "features": {
       "badge": "Métodos de Creación",
-      "title": "Características Principales",
+      "title": "Características principais",
       "aiCreation": {
         "title": "Creación con IA",
         "description": "Utiliza inteligencia artificial avanzada para generar preguntas personalizadas automáticamente.",
@@ -601,107 +601,107 @@
     },
     "benefits": {
       "badge": "Ventajas Clave",
-      "title": "Beneficios para Educadores",
+      "title": "Benefícios para educadores",
       "timeSaving": {
-        "title": "Ahorra Tiempo",
-        "description": "Reduce el tiempo de creación de exámenes de horas a minutos"
+        "title": "Economize tempo",
+        "description": "Reduza o tempo de criação de exames de horas para minutos"
       },
       "precision": {
-        "title": "Alta Precisión",
-        "description": "IA entrenada para generar preguntas relevantes y bien estructuradas"
+        "title": "Alta precisão",
+        "description": "IA treinada para gerar perguntas relevantes e bem estruturadas"
       },
       "formats": {
-        "title": "Formatos Múltiples",
-        "description": "Soporte para diferentes tipos de preguntas y estilos de evaluación"
+        "title": "Formatos múltiplos",
+        "description": "Suporte para diferentes tipos de perguntas e estilos de avaliação"
       },
       "reusable": {
-        "title": "Reutilizable",
-        "description": "Importa y adapta contenido existente fácilmente"
+        "title": "Reutilizável",
+        "description": "Importe e adapte facilmente o conteúdo existente"
       }
     },
     "cta": {
-      "title": "Transforma tu contenido en pruebas interesantes en segundos",
-      "description": "Genera múltiples tipos de preguntas a partir de texto o archivos cargados de manera inteligente y eficiente.",
-      "startNow": "Comenzar Ahora",
+      "title": "Transforme seu conteúdo em testes interessantes em segundos",
+      "description": "Gere múltiplos tipos de perguntas a partir de texto ou arquivos carregados de forma inteligente e eficiente.",
+      "startNow": "Começar agora",
       "learnMore": "Saiba mais"
     }
   },
   "contact": {
     "title": "Contato",
-    "subtitle": "¿Tienes preguntas? Estamos aquí para ayudarte.",
+    "subtitle": "Tem dúvidas? Estamos aqui para ajudá-lo.",
     "info": {
-      "title": "Información de contacto",
+      "title": "Informações de contato",
       "email": "Email:",
-      "phone": "Teléfono:",
-      "schedule": "Horario:",
-      "scheduleHours": "Lunes a Viernes, 9:00 AM - 6:00 PM"
+      "phone": "Telefone:",
+      "schedule": "Horário:",
+      "scheduleHours": "Segunda a sexta, 9h00 - 18h00"
     },
     "support": {
-      "title": "Soporte técnico",
+      "title": "Suporte técnico",
       "email": "Email:",
-      "liveChat": "Chat en vivo:",
-      "liveChatAvailable": "Disponible en la plataforma",
-      "knowledge": "Base de conocimientos:",
-      "knowledgeBase": "FAQ y guías"
+      "liveChat": "Chat ao vivo:",
+      "liveChatAvailable": "Disponível na plataforma",
+      "knowledge": "Base de conhecimento:",
+      "knowledgeBase": "FAQ e guias"
     }
   },
   "studentsManagement": {
-    "title": "Gestión de Estudiantes",
-    "subtitle": "Control completo de la información estudiantil.",
+    "title": "Gestão de alunos",
+    "subtitle": "Controle completo das informações dos alunos.",
     "mainFeatures": {
-      "title": "Funciones principales",
-      "item1": "Registro y mantenimiento de datos estudiantiles",
-      "item2": "Historial académico completo",
-      "item3": "Importación masiva desde Excel",
-      "item4": "Generación de reportes personalizados"
+      "title": "Principais funcionalidades",
+      "item1": "Registro e manutenção de dados de alunos",
+      "item2": "Histórico acadêmico completo",
+      "item3": "Importação em massa do Excel",
+      "item4": "Geração de relatórios personalizados"
     }
   },
   "subjectsManagement": {
-    "title": "Gestión de Materias",
-    "subtitle": "Organiza y administra todas las materias académicas.",
+    "title": "Gestão de disciplinas",
+    "subtitle": "Organize e gerencie todas as disciplinas acadêmicas.",
     "mainFeatures": {
-      "title": "Funciones principales",
-      "item1": "Creación y organización de materias",
-      "item2": "Asignación de profesores",
-      "item3": "Configuración de horarios",
-      "item4": "Gestión de contenidos curriculares"
+      "title": "Principais funcionalidades",
+      "item1": "Criação e organização de disciplinas",
+      "item2": "Atribuição de professores",
+      "item3": "Configuração de horários",
+      "item4": "Gestão de conteúdos curriculares"
     }
   },
   "reports": {
     "title": "Reportes y Análisis",
-    "subtitle": "Análisis detallado del rendimiento académico.",
+    "subtitle": "Análise detalhada da performance acadêmica.",
     "mainFeatures": {
       "title": "Características principales",
-      "item1": "Reportes de rendimiento por estudiante",
-      "item2": "Análisis estadístico por materia",
-      "item3": "Comparativas de grupo",
-      "item4": "Exportación a Excel y PDF"
+      "item1": "Relatórios de desempenho por aluno",
+      "item2": "Análise estatística por disciplina",
+      "item3": "Comparações de grupo",
+      "item4": "Exportação em Excel e PDF"
     }
   },
   "institutionsManagement": {
-    "title": "Gestión de Instituciones",
-    "subtitle": "Administra múltiples instituciones educativas.",
+    "title": "Gestão de instituições",
+    "subtitle": "Gerencie múltiplas instituições educacionais.",
     "mainFeatures": {
-      "title": "Funciones principales",
-      "item1": "Registro de múltiples instituciones",
-      "item2": "Gestión de campus y sedes",
-      "item3": "Configuración de permisos",
-      "item4": "Reportes consolidados"
+      "title": "Principais funcionalidades",
+      "item1": "Registro de múltiplas instituições",
+      "item2": "Gestão de campus e sites",
+      "item3": "Configuração de permissões",
+      "item4": "Relatórios consolidados"
     }
   },
   "mobileApp": {
-    "title": "Aplicación Móvil",
-    "subtitle": "Lleva ProfeVision contigo a cualquier lugar.",
+    "title": "Aplicativo móvel",
+    "subtitle": "Leve ProfeVision com você a qualquer lugar.",
     "mainFeatures": {
       "title": "Características principales",
-      "item1": "Escaneo de hojas de respuesta",
-      "item2": "Calificación en tiempo real",
-      "item3": "Acceso a reportes",
-      "item4": "Sincronización automática"
+      "item1": "Digitalização de folhas de resposta",
+      "item2": "Avaliação em tempo real",
+      "item3": "Acesso aos relatórios",
+      "item4": "Sincronização automática"
     }
   },
   "privacy": {
-    "title": "Política de Privacidad de ProfeVision",
+    "title": "Política de privacidade do ProfeVision",
     "effective": "Vigente desde el 27 de junio de 2025",
     "intro": "En ProfeVisión (www.profevision.com), nos tomamos muy en serio tu privacidad y la de tus estudiantes. Queremos que sepas cómo usamos y protegemos tu información cuando usas nuestra aplicación o nuestro sitio web. Aquí te explicamos, de manera sencilla y clara, todo lo que necesitas saber.",
     "section1": {

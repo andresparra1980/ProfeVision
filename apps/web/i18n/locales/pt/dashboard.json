@@ -837,7 +837,7 @@
     "card": {
       "location": "Ubicación:",
       "address": "Dirección:",
-      "phone": "Teléfono:",
+      "phone": "Telefone:",
       "email": "Email:",
       "website": "Web:"
     },
@@ -977,9 +977,9 @@
       "openMenu": "Abrir menú",
       "actions": "Ações",
       "editGroup": "Editar grupo",
-      "manageStudents": "Gestión de Estudiantes",
+      "manageStudents": "Gestão de alunos",
       "gradeTable": "Tabulado de Notas",
-      "gradingScheme": "Esquema de Calificaciones",
+      "gradingScheme": "Esquema de avaliação",
       "archive": "Archivar",
       "activate": "Activar",
       "delete": "Excluir",
@@ -1316,7 +1316,7 @@
     }
   },
   "reports": {
-    "title": "Reportes",
+    "title": "Relatórios",
     "description": "Visualiza estadísticas y análisis del desempeño de tus estudiantes",
     "stats": {
       "totalExams": "Total de exames",
@@ -1341,7 +1341,7 @@
         "title": "Rendimiento por Estudiante",
         "description": "Análisis del rendimiento individual de los estudiantes"
       },
-      "noDataAvailable": "No hay datos disponibles"
+      "noDataAvailable": "Nenhum dado disponível"
     }
   },
   "profile": {
