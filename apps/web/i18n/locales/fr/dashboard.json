@@ -1422,7 +1422,7 @@
   },
   "tierUsage": {
     "title": "Utilisation du forfait",
-    "cycleReset": "Redémarrage dans {x}",
+    "cycleReset": "Se réinitialise en",
     "day": "jour",
     "days": "jours"
   },
