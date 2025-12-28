@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "unauthorized": "Non autorisé",
+    "fetchLinks": "Error al obtener vínculos",
+    "internal": "Erreur interne du serveur"
+  },
+  "success": {
+    "completed": "Sincronización completada",
+    "noLinks": "No hay vínculos para sincronizar"
+  }
+}

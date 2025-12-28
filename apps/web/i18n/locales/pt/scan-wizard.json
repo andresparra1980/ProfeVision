@@ -1,0 +1,15 @@
+{
+  "titles": {
+    "instructions": "Instruções",
+    "imageCapture": "Captura del Examen",
+    "processing": "Procesando Imagen",
+    "results": "Resultados del Escaneo",
+    "saved": "Examen Guardado",
+    "default": "Asistente de Calificación"
+  },
+  "description": "Asistente para calificar exámenes escaneados",
+  "buttons": {
+    "close": "Fechar",
+    "back": "Atrás"
+  }
+}

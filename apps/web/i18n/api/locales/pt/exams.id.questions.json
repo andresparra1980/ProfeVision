@@ -1,0 +1,8 @@
+{
+  "errors": {
+    "missingId": "Se requiere ID del examen",
+    "serverConfig": "Erro de configuração do servidor",
+    "fetchQuestions": "Error al obtener preguntas del examen",
+    "internal": "Erro interno do servidor"
+  }
+}

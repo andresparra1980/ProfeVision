@@ -1,0 +1,14 @@
+{
+  "errors": {
+    "missingId": "ID de examen no proporcionado",
+    "missingFields": "Se requiere respuestaId y opcionId",
+    "fetchOption": "Error al verificar la opción",
+    "updateAnswer": "Error al actualizar la respuesta",
+    "fetchAllAnswers": "Error al obtener todas las respuestas",
+    "updateResult": "Error al actualizar puntaje final",
+    "internal": "Erro interno do servidor"
+  },
+  "success": {
+    "ok": "Respuesta actualizada"
+  }
+}

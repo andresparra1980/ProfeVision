@@ -1,0 +1,150 @@
+{
+  "features": {
+    "ai_generations": "Générations avec IA",
+    "scans": "Scans d'examens"
+  },
+  "subscription": {
+    "loading": "Cargando información de suscripción...",
+    "error": "No se pudo cargar la información de suscripción",
+    "title": "Mon Plan",
+    "description": "Gestiona tu suscripción y revisa tu uso actual",
+    "grandfathered": {
+      "title": "Plan Fondateur",
+      "description": "¡Gracias por ser parte de los primeros usuarios de ProfeVision! Tu invaluable apoyo nos ayuda a convertir un sueño en un servicio que ayudará a los profesores a retomar el control de su tiempo y ahorrarles tediosas horas calificando manualmente exámenes. Por ahora, puedes usar todas las funciones sin límites. Para cualquier duda, solicitud o sugerencia, escríbenos a fundadores@profevision.com"
+    },
+    "cancelled": {
+      "title": "Abonnement annulé",
+      "description": "Tu suscripción ha sido cancelada. Mantendrás acceso a las funciones Plus hasta el"
+    },
+    "manage": {
+      "title": "Gérer l'abonnement",
+      "description": "Ver facturas, actualizar método de pago o cancelar tu suscripción",
+      "descriptionCancelled": "Ver facturas o reactivar tu suscripción",
+      "button": "Ir al Portal de Cliente"
+    },
+    "plus": {
+      "title": "Plan Plus",
+      "description": "Plan premium con acceso ilimitado a todas las funciones de ProfeVision."
+    },
+    "admin": {
+      "title": "Plan Admin",
+      "description": "Plan de acceso completo para administradores y usuarios avanzados."
+    },
+    "free": {
+      "title": "Plan Gratuit",
+      "description": "Plan gratuito con funcionalidades básicas."
+    },
+    "usage": {
+      "title": "Utilisation actuelle",
+      "description": "Tu ciclo se renueva el",
+      "freeDescription": "Tus límites de uso mensual se reinician automáticamente cada mes",
+      "day": "jour",
+      "days": "jours",
+      "aiGenerations": "Générations avec IA",
+      "scans": "Scans d'examens"
+    },
+    "plans": {
+      "title": "Plans disponibles"
+    },
+    "faq": {
+      "title": "Foire aux questions",
+      "q1": {
+        "question": "¿Qué sucede si alcanzo mi límite mensual?",
+        "answer": "Si alcanzas tu límite mensual, no podrás usar esa función hasta que se renueve tu ciclo. Puedes actualizar a Plus para obtener acceso ilimitado."
+      },
+      "q2": {
+        "question": "¿Cuándo se renueva mi límite mensual?",
+        "answer": "Tu límite se renueva automáticamente cada mes en la fecha de inicio de tu ciclo de facturación."
+      },
+      "q3": {
+        "question": "¿Puedo cancelar mi suscripción en cualquier momento?",
+        "answer": "Sí, puedes cancelar tu suscripción en cualquier momento. Mantendrás acceso a las funciones premium hasta el final de tu periodo de facturación actual."
+      }
+    }
+  },
+  "pricing": {
+    "comingSoon": "Disponible bientôt",
+    "comingSoonDesc": "La funcionalidad de pago estará disponible pronto. ¡Mantente atento!",
+    "upgradeSuccess": "¡Bienvenido a Plus!",
+    "upgradeSuccessDesc": "Tu suscripción ha sido activada. ¡Disfruta de funciones ilimitadas!",
+    "free": {
+      "name": "Free",
+      "description": "Perfecto para empezar con lo básico",
+      "features": {
+        "aiGenerations": "10 créditos para generación con IA por mes",
+        "scans": "50 escaneos de exámenes por mes",
+        "students": "Hasta 100 estudiantes",
+        "groups": "Hasta 5 grupos",
+        "basicFeatures": "Acceso a todas las funciones básicas",
+        "emailSupport": "Soporte por email"
+      }
+    },
+    "plus": {
+      "name": "Plus",
+      "description": "Para profesores que necesitan más potencia",
+      "features": {
+        "unlimitedAI": "Generaciones ilimitadas con IA",
+        "unlimitedScans": "Escaneos ilimitados de exámenes",
+        "unlimitedStudents": "Estudiantes ilimitados",
+        "unlimitedGroups": "Grupos ilimitados",
+        "premiumFeatures": "Acceso a todas las funciones premium",
+        "prioritySupport": "Soporte prioritario",
+        "earlyAccess": "Acceso anticipado a nuevas funciones"
+      }
+    },
+    "badges": {
+      "recommended": "Recomendado",
+      "currentPlan": "Plan Actual",
+      "launchPrice": "Precio de lanzamiento",
+      "save": "Ahorra 17%"
+    },
+    "billing": {
+      "monthly": "Mensual",
+      "annual": "Anual",
+      "perMonth": "/mes",
+      "billedAnnually": "facturado anualmente",
+      "saveAmount": "Ahorra"
+    },
+    "actions": {
+      "startFree": "Comenzar gratis",
+      "upgradePlus": "Passer à Plus",
+      "currentPlan": "Plan actuel",
+      "downgradeToFree": "Passer à Gratuit"
+    }
+  },
+  "welcome": {
+    "title": "¡Bienvenido a ProfeVision!",
+    "description": "Elige el plan que mejor se adapte a tus necesidades. Puedes actualizar en cualquier momento.",
+    "continueFree": "Continuer avec le plan Gratuit",
+    "configuringAccount": "Configuration de votre compte...",
+    "upgradeAnytime": "Puedes actualizar a Plus en cualquier momento desde tu perfil",
+    "success": "¡Bienvenido a ProfeVision!",
+    "successDesc": "Tu cuenta ha sido configurada correctamente."
+  },
+  "limits": {
+    "reached": {
+      "title": "Limite atteinte",
+      "description": "Has alcanzado el límite mensual de {feature} disponibles en tu plan actual.",
+      "ai": "générations d'IA",
+      "scans": "scans",
+      "daysUntilReset": {
+        "today": "Tu límite se restablecerá mañana",
+        "tomorrow": "Tu límite se restablecerá en 1 día",
+        "multiple": "Tu límite se restablecerá en {days} días"
+      },
+      "waitOrUpgrade": "Puedes esperar hasta que se restablezca tu límite, o actualizar a un plan superior para obtener más {feature} mensuales.",
+      "understood": "Entendido"
+    },
+    "warning": {
+      "approaching": "Cerca del límite ({percentage}%)",
+      "approaching_ai": "Te estás acercando al límite mensual de generaciones con IA. Considera actualizar a Plus para acceso ilimitado.",
+      "remaining": "{count} restante",
+      "remainingPlural": "{count} restantes"
+    }
+  },
+  "usage": {
+    "unlimited": "Illimité",
+    "used": "utilisé",
+    "of": "de"
+  }
+}

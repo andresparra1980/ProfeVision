@@ -1,0 +1,8 @@
+{
+  "title": "¡Examen guardado correctamente!",
+  "description": "Los resultados del examen han sido registrados en el sistema.",
+  "buttons": {
+    "scanAnother": "Escanear otro examen",
+    "finish": "Finalizar"
+  }
+}

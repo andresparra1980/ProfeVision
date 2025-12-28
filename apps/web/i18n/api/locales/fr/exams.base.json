@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "serverConfig": "Erreur de configuration du serveur",
+    "fetchExams": "Erreur lors de la récupération des examens",
+    "unauthorized": "Non autorisé. Veuillez vous connecter pour continuer.",
+    "noUser": "Impossible d'identifier l'utilisateur",
+    "missingFields": "Champs obligatoires manquants (titre ou materia_id)",
+    "missingGroup": "Vous devez sélectionner un groupe",
+    "createExam": "Erreur lors de la création de l'examen"
+  }
+}

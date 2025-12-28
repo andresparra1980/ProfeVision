@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "serverConfig": "Erreur de configuration du serveur",
+    "unauthorizedMissing": "Non autorisé - Jeton non trouvé",
+    "unauthorized": "Non autorisé",
+    "createEntity": "Erreur lors de la création de l'entité éducative",
+    "relateEntity": "Erreur lors de l'association de l'entité avec l'enseignant",
+    "internal": "Erreur interne du serveur"
+  }
+}

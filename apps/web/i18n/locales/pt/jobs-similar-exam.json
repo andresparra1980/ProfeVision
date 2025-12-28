@@ -1,0 +1,35 @@
+{
+  "jobs": {
+    "similarExam": {
+      "title": "Crear examen similar",
+      "steps": {
+        "loadBlueprint": "Analizar examen fuente y construir plan (blueprint)",
+        "generate": "Generar borrador de examen similar",
+        "validate": "Validar borrador y producir recomendaciones",
+        "apply": "Aplicar recomendaciones",
+        "randomize": "Aleatorizar orden (determinista)",
+        "finalize": "Validación final y cierre"
+      },
+      "status": {
+        "idle": "No iniciado",
+        "started": "En progreso",
+        "succeeded": "Completado",
+        "failed": "Falló"
+      },
+      "errors": {
+        "schemaInvalid": "El examen generado no cumple con el esquema requerido.",
+        "parseFailed": "La respuesta de IA no se pudo parsear como JSON válido.",
+        "timeout": "La operación excedió el tiempo límite. Inténtalo de nuevo.",
+        "sourceNotFound": "No se encontró el examen fuente.",
+        "tooLarge": "El examen fuente es demasiado grande para procesar.",
+        "loadBlueprint": "Fallo al analizar el examen fuente y construir el blueprint.",
+        "generate": "Fallo al generar el borrador del examen similar.",
+        "validate": "Fallo durante la validación del borrador.",
+        "apply": "Fallo al aplicar las recomendaciones al borrador.",
+        "randomize": "Fallo al aleatorizar el orden de preguntas/opciones.",
+        "finalize": "Fallo durante la validación final y el cierre.",
+        "unknown": "Ocurrió un error desconocido."
+      }
+    }
+  }
+}
