@@ -561,7 +561,7 @@
           "incorrect": "(Incorrecte)",
           "noSubject": "Sans matière",
           "noGroup": "Sans groupe",
-          "notAvailable": "N/A"
+          "notAvailable": "S/O"
         }
       }
     },
@@ -635,7 +635,7 @@
       "portrait": "Portrait",
       "landscape": "Paysage",
       "letter": "Lettre (8.5\" x 11\")",
-      "a4": "A4 (210mm x 297mm)",
+      "a4": "A4 (210 mm x 297 mm)",
       "legal": "Légal (8.5\" x 14\")",
       "exportConfiguration": "Configuration d'exportation",
       "exportConfigurationDesc": "Sélectionnez le groupe et la taille du papier pour exporter",
