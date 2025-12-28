@@ -46,8 +46,8 @@
       "fromPhone": "do seu celular",
       "close": "Fechar notificação"
     },
-    "documentation": "Documentación",
-    "notifications": "Notificaciones"
+    "documentation": "Documentação",
+    "notifications": "Notificações"
   },
   "exams": {
     "title": "Exames",
@@ -146,11 +146,11 @@
       "error": "Erro ao excluir o exame."
     },
     "validation": {
-      "titleRequired": "El título es requerido",
-      "subjectRequired": "La materia es requerida",
-      "groupRequired": "El grupo es requerido",
-      "durationRequired": "La duración es requerida",
-      "durationMin": "La duración debe ser mayor a 0 minutos"
+      "titleRequired": "O título é obrigatório",
+      "subjectRequired": "A disciplina é obrigatória",
+      "groupRequired": "O grupo é obrigatório",
+      "durationRequired": "A duração é obrigatória",
+      "durationMin": "A duração deve ser maior que 0 minutos"
     },
     "messages": {
       "loadingError": "Erro ao carregar exames",
@@ -224,9 +224,9 @@
           "hard": "Difícil"
         },
         "questionTypeOptions": {
-          "multiple": "Opción múltiple",
-          "truefalse": "Verdadero/Falso",
-          "mixed": "Mixto"
+          "multiple": "Múltipla escolha",
+          "truefalse": "Verdadeiro/Falso",
+          "mixed": "Misto"
         },
         "topic": "Tema do exame",
         "topicPlaceholder": "Ex: Matemática básica, História do Brasil...",
@@ -414,7 +414,7 @@
       "average": "Média",
       "highestScore": "Nota mais alta",
       "lowestScore": "Nota mais baixa",
-      "na": "N/A",
+      "na": "N/D",
       "studentResults": "Resultados por Estudante",
       "studentsSection": "Estudantes",
       "studentsSectionDescription": "Resultados dos estudantes neste exame",
@@ -450,14 +450,14 @@
         "studentLabel": "Aluno",
         "gradeLabel": "Nota (0-5)",
         "saving": "Salvando...",
-        "saveGrade": "Guardar calificación",
-        "groupSelectionTitle": "Seleccionar Grupo",
-        "groupSelectionDescription": "Este examen está asignado a múltiples grupos. Seleccione el grupo para ver sus resultados.",
-        "close": "Cerrar",
-        "enterGrade": "Ingresar Nota",
-        "imageLoadError": "Error al cargar la imagen",
-        "noOriginalImage": "No hay imagen original disponible",
-        "noProcessedImage": "No hay imagen procesada disponible"
+        "saveGrade": "Salvar nota",
+        "groupSelectionTitle": "Selecionar Grupo",
+        "groupSelectionDescription": "Este exame está atribuído a múltiplos grupos. Selecione o grupo para ver seus resultados.",
+        "close": "Fechar",
+        "enterGrade": "Inserir Nota",
+        "imageLoadError": "Erro ao carregar a imagem",
+        "noOriginalImage": "Nenhuma imagem original disponível",
+        "noProcessedImage": "Nenhuma imagem processada disponível"
       },
       "table": {
         "name": "Nome",
@@ -549,21 +549,21 @@
           "incorrect": "(Incorreta)",
           "noSubject": "Sem matéria",
           "noGroup": "Sem grupo",
-          "notAvailable": "N/A"
+          "notAvailable": "N/D"
         },
-        "downloadPDF": "Descargar PDF",
-        "couldNotGenerate": "No se pudo generar el PDF",
-        "close": "Cerrar",
-        "retry": "Reintentar",
-        "noQuestions": "No hay preguntas"
+        "downloadPDF": "Baixar PDF",
+        "couldNotGenerate": "Não foi possível gerar o PDF",
+        "close": "Fechar",
+        "retry": "Tentar novamente",
+        "noQuestions": "Nenhuma pergunta"
       },
-      "percentage": "Porcentaje",
-      "completedAt": "Completado",
-      "viewDetails": "Ver Detalles",
-      "viewDetailsButton": "Ver detalles",
-      "downloadResults": "Descargar Resultados",
-      "noResults": "No hay resultados disponibles",
-      "searchPlaceholder": "Buscar por nombre o apellidos..."
+      "percentage": "Porcentagem",
+      "completedAt": "Concluído",
+      "viewDetails": "Ver Detalhes",
+      "viewDetailsButton": "Ver detalhes",
+      "downloadResults": "Baixar Resultados",
+      "noResults": "Sem resultados disponíveis",
+      "searchPlaceholder": "Pesquisar por nome ou sobrenome..."
     },
     "responses": {
       "title": "Gerar Folhas de Resposta",
@@ -628,16 +628,16 @@
       "noGroupsAssigned": "Não há grupos atribuídos a este exame",
       "assignGroups": "Atribuir Grupos",
       "paperSize": "Tamanho do Papel",
-      "fontSize": "Tamaño de letra",
-      "columns": "Columnas",
-      "orientation": "Orientación",
+      "fontSize": "Tamanho da fonte",
+      "columns": "Colunas",
+      "orientation": "Orientação",
       "paper": "Papel",
-      "portrait": "Vertical",
-      "landscape": "Horizontal",
+      "portrait": "Retrato",
+      "landscape": "Paisagem",
       "letter": "Carta (8.5\" x 11\")",
       "a4": "A4 (210mm x 297mm)",
       "legal": "Legal (8.5\" x 14\")",
-      "exportConfiguration": "Configuración de Exportación",
+      "exportConfiguration": "Configuração de Exportação",
       "answerSheetLabels": {
         "title": "FOLHA DE RESPOSTAS",
         "studentInfo": "Informação do Estudante",
