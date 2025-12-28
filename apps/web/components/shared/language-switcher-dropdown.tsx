@@ -3,6 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { locales, localeNames } from '@/i18n/config';
+import { getRouteMap } from '@/i18n/route-mapper';
 import { logger } from '@/lib/utils/logger';
 import { Languages } from 'lucide-react';
 import {
@@ -37,51 +38,25 @@ export function LanguageSwitcherDropdown({
   const locale = useLocale();
   const t = useTranslations('dashboard');
 
-  // Mapa bidireccional de rutas
-  const routeMap: Record<string, string> = {
-    '/': '/',
-    '/how-it-works': '/como-funciona',
-    '/pricing': '/precios',
-    '/contact': '/contacto',
-    '/blog': '/blog',
-    '/exams': '/examenes',
-    '/paper-exams': '/examenes-papel',
-    '/mobile-app': '/aplicacion-movil',
-    '/privacy': '/privacidad',
-    '/terms': '/terminos',
-    '/cookies': '/cookies',
-    '/reports': '/reportes',
-    '/institutions-management': '/gestion-instituciones',
-    '/subjects-management': '/gestion-materias',
-    '/groups-management': '/gestion-grupos',
-    '/students-management': '/gestion-estudiantes',
-    '/auth/login': '/auth/iniciar-sesion',
-    '/auth/register': '/auth/registro',
-    '/auth/reset-password': '/auth/restablecer-contrasena',
-    '/auth/update-password': '/auth/actualizar-contrasena',
-    '/auth/verify-email': '/auth/verificar-email',
-    '/auth/email-confirmed': '/auth/email-confirmado',
-    '/dashboard': '/dashboard'
-  };
-
-  // Crear mapa inverso
-  const reverseRouteMap = Object.entries(routeMap).reduce((acc, [en, es]) => {
-    acc[es] = en;
-    return acc;
-  }, {} as Record<string, string>);
+  // Obtener mapeos de rutas desde route-mapper (basados en routing.ts)
+  const routeMaps = getRouteMap(locale);
 
   const handleLocaleChange = (newLocale: string) => {
     logger.log('🔄 Language Switch START:', { pathname, locale, newLocale });
 
     let currentPath = pathname;
 
-    // 1) Normalizar: quitar prefijo de idioma actual (/es o /en)
-    if (pathname === '/en' || pathname === '/es') {
+    // 1) Normalizar: quitar prefijo de idioma actual (/es, /en, /fr, /pt)
+    if (pathname === '/en' || pathname === '/es' || pathname === '/fr' || pathname === '/pt') {
       currentPath = '/';
     } else if (pathname.startsWith('/en/')) {
       currentPath = pathname.replace(/^\/en/, '');
     } else if (pathname.startsWith('/es/')) {
       currentPath = pathname.replace(/^\/es/, '');
+    } else if (pathname.startsWith('/fr/')) {
+      currentPath = pathname.replace(/^\/fr/, '');
+    } else if (pathname.startsWith('/pt/')) {
+      currentPath = pathname.replace(/^\/pt/, '');
     }
 
     logger.log('🔄 Current path (no prefix):', currentPath);
@@ -108,15 +83,8 @@ export function LanguageSwitcherDropdown({
     logger.log('🔄 Static path:', staticPath, 'Dynamic params:', dynamicParams);
 
     // 3) Mapear solo la parte estática al idioma de destino
-    let targetStaticPath = staticPath;
-
-    if (newLocale === 'es') {
-      // EN -> ES
-      targetStaticPath = routeMap[staticPath] || staticPath;
-    } else if (newLocale === 'en') {
-      // ES -> EN
-      targetStaticPath = reverseRouteMap[staticPath] || staticPath;
-    }
+    // Usar route-mapper para obtener la traducción de la ruta
+    const targetStaticPath = routeMaps[newLocale]?.[staticPath] || staticPath;
 
     // 4) Reconstruir ruta con parámetros dinámicos
     let targetPath = targetStaticPath;
