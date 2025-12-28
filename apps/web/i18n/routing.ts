@@ -166,7 +166,12 @@ export const pathnames = {
   // Estas rutas deben permanecer sin prefijo para que Supabase funcione
   
   // Dashboard rutas principales
-  '/dashboard': '/dashboard',
+  '/dashboard': {
+    es: '/dashboard',
+    en: '/dashboard',
+    fr: '/tableau-de-bord',
+    pt: '/painel'
+  },
   '/dashboard/exams': { 
     es: '/dashboard/examenes', 
     en: '/dashboard/exams',
@@ -221,12 +226,12 @@ export const pathnames = {
     fr: '/dashboard/examens/[id]/assigner',
     pt: '/dashboard/exames/[id]/atribuir'
   },
-  '/dashboard/exams/[id]/link-grade-component': {
-    es: '/dashboard/examenes/[id]/vincular-calificacion',
-    en: '/dashboard/examenes/[id]/link-grade-component',
-    fr: '/dashboard/examens/[id]/lier-note',
-    pt: '/dashboard/exames/[id]/vincular-nota'
-  },
+   '/dashboard/exams/[id]/link-grade-component': {
+     es: '/dashboard/examenes/[id]/vincular-calificacion',
+     en: '/dashboard/exams/[id]/link-grade-component',
+     fr: '/dashboard/examens/[id]/lier-note',
+     pt: '/dashboard/exames/[id]/vincular-nota'
+   },
   '/dashboard/exams/[id]/results': {
     es: '/dashboard/examenes/[id]/resultados',
     en: '/dashboard/exams/[id]/results',
