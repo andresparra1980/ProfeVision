@@ -1,0 +1,49 @@
+---
+title: Réviser les résultats
+description: Vérifier les réponses détectées
+---
+
+## Réviser les résultats
+
+Après le traitement, vérifiez que les réponses ont été détectées correctement.
+
+### Informations affichées
+
+Vous verrez les données de la numérisation :
+
+- **Étudiant** : Nom et identification
+- **Examen** : Titre et matière
+- **Groupe** : Groupe de l'étudiant
+- **Notation** : Score obtenu
+
+![Scan information](/images/grading/scan-05-results.webp)
+
+### Réponses détectées
+
+Les bulles indiquent les réponses détectées :
+
+- **Bleu** : Réponse cochée par l'étudiant
+- **Vert** : Réponse correcte
+- **Rouge** : Réponse incorrecte
+
+
+### Corriger les réponses
+
+Si une réponse a été détectée de manière incorrecte :
+
+1. Cliquez sur la bulle correcte
+2. La réponse est mise à jour
+3. La notation est recalculée
+
+<Callout type="info">
+Les corrections manuelles sont rarement nécessaires. Si cela se produit fréquemment, vérifiez la qualité de l'impression et les conditions d'éclairage.
+</Callout>
+
+### Vérifier la notation
+
+La notation est calculée automatiquement :
+```
+Grade = (Correct answers / Total questions) × Maximum score
+```
+
+

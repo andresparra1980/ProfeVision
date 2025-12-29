@@ -1,0 +1,51 @@
+---
+title: Synchroniser les notations
+description: Connectez les examens au carnet de notes
+---
+
+## Synchroniser les notes
+
+Envoyez les notes d'examen vers les composants de notation du groupe.
+
+### Prérequis
+
+1. Avoir un barème de notation configuré
+2. L'examen doit être lié à un composant
+3. L'examen doit avoir des résultats notés
+
+### Lier l'examen à un composant
+
+1. Allez sur la page de l'examen
+2. Cliquez sur **Lier au composant**
+3. Sélectionnez le composant (ex: "Examen de mi-parcours 1")
+4. Enregistrez
+
+![Sync grades](/images/results/results-07-sync-grades.webp)
+
+### Synchronisation
+
+1. Dans le tableau des notes du groupe
+2. Cliquez sur **Synchroniser**
+3. Les notes se mettent à jour automatiquement
+
+### Fonctionnement
+
+Le système :
+1. Récupère le pourcentage de l'examen
+2. Le convertit sur une échelle de 0 à 5
+3. L'enregistre dans le composant lié
+
+**Formule** : `Note = Pourcentage / 20`
+
+### Exemple
+
+| Pourcentage | Note |
+|-------------|-------|
+| 100% | 5.0 |
+| 80% | 4.0 |
+| 60% | 3.0 |
+| 40% | 2.0 |
+
+<Callout type="info">
+Les notes manuelles se synchronisent également automatiquement.
+</Callout>
