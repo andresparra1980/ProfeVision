@@ -1,0 +1,35 @@
+{
+  "jobs": {
+    "similarExam": {
+      "title": "Criar exame semelhante",
+      "steps": {
+        "loadBlueprint": "Analisar exame de origem e construir plano (blueprint)",
+        "generate": "Gerar rascunho de exame semelhante",
+        "validate": "Validar rascunho e produzir recomendações",
+        "apply": "Aplicar recomendações",
+        "randomize": "Aleatorizar ordem (determinista)",
+        "finalize": "Validação final e encerramento"
+      },
+      "status": {
+        "idle": "Não iniciado",
+        "started": "Em progresso",
+        "succeeded": "Concluído",
+        "failed": "Falhou"
+      },
+      "errors": {
+        "schemaInvalid": "O exame gerado não cumpre o esquema exigido.",
+        "parseFailed": "A resposta da IA não pôde ser analisada como JSON válido.",
+        "timeout": "A operação excedeu o tempo limite. Tente novamente.",
+        "sourceNotFound": "Exame de origem não encontrado.",
+        "tooLarge": "O exame de origem é grande demais para ser processado.",
+        "loadBlueprint": "Falha ao analisar o exame de origem e construir o blueprint.",
+        "generate": "Falha ao gerar o rascunho do exame semelhante.",
+        "validate": "Falha durante a validação do rascunho.",
+        "apply": "Falha ao aplicar as recomendações ao rascunho.",
+        "randomize": "Falha ao aleatorizar a ordem das perguntas/opções.",
+        "finalize": "Falha durante a validação final e o encerramento.",
+        "unknown": "Ocorreu um erro desconhecido."
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "titles": {
+    "instructions": "Instruções",
+    "imageCapture": "Captura do Exame",
+    "processing": "Processando Imagem",
+    "results": "Resultados da Digitalização",
+    "saved": "Exame Salvo",
+    "default": "Assistente de Correção"
+  },
+  "description": "Assistente para corrigir exames digitalizados",
+  "buttons": {
+    "close": "Fechar",
+    "back": "Voltar"
+  }
+}

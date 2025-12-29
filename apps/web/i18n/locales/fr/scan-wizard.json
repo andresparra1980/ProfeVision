@@ -1,0 +1,15 @@
+{
+  "titles": {
+    "instructions": "Instructions",
+    "imageCapture": "Capture de l'Examen",
+    "processing": "Traitement de l'Image",
+    "results": "Résultats du Scan",
+    "saved": "Examen Enregistré",
+    "default": "Assistant de Notation"
+  },
+  "description": "Assistant pour noter les examens scannés",
+  "buttons": {
+    "close": "Fermer",
+    "back": "Retour"
+  }
+}

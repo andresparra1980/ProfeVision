@@ -2,6 +2,6 @@ import type { I18nConfig } from 'fumadocs-core/i18n';
 
 export const i18n: I18nConfig = {
   defaultLanguage: 'es',
-  languages: ['es', 'en'],
+  languages: ['es', 'en', 'fr', 'pt'],
   hideLocale: 'default-locale',
 };

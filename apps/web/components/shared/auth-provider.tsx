@@ -17,6 +17,7 @@ import type {
   AuthError,
 } from "@supabase/supabase-js";
 import { logger } from "@/lib/utils/logger";
+import { getLocalizedRoute } from "@/i18n/route-constants";
 
 interface AuthContextProps {
   session: Session | null;
@@ -38,54 +39,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Con localePrefix: 'always', SIEMPRE se antepone el prefijo del locale
   const getLocalizedRoutes = useMemo(() => {
     const base = `/${locale}`;
+    const loginPaths: Record<string, string> = {
+      es: "iniciar-sesion",
+      en: "login",
+      fr: "connexion",
+      pt: "entrar",
+    };
     return {
-      login: `${base}/auth/${locale === "es" ? "iniciar-sesion" : "login"}`,
+      login: `${base}/auth/${loginPaths[locale] || "login"}`,
       dashboard: `${base}/dashboard`,
     };
   }, [locale]);
 
   // 🔐 Rutas públicas localizadas - Lista completa actualizada (sincronizada con middleware)
-  const getPublicPaths = useMemo(
-    () => [
+  const getPublicPaths = useMemo(() => {
+    // Usar mapeo de rutas compartido desde route-constants.ts
+    const getRoute = (key: string) => getLocalizedRoute(key, locale);
+
+    return [
       // Rutas con prefijo de locale
       `/${locale}`,
       `/${locale}/`,
 
       // Páginas de contenido estático
-      `/${locale}/${locale === "es" ? "privacidad" : "privacy"}`,
-      `/${locale}/${locale === "es" ? "terminos" : "terms"}`,
-      `/${locale}/${locale === "es" ? "cookies" : "cookies"}`,
-      `/${locale}/${locale === "es" ? "data-deletion" : "data-deletion"}`,
+      `/${locale}/${getRoute("privacy")}`,
+      `/${locale}/${getRoute("terms")}`,
+      `/${locale}/${getRoute("cookies")}`,
+      `/${locale}/${getRoute("dataDeletion")}`,
 
       // Páginas de información
-      `/${locale}/${locale === "es" ? "como-funciona" : "how-it-works"}`,
-      `/${locale}/${locale === "es" ? "precios" : "pricing"}`,
-      `/${locale}/${locale === "es" ? "contacto" : "contact"}`,
-      `/${locale}/${locale === "es" ? "blog" : "blog"}`,
+      `/${locale}/${getRoute("howItWorks")}`,
+      `/${locale}/${getRoute("pricing")}`,
+      `/${locale}/${getRoute("contact")}`,
+      `/${locale}/${getRoute("blog")}`,
 
       // Páginas de exámenes
-      `/${locale}/${locale === "es" ? "examenes-con-ia" : "exams-with-ai"}`,
-      `/${locale}/${locale === "es" ? "examenes-papel" : "paper-exams"}`,
+      `/${locale}/${getRoute("examsWithAI")}`,
+      `/${locale}/${getRoute("paperExams")}`,
 
       // Páginas de gestión (información pública)
-      `/${locale}/${locale === "es" ? "gestion-instituciones" : "institutions-management"}`,
-      `/${locale}/${locale === "es" ? "gestion-materias" : "subjects-management"}`,
-      `/${locale}/${locale === "es" ? "gestion-grupos" : "groups-management"}`,
-      `/${locale}/${locale === "es" ? "gestion-estudiantes" : "students-management"}`,
-      `/${locale}/${locale === "es" ? "reportes" : "reports"}`,
-      `/${locale}/${locale === "es" ? "aplicacion-movil" : "mobile-app"}`,
+      `/${locale}/${getRoute("institutions")}`,
+      `/${locale}/${getRoute("subjects")}`,
+      `/${locale}/${getRoute("groups")}`,
+      `/${locale}/${getRoute("students")}`,
+      `/${locale}/${getRoute("reports")}`,
+      `/${locale}/${getRoute("mobileApp")}`,
 
       // Páginas de autenticación
-      `/${locale}/auth/${locale === "es" ? "iniciar-sesion" : "login"}`,
-      `/${locale}/auth/${locale === "es" ? "registro" : "register"}`,
-      `/${locale}/auth/${locale === "es" ? "restablecer-contrasena" : "reset-password"}`,
-      `/${locale}/auth/${locale === "es" ? "actualizar-contrasena" : "update-password"}`,
-      `/${locale}/auth/${locale === "es" ? "verificar-email" : "verify-email"}`,
-      `/${locale}/auth/${locale === "es" ? "email-confirmado" : "email-confirmed"}`,
-      // Nota: no incluimos rutas sin prefijo porque usamos localePrefix: 'always'
-    ],
-    [locale],
-  );
+      `/${locale}/auth/${getRoute("login")}`,
+      `/${locale}/auth/${getRoute("register")}`,
+      `/${locale}/auth/${getRoute("resetPassword")}`,
+      `/${locale}/auth/${getRoute("updatePassword")}`,
+      `/${locale}/auth/${getRoute("verifyEmail")}`,
+      `/${locale}/auth/${getRoute("emailConfirmed")}`,
+    ];
+  }, [locale]);
 
   useEffect(() => {
     let isMounted = true;

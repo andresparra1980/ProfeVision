@@ -1,0 +1,50 @@
+{
+  "description": "Examinez les résultats de l'analyse. Vous pouvez revenir en arrière pour scanner à nouveau si nécessaire.",
+  "examInfo": {
+    "title": "Informations de l'examen",
+    "loading": "Chargement des informations...",
+    "fields": {
+      "subject": "Matière :",
+      "exam": "Examen :",
+      "student": "Étudiant :",
+      "group": "Groupe :"
+    },
+    "notAvailable": "Non disponible"
+  },
+  "answers": {
+    "title": "Réponses"
+  },
+  "grading": {
+    "calculating": "Calcul de la note...",
+    "error": "Erreur lors du calcul de la note :",
+    "label": "Note :",
+    "correctAnswers": "correctes",
+    "scoreFormat": "{obtained}/{total} ({correct}/{totalQuestions} correctes)"
+  },
+  "buttons": {
+    "back": "Retour",
+    "saving": "Enregistrement...",
+    "saveResults": "Enregistrer les résultats",
+    "savedSuccessfully": "Enregistré avec succès",
+    "scanAnother": "Scanner un autre",
+    "finish": "Terminer"
+  },
+  "toasts": {
+    "resultsUpdated": "Résultats mis à jour",
+    "resultsSaved": "Résultats enregistrés",
+    "saveError": "Erreur lors de l'enregistrement",
+    "saveErrorDescription": "Une erreur est survenue lors de l'enregistrement des résultats"
+  },
+  "errors": {
+    "calculatingGrade": "Erreur lors du calcul de la note",
+    "noQRData": "Aucune donnée de code QR détectée.",
+    "saveResults": "Erreur lors de l'enregistrement des résultats",
+    "loadingEntities": "Erreur inconnue lors du chargement des données des entités",
+    "serverEmptyResponse": "Le serveur a répondu avec un corps vide",
+    "timeoutError": "La demande a dépassé le délai d'attente maximum (60 secondes)",
+    "formatError": "Erreur de format",
+    "unknownError": "Erreur inconnue",
+    "unauthorized": "Non autorisé. Connectez-vous pour continuer.",
+    "notOwner": "Cet examen appartient à un autre compte. Vous ne pouvez pas enregistrer de résultats pour des examens qui ne vous appartiennent pas."
+  }
+}

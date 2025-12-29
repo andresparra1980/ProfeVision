@@ -1,0 +1,7 @@
+{
+  "errors": {
+    "serverConfig": "Identifiants Supabase manquants",
+    "missingIds": "Au moins un identifiant est requis (examen, étudiant ou groupe)",
+    "internal": "Erreur lors de la traduction des données QR"
+  }
+}

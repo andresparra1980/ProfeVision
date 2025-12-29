@@ -1,0 +1,17 @@
+{
+  "status": {
+    "loading": "Carregando...",
+    "requestingCamera": "Solicitando câmera...",
+    "searching": "Posicione o documento",
+    "holdStill": "Mantenha firme...",
+    "capturing": "Capturando...",
+    "captured": "Capturado",
+    "searchingQr": "Buscando código QR...",
+    "blurry": "Imagem embaçada",
+    "noQr": "Nenhum código QR detectado"
+  },
+  "buttons": {
+    "capture": "Capturar",
+    "cancel": "Cancelar"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "missingParams": "São necessários examId e studentId",
+    "notFoundExam": "Exame não encontrado",
+    "fetchVersions": "Erro ao verificar versões de exame",
+    "fetchPrevious": "Erro ao verificar resultados anteriores",
+    "internal": "Erro interno do servidor"
+  }
+}

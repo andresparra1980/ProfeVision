@@ -3,6 +3,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { nonLocalizedRoutes } from "./i18n/routing";
+import { routeMappings, getLocalizedRoute } from "./i18n/route-constants";
 
 // Crear el middleware de i18n
 const intlMiddleware = createIntlMiddleware({
@@ -16,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.nextUrl.hostname;
   const defaultLocale = "es";
-  const supportedLocales = ["es", "en"] as const;
+  const supportedLocales = ["es", "en", "fr", "pt"] as const;
 
   // 🚫 Handle OPTIONS requests (CORS preflight) early
   if (request.method === "OPTIONS") {
@@ -50,7 +51,7 @@ export async function middleware(request: NextRequest) {
     return baseResponse;
   }
   // Redirigir sitemap localizado a raíz
-  if (/^\/(es|en)\/sitemap\.xml$/.test(pathname)) {
+  if (/^\/(es|en|fr|pt)\/sitemap\.xml$/.test(pathname)) {
     const url = new URL(request.url);
     url.pathname = "/sitemap.xml";
     return NextResponse.redirect(url, 308);
@@ -162,58 +163,68 @@ async function handleAuthMiddleware(
   } = await supabase.auth.getSession();
   const { pathname } = request.nextUrl;
 
-  // 🌍 El locale ahora se obtiene del header que pone `next-intl`
-  const locale = request.headers.get("x-next-intl-locale") || "es";
+  // 🌍 Extraer locale del pathname (más confiable que header en este punto)
+  const pathLocale = pathname.split("/")[1];
+  const locale = (["es", "en", "fr", "pt"].includes(pathLocale) ? pathLocale : "es") as "es" | "en" | "fr" | "pt";
 
   // 🔐 Construir rutas localizadas dinámicamente
   const getLocalizedRoutes = (currentLocale: string) => {
     // Siempre prefijar con el locale activo (localePrefix: 'always')
     const base = `/${currentLocale}`;
+    const loginPaths: Record<string, string> = {
+      es: "iniciar-sesion",
+      en: "login",
+      fr: "connexion",
+      pt: "entrar",
+    };
     return {
-      login: `${base}/auth/${currentLocale === "es" ? "iniciar-sesion" : "login"}`,
+      login: `${base}/auth/${loginPaths[currentLocale] || "login"}`,
       dashboard: `${base}/dashboard`,
     };
   };
 
   const localizedRoutes = getLocalizedRoutes(locale);
 
-  // 🔐 Rutas públicas localizadas - Lista completa actualizada
+  // 🔐 Usar mapeo de rutas compartido desde route-constants.ts
+  const getRoute = (key: string) => getLocalizedRoute(key, locale);
+
+  // 🔐 Rutas públicas localizadas - Lista completa con soporte FR/PT
   const publicRoutes = [
     // Rutas con prefijo de locale
     `/${locale}`,
     `/${locale}/`,
 
     // Páginas de contenido estático
-    `/${locale}/${locale === "es" ? "privacidad" : "privacy"}`,
-    `/${locale}/${locale === "es" ? "terminos" : "terms"}`,
-    `/${locale}/${locale === "es" ? "cookies" : "cookies"}`,
-    `/${locale}/${locale === "es" ? "data-deletion" : "data-deletion"}`,
+    `/${locale}/${getRoute("privacy")}`,
+    `/${locale}/${getRoute("terms")}`,
+    `/${locale}/${getRoute("cookies")}`,
+    `/${locale}/${getRoute("dataDeletion")}`,
 
     // Páginas de información
-    `/${locale}/${locale === "es" ? "como-funciona" : "how-it-works"}`,
-    `/${locale}/${locale === "es" ? "precios" : "pricing"}`,
-    `/${locale}/${locale === "es" ? "contacto" : "contact"}`,
-    `/${locale}/${locale === "es" ? "blog" : "blog"}`,
+    `/${locale}/${getRoute("howItWorks")}`,
+    `/${locale}/${getRoute("pricing")}`,
+    `/${locale}/${getRoute("contact")}`,
+    `/${locale}/${getRoute("blog")}`,
 
     // Páginas de exámenes
-    `/${locale}/${locale === "es" ? "examenes-con-ia" : "exams-with-ai"}`,
-    `/${locale}/${locale === "es" ? "examenes-papel" : "paper-exams"}`,
+    `/${locale}/${getRoute("examsWithAI")}`,
+    `/${locale}/${getRoute("paperExams")}`,
 
     // Páginas de gestión (información pública)
-    `/${locale}/${locale === "es" ? "gestion-instituciones" : "institutions-management"}`,
-    `/${locale}/${locale === "es" ? "gestion-materias" : "subjects-management"}`,
-    `/${locale}/${locale === "es" ? "gestion-grupos" : "groups-management"}`,
-    `/${locale}/${locale === "es" ? "gestion-estudiantes" : "students-management"}`,
-    `/${locale}/${locale === "es" ? "reportes" : "reports"}`,
-    `/${locale}/${locale === "es" ? "aplicacion-movil" : "mobile-app"}`,
+    `/${locale}/${getRoute("institutions")}`,
+    `/${locale}/${getRoute("subjects")}`,
+    `/${locale}/${getRoute("groups")}`,
+    `/${locale}/${getRoute("students")}`,
+    `/${locale}/${getRoute("reports")}`,
+    `/${locale}/${getRoute("mobileApp")}`,
 
     // Páginas de autenticación
-    `/${locale}/auth/${locale === "es" ? "iniciar-sesion" : "login"}`,
-    `/${locale}/auth/${locale === "es" ? "registro" : "register"}`,
-    `/${locale}/auth/${locale === "es" ? "restablecer-contrasena" : "reset-password"}`,
-    `/${locale}/auth/${locale === "es" ? "actualizar-contrasena" : "update-password"}`,
-    `/${locale}/auth/${locale === "es" ? "verificar-email" : "verify-email"}`,
-    `/${locale}/auth/${locale === "es" ? "email-confirmado" : "email-confirmed"}`,
+    `/${locale}/auth/${getRoute("login")}`,
+    `/${locale}/auth/${getRoute("register")}`,
+    `/${locale}/auth/${getRoute("resetPassword")}`,
+    `/${locale}/auth/${getRoute("updatePassword")}`,
+    `/${locale}/auth/${getRoute("verifyEmail")}`,
+    `/${locale}/auth/${getRoute("emailConfirmed")}`,
     // Nota: ya no se incluyen rutas sin prefijo, porque usamos localePrefix: 'always'
   ];
 

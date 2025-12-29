@@ -27,11 +27,35 @@ const translations = {
     previousPage: 'Previous',
     chooseTheme: 'Theme',
   },
+  fr: {
+    search: 'Rechercher',
+    searchNoResult: 'Aucun résultat trouvé',
+    toc: 'Sur cette page',
+    tocNoHeadings: 'Aucun en-tête',
+    lastUpdate: 'Dernière mise à jour',
+    chooseLanguage: 'Langue',
+    nextPage: 'Suivant',
+    previousPage: 'Précédent',
+    chooseTheme: 'Thème',
+  },
+  pt: {
+    search: 'Buscar',
+    searchNoResult: 'Nenhum resultado encontrado',
+    toc: 'Nesta página',
+    tocNoHeadings: 'Sem cabeçalhos',
+    lastUpdate: 'Última atualização',
+    chooseLanguage: 'Idioma',
+    nextPage: 'Próximo',
+    previousPage: 'Anterior',
+    chooseTheme: 'Tema',
+  },
 };
 
 const locales = [
-  { locale: 'es', name: 'Espanol' },
+  { locale: 'es', name: 'Español' },
   { locale: 'en', name: 'English' },
+  { locale: 'fr', name: 'Français' },
+  { locale: 'pt', name: 'Português (Brasil)' },
 ];
 
 export default async function RootLayout({

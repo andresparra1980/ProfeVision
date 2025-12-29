@@ -1,0 +1,1495 @@
+{
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "exams": "Examens",
+    "students": "Étudiants",
+    "groups": "Groupes",
+    "subjects": "Matières",
+    "subscription": "Mon Plan",
+    "admin": "Admin",
+    "settings": "Configuration",
+    "profile": "Profil",
+    "entities": "Entités Éducatives",
+    "userManual": "Manuel de l'utilisateur"
+  },
+  "common": {
+    "create": "Créer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès"
+  },
+  "ui": {
+    "toggleMenu": "Basculer le menu",
+    "expandMenu": "Développer le menu",
+    "collapseMenu": "Réduire le menu",
+    "language": "Langue",
+    "switchToSpanish": "Passer à l'espagnol",
+    "switchToEnglish": "Passer à l'anglais"
+  },
+  "user": {
+    "defaultName": "Utilisateur",
+    "myProfile": "Mon profil",
+    "logout": "Déconnexion",
+    "loggingOut": "Déconnexion en cours...",
+    "logoutSuccessTitle": "Déconnexion économique",
+    "logoutSuccessDescription": "Vous vous êtes déconnecté avec succès."
+  },
+  "header": {
+    "documentation": "Documentation",
+    "notifications": "Notifications",
+    "notification": {
+      "reminder": "Rappel",
+      "message": "Pour noter des examens papier, accédez à",
+      "fromPhone": "depuis votre téléphone portable",
+      "close": "Fermer la notification"
+    }
+  },
+  "exams": {
+    "title": "Examens",
+    "description": "Gérez et créez des examens pour vos étudiants.",
+    "create": "Créer un Examen",
+    "createNewDesc": "Concevez un nouvel examen pour vos étudiants",
+    "createDesc": "Définissez les informations de base de l'examen",
+    "backToExams": "Retour aux Examens",
+    "questions": "questions",
+    "subjectRequired": "Matière Requise",
+    "subjectRequiredDesc": "Vous devez créer au moins une matière avant de pouvoir créer des examens. Les examens doivent être associés à une matière.",
+    "createSubject": "Créer une Matière",
+    "actions": {
+      "create": "Créer",
+      "createWithAI": "Créer avec l'IA",
+      "createSimilarExam": "Générer un examen similaire avec l'IA",
+      "import": "Importer",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "view": "Voir",
+      "assign": "Assigner",
+      "export": "Exporter",
+      "print": "Imprimer",
+      "generateSheets": "Générer les Feuilles de Réponse",
+      "assignGroups": "Assigner les Groupes",
+      "viewResults": "Voir les Résultats",
+      "linkComponent": "Lier le Composant",
+      "linkComponentFull": "Lier au Composant de Note",
+      "backToExams": "Retour aux Examens",
+      "publish": "Publier",
+      "exportAndPrint": "Exporter les PDF et Imprimer"
+    },
+    "form": {
+      "title": "Titre de l'examen",
+      "description": "Description",
+      "subject": "Matière",
+      "group": "Groupe",
+      "duration": "Durée (minutes)",
+      "totalScore": "Score total",
+      "titlePlaceholder": "Saisissez le titre de l'examen",
+      "descriptionPlaceholder": "Décrivez brièvement l'examen",
+      "generalInfo": "Informations générales",
+      "numberOfQuestions": "Nombre de questions",
+      "selectSubject": "Sélectionnez une matière",
+      "selectGroup": "Sélectionnez un groupe",
+      "selectSubjectFirst": "Sélectionnez d'abord une matière",
+      "noGroupsForSubject": "Aucun groupe disponible pour cette matière",
+      "noGroupsAvailable": "Aucun groupe disponible pour cette matière",
+      "createGroup": "Créer un groupe",
+      "instructions": "Instructions (optionnel)",
+      "instructionsPlaceholder": "Instructions spécifiques pour les étudiants",
+      "questionNumber": "Question {current} sur {total}",
+      "questionText": "Texte de la question",
+      "options": "Options",
+      "questionPlaceholder": "Écrivez ici votre question",
+      "optionPlaceholder": "Option {number}",
+      "addOption": "Ajouter une option",
+      "addQuestion": "Ajouter une question",
+      "creating": "Création...",
+      "optionsNote": "Seules les options contenant du texte seront enregistrées",
+      "completeRequiredFields": "Remplissez les champs mis en évidence pour continuer"
+    },
+    "table": {
+      "name": "Nom",
+      "subject": "Sujet",
+      "group": "Groupe",
+      "students": "Étudiants",
+      "createdAt": "Créé",
+      "actions": "Actions",
+      "duration": "Durée",
+      "status": "État",
+      "search": "Rechercher des examens...",
+      "title": "Titre",
+      "allExams": "Tous les Examens",
+      "allExamsDesc": "Liste de tous les examens créés.",
+      "assignedGroups": "Groupes Assignés",
+      "noGroups": "Aucun groupe assigné"
+    },
+    "filters": {
+      "showArchivedGroups": "Afficher les examens des groupes archivés"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "published": "Publié",
+      "active": "Actif",
+      "completed": "Terminé",
+      "archived": "Archivé"
+    },
+    "delete": {
+      "title": "Confirmer la suppression ?",
+      "description": "Cette action ne peut pas être annulée. Êtes-vous sûr de vouloir supprimer cet examen ?",
+      "confirm": "Supprimer",
+      "cancel": "Annuler",
+      "loading": "Suppression de l'examen...",
+      "success": "Examen supprimé avec succès.",
+      "error": "Erreur lors de la suppression de l'examen."
+    },
+    "validation": {
+      "titleRequired": "Le titre est requis",
+      "subjectRequired": "La matière est requise",
+      "groupRequired": "Le groupe est requis",
+      "durationRequired": "La durée est requise",
+      "durationMin": "La durée doit être supérieure à 0 minute"
+    },
+    "messages": {
+      "loadingError": "Erreur lors du chargement des examens",
+      "createSuccess": "Examen créé avec succès",
+      "updateSuccess": "Examen mis à jour avec succès",
+      "noExams": "Aucun examen disponible",
+      "noResults": "Aucun examen ne correspond à votre recherche",
+      "tryDifferentSearch": "Essayez une autre recherche ou ajustez les filtres.",
+      "noExamsDescription": "Vous n'avez pas encore créé ou importé d'examen.",
+      "adjustSearch": "Essayez d'ajuster votre recherche.",
+      "createFirst": "Commencez par importer ou créer votre premier examen depuis les options en haut.",
+      "unauthorized": "Non autorisé",
+      "createError": "Erreur lors de la création de l'examen",
+      "success": "Succès",
+      "examCreated": "Examen créé avec succès",
+      "error": "Erreur"
+    },
+    "tooltips": {
+      "publishWarning": "Lors de la publication, l'examen est verrouillé pour modification. Vous ne pourrez pas modifier les textes des questions ou des options, seulement désactiver des questions ou changer la réponse correcte.",
+      "editDraft": "Modifiez librement les questions, les options et les textes. Vous pouvez également utiliser le Chat IA pour modifier l'examen.",
+      "editPublished": "Vous pouvez seulement désactiver des questions ou changer la réponse correcte. Les textes sont verrouillés.",
+      "exportRequiresPublishedAndGroup": "L'examen doit être publié et avoir au moins un groupe assigné pour pouvoir l'exporter et l'imprimer.",
+      "createSimilarExam": "En un seul clic, notre agent d'IA génère automatiquement un nouvel examen basé sur celui-ci, avec des thèmes, des questions et un niveau de difficulté similaires.",
+      "assignGroups": "Assignez cet examen au groupe qui le passera. Cela permet d'imprimer des feuilles de réponses personnalisées pour chaque étudiant.",
+      "linkComponent": "Optionnellement, liez les notes de cet examen à une composante de note créée dans Groupes → Schéma de Notation. Les notes seront automatiquement remplies dans le tableau pour tous les étudiants.",
+      "exportAndPrint": "Imprimez toutes les feuilles de réponses personnalisées pour chaque étudiant et exportez les questions de l'examen en PDF.",
+      "viewResults": "Observez les statistiques et tous les résultats de l'examen, y compris les images de détection et les feuilles de réponses originales remplies par les étudiants une fois les formulaires scannés."
+    },
+    "details": {
+      "title": "Détails de l'Examen",
+      "loading": "Chargement...",
+      "error": "Erreur",
+      "errorMessage": "Impossible de charger l'examen",
+      "unauthorized": "Non autorisé",
+      "loadingError": "Erreur lors du chargement des données de l'examen",
+      "deleteSuccess": "Examen supprimé avec succès",
+      "deleteError": "Erreur lors de la suppression de l'examen",
+      "scanResponses": "Scanner les Réponses",
+      "deleteConfirm": {
+        "title": "Êtes-vous sûr ?",
+        "description": "Cette action supprimera définitivement l'examen et tous ses éléments associés. Cette action ne peut pas être annulée.",
+        "cancel": "Annuler",
+        "confirm": "Supprimer"
+      }
+    },
+    "createWithAI": {
+      "title": "Créer un Examen avec IA",
+      "description": "Concevez un nouvel examen pour vos étudiants. Vous pouvez créer un examen à partir de zéro en ajoutant vos propres questions, ou utiliser le bouton",
+      "generateWithAI": "Générer avec IA",
+      "descriptionContinued": "pour obtenir des suggestions de questions automatiquement par un modèle de langage avancé (LLM). Cette option vous permet de gagner du temps et de personnaliser le contenu selon vos besoins.",
+      "createWithAI": "Créer avec Intelligence Artificielle",
+      "questionNumber": "Question {current} sur {total}",
+      "questionText": "Texte de la question",
+      "questionPlaceholder": "Écrivez votre question ici",
+      "options": "Options",
+      "optionPlaceholder": "Option {number}",
+      "addOption": "Ajouter une option",
+      "onlyTextOptionsWillBeSaved": "Seules les options contenant du texte seront sauvegardées",
+      "addQuestion": "Ajouter une question",
+      "creating": "Création...",
+      "createExam": "Créer l'examen",
+      "entityRequired": "Entité éducative requise",
+      "entityRequiredDescription": "Vous devez créer ou rejoindre au moins une entité éducative avant de pouvoir créer des examens. Les examens doivent être associés à une matière, et les matières à une entité éducative.",
+      "entityRequiredDesc": "Vous devez créer ou rejoindre au moins une entité éducative avant de pouvoir créer des examens. Les examens doivent être associés à une matière, et les matières à une entité éducative.",
+      "createEntity": "Créer une entité éducative",
+      "subjectRequired": "Matière requise",
+      "subjectRequiredDescription": "Vous devez créer au moins une matière avant de pouvoir créer des examens. Les examens doivent être associés à une matière.",
+      "subjectRequiredDesc": "Vous devez créer au moins une matière avant de pouvoir créer des examens. Les examens doivent être associés à une matière.",
+      "createSubject": "Créer une Matière",
+      "importedTitle": "Examen Importé",
+      "importedDesc": "Ont été importées",
+      "questionsImported": "questions avec succès",
+      "importError": "Impossible de traiter les données importées",
+      "form": {
+        "topic": "Sujet de l'examen",
+        "topicPlaceholder": "Ex: Mathématiques de base, Histoire de la Colombie...",
+        "difficulty": "Niveau de difficulté",
+        "difficultyOptions": {
+          "easy": "Facile",
+          "medium": "Moyen",
+          "hard": "Difficile"
+        },
+        "questionCount": "Nombre de questions",
+        "questionType": "Type de questions",
+        "questionTypeOptions": {
+          "multiple": "Choix multiple",
+          "truefalse": "Vrai/Faux",
+          "mixed": "Mixte"
+        },
+        "generate": "Générer l'examen",
+        "generating": "Génération de l'examen...",
+        "backToExams": "Retour aux examens",
+        "createExam": "Créer un examen",
+        "basicInfo": "Définissez les informations de base de l'examen",
+        "instructions": "Instructions (facultatif)",
+        "instructionsPlaceholder": "Instructions spécifiques pour les étudiants"
+      },
+      "messages": {
+        "generateSuccess": "Examen généré avec succès",
+        "generateError": "Erreur lors de la génération de l'examen"
+      }
+    },
+    "assign": {
+      "title": "Assigner l'Examen",
+      "description": "Assigne cet examen à des groupes d'étudiants",
+      "backToExams": "Retour aux Examens",
+      "selectGroup": "Groupes Disponibles",
+      "selectGroupDescription": "Cochez les groupes auxquels vous souhaitez assigner cet examen",
+      "assignDate": "Date d'application",
+      "duration": "Durée (minutes)",
+      "dueDate": "Date limite",
+      "assign": "Enregistrer les Assignations",
+      "assigning": "Assignation en cours...",
+      "success": "Groupes assignés correctement",
+      "error": "Erreur lors de l'enregistrement des affectations",
+      "loadingError": "Erreur lors du chargement des détails de l'examen",
+      "loadingGroupsError": "Erreur lors du chargement des groupes"
+    },
+    "edit": {
+      "title": "Modifier l'Examen",
+      "description": "Modifiez les questions et la configuration de l'examen",
+      "addQuestion": "Ajouter une Question",
+      "questionTitle": "Question",
+      "questionPlaceholder": "Écrivez votre question ici...",
+      "addOption": "Ajouter une Option",
+      "correctAnswer": "Réponse Correcte",
+      "points": "Points",
+      "deleteQuestion": "Supprimer la Question",
+      "save": "Enregistrer les Modifications",
+      "saving": "Enregistrement...",
+      "success": "Examen mis à jour avec succès",
+      "error": "Erreur lors de la mise à jour de l'examen",
+      "backToExams": "Retour aux Examens",
+      "publishExam": "Publier l'Examen",
+      "editWithAI": "Modifier dans Chat IA",
+      "questions": "Questions",
+      "questionsCount": "Questions ({count})",
+      "noQuestions": "Cet examen n'a pas encore de questions.",
+      "addNewQuestion": "Ajouter une Nouvelle Question",
+      "addNewQuestionDesc": "Définissez le contenu et les options de réponse pour la question",
+      "questionText": "Texte de la Question",
+      "questionTextRequired": "Texte de la Question*",
+      "questionTextPlaceholder": "Écrivez ici votre question",
+      "responseOptions": "Options de Réponse",
+      "optionPlaceholder": "Option {number}",
+      "optionsInfo": "Seules les options contenant du texte seront sauvegardées",
+      "feedback": "Rétroaction",
+      "difficulty": "Difficulté",
+      "enabled": "Activée",
+      "disabled": "Désactivée",
+      "correct": "(Correcte)",
+      "unknownType": "Type inconnu",
+      "confirmToggle": "{action} la question ?",
+      "confirmToggleDesc": "En {action} cette question, cela {effect} sur la note des étudiants.",
+      "confirmToggleEnable": "activant",
+      "confirmToggleDisable": "désactivant",
+      "confirmToggleEnableEffect": "sera à nouveau prise en compte",
+      "confirmToggleDisableEffect": "recalculera les notes de tous les étudiants ayant déjà passé cet examen, en excluant cette question du calcul",
+      "confirmUpdateAnswer": "Modifier la réponse correcte ?",
+      "confirmUpdateAnswerDesc": "En cliquant sur Confirmer, les notes de tous les étudiants ayant déjà passé cet examen seront recalculées.",
+      "cancel": "Annuler",
+      "confirm": "Confirmer",
+      "status": {
+        "draft": "Brouillon",
+        "published": "Publié"
+      },
+      "validation": {
+        "questionRequired": "Le texte de la question est obligatoire",
+        "optionsRequired": "Vous devez ajouter au moins une option avec du texte",
+        "cantPublishNoQuestions": "Vous ne pouvez pas publier un examen sans questions"
+      },
+      "messages": {
+        "questionAdded": "Question ajoutée avec succès",
+        "questionDeleted": "Question supprimée avec succès",
+        "questionEnabled": "Question activée correctement",
+        "questionDisabled": "Question désactivée avec succès",
+        "answerUpdated": "Réponse correcte mise à jour et notes recalculées",
+        "examPublished": "Examen publié avec succès",
+        "loadError": "Impossible de charger les informations de l'examen",
+        "addError": "Impossible d'ajouter la question",
+        "deleteError": "Impossible de supprimer la question",
+        "toggleError": "Impossible de {action} la question",
+        "updateAnswerError": "Impossible de mettre à jour la réponse correcte",
+        "publishError": "Impossible de publier l'examen",
+        "examNotFound": "L'examen demandé n'a pas été trouvé.",
+        "unauthorized": "Non autorisé"
+      }
+    },
+    "results": {
+      "title": "Résultats",
+      "description": "Détails des notes et des réponses des étudiants",
+      "loading": "Chargement...",
+      "error": "Erreur",
+      "loadingError": "Erreur lors du chargement des résultats de l'examen",
+      "backToExams": "Retour aux Examens",
+      "downloadExcel": "Télécharger les notes sur Excel",
+      "excelReport": "Rapport Excel",
+      "generatePDFReport": "Générer un rapport en PDF",
+      "pdfReport": "Rapport PDF",
+      "examDetails": "Détails de l'Examen",
+      "subject": "Matière",
+      "totalScore": "Score Total",
+      "group": "Groupe",
+      "creationDate": "Date de Création",
+      "noSubject": "Sans matière",
+      "noGroup": "Sans groupe",
+      "notAvailable": "Non disponible",
+      "statisticsTitle": "Statistiques",
+      "studentsWithExam": "Étudiants avec examen",
+      "of": "de_",
+      "average": "Moyenne",
+      "highestScore": "Note la plus élevée",
+      "lowestScore": "Note la plus basse",
+      "na": "N/A",
+      "statistics": {
+        "totalStudents": "Total d'étudiants",
+        "completed": "Terminés",
+        "pending": "En attente",
+        "averageScore": "Moyenne",
+        "highestScore": "Score le plus élevé",
+        "lowestScore": "Score le plus bas"
+      },
+      "questionAnalysis": {
+        "title": "Analyse des Questions",
+        "description": "Pourcentage de réponses correctes par question",
+        "question": "Question",
+        "correctPercentage": "% Correctes",
+        "chartTitle": "Difficulté des Questions",
+        "noData": "Pas assez de données pour l'analyse",
+        "average": "Moyenne",
+        "highest": "Le plus élevé",
+        "lowest": "Le plus bas",
+        "questionsAnalyzed": "Questions analysées",
+        "of": "de_",
+        "totalResponses": "Nombre total de réponses",
+        "correctResponses": "Réponses correctes",
+        "axis": {
+          "questionPrefix": "Q"
+        },
+        "tooltip": {
+          "question": "Question",
+          "disabled": "Désactivée"
+        },
+        "legend": {
+          "easy": "Facile",
+          "medium": "Moyen",
+          "hard": "Difficile",
+          "explanation": "% d'étudiants ayant répondu correctement à la question"
+        }
+      },
+      "answerAnalysis": {
+        "title": "Distribution des Réponses par Question",
+        "description": "Modèle de réponses choisies par les étudiants pour chaque question",
+        "noData": "Il n'y a pas assez de données pour l'analyse",
+        "hint": "Survolez chaque barre pour voir le détail des réponses. La réponse correcte est affichée en gras avec ✓",
+        "axis": {
+          "questionPrefix": "Q"
+        },
+        "tooltip": {
+          "question": "Question",
+          "responses": "réponses",
+          "noAnswer": "Sans réponse"
+        }
+      },
+      "studentResults": "Résultats par Étudiant",
+      "studentsSection": "Étudiants",
+      "studentsSectionDescription": "Résultats des étudiants à cet examen",
+      "student": "Étudiant",
+      "score": "Score",
+      "percentage": "Pourcentage",
+      "completedAt": "Terminé",
+      "viewDetails": "Voir les détails",
+      "viewDetailsButton": "Voir les détails",
+      "downloadResults": "Télécharger les résultats",
+      "noResults": "Aucun résultat disponible",
+      "toast": {
+        "answerUpdated": "Réponse mise à jour",
+        "answerUpdatedDesc": "La note a été recalculée avec succès.",
+        "updateError": "Erreur lors de la mise à jour",
+        "updateErrorDesc": "Impossible de mettre à jour la réponse",
+        "gradeSaved": "Note enregistrée",
+        "gradeSavedDesc": "La note a été enregistrée avec succès.",
+        "saveError": "Erreur lors de l'enregistrement",
+        "saveErrorDesc": "Impossible d'enregistrer la note",
+        "noResultsError": "Aucun résultat à exporter",
+        "exportSuccess": "Résultats exportés avec succès",
+        "exportError": "Impossible d'exporter les résultats",
+        "preparingPDF": "Préparation du PDF",
+        "preparingPDFDesc": "Chargement des images et préparation du rapport...",
+        "pdfGenerated": "PDF Généré",
+        "pdfGeneratedDesc": "Le rapport PDF a été généré avec succès.",
+        "pdfError": "Impossible de générer le PDF",
+        "gradeValidationError": "La note doit être un nombre entre 0 et 5"
+      },
+      "dialogs": {
+        "confirmChangeTitle": "Confirmer le changement de réponse",
+        "confirmChangeDescription": "Êtes-vous sûr de vouloir changer la réponse de la question {question} par l'option {option} ?\n\nCette action recalculera automatiquement la note de l'examen.",
+        "confirmChangeButton": "Confirmer le changement",
+        "updating": "Mise à jour...",
+        "manualGradeTitle": "Saisir une note manuelle",
+        "manualGradeDescription": "Cette fonctionnalité est conçue pour les cas particuliers où l'étudiant n'a pas passé l'examen général, comme les rattrapages ou les examens complémentaires.",
+        "manualGradeWarning": "Si un examen est scanné ultérieurement pour cet étudiant, cette note manuelle sera remplacée par le résultat du scan.",
+        "studentLabel": "Étudiant",
+        "gradeLabel": "Note (0-5)",
+        "saving": "Enregistrement...",
+        "saveGrade": "Enregistrer la note",
+        "groupSelectionTitle": "Sélectionner le groupe",
+        "groupSelectionDescription": "Cet examen est affecté à plusieurs groupes. Sélectionnez le groupe pour voir ses résultats.",
+        "close": "Fermer",
+        "enterGrade": "Saisir la note",
+        "imageLoadError": "Erreur lors du chargement de l'image",
+        "noOriginalImage": "Aucune image originale disponible",
+        "noProcessedImage": "Aucune image traitée disponible"
+      },
+      "table": {
+        "name": "Nom",
+        "identification": "Identification",
+        "score": "Note",
+        "percentage": "Pourcentage",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "status": {
+        "graded": "Noté",
+        "notPresented": "Non présenté"
+      },
+      "excel": {
+        "lastName": "Nom",
+        "firstName": "Prénom",
+        "fullName": "Nom et Prénom",
+        "identification": "Identification",
+        "score": "Note",
+        "percentage": "Pourcentage",
+        "gradedDate": "Date de notation",
+        "notPresented": "Non présenté",
+        "sheetName": "Résultats",
+        "examDetailsHeader": "DÉTAILS DE L'EXAMEN",
+        "resultsHeader": "RÉSULTATS",
+        "subjectLabel": "Matière",
+        "totalScoreLabel": "Score Total",
+        "groupLabel": "Groupe",
+        "creationDateLabel": "Date de Création",
+        "noSubjectAvailable": "Aucune matière",
+        "noGroupAvailable": "Aucun groupe",
+        "noDateAvailable": "Non disponible",
+        "statisticsHeader": "STATISTIQUES",
+        "studentsWithExamLabel": "Étudiants avec examen",
+        "of": "de_​",
+        "averageLabel": "Moyenne",
+        "highestScoreLabel": "Note la plus élevée",
+        "lowestScoreLabel": "Note la plus basse"
+      },
+      "modal": {
+        "responses": "Réponses",
+        "originalImage": "Image Originale",
+        "processedImage": "Image Traitée",
+        "scoreLabel": "Note",
+        "gradedOn": "Noté le",
+        "title": "Détails de l'Examen",
+        "description": "Résultats détaillés pour",
+        "totalQuestions": "Total des questions",
+        "validQuestions": "Valides"
+      },
+      "checkbox": {
+        "showOnlyGraded": "Afficher uniquement les étudiants avec un examen noté"
+      },
+      "emptyState": {
+        "noResultsMessage": "Aucun résultat disponible pour cet examen.",
+        "noSearchResults": "Aucun étudiant trouvé avec ce critère"
+      },
+      "searchPlaceholder": "Rechercher par nom ou prénom...",
+      "pagination": {
+        "showing": "Affichage de",
+        "of": "sur",
+        "students": "étudiants",
+        "noResults": "Aucun résultat",
+        "page": "Page",
+        "previous": "Précédent",
+        "next": "Suivant"
+      },
+      "common": {
+        "cancel": "Annuler"
+      },
+      "pdfExport": {
+        "generatingPDF": "Génération du PDF",
+        "pdfReady": "PDF prêt à être téléchargé",
+        "generationError": "Erreur lors de la génération du PDF",
+        "preparingInfo": "Préparation des informations et chargement des images...",
+        "pdfGeneratedSuccess": "Le PDF a été généré correctement et est prêt à être téléchargé.",
+        "errorOccurred": "Une erreur est survenue lors de la préparation du PDF. Veuillez réessayer.",
+        "preparingDocument": "Préparation du document PDF...",
+        "loadingImages": "Chargement des images...",
+        "pdfGeneratedCorrectly": "PDF généré correctement",
+        "preparingPDF": "Préparation du PDF...",
+        "downloadPDF": "Télécharger le PDF",
+        "couldNotGenerate": "Impossible de générer le PDF",
+        "close": "Fermer",
+        "retry": "Réessayer",
+        "noQuestions": "Pas de questions",
+        "content": {
+          "subject": "Matière :",
+          "group": "Groupe :",
+          "studentIdentification": "Identification Étudiant :",
+          "score": "Note :",
+          "percentage": "Pourcentage :",
+          "detectedAnswers": "Réponses Détectées",
+          "correct": "(Correcte)",
+          "incorrect": "(Incorrecte)",
+          "noSubject": "Sans matière",
+          "noGroup": "Sans groupe",
+          "notAvailable": "S/O"
+        }
+      }
+    },
+    "responses": {
+      "title": "Générer des Feuilles de Réponse",
+      "description": "Sélectionnez le groupe pour lequel vous souhaitez générer les feuilles de réponse",
+      "backToExams": "Retour aux Examens",
+      "group": "Groupe",
+      "selectGroup": "Sélectionner un groupe",
+      "generatePDF": "Générer PDF",
+      "loadingError": "Erreur lors du chargement de l'examen",
+      "selectStudent": "Sélectionner un Étudiant",
+      "question": "Question",
+      "studentAnswer": "Réponse de l'Étudiant",
+      "correctAnswer": "Réponse Correcte",
+      "points": "Points",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "noResponses": "Aucune réponse disponible"
+    },
+    "linkGrade": {
+      "title": "Lier les Notes",
+      "description": "Liez les notes de l’examen avec le système de notation",
+      "selectPeriod": "Sélectionner la Période",
+      "selectComponent": "Sélectionner le Composant",
+      "percentage": "Pourcentage",
+      "link": "Lier",
+      "linking": "Liaison en cours...",
+      "success": "Notes liées avec succès",
+      "error": "Erreur lors de la liaison des notes"
+    },
+    "export": {
+      "pageTitle": "Exporter des PDF et Imprimer",
+      "title": "Exporter des Formats",
+      "availableFormats": "Formats Disponibles",
+      "description": "Téléchargez différents formats de votre examen pour l'impression et la distribution",
+      "answerSheets": {
+        "title": "Feuilles de Réponses",
+        "description": "Génère les feuilles où les étudiants marqueront leurs réponses",
+        "info": "Chaque étudiant reçoit une feuille unique avec son nom, son identification et un code QR unique pour le scan automatique.",
+        "selectGroup": "Sélectionne le groupe",
+        "selectGroupHint": "Sélectionne un groupe",
+        "students": "étudiants",
+        "noGroups": "Il n'y a pas de groupes assignés à cet examen. Assigne d'abord un groupe."
+      },
+      "questionSheet": {
+        "title": "Feuille de Questions",
+        "optional": "optionnel",
+        "description": "Une seule copie avec toutes les questions de l'examen à distribuer aux étudiants ou à projeter."
+      },
+      "preview": "Aperçu",
+      "downloadPDF": "Télécharger PDF",
+      "downloadTex": "Télécharger LaTeX",
+      "exportText": "Exporter Texte",
+      "generateAnswerSheets": "Générer des Feuilles de Réponses",
+      "back": "Retour",
+      "backToExams": "Retour aux Examens",
+      "notFound": "L'examen n'a pas pu être trouvé",
+      "success": "Examen exporté avec succès",
+      "error": "Erreur lors de l'exportation de l'examen",
+      "group": "Groupe",
+      "selectGroup": "Sélectionnez un groupe",
+      "selectGroupHint": "Pour télécharger les formats LaTeX ou PDF, vous devez sélectionner le groupe.",
+      "noGroupsAssigned": "Il n'y a pas de groupes assignés à cet examen",
+      "assignGroups": "Assigner des Groupes",
+      "paperSize": "Taille du Papier",
+      "fontSize": "Taille de police",
+      "columns": "Colonnes",
+      "orientation": "Orientation",
+      "paper": "Papier",
+      "portrait": "Portrait",
+      "landscape": "Paysage",
+      "letter": "Lettre (8.5\" x 11\")",
+      "a4": "A4 (210 mm x 297 mm)",
+      "legal": "Légal (8.5\" x 14\")",
+      "exportConfiguration": "Configuration d'exportation",
+      "exportConfigurationDesc": "Sélectionnez le groupe et la taille du papier pour exporter",
+      "answerSheetLabels": {
+        "title": "FEUILLE DE RÉPONSES",
+        "studentInfo": "Informations de l'Étudiant",
+        "name": "Nom :",
+        "identification": "Identification :",
+        "group": "Groupe :",
+        "subject": "Matière :",
+        "exam": "Examen :",
+        "duration": "Durée :",
+        "minutes": "minutes",
+        "pageOf": "Page __current__ de __total__",
+        "instructions": "Instructions : Remplissez complètement le cercle correspondant à la réponse correcte. Utilisez un stylo noir ou bleu. N'utilisez pas de stylo rouge ou de crayon. Veillez à effacer complètement si vous devez changer une réponse.",
+        "loading": "Chargement...",
+        "downloadPdf": "Télécharger le PDF"
+      },
+      "latexLabels": {
+        "group": "Groupe :",
+        "instructions": "Instructions :",
+        "duration": "Durée :",
+        "minutes": "minutes",
+        "totalScore": "Score total :",
+        "pts": "pts_"
+      }
+    },
+    "textExport": {
+      "title": "Exporter le texte",
+      "description": "Cliquez sur le champ pour copier tout le contenu dans le presse-papiers. Ensuite, collez-le dans Word.",
+      "buttons": {
+        "copyAll": "Tout copier"
+      },
+      "actions": {
+        "close": "Fermer",
+        "copy": "Copier"
+      },
+      "statuses": {
+        "copied": "Copié"
+      },
+      "tips": {
+        "wordList": "Conseil : Copiez dans Word et appliquez le style de liste pour conserver la numérotation et les lettres."
+      },
+      "toasts": {
+        "copied": "Copié !"
+      }
+    },
+    "linkGradeComponent": {
+      "title": "Lier l'Examen aux Composants de Notation",
+      "loading": "Chargement des composants de notation...",
+      "back": "Retour",
+      "backToExams": "Retour aux Examens",
+      "noGroupsAssigned": "Aucun groupe assigné",
+      "noGroupsAssignedDesc": "Cet examen doit être assigné à au moins un groupe pour pouvoir le lier à des composants de notation",
+      "assignGroups": "Assigner des Groupes",
+      "noGradingComponents": "Aucun composant de notation disponible",
+      "noGradingComponentsDesc": "Les groupes assignés à cet examen n'ont pas de schémas de notation configurés",
+      "goToGradingSchemes": "Aller aux Schémas de Notation",
+      "exam": "Examen",
+      "description": "Sélectionnez les composants de notation auxquels vous souhaitez lier cet examen. Les notes des étudiants seront automatiquement transférées vers ces composants.",
+      "availableComponents": "Composants de Notation Disponibles",
+      "selectComponents": "Sélectionnez les composants auxquels vous souhaitez lier cet examen",
+      "group": "Groupe :",
+      "scheme": "Schéma :",
+      "period": "Période :",
+      "save": "Enregistrer les Liaisons",
+      "saving": "Enregistrement...",
+      "cancel": "Annuler",
+      "success": "Liaisons enregistrées avec succès",
+      "error": "Erreur lors de l'enregistrement des liaisons",
+      "loadError": "Erreur lors du chargement des données",
+      "validation": {
+        "selectAtLeastOne": "Vous devez sélectionner au moins un composant de notation"
+      }
+    },
+    "import": {
+      "title": "Importer un Examen",
+      "description": "Téléchargez un fichier PDF, DOC ou DOCX avec des questions d'examen pour le traiter automatiquement",
+      "stages": {
+        "analyzing": "Analyse du document...",
+        "extracting": "Extraction des questions avec l'IA...",
+        "identifying": "Identification des options de réponse...",
+        "processing": "Traitement du format final..."
+      },
+      "tips": {
+        "validateAnswers": "Assurez-vous de valider avant d'enregistrer l'examen que les bonnes réponses marquées par l'IA sont les bonnes.",
+        "highlightAnswers": "Utilisez de préférence un PDF avec les bonnes réponses surlignées d'une couleur vive (ex. vert phosphorescent) ou mettez un astérisque (*) à la fin de la bonne réponse.",
+        "clearFormat": "Pour de meilleurs résultats, assurez-vous que votre document a un format clair avec des questions numérotées.",
+        "labeledOptions": "Les questions avec des options clairement étiquetées (A, B, C, D) sont plus faciles à traiter.",
+        "goodContrast": "De meilleurs résultats sont obtenus avec des documents ayant un bon contraste et un texte net.",
+        "uniformPattern": "Le système peut reconnaître plusieurs formats, mais il est idéal que toutes les questions suivent un modèle uniforme."
+      },
+      "upload": {
+        "dragActive": "Déposez le fichier ici...",
+        "processing": "Traitement du fichier...",
+        "dragDrop": "Glissez un fichier ici ou cliquez pour sélectionner",
+        "supportedFiles": "Fichiers supportés : PDF, DOC, DOCX (max. 10Mo)",
+        "estimatedTime": "Temps estimé : environ {seconds} secondes restantes"
+      },
+      "errors": {
+        "processingFile": "Erreur lors du traitement du fichier",
+        "unknown": "Erreur inconnue"
+      },
+      "success": {
+        "examProcessed": "Examen traité avec succès : {count} questions trouvées",
+        "examProcessedTitle": "Examen Traité",
+        "questionsCount": "{count} questions",
+        "questionsDetected": "Les questions suivantes ont été détectées :",
+        "optionsLabel": "Options",
+        "correctAnswerLabel": "Réponse correcte",
+        "notDetected": "Non détectée",
+        "moreQuestions": "... et {count} questions supplémentaires"
+      },
+      "actions": {
+        "cancel": "Annuler",
+        "import": "Importer Examen"
+      },
+      "formatExample": {
+        "button": "Voir l'exemple",
+        "toggle": "Voir l'exemple de format",
+        "title": "Exemple de format correct",
+        "close": "Fermer",
+        "imageAlt": "Exemple de document avec des questions correctement formatées",
+        "caption": "Marquez la réponse correcte en ajoutant un astérisque (*) à la fin de l'option. Exemple : 'b. Lorem ipsum dolor *'"
+      }
+    }
+  },
+  "entities": {
+    "title": "Établissements d'Enseignement",
+    "description": "Gérez vos établissements d'enseignement",
+    "emptyDescription": "Vous devez créer au moins un établissement d'enseignement avant de pouvoir créer des matières",
+    "newEntity": "Nouvel Établissement",
+    "addFirstEntity": "Ajouter un Premier Établissement",
+    "yourEntities": "Vos Établissements d'Enseignement",
+    "entitiesDescription": "Établissements où vous enseignez",
+    "searchPlaceholder": "Rechercher un établissement...",
+    "noEntitiesMessage": "Vous n'avez pas encore d'établissements d'enseignement enregistrés. Vous devez en ajouter au moins un pour pouvoir créer des matières et des examens.",
+    "noResultsMessage": "Aucun établissement d'enseignement trouvé",
+    "form": {
+      "addTitle": "Ajouter un établissement d'enseignement",
+      "addDescription": "Saisissez le nom et le type de l'établissement où vous enseignez",
+      "nameLabel": "Nom de l'établissement *",
+      "namePlaceholder": "Ex. Université Nationale, Collège Saint-Joseph",
+      "typeLabel": "Type d'établissement",
+      "typePlaceholder": "Sélectionnez un type d'établissement",
+      "typeUniversity": "Université",
+      "typeInstitute": "Institut",
+      "typeSchool": "École / Collège",
+      "cancel": "Annuler",
+      "creating": "Création...",
+      "addButton": "Ajouter Institution"
+    },
+    "table": {
+      "name": "Nom",
+      "type": "Type",
+      "notSpecified": "Non spécifié"
+    },
+    "toast": {
+      "successTitle": "Succès !",
+      "successDescription": "Entité éducative créée avec succès",
+      "errorCreating": "lors de la création de l'entité éducative",
+      "errorLoading": "lors du chargement des établissements d'enseignement",
+      "loginRequired": "Vous devez vous connecter pour créer une entité éducative",
+      "creationError": "Erreur lors de la création de l'entité éducative"
+    }
+  },
+  "entidades": {
+    "title": "Entités Éducatives",
+    "description": "Gérez les établissements d'enseignement avec lesquels vous travaillez",
+    "newEntity": "Nouvelle entité",
+    "addEntity": "Ajouter une entité",
+    "noEntitiesMessage": "Il n'y a aucune entité éducative enregistrée.",
+    "form": {
+      "newTitle": "Nouvel établissement d'enseignement",
+      "editTitle": "Modifier l'entité",
+      "newDescription": "Saisissez les données du nouvel établissement d'enseignement.",
+      "editDescription": "Mettre à jour les informations de l'établissement d'enseignement.",
+      "nameLabel": "Nom*",
+      "typeLabel": "Type d'institution",
+      "cityLabel": "Ville",
+      "cityPlaceholder": "Ville",
+      "countryLabel": "Pays",
+      "countryPlaceholder": "Pays",
+      "addressLabel": "Adresse",
+      "addressPlaceholder": "Adresse physique de l'entité",
+      "phoneLabel": "Téléphone",
+      "phonePlaceholder": "Numéro de contact",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "e-mail@exemple.com",
+      "websiteLabel": "Site web",
+      "websitePlaceholder": "https://exemple.com",
+      "cancel": "Annuler",
+      "create": "Créer",
+      "update": "Mettre à jour",
+      "nameError": "Le nom doit comporter au moins 2 caractères",
+      "emailError": "Veuillez saisir une adresse e-mail valide",
+      "websiteError": "Veuillez saisir une URL valide"
+    },
+    "card": {
+      "location": "Emplacement :",
+      "address": "Adresse :",
+      "phone": "Téléphone :",
+      "email": "E-mail :",
+      "website": "Site web :"
+    },
+    "deleteDialog": {
+      "title": "Confirmer la suppression",
+      "description": "Êtes-vous sûr de vouloir supprimer cet établissement d'enseignement ? Cette action ne peut pas être annulée.",
+      "cancel": "Annuler",
+      "delete": "Supprimer"
+    },
+    "toast": {
+      "createSuccess": "Entité éducative créée avec succès",
+      "updateSuccess": "Entité éducative mise à jour avec succès",
+      "deleteSuccess": "Établissement d'enseignement supprimé avec succès",
+      "createError": "Erreur lors de la création de l'entité éducative",
+      "updateError": "Erreur lors de la mise à jour de l'entité éducative",
+      "deleteError": "Erreur lors de la suppression de l'entité éducative"
+    }
+  },
+  "subjects": {
+    "title": "Matières",
+    "description": "Gérez les matières que vous enseignez",
+    "addSubject": "Ajouter une matière",
+    "noSubjectsMessage": "Il n'y a pas de matières enregistrées.",
+    "toast": {
+      "createTitle": "Matière créée",
+      "createDescription": "La matière a été créée avec succès.",
+      "updateTitle": "Matière mise à jour",
+      "updateDescription": "La matière a été mise à jour avec succès.",
+      "deleteTitle": "Matière supprimée",
+      "deleteDescription": "La matière a été supprimée avec succès.",
+      "saveError": "lors de l'enregistrement de la matière",
+      "deleteError": "lors de la suppression de la matière"
+    },
+    "form": {
+      "newSubject": "Nouvelle matière",
+      "editTitle": "Modifier la matière",
+      "newTitle": "Nouvelle matière",
+      "newDescription": "Saisissez les données de la nouvelle matière.",
+      "editDescription": "Mettez à jour les informations de la matière.",
+      "nameLabel": "Nom*",
+      "nameError": "Le nom doit comporter au moins 2 caractères",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Brève description de la matière",
+      "institutionLabel": "Établissement d'enseignement",
+      "institutionPlaceholder": "Sélectionnez une institution",
+      "institutionNone": "Aucune",
+      "institutionNote": "Si vous n'associez pas la matière à une institution, elle sera considérée comme privée.",
+      "cancel": "Annuler",
+      "create": "Créer",
+      "update": "Mettre à jour"
+    },
+    "deleteModal": {
+      "title": "AVERTISSEMENT ! Suppression Permanente",
+      "warningMessage": "Vous êtes sur le point de supprimer la matière",
+      "selected": "sélectionnée",
+      "irreversibleAction": "Cette action est",
+      "irreversible": "IRRÉVERSIBLE",
+      "consequences": "et entraînera :",
+      "deleteGroups": "Suppression de tous les",
+      "groups": "groupes",
+      "associated": "associés.",
+      "deleteExams": "Suppression de tous les",
+      "exams": "examens",
+      "createdFor": "créés pour cette matière.",
+      "deleteResults": "Suppression de tous les",
+      "resultsAndGrades": "résultats d'examens et notes",
+      "linked": "liés.",
+      "confirmationInstruction": "Pour confirmer cette action et procéder à la suppression, veuillez saisir le nom exact de la matière dans le champ ci-dessous.",
+      "typeLabel": "Saisissez",
+      "toConfirm": "pour confirmer :",
+      "placeholder": "Nom exact de la matière",
+      "cancel": "Annuler",
+      "confirmDelete": "Oui, supprimer cette matière et ses données"
+    }
+  },
+  "groups": {
+    "title": "Groupes",
+    "description": "Gérez vos groupes d'étudiants",
+    "noGroupsMessage": "Aucun groupe enregistré.",
+    "noSubjectsMessage": "Vous devez créer au moins une matière avant de créer un groupe.",
+    "goToSubjects": "Aller à créer une matière",
+    "buttons": {
+      "showActive": "Voir les Groupes Actifs",
+      "showArchived": "Voir les Groupes Archivés"
+    },
+    "error": {
+      "title": "Erreur dans",
+      "description": "Erreur",
+      "unknown": "Inconnu",
+      "professorLoad": "Erreur lors du chargement des données du professeur",
+      "professorAuth": "Impossible de charger les données. Veuillez essayer de vous reconnecter",
+      "loadingGroups": "Erreur lors du chargement des groupes",
+      "loadingSubjects": "Erreur lors du chargement des matières",
+      "loadingEntities": "Erreur lors du chargement des entités éducatives",
+      "savingGroup": "Erreur lors de l'enregistrement du groupe",
+      "deletingGroup": "lors de la suppression du groupe",
+      "changingGroupState": "Erreur lors du changement d'état du groupe"
+    },
+    "toast": {
+      "createTitle": "Groupe créé",
+      "createDescription": "Le groupe a été créé avec succès.",
+      "updateTitle": "Groupe mis à jour",
+      "updateDescription": "Le groupe a été mis à jour avec succès.",
+      "deleteTitle": "Groupe supprimé",
+      "deleteDescription": "Le groupe a été supprimé avec succès.",
+      "archivedTitle": "Groupe archivé",
+      "archivedDescription": "Le groupe a été archivé avec succès.",
+      "activatedTitle": "Groupe activé",
+      "activatedDescription": "Le groupe a été activé avec succès."
+    },
+    "deleteDialog": {
+      "title": "AVERTISSEMENT ! Suppression permanente",
+      "mainMessage": "Vous êtes sur le point de supprimer le groupe",
+      "selectedGroup": "sélectionné",
+      "irreversible": "Cette action est",
+      "irreversibleText": "IRRÉVERSIBLE",
+      "resultingIn": "et entraînera",
+      "consequence1": "La suppression de toutes les inscriptions d'étudiants à ce groupe.",
+      "consequence2": "La suppression de tous les barèmes de notation associés.",
+      "consequence3": "La suppression de toutes les affectations d'examens à ce groupe.",
+      "consequence4": "Les références à ce groupe dans les scans d'examens existants seront perdues (elles seront marquées comme NULLES).",
+      "confirmMessage": "Pour confirmer cette action et procéder à la suppression, veuillez saisir le nom exact du groupe dans le champ ci-dessous.",
+      "archiveAlternative": "N'oubliez pas que vous pouvez",
+      "archiveText": "Archiver",
+      "archiveReason": "le groupe pour éviter la suppression permanente.",
+      "typePrompt": "Saisissez",
+      "typeConfirm": "pour confirmer",
+      "placeholder": "Nom exact du groupe",
+      "cancel": "Annuler",
+      "confirm": "Oui, supprimer ce groupe et ses données"
+    },
+    "card": {
+      "subject": "Matière",
+      "entity": "Entité",
+      "period": "Période",
+      "notAssigned": "Non assignée",
+      "openMenu": "Ouvrir le menu",
+      "actions": "Actions",
+      "editGroup": "Modifier le groupe",
+      "manageStudents": "Gestion des Étudiants",
+      "gradeTable": "Tableau des Notes",
+      "gradingScheme": "Système de Notation",
+      "archive": "Archiver",
+      "activate": "Activer",
+      "delete": "Supprimer",
+      "students": "étudiants",
+      "tooltips": {
+        "editGroup": "Modifier le nom du groupe, la matière ou d'autres détails",
+        "manageStudents": "Ajouter, supprimer ou importer des étudiants dans ce groupe",
+        "gradeTable": "Voir et gérer les notes des étudiants de ce groupe",
+        "gradingScheme": "Configurer les composantes et les coefficients de notation pour ce groupe",
+        "archive": "Archiver ce groupe pour le masquer de la liste principale",
+        "activate": "Restaurer ce groupe dans la liste des actifs"
+      }
+    },
+    "form": {
+      "newGroup": "Nouveau groupe",
+      "editTitle": "Modifier le groupe",
+      "newTitle": "Nouveau groupe",
+      "editDescription": "Mettez à jour les informations du groupe.",
+      "newDescription": "Entrez les détails du nouveau groupe.",
+      "nameLabel": "Nom du groupe (Ex : 10-A, Groupe Matin, etc.)*",
+      "namePlaceholder": "Ex : 10-A, Groupe Matin, etc.",
+      "nameError": "Le nom doit comporter au moins 2 caractères",
+      "entityLabel": "Entité Éducative*",
+      "entityPlaceholder": "Sélectionnez une entité éducative",
+      "entityError": "Sélectionnez un établissement d'enseignement",
+      "noEntities": "Aucun établissement d'enseignement enregistré",
+      "noEntitiesMessage": "Vous devez créer au moins un établissement d'enseignement avant de créer un groupe.",
+      "createEntity": "Créer un établissement d'enseignement",
+      "subjectLabel": "Matière*",
+      "subjectPlaceholder": "Sélectionnez une matière",
+      "subjectError": "Sélectionnez une matière",
+      "selectEntityFirst": "Sélectionnez d'abord un établissement d'enseignement",
+      "noSubjectsForEntity": "Aucune matière pour cet établissement d'enseignement",
+      "noSubjectsMessage": "Il n'y a pas de matières enregistrées pour cet établissement d'enseignement.",
+      "createSubject": "Créer de la matière",
+      "schoolPeriod": "Période scolaire",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "month": "Mois",
+      "year": "Année",
+      "interpretedPeriod": "Période interprétée",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Informations complémentaires sur le groupe",
+      "cancel": "Annuler",
+      "create": "Créer",
+      "update": "Mettre à jour"
+    },
+    "grades": {
+      "title": "Notes",
+      "backToGroups": "Retour aux Groupes",
+      "subjectLabel": "Matière",
+      "groupLabel": "Groupe",
+      "defaultInstitution": "ÉTABLISSEMENT D'ENSEIGNEMENT",
+      "noTitleExam": "Examen sans titre",
+      "noSubject": "Sans matière",
+      "error": {
+        "title": "Erreur",
+        "loadingScheme": "Impossible de charger le schéma de notation.",
+        "noScheme": "Aucun schéma de notation",
+        "mustCreateScheme": "Vous devez d'abord créer un schéma de notation pour ce groupe.",
+        "loadingData": "Impossible de charger les données. Veuillez réessayer.",
+        "gradeLocked": "Cette note est verrouillée pour modification.",
+        "gradeLinked": "Cette note est liée à l'examen",
+        "cannotModify": "et ne peut pas être modifiée manuellement",
+        "cannotUnlock": "et ne peut pas être déverrouillée",
+        "componentLinked": "Ce composant est lié à l'examen",
+        "cannotImport": "et les notes ne peuvent pas être importées manuellement",
+        "savingGrade": "Impossible d'enregistrer la note. Veuillez réessayer."
+      },
+      "modal": {
+        "importTitle": "Importer les Notes",
+        "exportTitle": "Exporter les Notes",
+        "importDescription": "Importe les notes à partir d'un fichier Excel",
+        "exportDescription": "Exporte les notes vers un fichier Excel",
+        "exportPeriod": "Exporter les notes du",
+        "exportFinal": "Exporter toutes les notes et la note finale"
+      }
+    },
+    "students": {
+      "backToGroups": "Retour aux Groupes",
+      "noSchoolPeriod": "Sans période scolaire",
+      "groupStudents": "Élèves du Groupe",
+      "studentsRegistered": "élèves inscrits dans ce groupe",
+      "importFromExcel": "Importer depuis Excel",
+      "importExcelTitle": "Importer des Élèves depuis Excel",
+      "importExcelDescription": "Importez des élèves depuis un fichier Excel et ils seront automatiquement ajoutés à ce groupe",
+      "addStudent": "Ajouter un Élève",
+      "searchStudent": "Rechercher un Élève",
+      "searchStudentDescription": "Recherchez un élève par nom ou identification pour l'ajouter au groupe",
+      "searchPlaceholder": "Rechercher par nom ou identification...",
+      "add": "Ajouter",
+      "noStudentsFound": "Aucun étudiant trouvé",
+      "error": {
+        "title": "Erreur",
+        "loadingGroup": "Impossible de charger les informations du groupe",
+        "loadingStudents": "Impossible de charger les étudiants de ce groupe",
+        "searchingStudents": "Impossible de rechercher des étudiants",
+        "addingStudent": "Impossible d'ajouter l'étudiant au groupe",
+        "removingStudent": "Impossible de retirer l'étudiant du groupe",
+        "groupNotFound": "Le groupe demandé n'a pas été trouvé."
+      },
+      "success": {
+        "title": "Succès !",
+        "importComplete": "Les étudiants ont été importés avec succès",
+        "studentAdded": "Étudiant ajouté",
+        "studentAddedDescription": "L'étudiant a été ajouté au groupe avec succès",
+        "studentRemoved": "Étudiant retiré",
+        "studentRemovedDescription": "L'étudiant a été retiré du groupe avec succès"
+      },
+      "table": {
+        "identification": "Identification",
+        "names": "Prénoms",
+        "surnames": "Noms",
+        "fullName": "Noms et Prénoms",
+        "email": "E-mail",
+        "actions": "Actions"
+      }
+    },
+    "gradingScheme": {
+      "title": "Schéma de Notation",
+      "backToGroups": "Retour aux groupes",
+      "defaultInstitution": "ÉTABLISSEMENT D'ENSEIGNEMENT",
+      "error": {
+        "loadingData": "Erreur lors du chargement des données",
+        "savingScheme": "Erreur lors de l'enregistrement du schéma"
+      },
+      "success": {
+        "title": "Succès",
+        "schemeSaved": "Schéma de notation enregistré avec succès"
+      }
+    }
+  },
+  "main": {
+    "title": "Tableau de bord",
+    "welcome1": "Bienvenue sur ",
+    "welcome2": ", votre plateforme de gestion d'examens.",
+    "stats": {
+      "totalInstitutions": "Institutions",
+      "totalSubjects": "Matières",
+      "activeGroups": "Groupes Actifs",
+      "archivedGroups": "Groupes Archivés",
+      "totalStudents": "Étudiants",
+      "recentExams": "Examens Récents",
+      "gradedExams": "Examens Notés",
+      "timeSaved": "Temps Gagné",
+      "timeSavedContext": "Sans ProfeVision : 5 min/examen • Avec ProfeVision : 5 s/examen",
+      "noExams": "Aucun examen récent",
+      "examStatus": {
+        "borrador": "Brouillon",
+        "publicado": "Publié",
+        "archivado": "Archivé"
+      },
+      "actions": {
+        "edit": "Modifier",
+        "viewResults": "Voir les Résultats"
+      }
+    },
+    "metrics": {
+      "examsCreated": "Examens créés",
+      "studentsEvaluated": "Étudiants évalués",
+      "averageScore": "Moyenne générale",
+      "completionRate": "Taux de complétion",
+      "timeSaved": "Temps gagné",
+      "sinceLastMonth": "depuis le mois dernier"
+    },
+    "recentActivity": "Activité récente",
+    "recentActivityDesc": "Dernières activités sur votre compte",
+    "activity": {
+      "examCreated": "Examen de Mathématiques créé",
+      "examCreatedDesc": "Vous avez créé un nouvel examen de Mathématiques pour la classe de 9ème.",
+      "groupAdded": "Groupe d'étudiants ajouté",
+      "groupAddedDesc": "Vous avez ajouté 24 étudiants à la classe de Physique.",
+      "examGraded": "Examen noté",
+      "examGradedDesc": "Vous avez noté l'examen de Biologie pour 32 étudiants.",
+      "ago2h": "Il y a 2 heures",
+      "ago1d": "Il y a 1 jour",
+      "ago3d": "Il y a 3 jours"
+    },
+    "upcomingExams": "Examens à venir",
+    "upcomingExamsDesc": "Examens programmés pour les prochains jours",
+    "upcoming": {
+      "chemistry": "Chimie - 10ème année",
+      "chemistryDate": "22 mai 2024",
+      "history": "Histoire - 11ème année",
+      "historyDate": "24 mai 2024",
+      "physics": "Physique - 9ème année",
+      "physicsDate": "27 mai 2024"
+    }
+  },
+  "components": {
+    "gradesTable": {
+      "studentData": "Données de l'étudiant",
+      "exportPeriod": "Exporter la période",
+      "finalGrade": "Note finale",
+      "exportFinalGrades": "Exporter les notes finales",
+      "surnames": "Noms de famille",
+      "names": "Prénoms",
+      "fullName": "Noms et Prénoms",
+      "identification": "Identification",
+      "exam": "Examen",
+      "linkedToExam": "Lié à l'examen",
+      "lockGrades": "Verrouiller les notes",
+      "unlockGrades": "Déverrouiller les notes",
+      "syncFromExam": "Synchroniser les notes depuis l'examen",
+      "importGrades": "Importer les notes",
+      "exportGrades": "Exporter les notes",
+      "grade": "Note",
+      "period": "Période",
+      "weighted": "Étang.",
+      "absolute": "Abs.",
+      "absoluteGrade": "Note absolue",
+      "error": {
+        "noAuthToken": "Aucun jeton d'authentification trouvé",
+        "syncGrades": "Erreur lors de la synchronisation des notes"
+      },
+      "success": {
+        "syncComplete": "Notes synchronisées correctement"
+      }
+    },
+    "gradingSchemeEditor": {
+      "defaultSchemeName": "Schéma de Notation",
+      "defaultPeriodName": "Première Période",
+      "defaultComponentName": "Devoirs",
+      "newComponent": "Nouveau Composant",
+      "period": "Période",
+      "schemeName": "Nom du Schéma",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "type": "Type",
+      "addComponent": "Ajouter un Composant",
+      "addPeriod": "Ajouter une période",
+      "saving": "Enregistrement...",
+      "saveChanges": "Enregistrer les modifications",
+      "componentTypes": {
+        "exam": "Examen",
+        "project": "Projet",
+        "quiz": "Quiz",
+        "work": "Travail"
+      },
+      "error": {
+        "title": "Erreur",
+        "missingDates": "Vous devez définir les dates de début et de fin du schéma",
+        "invalidDates": "La date de fin doit être postérieure à la date de début",
+        "periodsSum": "La somme des pourcentages des périodes doit être égale à 100%",
+        "componentsSum": "Les pourcentages des composants de la période",
+        "componentsSumValue": "doivent totaliser",
+        "saving": "Impossible d'enregistrer le schéma de notation"
+      },
+      "placeholders": {
+        "schemeName": "Entrez le nom du schéma",
+        "periodName": "Entrez le nom de la période",
+        "componentName": "Entrez le nom du composant"
+      }
+    }
+  },
+  "students": {
+    "title": "Étudiants",
+    "description": "Gérez les étudiants affectés à vos groupes",
+    "actions": {
+      "manageGroups": "Gérer les groupes",
+      "createStudent": "Créer un étudiant"
+    },
+    "form": {
+      "title": "Ajouter un Étudiant",
+      "description": "Saisissez les données de l'étudiant et sélectionnez le groupe auquel il sera affecté.",
+      "names": "Prénoms",
+      "surnames": "Noms de famille",
+      "identification": "Identification",
+      "email": "E-mail",
+      "group": "Groupe",
+      "placeholders": {
+        "names": "Prénoms de l'étudiant",
+        "surnames": "Noms de famille de l'étudiant",
+        "identification": "Numéro d'identification",
+        "email": "Courriel de l'étudiant",
+        "selectGroup": "Sélectionnez un groupe"
+      },
+      "actions": {
+        "cancel": "Annuler",
+        "create": "Créer Étudiant",
+        "creating": "Création..."
+      }
+    },
+    "table": {
+      "title": "Étudiants dans mes Groupes",
+      "description": "Étudiants assignés aux groupes que vous gérez",
+      "search": "Rechercher un étudiant...",
+      "refreshList": "Actualiser la Liste",
+      "studentsFound": "étudiants trouvés",
+      "headers": {
+        "surnames": "Noms de famille",
+        "names": "Prénoms",
+        "fullName": "Nom et prénoms",
+        "identification": "Identification",
+        "email": "E-mail",
+        "actions": "Actions"
+      },
+      "actions": {
+        "viewDetails": "Voir les Détails"
+      }
+    },
+    "pagination": {
+      "showing": "Affichage de",
+      "of": "sur",
+      "students": "étudiants",
+      "page": "Page",
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "details": {
+      "title": "Détails de l'Étudiant",
+      "description": "Groupes et matières auxquels l'étudiant est affecté",
+      "subject": "Matière",
+      "close": "Fermer"
+    },
+    "empty": {
+      "noGroups": {
+        "title": "Vous devez d'abord créer des groupes",
+        "description": "Pour gérer les étudiants, vous devez d'abord créer au moins un groupe associé à l'une de vos matières. Les étudiants dans ProfeVision sont toujours associés à des groupes spécifiques.",
+        "createGroup": "Créer un groupe"
+      },
+      "noStudents": {
+        "title": "Vous n'avez pas encore d'étudiants",
+        "description": "Il n'y a pas d'étudiants assignés à vos groupes. Vous pouvez créer des étudiants puis les assigner à des groupes, ou aller directement à un groupe spécifique pour ajouter des étudiants.",
+        "createStudent": "Créer Étudiant",
+        "manageGroups": "Gérer les Groupes"
+      }
+    },
+    "error": {
+      "title": "Erreur",
+      "verifyGroups": "Impossible de vérifier les groupes",
+      "loadingStudents": "Impossible de charger les étudiants",
+      "loadingGroups": "Erreur lors du chargement des groupes"
+    }
+  },
+  "reports": {
+    "title": "Rapports",
+    "description": "Visualisez les statistiques et les analyses des performances de vos étudiants",
+    "stats": {
+      "totalExams": "Total Examens",
+      "examsCreated": "Examens créés",
+      "totalStudents": "Total Étudiants",
+      "studentsRegistered": "Étudiants inscrits",
+      "totalSubjects": "Total Matières",
+      "subjectsCreated": "Matières créées",
+      "applications": "Applications",
+      "examsApplied": "Examens appliqués"
+    },
+    "charts": {
+      "examPerformance": {
+        "title": "Performance par Examen",
+        "description": "Scores moyens aux examens récents"
+      },
+      "gradeDistribution": {
+        "title": "Distribution des Notes",
+        "description": "Distribution des notes par intervalle"
+      },
+      "studentPerformance": {
+        "title": "Performance par Étudiant",
+        "description": "Analyse de la performance individuelle des étudiants"
+      },
+      "noDataAvailable": "Aucune donnée disponible"
+    }
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "description": "Gérez vos informations personnelles et vos préférences",
+    "personalInfo": {
+      "title": "Informations personnelles",
+      "description": "Mettez à jour vos informations de profil"
+    },
+    "form": {
+      "email": "E-mail",
+      "emailNotChangeable": "L'e-mail ne peut pas être modifié",
+      "firstName": "Prénoms",
+      "lastName": "Noms",
+      "phone": "Téléphone",
+      "position": "Poste",
+      "positionPlaceholder": "Ex : Professeur de mathématiques",
+      "biography": "Biographie",
+      "biographyPlaceholder": "Brève description de vous",
+      "saveChanges": "Enregistrer les modifications",
+      "saving": "Enregistrement..."
+    },
+    "validation": {
+      "firstNameRequired": "Les prénoms doivent comporter au moins 2 caractères",
+      "lastNameRequired": "Les noms de famille doivent comporter au moins 2 caractères"
+    },
+    "messages": {
+      "loading": "Chargement...",
+      "updated": "Profil mis à jour",
+      "updateSuccess": "Vos données ont été mises à jour avec succès.",
+      "loadError": "Erreur lors du chargement du profil",
+      "updateError": "Erreur lors de la mise à jour du profil",
+      "unknownError": "Inconnu"
+    }
+  },
+  "settings": {
+    "title": "Configuration",
+    "description": "Gérez votre profil et les paramètres de la plateforme",
+    "profile": {
+      "title": "Profil de Professeur",
+      "description": "Mettez à jour vos informations personnelles et de contact",
+      "form": {
+        "firstName": "Noms",
+        "lastName": "Noms de famille",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "biography": "Biographie",
+        "emailNotChangeable": "L'adresse e-mail ne peut pas être modifiée",
+        "saveChanges": "Enregistrer les modifications",
+        "saving": "Enregistrement..."
+      }
+    },
+    "password": {
+      "title": "Changer le mot de passe",
+      "description": "Mettez à jour votre mot de passe pour assurer la sécurité de votre compte",
+      "button": "Changer le mot de passe"
+    },
+    "notifications": {
+      "title": "Préférences de Notifications",
+      "description": "Configurez comment et quand recevoir les notifications",
+      "comingSoon": "Les préférences de notifications seront bientôt disponibles."
+    },
+    "messages": {
+      "profileUpdated": "Profil mis à jour",
+      "changesSaved": "Les modifications ont été enregistrées avec succès"
+    },
+    "errors": {
+      "title": "Erreur",
+      "fetchProfile": "Impossible de charger les informations du profil",
+      "noSession": "Aucune session active",
+      "saveChanges": "Impossible d'enregistrer les modifications",
+      "serverConfig": "Erreur de configuration du serveur",
+      "unauthorizedMissing": "Jeton d'authentification requis",
+      "unauthorized": "Non autorisé",
+      "fetchData": "Erreur lors de la récupération des données",
+      "internal": "Erreur interne du serveur"
+    }
+  },
+  "tierUsage": {
+    "title": "Utilisation du forfait",
+    "cycleReset": "Se réinitialise en",
+    "day": "jour",
+    "days": "jours"
+  },
+  "admin": {
+    "title": "Tableau de bord de l'administrateur",
+    "description": "Observabilité globale de la plateforme",
+    "loading": "Chargement des statistiques...",
+    "errorLoading": "Erreur lors du chargement des données",
+    "retry": "Réessayer",
+    "refresh": "Actualiser",
+    "viewUsers": "Voir les utilisateurs",
+    "trends": {
+      "title": "Tendances (6 derniers mois)",
+      "users": "Utilisateurs",
+      "exams": "Examens",
+      "scans": "Scans"
+    },
+    "stats": {
+      "totalUsers": "Utilisateurs totaux",
+      "newThisMonth": "Nouveaux ce mois-ci",
+      "totalExams": "Examens totaux",
+      "createdThisMonth": "Créés ce mois-ci",
+      "withResults": "Avec résultats",
+      "totalScans": "Scans totaux",
+      "scansThisMonth": "Ce mois-ci",
+      "institutions": "Institutions",
+      "groups": "Groupes",
+      "active": "actifs",
+      "archived": "archivés",
+      "students": "Étudiants"
+    },
+    "tiers": {
+      "title": "Répartition par Tier",
+      "free": "Gratuit",
+      "plus": "Plus",
+      "admin": "Admin",
+      "grandfathered": "Droits acquis"
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "description": "Liste de tous les utilisateurs enregistrés",
+      "back": "Retour",
+      "searchPlaceholder": "Rechercher par nom...",
+      "filterByTier": "Filtrer par tier",
+      "allTiers": "Tous les tiers",
+      "table": {
+        "user": "Utilisateur",
+        "email": "E-mail",
+        "tier": "Niveau",
+        "entities": "Entités",
+        "subjects": "Matières",
+        "groups": "Groupes",
+        "exams": "Examens",
+        "scans": "Scans",
+        "activity": "Activité",
+        "registered": "Inscrit",
+        "noUsers": "Aucun utilisateur trouvé",
+        "copyEmail": "Copier l'e-mail",
+        "emailCopied": "E-mail copié",
+        "emailConfirmed": "E-mail confirmé",
+        "emailNotConfirmed": "E-mail non confirmé"
+      },
+      "noUsers": "Aucun utilisateur trouvé",
+      "showing": "Affichage de",
+      "of": "sur",
+      "previous": "Précédent",
+      "next": "Suivant"
+    }
+  }
+}

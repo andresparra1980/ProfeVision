@@ -1,0 +1,33 @@
+{
+  "slides": [
+    {
+      "title": "Correção em Minutos",
+      "subtitle": "Tecnologia OMR + IA",
+      "description": "Nosso aplicativo para escanear exames com tecnologia OMR (Visão Computacional) para papel e a IA para o online oferecem resultados instantâneos."
+    },
+    {
+      "title": "Gestão Educativa Completa",
+      "subtitle": "Tudo Centralizado",
+      "description": "Centralize instituições, matérias, turmas e estudantes sem esforço."
+    },
+    {
+      "title": "Criação de Exames com IA",
+      "subtitle": "Geração Inteligente",
+      "description": "Gere provas de qualidade rapidamente, adaptadas às suas necessidades."
+    },
+    {
+      "title": "Análise Detalhada de Desempenho",
+      "subtitle": "Insights Chave",
+      "description": "Obtenha insights chave para melhorar o ensino e o aprendizado dos seus estudantes."
+    },
+    {
+      "title": "Plataforma Intuitiva",
+      "subtitle": "Fácil de Usar",
+      "description": "Projetada para educadores, fácil de usar desde o primeiro momento."
+    }
+  ],
+  "metrics": {
+    "timeSaved": "Tempo Economizado",
+    "accuracy": "Precisão"
+  }
+}

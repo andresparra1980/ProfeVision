@@ -1,0 +1,33 @@
+{
+  "slides": [
+    {
+      "title": "Notation en Quelques Minutes",
+      "subtitle": "Technologie OMR + IA",
+      "description": "Notre application pour scanner les examens avec la technologie OMR (Vision Artificielle) pour le papier et l'IA pour le format en ligne vous donne des résultats instantanés."
+    },
+    {
+      "title": "Gestion Éducative Complète",
+      "subtitle": "Tout Centralisé",
+      "description": "Centralisez les institutions, les matières, les groupes et les étudiants sans effort."
+    },
+    {
+      "title": "Création d'Examens avec l'IA",
+      "subtitle": "Génération Intelligente",
+      "description": "Générez rapidement des épreuves de qualité, adaptées à vos besoins."
+    },
+    {
+      "title": "Analyse Détaillée de la Performance",
+      "subtitle": "Insights Clés",
+      "description": "Obtenez des informations clés pour améliorer l'enseignement et l'apprentissage de vos étudiants."
+    },
+    {
+      "title": "Plateforme Intuitive",
+      "subtitle": "Facile à Utiliser",
+      "description": "Conçue pour les éducateurs, facile à utiliser dès le premier instant."
+    }
+  ],
+  "metrics": {
+    "timeSaved": "Temps Gagné",
+    "accuracy": "Précision"
+  }
+}

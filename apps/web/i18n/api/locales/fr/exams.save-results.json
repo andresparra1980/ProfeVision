@@ -1,0 +1,15 @@
+{
+  "errors": {
+    "parse": "Erreur lors du traitement des données d'entrée",
+    "missingQr": "Données QR incomplètes",
+    "fetchQuestions": "Erreur lors de la récupération des questions de l'examen",
+    "uploadOriginal": "Erreur lors de l'enregistrement de l'image originale",
+    "uploadProcessed": "Erreur lors de l'enregistrement de l'image traitée",
+    "saveResults": "Erreur lors de l'enregistrement des résultats",
+    "saveScans": "Erreur lors de l'enregistrement des images scannées",
+    "internal": "Erreur interne du serveur",
+    "unauthorized": "Non autorisé. Connectez-vous pour continuer.",
+    "examNotFound": "Examen non trouvé",
+    "notOwner": "Cet examen appartient à un autre compte"
+  }
+}

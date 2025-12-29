@@ -1,0 +1,17 @@
+{
+  "errors": {
+    "unauthorized": "Non autorisé",
+    "internal": "Erreur lors du traitement de la demande",
+    "notFound": "Examen non trouvé",
+    "onlyDraftDelete": "Seuls les examens en état de brouillon peuvent être supprimés",
+    "serverConfig": "Erreur de configuration du serveur",
+    "missingFields": "Champs obligatoires manquants",
+    "updateExam": "Erreur lors de la mise à jour de l'examen",
+    "updateState": "Erreur lors de la mise à jour de l'état de l'examen"
+  },
+  "success": {
+    "deleted": "Examen et éléments associés supprimés avec succès",
+    "stateUpdated": "État de l'examen mis à jour avec succès",
+    "updated": "Examen mis à jour avec succès"
+  }
+}

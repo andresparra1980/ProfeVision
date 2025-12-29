@@ -1,0 +1,9 @@
+{
+  "success": {
+    "deleted": "Arquivos temporais eliminados com sucesso"
+  },
+  "errors": {
+    "cleanup": "Erro ao limpar arquivos temporais",
+    "internal": "Erro interno do servidor"
+  }
+}

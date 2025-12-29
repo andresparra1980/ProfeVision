@@ -1,0 +1,50 @@
+{
+  "description": "Revise os resultados da digitalização. Você pode voltar para digitalizar novamente se for necessário.",
+  "examInfo": {
+    "title": "Informações do Exame",
+    "loading": "Carregando informações...",
+    "fields": {
+      "subject": "Matéria:",
+      "exam": "Exame:",
+      "student": "Estudante:",
+      "group": "Grupo:"
+    },
+    "notAvailable": "Não disponível"
+  },
+  "answers": {
+    "title": "Respostas"
+  },
+  "grading": {
+    "calculating": "Calculando nota...",
+    "error": "Erro ao calcular nota:",
+    "label": "Nota:",
+    "correctAnswers": "corretas",
+    "scoreFormat": "{obtained}/{total} ({correct}/{totalQuestions} corretas)"
+  },
+  "buttons": {
+    "back": "Voltar",
+    "saving": "Salvando...",
+    "saveResults": "Salvar Resultados",
+    "savedSuccessfully": "Salvo com sucesso",
+    "scanAnother": "Escanear Outro",
+    "finish": "Finalizar"
+  },
+  "toasts": {
+    "resultsUpdated": "Resultados atualizados",
+    "resultsSaved": "Resultados salvos",
+    "saveError": "Erro ao salvar",
+    "saveErrorDescription": "Ocorreu um erro ao salvar os resultados"
+  },
+  "errors": {
+    "calculatingGrade": "Erro ao calcular a nota",
+    "noQRData": "Nenhum dado do código QR detectado.",
+    "saveResults": "Erro ao salvar os resultados",
+    "loadingEntities": "Erro desconhecido ao carregar dados das entidades",
+    "serverEmptyResponse": "O servidor respondeu com um corpo vazio",
+    "timeoutError": "A solicitação excedeu o tempo máximo de espera (60 segundos)",
+    "formatError": "Erro de formato",
+    "unknownError": "Erro desconhecido",
+    "unauthorized": "Não autorizado. Faça login para continuar.",
+    "notOwner": "Este exame pertence a outra conta. Você não pode salvar resultados de exames que não são seus."
+  }
+}

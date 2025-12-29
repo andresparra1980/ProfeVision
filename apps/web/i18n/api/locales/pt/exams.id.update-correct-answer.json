@@ -1,0 +1,17 @@
+{
+  "errors": {
+    "missingId": "ID do exame não fornecido",
+    "missingFields": "É necessário questionId e optionId",
+    "verifyQuestion": "Erro ao verificar a pergunta ou ela não pertence a este exame",
+    "fetchOptions": "Erro ao obter opções da pergunta",
+    "updateOptions": "Erro ao atualizar opções de resposta",
+    "updateCorrect": "Erro ao atualizar opção correta",
+    "fetchResults": "Erro ao obter resultados para recalcular",
+    "updateResult": "Erro ao atualizar resultado",
+    "updateStudentAnswer": "Erro ao atualizar resposta do estudante",
+    "internal": "Erro interno do servidor"
+  },
+  "success": {
+    "ok": "Resposta correta atualizada e notas recalculadas"
+  }
+}

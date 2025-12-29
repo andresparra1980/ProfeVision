@@ -1,0 +1,7 @@
+{
+  "title": "404 • Página não encontrada",
+  "description": "Ocorreu um erro e não conseguimos encontrar este recurso. Se você chegou aqui por erro ou isso acontece ocasionalmente, tente forçar uma atualização.",
+  "forceRefresh": "Clique aqui (forçar atualização)",
+  "goHome": "Ir para o início",
+  "tip": "Dica: se este 404 aparecer depois de um tempo, pode ser devido ao cache do navegador ou do CDN."
+}

@@ -1,0 +1,26 @@
+{
+  "states": {
+    "processing": "Processando imagem...",
+    "checkingDuplicates": "Verificando duplicados...",
+    "complete": "Processamento concluído",
+    "duplicate": "Exame já avaliado",
+    "examNotDetected": "Exame não detectado",
+    "error": "Erro de processamento"
+  },
+  "messages": {
+    "processingSuccess": "Processado com sucesso!",
+    "duplicateWithDate": "Exame já avaliado em {date}",
+    "duplicateGeneric": "Exame já avaliado.",
+    "noExamDetected": "Exame não detectado. Tente novamente.",
+    "invalidExamDetected": "Não foi possível detectar um exame válido na imagem. Certifique-se de que o código QR e as marcações de resposta estejam claramente visíveis e tente novamente.",
+    "genericProcessingError": "Erro ao processar. Tente novamente.",
+    "processedImageAlt": "Imagem processada"
+  },
+  "buttons": {
+    "retakePhoto": "Tirar outra foto",
+    "retry": "Repetir",
+    "continueAnyway": "Continuar mesmo assim",
+    "continue": "Continuar"
+  },
+  "locale": "pt-BR"
+}

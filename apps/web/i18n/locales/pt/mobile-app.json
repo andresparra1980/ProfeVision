@@ -1,0 +1,14 @@
+{
+  "title": "Aplicativo Móvel",
+  "description": "Em breve disponível - Acesse o ProfeVision do seu dispositivo móvel.",
+  "plannedFeatures": {
+    "title": "Funcionalidades planejadas",
+    "items": {
+      "0": "Escaneamento de exames com a câmera do telefone",
+      "1": "Acesso a notas em tempo real",
+      "2": "Notificações de resultados",
+      "3": "Interface otimizada para dispositivos móveis"
+    }
+  },
+  "inDevelopment": "🚧 Em desenvolvimento - Fique atento às atualizações"
+}

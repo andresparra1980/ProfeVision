@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "missingId": "ID de l'étudiant non fourni",
+    "serverConfig": "Erreur de configuration du serveur",
+    "fetch": "Erreur lors de la récupération des détails de l'étudiant",
+    "notFound": "Étudiant non trouvé",
+    "internal": "Erreur interne du serveur"
+  }
+}

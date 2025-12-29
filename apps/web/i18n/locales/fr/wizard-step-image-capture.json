@@ -1,0 +1,26 @@
+{
+  "title": "Capture de l'Examen",
+  "capture": {
+    "instruction": "Prenez une photo claire de l'examen complet",
+    "subInstruction": "Assurez-vous que tous les coins sont visibles",
+    "button": "Prendre une Photo",
+    "description": "En cliquant sur \"Prendre une Photo\", l'appareil photo de votre appareil s'ouvrira",
+    "flashOn": "Flash activé",
+    "flashOff": "Flash désactivé"
+  },
+  "suggestions": {
+    "title": "Suggestions pour une meilleure capture",
+    "tips": [
+      "Bon éclairage, de préférence lumière naturelle",
+      "Surface plane sans ombres",
+      "Toute la feuille visible dans le cadre",
+      "Appareil photo parallèle au document",
+      "Évitez les mouvements brusques"
+    ]
+  },
+  "preview": {
+    "altText": "Examen capturé",
+    "retakeButton": "Reprendre la capture",
+    "continueButton": "Continuer"
+  }
+}

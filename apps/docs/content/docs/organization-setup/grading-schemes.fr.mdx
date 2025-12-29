@@ -1,0 +1,58 @@
+---
+title: Barèmes de notation
+description: Configurez la manière dont les notes sont calculées
+---
+
+## Schémas de notation
+
+Un schéma définit la manière dont les notes finales sont calculées pour un groupe.
+
+### Structure
+
+Les schémas comportent 3 niveaux :
+
+1. **Schéma** : Conteneur principal avec le nom et les dates
+2. **Périodes** : Divisions temporelles (ex. : "Première période", "Deuxième période")
+3. **Composants** : Éléments individuels (examens, projets, quiz)
+
+### Accéder au schéma
+
+1. Sur la carte du groupe, cliquez sur l'icône **Schéma**
+2. Ou naviguez vers **Groupes** → sélectionnez un groupe → **Schéma de notation**
+
+![Grading scheme](/images/organization-setup/grading-scheme-01-view.webp)
+
+### Configurer le schéma
+
+1. **Nommez le schéma** dans le champ supérieur
+2. **Ajoutez des périodes** avec le bouton correspondant
+3. Pour chaque période, configurez :
+   - **Nom** : Identifiant de la période
+   - **Pourcentage** : Poids dans la note finale
+   - **Dates** : Début et fin de la période
+4. **Ajoutez des composants** à chaque période :
+   - **Nom** : Nom du composant
+   - **Type** : Examen, projet, quiz ou travail
+   - **Pourcentage** : Poids au sein de la période
+5. Cliquez sur **Enregistrer les modifications**
+
+![Configure scheme](/images/organization-setup/grading-scheme-02-edit.webp)
+
+### Types de composants
+
+| Type | Utilisation |
+|------|-------------|
+| Examen | Évaluations formelles |
+| Projet | Travaux à long terme |
+| Quiz | Évaluations courtes |
+| Travail | Tâches et activités |
+
+### Règles de validation
+
+- La somme des pourcentages des périodes doit être égale à **100 %**
+- La somme des composants de chaque période doit correspondre au pourcentage de la période
+- Les dates de début doivent être antérieures aux dates de fin
+
+<Callout type="info">
+Vous pouvez faire glisser les périodes pour les réorganiser.
+</Callout>

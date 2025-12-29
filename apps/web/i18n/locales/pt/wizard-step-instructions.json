@@ -1,0 +1,14 @@
+{
+  "title": "Assistente de Calificação",
+  "subtitle": "Instruções",
+  "description": "Neste assistente de calificação de exames você poderá:",
+  "steps": [
+    "Escanear com a câmera do seu celular um por um de maneira rápida os exames",
+    "Validar se a detecção foi correta",
+    "Reescanear se for necessário",
+    "Verificar visualmente se o sistema não detectar alguma pergunta e marcá-la manualmente se desejar"
+  ],
+  "button": {
+    "continue": "Continuar"
+  }
+}

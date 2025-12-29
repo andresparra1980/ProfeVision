@@ -5,6 +5,7 @@ export function baseOptions(locale: string): BaseLayoutProps {
     i18n: true,
     nav: {
       title: 'ProfeVision Docs',
+      url: `/${locale}`,
     },
     links: [
       {

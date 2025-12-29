@@ -1,0 +1,188 @@
+{
+  "header": {
+    "back": "Voltar para Exames",
+    "title": "Criar exames com IA",
+    "description": "Experiência de chat para gerar bancos de questões e resumos.",
+    "clearChat": "Limpar Chat",
+    "saveDraft": "Salvar Rascunho",
+    "examLanguageLabel": "Idioma do Exame:"
+  },
+  "language": {
+    "label": "Gerar em:",
+    "auto": "Automático",
+    "spanish": "Espanhol",
+    "english": "Inglês",
+    "tooltip": "Automático: O agente detecta o idioma\nautomaticamente segundo o contexto,\no tema e tipo de exame.\nRecomendado para melhores resultados."
+  },
+  "context": {
+    "title": "Contexto do documento",
+    "description": "Suba até 5 arquivos para serem resumidos pela IA que sirvam de contexto para a geração do exame.",
+    "attach": "Anexar",
+    "remove": "Remover documento",
+    "viewSummary": "Ver resumo",
+    "summaryNotReadyTitle": "Resumo não disponível",
+    "summaryNotReady": "O resumo estará disponível assim que o processamento terminar.",
+    "summaryTitle": "Resumo do documento",
+    "summaryDesc": "Visualização prévia do resumo gerado por IA.",
+    "loadingSummary": "Carregando resumo...",
+    "document": "Documento",
+    "limitDesc": "São permitidos apenas 5 documentos.",
+    "uploadErrorTitle": "Erro ao carregar documento",
+    "uploadError": "Não foi possível carregar o documento. Verifique se o arquivo é válido e se possui um formato suportado (PDF, DOCX, PPTX, imagens)."
+  },
+  "results": {
+    "title": "Resultados",
+    "description": "Revise o exame gerado.",
+    "generatedQuestions": "Questões geradas",
+    "empty": "Os resultados aparecerão aqui após a geração.",
+    "generating": "Gerando questões...",
+    "generatedSoFar": "geradas",
+    "randomizeOptions": "Aleatorizar opções",
+    "edit": "Editar",
+    "delete": "Excluir questão",
+    "selectCorrect": "Selecione a resposta correta:",
+    "true": "Verdadeiro",
+    "false": "Falso",
+    "rationale": "Rationale",
+    "hint": "Clique para ver as questões geradas.",
+    "hintTooltip": "Clique no botão para ver as questões geradas.",
+    "deleteDialog": {
+      "title": "Excluir questão?",
+      "description": "Esta questão será removida do exame gerado. Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "confirm": "Excluir"
+    }
+  },
+  "editor": {
+    "title": "Editar questão",
+    "description": "Ajuste o enunciado, opções, resposta correta e metadados.",
+    "type": "Tipo",
+    "selectType": "Selecione o tipo",
+    "types": {
+      "multiple_choice": "Múltipla escolha",
+      "true_false": "Verdadeiro/Falso",
+      "short_answer": "Resposta curta",
+      "essay": "Dissertativa"
+    },
+    "prompt": "Enunciado",
+    "options": "Opções",
+    "addOption": "Adicionar opção",
+    "delete": "Excluir",
+    "correctAnswer": "Resposta correta",
+    "mustSelectCorrectAnswer": "* Deve selecionar uma opção correta",
+    "rationale": "Rationale (opcional)",
+    "difficulty": "Dificuldade",
+    "difficulties": {
+      "easy": "Fácil",
+      "medium": "Média",
+      "hard": "Difícil"
+    },
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "discardDialog": {
+      "title": "Descartar alterações?",
+      "description": "Você tem alterações não salvas. Se fechar o editor, estas alterações serão perdidas.",
+      "cancel": "Continuar editando",
+      "discard": "Descartar alterações",
+      "save": "Salvar alterações"
+    }
+  },
+  "clearDialog": {
+    "title": "Limpar dados do chat?",
+    "description": "Esta ação limpará documentos e saídas no navegador, o contexto do documento e o rascunho local do exame gerado por IA.",
+    "cancel": "Cancelar",
+    "confirm": "Limpar"
+  },
+  "clearToasts": {
+    "successTitle": "Dados do chat limpos",
+    "successDesc": "Documentos, saídas e o rascunho local foram limpos.",
+    "errorTitle": "Erro ao limpar",
+    "errorDesc": "Não foi possível limpar completamente o armazenamento local."
+  },
+  "loadDraft": {
+    "successTitle": "Rascunho carregado",
+    "successDesc": "Você pode editar as questões no chat.",
+    "errorTitle": "Erro",
+    "errorDesc": "Não foi possível carregar o rascunho"
+  },
+  "saveDraftDialog": {
+    "create": {
+      "title": "Salvar rascunho de exame",
+      "description": "Complete as informações gerais para salvar este exame como rascunho.",
+      "submit": "Salvar rascunho"
+    },
+    "edit": {
+      "title": "Salvar alterações do exame",
+      "description": "As questões do exame serão atualizadas com as alterações realizadas. Matéria e grupo não serão modificados.",
+      "submit": "Salvar alterações"
+    },
+    "form": {
+      "title": "Título",
+      "titlePlaceholder": "Ex: Exame de leitura",
+      "subject": "Matéria",
+      "group": "Grupo",
+      "duration": "Duração (min)",
+      "totalScore": "Pontuação total",
+      "selectSubject": "Selecione uma matéria",
+      "selectGroup": "Selecione um grupo",
+      "selectSubjectFirst": "Primeiro selecione uma matéria",
+      "noGroups": "Não há grupos disponíveis",
+      "cancel": "Cancelar"
+    },
+    "toasts": {
+      "saved": "Rascunho salvo",
+      "savedDesc": "O exame foi salvo como rascunho.",
+      "updated": "Rascunho atualizado",
+      "updatedDesc": "O rascunho foi atualizado.",
+      "error": "Erro",
+      "saveError": "Não foi possível salvar o rascunho",
+      "invalidContract": "Contrato JSON inválido, por favor tente novamente"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "description": "Descreva o exame que deseja gerar e ajuste com instruções.",
+    "needLogin": "Você deve iniciar sessão para usar a IA.",
+    "send": "Enviar",
+    "inputPlaceholder": "Escreva suas instruções aqui...",
+    "waitingPlaceholder": "Aguardando resposta...",
+    "you": "Você",
+    "assistant": "Assistente",
+    "system": "Sistema",
+    "progress": {
+      "step": "Processando...",
+      "planning": "Planejando exame",
+      "generating": "Gerando questões",
+      "validating": "Validando resultados",
+      "randomizing": "Aleatorizando opções",
+      "regenerating": "Regerando questão",
+      "adding": "Adicionando questões",
+      "modifying": "Modificando questões",
+      "modifying_batch": "Modificando múltiplas questões",
+      "completed": "Geração concluída"
+    },
+    "examGenerated": "✨ Exame gerado com sucesso com {count} questões. Revise os resultados no painel de Resultados.",
+    "error": {
+      "generation": "Erro ao gerar o exame",
+      "connection": "Erro de conexão"
+    },
+    "toasts": {
+      "successTitle": "Resultados gerados",
+      "successDesc": "Revise o exame gerado no painel de Resultados.",
+      "errorTitle": "Erro",
+      "errorDesc": "Ocorreu um erro inesperado. Tente novamente.",
+      "invalidJson": "Erro na resposta do assistente. Tente novamente.",
+      "invalidContract": "A resposta não cumpriu o contrato esperado. Ajustei as regras e você pode tentar novamente."
+    }
+  },
+  "empty": {
+    "title": "Como posso te ajudar hoje?",
+    "subtitle": "Escolha uma sugestão ou escreva suas instruções abaixo.",
+    "examples": {
+      "createExam": "Vamos criar um exame de 5 questões sobre ...",
+      "modifyQuestion": "Vamos modificar a questão 2 deste exame e fazê-la sobre ...",
+      "useDocuments": "Use os documentos anexos para gerar ... questões de múltipla escolha.",
+      "moreHarder": "Gere 3 questões adicionais aumentando a dificuldade para o nível Avançado."
+    }
+  }
+}

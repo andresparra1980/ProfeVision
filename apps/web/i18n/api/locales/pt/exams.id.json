@@ -1,0 +1,17 @@
+{
+  "errors": {
+    "unauthorized": "Não autorizado",
+    "internal": "Erro ao processar a solicitação",
+    "notFound": "Exame não encontrado",
+    "onlyDraftDelete": "Apenas exames em estado de rascunho podem ser excluídos",
+    "serverConfig": "Erro de configuração do servidor",
+    "missingFields": "Campos obrigatórios ausentes",
+    "updateExam": "Erro ao atualizar exame",
+    "updateState": "Erro ao atualizar o estado do exame"
+  },
+  "success": {
+    "deleted": "Exame e elementos relacionados excluídos com sucesso",
+    "stateUpdated": "Estado do exame atualizado com sucesso",
+    "updated": "Exame atualizado com sucesso"
+  }
+}

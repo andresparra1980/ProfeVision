@@ -1,0 +1,17 @@
+{
+  "errors": {
+    "serverConfig": "Erreur de configuration du serveur",
+    "forbidden": "Impossible de vérifier l'accès au groupe",
+    "groupNotFound": "Groupe non trouvé",
+    "missingPeriodDates": "Les dates de début et de fin sont requises",
+    "invalidPeriodRange": "La date de fin doit être postérieure à la date de début",
+    "createScheme": "Impossible de créer le schéma",
+    "createPeriod": "Impossible de créer la période",
+    "createComponent": "Impossible de créer le composant",
+    "updatePeriod": "Erreur lors de la mise à jour de la période",
+    "deleteComponents": "Erreur lors de la suppression des composants",
+    "deletePeriods": "Erreur lors de la suppression des périodes",
+    "loadScheme": "Erreur lors du chargement du schéma mis à jour",
+    "internal": "Erreur lors de l'enregistrement du schéma de notation"
+  }
+}

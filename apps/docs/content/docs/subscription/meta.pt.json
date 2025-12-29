@@ -1,0 +1,11 @@
+{
+  "title": "Assinatura",
+  "pages": [
+    "index",
+    "free-tier",
+    "plus-tier",
+    "usage-tracking",
+    "upgrade",
+    "manage-subscription"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "title": "Application Mobile",
+  "description": "Bientôt disponible - Accédez à ProfeVision depuis votre appareil mobile.",
+  "plannedFeatures": {
+    "title": "Fonctionnalités prévues",
+    "items": {
+      "0": "Numérisation d'examens avec la caméra du téléphone",
+      "1": "Accès aux notes en temps réel",
+      "2": "Notifications de résultats",
+      "3": "Interface optimisée pour les appareils mobiles"
+    }
+  },
+  "inDevelopment": "🚧 En développement - Restez à l'affût des mises à jour"
+}

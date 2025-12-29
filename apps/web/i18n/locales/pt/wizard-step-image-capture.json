@@ -1,0 +1,26 @@
+{
+  "title": "Captura do Exame",
+  "capture": {
+    "instruction": "Tire uma foto nítida do exame completo",
+    "subInstruction": "Certifique-se de que todos os cantos estejam visíveis",
+    "button": "Tirar Foto",
+    "description": "Ao clicar em \"Tirar Foto\", a câmera do seu dispositivo será aberta",
+    "flashOn": "Flash ligado",
+    "flashOff": "Flash desligado"
+  },
+  "suggestions": {
+    "title": "Sugestões para uma melhor captura",
+    "tips": [
+      "Boa iluminação, preferencialmente luz natural",
+      "Superfície plana sem sombras",
+      "Toda a folha visível no enquadramento",
+      "Câmera paralela ao documento",
+      "Evite movimentos bruscos"
+    ]
+  },
+  "preview": {
+    "altText": "Exame capturado",
+    "retakeButton": "Capturar novamente",
+    "continueButton": "Continuar"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Exame salvo com sucesso!",
+  "description": "Os resultados do exame foram registrados no sistema.",
+  "buttons": {
+    "scanAnother": "Escanear outro exame",
+    "finish": "Finalizar"
+  }
+}

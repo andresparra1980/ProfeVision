@@ -1,0 +1,8 @@
+{
+  "errors": {
+    "missingArray": "É necessário um array de IDs de perguntas",
+    "serverConfig": "Erro de configuração do servidor",
+    "fetch": "Erro ao obter opções de resposta",
+    "internal": "Erro interno do servidor"
+  }
+}

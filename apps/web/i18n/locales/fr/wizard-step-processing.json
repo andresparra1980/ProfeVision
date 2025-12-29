@@ -1,0 +1,26 @@
+{
+  "states": {
+    "processing": "Traitement de l'image...",
+    "checkingDuplicates": "Vérification des doublons...",
+    "complete": "Traitement réussi",
+    "duplicate": "Examen déjà noté",
+    "examNotDetected": "Examen non détecté",
+    "error": "Erreur de traitement"
+  },
+  "messages": {
+    "processingSuccess": "Traité avec succès !",
+    "duplicateWithDate": "Examen déjà noté le {date}",
+    "duplicateGeneric": "Examen déjà noté.",
+    "noExamDetected": "Examen non détecté. Veuillez réessayer.",
+    "invalidExamDetected": "Impossible de détecter un examen valide sur l'image. Veuillez vous assurer que le code QR et les marques de réponse sont bien visibles et réessayez.",
+    "genericProcessingError": "Erreur lors du traitement. Veuillez réessayer.",
+    "processedImageAlt": "Image traitée"
+  },
+  "buttons": {
+    "retakePhoto": "Prendre une autre photo",
+    "retry": "Réessayer",
+    "continueAnyway": "Continuer quand même",
+    "continue": "Continuer"
+  },
+  "locale": "fr-FR"
+}

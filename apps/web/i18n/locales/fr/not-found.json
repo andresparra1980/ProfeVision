@@ -1,0 +1,7 @@
+{
+  "title": "404 • Page non trouvée",
+  "description": "Une erreur s'est produite et nous n'avons pas pu trouver cette ressource. Si vous êtes arrivé ici par erreur ou si cela apparaît occasionnellement, essayez de forcer le rafraîchissement.",
+  "forceRefresh": "Cliquez ici (forcer le rafraîchissement)",
+  "goHome": "Aller à l'accueil",
+  "tip": "Conseil : si cette erreur 404 apparaît après un certain temps, cela peut être dû au cache du navigateur ou du CDN."
+}

@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "serverConfig": "Erro de configuração do servidor",
+    "fetchExams": "Erro ao obter os exames",
+    "unauthorized": "Não autorizado. Faça login para continuar.",
+    "noUser": "Não foi possível identificar o usuário",
+    "missingFields": "Faltam campos obrigatórios (título ou materia_id)",
+    "missingGroup": "Você deve selecionar um grupo",
+    "createExam": "Erro ao criar exame"
+  }
+}

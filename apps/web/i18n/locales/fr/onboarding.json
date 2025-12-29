@@ -1,0 +1,185 @@
+{
+  "wizard": {
+    "title": "Configurez votre compte",
+    "subtitle": "Nous vous guiderons étape par étape",
+    "skip": "Ignorer",
+    "skipConfirm": "Vous pourrez compléter cela plus tard depuis le panneau",
+    "back": "Retour",
+    "next": "Suivant",
+    "continue": "Continuer",
+    "saving": "Enregistrement...",
+    "finish": "Terminer",
+    "step": "Étape {current} sur {total}",
+    "progress": "{percent}% complété"
+  },
+  "welcome": {
+    "title": "Bienvenue sur ProfeVision",
+    "greeting": "Bonjour {name}",
+    "description": "Nous allons configurer votre compte en quelques minutes. Nous créerons votre première institution, matière, groupe et étudiants.",
+    "duration": "Environ 3 minutes",
+    "steps": "5 étapes simples",
+    "start": "Commencer"
+  },
+  "institution": {
+    "title": "Votre institution",
+    "description": "Où enseignez-vous ?",
+    "nameLabel": "Nom de l'institution",
+    "namePlaceholder": "Ex : Collège Saint-Joseph",
+    "typeLabel": "Type d'institution",
+    "typePlaceholder": "Sélectionnez le type",
+    "types": {
+      "school": "École / Collège",
+      "university": "Université",
+      "institute": "Institut",
+      "academy": "Académie",
+      "other": "Autre"
+    },
+    "logoLabel": "Logo (optionnel)",
+    "logoHint": "Glissez ou cliquez pour télécharger",
+    "skipLogo": "Ajouter plus tard"
+  },
+  "subject": {
+    "title": "Votre matière",
+    "description": "Que enseignez-vous ?",
+    "institutionLabel": "Institution",
+    "selectInstitution": "Sélectionnez une institution",
+    "noInstitutions": "Pas d'institutions. Retournez à l'étape précédente.",
+    "nameLabel": "Nom de la matière",
+    "namePlaceholder": "Ex : Mathématiques",
+    "levelLabel": "Niveau éducatif (optionnel)",
+    "levelPlaceholder": "Ex : Secondaire, Lycée",
+    "descriptionLabel": "Description (optionnel)",
+    "descriptionPlaceholder": "Brève description de la matière"
+  },
+  "group": {
+    "title": "Votre groupe",
+    "description": "À qui enseignez-vous ?",
+    "subjectLabel": "Matière",
+    "selectSubject": "Sélectionnez une matière",
+    "noSubjects": "Pas de matières. Retournez à l'étape précédente.",
+    "nameLabel": "Nom du groupe",
+    "namePlaceholder": "Ex : 3ème A, Section 101",
+    "yearLabel": "Année scolaire (optionnel)",
+    "yearPlaceholder": "Ex : 2024-2025",
+    "periodLabel": "Période (optionnel)",
+    "periodPlaceholder": "Ex : Premier semestre"
+  },
+  "students": {
+    "title": "Vos étudiants",
+    "description": "Ajoutez des étudiants à votre groupe",
+    "groupLabel": "Groupe",
+    "selectGroup": "Sélectionnez un groupe",
+    "noGroups": "Pas de groupes. Retournez à l'étape précédente.",
+    "importTab": "Importer Excel",
+    "manualTab": "Ajout manuel",
+    "importHint": "Téléchargez un fichier Excel avec vos étudiants",
+    "importButton": "Sélectionner un fichier",
+    "separateNamesOption": "Les noms et prénoms sont dans des champs séparés",
+    "fullNameLabel": "Noms et Prénoms",
+    "fullNamePlaceholder": "Ex : Perez Gonzalez Juan Carlos",
+    "firstNameLabel": "Prénoms",
+    "firstNamePlaceholder": "Prénoms de l'étudiant",
+    "lastNameLabel": "Noms",
+    "lastNamePlaceholder": "Noms de l'étudiant",
+    "idLabel": "Identification",
+    "idPlaceholder": "Code ou document",
+    "addStudent": "Ajouter l'étudiant",
+    "studentCount": "{count} étudiant(s) ajouté(s)",
+    "noStudents": "Vous n'avez pas encore ajouté d'étudiants",
+    "noGroupForImport": "Impossible d'importer sans un groupe créé",
+    "importSuccess": "Étudiants importés avec succès",
+    "skipStudents": "Ajouter plus tard",
+    "skipWarning": "Vous pourrez ajouter des étudiants plus tard, mais vous en aurez besoin d'au moins un pour créer des examens",
+    "removeStudent": "Supprimer"
+  },
+  "examOptions": {
+    "title": "Créez votre premier examen",
+    "description": "Comment voulez-vous commencer ?",
+    "aiOption": {
+      "title": "Créer avec l'IA",
+      "description": "Générez des questions automatiquement avec l'intelligence artificielle",
+      "badge": "Recommandé"
+    },
+    "importOption": {
+      "title": "Importer un existant",
+      "description": "Téléchargez un document PDF ou Word avec vos questions"
+    },
+    "manualOption": {
+      "title": "Créer manuellement",
+      "description": "Écrivez vos propres questions à partir de zéro"
+    },
+    "exploreOption": {
+      "title": "Explorer d'abord",
+      "description": "Voir le panneau et créer l'examen plus tard"
+    }
+  },
+  "complete": {
+    "title": "Tout est prêt !",
+    "description": "Votre compte est configuré et prêt à être utilisé",
+    "goToDashboard": "Aller au tableau de bord"
+  },
+  "completion": {
+    "title": "Félicitations !",
+    "description": "Vous avez configuré votre compte ProfeVision avec succès. Vous êtes à quelques étapes d'en profiter pleinement.",
+    "nextStepsTitle": "Prochaines Étapes",
+    "steps": {
+      "createExam": "Créez votre premier examen",
+      "publishExam": "Publiez-le",
+      "printSheets": "Imprimez les feuilles de réponses",
+      "scanExam": "Scannez-le avec votre téléphone pour le corriger instantanément"
+    },
+    "progressTrackerHint": "Vous trouverez un suivi de progression sur votre tableau de bord pour vous guider dans ces étapes.",
+    "startButton": "Commencer à utiliser ProfeVision",
+    "finishing": "Finalisation..."
+  },
+  "examCreationDrawer": {
+    "title": "Créez votre premier examen",
+    "subtitle": "Choisissez comment vous souhaitez commencer",
+    "import": {
+      "title": "Importer un examen",
+      "description": "Téléchargez un PDF ou Word avec vos questions. L'IA extraira automatiquement les questions et les options. Marquez la réponse correcte avec un astérisque (*) à la fin.",
+      "showExample": "Voir un exemple de format",
+      "exampleTitle": "Exemple de format pour l'importation",
+      "exampleAlt": "Exemple de document avec des questions formatées",
+      "exampleCaption": "Marquez la réponse correcte en ajoutant un astérisque (*) à la fin de l'option."
+    },
+    "ai": {
+      "title": "Générer avec l'IA",
+      "description": "Décrivez le sujet et l'IA générera des questions à choix multiples. Vous pouvez télécharger des documents de référence pour plus de précision.",
+      "badge": "Recommandé",
+      "chatHint": "Chat interactif"
+    }
+  },
+  "checklist": {
+    "title": "Premiers pas",
+    "subtitle": "Complétez ces étapes pour profiter au maximum de ProfeVision",
+    "progress": "{completed} sur {total} complétés",
+    "minimize": "Réduire",
+    "expand": "Agrandir",
+    "dismiss": "Ne plus afficher",
+    "dismissConfirm": "Vous pouvez accéder à ce guide depuis votre profil",
+    "allComplete": "Vous avez complété toutes les étapes !",
+    "items": {
+      "createExam": {
+        "title": "Créez votre premier examen",
+        "description": "Utilisez l'IA, importez ou créez manuellement",
+        "cta": "Créer un examen"
+      },
+      "publishExam": {
+        "title": "Publiez l'examen",
+        "description": "Finalisez l'examen pour l'imprimer et le corriger. Cliquez sur 'Publier' dans les options de l'examen.",
+        "cta": "Publier"
+      },
+      "exportPdf": {
+        "title": "Exportez les feuilles de réponses",
+        "description": "Téléchargez les PDFs pour imprimer",
+        "cta": "Exporter PDF"
+      },
+      "scanExam": {
+        "title": "Scannez votre premier examen",
+        "description": "Utilisez l'appareil photo de votre téléphone pour corriger automatiquement",
+        "cta": "Scanner"
+      }
+    }
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "header": {
+    "back": "Retour aux Examens",
+    "title": "Créer des examens avec IA",
+    "description": "Expérience de chat pour générer des banques de questions et des résumés.",
+    "clearChat": "Effacer le Chat",
+    "saveDraft": "Enregistrer le brouillon",
+    "examLanguageLabel": "Langue de l'examen :"
+  },
+  "language": {
+    "label": "Générer en :",
+    "auto": "Automatique",
+    "spanish": "Español",
+    "english": "English",
+    "tooltip": "Automatique : L'agent détecte la langue\nautomatiquement selon le contexte,\nle sujet et le type d'examen.\nRecommandé pour de meilleurs résultats."
+  },
+  "context": {
+    "title": "Contexte du document",
+    "description": "Téléchargez jusqu'à 5 fichiers pour être résumés par l'IA afin de servir de contexte à la génération de l'examen.",
+    "attach": "Joindre",
+    "remove": "Supprimer le document",
+    "viewSummary": "Voir le résumé",
+    "summaryNotReadyTitle": "Résumé non disponible",
+    "summaryNotReady": "Le résumé sera disponible dès que le traitement sera terminé.",
+    "summaryTitle": "Résumé du document",
+    "summaryDesc": "Aperçu du résumé généré par l'IA.",
+    "loadingSummary": "Chargement du résumé...",
+    "document": "Document",
+    "limitDesc": "Seulement 5 documents sont autorisés.",
+    "uploadErrorTitle": "Erreur lors du chargement du document",
+    "uploadError": "Impossible de charger le document. Vérifiez que le fichier est valide et qu'il possède un format pris en charge (PDF, DOCX, PPTX, images)."
+  },
+  "results": {
+    "title": "Résultats",
+    "description": "Examinez l'examen généré.",
+    "generatedQuestions": "Questions générées",
+    "empty": "Les résultats apparaîtront ici après la génération.",
+    "generating": "Génération des questions...",
+    "generatedSoFar": "générées",
+    "randomizeOptions": "Aléatoiriser les options",
+    "edit": "Modifier",
+    "delete": "Supprimer la question",
+    "selectCorrect": "Sélectionnez la réponse correcte :",
+    "true": "Vrai",
+    "false": "Faux",
+    "rationale": "Rationale",
+    "hint": "Cliquez pour voir les questions générées.",
+    "hintTooltip": "Cliquez sur le bouton pour voir les questions générées.",
+    "deleteDialog": {
+      "title": "Supprimer la question ?",
+      "description": "Cette question sera supprimée de l'examen généré. Cette action est irréversible.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer"
+    }
+  },
+  "editor": {
+    "title": "Modifier la question",
+    "description": "Ajustez l'énoncé, les options, la réponse correcte et les métadonnées.",
+    "type": "Type",
+    "selectType": "Sélectionnez le type",
+    "types": {
+      "multiple_choice": "Choix multiple",
+      "true_false": "Vrai/Faux",
+      "short_answer": "Réponse courte",
+      "essay": "Essai"
+    },
+    "prompt": "Énoncé",
+    "options": "Options",
+    "addOption": "Ajouter une option",
+    "delete": "Supprimer",
+    "correctAnswer": "Réponse correcte",
+    "mustSelectCorrectAnswer": "* Vous devez sélectionner une option correcte",
+    "rationale": "Rationale (optionnel)",
+    "difficulty": "Difficulté",
+    "difficulties": {
+      "easy": "Facile",
+      "medium": "Moyenne",
+      "hard": "Difficile"
+    },
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "discardDialog": {
+      "title": "Abandonner les modifications ?",
+      "description": "Vous avez des modifications non enregistrées. Si vous fermez l'éditeur, ces modifications seront perdues.",
+      "cancel": "Continuer l'édition",
+      "discard": "Abandonner les modifications",
+      "save": "Enregistrer les modifications"
+    }
+  },
+  "clearDialog": {
+    "title": "Effacer les données du chat ?",
+    "description": "Cette action nettoiera les documents et les sorties dans le navigateur, le contexte du document et le brouillon local de l'examen généré par l'IA.",
+    "cancel": "Annuler",
+    "confirm": "Effacer"
+  },
+  "clearToasts": {
+    "successTitle": "Données du chat effacées",
+    "successDesc": "Les documents, les sorties et le brouillon local ont été nettoyés.",
+    "errorTitle": "Erreur lors de l'effacement",
+    "errorDesc": "Impossible de nettoyer complètement le stockage local."
+  },
+  "loadDraft": {
+    "successTitle": "Brouillon chargé",
+    "successDesc": "Vous pouvez modifier les questions dans le chat.",
+    "errorTitle": "Erreur",
+    "errorDesc": "Impossible de charger le brouillon"
+  },
+  "saveDraftDialog": {
+    "create": {
+      "title": "Enregistrer le brouillon d'examen",
+      "description": "Complétez les informations générales pour enregistrer cet examen comme brouillon.",
+      "submit": "Enregistrer le brouillon"
+    },
+    "edit": {
+      "title": "Enregistrer les modifications de l'examen",
+      "description": "Les questions de l'examen seront mises à jour avec les modifications effectuées. La matière et le groupe ne sont pas modifiés.",
+      "submit": "Enregistrer les modifications"
+    },
+    "form": {
+      "title": "Titre",
+      "titlePlaceholder": "Ex. Examen de lecture",
+      "subject": "Matière",
+      "group": "Groupe",
+      "duration": "Durée (min)",
+      "totalScore": "Score total",
+      "selectSubject": "Sélectionnez une matière",
+      "selectGroup": "Sélectionnez un groupe",
+      "selectSubjectFirst": "Sélectionnez d'abord une matière",
+      "noGroups": "Aucun groupe disponible",
+      "cancel": "Annuler"
+    },
+    "toasts": {
+      "saved": "Brouillon enregistré",
+      "savedDesc": "L'examen a été enregistré comme brouillon.",
+      "updated": "Brouillon mis à jour",
+      "updatedDesc": "Le brouillon a été mis à jour.",
+      "error": "Erreur",
+      "saveError": "Impossible d'enregistrer le brouillon",
+      "invalidContract": "Contrat JSON invalide, veuillez réessayer"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "description": "Décrivez l'examen que vous souhaitez générer et ajustez-le avec des instructions.",
+    "needLogin": "Vous devez vous connecter pour utiliser l'IA.",
+    "send": "Envoyer",
+    "inputPlaceholder": "Écrivez vos instructions ici...",
+    "waitingPlaceholder": "En attente de réponse...",
+    "you": "Vous",
+    "assistant": "Assistant",
+    "system": "Système",
+    "progress": {
+      "step": "Traitement...",
+      "planning": "Planification de l'examen",
+      "generating": "Génération des questions",
+      "validating": "Validation des résultats",
+      "randomizing": "Aléatoirisation des options",
+      "regenerating": "Régénération de la question",
+      "adding": "Ajout de questions",
+      "modifying": "Modification des questions",
+      "modifying_batch": "Modification de plusieurs questions",
+      "completed": "Génération terminée"
+    },
+    "examGenerated": "✨ Examen généré avec succès avec {count} questions. Consultez les résultats dans le panneau de Résultats.",
+    "error": {
+      "generation": "Erreur lors de la génération de l'examen",
+      "connection": "Erreur de connexion"
+    },
+    "toasts": {
+      "successTitle": "Résultats générés",
+      "successDesc": "Consultez l'examen généré dans le panneau de Résultats.",
+      "errorTitle": "Erreur",
+      "errorDesc": "Une erreur inattendue est survenue. Réessayez.",
+      "invalidJson": "Erreur dans la réponse de l'assistant. Réessayez.",
+      "invalidContract": "La réponse n'a pas respecté le contrat attendu. J'ai ajusté les règles et vous pouvez réessayer."
+    }
+  },
+  "empty": {
+    "title": "Comment puis-je vous aider aujourd'hui ?",
+    "subtitle": "Choisissez une suggestion ou écrivez vos instructions ci-dessous.",
+    "examples": {
+      "createExam": "Créons un examen de 5 questions sur ...",
+      "modifyQuestion": "Modifions la question 2 de cet examen pour qu'elle porte sur ...",
+      "useDocuments": "Utilisez les documents joints pour générer ... questions à choix multiples.",
+      "moreHarder": "Générez-moi 3 questions supplémentaires en augmentant la difficulté au niveau Avancé."
+    }
+  }
+}

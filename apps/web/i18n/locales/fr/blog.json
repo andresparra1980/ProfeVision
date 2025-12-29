@@ -1,0 +1,14 @@
+{
+  "title": "Blog",
+  "description": "Dernières nouvelles, conseils et mises à jour sur ProfeVision.",
+  "comingSoon": {
+    "title": "Bientôt disponible",
+    "description": "Nous préparons du contenu précieux pour les éducateurs. Vous trouverez ici :",
+    "items": [
+      "Meilleures pratiques en évaluation numérique",
+      "Conseils pour optimiser le temps de correction",
+      "Cas de succès d'institutions éducatives",
+      "Nouveautés et mises à jour de la plateforme"
+    ]
+  }
+}

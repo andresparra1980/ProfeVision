@@ -1,0 +1,17 @@
+{
+  "errors": {
+    "serverConfig": "Erro de configuração do servidor",
+    "forbidden": "Não foi possível verificar o acesso ao grupo",
+    "groupNotFound": "Grupo não encontrado",
+    "missingPeriodDates": "As datas de início e fim são obrigatórias",
+    "invalidPeriodRange": "A data de fim deve ser posterior à data de início",
+    "createScheme": "Não foi possível criar o esquema",
+    "createPeriod": "Não foi possível criar o período",
+    "createComponent": "Não foi possível criar o componente",
+    "updatePeriod": "Erro ao atualizar período",
+    "deleteComponents": "Erro ao excluir componentes",
+    "deletePeriods": "Erro ao excluir períodos",
+    "loadScheme": "Erro ao carregar esquema atualizado",
+    "internal": "Erro ao salvar o esquema de notas"
+  }
+}
