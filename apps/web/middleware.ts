@@ -8,9 +8,15 @@ import { routeMappings, getLocalizedRoute } from "./i18n/route-constants";
 // Crear el middleware de i18n
 const intlMiddleware = createIntlMiddleware({
   ...routing,
-  localeDetection: false, // Deshabilitar detección automática para evitar redirecciones inesperadas
+  localeDetection: true, // ✅ Habilitar detección automática con cookie
   localePrefix: "always", // Prefijar siempre el locale (incluye 'es') para evitar normalizaciones 307
   alternateLinks: false,
+  localeCookie: {
+    name: 'NEXT_LOCALE',
+    maxAge: 31536000, // 1 año
+    sameSite: 'lax',
+    path: '/'
+  }
 });
 
 export async function middleware(request: NextRequest) {
@@ -68,26 +74,87 @@ export async function middleware(request: NextRequest) {
     return resp;
   }
 
-  // 🌍 Si es la raíz, redirigir únicamente a /{defaultLocale}
+  // 🌍 Si es la raíz, detectar idioma preferido del usuario
   if (pathname === "/") {
-    const redirectUrl = new URL(`/${defaultLocale}`, request.url);
+    // 1. Verificar cookie NEXT_LOCALE
+    const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
+    
+    // 2. Detectar idioma del navegador desde Accept-Language
+    const acceptLanguage = request.headers.get('accept-language');
+    let detectedLocale = defaultLocale;
+    
+    if (cookieLocale && supportedLocales.includes(cookieLocale as any)) {
+      detectedLocale = cookieLocale;
+      console.log(`[Middleware] Using locale from cookie: ${detectedLocale}`);
+    } else if (acceptLanguage) {
+      // Parsear Accept-Language y buscar coincidencia con locales soportados
+      const browserLocales = acceptLanguage
+        .split(',')
+        .map(lang => lang.split(';')[0].trim().toLowerCase().substring(0, 2));
+      
+      const matched = browserLocales.find(lang => 
+        supportedLocales.includes(lang as any)
+      );
+      
+      if (matched) {
+        detectedLocale = matched;
+        console.log(`[Middleware] Auto-detected locale from browser: ${detectedLocale}`);
+      }
+    }
+    
+    const redirectUrl = new URL(`/${detectedLocale}`, request.url);
     console.log(
-      `[Middleware] Redirecting root to default locale: ${redirectUrl.pathname}`,
+      `[Middleware] Redirecting root to detected locale: ${redirectUrl.pathname}`,
     );
-    return NextResponse.redirect(redirectUrl);
+    
+    // Establecer cookie si no existe
+    const response = NextResponse.redirect(redirectUrl);
+    if (!cookieLocale) {
+      response.cookies.set('NEXT_LOCALE', detectedLocale, {
+        maxAge: 31536000, // 1 año
+        sameSite: 'lax',
+        path: '/'
+      });
+    }
+    
+    return response;
   }
 
-  // 🌍 Redirigir cualquier ruta NO localizada al defaultLocale
+  // 🌍 Redirigir cualquier ruta NO localizada usando idioma preferido del usuario
   const hasLocalePrefix = supportedLocales.some(
     (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`),
   );
   if (!hasLocalePrefix) {
+    // Detectar idioma preferido (cookie > Accept-Language > default)
+    const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
+    const acceptLanguage = request.headers.get('accept-language');
+    let targetLocale = defaultLocale;
+    
+    if (cookieLocale && supportedLocales.includes(cookieLocale as any)) {
+      targetLocale = cookieLocale;
+    } else if (acceptLanguage) {
+      const browserLocales = acceptLanguage
+        .split(',')
+        .map(lang => lang.split(';')[0].trim().toLowerCase().substring(0, 2));
+      const matched = browserLocales.find(lang => supportedLocales.includes(lang as any));
+      if (matched) targetLocale = matched;
+    }
+    
     const redirectUrl = new URL(request.url);
-    redirectUrl.pathname = `/${defaultLocale}${pathname}`;
+    redirectUrl.pathname = `/${targetLocale}${pathname}`;
     console.log(
-      `[Middleware] Redirecting non-localized path '${pathname}' to default locale: ${redirectUrl.pathname}${redirectUrl.search}`,
+      `[Middleware] Redirecting non-localized path '${pathname}' to detected locale: ${redirectUrl.pathname}${redirectUrl.search}`,
     );
-    return NextResponse.redirect(redirectUrl);
+    
+    const response = NextResponse.redirect(redirectUrl);
+    if (!cookieLocale) {
+      response.cookies.set('NEXT_LOCALE', targetLocale, {
+        maxAge: 31536000,
+        sameSite: 'lax',
+        path: '/'
+      });
+    }
+    return response;
   }
 
   // 🌍 Aplicar middleware de i18n SIEMPRE (gestiona slugs traducidos y reescrituras)

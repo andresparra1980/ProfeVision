@@ -44,6 +44,10 @@ export function LanguageSwitcherDropdown({
   const handleLocaleChange = (newLocale: string) => {
     logger.log('🔄 Language Switch START:', { pathname, locale, newLocale });
 
+    // Establecer cookie NEXT_LOCALE para persistir la elección del usuario
+    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+    logger.log('🍪 Cookie NEXT_LOCALE set to:', newLocale);
+
     let currentPath = pathname;
 
     // 1) Normalizar: quitar prefijo de idioma actual (/es, /en, /fr, /pt)
