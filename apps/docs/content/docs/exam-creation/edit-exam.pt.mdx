@@ -1,48 +1,6 @@
 ---
 title: Editar exame
-
-# Página de Edição de Exame
-
-Esta página permite que você modifique os detalhes de um exame existente no **ProfeVision**.
-
-## Como Editar um Exame
-
-Para editar as informações do seu exame, siga as instruções abaixo:
-
-1. Acesse o seu **painel**.
-2. Localize o exame que deseja alterar na lista de exames.
-3. Clique no botão de edição para abrir o formulário de configurações.
-
-## Campos Disponíveis
-
-Ao editar um exame, você pode atualizar os seguintes campos:
-
-- **Nome do Exame:** O título que identifica a avaliação para o professor e o aluno.
-- **Data:** A data em que o exame será aplicado.
-- **Critérios de Correção:** Defina como as notas serão atribuídas às questões digitalizadas.
-
-<Cards>
-  <Card title="Dica para o Professor" href="/docs/tips">
-    Lembre-se de revisar os critérios de correção antes de iniciar a digitalização das folhas de resposta dos alunos.
-  </Card>
-</Cards>
-
-### Observações Importantes
-
-> [!IMPORTANT]
-> Se um exame já possui alunos vinculados e o processo de correção já foi iniciado, algumas alterações nas questões podem ser restritas para garantir a integridade das notas.
-
-```javascript
-// Exemplo de objeto de configuração do exame
-{
-  id: "exame-123",
-  status: "em_edicao",
-  totalPoints: 10
-}
-```
-
-Após realizar todas as alterações necessárias, clique em **Salvar Alterações** para atualizar o banco de dados do sistema.
-description: Modificar exames existentes
+description: Modifique exames existentes
 ---
 
 ## Editar exame
@@ -54,19 +12,19 @@ Modifique seus exames após criá-los.
 1. Em **Exames**, encontre o exame
 2. Clique em **Editar**
 
-![Edit access](/images/exam-creation/edit-01-access.webp)
+![Acesso à edição](/images/exam-creation/edit-01-access.webp)
 
 ### Exames em rascunho
 
 Enquanto o exame estiver em rascunho, você pode:
 
-- Editar o texto das questões
+- Editar o texto das perguntas
 - Alterar as opções de resposta
 - Modificar a resposta correta
-- Adicionar ou excluir questões
-- Reordenar questões
+- Adicionar ou excluir perguntas
+- Reordenar perguntas
 
-![Edit draft](/images/exam-creation/edit-02-draft.webp)
+![Editar rascunho](/images/exam-creation/edit-02-draft.webp)
 
 ### Publicar exame
 
@@ -84,10 +42,10 @@ Após a publicação, as opções de edição são limitadas para proteger a int
 
 Em exames publicados, você pode:
 
-- **Ativar/desativar questões**: A questão é excluída do cálculo
-- **Alterar resposta correta**: Recalcula automaticamente as notas
+- **Ativar/desativar perguntas**: A pergunta é excluída do cálculo
+- **Alterar a resposta correta**: Recalcula as notas automaticamente
 
-![Published exam](/images/exam-creation/edit-03-published.webp)
+![Exame publicado](/images/exam-creation/edit-03-published.webp)
 
 ### Alterar resposta correta
 
