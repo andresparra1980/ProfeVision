@@ -1,0 +1,9 @@
+{
+  "title": "PDF e Impressão",
+  "pages": [
+    "index",
+    "generate-pdf",
+    "qr-codes",
+    "print-guidelines"
+  ]
+}

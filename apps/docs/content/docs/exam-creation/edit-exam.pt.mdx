@@ -1,0 +1,100 @@
+---
+title: Editar exame
+
+# Página de Edição de Exame
+
+Esta página permite que você modifique os detalhes de um exame existente no **ProfeVision**.
+
+## Como Editar um Exame
+
+Para editar as informações do seu exame, siga as instruções abaixo:
+
+1. Acesse o seu **painel**.
+2. Localize o exame que deseja alterar na lista de exames.
+3. Clique no botão de edição para abrir o formulário de configurações.
+
+## Campos Disponíveis
+
+Ao editar um exame, você pode atualizar os seguintes campos:
+
+- **Nome do Exame:** O título que identifica a avaliação para o professor e o aluno.
+- **Data:** A data em que o exame será aplicado.
+- **Critérios de Correção:** Defina como as notas serão atribuídas às questões digitalizadas.
+
+<Cards>
+  <Card title="Dica para o Professor" href="/docs/tips">
+    Lembre-se de revisar os critérios de correção antes de iniciar a digitalização das folhas de resposta dos alunos.
+  </Card>
+</Cards>
+
+### Observações Importantes
+
+> [!IMPORTANT]
+> Se um exame já possui alunos vinculados e o processo de correção já foi iniciado, algumas alterações nas questões podem ser restritas para garantir a integridade das notas.
+
+```javascript
+// Exemplo de objeto de configuração do exame
+{
+  id: "exame-123",
+  status: "em_edicao",
+  totalPoints: 10
+}
+```
+
+Após realizar todas as alterações necessárias, clique em **Salvar Alterações** para atualizar o banco de dados do sistema.
+description: Modificar exames existentes
+---
+
+## Editar exame
+
+Modifique seus exames após criá-los.
+
+### Acesso
+
+1. Em **Exames**, encontre o exame
+2. Clique em **Editar**
+
+![Edit access](/images/exam-creation/edit-01-access.webp)
+
+### Exames em rascunho
+
+Enquanto o exame estiver em rascunho, você pode:
+
+- Editar o texto das questões
+- Alterar as opções de resposta
+- Modificar a resposta correta
+- Adicionar ou excluir questões
+- Reordenar questões
+
+![Edit draft](/images/exam-creation/edit-02-draft.webp)
+
+### Publicar exame
+
+Quando o exame estiver pronto:
+
+1. Clique em **Publicar**
+2. O status muda de "Rascunho" para "Publicado"
+3. Você poderá gerar o PDF e atribuir a grupos
+
+<Callout type="warn">
+Após a publicação, as opções de edição são limitadas para proteger a integridade dos resultados.
+</Callout>
+
+### Exames publicados
+
+Em exames publicados, você pode:
+
+- **Ativar/desativar questões**: A questão é excluída do cálculo
+- **Alterar resposta correta**: Recalcula automaticamente as notas
+
+![Published exam](/images/exam-creation/edit-03-published.webp)
+
+### Alterar resposta correta
+
+1. Clique na opção que deve ser a correta
+2. Confirme a alteração
+3. O sistema recalcula todas as notas
+
+<Callout type="info">
+Ao alterar a resposta correta, todas as notas dos alunos são atualizadas automaticamente.
+</Callout>

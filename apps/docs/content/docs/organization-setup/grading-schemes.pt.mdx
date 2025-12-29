@@ -1,0 +1,58 @@
+---
+title: Esquemas de correção
+description: Configure como as notas são calculadas
+---
+
+## Esquemas de notas
+
+Um esquema define como as notas finais são calculadas para um grupo.
+
+### Estrutura
+
+Os esquemas possuem 3 níveis:
+
+1. **Esquema**: Contêiner principal com nome e datas
+2. **Períodos**: Divisões de tempo (ex: "Primeiro período", "Segundo período")
+3. **Componentes**: Itens individuais (exames, projetos, questionários)
+
+### Acessar o esquema
+
+1. No card do grupo, clique no ícone de **Esquema**
+2. Ou navegue até **Grupos** → selecione um grupo → **Esquema de notas**
+
+![Grading scheme](/images/organization-setup/grading-scheme-01-view.webp)
+
+### Configurar o esquema
+
+1. **Nomeie o esquema** no campo superior
+2. **Adicione períodos** com o botão correspondente
+3. Para cada período, configure:
+   - **Nome**: Identificador do período
+   - **Porcentagem**: Peso na nota final
+   - **Datas**: Início e fim do período
+4. **Adicione componentes** a cada período:
+   - **Nome**: Nome do componente
+   - **Tipo**: Exame, projeto, questionário ou trabalho
+   - **Porcentagem**: Peso dentro do período
+5. Clique em **Salvar alterações**
+
+![Configure scheme](/images/organization-setup/grading-scheme-02-edit.webp)
+
+### Tipos de componentes
+
+| Tipo | Uso |
+|------|-----|
+| Exame | Avaliações formais |
+| Projeto | Trabalhos de longo prazo |
+| Questionário | Avaliações curtas |
+| Trabalho | Tarefas e atividades |
+
+### Regras de validação
+
+- As porcentagens dos períodos devem somar **100%**
+- Os componentes de cada período devem somar a porcentagem total do período
+- As datas de início devem ser anteriores às datas de término
+
+<Callout type="info">
+Você pode arrastar os períodos para reordená-los.
+</Callout>

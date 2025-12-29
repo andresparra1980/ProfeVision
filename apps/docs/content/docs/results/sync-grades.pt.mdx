@@ -1,0 +1,51 @@
+---
+title: Sincronizar notas
+description: Conecte exames com a caderneta de notas
+---
+
+## Sincronizar notas
+
+Envie as notas dos exames para os componentes de avaliação do grupo.
+
+### Pré-requisitos
+
+1. Ter um esquema de avaliação configurado
+2. O exame deve estar vinculado a um componente
+3. O exame deve ter resultados corrigidos
+
+### Vincular exame ao componente
+
+1. Vá para a página do exame
+2. Clique em **Vincular ao componente**
+3. Selecione o componente (ex: "Exame Parcial 1")
+4. Salvar
+
+![Sync grades](/images/results/results-07-sync-grades.webp)
+
+### Sincronizar
+
+1. Na tabela de notas do grupo
+2. Clique em **Sincronizar**
+3. As notas são atualizadas automaticamente
+
+### Como funciona
+
+O sistema:
+1. Pega a porcentagem do exame
+2. Converte para uma escala de 0 a 5
+3. Salva no componente vinculado
+
+**Fórmula**: `Nota = Porcentagem / 20`
+
+### Exemplo
+
+| Porcentagem | Nota |
+|-------------|------|
+| 100%        | 5.0  |
+| 80%         | 4.0  |
+| 60%         | 3.0  |
+| 40%         | 2.0  |
+
+<Callout type="info">
+Notas manuais também são sincronizadas automaticamente.
+</Callout>

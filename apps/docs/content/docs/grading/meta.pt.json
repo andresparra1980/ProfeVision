@@ -1,0 +1,12 @@
+{
+  "title": "Correção pela Câmera",
+  "pages": [
+    "index",
+    "scan-overview",
+    "start-scanning",
+    "capture-image",
+    "review-results",
+    "save-continue",
+    "troubleshooting"
+  ]
+}
