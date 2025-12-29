@@ -1,0 +1,11 @@
+{
+  "title": "Configuration de l'organisation",
+  "pages": [
+    "index",
+    "create-institution",
+    "create-subject",
+    "create-group",
+    "add-students",
+    "grading-schemes"
+  ]
+}

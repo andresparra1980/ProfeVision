@@ -1,0 +1,12 @@
+{
+  "title": "Résultats et Analyses",
+  "pages": [
+    "index",
+    "results-dashboard",
+    "question-analysis",
+    "student-results",
+    "export-excel",
+    "manual-override",
+    "sync-grades"
+  ]
+}
