@@ -18,6 +18,16 @@ export default async function HomePage({
         'Complete documentation for teachers using ProfeVision.',
       getStarted: 'Get Started',
     },
+    fr: {
+      description:
+        'Documentation complète pour les enseignants utilisant ProfeVision.',
+      getStarted: 'Commencer',
+    },
+    pt: {
+      description:
+        'Documentação completa para professores usando ProfeVision.',
+      getStarted: 'Começar',
+    },
   };
 
   const t = content[lang as keyof typeof content] || content.es;
