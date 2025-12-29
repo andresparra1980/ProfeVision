@@ -1,0 +1,150 @@
+# Portuguese Brazilian (Português Brasil) - Translation Configuration
+# Based on FR/PT implementation (Dec 2025)
+
+language: "pt"
+language_english: "Brazilian Portuguese"
+locale_code: "pt"
+
+# Formality settings
+formality: "formal"
+formality_details: "você (formal), not tu (very informal)"
+
+# Technical terminology translations
+tech_terms:
+  dashboard: "painel de controle"
+  exam: "exame"
+  grade: "nota"
+  grading: "correção"
+  scan: "digitalizar"
+  student: "aluno"
+  teacher: "professor"
+  subject: "disciplina"
+  group: "grupo"
+  assignment: "tarefa"
+  result: "resultado"
+  score: "pontuação"
+  question: "pergunta"
+  answer: "resposta"
+  multiple_choice: "múltipla escolha"
+  true_false: "verdadeiro/falso"
+  short_answer: "resposta curta"
+  essay: "ensaio"
+  upload: "enviar"
+  download: "baixar"
+  export: "exportar"
+  import: "importar"
+  settings: "configurações"
+  profile: "perfil"
+  notification: "notificação"
+  report: "relatório"
+  analytics: "análises"
+
+# UI-specific terminology
+ui_terms:
+  login: "entrar"
+  logout: "sair"
+  signup: "cadastrar"
+  forgot_password: "esqueceu a senha"
+  reset_password: "redefinir senha"
+  save: "salvar"
+  cancel: "cancelar"
+  delete: "excluir"
+  edit: "editar"
+  create: "criar"
+  back: "voltar"
+  next: "próximo"
+  previous: "anterior"
+  finish: "concluir"
+  loading: "carregando"
+  error: "erro"
+  success: "sucesso"
+
+# Fumadocs UI component translations (for apps/docs layout.tsx)
+fumadocs_ui:
+  search: "Buscar"
+  searchNoResult: "Nenhum resultado encontrado"
+  toc: "Nesta página"
+  tocNoHeadings: "Sem cabeçalhos"
+  lastUpdate: "Última atualização"
+  chooseLanguage: "Idioma"
+  nextPage: "Próximo"
+  previousPage: "Anterior"
+  chooseTheme: "Tema"
+
+# Additional guidelines for Brazilian Portuguese
+additional_guidelines: |
+  - Use Brazilian Portuguese spelling and vocabulary (not European Portuguese)
+  - Maintain formal tone with 'você' (not 'tu')
+  - Academic terminology should be professional and clear
+  - Common differences from PT-PT:
+    - "tela" not "ecrã" (screen)
+    - "celular" not "telemóvel" (mobile)
+    - "aplicativo" not "aplicação" (app)
+    - "deletar"/"excluir" not "apagar" (delete)
+  - Date format: DD/MM/YYYY
+  - Number format: 1.234,56 (dot for thousands, comma for decimals)
+  - Use "ç" and accents properly (português, açúcar, você)
+  - Keep gerund forms natural (-ando, -endo, -indo)
+
+# Common phrases and idioms
+common_phrases:
+  welcome: "Bem-vindo"
+  get_started: "Começar"
+  learn_more: "Saiba mais"
+  contact_us: "Entre em contato"
+  terms_of_service: "Termos de serviço"
+  privacy_policy: "Política de privacidade"
+  all_rights_reserved: "Todos os direitos reservados"
+
+# Examples of quality translations
+examples:
+  - source: "Crear Examen"
+    target: "Criar Exame"
+    notes: "Direct translation, natural word order"
+    
+  - source: "¿Olvidaste tu contraseña?"
+    target: "Esqueceu sua senha?"
+    notes: "Natural Brazilian phrasing"
+    
+  - source: "Gestiona y crea exámenes para tus estudiantes"
+    target: "Gerencie e crie exames para seus alunos"
+    notes: "Formal você form (implied)"
+    
+  - source: "Has cerrado sesión correctamente"
+    target: "Você encerrou sua sessão corretamente"
+    notes: "Explicit você subject"
+    
+  - source: "¡Email Verificado!"
+    target: "Email Verificado!"
+    notes: "No inverted exclamation in Portuguese"
+
+# Quality checks specific to Brazilian Portuguese
+quality_checks:
+  - check: "brazilian_spelling"
+    description: "Verify Brazilian spelling vs European (aplicativo, não aplicação)"
+    
+  - check: "formality"
+    description: "Ensure 'você' form is used consistently"
+    
+  - check: "accents"
+    description: "Check proper use of accents (á, â, ã, é, ê, í, ó, ô, õ, ú, ç)"
+    
+  - check: "natural_flow"
+    description: "Verify text sounds natural in Brazilian Portuguese"
+
+# Common mistakes to avoid
+common_mistakes:
+  - mistake: "Using European Portuguese vocabulary"
+    correct: "Use Brazilian Portuguese: 'celular' not 'telemóvel'"
+    
+  - mistake: "Formal 'vós' form"
+    correct: "Use 'você/vocês' for formal, never 'vós'"
+    
+  - mistake: "Literal translation of Spanish gerunds"
+    correct: "Adapt to natural Portuguese structure"
+    
+  - mistake: "Translating brand names"
+    correct: "Keep 'ProfeVision' unchanged"
+    
+  - mistake: "Using 'deletar' exclusively"
+    correct: "Prefer 'excluir' in formal contexts"

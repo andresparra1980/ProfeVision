@@ -1,0 +1,145 @@
+# Language Translation Configuration Template
+# Copy this file to {language_code}.yaml and customize
+
+# Basic language info
+language: "de"  # ISO 639-1 code
+language_english: "German"
+locale_code: "de"
+
+# Formality settings
+formality: "formal"  # formal | informal | mixed
+formality_details: "Sie (formal), not du (informal)"
+
+# Technical terminology translations
+# Add all common technical terms used in ProfeVision
+tech_terms:
+  dashboard: "Dashboard"  # or translated equivalent
+  exam: "Prüfung"
+  grade: "Note"
+  grading: "Bewertung"
+  scan: "Scannen"
+  student: "Student"
+  teacher: "Lehrer"
+  subject: "Fach"
+  group: "Gruppe"
+  assignment: "Aufgabe"
+  result: "Ergebnis"
+  score: "Punktzahl"
+  question: "Frage"
+  answer: "Antwort"
+  # Add more as needed...
+
+# UI-specific terminology
+ui_terms:
+  login: "Anmelden"
+  logout: "Abmelden"
+  signup: "Registrieren"
+  forgot_password: "Passwort vergessen"
+  reset_password: "Passwort zurücksetzen"
+  save: "Speichern"
+  cancel: "Abbrechen"
+  delete: "Löschen"
+  edit: "Bearbeiten"
+  create: "Erstellen"
+  back: "Zurück"
+  next: "Weiter"
+  previous: "Zurück"
+  finish: "Fertigstellen"
+  loading: "Lädt"
+  error: "Fehler"
+  success: "Erfolg"
+
+# Fumadocs UI component translations (for apps/docs layout.tsx)
+# These are used in the documentation site's UI elements
+fumadocs_ui:
+  search: "Suchen"  # Search box placeholder
+  searchNoResult: "Keine Ergebnisse gefunden"  # No results message
+  toc: "Auf dieser Seite"  # Table of contents header
+  tocNoHeadings: "Keine Überschriften"  # No headings message
+  lastUpdate: "Zuletzt aktualisiert"  # Last update label
+  chooseLanguage: "Sprache"  # Language selector label
+  nextPage: "Weiter"  # Next page button
+  previousPage: "Zurück"  # Previous page button
+  chooseTheme: "Thema"  # Theme selector label
+
+# Additional guidelines specific to this language
+additional_guidelines: |
+  - Use [country] standard dialect (e.g., German standard/Hochdeutsch)
+  - Maintain [formal/informal] tone throughout
+  - Academic terminology should be [formal/professional/clear]
+  - Special grammar rules: [list any specific rules]
+  - Date format: DD/MM/YYYY or MM/DD/YYYY
+  - Number format: 1,234.56 or 1.234,56
+  - Use proper diacritics/special characters
+  - [Add any other language-specific guidelines]
+
+# Common phrases and idioms
+common_phrases:
+  welcome: "Willkommen"
+  get_started: "Erste Schritte"
+  learn_more: "Mehr erfahren"
+  contact_us: "Kontaktieren Sie uns"
+  terms_of_service: "Nutzungsbedingungen"
+  privacy_policy: "Datenschutzrichtlinie"
+  all_rights_reserved: "Alle Rechte vorbehalten"
+
+# Examples of quality translations
+# Include 3-5 representative examples
+examples:
+  - source: "Crear Examen"
+    target: "Prüfung erstellen"
+    notes: "Use infinitive verb form"
+    
+  - source: "¿Olvidaste tu contraseña?"
+    target: "Passwort vergessen?"
+    notes: "Question format"
+    
+  - source: "Gestiona y crea exámenes para tus estudiantes"
+    target: "Verwalten und erstellen Sie Prüfungen für Ihre Studenten"
+    notes: "Formal Sie form"
+    
+  # Add more examples...
+
+# Quality checks specific to this language
+quality_checks:
+  - check: "formality"
+    description: "Ensure [formal pronoun] is used consistently"
+    
+  - check: "capitalization"
+    description: "Verify proper capitalization rules"
+    
+  - check: "grammar"
+    description: "Check gender agreement, declensions, etc."
+    
+  # Add more checks...
+
+# Common mistakes to avoid
+common_mistakes:
+  - mistake: "Using informal pronoun in formal context"
+    correct: "Always use formal [Sie/você/vous] for users"
+    
+  - mistake: "Literal word-for-word translation"
+    correct: "Adapt to natural phrasing in target language"
+    
+  - mistake: "Translating brand names"
+    correct: "Keep 'ProfeVision' unchanged"
+    
+  - mistake: "Inconsistent terminology"
+    correct: "Use standardized terms from tech_terms list"
+    
+  # Add more common mistakes...
+
+# Resources for translators (optional)
+resources:
+  dictionaries:
+    - "https://dict.leo.org"
+  terminology_databases:
+    - "University glossaries"
+  style_guides:
+    - "Academic writing guides"
+
+# Notes for reviewers (optional)
+reviewer_notes: |
+  - Pay special attention to [specific areas]
+  - Common issues in past translations: [list]
+  - Cultural considerations: [list]

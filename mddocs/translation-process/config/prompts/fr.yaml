@@ -1,0 +1,146 @@
+# French (Français) - Translation Configuration
+# Based on FR/PT implementation (Dec 2025)
+
+language: "fr"
+language_english: "French"
+locale_code: "fr"
+
+# Formality settings
+formality: "formal"
+formality_details: "vous (formal), not tu (informal)"
+
+# Technical terminology translations
+tech_terms:
+  dashboard: "tableau de bord"
+  exam: "examen"
+  grade: "note"
+  grading: "notation"
+  scan: "numériser"
+  student: "étudiant"
+  teacher: "enseignant"
+  subject: "matière"
+  group: "groupe"
+  assignment: "devoir"
+  result: "résultat"
+  score: "score"
+  question: "question"
+  answer: "réponse"
+  multiple_choice: "choix multiples"
+  true_false: "vrai/faux"
+  short_answer: "réponse courte"
+  essay: "essai"
+  upload: "télécharger"
+  download: "télécharger"
+  export: "exporter"
+  import: "importer"
+  settings: "paramètres"
+  profile: "profil"
+  notification: "notification"
+  report: "rapport"
+  analytics: "analytiques"
+
+# UI-specific terminology
+ui_terms:
+  login: "connexion"
+  logout: "déconnexion"
+  signup: "inscription"
+  forgot_password: "mot de passe oublié"
+  reset_password: "réinitialiser le mot de passe"
+  save: "enregistrer"
+  cancel: "annuler"
+  delete: "supprimer"
+  edit: "modifier"
+  create: "créer"
+  back: "retour"
+  next: "suivant"
+  previous: "précédent"
+  finish: "terminer"
+  loading: "chargement"
+  error: "erreur"
+  success: "succès"
+
+# Fumadocs UI component translations (for apps/docs layout.tsx)
+fumadocs_ui:
+  search: "Rechercher"
+  searchNoResult: "Aucun résultat trouvé"
+  toc: "Sur cette page"
+  tocNoHeadings: "Aucun en-tête"
+  lastUpdate: "Dernière mise à jour"
+  chooseLanguage: "Langue"
+  nextPage: "Suivant"
+  previousPage: "Précédent"
+  chooseTheme: "Thème"
+
+# Additional guidelines for French translations
+additional_guidelines: |
+  - Use French standard (France, not Canadian or African variants)
+  - Maintain formal tone throughout (vous, not tu)
+  - Preserve gender-neutral language when possible
+  - Academic terminology should be formal and professional
+  - Use proper French typography:
+    - Space before : ; ! ?
+    - « guillemets français » for quotes
+    - Capitalize only first word in titles (unless proper noun)
+  - Technical terms from English can stay if commonly used (ex: "dashboard", "email")
+  - Date format: DD/MM/YYYY
+  - Number format: 1 234,56 (space for thousands, comma for decimals)
+
+# Common phrases and idioms
+common_phrases:
+  welcome: "Bienvenue"
+  get_started: "Commencer"
+  learn_more: "En savoir plus"
+  contact_us: "Nous contacter"
+  terms_of_service: "Conditions d'utilisation"
+  privacy_policy: "Politique de confidentialité"
+  all_rights_reserved: "Tous droits réservés"
+
+# Examples of quality translations
+examples:
+  - source: "Crear Examen"
+    target: "Créer un Examen"
+    notes: "Use article 'un'"
+    
+  - source: "¿Olvidaste tu contraseña?"
+    target: "Mot de passe oublié ?"
+    notes: "Space before question mark"
+    
+  - source: "Gestiona y crea exámenes para tus estudiantes"
+    target: "Gérez et créez des examens pour vos étudiants"
+    notes: "Formal vous form"
+    
+  - source: "Has cerrado sesión correctamente"
+    target: "Vous avez fermé votre session correctement"
+    notes: "Full sentence with vous"
+    
+  - source: "¡Email Verificado!"
+    target: "Email vérifié !"
+    notes: "Space before exclamation"
+
+# Quality checks specific to French
+quality_checks:
+  - check: "formality"
+    description: "Ensure 'vous' is used, not 'tu'"
+    
+  - check: "typography"
+    description: "Verify spacing before punctuation (: ; ! ?)"
+    
+  - check: "articles"
+    description: "Check proper use of articles (le/la/les/un/une/des)"
+    
+  - check: "gender"
+    description: "Verify gender agreement (adjectives, past participles)"
+
+# Common mistakes to avoid
+common_mistakes:
+  - mistake: "Using 'tu' instead of 'vous'"
+    correct: "Always use formal 'vous' for users"
+    
+  - mistake: "No space before : ; ! ?"
+    correct: "Always add space before these punctuation marks"
+    
+  - mistake: "English quotes \" \""
+    correct: "Use French guillemets « »"
+    
+  - mistake: "Translating brand names"
+    correct: "Keep 'ProfeVision' unchanged"

@@ -1,0 +1,179 @@
+# ProfeVision Translation Languages Configuration
+# v1.0 - Diciembre 29, 2025
+
+# Source language (reference for all translations)
+source_language: "es"
+
+# Fallback language (when target not available)
+fallback_language: "en"
+
+# Supported languages
+languages:
+  # ============================================================================
+  # ACTIVE LANGUAGES
+  # ============================================================================
+  
+  fr:
+    name: "Français"
+    name_english: "French"
+    locale_code: "fr"
+    iso_code: "fr-FR"
+    country: "France"
+    enabled: true
+    priority: 1
+    notes: "Completed Dec 2025"
+    
+  pt:
+    name: "Português (Brasil)"
+    name_english: "Brazilian Portuguese"
+    locale_code: "pt"
+    iso_code: "pt-BR"
+    country: "Brazil"
+    enabled: true
+    priority: 2
+    notes: "Completed Dec 2025"
+  
+  # ============================================================================
+  # PLANNED LANGUAGES
+  # ============================================================================
+  
+  de:
+    name: "Deutsch"
+    name_english: "German"
+    locale_code: "de"
+    iso_code: "de-DE"
+    country: "Germany"
+    enabled: false  # Set to true when ready
+    priority: 3
+    notes: "Target Q1 2026"
+    
+  it:
+    name: "Italiano"
+    name_english: "Italian"
+    locale_code: "it"
+    iso_code: "it-IT"
+    country: "Italy"
+    enabled: false
+    priority: 4
+    notes: "Target Q1 2026"
+    
+  zh-cn:
+    name: "简体中文"
+    name_english: "Simplified Chinese"
+    locale_code: "zh"
+    iso_code: "zh-CN"
+    country: "China"
+    enabled: false
+    priority: 5
+    notes: "Target Q2 2026"
+    
+  ja:
+    name: "日本語"
+    name_english: "Japanese"
+    locale_code: "ja"
+    iso_code: "ja-JP"
+    country: "Japan"
+    enabled: false
+    priority: 6
+    notes: "Target Q2 2026"
+    
+  ar:
+    name: "العربية"
+    name_english: "Arabic"
+    locale_code: "ar"
+    iso_code: "ar-SA"
+    country: "Saudi Arabia"
+    enabled: false
+    priority: 7
+    notes: "Target Q3 2026 (RTL support needed)"
+    rtl: true  # Right-to-left language
+    
+  ko:
+    name: "한국어"
+    name_english: "Korean"
+    locale_code: "ko"
+    iso_code: "ko-KR"
+    country: "South Korea"
+    enabled: false
+    priority: 8
+    notes: "Target Q3 2026"
+    
+  ru:
+    name: "Русский"
+    name_english: "Russian"
+    locale_code: "ru"
+    iso_code: "ru-RU"
+    country: "Russia"
+    enabled: false
+    priority: 9
+    notes: "Target Q4 2026"
+    
+  hi:
+    name: "हिन्दी"
+    name_english: "Hindi"
+    locale_code: "hi"
+    iso_code: "hi-IN"
+    country: "India"
+    enabled: false
+    priority: 10
+    notes: "Target Q4 2026"
+    
+  nl:
+    name: "Nederlands"
+    name_english: "Dutch"
+    locale_code: "nl"
+    iso_code: "nl-NL"
+    country: "Netherlands"
+    enabled: false
+    priority: 11
+    notes: "Community request"
+    
+  pl:
+    name: "Polski"
+    name_english: "Polish"
+    locale_code: "pl"
+    iso_code: "pl-PL"
+    country: "Poland"
+    enabled: false
+    priority: 12
+    notes: "Community request"
+
+# ============================================================================
+# GLOBAL SETTINGS
+# ============================================================================
+
+settings:
+  # Translation model preferences
+  default_model: "google/gemini-3-flash-preview"
+  fallback_model: "anthropic/claude-3-5-sonnet"
+  
+  # Processing
+  batch_size: 5  # Max concurrent translations
+  rate_limit_delay: 0.5  # Seconds between requests
+  max_retries: 3
+  retry_backoff: 2  # Exponential backoff multiplier
+  
+  # Validation
+  validate_structure: true
+  validate_placeholders: true
+  validate_html_entities: true
+  validate_keys: true
+  
+  # Output
+  preserve_formatting: true
+  indent_size: 2
+  ensure_ascii: false
+  
+  # Logging
+  log_level: "INFO"  # DEBUG | INFO | WARNING | ERROR
+  log_file: "translation.log"
+
+# ============================================================================
+# COST TRACKING (Estimated)
+# ============================================================================
+
+cost_estimates:
+  per_1k_tokens: 0.0001  # USD per 1k tokens (Gemini Flash)
+  ui_files_tokens: 150000  # Estimated tokens for UI/API
+  docs_files_tokens: 200000  # Estimated tokens for Docs
+  total_per_language: 35  # USD (rounded)
