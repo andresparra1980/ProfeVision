@@ -162,8 +162,9 @@ async function handleAuthMiddleware(
   } = await supabase.auth.getSession();
   const { pathname } = request.nextUrl;
 
-  // 🌍 El locale ahora se obtiene del header que pone `next-intl`
-  const locale = request.headers.get("x-next-intl-locale") || "es";
+  // 🌍 Extraer locale del pathname (más confiable que header en este punto)
+  const pathLocale = pathname.split("/")[1];
+  const locale = (["es", "en", "fr", "pt"].includes(pathLocale) ? pathLocale : "es") as "es" | "en" | "fr" | "pt";
 
   // 🔐 Construir rutas localizadas dinámicamente
   const getLocalizedRoutes = (currentLocale: string) => {
