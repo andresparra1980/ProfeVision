@@ -18,12 +18,24 @@ export function getRouteMap(sourceLocale: string): Record<string, Record<string,
   const maps = {} as Record<string, Record<string, string>>;
 
   Object.entries(routing.pathnames).forEach(([_baseKey, translations]) => {
-    // El primer valor es la ruta en el locale de origen
+    // Si es un string literal (ej: '/': '/'), usar el mismo valor para todos los locales
+    if (typeof translations === 'string') {
+      // Para rutas como '/' que son iguales en todos los idiomas
+      routing.locales.forEach((targetLocale) => {
+        if (!maps[targetLocale]) {
+          maps[targetLocale] = {};
+        }
+        maps[targetLocale][translations] = translations;
+      });
+      return;
+    }
+
+    // El valor es la ruta en el locale de origen
     const sourceRoute = (translations as any)[sourceLocale];
     
     if (!sourceRoute) {
-      // Si el locale de origen no existe, saltar
-      console.warn(`⚠️ Route mapper: No se encontró ruta para locale "${sourceLocale}" en pathnames`);
+      // Si el locale de origen no existe en este objeto, saltar silenciosamente
+      // Esto puede pasar con rutas parcialmente definidas
       return;
     }
 
