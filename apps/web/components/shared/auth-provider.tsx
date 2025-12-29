@@ -38,54 +38,87 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Con localePrefix: 'always', SIEMPRE se antepone el prefijo del locale
   const getLocalizedRoutes = useMemo(() => {
     const base = `/${locale}`;
+    const loginPaths: Record<string, string> = {
+      es: "iniciar-sesion",
+      en: "login",
+      fr: "connexion",
+      pt: "entrar",
+    };
     return {
-      login: `${base}/auth/${locale === "es" ? "iniciar-sesion" : "login"}`,
+      login: `${base}/auth/${loginPaths[locale] || "login"}`,
       dashboard: `${base}/dashboard`,
     };
   }, [locale]);
 
   // 🔐 Rutas públicas localizadas - Lista completa actualizada (sincronizada con middleware)
-  const getPublicPaths = useMemo(
-    () => [
+  const getPublicPaths = useMemo(() => {
+    // Mapeo de rutas por locale (sincronizado con middleware.ts)
+    const routeMappings: Record<string, Record<string, string>> = {
+      privacy: { es: "privacidad", en: "privacy", fr: "confidentialite", pt: "privacidade" },
+      terms: { es: "terminos", en: "terms", fr: "conditions", pt: "termos" },
+      cookies: { es: "cookies", en: "cookies", fr: "cookies", pt: "cookies" },
+      dataDeletion: { es: "data-deletion", en: "data-deletion", fr: "data-deletion", pt: "data-deletion" },
+      howItWorks: { es: "como-funciona", en: "how-it-works", fr: "comment-ca-marche", pt: "como-funciona" },
+      pricing: { es: "precios", en: "pricing", fr: "tarification", pt: "precos" },
+      contact: { es: "contacto", en: "contact", fr: "contact", pt: "contato" },
+      blog: { es: "blog", en: "blog", fr: "blog", pt: "blog" },
+      examsWithAI: { es: "examenes-con-ia", en: "exams-with-ai", fr: "examens-avec-ia", pt: "exames-com-ia" },
+      paperExams: { es: "examenes-papel", en: "paper-exams", fr: "examens-papier", pt: "exames-papel" },
+      institutions: { es: "gestion-instituciones", en: "institutions-management", fr: "gestion-etablissements", pt: "gerenciamento-instituicoes" },
+      subjects: { es: "gestion-materias", en: "subjects-management", fr: "gestion-matieres", pt: "gerenciamento-disciplinas" },
+      groups: { es: "gestion-grupos", en: "groups-management", fr: "gestion-groupes", pt: "gerenciamento-grupos" },
+      students: { es: "gestion-estudiantes", en: "students-management", fr: "gestion-etudiants", pt: "gerenciamento-estudantes" },
+      reports: { es: "reportes", en: "reports", fr: "rapports", pt: "relatorios" },
+      mobileApp: { es: "aplicacion-movil", en: "mobile-app", fr: "application-mobile", pt: "aplicativo-movil" },
+      // Auth routes
+      login: { es: "iniciar-sesion", en: "login", fr: "connexion", pt: "entrar" },
+      register: { es: "registro", en: "register", fr: "inscription", pt: "cadastro" },
+      resetPassword: { es: "restablecer-contrasena", en: "reset-password", fr: "reinitialiser-mot-de-passe", pt: "redefinir-senha" },
+      updatePassword: { es: "actualizar-contrasena", en: "update-password", fr: "mettre-a-jour-mot-de-passe", pt: "atualizar-senha" },
+      verifyEmail: { es: "verificar-email", en: "verify-email", fr: "verifier-email", pt: "verificar-email" },
+      emailConfirmed: { es: "email-confirmado", en: "email-confirmed", fr: "email-confirme", pt: "email-confirmado" },
+    };
+
+    const getRoute = (key: string) => routeMappings[key]?.[locale] || routeMappings[key]?.["en"] || key;
+
+    return [
       // Rutas con prefijo de locale
       `/${locale}`,
       `/${locale}/`,
 
       // Páginas de contenido estático
-      `/${locale}/${locale === "es" ? "privacidad" : "privacy"}`,
-      `/${locale}/${locale === "es" ? "terminos" : "terms"}`,
-      `/${locale}/${locale === "es" ? "cookies" : "cookies"}`,
-      `/${locale}/${locale === "es" ? "data-deletion" : "data-deletion"}`,
+      `/${locale}/${getRoute("privacy")}`,
+      `/${locale}/${getRoute("terms")}`,
+      `/${locale}/${getRoute("cookies")}`,
+      `/${locale}/${getRoute("dataDeletion")}`,
 
       // Páginas de información
-      `/${locale}/${locale === "es" ? "como-funciona" : "how-it-works"}`,
-      `/${locale}/${locale === "es" ? "precios" : "pricing"}`,
-      `/${locale}/${locale === "es" ? "contacto" : "contact"}`,
-      `/${locale}/${locale === "es" ? "blog" : "blog"}`,
+      `/${locale}/${getRoute("howItWorks")}`,
+      `/${locale}/${getRoute("pricing")}`,
+      `/${locale}/${getRoute("contact")}`,
+      `/${locale}/${getRoute("blog")}`,
 
       // Páginas de exámenes
-      `/${locale}/${locale === "es" ? "examenes-con-ia" : "exams-with-ai"}`,
-      `/${locale}/${locale === "es" ? "examenes-papel" : "paper-exams"}`,
+      `/${locale}/${getRoute("examsWithAI")}`,
+      `/${locale}/${getRoute("paperExams")}`,
 
       // Páginas de gestión (información pública)
-      `/${locale}/${locale === "es" ? "gestion-instituciones" : "institutions-management"}`,
-      `/${locale}/${locale === "es" ? "gestion-materias" : "subjects-management"}`,
-      `/${locale}/${locale === "es" ? "gestion-grupos" : "groups-management"}`,
-      `/${locale}/${locale === "es" ? "gestion-estudiantes" : "students-management"}`,
-      `/${locale}/${locale === "es" ? "reportes" : "reports"}`,
-      `/${locale}/${locale === "es" ? "aplicacion-movil" : "mobile-app"}`,
+      `/${locale}/${getRoute("institutions")}`,
+      `/${locale}/${getRoute("subjects")}`,
+      `/${locale}/${getRoute("groups")}`,
+      `/${locale}/${getRoute("students")}`,
+      `/${locale}/${getRoute("reports")}`,
+      `/${locale}/${getRoute("mobileApp")}`,
 
       // Páginas de autenticación
-      `/${locale}/auth/${locale === "es" ? "iniciar-sesion" : "login"}`,
-      `/${locale}/auth/${locale === "es" ? "registro" : "register"}`,
-      `/${locale}/auth/${locale === "es" ? "restablecer-contrasena" : "reset-password"}`,
-      `/${locale}/auth/${locale === "es" ? "actualizar-contrasena" : "update-password"}`,
-      `/${locale}/auth/${locale === "es" ? "verificar-email" : "verify-email"}`,
-      `/${locale}/auth/${locale === "es" ? "email-confirmado" : "email-confirmed"}`,
-      // Nota: no incluimos rutas sin prefijo porque usamos localePrefix: 'always'
-    ],
-    [locale],
-  );
+      `/${locale}/auth/${getRoute("login")}`,
+      `/${locale}/auth/${getRoute("register")}`,
+      `/${locale}/auth/${getRoute("resetPassword")}`,
+      `/${locale}/auth/${getRoute("updatePassword")}`,
+      `/${locale}/auth/${getRoute("verifyEmail")}`,
+      `/${locale}/auth/${getRoute("emailConfirmed")}`,
+    ];
+  }, [locale]);
 
   useEffect(() => {
     let isMounted = true;
