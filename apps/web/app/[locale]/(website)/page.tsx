@@ -1,7 +1,7 @@
 "use client"
 
 import { Link } from "@/i18n/navigation"
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { FeatureSlideshow } from "@/components/shared/feature-slideshow"
 import {
@@ -20,6 +20,7 @@ import { useMemo } from 'react'
 
 export default function Home() {
   const t = useTranslations('common')
+  const locale = useLocale()
   
   const avatarSeeds = useMemo(
     () => ['seed1', 'seed2', 'seed3', 'seed4'],
@@ -175,7 +176,7 @@ export default function Home() {
                   </ul>
                   <div className="mt-6 flex justify-end">
                     <a
-                      href="https://docs.profevision.com/dashboard-entities"
+                      href={`https://docs.profevision.com/${locale}/docs/organization-setup/create-institution`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
@@ -212,7 +213,7 @@ export default function Home() {
                   </ul>
                   <div className="mt-6 flex justify-end">
                     <a
-                      href="https://docs.profevision.com/dashboard-subjects"
+                      href={`https://docs.profevision.com/${locale}/docs/organization-setup/create-subject`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
@@ -249,7 +250,7 @@ export default function Home() {
                   </ul>
                   <div className="mt-6 flex justify-end">
                     <a
-                      href="https://docs.profevision.com/dashboard-groups"
+                      href={`https://docs.profevision.com/${locale}/docs/organization-setup/create-group`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
@@ -286,7 +287,7 @@ export default function Home() {
                   </ul>
                   <div className="mt-6 flex justify-end">
                     <a
-                      href="https://docs.profevision.com/dashboard-groups#sistema-de-calificaciones"
+                      href={`https://docs.profevision.com/${locale}/docs/organization-setup/grading-schemes`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
@@ -323,7 +324,7 @@ export default function Home() {
                   </ul>
                   <div className="mt-6 flex justify-end">
                     <a
-                      href="https://docs.profevision.com/dashboard-exams"
+                      href={`https://docs.profevision.com/${locale}/docs/exam-creation`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
@@ -360,7 +361,7 @@ export default function Home() {
                   </ul>
                   <div className="mt-6 flex justify-end">
                     <a
-                      href="https://docs.profevision.com/dashboard-exams#ver-resultados-del-examen"
+                      href={`https://docs.profevision.com/${locale}/docs/results`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
                       className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"

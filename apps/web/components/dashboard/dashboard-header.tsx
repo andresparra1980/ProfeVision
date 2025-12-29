@@ -7,7 +7,7 @@ import { useSidebar } from "@/lib/contexts/sidebar-context";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { logoFont } from "@/lib/fonts";
 
 export default function DashboardHeader() {
@@ -15,6 +15,7 @@ export default function DashboardHeader() {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationDismissed, setNotificationDismissed] = useState(false);
   const t = useTranslations('dashboard');
+  const locale = useLocale();
 
   // Cargar estado de la notificación desde localStorage
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function DashboardHeader() {
         
         {/* Contenedor derecho para íconos */}
         <div className="ml-auto flex items-center space-x-2">
-          <a href="https://docs.profevision.com" target="_blank" rel="noopener noreferrer" className="hidden md:block">
+          <a href={`https://docs.profevision.com/${locale}/docs`} target="_blank" rel="noopener noreferrer" className="hidden md:block">
             <Button variant="ghost" size="icon">
               <HelpCircle className="h-5 w-5" />
               <span className="sr-only">{t('header.documentation', { defaultValue: 'Documentación' })}</span>

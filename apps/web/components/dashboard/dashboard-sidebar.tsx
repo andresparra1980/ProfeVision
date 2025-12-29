@@ -25,7 +25,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/sidebar-context';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { logoFont } from '@/lib/fonts';
 import { LanguageSwitcherDashboard } from '@/components/shared/language-switcher-dashboard';
 import { supabase } from '@/lib/supabase/client';
@@ -50,6 +50,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
   const pathname = usePathname();
   const { isCollapsed, toggleCollapse, isMobile, isOpen, setIsOpen } = useSidebar();
   const t = useTranslations('dashboard');
+  const locale = useLocale();
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Check if user is admin
@@ -122,7 +123,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
     },
     {
       title: t('navigation.userManual', { defaultValue: 'Manual de Usuario' }),
-      href: 'https://docs.profevision.com',
+      href: `https://docs.profevision.com/${locale}/docs`,
       icon: HelpCircle,
       external: true,
     },
