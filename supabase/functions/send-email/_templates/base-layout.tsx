@@ -55,7 +55,9 @@ export const styles = {
 export const BaseLayout = ({ preview, children }: BaseLayoutProps) => {
   return (
     <Html>
-      <Head />
+      <Head>
+        <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
+      </Head>
       <Preview>{preview}</Preview>
       <Body style={styles.main}>
         <Container style={styles.container}>
@@ -69,7 +71,7 @@ export const BaseLayout = ({ preview, children }: BaseLayoutProps) => {
           
           <Section style={styles.footer}>
             <Text style={styles.footerText}>
-              ProfeVision © {new Date().getFullYear()}
+              ProfeVision {'\u00A9'} {new Date().getFullYear()}
             </Text>
           </Section>
         </Container>
