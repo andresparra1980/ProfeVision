@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from 'next-intl';
+import { useLocalizedRoute } from '@/lib/utils/i18n-routes';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +29,7 @@ export default function RegisterPage() {
   const tErrors = useTranslations('auth.errors');
   const router = useRouter();
   const locale = useLocale();
+  const routes = useLocalizedRoute(locale);
   const [isLoading, setIsLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
@@ -89,8 +91,7 @@ export default function RegisterPage() {
       });
       
       // 🔄 Redirección localizada
-      const verifyEmailPath = locale === 'es' ? '/auth/verify-email' : '/en/auth/verify-email';
-      router.push(verifyEmailPath);
+      router.push(routes.auth.verifyEmail());
     } catch (error: unknown) {
       toast.error(t('error'), {
         description: getAuthErrorMessage(error, tErrors),
@@ -106,7 +107,7 @@ export default function RegisterPage() {
   }
 
   // 🔄 Rutas localizadas
-  const loginPath = locale === 'es' ? '/auth/login' : '/en/auth/login';
+  const loginPath = routes.auth.login();
 
   return (
     <Card className="w-full max-w-md">
