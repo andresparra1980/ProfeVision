@@ -35,8 +35,8 @@ export function getLocalizedRoute(locale: string, route: LocalizedRoute): string
     return route.pt;
   }
   
-  // Fallback a español si el locale no es reconocido
-  return route.es;
+  // Fallback to English if locale is not recognized
+  return route.en;
 }
 
 /**

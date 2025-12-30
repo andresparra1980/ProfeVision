@@ -108,7 +108,7 @@ function latexPreamble(opts: LatexOptions): string {
   const orientation = opts.orientation ?? 'portrait';
   const columns = opts.columns ?? 2;
   const balance = opts.columnBalance ?? 'unbalanced';
-  const locale = opts.locale ?? 'es';
+  const locale = opts.locale ?? 'en';
 
   // geometry options: map to geometry keywords
   const paperOpt = paper === 'letter' ? 'letterpaper'

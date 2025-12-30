@@ -33,7 +33,7 @@ export function resolveApiLocale(request: Request): ApiLocale {
   if (acceptLanguage) return acceptLanguage;
 
   // 4) Default
-  return 'es';
+  return 'en';
 }
 
 export type ApiMessages = Record<string, string> & {

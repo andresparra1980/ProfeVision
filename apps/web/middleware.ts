@@ -22,7 +22,7 @@ const intlMiddleware = createIntlMiddleware({
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.nextUrl.hostname;
-  const defaultLocale = "es";
+  const defaultLocale = "en";
   const supportedLocales = ["es", "en", "fr", "pt"] as const;
 
   // 🚫 Handle OPTIONS requests (CORS preflight) early
@@ -177,9 +177,10 @@ export async function middleware(request: NextRequest) {
   baseResponse.headers.forEach((v, k) => authResponse.headers.set(k, v));
 
   // 🌍 Detectar locale y agregarlo como header para SEO
+  const pathLocale = pathname.split("/")[1];
   const locale =
     intlResponse.headers.get("x-next-intl-locale") ||
-    (pathname.startsWith("/en") ? "en" : "es");
+    (["es", "en", "fr", "pt"].includes(pathLocale) ? pathLocale : "en");
   authResponse.headers.set("x-locale", locale);
   // Enforce no-cache for all page responses
   authResponse.headers.set("Cache-Control", "no-store, must-revalidate");

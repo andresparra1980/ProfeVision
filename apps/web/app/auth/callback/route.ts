@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const supportedLocales = ['es', 'en', 'fr', 'pt'];
   const preferredLocale = (urlLocale && supportedLocales.includes(urlLocale))
     ? urlLocale
-    : (acceptLanguage?.startsWith('en') ? 'en' : 'es'); // Fallback simple, idealmente parsear header completo
+    : (acceptLanguage?.startsWith('es') ? 'es' : 'en'); // Fallback to 'en' if not Spanish
   
   logger.auth("Auth callback received", {
     type,

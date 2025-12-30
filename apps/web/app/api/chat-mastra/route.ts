@@ -202,7 +202,7 @@ export async function POST(req: NextRequest) {
     // - generationLocale: Language for exam content (from priority detection)
 
     // UI Locale: Always from frontend context (next-intl locale)
-    const uiLocale = context.language || 'es';
+    const uiLocale = context.language || 'en';
 
     // Generation Locale: Priority order (Issue #40 Phase 3)
     // 0. User explicit override (languageOverride !== 'auto') - HIGHEST
@@ -300,10 +300,10 @@ export async function POST(req: NextRequest) {
       // Priority 6: Default
       logger.api("Generation locale from default", {
         userId,
-        generationLocale: "es",
+        generationLocale: "en",
         source: "default"
       });
-      return "es";
+      return "en";
     })();
 
     // Log both locales for debugging

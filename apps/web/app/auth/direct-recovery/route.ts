@@ -25,12 +25,14 @@ export async function GET(request: NextRequest) {
   const supportedLocales = ['es', 'en', 'fr', 'pt'];
   const preferredLocale = (urlLocale && supportedLocales.includes(urlLocale))
     ? urlLocale
-    : (acceptLanguage?.startsWith('en') ? 'en' : 'es');
+    : (acceptLanguage?.startsWith('es') ? 'es' : 'en'); // Fallback to 'en' if not Spanish
   
   // 🌍 Construir URL localizada para update-password usando routeMappings
-  const updatePasswordSlug = routeMappings.updatePassword[preferredLocale] || routeMappings.updatePassword.es;
-  const localizedUpdatePassword = preferredLocale === 'es' 
-    ? `/auth/${updatePasswordSlug}` 
+  const updatePasswordSlug = routeMappings.updatePassword[preferredLocale] || routeMappings.updatePassword.en;
+  const localizedUpdatePassword = preferredLocale === 'en' 
+    ? `/en/auth/${updatePasswordSlug}` 
+    : preferredLocale === 'es'
+    ? `/auth/${updatePasswordSlug}`
     : `/${preferredLocale}/auth/${updatePasswordSlug}`;
 
   // Log all parameters to help debug
