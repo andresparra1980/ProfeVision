@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import type { Session, AuthError } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { logger } from "@/lib/utils/logger";
+import { routeMappings } from "@/i18n/route-constants";
 
 
 export async function GET(request: NextRequest) {
@@ -31,24 +32,18 @@ export async function GET(request: NextRequest) {
     url: request.url,
   });
   
-  // 🌍 Helper para construir URLs localizadas
+  // 🌍 Helper para construir URLs localizadas usando routeMappings
   const buildLocalizedUrls = (loc: string) => {
-    // Definir slugs traducidos manualmente o usar un mapa centralizado si existe
-    const slugs: Record<string, { login: string; emailConfirmed: string; updatePassword: string }> = {
-      es: { login: 'iniciar-sesion', emailConfirmed: 'email-confirmado', updatePassword: 'actualizar-contrasena' },
-      en: { login: 'login', emailConfirmed: 'email-confirmed', updatePassword: 'update-password' },
-      fr: { login: 'connexion', emailConfirmed: 'email-confirme', updatePassword: 'mettre-a-jour-mot-de-passe' },
-      pt: { login: 'entrar', emailConfirmed: 'email-confirmado', updatePassword: 'atualizar-senha' },
-    };
-
-    // Fallback a slugs en inglés o español si no existe traducción específica configurada aquí, 
-    // aunque idealmente deberían venir de route-constants.ts
-    const currentSlugs = slugs[loc] || slugs.es;
+    const loginSlug = routeMappings.login[loc] || routeMappings.login.es;
+    const emailConfirmedSlug = routeMappings.emailConfirmed[loc] || routeMappings.emailConfirmed.es;
+    const updatePasswordSlug = routeMappings.updatePassword[loc] || routeMappings.updatePassword.es;
+    
+    const prefix = loc === 'es' ? '' : `/${loc}`;
 
     return {
-      login: `/${loc}/auth/${currentSlugs.login}`,
-      emailConfirmed: `/${loc}/auth/${currentSlugs.emailConfirmed}`,
-      updatePassword: `/${loc}/auth/${currentSlugs.updatePassword}`,
+      login: `${prefix}/auth/${loginSlug}`,
+      emailConfirmed: `${prefix}/auth/${emailConfirmedSlug}`,
+      updatePassword: `${prefix}/auth/${updatePasswordSlug}`,
     };
   };
   let localizedUrls = buildLocalizedUrls(preferredLocale);

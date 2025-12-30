@@ -6,12 +6,14 @@
 export type LocalizedRoute = {
   es: string;
   en: string;
+  fr: string;
+  pt: string;
 };
 
 /**
  * Genera una ruta localizada correctamente según el locale actual
- * @param locale - El locale actual ('es' o 'en')
- * @param route - La definición de la ruta para ambos idiomas
+ * @param locale - El locale actual ('es', 'en', 'fr', 'pt')
+ * @param route - La definición de la ruta para todos los idiomas
  * @returns La ruta correcta con o sin prefijo según la configuración
  */
 export function getLocalizedRoute(locale: string, route: LocalizedRoute): string {
@@ -20,9 +22,17 @@ export function getLocalizedRoute(locale: string, route: LocalizedRoute): string
     return route.es;
   }
   
-  // Para inglés, usar prefijo /en
+  // Para otros idiomas, usar prefijo /{locale}
   if (locale === 'en') {
     return route.en;
+  }
+  
+  if (locale === 'fr') {
+    return route.fr;
+  }
+  
+  if (locale === 'pt') {
+    return route.pt;
   }
   
   // Fallback a español si el locale no es reconocido
@@ -35,27 +45,39 @@ export function getLocalizedRoute(locale: string, route: LocalizedRoute): string
 export const AUTH_ROUTES = {
   login: {
     es: '/auth/iniciar-sesion',
-    en: '/en/auth/login'
+    en: '/en/auth/login',
+    fr: '/fr/auth/connexion',
+    pt: '/pt/auth/entrar'
   },
   register: {
     es: '/auth/registro',
-    en: '/en/auth/register'
+    en: '/en/auth/register',
+    fr: '/fr/auth/inscription',
+    pt: '/pt/auth/cadastro'
   },
   resetPassword: {
     es: '/auth/restablecer-contrasena',
-    en: '/en/auth/reset-password'
+    en: '/en/auth/reset-password',
+    fr: '/fr/auth/reinitialiser-mot-de-passe',
+    pt: '/pt/auth/redefinir-senha'
   },
   updatePassword: {
     es: '/auth/actualizar-contrasena',
-    en: '/en/auth/update-password'
+    en: '/en/auth/update-password',
+    fr: '/fr/auth/mettre-a-jour-mot-de-passe',
+    pt: '/pt/auth/atualizar-senha'
   },
   verifyEmail: {
     es: '/auth/verificar-email',
-    en: '/en/auth/verify-email'
+    en: '/en/auth/verify-email',
+    fr: '/fr/auth/verifier-email',
+    pt: '/pt/auth/verificar-email'
   },
   emailConfirmed: {
     es: '/auth/email-confirmado',
-    en: '/en/auth/email-confirmed'
+    en: '/en/auth/email-confirmed',
+    fr: '/fr/auth/email-confirme',
+    pt: '/pt/auth/email-confirmado'
   }
 } as const;
 
@@ -65,15 +87,21 @@ export const AUTH_ROUTES = {
 export const DASHBOARD_ROUTES = {
   home: {
     es: '/dashboard',
-    en: '/en/dashboard'
+    en: '/en/dashboard',
+    fr: '/fr/dashboard',
+    pt: '/pt/dashboard'
   },
   exams: {
     es: '/dashboard/examenes',
-    en: '/en/dashboard/exams'
+    en: '/en/dashboard/exams',
+    fr: '/fr/dashboard/examens',
+    pt: '/pt/dashboard/exames'
   },
   profile: {
     es: '/dashboard/perfil',
-    en: '/en/dashboard/profile'
+    en: '/en/dashboard/profile',
+    fr: '/fr/dashboard/profil',
+    pt: '/pt/dashboard/perfil'
   }
 } as const;
 
@@ -83,35 +111,51 @@ export const DASHBOARD_ROUTES = {
 export const PUBLIC_ROUTES = {
   home: {
     es: '/',
-    en: '/en'
+    en: '/en',
+    fr: '/fr',
+    pt: '/pt'
   },
   howItWorks: {
     es: '/como-funciona',
-    en: '/en/how-it-works'
+    en: '/en/how-it-works',
+    fr: '/fr/comment-ca-marche',
+    pt: '/pt/como-funciona'
   },
   pricing: {
     es: '/precios',
-    en: '/en/pricing'
+    en: '/en/pricing',
+    fr: '/fr/tarification',
+    pt: '/pt/precos'
   },
   contact: {
     es: '/contacto',
-    en: '/en/contact'
+    en: '/en/contact',
+    fr: '/fr/contact',
+    pt: '/pt/contato'
   },
   blog: {
     es: '/blog',
-    en: '/en/blog'
+    en: '/en/blog',
+    fr: '/fr/blog',
+    pt: '/pt/blog'
   },
   privacy: {
     es: '/privacidad',
-    en: '/en/privacy'
+    en: '/en/privacy',
+    fr: '/fr/confidentialite',
+    pt: '/pt/privacidade'
   },
   terms: {
     es: '/terminos',
-    en: '/en/terms'
+    en: '/en/terms',
+    fr: '/fr/conditions',
+    pt: '/pt/termos'
   },
   cookies: {
     es: '/cookies',
-    en: '/en/cookies'
+    en: '/en/cookies',
+    fr: '/fr/cookies',
+    pt: '/pt/cookies'
   }
 } as const;
 
