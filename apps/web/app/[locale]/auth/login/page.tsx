@@ -153,7 +153,7 @@ export default function LoginPage() {
               onExpire={() => setCaptchaToken(null)}
               className="mx-auto"
               options={{
-                language: locale === 'es' ? 'es' : 'en',
+                language: locale,
                 theme: "auto",
               }}
             />

@@ -159,7 +159,7 @@ export default function ResetPasswordPage() {
               onExpire={() => setCaptchaToken(null)}
               className="mx-auto"
               options={{
-                language: locale === 'es' ? 'es' : 'en',
+                language: locale,
                 theme: "auto",
               }}
             />

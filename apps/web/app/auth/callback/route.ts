@@ -19,9 +19,10 @@ export async function GET(request: NextRequest) {
   
   // 🌍 Detectar idioma preferido del usuario
   const acceptLanguage = request.headers.get('accept-language');
-  const preferredLocale = (urlLocale === 'en' || urlLocale === 'es')
+  const supportedLocales = ['es', 'en', 'fr', 'pt'];
+  const preferredLocale = (urlLocale && supportedLocales.includes(urlLocale))
     ? urlLocale
-    : (acceptLanguage?.startsWith('en') ? 'en' : 'es');
+    : (acceptLanguage?.startsWith('en') ? 'en' : 'es'); // Fallback simple, idealmente parsear header completo
   
   logger.auth("Auth callback received", {
     type,
@@ -31,17 +32,42 @@ export async function GET(request: NextRequest) {
   });
   
   // 🌍 Helper para construir URLs localizadas
-  const buildLocalizedUrls = (loc: 'es' | 'en') => ({
-    login: `/${loc}/auth/${loc === 'es' ? 'iniciar-sesion' : 'login'}`,
-    emailConfirmed: `/${loc}/auth/${loc === 'es' ? 'email-confirmado' : 'email-confirmed'}`,
-    updatePassword: `/${loc}/auth/${loc === 'es' ? 'actualizar-contrasena' : 'update-password'}`,
-  });
-  let localizedUrls = buildLocalizedUrls(preferredLocale as 'es' | 'en');
+  const buildLocalizedUrls = (loc: string) => {
+    // Definir slugs traducidos manualmente o usar un mapa centralizado si existe
+    const slugs: Record<string, { login: string; emailConfirmed: string; updatePassword: string }> = {
+      es: { login: 'iniciar-sesion', emailConfirmed: 'email-confirmado', updatePassword: 'actualizar-contrasena' },
+      en: { login: 'login', emailConfirmed: 'email-confirmed', updatePassword: 'update-password' },
+      fr: { login: 'connexion', emailConfirmed: 'email-confirme', updatePassword: 'mettre-a-jour-mot-de-passe' },
+      pt: { login: 'entrar', emailConfirmed: 'email-confirmado', updatePassword: 'atualizar-senha' },
+    };
+
+    // Fallback a slugs en inglés o español si no existe traducción específica configurada aquí, 
+    // aunque idealmente deberían venir de route-constants.ts
+    const currentSlugs = slugs[loc] || slugs.es;
+
+    return {
+      login: `/${loc}/auth/${currentSlugs.login}`,
+      emailConfirmed: `/${loc}/auth/${currentSlugs.emailConfirmed}`,
+      updatePassword: `/${loc}/auth/${currentSlugs.updatePassword}`,
+    };
+  };
+  let localizedUrls = buildLocalizedUrls(preferredLocale);
+
+  // Helper para crear respuesta con cookie de locale
+  const createRedirect = (url: URL) => {
+    const response = NextResponse.redirect(url);
+    response.cookies.set('NEXT_LOCALE', preferredLocale, {
+      path: '/',
+      maxAge: 31536000, // 1 año
+      sameSite: 'lax',
+    });
+    return response;
+  };
 
   // If neither code nor type is present, redirect to login
   if (!code && !type) {
     logger.auth("Missing both code and type, redirecting to login", { type });
-    return NextResponse.redirect(new URL(localizedUrls.login, requestOrigin));
+    return createRedirect(new URL(localizedUrls.login, requestOrigin));
   }
 
   try {
@@ -83,7 +109,7 @@ export async function GET(request: NextRequest) {
     // 🌍 Re-resolver locale con user_metadata si existe
     try {
       const metaLocale = sessionResult.data.session?.user?.user_metadata?.preferred_locale;
-      if (metaLocale === 'en' || metaLocale === 'es') {
+      if (metaLocale && supportedLocales.includes(metaLocale)) {
         localizedUrls = buildLocalizedUrls(metaLocale);
       }
     } catch (_) {
@@ -93,24 +119,24 @@ export async function GET(request: NextRequest) {
     // 🌍 Redirect to localized confirmation page
     if (type === "email_confirmation" || type === "signup" || flow === 'signup' || (!type && code)) {
       logger.auth("Confirmation type, redirecting to email-confirmed", { type });
-      return NextResponse.redirect(new URL(localizedUrls.emailConfirmed, requestOrigin));
+      return createRedirect(new URL(localizedUrls.emailConfirmed, requestOrigin));
     }
 
     // 🌍 Handle password recovery
     if (type === "recovery") {
       logger.auth("Recovery type, redirecting to update-password", { type });
-      return NextResponse.redirect(new URL(localizedUrls.updatePassword, requestOrigin));
+      return createRedirect(new URL(localizedUrls.updatePassword, requestOrigin));
     }
 
     // 🌍 For other auth types
     logger.auth("Other auth type, redirecting to login", { type });
-    return NextResponse.redirect(new URL(localizedUrls.login, requestOrigin));
+    return createRedirect(new URL(localizedUrls.login, requestOrigin));
   } catch (error: unknown) {
     logger.auth("Error during auth callback", {
       error: error instanceof Error ? error : new Error("Unknown error"),
       type,
     });
-    return NextResponse.redirect(
+    return createRedirect(
       new URL(`${localizedUrls.login}?error=auth_callback_error`, requestOrigin)
     );
   }
