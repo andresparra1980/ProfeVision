@@ -42,7 +42,7 @@ export const signUpWithRedirect = (
   password: string,
   userData: UserSignupData,
   captchaToken?: string,
-  locale?: 'es' | 'en'
+  locale?: 'es' | 'en' | 'fr' | 'pt'
 ) => {
   const currentSiteUrl = getSiteUrl();
   const query = new URLSearchParams();
@@ -54,7 +54,10 @@ export const signUpWithRedirect = (
     email,
     password,
     options: {
-      data: userData,
+      data: {
+        ...userData,
+        preferred_locale: locale || 'es',
+      },
       // Always redirect back to the centralized auth callback so it can
       // decide the proper localized destination (en/es) consistently.
       emailRedirectTo: callbackUrl,
@@ -64,7 +67,7 @@ export const signUpWithRedirect = (
 };
 
 // Helper function specifically for password reset
-export const resetPassword = (email: string, captchaToken?: string, locale?: 'es' | 'en') => {
+export const resetPassword = (email: string, captchaToken?: string, locale?: 'es' | 'en' | 'fr' | 'pt') => {
   // Always recalculate the URL to ensure we have the correct origin
   const currentSiteUrl = getSiteUrl();
   // Use the direct-recovery endpoint specifically
