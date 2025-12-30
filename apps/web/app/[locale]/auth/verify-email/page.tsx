@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useTranslations, useLocale } from 'next-intl';
+import { useLocalizedRoute } from '@/lib/utils/i18n-routes';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,9 +14,10 @@ import {
 export default function VerifyEmailPage() {
   const t = useTranslations('auth.verifyEmail');
   const locale = useLocale();
+  const routes = useLocalizedRoute(locale);
   
   // 🔄 Rutas localizadas
-  const loginPath = locale === 'es' ? '/auth/login' : '/en/auth/login';
+  const loginPath = routes.auth.login();
 
   return (
     <Card className="w-full max-w-md">

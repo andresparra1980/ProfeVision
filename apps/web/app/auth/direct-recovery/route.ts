@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { logger } from "@/lib/utils/logger";
 import { createServerClient } from "@supabase/ssr";
+import { routeMappings } from "@/i18n/route-constants";
 
 export async function GET(request: NextRequest) {
   // Extract tokens from URL
@@ -21,12 +22,16 @@ export async function GET(request: NextRequest) {
   // 🌍 Determinar locale prioritariamente por query param, luego header
   const urlLocale = requestUrl.searchParams.get('locale');
   const acceptLanguage = request.headers.get('accept-language');
-  const preferredLocale = (urlLocale === 'en' || urlLocale === 'es')
+  const supportedLocales = ['es', 'en', 'fr', 'pt'];
+  const preferredLocale = (urlLocale && supportedLocales.includes(urlLocale))
     ? urlLocale
     : (acceptLanguage?.startsWith('en') ? 'en' : 'es');
   
-  // 🌍 Construir URL localizada para update-password
-  const localizedUpdatePassword = `/${preferredLocale}/auth/${preferredLocale === 'es' ? 'actualizar-contrasena' : 'update-password'}`;
+  // 🌍 Construir URL localizada para update-password usando routeMappings
+  const updatePasswordSlug = routeMappings.updatePassword[preferredLocale] || routeMappings.updatePassword.es;
+  const localizedUpdatePassword = preferredLocale === 'es' 
+    ? `/auth/${updatePasswordSlug}` 
+    : `/${preferredLocale}/auth/${updatePasswordSlug}`;
 
   // Log all parameters to help debug
   logger.auth("Direct recovery request received", {

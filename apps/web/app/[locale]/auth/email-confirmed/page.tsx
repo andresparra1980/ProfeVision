@@ -3,15 +3,17 @@
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { useTranslations, useLocale } from 'next-intl';
+import { useLocalizedRoute } from '@/lib/utils/i18n-routes';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function EmailConfirmedPage() {
   const t = useTranslations('auth.emailConfirmed');
   const locale = useLocale();
+  const routes = useLocalizedRoute(locale);
   
   // 🔄 Rutas localizadas
-  const loginPath = locale === 'es' ? '/auth/iniciar-sesion' : '/en/auth/login';
+  const loginPath = routes.auth.login();
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
