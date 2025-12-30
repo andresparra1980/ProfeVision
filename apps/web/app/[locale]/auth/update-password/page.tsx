@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from 'next-intl';
+import { useLocalizedRoute } from '@/lib/utils/i18n-routes';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +33,7 @@ function UpdatePasswordContent() {
   const t = useTranslations('auth.updatePassword');
   const tErrors = useTranslations('auth.errors');
   const locale = useLocale();
+  const routes = useLocalizedRoute(locale);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -165,7 +167,7 @@ function UpdatePasswordContent() {
       });
       
       // 🔄 Redirección localizada
-      const loginPath = locale === 'es' ? '/auth/iniciar-sesion' : '/en/auth/login';
+      const loginPath = routes.auth.login();
       router.push(loginPath);
     } catch (error: unknown) {
       let errorMsg = tErrors('generalError');
@@ -187,7 +189,7 @@ function UpdatePasswordContent() {
   }
 
   // 🔄 Rutas localizadas
-  const resetPasswordPath = locale === 'es' ? '/auth/restablecer-contrasena' : '/en/auth/reset-password';
+  const resetPasswordPath = routes.auth.resetPassword();
 
   if (error) {
     return (

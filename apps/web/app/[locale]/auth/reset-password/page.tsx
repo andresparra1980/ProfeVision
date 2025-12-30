@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from 'next-intl';
+import { useLocalizedRoute } from '@/lib/utils/i18n-routes';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +28,7 @@ export default function ResetPasswordPage() {
   const t = useTranslations('auth.resetPassword');
   const tErrors = useTranslations('auth.errors');
   const locale = useLocale();
+  const routes = useLocalizedRoute(locale);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -93,7 +95,7 @@ export default function ResetPasswordPage() {
   }
 
   // 🔄 Rutas localizadas
-  const loginPath = locale === 'es' ? '/auth/login' : '/en/auth/login';
+  const loginPath = routes.auth.login();
 
   if (isSubmitted) {
     return (
