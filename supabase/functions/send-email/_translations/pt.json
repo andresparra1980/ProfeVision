@@ -1,0 +1,21 @@
+{
+  "confirmSignup": {
+    "subject": "Confirme sua conta no ProfeVision",
+    "heading": "Bem-vindo ao ProfeVision!",
+    "body": "Obrigado por se cadastrar. Clique no botão para confirmar seu e-mail.",
+    "button": "Confirmar E-mail",
+    "otp": "Ou use este código: {token}",
+    "footer": "Se você não criou esta conta, pode ignorar este e-mail."
+  },
+  "resetPassword": {
+    "subject": "Redefina sua senha",
+    "heading": "Redefinir Senha",
+    "body": "Recebemos uma solicitação para redefinir sua senha. Clique no botão para continuar.",
+    "button": "Redefinir Senha",
+    "otp": "Ou use este código: {token}",
+    "footer": "Se você não solicitou isso, pode ignorar este e-mail."
+  },
+  "common": {
+    "expires": "Este link expira em 24 horas."
+  }
+}
