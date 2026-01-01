@@ -209,29 +209,8 @@ async def verify_supabase_jwt(authorization: str = Header(None, alias="Authoriza
             # Not an ES256 token or JWKS fetch failed - fall through to HS256
             logger.debug(f"ES256 verification failed, trying HS256: {str(e)}")
 
-    # Fallback to HS256 (legacy shared secret)
-    if SUPABASE_JWT_SECRET:
-        try:
-            payload = jwt.decode(
-                token,
-                SUPABASE_JWT_SECRET,
-                algorithms=["HS256"],
-                audience="authenticated"
-            )
-            logger.debug("JWT verified via HS256 (legacy)")
-            return payload
-        except jwt.ExpiredSignatureError:
-            logger.warning("JWT token expired (HS256)")
-            raise HTTPException(status_code=401, detail="Token expired")
-        except jwt.InvalidAudienceError:
-            logger.warning("JWT invalid audience (HS256)")
-            raise HTTPException(status_code=401, detail="Invalid token audience")
-        except jwt.InvalidTokenError as e:
-            logger.warning(f"HS256 validation failed: {str(e)}")
-            raise HTTPException(status_code=401, detail="Invalid token")
-    
-    # No verification method available
-    logger.error("No JWT verification method configured (missing SUPABASE_PROJECT_REF and SUPABASE_JWT_SECRET)")
+    # No ES256 verification available
+    logger.error("No JWT verification method configured (missing SUPABASE_PROJECT_REF)")
     raise HTTPException(
         status_code=500,
         detail="Server configuration error"
