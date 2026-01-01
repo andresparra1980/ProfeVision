@@ -55,9 +55,7 @@ app.add_middleware(
 # Configuration
 MAX_IMAGE_SIZE_MB = int(os.getenv("MAX_IMAGE_SIZE_MB", "10"))
 MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
-SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET", "")
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_PROJECT_REF = os.getenv("SUPABASE_PROJECT_REF", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")  # For JWKS access
 IMAGE_QUALITY = int(os.getenv("IMAGE_QUALITY", "80"))
 MAX_IMAGE_DIMENSION = int(os.getenv("MAX_IMAGE_DIMENSION", "800"))
@@ -80,16 +78,10 @@ async def startup_event():
     logger.info(f"Max dimension: {MAX_IMAGE_DIMENSION}px")
     
     # JWT verification status
-    has_es256 = bool(SUPABASE_PROJECT_REF)
-    has_hs256 = bool(SUPABASE_JWT_SECRET)
-    if has_es256 and has_hs256:
-        logger.info("JWT auth: dual-mode (ES256 + HS256 fallback)")
-    elif has_es256:
-        logger.info("JWT auth: ES256 only (new)")
-    elif has_hs256:
-        logger.info("JWT auth: HS256 only (legacy)")
+    if SUPABASE_URL and SUPABASE_ANON_KEY:
+        logger.info("JWT auth: ES256 (asymmetric keys via JWKS)")
     else:
-        logger.warning("JWT auth: DISABLED (no keys configured)")
+        logger.warning("JWT auth: DISABLED (missing SUPABASE_URL or SUPABASE_ANON_KEY)")
 
 
 # Pydantic Models
@@ -459,16 +451,10 @@ if __name__ == "__main__":
     logger.info(f"Max dimension: {MAX_IMAGE_DIMENSION}px")
     
     # JWT verification status
-    has_es256 = bool(SUPABASE_PROJECT_REF)
-    has_hs256 = bool(SUPABASE_JWT_SECRET)
-    if has_es256 and has_hs256:
-        logger.info("JWT auth: dual-mode (ES256 + HS256 fallback)")
-    elif has_es256:
-        logger.info("JWT auth: ES256 only (new)")
-    elif has_hs256:
-        logger.info("JWT auth: HS256 only (legacy)")
+    if SUPABASE_URL and SUPABASE_ANON_KEY:
+        logger.info("JWT auth: ES256 (asymmetric keys via JWKS)")
     else:
-        logger.warning("JWT auth: DISABLED (no keys configured)")
+        logger.warning("JWT auth: DISABLED (missing SUPABASE_URL or SUPABASE_ANON_KEY)")
 
     uvicorn.run(
         app,

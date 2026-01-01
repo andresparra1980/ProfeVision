@@ -6,7 +6,7 @@ interface RequestData {
   examId?: string;
 }
 
-// JWT verification (dual-mode: HS256 legacy + ES256 new)
+// JWT verification (ES256 via JWKS)
 async function verifyJWT(authHeader: string | null): Promise<jose.JWTPayload> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new Error('Missing or invalid Authorization header');
@@ -14,40 +14,17 @@ async function verifyJWT(authHeader: string | null): Promise<jose.JWTPayload> {
 
   const token = authHeader.replace('Bearer ', '');
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-  const jwtSecret = Deno.env.get('JWT_SECRET') || '';
 
-  // Try ES256 first (new asymmetric keys via JWKS)
-  try {
-    const jwksUrl = `${supabaseUrl}/auth/v1/jwks`;
-    const JWKS = jose.createRemoteJWKSet(new URL(jwksUrl));
-    
-    const { payload } = await jose.jwtVerify(token, JWKS, {
-      audience: 'authenticated',
-    });
-    
-    console.log('JWT verified via ES256 (new)');
-    return payload;
-  } catch (e) {
-    console.log('ES256 verification failed, trying HS256:', e.message);
-  }
-
-  // Fallback to HS256 (legacy shared secret)
-  if (jwtSecret) {
-    try {
-      const secret = new TextEncoder().encode(jwtSecret);
-      const { payload } = await jose.jwtVerify(token, secret, {
-        algorithms: ['HS256'],
-        audience: 'authenticated',
-      });
-      
-      console.log('JWT verified via HS256 (legacy)');
-      return payload;
-    } catch (e) {
-      throw new Error(`JWT verification failed: ${e.message}`);
-    }
-  }
-
-  throw new Error('No JWT verification method available');
+  // ES256 verification via JWKS
+  const jwksUrl = `${supabaseUrl}/auth/v1/.well-known/jwks.json`;
+  const JWKS = jose.createRemoteJWKSet(new URL(jwksUrl));
+  
+  const { payload } = await jose.jwtVerify(token, JWKS, {
+    audience: 'authenticated',
+  });
+  
+  console.log('JWT verified via ES256');
+  return payload;
 }
 
 serve(async (req) => {
