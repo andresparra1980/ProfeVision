@@ -14,7 +14,7 @@ async function verifyJWT(authHeader: string | null): Promise<jose.JWTPayload> {
 
   const token = authHeader.replace('Bearer ', '');
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-  const jwtSecret = Deno.env.get('SUPABASE_JWT_SECRET') || '';
+  const jwtSecret = Deno.env.get('JWT_SECRET') || '';
 
   // Try ES256 first (new asymmetric keys via JWKS)
   try {

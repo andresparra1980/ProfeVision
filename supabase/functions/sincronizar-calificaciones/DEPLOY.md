@@ -12,10 +12,11 @@ supabase functions deploy sincronizar-calificaciones --no-verify-jwt
 ### Required secrets:
 ```bash
 # Legacy HS256 secret (keep during migration)
-supabase secrets set SUPABASE_JWT_SECRET=your_jwt_secret
+# NOTE: Cannot use SUPABASE_ prefix, use JWT_SECRET instead
+supabase secrets set JWT_SECRET=your_jwt_secret
 
-# Service role for Supabase client
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are auto-injected by Supabase
+# No need to set them manually
 ```
 
 ### Why --no-verify-jwt?
