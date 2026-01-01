@@ -7,7 +7,8 @@ uvicorn[standard]==0.27.0
 python-multipart==0.0.9
 
 # JWT Authentication
-pyjwt==2.8.0
+pyjwt[crypto]==2.8.0  # [crypto] for ES256 + JWKS support
+cryptography==41.0.7
 
 # Computer Vision & Image Processing
 opencv-python-headless==4.10.0.84  # Headless version for Docker

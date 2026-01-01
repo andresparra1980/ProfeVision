@@ -1,12 +1,68 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import * as jose from 'https://deno.land/x/jose@v5.9.6/index.ts';
 
 interface RequestData {
   examId?: string;
 }
 
+// JWT verification (dual-mode: HS256 legacy + ES256 new)
+async function verifyJWT(authHeader: string | null): Promise<jose.JWTPayload> {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new Error('Missing or invalid Authorization header');
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+  const jwtSecret = Deno.env.get('SUPABASE_JWT_SECRET') || '';
+
+  // Try ES256 first (new asymmetric keys via JWKS)
+  try {
+    const jwksUrl = `${supabaseUrl}/auth/v1/jwks`;
+    const JWKS = jose.createRemoteJWKSet(new URL(jwksUrl));
+    
+    const { payload } = await jose.jwtVerify(token, JWKS, {
+      audience: 'authenticated',
+    });
+    
+    console.log('JWT verified via ES256 (new)');
+    return payload;
+  } catch (e) {
+    console.log('ES256 verification failed, trying HS256:', e.message);
+  }
+
+  // Fallback to HS256 (legacy shared secret)
+  if (jwtSecret) {
+    try {
+      const secret = new TextEncoder().encode(jwtSecret);
+      const { payload } = await jose.jwtVerify(token, secret, {
+        algorithms: ['HS256'],
+        audience: 'authenticated',
+      });
+      
+      console.log('JWT verified via HS256 (legacy)');
+      return payload;
+    } catch (e) {
+      throw new Error(`JWT verification failed: ${e.message}`);
+    }
+  }
+
+  throw new Error('No JWT verification method available');
+}
+
 serve(async (req) => {
   try {
+    // Verify JWT manually (function deployed with --no-verify-jwt)
+    const authHeader = req.headers.get('Authorization');
+    try {
+      await verifyJWT(authHeader);
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: `Unauthorized: ${e.message}` }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Crear cliente de Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
