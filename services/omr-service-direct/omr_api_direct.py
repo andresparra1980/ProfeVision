@@ -206,8 +206,9 @@ async def verify_supabase_jwt(authorization: str = Header(None, alias="Authoriza
             logger.warning("JWT invalid audience (ES256)")
             raise HTTPException(status_code=401, detail="Invalid token audience")
         except Exception as e:
-            # Not an ES256 token or JWKS fetch failed - fall through to HS256
-            logger.debug(f"ES256 verification failed, trying HS256: {str(e)}")
+            # ES256 verification failed
+            logger.error(f"ES256 verification failed: {str(e)}", exc_info=True)
+            raise HTTPException(status_code=401, detail=f"JWT verification failed: {str(e)}")
 
     # No ES256 verification available
     logger.error("No JWT verification method configured (missing SUPABASE_PROJECT_REF)")
