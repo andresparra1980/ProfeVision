@@ -58,6 +58,7 @@ MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
 SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET", "")
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_PROJECT_REF = os.getenv("SUPABASE_PROJECT_REF", "")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")  # For JWKS access
 IMAGE_QUALITY = int(os.getenv("IMAGE_QUALITY", "80"))
 MAX_IMAGE_DIMENSION = int(os.getenv("MAX_IMAGE_DIMENSION", "800"))
 
@@ -145,13 +146,18 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-# JWT Validation - Dual Mode (HS256 legacy + ES256 new)
+# JWT Validation - ES256 only (after key rotation)
 def _get_jwks_client():
     """Lazy-initialize JWKS client for ES256 token verification"""
     global _jwks_client
-    if _jwks_client is None and SUPABASE_PROJECT_REF:
-        jwks_url = f"https://{SUPABASE_PROJECT_REF}.supabase.co/auth/v1/jwks"
-        _jwks_client = PyJWKClient(jwks_url, cache_keys=True)
+    if _jwks_client is None and SUPABASE_URL and SUPABASE_ANON_KEY:
+        jwks_url = f"{SUPABASE_URL}/auth/v1/jwks"
+        # PyJWKClient with custom headers for Supabase auth
+        _jwks_client = PyJWKClient(
+            jwks_url,
+            cache_keys=True,
+            headers={"apikey": SUPABASE_ANON_KEY}
+        )
         logger.info(f"Initialized JWKS client: {jwks_url}")
     return _jwks_client
 
@@ -211,7 +217,7 @@ async def verify_supabase_jwt(authorization: str = Header(None, alias="Authoriza
             raise HTTPException(status_code=401, detail=f"JWT verification failed: {str(e)}")
 
     # No ES256 verification available
-    logger.error("No JWT verification method configured (missing SUPABASE_PROJECT_REF)")
+    logger.error("No JWT verification method configured (missing SUPABASE_URL or SUPABASE_ANON_KEY)")
     raise HTTPException(
         status_code=500,
         detail="Server configuration error"
