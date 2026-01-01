@@ -1,12 +1,45 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import * as jose from 'https://deno.land/x/jose@v5.9.6/index.ts';
 
 interface RequestData {
   examId?: string;
 }
 
+// JWT verification (ES256 via JWKS)
+async function verifyJWT(authHeader: string | null): Promise<jose.JWTPayload> {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new Error('Missing or invalid Authorization header');
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+
+  // ES256 verification via JWKS
+  const jwksUrl = `${supabaseUrl}/auth/v1/.well-known/jwks.json`;
+  const JWKS = jose.createRemoteJWKSet(new URL(jwksUrl));
+  
+  const { payload } = await jose.jwtVerify(token, JWKS, {
+    audience: 'authenticated',
+  });
+  
+  console.log('JWT verified via ES256');
+  return payload;
+}
+
 serve(async (req) => {
   try {
+    // Verify JWT manually (function deployed with --no-verify-jwt)
+    const authHeader = req.headers.get('Authorization');
+    try {
+      await verifyJWT(authHeader);
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: `Unauthorized: ${e.message}` }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Crear cliente de Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';

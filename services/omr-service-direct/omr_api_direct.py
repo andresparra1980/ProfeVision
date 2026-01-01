@@ -20,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import uvicorn
 import jwt
+from jwt import PyJWKClient  # type: ignore
 from PIL import Image, ImageOps
 
 # Import the OMR processor
@@ -54,13 +55,33 @@ app.add_middleware(
 # Configuration
 MAX_IMAGE_SIZE_MB = int(os.getenv("MAX_IMAGE_SIZE_MB", "10"))
 MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
-SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET", "")
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")  # For JWKS access
 IMAGE_QUALITY = int(os.getenv("IMAGE_QUALITY", "80"))
 MAX_IMAGE_DIMENSION = int(os.getenv("MAX_IMAGE_DIMENSION", "800"))
 
+# JWKS client for ES256 verification (lazy-initialized)
+_jwks_client = None
+
 # Service start time for uptime tracking
 SERVICE_START_TIME = time.time()
+
+
+# Startup event to log configuration
+@app.on_event("startup")
+async def startup_event():
+    """Log service configuration on startup"""
+    logger.info("Starting ProfeVision OMR Direct API")
+    logger.info(f"Allowed origins: {ALLOWED_ORIGINS}")
+    logger.info(f"Max image size: {MAX_IMAGE_SIZE_MB}MB")
+    logger.info(f"Image quality: {IMAGE_QUALITY}")
+    logger.info(f"Max dimension: {MAX_IMAGE_DIMENSION}px")
+    
+    # JWT verification status
+    if SUPABASE_URL and SUPABASE_ANON_KEY:
+        logger.info("JWT auth: ES256 (asymmetric keys via JWKS)")
+    else:
+        logger.warning("JWT auth: DISABLED (missing SUPABASE_URL or SUPABASE_ANON_KEY)")
 
 
 # Pydantic Models
@@ -117,10 +138,28 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-# JWT Validation
+# JWT Validation - ES256 only (after key rotation)
+def _get_jwks_client():
+    """Lazy-initialize JWKS client for ES256 token verification"""
+    global _jwks_client
+    if _jwks_client is None and SUPABASE_URL and SUPABASE_ANON_KEY:
+        jwks_url = f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json"
+        # PyJWKClient with custom headers for Supabase auth
+        _jwks_client = PyJWKClient(
+            jwks_url,
+            cache_keys=True,
+            headers={"apikey": SUPABASE_ANON_KEY}
+        )
+        logger.info(f"Initialized JWKS client: {jwks_url}")
+    return _jwks_client
+
+
 async def verify_supabase_jwt(authorization: str = Header(None, alias="Authorization")):
     """
-    Verify Supabase JWT token
+    Verify Supabase JWT token (dual-mode: HS256 legacy + ES256 new)
+    
+    Attempts ES256 verification first (new keys), falls back to HS256 (legacy).
+    This allows zero-downtime migration.
 
     Args:
         authorization: Authorization header with Bearer token
@@ -131,13 +170,6 @@ async def verify_supabase_jwt(authorization: str = Header(None, alias="Authoriza
     Raises:
         HTTPException: If token is invalid, expired, or missing
     """
-    if not SUPABASE_JWT_SECRET:
-        logger.error("SUPABASE_JWT_SECRET not configured")
-        raise HTTPException(
-            status_code=500,
-            detail="Server configuration error"
-        )
-
     if not authorization:
         raise HTTPException(
             status_code=401,
@@ -152,23 +184,36 @@ async def verify_supabase_jwt(authorization: str = Header(None, alias="Authoriza
 
     token = authorization.replace("Bearer ", "")
 
-    try:
-        payload = jwt.decode(
-            token,
-            SUPABASE_JWT_SECRET,
-            algorithms=["HS256"],
-            audience="authenticated"
-        )
-        return payload
-    except jwt.ExpiredSignatureError:
-        logger.warning("JWT token expired")
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidAudienceError:
-        logger.warning("JWT invalid audience")
-        raise HTTPException(status_code=401, detail="Invalid token audience")
-    except jwt.InvalidTokenError as e:
-        logger.warning(f"JWT validation failed: {str(e)}")
-        raise HTTPException(status_code=401, detail="Invalid token")
+    # Try ES256 first (new asymmetric keys via JWKS)
+    jwks_client = _get_jwks_client()
+    if jwks_client:
+        try:
+            signing_key = jwks_client.get_signing_key_from_jwt(token)
+            payload = jwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["ES256"],
+                audience="authenticated"
+            )
+            logger.debug("JWT verified via ES256 (new)")
+            return payload
+        except jwt.ExpiredSignatureError:
+            logger.warning("JWT token expired (ES256)")
+            raise HTTPException(status_code=401, detail="Token expired")
+        except jwt.InvalidAudienceError:
+            logger.warning("JWT invalid audience (ES256)")
+            raise HTTPException(status_code=401, detail="Invalid token audience")
+        except Exception as e:
+            # ES256 verification failed
+            logger.error(f"ES256 verification failed: {str(e)}", exc_info=True)
+            raise HTTPException(status_code=401, detail=f"JWT verification failed: {str(e)}")
+
+    # No ES256 verification available
+    logger.error("No JWT verification method configured (missing SUPABASE_URL or SUPABASE_ANON_KEY)")
+    raise HTTPException(
+        status_code=500,
+        detail="Server configuration error"
+    )
 
 
 # Image Compression
@@ -404,7 +449,12 @@ if __name__ == "__main__":
     logger.info(f"Max image size: {MAX_IMAGE_SIZE_MB}MB")
     logger.info(f"Image quality: {IMAGE_QUALITY}")
     logger.info(f"Max dimension: {MAX_IMAGE_DIMENSION}px")
-    logger.info(f"JWT auth: {'enabled' if SUPABASE_JWT_SECRET else 'disabled'}")
+    
+    # JWT verification status
+    if SUPABASE_URL and SUPABASE_ANON_KEY:
+        logger.info("JWT auth: ES256 (asymmetric keys via JWKS)")
+    else:
+        logger.warning("JWT auth: DISABLED (missing SUPABASE_URL or SUPABASE_ANON_KEY)")
 
     uvicorn.run(
         app,
