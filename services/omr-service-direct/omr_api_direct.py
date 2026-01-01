@@ -22,7 +22,6 @@ import uvicorn
 import jwt
 from jwt import PyJWKClient  # type: ignore
 from PIL import Image, ImageOps
-import requests
 
 # Import the OMR processor
 from omr_standalone import StandaloneOMRProcessor

@@ -9,6 +9,7 @@ python-multipart==0.0.9
 # JWT Authentication
 pyjwt[crypto]==2.8.0  # [crypto] for ES256 + JWKS support
 cryptography==41.0.7
+requests==2.31.0  # Required by PyJWKClient for JWKS fetching
 
 # Computer Vision & Image Processing
 opencv-python-headless==4.10.0.84  # Headless version for Docker
