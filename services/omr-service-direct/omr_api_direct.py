@@ -151,7 +151,7 @@ def _get_jwks_client():
     """Lazy-initialize JWKS client for ES256 token verification"""
     global _jwks_client
     if _jwks_client is None and SUPABASE_URL and SUPABASE_ANON_KEY:
-        jwks_url = f"{SUPABASE_URL}/auth/v1/jwks"
+        jwks_url = f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json"
         # PyJWKClient with custom headers for Supabase auth
         _jwks_client = PyJWKClient(
             jwks_url,
