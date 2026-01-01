@@ -68,6 +68,29 @@ _jwks_client = None
 SERVICE_START_TIME = time.time()
 
 
+# Startup event to log configuration
+@app.on_event("startup")
+async def startup_event():
+    """Log service configuration on startup"""
+    logger.info("Starting ProfeVision OMR Direct API")
+    logger.info(f"Allowed origins: {ALLOWED_ORIGINS}")
+    logger.info(f"Max image size: {MAX_IMAGE_SIZE_MB}MB")
+    logger.info(f"Image quality: {IMAGE_QUALITY}")
+    logger.info(f"Max dimension: {MAX_IMAGE_DIMENSION}px")
+    
+    # JWT verification status
+    has_es256 = bool(SUPABASE_PROJECT_REF)
+    has_hs256 = bool(SUPABASE_JWT_SECRET)
+    if has_es256 and has_hs256:
+        logger.info("JWT auth: dual-mode (ES256 + HS256 fallback)")
+    elif has_es256:
+        logger.info("JWT auth: ES256 only (new)")
+    elif has_hs256:
+        logger.info("JWT auth: HS256 only (legacy)")
+    else:
+        logger.warning("JWT auth: DISABLED (no keys configured)")
+
+
 # Pydantic Models
 class Answer(BaseModel):
     """Individual answer from exam"""
