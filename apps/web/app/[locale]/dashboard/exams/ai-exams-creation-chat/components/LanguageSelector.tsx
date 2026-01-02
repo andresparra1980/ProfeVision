@@ -18,14 +18,16 @@ import {
 } from "@/components/ui/tooltip";
 
 interface LanguageSelectorProps {
-  value: 'auto' | 'es' | 'en';
-  onValueChange: (_value: 'auto' | 'es' | 'en') => void;
+  value: 'auto' | 'es' | 'en' | 'fr' | 'pt';
+  onValueChange: (_value: 'auto' | 'es' | 'en' | 'fr' | 'pt') => void;
 }
 
 const languageOptions = [
-  { value: 'auto', label: '🌐', fullLabel: 'Auto' },
-  { value: 'es', label: '🇪🇸', fullLabel: 'Español' },
-  { value: 'en', label: '🇬🇧', fullLabel: 'English' },
+  { value: 'auto', label: 'Auto' },
+  { value: 'es', label: 'Español' },
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'Français' },
+  { value: 'pt', label: 'Português' },
 ] as const;
 
 export function LanguageSelector({ value, onValueChange }: LanguageSelectorProps) {
@@ -42,7 +44,7 @@ export function LanguageSelector({ value, onValueChange }: LanguageSelectorProps
             className="gap-2 w-[120px]"
           >
             <Globe className="h-4 w-4" />
-            <span>{languageOptions.find(opt => opt.value === value)?.fullLabel}</span>
+            <span>{languageOptions.find(opt => opt.value === value)?.label}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -52,8 +54,7 @@ export function LanguageSelector({ value, onValueChange }: LanguageSelectorProps
               onClick={() => onValueChange(option.value)}
               className="cursor-pointer"
             >
-              <span className="mr-2">{option.label}</span>
-              {option.fullLabel}
+              {option.label}
               {option.value === value && <span className="ml-auto text-xs">✓</span>}
             </DropdownMenuItem>
           ))}

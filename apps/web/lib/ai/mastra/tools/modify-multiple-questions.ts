@@ -64,7 +64,7 @@ const inputSchema = z.object({
   }),
 
   /** Language for generation */
-  language: z.enum(["es", "en"]).default("es"),
+  language: z.enum(["es", "en", "fr", "pt"]).default("en"),
 
   /** Optional chunk size (auto-calculated if not provided) */
   chunkSize: z.number().int().min(1).max(5).optional(),

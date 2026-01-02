@@ -45,7 +45,7 @@ const inputSchema = z.object({
   taxonomyLevels: z.array(TaxonomyLevelEnum).optional(),
 
   /** Language for generation */
-  language: z.enum(["es", "en"]).default("es"),
+  language: z.enum(["es", "en", "fr", "pt"]).default("en"),
 
   /** Optional document summaries */
   documentSummaries: z

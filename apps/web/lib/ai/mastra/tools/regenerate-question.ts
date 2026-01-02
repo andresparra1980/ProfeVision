@@ -58,7 +58,7 @@ const inputSchema = z.object({
     .optional(),
 
   /** Language for generation */
-  language: z.enum(["es", "en"]).default("es"),
+  language: z.enum(["es", "en", "fr", "pt"]).default("en"),
 
   /** Current exam context (for maintaining coherence) */
   currentExam: z

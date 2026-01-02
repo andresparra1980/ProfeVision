@@ -204,14 +204,14 @@ export async function POST(req: NextRequest) {
     // UI Locale: Always from frontend context (next-intl locale)
     const uiLocale = context.language || 'en';
 
-    // Generation Locale: Priority order (Issue #40 Phase 3)
+    // Generation Locale: Priority order (Issue #40 Phase 3 - Updated for multi-language)
     // 0. User explicit override (languageOverride !== 'auto') - HIGHEST
     // 1. Existing exam language (if modifying existing exam)
-    // 2. Exam type hints (TOEFL → en, Selectividad → es)
-    // 3. Message text analysis (accents, word frequency)
-    // 4. UI locale fallback (frontend context.language)
+    // 2. UI locale (frontend context.language) - Trusts user's interface choice
+    // 3. Exam type hints (TOEFL → en, Selectividad → es, Baccalauréat → fr, ENEM → pt)
+    // 4. Message text analysis (accents, word frequency)
     // 5. Headers (x-locale, accept-language)
-    // 6. Default: "es"
+    // 6. Default: "en"
     const generationLocale = (() => {
       // Debug log for languageOverride
       logger.api("Checking languageOverride for generation", {
@@ -242,10 +242,21 @@ export async function POST(req: NextRequest) {
         return context.existingExam.exam.language;
       }
 
-      // Get last user message for analysis
+      // Priority 2: UI locale (frontend context.language) - Trust user's interface choice
+      // This is more reliable than text analysis for multi-language support
+      if (context.language) {
+        logger.api("Generation locale from UI locale (highest priority for auto mode)", {
+          userId,
+          generationLocale: context.language,
+          source: "ui_locale"
+        });
+        return context.language;
+      }
+
+      // Get last user message for analysis (fallback only)
       const lastUserMessage = messages[messages.length - 1]?.content || "";
 
-      // Priority 2: Exam type hints (TOEFL, IELTS, Selectividad, etc.)
+      // Priority 3: Exam type hints (TOEFL, IELTS, Selectividad, etc.)
       const examHintLang = detectLanguageFromMessage(lastUserMessage);
       if (examHintLang) {
         logger.api("Generation locale from exam type hint", {
@@ -257,7 +268,7 @@ export async function POST(req: NextRequest) {
         return examHintLang;
       }
 
-      // Priority 3: Message text analysis (accents, word frequency)
+      // Priority 4: Message text analysis (accents, word frequency)
       const messageLang = detectMessageLanguage(lastUserMessage);
       if (messageLang) {
         logger.api("Generation locale from message analysis", {
@@ -267,16 +278,6 @@ export async function POST(req: NextRequest) {
           message: lastUserMessage.substring(0, 100)
         });
         return messageLang;
-      }
-
-      // Priority 4: UI locale fallback (frontend context.language)
-      if (context.language) {
-        logger.api("Generation locale from frontend context", {
-          userId,
-          generationLocale: context.language,
-          source: "context"
-        });
-        return context.language;
       }
 
       // Priority 5: Headers (x-locale, accept-language)
@@ -366,19 +367,34 @@ export async function POST(req: NextRequest) {
 
           // Inject language context (ALWAYS - highest priority instruction)
           // Two distinct languages: UI for responses, Generation for exam content
+          
+          // Helper to get full language name
+          const getLanguageName = (locale: string): string => {
+            const languageMap: Record<string, string> = {
+              es: 'SPANISH (español)',
+              en: 'ENGLISH',
+              fr: 'FRENCH (français)',
+              pt: 'PORTUGUESE (português)'
+            };
+            return languageMap[locale] || languageMap.en;
+          };
+          
+          const uiLanguageName = getLanguageName(uiLocale);
+          const generationLanguageName = getLanguageName(generationLocale);
+          
           const languageContext = `[LANGUAGE_SETTING]
 UI Language: ${uiLocale} - Use this for ALL conversational responses to the user
 Generation Language: ${generationLocale} - Use this for ALL exam content (questions, options, rationale, tags)
 
 IMPORTANT DISTINCTION:
-1. Your responses/messages to the user MUST be in ${uiLocale === 'es' ? 'SPANISH (español)' : 'ENGLISH'}
+1. Your responses/messages to the user MUST be in ${uiLanguageName}
    - Examples: "Generando examen...", "He creado las preguntas...", progress messages, etc.
 
-2. The exam content (questions, answers, rationale) MUST be in ${generationLocale === 'es' ? 'SPANISH (español)' : 'ENGLISH'}
-   - Question text: ${generationLocale === 'es' ? 'Spanish' : 'English'}
-   - Answer options: ${generationLocale === 'es' ? 'Spanish' : 'English'}
-   - Rationale: ${generationLocale === 'es' ? 'Spanish' : 'English'}
-   - Tags: ${generationLocale === 'es' ? 'Spanish' : 'English'}
+2. The exam content (questions, answers, rationale) MUST be in ${generationLanguageName}
+   - Question text: ${generationLanguageName}
+   - Answer options: ${generationLanguageName}
+   - Rationale: ${generationLanguageName}
+   - Tags: ${generationLanguageName}
 
 Generation language (${generationLocale}) has been determined by:
 ${context.languageOverride && context.languageOverride !== 'auto' ? '✅ USER EXPLICIT OVERRIDE - This is the highest priority, respect it absolutely' : 'Context-aware detection (exam context, hints, or message analysis)'}

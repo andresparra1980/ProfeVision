@@ -85,7 +85,7 @@ interface UseChatMessagesProps {
   result: unknown;
   setResult: (_result: unknown) => void;
   t: (_key: string, _options?: { fallback?: string } | Record<string, unknown>) => string;
-  languageOverride: 'auto' | 'es' | 'en';
+  languageOverride: 'auto' | 'es' | 'en' | 'fr' | 'pt';
 }
 
 /**

@@ -131,7 +131,7 @@ export const ExamPlanSchema = z.object({
         .optional(),
 
       /** Language of the exam */
-      language: z.enum(["es", "en"]).default("es"),
+      language: z.enum(["es", "en", "fr", "pt"]).default("en"),
     })
     .optional(),
 });

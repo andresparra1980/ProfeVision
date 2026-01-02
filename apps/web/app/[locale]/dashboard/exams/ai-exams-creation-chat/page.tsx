@@ -29,12 +29,12 @@ export default function AIExamsCreationChatPage() {
   const [_loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
 
   // Language override state with localStorage persistence
-  const [languageOverride, setLanguageOverride] = React.useState<'auto' | 'es' | 'en'>(() => {
+  const [languageOverride, setLanguageOverride] = React.useState<'auto' | 'es' | 'en' | 'fr' | 'pt'>(() => {
     try {
       if (typeof window === 'undefined') return 'auto';
       const stored = localStorage.getItem(LANGUAGE_OVERRIDE_KEY);
-      if (stored === 'es' || stored === 'en' || stored === 'auto') {
-        return stored;
+      if (['auto', 'es', 'en', 'fr', 'pt'].includes(stored as string)) {
+        return stored as 'auto' | 'es' | 'en' | 'fr' | 'pt';
       }
       return 'auto';
     } catch {
