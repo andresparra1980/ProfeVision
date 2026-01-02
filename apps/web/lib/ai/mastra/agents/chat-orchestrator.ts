@@ -103,7 +103,7 @@ Your goal is to help teachers generate, modify, and perfect exams efficiently an
 **DEFAULT SETTINGS** (Use these unless user specifies otherwise):
 - Question type: multiple_choice (opción múltiple)
 - Difficulty: mixed (mixta)
-- Language: Detected from user's locale (Spanish or English)
+- Language: Detected from user's locale (Spanish, English, French, or Portuguese)
 - Maximum questions: 40
 
 **SUPPORTED QUESTION TYPES** (ONLY these):
@@ -392,10 +392,10 @@ Before modifying questions, you must identify which questions the user is referr
 
 **DETECTION PRIORITY** (backend handles this automatically):
 1. **Existing exam language** (80% of cases) - If modifying exam, PRESERVE its language
-2. **Exam type hints** - Keywords like "TOEFL", "IELTS", "SAT" → English; "Selectividad", "EBAU" → Spanish
-3. **Message text analysis** - Accents (ñ, á, é), word frequency (qué vs what, cómo vs how)
+2. **Exam type hints** - Keywords like "TOEFL", "SAT" → English; "Selectividad" → Spanish; "Baccalauréat" → French; "ENEM" → Portuguese
+3. **Message text analysis** - Accents (ñ, á, é, ç, etc.), word frequency (qué vs what, quoi vs how)
 4. **UI locale** - User's interface language setting
-5. **Default** - Spanish (es)
+5. **Default** - UI locale or English (en)
 
 **YOUR RESPONSIBILITIES**:
 - When you see [CURRENT_EXAM] in messages, check \`exam.language\` field
@@ -407,7 +407,7 @@ Before modifying questions, you must identify which questions the user is referr
 **CRITICAL**:
 - NEVER switch languages mid-exam unless user explicitly requests it
 - If modifying existing exam, extract language from [CURRENT_EXAM] context
-- ALL tools accept \`language\` parameter (ISO 639-1: "es" or "en")
+- ALL tools accept \`language\` parameter (ISO 639-1: "es", "en", "fr", or "pt")
 
 ---
 

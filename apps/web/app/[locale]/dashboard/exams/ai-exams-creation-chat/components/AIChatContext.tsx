@@ -15,7 +15,7 @@ export interface AIExamResult {
 interface Ctx {
   result: AIExamResult | null;
   setResult: Dispatch<SetStateAction<AIExamResult | null>>;
-  languageOverride: 'auto' | 'es' | 'en';
+  languageOverride: 'auto' | 'es' | 'en' | 'fr' | 'pt';
 }
 
 const AIChatContext = createContext<Ctx | undefined>(undefined);
@@ -25,7 +25,7 @@ export function AIChatProvider({
   languageOverride = 'auto'
 }: {
   children: React.ReactNode;
-  languageOverride?: 'auto' | 'es' | 'en';
+  languageOverride?: 'auto' | 'es' | 'en' | 'fr' | 'pt';
 }) {
   const [result, setResult] = useState<AIExamResult | null>(null);
 

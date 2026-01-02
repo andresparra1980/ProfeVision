@@ -47,7 +47,7 @@ const inputSchema = z.object({
         .optional(),
 
       /** Language for generation (ISO 639-1) */
-      language: z.enum(["es", "en"]).default("es"),
+      language: z.enum(["es", "en", "fr", "pt"]).default("en"),
 
       /** Additional instructions */
       additionalInstructions: z.string().optional(),
@@ -228,16 +228,51 @@ export const generateQuestionsInBulkTool = createTool({
  * Builds the system prompt for question generation
  */
 function buildSystemPrompt(language: string): string {
-  const languageName = language === "es" ? "Spanish" : language === "en" ? "English" : language;
-  const examplePrompt = language === "es" ? "¿Qué es la fotosíntesis?" : "What is photosynthesis?";
-  const exampleOptions = language === "es"
-    ? '["Proceso de respiración", "Proceso de nutrición autótrofa", "Proceso de reproducción", "Proceso de excreción"]'
-    : '["Respiration process", "Autotrophic nutrition process", "Reproduction process", "Excretion process"]';
-  const exampleAnswer = language === "es" ? "Proceso de nutrición autótrofa" : "Autotrophic nutrition process";
-  const exampleRationale = language === "es"
-    ? "La fotosíntesis es el proceso por el cual las plantas producen su propio alimento usando luz solar."
-    : "Photosynthesis is the process by which plants produce their own food using sunlight.";
-  const exampleTags = language === "es" ? '["biología", "plantas", "fotosíntesis"]' : '["biology", "plants", "photosynthesis"]';
+  const languageConfig: Record<string, {
+    name: string;
+    examplePrompt: string;
+    exampleOptions: string;
+    exampleAnswer: string;
+    exampleRationale: string;
+    exampleTags: string;
+  }> = {
+    es: {
+      name: 'Spanish',
+      examplePrompt: '¿Qué es la fotosíntesis?',
+      exampleOptions: '["Proceso de respiración", "Proceso de nutrición autótrofa", "Proceso de reproducción", "Proceso de excreción"]',
+      exampleAnswer: 'Proceso de nutrición autótrofa',
+      exampleRationale: 'La fotosíntesis es el proceso por el cual las plantas producen su propio alimento usando luz solar.',
+      exampleTags: '["biología", "plantas", "fotosíntesis"]'
+    },
+    en: {
+      name: 'English',
+      examplePrompt: 'What is photosynthesis?',
+      exampleOptions: '["Respiration process", "Autotrophic nutrition process", "Reproduction process", "Excretion process"]',
+      exampleAnswer: 'Autotrophic nutrition process',
+      exampleRationale: 'Photosynthesis is the process by which plants produce their own food using sunlight.',
+      exampleTags: '["biology", "plants", "photosynthesis"]'
+    },
+    fr: {
+      name: 'French',
+      examplePrompt: "Qu'est-ce que la photosynthèse ?",
+      exampleOptions: '["Processus de respiration", "Processus de nutrition autotrophe", "Processus de reproduction", "Processus d\'excrétion"]',
+      exampleAnswer: 'Processus de nutrition autotrophe',
+      exampleRationale: 'La photosynthèse est le processus par lequel les plantes produisent leur propre nourriture en utilisant la lumière du soleil.',
+      exampleTags: '["biologie", "plantes", "photosynthèse"]'
+    },
+    pt: {
+      name: 'Portuguese',
+      examplePrompt: 'O que é a fotossíntese?',
+      exampleOptions: '["Processo de respiração", "Processo de nutrição autotrófica", "Processo de reprodução", "Processo de excreção"]',
+      exampleAnswer: 'Processo de nutrição autotrófica',
+      exampleRationale: 'A fotossíntese é o processo pelo qual as plantas produzem seu próprio alimento usando a luz solar.',
+      exampleTags: '["biologia", "plantas", "fotossíntese"]'
+    }
+  };
+
+  const config = languageConfig[language] || languageConfig.en;
+  const languageName = config.name;
+  const { examplePrompt, exampleOptions, exampleAnswer, exampleRationale, exampleTags } = config;
 
   return `You are an expert in creating high-quality educational exams.
 
