@@ -21,6 +21,7 @@ interface CookieBannerProps {
 export function CookieBanner({ className }: CookieBannerProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [showPreferences, setShowPreferences] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [preferences, setPreferences] = useState({
     necessary: true, // Always true, can't be disabled
     analytics: true,
@@ -46,6 +47,7 @@ export function CookieBanner({ className }: CookieBannerProps) {
   }
 
   useEffect(() => {
+    setMounted(true)
     // Check if user has already made a choice
     const cookieConsent = localStorage.getItem('profevision-cookie-consent')
     if (!cookieConsent) {
@@ -107,7 +109,7 @@ export function CookieBanner({ className }: CookieBannerProps) {
     setIsVisible(false)
   }
 
-  if (!isVisible) return null
+  if (!mounted || !isVisible) return null
 
   return (
     <div className={cn(
