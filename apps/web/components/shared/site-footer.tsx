@@ -166,7 +166,7 @@ export function SiteFooter() {
         </div>
         <div className="border-t mt-8 md:mt-12 pt-4 md:pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className={`text-xs text-muted-foreground ${logoFont}`}>
-            &copy; {new Date().getFullYear()} ProfeVision. {t('footer.copyright')}
+            &copy; 2026 ProfeVision. {t('footer.copyright')}
           </p>
           <div className="flex gap-4 mt-2 md:mt-0">
             <Link href="/cookies" className="text-xs text-muted-foreground hover:text-foreground" title={t('footer.links.cookiesPolicy')}>
