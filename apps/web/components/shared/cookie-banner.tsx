@@ -36,12 +36,15 @@ export function CookieBanner({ className }: CookieBannerProps) {
   const routeMap = {
     'cookies': {
       es: '/cookies',
-      en: '/cookies'
+      en: '/cookies',
+      fr: '/cookies',
+      pt: '/cookies'
     }
   } as const;
   const getLocalizedRoute = (routeKey: keyof typeof routeMap | string): string => {
     if (routeKey in routeMap) {
-      return routeMap[routeKey as keyof typeof routeMap][locale as 'es' | 'en'];
+      const routes = routeMap[routeKey as keyof typeof routeMap];
+      return routes[locale as keyof typeof routes] || routes.en;
     }
     return routeKey;
   }
