@@ -29,23 +29,22 @@ export default function AIExamsCreationChatPage() {
   const [_loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
 
   // Language override state with localStorage persistence
-  const [languageOverride, setLanguageOverride] = React.useState<'auto' | 'es' | 'en' | 'fr' | 'pt'>(() => {
-    try {
-      if (typeof window === 'undefined') return 'auto';
-      const stored = localStorage.getItem(LANGUAGE_OVERRIDE_KEY);
-      if (['auto', 'es', 'en', 'fr', 'pt'].includes(stored as string)) {
-        return stored as 'auto' | 'es' | 'en' | 'fr' | 'pt';
-      }
-      return 'auto';
-    } catch {
-      return 'auto';
-    }
-  });
+  const [languageOverride, setLanguageOverride] = React.useState<'auto' | 'es' | 'en' | 'fr' | 'pt'>('auto');
 
-  // Persist language override to localStorage
+  // Load and persist language override from/to localStorage
   React.useEffect(() => {
     try {
-      if (typeof window === 'undefined') return;
+      const stored = localStorage.getItem(LANGUAGE_OVERRIDE_KEY);
+      if (['auto', 'es', 'en', 'fr', 'pt'].includes(stored as string)) {
+        setLanguageOverride(stored as 'auto' | 'es' | 'en' | 'fr' | 'pt');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  React.useEffect(() => {
+    try {
       localStorage.setItem(LANGUAGE_OVERRIDE_KEY, languageOverride);
     } catch {
       // ignore

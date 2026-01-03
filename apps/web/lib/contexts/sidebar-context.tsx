@@ -16,33 +16,26 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   
-  // Detectar tamaño de pantalla
+  // Mark as mounted and load client-side values
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const checkIsMobile = () => {
-        setIsMobile(window.innerWidth < 768); // 768px es el punto de quiebre md en Tailwind
-      };
-      
-      // Comprobar al inicio
-      checkIsMobile();
-      
-      // Actualizar al cambiar el tamaño de la ventana
-      window.addEventListener('resize', checkIsMobile);
-      
-      return () => {
-        window.removeEventListener('resize', checkIsMobile);
-      };
-    }
-  }, []);
-
-  // Cargar preferencia guardada al inicio
-  useEffect(() => {
-    // Solo ejecutar en el cliente
-    if (typeof window !== 'undefined') {
-      const savedState = localStorage.getItem('sidebar-collapsed');
-      setIsCollapsed(savedState === 'true');
-    }
+    setMounted(true);
+    
+    // Detect mobile
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    // Load saved collapse state
+    const savedState = localStorage.getItem('sidebar-collapsed');
+    if (savedState === 'true') setIsCollapsed(true);
+    
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
   }, []);
   
   // Asegurarse de que en móvil nunca esté contraído

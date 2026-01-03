@@ -59,12 +59,13 @@ export function OnboardingChecklist() {
   }, [pathname, isSidebarOpen]);
   
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem("onboarding_checklist_dismissed") === "true";
-    }
-    return false;
-  });
+  const [isDismissed, setIsDismissed] = useState(false);
+  
+  // Load dismissed state from localStorage after mount
+  useEffect(() => {
+    const dismissed = localStorage.getItem("onboarding_checklist_dismissed") === "true";
+    if (dismissed) setIsDismissed(true);
+  }, []);
   const [checkingProgress, setCheckingProgress] = useState(true);
   const [showExamDrawer, setShowExamDrawer] = useState(false);
   const [itemsStatus, setItemsStatus] = useState<Record<ChecklistItemKey, boolean>>({
