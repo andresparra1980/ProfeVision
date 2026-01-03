@@ -16,11 +16,8 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  
-  // Mark as mounted and load client-side values
+  // Load client-side values after mount
   useEffect(() => {
-    setMounted(true);
     
     // Detect mobile
     const checkIsMobile = () => {
