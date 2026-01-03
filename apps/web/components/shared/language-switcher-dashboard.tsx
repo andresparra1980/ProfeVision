@@ -1,6 +1,6 @@
 'use client';
 
-import { LanguageSwitcherDropdown } from './language-switcher-dropdown';
+import { LanguageSwitcherDropdownSuspense } from './language-switcher-dropdown';
 
 interface LanguageSwitcherDashboardProps {
   collapsed?: boolean;
@@ -12,7 +12,7 @@ export function LanguageSwitcherDashboard({ collapsed = false }: LanguageSwitche
   // withTooltip muestra tooltip cuando está colapsado
   return (
     <div className="py-3 px-2 flex items-center justify-center w-full">
-      <LanguageSwitcherDropdown
+      <LanguageSwitcherDropdownSuspense
         variant="outline"
         size="sm"
         showLabel={!collapsed}

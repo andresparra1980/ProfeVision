@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { locales, localeNames } from '@/i18n/config';
@@ -161,4 +162,17 @@ export function LanguageSwitcherDropdown({
   }
 
   return dropdownComponent;
+}
+
+// Wrapper with Suspense to prevent hydration mismatch from useSearchParams
+export function LanguageSwitcherDropdownSuspense(props: LanguageSwitcherDropdownProps) {
+  return (
+    <Suspense fallback={
+      <Button variant={props.variant || 'outline'} size={props.size || 'sm'} className="gap-2">
+        <Languages className="h-4 w-4" />
+      </Button>
+    }>
+      <LanguageSwitcherDropdown {...props} />
+    </Suspense>
+  );
 }

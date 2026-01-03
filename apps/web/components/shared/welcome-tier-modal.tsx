@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { logoFont } from "@/lib/fonts";
-import { LanguageSwitcherDropdown } from "./language-switcher-dropdown";
+import { LanguageSwitcherDropdownSuspense } from "./language-switcher-dropdown";
 
 interface WelcomeTierModalProps {
   open: boolean;
@@ -115,7 +115,7 @@ export function WelcomeTierModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <div className="absolute top-4 right-4 z-50">
-          <LanguageSwitcherDropdown variant="outline" size="sm" withTooltip tooltipSide="left" />
+          <LanguageSwitcherDropdownSuspense variant="outline" size="sm" withTooltip tooltipSide="left" />
         </div>
         <DialogHeader className="text-center">
           <div className="flex items-center justify-center mb-4">

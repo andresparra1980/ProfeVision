@@ -11,7 +11,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Progress } from "@/components/ui/progress";
 import { useOnboarding } from "@/lib/contexts/onboarding-context";
 import { useTranslations } from "next-intl";
-import { LanguageSwitcherDropdown } from "@/components/shared/language-switcher-dropdown";
+import { LanguageSwitcherDropdownSuspense } from "@/components/shared/language-switcher-dropdown";
 
 // Steps
 import { 
@@ -190,7 +190,7 @@ export function OnboardingWizard({ waitForWelcome = false }: OnboardingWizardPro
                <p className="text-sm text-muted-foreground">{t("wizard.subtitle")}</p>
              </div>
              <div className="flex-shrink-0">
-               <LanguageSwitcherDropdown variant="outline" size="sm" withTooltip tooltipSide="left" />
+               <LanguageSwitcherDropdownSuspense variant="outline" size="sm" withTooltip tooltipSide="left" />
              </div>
            </div>
           
