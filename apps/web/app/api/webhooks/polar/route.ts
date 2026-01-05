@@ -84,6 +84,15 @@ export const POST = Webhooks({
       return;
     }
 
+    // Verificar si es un retry (mismo subscription_id ya existe)
+    const { data: profesor } = await supabaseAdmin
+      .from("profesores")
+      .select("polar_subscription_id")
+      .eq("id", profesorId)
+      .single();
+
+    const isRetry = profesor?.polar_subscription_id === subscription.id;
+
     await updateProfesorSubscription(profesorId, {
       subscription_tier: "plus",
       subscription_status: "active",
@@ -92,40 +101,44 @@ export const POST = Webhooks({
       subscription_cycle_start: subscription.startedAt ? new Date(subscription.startedAt).toISOString() : new Date().toISOString(),
     });
 
-    // Enviar email de bienvenida Plus
-    try {
-      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(profesorId);
-      
-      if (authUser?.user?.email) {
-        const locale = authUser.user.user_metadata?.preferred_locale || 'es';
-        const dashboardUrl = `https://profevision.com/${locale}/dashboard`;
+    // Solo enviar email si NO es retry del mismo webhook
+    if (isRetry) {
+      logger.log(`[subscription.created] Webhook retry detected for subscription ${subscription.id}, skipping email`);
+    } else {
+      try {
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(profesorId);
+        
+        if (authUser?.user?.email) {
+          const locale = authUser.user.user_metadata?.preferred_locale || 'es';
+          const dashboardUrl = `https://profevision.com/${locale}/dashboard`;
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-plus-welcome`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${process.env.SEND_PLUS_WELCOME_SECRET}`,
-            },
-            body: JSON.stringify({
-              email: authUser.user.email,
-              locale,
-              dashboardUrl,
-            }),
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-plus-welcome`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.SEND_PLUS_WELCOME_SECRET}`,
+              },
+              body: JSON.stringify({
+                email: authUser.user.email,
+                locale,
+                dashboardUrl,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            logger.warn(`[subscription.created] Failed to send welcome plus email:`, errorText);
+          } else {
+            logger.log(`[subscription.created] Welcome Plus email sent to: ${authUser.user.email}`);
           }
-        );
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          logger.warn(`[subscription.created] Failed to send welcome plus email:`, errorText);
-        } else {
-          logger.log(`[subscription.created] Welcome Plus email sent to: ${authUser.user.email}`);
         }
+      } catch (emailError) {
+        // No fallar el webhook si el email falla
+        logger.error(`[subscription.created] Error sending welcome plus email:`, emailError);
       }
-    } catch (emailError) {
-      // No fallar el webhook si el email falla
-      logger.error(`[subscription.created] Error sending welcome plus email:`, emailError);
     }
 
     logger.log(`Upgrade a Plus completado para profesor: ${profesorId}`);
