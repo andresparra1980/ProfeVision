@@ -98,7 +98,7 @@ export const POST = Webhooks({
       
       if (authUser?.user?.email) {
         const locale = authUser.user.user_metadata?.preferred_locale || 'es';
-        const dashboardUrl = `https://app.profevision.com/${locale}/dashboard`;
+        const dashboardUrl = `https://profevision.com/${locale}/dashboard`;
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-plus-welcome`,

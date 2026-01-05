@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
 
     const html = await renderAsync(
       React.createElement(WelcomePlusEmail, {
-        dashboardUrl: dashboardUrl || "https://app.profevision.com/dashboard",
+        dashboardUrl: dashboardUrl || "https://profevision.com/dashboard",
         translation: t.welcomePlus,
       })
     );
