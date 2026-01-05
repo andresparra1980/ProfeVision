@@ -1,0 +1,21 @@
+{
+  "welcomePlus": {
+    "subject": "Bem-vindo ao ProfeVision Plus",
+    "heading": "Bem-vindo ao Plus!",
+    "intro": "Obrigado por atualizar para o ProfeVision Plus. Agora voce tem acesso a todos os recursos premium.",
+    "benefitsTitle": "Seus beneficios agora:",
+    "benefits": {
+      "aiUnlimited": "Geracoes de exames com IA ilimitadas",
+      "scansUnlimited": "Digitalizacoes de exames ilimitadas",
+      "exportPdf": "Exportar exames para PDF",
+      "exportLatex": "Exportar exames para LaTeX",
+      "prioritySupport": "Suporte prioritario"
+    },
+    "comingSoonTitle": "Em breve:",
+    "comingSoon": {
+      "bulkOperations": "Operacoes em massa"
+    },
+    "button": "Ir para o Painel",
+    "footer": "Tem perguntas? Responda a este email e ajudaremos."
+  }
+}
