@@ -54,7 +54,8 @@
     "POLAR_SERVER_ID",
     "POLAR_PRODUCT_ID_MONTHLY",
     "POLAR_PRODUCT_ID_ANNUAL",
-    "POLAR_ENVIRONMENT"
+    "POLAR_ENVIRONMENT",
+    "SEND_PLUS_WELCOME_SECRET"
   ],
   "tasks": {
     "build": {
