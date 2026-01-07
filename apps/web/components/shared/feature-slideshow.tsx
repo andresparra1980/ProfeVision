@@ -99,21 +99,17 @@ export function FeatureSlideshow({
               <div className="p-4 border-b">
                 <div className="flex items-center justify-between">
                   <h2 className="font-medium text-base">{currentSlideData.title}</h2>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1" role="status" aria-label={`Slide ${currentSlide + 1} of ${slides.length}`}>
                     {slides.map((_, index) => (
-                      <button
+                      <div
                         key={index}
-                        onClick={() => setCurrentSlide(index)}
-                        aria-label={`Go to slide ${index + 1}`}
-                        aria-current={index === currentSlide ? 'true' : 'false'}
-                        className="p-2 -m-2"
-                      >
-                        <span className={`block w-2 h-2 rounded-full transition-all duration-300 ${
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
                           index === currentSlide 
                             ? 'bg-[#0b890f] w-6' 
-                            : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                        }`} />
-                      </button>
+                            : 'bg-muted-foreground/30'
+                        }`}
+                        role="presentation"
+                      />
                     ))}
                   </div>
                 </div>
@@ -150,21 +146,17 @@ export function FeatureSlideshow({
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
               <h2 className="font-medium text-base">{currentSlideData.title}</h2>
-              <div className="flex gap-1">
+              <div className="flex gap-1" role="status" aria-label={`Slide ${currentSlide + 1} of ${slides.length}`}>
                 {slides.map((_, index) => (
-                  <button
+                  <div
                     key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    aria-label={`Go to slide ${index + 1}`}
-                    aria-current={index === currentSlide ? 'true' : 'false'}
-                    className="p-2 -m-2"
-                  >
-                    <span className={`block w-2 h-2 rounded-full transition-all duration-300 ${
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
                       index === currentSlide 
                         ? 'bg-[#0b890f] w-6' 
-                        : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                    }`} />
-                  </button>
+                        : 'bg-muted-foreground/30'
+                    }`}
+                    role="presentation"
+                  />
                 ))}
               </div>
             </div>
