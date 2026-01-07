@@ -78,7 +78,7 @@
     @apply bg-background text-foreground;
     line-height: 28px;
   }
-  :root:not(.dark) main:not(.auth-main):not(.legal-main) {
+  :root:not(.dark) main:not(.auth-main):not(.legal-main):not(.website-main) {
     background-color: #f8f9fa !important;
   }
   :root:not(.dark) header,
@@ -89,7 +89,7 @@
   :root.dark aside {
     background-color: #333334 !important;
   }
-  :root.dark main:not(.auth-main):not(.legal-main) {
+  :root.dark main:not(.auth-main):not(.legal-main):not(.website-main) {
     background-color: #333334 !important;
   }
   @media (max-width: 768px) {

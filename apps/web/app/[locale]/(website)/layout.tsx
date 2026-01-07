@@ -11,7 +11,7 @@ export default function LocalizedWebsiteLayout({
   return (
     <>
       <SiteHeader />
-      <main className="pt-16">
+      <main className="pt-16 website-main">
         {children}
       </main>
       <SiteFooter />
