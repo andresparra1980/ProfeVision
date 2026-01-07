@@ -132,7 +132,7 @@ export function CookieBanner({ className }: CookieBannerProps) {
                  <h3 className="font-medium text-base mb-1">{t('main.title')}</h3>
                  <p className="text-xs text-muted-foreground leading-snug">
                    {t('main.description')}{" "}
-                   <Link href={getLocalizedRoute('cookies')} className="text-[#0b890f] hover:underline font-medium">
+                   <Link href={getLocalizedRoute('cookies')} className="text-[#087a0c] hover:underline font-medium">
                      {t('main.moreInfo')}
                    </Link>
                  </p>

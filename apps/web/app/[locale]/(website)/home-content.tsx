@@ -449,7 +449,7 @@ export function HomeContent() {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <h4 className="font-medium">{t('homepage.benefits.gradingTable.subject')}</h4>
-                        <span className="text-xs bg-[#0b890f]/10 text-[#0b890f] px-2 py-1 rounded-full">{t('homepage.benefits.gradingTable.period')}</span>
+                        <span className="text-xs bg-[#0b890f]/10 text-[#087a0c] px-2 py-1 rounded-full font-medium">{t('homepage.benefits.gradingTable.period')}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">{t('homepage.benefits.gradingTable.stats')}</div>
                     </div>
