@@ -20,7 +20,7 @@ import {
   PromptInputTools,
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
-import { Noto_Sans } from "next/font/google";
+import { notoSans } from "@/lib/fonts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,8 +41,6 @@ import { ProgressMessages } from "./ProgressMessages";
 import { StepProgressList } from "./StepProgressList";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { LimitReachedModal } from "@/components/shared/limit-reached-modal";
-
-const notoSans = Noto_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export default function ChatPanel() {
   const t = useTranslations('ai_exams_chat');

@@ -1,22 +1,7 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { headers } from 'next/headers';
+import { ibmPlexSans, ibmPlexMono } from '@/lib/fonts';
 import '@/styles/globals.css';
-
-const ibmPlexSans = IBM_Plex_Sans({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-sans',
-  style: ['normal'],
-  display: 'swap',
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: '500',
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: {
@@ -48,8 +33,6 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body
