@@ -106,12 +106,14 @@ export function FeatureSlideshow({
                         onClick={() => setCurrentSlide(index)}
                         aria-label={`Go to slide ${index + 1}`}
                         aria-current={index === currentSlide ? 'true' : 'false'}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        className="p-2 -m-2"
+                      >
+                        <span className={`block w-2 h-2 rounded-full transition-all duration-300 ${
                           index === currentSlide 
                             ? 'bg-[#0b890f] w-6' 
                             : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                        }`}
-                      />
+                        }`} />
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -155,12 +157,14 @@ export function FeatureSlideshow({
                     onClick={() => setCurrentSlide(index)}
                     aria-label={`Go to slide ${index + 1}`}
                     aria-current={index === currentSlide ? 'true' : 'false'}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    className="p-2 -m-2"
+                  >
+                    <span className={`block w-2 h-2 rounded-full transition-all duration-300 ${
                       index === currentSlide 
                         ? 'bg-[#0b890f] w-6' 
                         : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                    }`}
-                  />
+                    }`} />
+                  </button>
                 ))}
               </div>
             </div>
