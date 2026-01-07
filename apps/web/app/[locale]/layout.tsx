@@ -4,13 +4,9 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { AuthProvider } from '@/components/shared/auth-provider';
 import { ClientLayout } from '@/components/shared/client-layout';
-import dynamic from 'next/dynamic';
+import { CookieBanner } from '@/components/shared/cookie-banner';
 import Script from 'next/script';
 import type { Metadata } from 'next';
-
-const CookieBanner = dynamic(() => import('@/components/shared/cookie-banner').then(mod => ({ default: mod.CookieBanner })), {
-  ssr: false,
-});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

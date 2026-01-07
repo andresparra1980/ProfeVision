@@ -15,9 +15,26 @@ const nextConfig: NextConfig = {
     } : false,
   },
 
-  // Target modern browsers
+  // Target modern browsers and optimize imports
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-icons',
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-checkbox',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-label',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-select',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-slot',
+      '@radix-ui/react-switch',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+    ],
   },
 
   // Enable image optimization from external sources
