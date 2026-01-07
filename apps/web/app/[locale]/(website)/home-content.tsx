@@ -41,7 +41,7 @@ export function HomeContent() {
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
                   {t('homepage.hero.title')} <span className="text-[#0b890f]">{t('homepage.hero.titleHighlight')}</span>
                 </h1>
-                <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                <p className="max-w-[600px] text-foreground/80 md:text-xl">
                   {t('homepage.hero.description')}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -81,7 +81,7 @@ export function HomeContent() {
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                 {t('homepage.features.title')}
               </h2>
-              <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="max-w-[700px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 {t('homepage.features.description')}
               </p>
             </div>
@@ -126,7 +126,7 @@ export function HomeContent() {
                 {t('homepage.modules.badge')}
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">{t('homepage.modules.title')}</h2>
-              <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="max-w-[700px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 {t('homepage.modules.description')}
               </p>
             </div>
@@ -368,7 +368,7 @@ export function HomeContent() {
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                   {t('homepage.benefits.title')}
                 </h2>
-                <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                <p className="max-w-[600px] text-foreground/80 md:text-xl">
                   {t('homepage.benefits.description')}
                 </p>
                 <ul className="space-y-2">

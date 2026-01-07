@@ -130,11 +130,11 @@ export function FeatureSlideshow({
                 </div>
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <div className="rounded-lg bg-muted p-4">
-                    <p className="text-sm text-muted-foreground">{t('metrics.timeSaved')}</p>
+                    <p className="text-sm text-foreground/70">{t('metrics.timeSaved')}</p>
                     <p className="font-bold text-xl">95%</p>
                   </div>
                   <div className="rounded-lg bg-muted p-4">
-                    <p className="text-sm text-muted-foreground">{t('metrics.accuracy')}</p>
+                    <p className="text-sm text-foreground/70">{t('metrics.accuracy')}</p>
                     <p className="font-bold text-xl">99.9%</p>
                   </div>
                 </div>
@@ -179,11 +179,11 @@ export function FeatureSlideshow({
             </div>
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="rounded-lg bg-muted p-4">
-                <p className="text-sm text-muted-foreground">{t('metrics.timeSaved')}</p>
+                <p className="text-sm text-foreground/70">{t('metrics.timeSaved')}</p>
                 <p className="font-bold text-xl">95%</p>
               </div>
               <div className="rounded-lg bg-muted p-4">
-                <p className="text-sm text-muted-foreground">{t('metrics.accuracy')}</p>
+                <p className="text-sm text-foreground/70">{t('metrics.accuracy')}</p>
                 <p className="font-bold text-xl">99.9%</p>
               </div>
             </div>
