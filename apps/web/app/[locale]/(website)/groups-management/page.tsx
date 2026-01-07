@@ -1,22 +1,16 @@
-'use client';
+import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/seo/page-metadata";
+import { GroupsManagementPageContent } from "./groups-management-content";
 
-import { useTranslations } from 'next-intl';
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return generatePageMetadata("/groups-management", locale);
+}
 
 export default function GroupsManagementPage() {
-  const t = useTranslations('common');
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">{t('navigation.groupsManagement')}</h1>
-        <p className="text-lg text-muted-foreground">
-          Gestión de grupos
-        </p>
-      </div>
-      
-      <div className="prose max-w-none">
-        <p>Contenido de la gestión de grupos...</p>
-      </div>
-    </div>
-  );
-} 
+  return <GroupsManagementPageContent />;
+}
