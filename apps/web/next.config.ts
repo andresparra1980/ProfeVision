@@ -8,6 +8,18 @@ const nextConfig: NextConfig = {
   // Disable strict mode in development for demo purposes
   reactStrictMode: false,
 
+  // Optimize for modern browsers - remove unnecessary polyfills
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+
+  // Target modern browsers
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+
   // Enable image optimization from external sources
   images: {
     remotePatterns: [
@@ -17,15 +29,8 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/storage/v1/object/public/**",
       },
-      {
-        protocol: "https",
-        hostname: "api.dicebear.com",
-        port: "",
-        pathname: "/9.x/avataaars/svg",
-      },
     ],
     minimumCacheTTL: 60,
-    dangerouslyAllowSVG: true,
   },
 
   // Ensure trailing slashes are handled properly
