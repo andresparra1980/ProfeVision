@@ -104,6 +104,8 @@ export function FeatureSlideshow({
                       <button
                         key={index}
                         onClick={() => setCurrentSlide(index)}
+                        aria-label={`Go to slide ${index + 1}`}
+                        aria-current={index === currentSlide ? 'true' : 'false'}
                         className={`w-2 h-2 rounded-full transition-all duration-300 ${
                           index === currentSlide 
                             ? 'bg-[#0b890f] w-6' 
@@ -151,6 +153,8 @@ export function FeatureSlideshow({
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
+                    aria-label={`Go to slide ${index + 1}`}
+                    aria-current={index === currentSlide ? 'true' : 'false'}
                     className={`w-2 h-2 rounded-full transition-all duration-300 ${
                       index === currentSlide 
                         ? 'bg-[#0b890f] w-6' 
