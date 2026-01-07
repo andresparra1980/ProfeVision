@@ -13,7 +13,7 @@
     "continue": "Continuer",
     "confirm": "Confirmer",
     "startFree": "Commencer Gratuitement !",
-    "learnMore": "En savoir plus",
+    "learnMore": "Découvrez comment fonctionne ProfeVision",
     "startTrial": "Démarrer l'essai gratuit",
     "exportGrades": "Exporter les notes",
     "login": "Se connecter",
@@ -112,7 +112,7 @@
       "titleHighlight": "pour Scanner et Noter les Examens sur Papier",
       "description": "Chez ProfeVisión, nous comprenons les défis de l'éducation moderne. Nous avons développé la solution tout-en-un qui automatise la création, la notation et la gestion des examens avec l'IA, libérant ainsi votre temps précieux pour que vous puissiez vous concentrer sur ce qui compte vraiment : enseigner et stimuler l'apprentissage de vos étudiants.",
       "startFree": "Commencer Gratuitement !",
-      "learnMore": "En savoir plus",
+      "learnMore": "Découvrez comment fonctionne ProfeVision",
       "registerTitle": "S'inscrire gratuitement sur ProfeVisión - Créer un compte sans frais",
       "learnMoreTitle": "En savoir plus sur les fonctionnalités de ProfeVisión",
       "avatarAlt": "Avatar de l'enseignant {number} qui utilise ProfeVisión",
@@ -142,7 +142,7 @@
       "badge": "Modules Principaux",
       "title": "Gestion éducative complète",
       "description": "Organisez tous les aspects de votre environnement éducatif en un seul endroit",
-      "moreInfo": "Plus d'informations",
+      "moreInfo": "Voir la documentation",
       "institutions": {
         "title": "Gestion des Institutions",
         "feature1": "Créez et gérez plusieurs institutions",
@@ -229,7 +229,7 @@
       "description": "Rejoignez des milliers d'éducateurs qui optimisent déjà leur travail et améliorent les résultats de leurs étudiants.",
       "startTrial": "Commencer l'essai gratuit",
       "startTrialTitle": "Démarrer l'essai gratuit de ProfeVision - Sans engagement",
-      "learnMore": "En savoir plus",
+      "learnMore": "Découvrez comment fonctionne ProfeVision",
       "stats": {
         "teachers": "1000+",
         "teachersLabel": "Enseignants Actifs",
@@ -299,7 +299,7 @@
       "title": "Prêt à révolutionner vos évaluations ?",
       "description": "Rejoignez-nous maintenant et profitez d'un accès gratuit à toutes les fonctionnalités de ProfeVisión pendant notre période de lancement.",
       "startFree": "Commencer gratuitement",
-      "learnMore": "En savoir plus"
+      "learnMore": "Découvrez comment fonctionne ProfeVision"
     }
   },
   "howItWorks": {
@@ -625,7 +625,7 @@
       "title": "Transformez votre contenu en quiz captivants en quelques secondes",
       "description": "Générez plusieurs types de questions à partir de textes ou de fichiers téléchargés de manière intelligente et efficace.",
       "startNow": "Commencer maintenant",
-      "learnMore": "En savoir plus"
+      "learnMore": "Découvrez comment fonctionne ProfeVision"
     },
     "results": {
       "na": "S/O"

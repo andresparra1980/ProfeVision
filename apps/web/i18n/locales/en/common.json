@@ -13,7 +13,7 @@
     "continue": "Continue",
     "confirm": "Confirm",
     "startFree": "Start Free!",
-    "learnMore": "Learn More",
+    "learnMore": "Discover how ProfeVision works",
     "startTrial": "Start Free Trial",
     "exportGrades": "Export Grades",
     "login": "Sign In",
@@ -138,7 +138,7 @@
       "titleHighlight": "for Scanning and Grading Paper Exams",
       "description": "At ProfeVision, we understand the challenges of modern education. We've developed an all-in-one solution that automates exam creation, grading, and management with AI, freeing up your valuable time to focus on what really matters: teaching and empowering your students' learning.",
       "startFree": "Start Free!",
-      "learnMore": "Learn More",
+      "learnMore": "Discover how ProfeVision works",
       "registerTitle": "Sign up for free with ProfeVision - Create account at no cost",
       "learnMoreTitle": "Learn more about ProfeVision features",
       "avatarAlt": "Teacher avatar {number} using ProfeVision",
@@ -168,7 +168,7 @@
       "badge": "Main Modules",
       "title": "Complete educational management",
       "description": "Organize all aspects of your educational environment in one place",
-      "moreInfo": "More information",
+      "moreInfo": "View documentation",
       "institutions": {
         "title": "Institution Management",
         "feature1": "Create and manage multiple institutions",
@@ -255,7 +255,7 @@
       "description": "Join thousands of educators who are already optimizing their work and improving their students' results.",
       "startTrial": "Start Free Trial",
       "startTrialTitle": "Start free trial of ProfeVision - No commitments",
-      "learnMore": "Learn More",
+      "learnMore": "Discover how ProfeVision works",
       "stats": {
         "teachers": "1000+",
         "teachersLabel": "Active Teachers",
@@ -325,7 +325,7 @@
       "title": "Ready to Revolutionize Your Assessments?",
       "description": "Join now and get free access to all ProfeVision features during our launch period.",
       "startFree": "Start Free",
-      "learnMore": "Learn More"
+      "learnMore": "Discover how ProfeVision works"
     }
   },
   "howItWorks": {
@@ -651,7 +651,7 @@
       "title": "Transform your content into engaging tests in seconds",
       "description": "Generate multiple types of questions from text or uploaded files intelligently and efficiently.",
       "startNow": "Start Now",
-      "learnMore": "Learn More"
+      "learnMore": "Discover how ProfeVision works"
     }
   },
   "contact": {

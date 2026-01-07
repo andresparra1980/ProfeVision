@@ -13,7 +13,7 @@
     "continue": "Continuar",
     "confirm": "Confirmar",
     "startFree": "Começar Grátis!",
-    "learnMore": "Saiba Mais",
+    "learnMore": "Descubra como funciona o ProfeVision",
     "startTrial": "Inicie o Teste Grátis",
     "exportGrades": "Exportar Notas",
     "login": "Entrar",
@@ -112,7 +112,7 @@
       "titleHighlight": "para Escanear e Corrigir Provas em Papel",
       "description": "Na ProfeVisión, entendemos os desafios da educação moderna. Desenvolvemos a solução tudo-em-um que automatiza a criação, correção e gestão de exames com IA, liberando seu tempo precioso para que você se concentre no que realmente importa: ensinar e potencializar o aprendizado de seus alunos.",
       "startFree": "Começar Grátis!",
-      "learnMore": "Saiba Mais",
+      "learnMore": "Descubra como funciona o ProfeVision",
       "registerTitle": "Registrar-se grátis na ProfeVisión - Criar conta sem custo",
       "learnMoreTitle": "Saiba mais sobre as funcionalidades da ProfeVisión",
       "avatarAlt": "Avatar do professor {number} que usa ProfeVisión",
@@ -142,7 +142,7 @@
       "badge": "Módulos Principais",
       "title": "Gestão educacional completa",
       "description": "Organize todos os aspectos do seu ambiente educacional em um só lugar",
-      "moreInfo": "Mais informações",
+      "moreInfo": "Ver documentação",
       "institutions": {
         "title": "Gestão de Instituições",
         "feature1": "Crie e administre múltiplas instituições",
@@ -229,7 +229,7 @@
       "description": "Junte-se a milhares de educadores que já estão otimizando seu trabalho e melhorando os resultados de seus alunos.",
       "startTrial": "Inicie o Teste Grátis",
       "startTrialTitle": "Iniciar teste gratuito do ProfeVisión - Sem compromisso",
-      "learnMore": "Saiba Mais",
+      "learnMore": "Descubra como funciona o ProfeVision",
       "stats": {
         "teachers": "1000+",
         "teachersLabel": "Professores Ativos",
@@ -299,7 +299,7 @@
       "title": "Pronto para Revolucionar suas Avaliações?",
       "description": "Participe agora e ganhe acesso gratuito a todas as funções do ProfeVisión durante nosso período de lançamento.",
       "startFree": "Começar Grátis",
-      "learnMore": "Saiba Mais"
+      "learnMore": "Descubra como funciona o ProfeVision"
     }
   },
   "howItWorks": {
@@ -625,7 +625,7 @@
       "title": "Transforme seu conteúdo em testes interessantes em segundos",
       "description": "Gere múltiplos tipos de perguntas a partir de texto ou arquivos carregados de maneira inteligente e eficiente.",
       "startNow": "Começar Agora",
-      "learnMore": "Saiba Mais"
+      "learnMore": "Descubra como funciona o ProfeVision"
     },
     "results": {
       "na": "N/D"
