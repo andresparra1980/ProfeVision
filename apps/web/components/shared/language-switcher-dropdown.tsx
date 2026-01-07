@@ -118,6 +118,7 @@ export function LanguageSwitcherDropdown({
       variant={variant}
       size={size}
       className={`gap-2 ${centered ? 'flex-1 justify-center' : ''}`}
+      aria-label={showLabel ? undefined : t('ui.language')}
     >
       <Languages className="h-4 w-4" />
       {showLabel && <span>{localeNames[locale as keyof typeof localeNames]}</span>}
@@ -168,7 +169,12 @@ export function LanguageSwitcherDropdown({
 export function LanguageSwitcherDropdownSuspense(props: LanguageSwitcherDropdownProps) {
   return (
     <Suspense fallback={
-      <Button variant={props.variant || 'outline'} size={props.size || 'sm'} className="gap-2">
+      <Button 
+        variant={props.variant || 'outline'} 
+        size={props.size || 'sm'} 
+        className="gap-2"
+        aria-label="Language"
+      >
         <Languages className="h-4 w-4" />
       </Button>
     }>
