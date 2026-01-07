@@ -15,17 +15,10 @@ import {
   ArrowRight,
   Smartphone
 } from "lucide-react"
-import Image from 'next/image'
-import { useMemo } from 'react'
 
 export function HomeContent() {
   const t = useTranslations('common')
   const locale = useLocale()
-  
-  const avatarSeeds = useMemo(
-    () => ['seed1', 'seed2', 'seed3', 'seed4'],
-    []
-  )
 
   // Internal links use i18n-aware Link which preserves current locale
 
@@ -67,20 +60,7 @@ export function HomeContent() {
                     </a>
                   </Button>
                 </div>
-                <div className="flex items-center gap-4 pt-4">
-                  <div className="flex -space-x-2 overflow-hidden" suppressHydrationWarning>
-                    {avatarSeeds.map((seed, index) => (
-                      <Image
-                        key={index}
-                        src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`}
-                        alt={t('homepage.hero.avatarAlt', { number: index + 1 })}
-                        title={t('homepage.hero.avatarTitle')}
-                        width={32}
-                        height={32}
-                        className="w-8 h-8 rounded-full border-2 border-background"
-                      />
-                    ))}
-                  </div>
+                <div className="flex items-center pt-4">
                   <p className="text-sm text-muted-foreground">
                     {t('homepage.hero.trustText')} <span className="font-bold text-foreground">{t('homepage.hero.trustNumber')}</span> {t('homepage.hero.trustSuffix')}
                   </p>

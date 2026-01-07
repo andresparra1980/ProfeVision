@@ -4,9 +4,13 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { AuthProvider } from '@/components/shared/auth-provider';
 import { ClientLayout } from '@/components/shared/client-layout';
-import { CookieBanner } from '@/components/shared/cookie-banner';
+import dynamic from 'next/dynamic';
 import Script from 'next/script';
 import type { Metadata } from 'next';
+
+const CookieBanner = dynamic(() => import('@/components/shared/cookie-banner').then(mod => ({ default: mod.CookieBanner })), {
+  ssr: false,
+});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -141,7 +145,7 @@ export default async function LocaleLayout({
     <>
       <Script
         id="gtm-script"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         dangerouslySetInnerHTML={{
           __html: `
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

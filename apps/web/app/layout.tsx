@@ -8,12 +8,14 @@ const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
   style: ['normal'],
+  display: 'swap',
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
   weight: '500',
   subsets: ['latin'],
   variable: '--font-mono',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -45,6 +47,11 @@ export default async function RootLayout({
   
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      </head>
       <body
         className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
         suppressHydrationWarning
