@@ -98,7 +98,7 @@ export function FeatureSlideshow({
             <div className="relative bg-card backdrop-blur-sm rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-auto transition-all duration-500">
               <div className="p-4 border-b">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-medium text-base">{currentSlideData.title}</h2>
+                  <div className="font-medium text-base">{currentSlideData.title}</div>
                   <div className="flex gap-1" role="status" aria-label={`Slide ${currentSlide + 1} of ${slides.length}`}>
                     {slides.map((_, index) => (
                       <div
@@ -145,7 +145,7 @@ export function FeatureSlideshow({
         <div className="relative bg-card backdrop-blur-sm border rounded-2xl shadow-xl overflow-hidden w-full max-w-md mx-auto transition-all duration-500">
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
-              <h2 className="font-medium text-base">{currentSlideData.title}</h2>
+              <div className="font-medium text-base">{currentSlideData.title}</div>
               <div className="flex gap-1" role="status" aria-label={`Slide ${currentSlide + 1} of ${slides.length}`}>
                 {slides.map((_, index) => (
                   <div
