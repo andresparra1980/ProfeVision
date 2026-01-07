@@ -1,29 +1,12 @@
 import type { Metadata } from 'next';
-
-const BASE_URL = 'https://profevision.com';
-
-type Locale = 'en' | 'es' | 'fr' | 'pt';
-
-// Slugs localizados por ruta canónica
-const localizedSlugs: Record<string, Record<Locale, string>> = {
-  '/': { en: '', es: '', fr: '', pt: '' },
-  '/pricing': { en: 'pricing', es: 'precios', fr: 'tarification', pt: 'precos' },
-  '/how-it-works': { en: 'how-it-works', es: 'como-funciona', fr: 'comment-ca-marche', pt: 'como-funciona' },
-  '/privacy': { en: 'privacy', es: 'privacidad', fr: 'confidentialite', pt: 'privacidade' },
-  '/terms': { en: 'terms', es: 'terminos', fr: 'conditions', pt: 'termos' },
-  '/cookies': { en: 'cookies', es: 'cookies', fr: 'cookies', pt: 'cookies' },
-  '/contact': { en: 'contact', es: 'contacto', fr: 'contact', pt: 'contato' },
-  '/blog': { en: 'blog', es: 'blog', fr: 'blog', pt: 'blog' },
-  '/exams-with-ai': { en: 'exams-with-ai', es: 'examenes-con-ia', fr: 'examens-avec-ia', pt: 'exames-com-ia' },
-  '/paper-exams': { en: 'paper-exams', es: 'examenes-papel', fr: 'examens-papier', pt: 'exames-papel' },
-  '/institutions-management': { en: 'institutions-management', es: 'gestion-instituciones', fr: 'gestion-etablissements', pt: 'gerenciamento-instituicoes' },
-  '/subjects-management': { en: 'subjects-management', es: 'gestion-materias', fr: 'gestion-matieres', pt: 'gerenciamento-disciplinas' },
-  '/groups-management': { en: 'groups-management', es: 'gestion-grupos', fr: 'gestion-groupes', pt: 'gerenciamento-grupos' },
-  '/students-management': { en: 'students-management', es: 'gestion-estudiantes', fr: 'gestion-etudiants', pt: 'gerenciamento-estudantes' },
-  '/reports': { en: 'reports', es: 'reportes', fr: 'rapports', pt: 'relatorios' },
-  '/mobile-app': { en: 'mobile-app', es: 'aplicacion-movil', fr: 'application-mobile', pt: 'aplicativo-movil' },
-  '/data-deletion': { en: 'data-deletion', es: 'data-deletion', fr: 'data-deletion', pt: 'data-deletion' },
-};
+import {
+  BASE_URL,
+  LOCALES,
+  LOCALIZED_ROUTES,
+  buildLocalizedUrl,
+  buildAlternates,
+  type Locale,
+} from './routes';
 
 // Metadata por página y locale
 type PageMeta = {
@@ -340,6 +323,22 @@ const pageMetadata: Record<string, Record<Locale, PageMeta>> = {
   },
 };
 
+const OG_IMAGE = `${BASE_URL}/android-chrome-512x512.png`;
+
+function getOgLocale(locale: Locale): string {
+  const map: Record<Locale, string> = {
+    en: 'en_US',
+    es: 'es_ES',
+    fr: 'fr_FR',
+    pt: 'pt_BR',
+  };
+  return map[locale];
+}
+
+function getAlternateLocales(currentLocale: Locale): string[] {
+  return LOCALES.filter((l) => l !== currentLocale).map(getOgLocale);
+}
+
 /**
  * Generate SEO metadata for a public page
  * @param canonicalPath - The canonical path (e.g., '/pricing', '/how-it-works')
@@ -351,46 +350,35 @@ export function generatePageMetadata(
 ): Metadata {
   const validLocale = (locale as Locale) || 'en';
   const meta = pageMetadata[canonicalPath]?.[validLocale] || pageMetadata[canonicalPath]?.en;
-  const slugs = localizedSlugs[canonicalPath];
 
-  if (!meta || !slugs) {
-    // Fallback for unknown pages
+  if (!meta || !LOCALIZED_ROUTES[canonicalPath]) {
     return {
       title: 'ProfeVision',
       description: 'The best app to scan and grade paper exams with AI.',
     };
   }
 
-  const currentSlug = slugs[validLocale];
-  const currentUrl = `${BASE_URL}/${validLocale}${currentSlug ? `/${currentSlug}` : ''}`;
-
-  // Build alternates for all locales
-  const languages: Record<string, string> = {
-    'x-default': `${BASE_URL}/en${slugs.en ? `/${slugs.en}` : ''}`,
-  };
-  
-  for (const loc of ['en', 'es', 'fr', 'pt'] as Locale[]) {
-    const slug = slugs[loc];
-    languages[loc] = `${BASE_URL}/${loc}${slug ? `/${slug}` : ''}`;
-  }
+  const currentUrl = buildLocalizedUrl(canonicalPath, validLocale);
+  const alternates = buildAlternates(canonicalPath);
 
   return {
     title: meta.title,
     description: meta.description,
     alternates: {
       canonical: currentUrl,
-      languages,
+      languages: alternates,
     },
     openGraph: {
       title: meta.title,
       description: meta.description,
       url: currentUrl,
       siteName: 'ProfeVision',
-      locale: validLocale === 'es' ? 'es_ES' : validLocale === 'fr' ? 'fr_FR' : validLocale === 'pt' ? 'pt_BR' : 'en_US',
+      locale: getOgLocale(validLocale),
+      alternateLocale: getAlternateLocales(validLocale),
       type: 'website',
       images: [
         {
-          url: `${BASE_URL}/android-chrome-512x512.png`,
+          url: OG_IMAGE,
           width: 512,
           height: 512,
           alt: meta.title,
@@ -401,6 +389,7 @@ export function generatePageMetadata(
       card: 'summary_large_image',
       title: meta.title,
       description: meta.description,
+      images: [OG_IMAGE],
     },
   };
 }
