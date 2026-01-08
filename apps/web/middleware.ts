@@ -366,8 +366,7 @@ export const config = {
      * - security.txt (legacy location)
      * - .git/ (ignore probes from browser extensions/scanners)
      * - opencv.js (OpenCV library for document capture)
-     * - gtm (Cloudflare Google Tag Manager gateway)
      */
-    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/|opencv.js|turnstile.html|gtm).*)",
+    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/|opencv.js|turnstile.html).*)",
   ],
 };

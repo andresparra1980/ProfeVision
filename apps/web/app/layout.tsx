@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
-import Script from 'next/script';
 import { ibmPlexSans, ibmPlexMono } from '@/lib/fonts';
 import '@/styles/globals.css';
 
@@ -30,8 +29,7 @@ export default async function RootLayout({
   // 🌍 Detectar locale desde middleware para SEO correcto
   const headersList = await headers();
   const locale = headersList.get('x-locale') || 'es';
-  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
-
+  
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -41,31 +39,6 @@ export default async function RootLayout({
         className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
         suppressHydrationWarning
       >
-        {gtmId && (
-          <>
-            <Script
-              id="gtm"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                  'https://profevision.com/gtm?id='+i+dl;f.parentNode.insertBefore(j,f);
-                  })(window,document,'script','dataLayer','${gtmId}');
-                `,
-              }}
-            />
-            <noscript>
-              <iframe
-                src={`https://profevision.com/gtmns?id=${gtmId}`}
-                height="0"
-                width="0"
-                style={{ display: 'none', visibility: 'hidden' }}
-              />
-            </noscript>
-          </>
-        )}
         {children}
       </body>
     </html>
