@@ -56,12 +56,12 @@ export function MobileAppContent() {
   }
 
   const features = [
-    { key: 'dashboard', icon: LayoutDashboard, image: '1-dashboard.png' },
-    { key: 'subjects', icon: FolderOpen, image: '2-subjects-groups.png' },
-    { key: 'exams', icon: FileText, image: '3-exams.png' },
-    { key: 'settings', icon: Settings, image: '4-settings.png' },
-    { key: 'scan', icon: ScanLine, image: '5-scan-wizard.png' },
-    { key: 'results', icon: BarChart3, image: '6-results.png' },
+    { key: 'dashboard', icon: LayoutDashboard, image: '1-dashboard.webp' },
+    { key: 'subjects', icon: FolderOpen, image: '2-subjects-groups.webp' },
+    { key: 'exams', icon: FileText, image: '3-exams.webp' },
+    { key: 'settings', icon: Settings, image: '4-settings.webp' },
+    { key: 'scan', icon: ScanLine, image: '5-scan-wizard.webp' },
+    { key: 'results', icon: BarChart3, image: '6-results.webp' },
   ]
 
   const benefits = [
@@ -143,7 +143,7 @@ export function MobileAppContent() {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/20 to-[#ffd60a]/20 rounded-3xl blur-2xl" />
                 <Image
-                  src="/images/mobile-app/adaptive-icon.png"
+                  src="/images/mobile-app/adaptive-icon.webp"
                   alt={t('imageAlt.icon')}
                   width={280}
                   height={280}
