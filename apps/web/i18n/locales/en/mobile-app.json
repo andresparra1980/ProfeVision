@@ -1,14 +1,142 @@
 {
-  "title": "Mobile App",
-  "description": "Coming soon - Access ProfeVision from your mobile device.",
-  "plannedFeatures": {
-    "title": "Planned Features",
-    "items": {
-      "0": "Exam scanning with phone camera",
-      "1": "Real-time access to grades",
-      "2": "Result notifications",
-      "3": "Mobile-optimized interface"
+  "hero": {
+    "badge": "Android Closed Beta",
+    "title": "Grade Exams with your",
+    "titleHighlight": "Camera",
+    "titleEnd": "in Seconds",
+    "description": "Scan and grade exams automatically",
+    "descriptionHighlight": "from your phone or browser.",
+    "descriptionEnd": "96.7% faster than traditional methods.",
+    "ctaAndroid": "Join the Beta",
+    "ctaIos": "Notify Me (iOS)"
+  },
+  "availability": {
+    "android": "Android",
+    "androidStatus": "Closed beta",
+    "ios": "iOS",
+    "iosStatus": "Coming soon"
+  },
+  "betaAccess": {
+    "badge": "Beta Access",
+    "title": "Join the Closed Beta",
+    "description": "Follow these 3 steps to access the beta version of ProfeVision Mobile. You can also grade exams directly from your browser at profevision.com",
+    "step1": {
+      "title": "Join the testers group",
+      "description": "Click the button and request to join the Google group"
+    },
+    "step2": {
+      "title": "Accept being a tester",
+      "description": "Access the testing program and accept to participate"
+    },
+    "step3": {
+      "title": "Download the app",
+      "description": "Install ProfeVision Mobile from Google Play Store"
+    },
+    "ctaGroup": "1. Join group",
+    "ctaTesting": "2. Accept testing",
+    "ctaDownload": "3. Download app",
+    "note": "Group access is immediate"
+  },
+  "benefits": {
+    "badge": "Benefits",
+    "title": "Why use ProfeVision Mobile",
+    "time": {
+      "title": "Save 96.7% of time",
+      "description": "10 seconds vs 5 minutes per exam"
+    },
+    "scan": {
+      "title": "Scan anywhere",
+      "description": "From the mobile app or your web browser"
+    },
+    "accuracy": {
+      "title": "Accurate grading",
+      "description": "Eliminates human errors in grading"
+    },
+    "sync": {
+      "title": "Synced with web",
+      "description": "Results available on profevision.com"
     }
   },
-  "inDevelopment": "🚧 In development - Stay tuned for updates"
-} 
+  "features": {
+    "badge": "Features",
+    "title": "Everything you need",
+    "scrollHint": "See more",
+    "dashboard": {
+      "title": "Personal Dashboard",
+      "description": "Performance metrics, plan usage, and quick access to all your features"
+    },
+    "subjects": {
+      "title": "Subjects & Groups",
+      "description": "Organize your courses with hierarchical view: Subjects, Groups, Exams"
+    },
+    "exams": {
+      "title": "Exam List",
+      "description": "Search, filter and manage all your exams with detailed information"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Dark mode, 4 languages available, OTA updates"
+    },
+    "scan": {
+      "title": "Smart Scanning",
+      "description": "Step-by-step guide with tips for best results"
+    },
+    "results": {
+      "title": "Detailed Results",
+      "description": "Per-student statistics, question-by-question breakdown"
+    }
+  },
+  "howItWorks": {
+    "badge": "How It Works",
+    "title": "Scanning in 5 Steps",
+    "step1": {
+      "title": "Instructions",
+      "description": "Tips for successful scanning"
+    },
+    "step2": {
+      "title": "Capture",
+      "description": "Native document scanner"
+    },
+    "step3": {
+      "title": "Processing",
+      "description": "OMR + automatic QR detection"
+    },
+    "step4": {
+      "title": "Results",
+      "description": "Instant grading"
+    },
+    "step5": {
+      "title": "Confirmation",
+      "description": "Save and continue"
+    }
+  },
+  "plans": {
+    "badge": "Plans",
+    "title": "Included in your subscription",
+    "free": {
+      "title": "FREE",
+      "scans": "50 scans/month",
+      "students": "100 students",
+      "groups": "5 groups"
+    },
+    "plus": {
+      "title": "PLUS / ADMIN",
+      "description": "Everything unlimited"
+    }
+  },
+  "cta": {
+    "title": "Start grading faster",
+    "description": "Download the app and connect with your ProfeVision account",
+    "register": "Create free account",
+    "download": "Download App"
+  },
+  "imageAlt": {
+    "icon": "ProfeVision Mobile icon",
+    "dashboard": "ProfeVision Mobile dashboard",
+    "subjects": "Subjects and groups management",
+    "exams": "Exam list",
+    "settings": "App settings",
+    "scan": "Scanning wizard",
+    "results": "Detailed results"
+  }
+}

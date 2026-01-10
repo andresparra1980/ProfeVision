@@ -1,14 +1,142 @@
 {
-  "title": "Aplicación Móvil",
-  "description": "Próximamente disponible - Accede a ProfeVision desde tu dispositivo móvil.",
-  "plannedFeatures": {
-    "title": "Funcionalidades planeadas",
-    "items": {
-      "0": "Escaneo de exámenes con la cámara del teléfono",
-      "1": "Acceso a calificaciones en tiempo real",
-      "2": "Notificaciones de resultados",
-      "3": "Interfaz optimizada para dispositivos móviles"
+  "hero": {
+    "badge": "Beta Cerrada Android",
+    "title": "Califica Exámenes con tu",
+    "titleHighlight": "Cámara",
+    "titleEnd": "en Segundos",
+    "description": "Escanea y califica exámenes automáticamente",
+    "descriptionHighlight": "desde tu celular o navegador.",
+    "descriptionEnd": "96.7% más rápido que el método tradicional.",
+    "ctaAndroid": "Unirme a la Beta",
+    "ctaIos": "Notificarme (iOS)"
+  },
+  "availability": {
+    "android": "Android",
+    "androidStatus": "Beta cerrada",
+    "ios": "iOS",
+    "iosStatus": "Próximamente"
+  },
+  "betaAccess": {
+    "badge": "Acceso Beta",
+    "title": "Únete a la Beta Cerrada",
+    "description": "Sigue estos 3 pasos para acceder a la versión beta de ProfeVision Mobile. También puedes calificar exámenes directamente desde el navegador en profevision.com",
+    "step1": {
+      "title": "Únete al grupo de testers",
+      "description": "Haz clic en el botón y solicita unirte al grupo de Google"
+    },
+    "step2": {
+      "title": "Acepta ser tester",
+      "description": "Accede al programa de pruebas y acepta participar"
+    },
+    "step3": {
+      "title": "Descarga la app",
+      "description": "Instala ProfeVision Mobile desde Google Play Store"
+    },
+    "ctaGroup": "1. Unirme al grupo",
+    "ctaTesting": "2. Aceptar ser tester",
+    "ctaDownload": "3. Descargar app",
+    "note": "El acceso al grupo es inmediato"
+  },
+  "benefits": {
+    "badge": "Beneficios",
+    "title": "Por qué usar ProfeVision Mobile",
+    "time": {
+      "title": "Ahorra 96.7% de tiempo",
+      "description": "10 segundos vs 5 minutos por examen"
+    },
+    "scan": {
+      "title": "Escanea donde quieras",
+      "description": "Desde la app móvil o tu navegador web"
+    },
+    "accuracy": {
+      "title": "Calificación precisa",
+      "description": "Elimina errores humanos en la calificación"
+    },
+    "sync": {
+      "title": "Sincronizado con la web",
+      "description": "Resultados disponibles en profevision.com"
     }
   },
-  "inDevelopment": "🚧 En desarrollo - Mantente atento a las actualizaciones"
-} 
+  "features": {
+    "badge": "Características",
+    "title": "Todo lo que necesitas",
+    "scrollHint": "Ver más",
+    "dashboard": {
+      "title": "Dashboard Personal",
+      "description": "Métricas de rendimiento, uso del plan y acceso rápido a todas tus funciones"
+    },
+    "subjects": {
+      "title": "Materias y Grupos",
+      "description": "Organiza tus cursos con visualización jerárquica: Materias, Grupos, Exámenes"
+    },
+    "exams": {
+      "title": "Lista de Exámenes",
+      "description": "Busca, filtra y gestiona todos tus exámenes con información detallada"
+    },
+    "settings": {
+      "title": "Configuración",
+      "description": "Modo oscuro, 4 idiomas disponibles, actualizaciones OTA"
+    },
+    "scan": {
+      "title": "Escaneo Inteligente",
+      "description": "Guía paso a paso con consejos para obtener los mejores resultados"
+    },
+    "results": {
+      "title": "Resultados Detallados",
+      "description": "Estadísticas por estudiante, desglose pregunta por pregunta"
+    }
+  },
+  "howItWorks": {
+    "badge": "Cómo Funciona",
+    "title": "Escaneo en 5 Pasos",
+    "step1": {
+      "title": "Instrucciones",
+      "description": "Consejos para un escaneo exitoso"
+    },
+    "step2": {
+      "title": "Captura",
+      "description": "Escáner nativo de documentos"
+    },
+    "step3": {
+      "title": "Procesamiento",
+      "description": "OMR + detección QR automática"
+    },
+    "step4": {
+      "title": "Resultados",
+      "description": "Calificación instantánea"
+    },
+    "step5": {
+      "title": "Confirmación",
+      "description": "Guardar y continuar"
+    }
+  },
+  "plans": {
+    "badge": "Planes",
+    "title": "Incluido en tu suscripción",
+    "free": {
+      "title": "GRATIS",
+      "scans": "50 escaneos/mes",
+      "students": "100 estudiantes",
+      "groups": "5 grupos"
+    },
+    "plus": {
+      "title": "PLUS / ADMIN",
+      "description": "Todo ilimitado"
+    }
+  },
+  "cta": {
+    "title": "Comienza a calificar más rápido",
+    "description": "Descarga la app y conecta con tu cuenta de ProfeVision",
+    "register": "Crear cuenta gratis",
+    "download": "Descargar App"
+  },
+  "imageAlt": {
+    "icon": "Icono de ProfeVision Mobile",
+    "dashboard": "Dashboard de ProfeVision Mobile",
+    "subjects": "Gestión de materias y grupos",
+    "exams": "Lista de exámenes",
+    "settings": "Configuración de la app",
+    "scan": "Asistente de escaneo",
+    "results": "Resultados detallados"
+  }
+}

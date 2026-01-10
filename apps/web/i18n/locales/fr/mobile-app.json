@@ -1,14 +1,142 @@
 {
-  "title": "Application Mobile",
-  "description": "Bientôt disponible - Accédez à ProfeVision depuis votre appareil mobile.",
-  "plannedFeatures": {
-    "title": "Fonctionnalités prévues",
-    "items": {
-      "0": "Numérisation d'examens avec la caméra du téléphone",
-      "1": "Accès aux notes en temps réel",
-      "2": "Notifications de résultats",
-      "3": "Interface optimisée pour les appareils mobiles"
+  "hero": {
+    "badge": "Beta Fermee Android",
+    "title": "Notez les examens avec votre",
+    "titleHighlight": "Camera",
+    "titleEnd": "en quelques secondes",
+    "description": "Scannez et notez les examens automatiquement",
+    "descriptionHighlight": "depuis votre telephone ou navigateur.",
+    "descriptionEnd": "96.7% plus rapide que les methodes traditionnelles.",
+    "ctaAndroid": "Rejoindre la Beta",
+    "ctaIos": "Me notifier (iOS)"
+  },
+  "availability": {
+    "android": "Android",
+    "androidStatus": "Beta fermee",
+    "ios": "iOS",
+    "iosStatus": "Bientot"
+  },
+  "betaAccess": {
+    "badge": "Acces Beta",
+    "title": "Rejoignez la Beta Fermee",
+    "description": "Suivez ces 3 etapes pour acceder a la version beta de ProfeVision Mobile. Vous pouvez aussi noter des examens directement depuis votre navigateur sur profevision.com",
+    "step1": {
+      "title": "Rejoignez le groupe de testeurs",
+      "description": "Cliquez sur le bouton et demandez a rejoindre le groupe Google"
+    },
+    "step2": {
+      "title": "Acceptez d'etre testeur",
+      "description": "Accedez au programme de test et acceptez de participer"
+    },
+    "step3": {
+      "title": "Telechargez l'application",
+      "description": "Installez ProfeVision Mobile depuis Google Play Store"
+    },
+    "ctaGroup": "1. Rejoindre le groupe",
+    "ctaTesting": "2. Accepter le test",
+    "ctaDownload": "3. Telecharger l'app",
+    "note": "L'acces au groupe est immediat"
+  },
+  "benefits": {
+    "badge": "Avantages",
+    "title": "Pourquoi utiliser ProfeVision Mobile",
+    "time": {
+      "title": "Economisez 96.7% de temps",
+      "description": "10 secondes vs 5 minutes par examen"
+    },
+    "scan": {
+      "title": "Scannez ou vous voulez",
+      "description": "Depuis l'app mobile ou votre navigateur web"
+    },
+    "accuracy": {
+      "title": "Notation precise",
+      "description": "Elimine les erreurs humaines dans la notation"
+    },
+    "sync": {
+      "title": "Synchronise avec le web",
+      "description": "Resultats disponibles sur profevision.com"
     }
   },
-  "inDevelopment": "🚧 En développement - Restez à l'affût des mises à jour"
+  "features": {
+    "badge": "Fonctionnalites",
+    "title": "Tout ce dont vous avez besoin",
+    "scrollHint": "Voir plus",
+    "dashboard": {
+      "title": "Tableau de bord personnel",
+      "description": "Metriques de performance, utilisation du plan et acces rapide a toutes vos fonctions"
+    },
+    "subjects": {
+      "title": "Matieres et Groupes",
+      "description": "Organisez vos cours avec une vue hierarchique: Matieres, Groupes, Examens"
+    },
+    "exams": {
+      "title": "Liste des examens",
+      "description": "Recherchez, filtrez et gerez tous vos examens avec des informations detaillees"
+    },
+    "settings": {
+      "title": "Parametres",
+      "description": "Mode sombre, 4 langues disponibles, mises a jour OTA"
+    },
+    "scan": {
+      "title": "Scan intelligent",
+      "description": "Guide etape par etape avec des conseils pour de meilleurs resultats"
+    },
+    "results": {
+      "title": "Resultats detailles",
+      "description": "Statistiques par etudiant, analyse question par question"
+    }
+  },
+  "howItWorks": {
+    "badge": "Comment ca marche",
+    "title": "Scan en 5 etapes",
+    "step1": {
+      "title": "Instructions",
+      "description": "Conseils pour un scan reussi"
+    },
+    "step2": {
+      "title": "Capture",
+      "description": "Scanner de documents natif"
+    },
+    "step3": {
+      "title": "Traitement",
+      "description": "OMR + detection QR automatique"
+    },
+    "step4": {
+      "title": "Resultats",
+      "description": "Notation instantanee"
+    },
+    "step5": {
+      "title": "Confirmation",
+      "description": "Enregistrer et continuer"
+    }
+  },
+  "plans": {
+    "badge": "Plans",
+    "title": "Inclus dans votre abonnement",
+    "free": {
+      "title": "GRATUIT",
+      "scans": "50 scans/mois",
+      "students": "100 etudiants",
+      "groups": "5 groupes"
+    },
+    "plus": {
+      "title": "PLUS / ADMIN",
+      "description": "Tout illimite"
+    }
+  },
+  "cta": {
+    "title": "Commencez a noter plus vite",
+    "description": "Telechargez l'application et connectez-vous avec votre compte ProfeVision",
+    "register": "Creer un compte gratuit",
+    "download": "Telecharger l'app"
+  },
+  "imageAlt": {
+    "icon": "Icone ProfeVision Mobile",
+    "dashboard": "Tableau de bord ProfeVision Mobile",
+    "subjects": "Gestion des matieres et groupes",
+    "exams": "Liste des examens",
+    "settings": "Parametres de l'application",
+    "scan": "Assistant de scan",
+    "results": "Resultats detailles"
+  }
 }

@@ -287,20 +287,20 @@ const pageMetadata: Record<string, Record<Locale, PageMeta>> = {
   },
   '/mobile-app': {
     en: {
-      title: 'Mobile App - ProfeVision',
-      description: 'Grade exams on the go with our mobile app. Scan paper tests with your phone camera anywhere, anytime.',
+      title: 'Mobile App - Grade Exams 96% Faster with Camera | ProfeVision',
+      description: 'Scan and grade multiple choice exams automatically with your phone or browser. OMR technology, instant results, synced with web. Android beta available.',
     },
     es: {
-      title: 'Aplicación Móvil - ProfeVisión',
-      description: 'Califica exámenes sobre la marcha con nuestra app móvil. Escanea pruebas con tu celular donde sea.',
+      title: 'App Móvil - Califica Exámenes 96% Más Rápido con Cámara | ProfeVisión',
+      description: 'Escanea y califica exámenes de opción múltiple automáticamente desde tu celular o navegador. Tecnología OMR, resultados instantáneos. Beta Android disponible.',
     },
     fr: {
-      title: 'Application Mobile - ProfeVision',
-      description: "Notez les examens en déplacement avec notre application mobile. Scannez les tests n'importe où.",
+      title: 'App Mobile - Notez les Examens 96% Plus Vite | ProfeVision',
+      description: 'Scannez et notez les examens QCM automatiquement depuis votre téléphone ou navigateur. Technologie OMR, résultats instantanés. Beta Android disponible.',
     },
     pt: {
-      title: 'Aplicativo Móvel - ProfeVision',
-      description: 'Corrija provas em qualquer lugar com nosso app móvel. Escaneie testes com seu celular onde estiver.',
+      title: 'App Móvel - Corrija Provas 96% Mais Rápido com Câmera | ProfeVision',
+      description: 'Escaneie e corrija provas de múltipla escolha automaticamente pelo celular ou navegador. Tecnologia OMR, resultados instantâneos. Beta Android disponível.',
     },
   },
   '/data-deletion': {
