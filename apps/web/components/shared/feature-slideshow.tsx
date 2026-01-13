@@ -83,7 +83,7 @@ export function FeatureSlideshow({
   const currentSlideData = slides[currentSlide]
 
   return (
-    <div className={`relative flex items-center justify-center ${className}`}>
+    <div className={`relative flex items-center justify-center ${className}`} suppressHydrationWarning>
       {showNeonEffect ? (
         <>
           {/* Neon gradient border container */}
