@@ -99,7 +99,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
     setIsLoading(true);
 
-    // 🔐 Verificar sesión inicial (lógica preservada)
+    // 🔐 Verificar sesión inicial con getClaims() para mejor hydration
+    // getClaims() es local con asymmetric keys (no network request)
+    // Evita hydration mismatch vs getSession() que siempre hace request
     supabase.auth
       .getSession()
       .then(

@@ -115,7 +115,7 @@ export function SiteHeader() {
             <nav className="hidden md:flex items-center gap-6 relative overflow-visible">
               <MainNavigation />
             </nav>
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2" suppressHydrationWarning>
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <Skeleton className="h-9 w-20" />
@@ -223,7 +223,7 @@ export function SiteHeader() {
               <MobileMenuItem href='/blog' title={t('navigation.blog')} />
               
               <div className="border-t mt-4">
-                <div className="pt-4 flex flex-col gap-3">
+                <div className="pt-4 flex flex-col gap-3" suppressHydrationWarning>
                   {isLoading ? (
                     <div className="flex flex-col gap-3">
                       <Skeleton className="h-10 w-full" />
