@@ -115,11 +115,14 @@ export function CookieBanner({ className }: CookieBannerProps) {
   if (!mounted || !isVisible) return null
 
   return (
-    <div className={cn(
-      "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t shadow-lg",
-      "animate-in slide-in-from-bottom-5 duration-300",
-      className
-    )}>
+    <div
+      className={cn(
+        "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t shadow-lg",
+        "animate-in slide-in-from-bottom-5 duration-300",
+        className
+      )}
+      suppressHydrationWarning
+    >
       <div className="container mx-auto p-3 md:p-4">
         {!showPreferences ? (
           // Main banner
