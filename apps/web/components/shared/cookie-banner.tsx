@@ -53,11 +53,13 @@ export function CookieBanner({ className }: CookieBannerProps) {
     setMounted(true)
     // Check if user has already made a choice
     const cookieConsent = localStorage.getItem('profevision-cookie-consent')
-    if (!cookieConsent) {
-      // Show banner after a short delay for better UX
-      const timer = setTimeout(() => setIsVisible(true), 1000)
-      return () => clearTimeout(timer)
+    if (cookieConsent) {
+      // User already made choice, don't show banner
+      return
     }
+    // Show banner after a short delay for better UX
+    const timer = setTimeout(() => setIsVisible(true), 1000)
+    return () => clearTimeout(timer)
   }, [])
 
   const acceptAll = () => {
@@ -112,13 +114,14 @@ export function CookieBanner({ className }: CookieBannerProps) {
     setIsVisible(false)
   }
 
-  if (!mounted || !isVisible) return null
+  // Don't show if user already made a choice (checked in localStorage)
+  const shouldShow = mounted && isVisible
 
   return (
     <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t shadow-lg",
-        "animate-in slide-in-from-bottom-5 duration-300",
+        "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t shadow-lg transition-transform duration-300",
+        shouldShow ? "translate-y-0" : "translate-y-full pointer-events-none",
         className
       )}
       suppressHydrationWarning
