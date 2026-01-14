@@ -22,13 +22,13 @@
 ## Fase 1: Utilidades Puras
 > Quick wins - funciones sin dependencias externas
 
-- [ ] `sanitize-prompt.ts` - Seguridad, detección inyección
-- [ ] `qr-code.ts` - Hash validation, formatos
-- [ ] `cleanText.ts` - Normalización texto
-- [ ] `chunkText.ts` - Chunking para LLM
-- [ ] `buildExamTex.ts` - LaTeX escaping, math preservation
-- [ ] `fisher-yates.ts` - Shuffle correctness
-- [ ] `student-name.ts` - Format detection
+- [x] `sanitize-prompt.ts` - Seguridad, detección inyección (38 tests)
+- [x] `qr-code.ts` - Hash validation, formatos (18 tests)
+- [x] `cleanText.ts` - Normalización texto (9 tests)
+- [x] `chunkText.ts` - Chunking para LLM (11 tests)
+- [x] `buildExamTex.ts` - LaTeX escaping, math preservation (32 tests)
+- [x] `fisher-yates.ts` - Shuffle correctness (19 tests)
+- [x] `student-name.ts` - Format detection (12 tests)
 
 ---
 
@@ -76,8 +76,8 @@
 ## Commits por Fase
 | Fase | Commit | Fecha |
 |------|--------|-------|
-| Setup | dc06a268 | 2026-01-14 |
-| Fase 1 | - | - |
+| Setup | 2ad1acf1 | 2026-01-14 |
+| Fase 1 | 7d29d399 | 2026-01-14 |
 | Fase 2 | - | - |
 | Fase 3 | - | - |
 | Fase 4 | - | - |
@@ -91,3 +91,12 @@
 - Vitest v4 con happy-dom
 - Mocks globales para next-intl, next/navigation
 - Coverage thresholds configurados al 80%
+
+### Fase 1 (Completado)
+- 139 tests para utilidades puras
+- sanitize-prompt: detección inyección, redacción, límites
+- qr-code: generación, validación hash, formatos legacy/compact
+- text processing: cleanText, chunkText con edge cases
+- buildExamTex: escaping LaTeX, preservación math, opciones
+- fisher-yates: shuffle determinístico, sync shuffle
+- student-name: formatos combinado/separado
