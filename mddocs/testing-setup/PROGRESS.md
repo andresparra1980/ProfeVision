@@ -54,11 +54,11 @@
 ## Fase 4: Componentes
 > Mayor setup, renderizado
 
-- [ ] UI Components (smoke tests)
-- [ ] `question-analysis-card` - Cálculos estadísticos
-- [ ] `students-results-table` - Filtrado, paginación
-- [ ] `scan-wizard` - Multi-step flow
-- [ ] `onboarding-wizard` - Form progression
+- [x] UI Components (smoke tests)
+- [x] `question-analysis-card` - Cálculos estadísticos
+- [x] `students-results-table` - Filtrado, paginación
+- [x] `scan-wizard` - Multi-step flow
+- [x] `onboarding-wizard` - Form progression
 
 ---
 
@@ -101,8 +101,7 @@
 - fisher-yates: shuffle determinístico, sync shuffle
 - student-name: formatos combinado/separado
 
-### Fase 3 (Completado)
-- 34 tests para hooks
-- useTierLimits: uso de suscripciones y límites
-- useProfesor: manejo de perfil y actualizaciones
-- use-exam-results: lógica compleja de resultados y filtrado
+### Fase 4 (Completado)
+- 26 tests para componentes complejos
+- Mocks avanzados para FileReader, Contexts, Hooks, y Fonts
+- Cobertura de flujos de usuario (wizard steps, pagination, filters)
