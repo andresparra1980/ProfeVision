@@ -45,9 +45,9 @@
 ## Fase 3: Hooks
 > Requiere context mocking
 
-- [ ] `useTierLimits` - Feature access checks
-- [ ] `useProfesor` - Profile management
-- [ ] `use-exam-results` - Complex queries
+- [x] `useTierLimits` - Feature access checks
+- [x] `useProfesor` - Profile management
+- [x] `use-exam-results` - Complex queries
 
 ---
 
@@ -78,7 +78,7 @@
 |------|--------|-------|
 | Setup | 2ad1acf1 | 2026-01-14 |
 | Fase 1 | b61f412f | 2026-01-14 |
-| Fase 2 | pending | - |
+| Fase 2 | 58d7507a | 2026-01-14 |
 | Fase 3 | - | - |
 | Fase 4 | - | - |
 
@@ -101,9 +101,8 @@
 - fisher-yates: shuffle determinístico, sync shuffle
 - student-name: formatos combinado/separado
 
-### Fase 2 (Completado)
-- 67 tests para servicios
-- tier-service: RPC mocking, subscription states, feature access
-- exam-scan-service: storage upload, job lifecycle, OMR notification
-- omr-client: retry logic, exponential backoff, error codes
-- latex-client: compilation, timeout handling, health check
+### Fase 3 (Completado)
+- 34 tests para hooks
+- useTierLimits: uso de suscripciones y límites
+- useProfesor: manejo de perfil y actualizaciones
+- use-exam-results: lógica compleja de resultados y filtrado
