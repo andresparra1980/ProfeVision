@@ -1,6 +1,8 @@
+
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard'
+
 
 // Mock next-intl
 vi.mock('next-intl', () => ({
@@ -109,8 +111,12 @@ describe('OnboardingWizard', () => {
   it('advances to next step on next click', async () => {
     render(<OnboardingWizard />)
     
-    fireEvent.click(screen.getByText('Next Step'))
+    // Simulate user interaction and state update
+    await act(async () => {
+      fireEvent.click(screen.getByText('Next Step'))
+    })
     
+    // We expect the prop function to be called, which triggers state update
     expect(mockCompleteWizardStep).toHaveBeenCalledWith(1)
   })
 
@@ -122,13 +128,15 @@ describe('OnboardingWizard', () => {
     expect(screen.getByText('Step 3 of 6')).toBeInTheDocument()
   })
 
-  it('completes the wizard on the final step', () => {
+  it('completes the wizard on the final step', async () => {
     mockOnboardingStatus.wizard_step = 5 // Completion Step
     render(<OnboardingWizard />)
     
     expect(screen.getByTestId('step-completion')).toBeInTheDocument()
     
-    fireEvent.click(screen.getByText('Finish Wizard'))
+    await act(async () => {
+      fireEvent.click(screen.getByText('Finish Wizard'))
+    })
     
     // TOTAL_STEPS is 6
     expect(mockCompleteWizardStep).toHaveBeenCalledWith(6)

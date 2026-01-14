@@ -119,6 +119,12 @@ describe('useExamResults', () => {
       const { result } = renderHook(() => useExamResults(mockExamId))
 
       expect(result.current.loading).toBe(true)
+
+      // Wait for loading to potentially change to false (even if it stays true due to error or data,
+      // we need to wait for the async effect to settle to avoid "not wrapped in act")
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
   })
 
@@ -433,11 +439,14 @@ describe('useExamResults', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      act(() => {
+      await act(async () => {
         result.current.setSelectedGroupId('grupo-2')
       })
 
-      expect(result.current.selectedGroupId).toBe('grupo-2')
+      // Need to wait for any effects triggered by setSelectedGroupId to complete
+      await waitFor(() => {
+        expect(result.current.selectedGroupId).toBe('grupo-2')
+      })
     })
   })
 

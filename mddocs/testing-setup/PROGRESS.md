@@ -101,7 +101,6 @@
 - fisher-yates: shuffle determinístico, sync shuffle
 - student-name: formatos combinado/separado
 
-### Fase 4 (Completado)
-- 26 tests para componentes complejos
-- Mocks avanzados para FileReader, Contexts, Hooks, y Fonts
-- Cobertura de flujos de usuario (wizard steps, pagination, filters)
+### Mantenimiento
+- [x] Corregir warnings de `act(...)` en tests asíncronos
+- [x] Estabilizar dependencias en `useExamResults` para evitar re-renderizados infinitos

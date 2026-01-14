@@ -52,6 +52,11 @@ describe('useProfesor', () => {
       expect(result.current.loading).toBe(true)
       expect(result.current.profesor).toBeNull()
       expect(result.current.error).toBeNull()
+
+      // Wait for async operations to complete
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
     })
   })
 
