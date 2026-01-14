@@ -97,6 +97,25 @@ apps/web/
 - Use centralized logger (`lib/utils/logger.ts`)
 - Try/catch for async operations
 - Typed errors with Zod validation
+- Toast notifications via `sonner`
+
+### Component Patterns
+- Props extend native HTML attrs when applicable (`React.ButtonHTMLAttributes`)
+- Variants via `class-variance-authority` (CVA)
+- State: useState (local), Context API (global), custom hooks (complex logic)
+- Hydration safety: `suppressHydrationWarning`, `mounted` state pattern
+- Forms: react-hook-form + zodResolver
+- DB types: `Database['public']['Tables']['tablename']['Row']`
+
+### Common Imports
+- UI: `@/components/ui/*` (Shadcn)
+- Supabase: `@/lib/supabase/client`
+- Icons: `lucide-react`
+- Toast: `sonner`
+- i18n: `useTranslations` from `next-intl`
+
+## Testing
+- No tests yet (planned)
 
 ## Key Technologies
 
@@ -111,7 +130,7 @@ apps/web/
 | Scanning | OpenCV.js, jsQR |
 
 ## AI Models
-- Primary: `google/gemini-2.5-flash-lite`
+- Primary: `google/gemini-3-flash-preview`
 - Fallback: `mistralai/ministral-8b`
 
 ## Environment Variables
@@ -126,9 +145,11 @@ OPENROUTER_API_KEY=
 
 ## Database
 
+- **Schema reference**: `mddocs/DATABASE_SCHEMA.md`
+- **Types**: `apps/web/lib/supabase/database.types.ts`
 - RLS enabled on all tables
-- Migrations in `supabase/migrations/`
-- Types auto-generated from schema
+- **No local Supabase** - develop against prod DB
+- Migrations via Supabase GUI (manual, careful analysis)
 
 ## Git Workflow
 
