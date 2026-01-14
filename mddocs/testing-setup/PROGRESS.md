@@ -35,10 +35,10 @@
 ## Fase 2: Servicios
 > Requiere mocking de Supabase/fetch
 
-- [ ] `tier-service.ts` - Auto-downgrade, ciclos, límites
-- [ ] `exam-scan-service.ts` - Job lifecycle
-- [ ] `omr-client.ts` - Retry logic, backoff
-- [ ] `latex-client.ts` - Integración externa
+- [x] `tier-service.ts` - Auto-downgrade, ciclos, límites (20 tests)
+- [x] `exam-scan-service.ts` - Job lifecycle (15 tests)
+- [x] `omr-client.ts` - Retry logic, backoff (15 tests)
+- [x] `latex-client.ts` - Integración externa (17 tests)
 
 ---
 
@@ -77,8 +77,8 @@
 | Fase | Commit | Fecha |
 |------|--------|-------|
 | Setup | 2ad1acf1 | 2026-01-14 |
-| Fase 1 | 7d29d399 | 2026-01-14 |
-| Fase 2 | - | - |
+| Fase 1 | b61f412f | 2026-01-14 |
+| Fase 2 | pending | - |
 | Fase 3 | - | - |
 | Fase 4 | - | - |
 
@@ -100,3 +100,10 @@
 - buildExamTex: escaping LaTeX, preservación math, opciones
 - fisher-yates: shuffle determinístico, sync shuffle
 - student-name: formatos combinado/separado
+
+### Fase 2 (Completado)
+- 67 tests para servicios
+- tier-service: RPC mocking, subscription states, feature access
+- exam-scan-service: storage upload, job lifecycle, OMR notification
+- omr-client: retry logic, exponential backoff, error codes
+- latex-client: compilation, timeout handling, health check
