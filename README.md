@@ -1,115 +1,115 @@
 # ProfeVision 📚✨
 
-Plataforma integral que transforma la forma en que los profesores crean, administran y califican exámenes. Con ProfeVision, los docentes pueden diseñar evaluaciones de opción múltiple, generar formatos personalizados para cada estudiante, y calificar automáticamente mediante escaneo con un smartphone.
+[![Next.js 15](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-green)](https://supabase.com/)
+[![Powered by AI](https://img.shields.io/badge/AI-Powered-purple)](https://vercel.com/ai)
 
-## Calidad de Código
 
-Hemos implementado mejoras significativas en la calidad del código:
+Plataforma integral impulsada por IA que transforma la forma en que los profesores crean, administran y califican exámenes. Con ProfeVision, los docentes pueden diseñar evaluaciones de opción múltiple con asistencia de IA, generar formatos personalizados, y calificar automáticamente en segundos mediante escaneo con smartphone.
 
-1. **ESLint Configurado**: Configuración estandarizada para detectar y prevenir errores comunes
-2. **Centralizamos el Logging**: Creamos un sistema de logs centralizado en `lib/utils/logger.ts`
-3. **Guía de Calidad**: Ver [CODE_QUALITY.md](./CODE_QUALITY.md) para estándares y mejores prácticas
+## 🚀 Características Principales
 
-## Características Principales 🚀
+### 🤖 Potenciado por IA (Mastra + Vercel AI SDK)
+- **Generación de Exámenes**: Crea evaluaciones completas en segundos utilizando modelos avanzados como **Gemini 1.5 Pro/Flash**, **GPT-4o** y **Claude 3.5 Sonnet**.
+- **Asistente Virtual (Mastra Chat)**: Chat inteligente integrado para ayudar a los profesores a mejorar preguntas, sugerir temas y refinar el contenido.
+- **Análisis Predictivo**: Insights profundos sobre el rendimiento de los estudiantes y la calidad de las preguntas.
 
-- **Creación de Exámenes**: Diseño intuitivo con asistencia de IA
-- **Versiones Únicas**: Generación automática de múltiples versiones
-- **Calificación Automática**: Escaneo y calificación mediante smartphone
-- **Análisis Detallado**: Insights sobre el desempeño estudiantil
+### 📱 Escaneo y Calificación Inteligente
+- **OMR Digital**: Tecnología de reconocimiento óptico de marcas (Optical Mark Recognition) usando `opencv-js` y `jsqr`.
+- **Calificación en Tiempo Real**: Escanea las hojas de respuesta con la cámara de tu dispositivo y obtén resultados instantáneos.
+- **Soporte Móvil**: Interfaz optimizada para uso en smartphones y tablets.
 
-## Stack Tecnológico 💻
+### 💰 Suscripciones y Monetización (Polar.sh)
+- **Gestión de Planes**: Integración completa con **Polar.sh** para gestionar suscripciones (Free vs ProfeVision Plus).
+- **Billing Flexible**: Soporte para facturación mensual y anual.
+- **Límites por Tier**: Control de acceso a features avanzadas basado en el nivel de suscripción.
 
-- **Frontend**: Next.js 14+, TypeScript, Tailwind CSS, Shadcn/UI
-- **Backend**: Next.js API Routes, Supabase (Auth, PostgreSQL, Storage, Edge Functions)
-- **AI**: OpenRouter.ai (GPT-4, Claude 3, Gemini), LangChain
-- **Observability**: LangSmith (AI tracing, cost analytics)
-- **Procesamiento de Imágenes**: MediaDevices API, jsQR/zxing, TensorFlow.js/OpenCV.js
-- **Payments**: PayU API
+### 🌍 Internacionalización (i18n)
+- **Multilenguaje Nativo**: Soporte completo para múltiples idiomas (Español, Inglés, Portugués, Francés) mediante `next-intl`.
+- **Adaptación Cultural**: Contenidos y formatos adaptados a diferentes regiones educativas.
 
-## Inicio Rápido 🏃‍♂️
+### 📊 Dashboard y Análisis
+- **Reportes Detallados**: Gráficos interactivos con **Tremor** y **Recharts**.
+- **Gestión de Cursos y Estudiantes**: Panel administrativo completo para organizar grupos y alumnos.
+- **Historial Académico**: Seguimiento longitudinal del desempeño.
 
-```bash
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/profevision.git
-cd profevision
+## 💻 Stack Tecnológico
 
-# Instalar dependencias
-npm install
+El proyecto utiliza una arquitectura moderna basada en un monorepo gestionado con **Turborepo**, lo que nos permite escalar y mantener múltiples aplicaciones y paquetes en un solo repositorio de manera eficiente.
 
-# Configurar variables de entorno
-cp .env.example .env.local
-# Editar .env.local con tus credenciales
+### Estructura del Monorepo
 
-# Iniciar en modo desarrollo
-npm run dev
-```
+- `apps/web`: La aplicación principal de ProfeVision (Next.js 15), donde reside la plataforma para profesores y estudiantes.
+- `apps/docs`: Sitio de documentación (si aplica) o recursos estáticos adicionales para el proyecto.
+- `packages/*`: (Opcional) Librerías compartidas de UI, configuraciones de TS/ESLint, etc.
 
-## Estado del Proyecto 🌱
+### 📱 Aplicación Móvil
+La aplicación nativa (React Native) para Android e iOS se gestiona en un repositorio independiente:
+👉 **[andresparra1980/profevision-mobile-app](https://github.com/andresparra1980/profevision-mobile-app)**
 
-Actualmente en desarrollo activo. MVP planificado para Q1 2024.
+### Frontend
+- **Framework**: Next.js 15 (App Router, Turbopack)
+- **Core**: React 19 RC
+- **Estilos**: Tailwind CSS 3.4, Shadcn/UI (Radix Primitives)
+- **Visualización**: Tremor, Recharts
+- **Edición**: Tiptap Editor
 
-## Licencia 📄
+### Backend & Servicios
+- **Base de Datos**: Supabase (PostgreSQL)
+- **Autenticación**: Supabase Auth
+- **AI Engine**: Mastra Core, Vercel AI SDK, LangChain
+- **Pagos**: Polar.sh SDK
+- **Edge Functions**: Supabase Edge Functions
 
-Este proyecto está bajo la licencia [MIT](./LICENSE).
+### Calidad y Testing
+- **Unit & Integration**: Vitest
+- **Linting**: ESLint (Configuración Next.js + Prettier)
+- **Type Checking**: TypeScript 5
 
-## Uso de la Plataforma
+## 🛠️ Desarrollo Local
 
-Con ProfeVision, los docentes pueden:
-
-- Diseñar evaluaciones de opción múltiple
-- Generar formatos personalizados para cada estudiante
-- Calificar automáticamente mediante escaneo con un smartphone
-- Obtener análisis detallados del desempeño estudiantil
-
-## Desarrollo
-
-### Requisitos
-
-- Node.js 18+
-- npm o yarn
+### Requisitos Previos
+- Node.js 20+
+- pnpm 9+
 - Git
 
-### Comandos Principales
+### Instalación
 
-- `npm run dev` - Iniciar servidor de desarrollo
-- `npm run build` - Compilar para producción
-- `npm run start` - Iniciar en modo producción
-- `npm run lint` - Ejecutar verificación de linting
+1.  **Clonar el repositorio**
+    ```bash
+    git clone https://github.com/tu-usuario/profevision.git
+    cd profevision
+    ```
 
-## Contribuciones
+2.  **Instalar dependencias**
+    ```bash
+    pnpm install
+    ```
 
-Consulta [CONTRIBUTING.md](./CONTRIBUTING.md) para conocer nuestras pautas de contribución.
+3.  **Configurar Variables de Entorno**
+    Copia el archivo de ejemplo y completa tus credenciales:
+    ```bash
+    cp apps/web/.env.example apps/web/.env.local
+    ```
+    *Necesitarás API Keys de: Supabase, OpenRouter (o OpenAI/Anthropic), y Polar.sh (para pagos).*
 
-## Configuración de entorno para generación de preguntas con IA
+4.  **Iniciar Servidor de Desarrollo**
+    Utilizamos Turbopack para una experiencia de desarrollo ultra rápida:
+    ```bash
+    pnpm dev
+    ```
+    La aplicación estará disponible en `http://localhost:3000`.
 
-Asegúrate de tener las siguientes variables en tu `.env.local`:
+### Comandos Útiles
 
-```bash
-# OpenRouter (Required)
-OPENROUTER_API_KEY=tu_api_key_de_openrouter
-OPENAI_MODEL=google/gemini-2.5-flash-lite
-OPENAI_FALLBACK_MODEL=mistralai/ministral-8b
+- `pnpm build` - Compilar el proyecto para producción.
+- `pnpm test` - Ejecutar suite de pruebas con Vitest.
+- `pnpm test:ui` - Abrir interfaz gráfica de pruebas.
+- `pnpm lint` - Verificar calidad de código.
 
-# LangSmith (Optional - for AI observability)
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_API_KEY=tu_api_key_de_langsmith
-LANGCHAIN_PROJECT=ProfeVision
-```
 
-### API Keys
-- **OpenRouter**: Obtén tu API Key en [openrouter.ai](https://openrouter.ai/)
-- **LangSmith**: Obtén tu API Key en [smith.langchain.com/settings](https://smith.langchain.com/settings)
+## 📄 Licencia
 
-### Modelos Recomendados
-- **Primario**: `google/gemini-2.5-flash-lite` (rápido y económico)
-- **Fallback**: `mistralai/ministral-8b` (backup confiable)
-- **Alternativas**: `openai/gpt-4`, `anthropic/claude-3-opus`
-
-### Observabilidad (Opcional)
-Ver **[LANGSMITH_QUICKSTART.md](./LANGSMITH_QUICKSTART.md)** para configurar tracing completo de IA con:
-- 📊 Análisis de costos en tiempo real
-- 🔍 Debugging de prompts y respuestas
-- 📈 Métricas de rendimiento
-- 💰 Tracking de tokens y gastos
-
-No se requiere configuración adicional en Supabase para esta funcionalidad.
+Propiedad de **ProfeVision**.
+Todos los derechos reservados. No está permitida la distribución ni modificación de este código sin autorización previa.
