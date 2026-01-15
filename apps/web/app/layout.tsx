@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ibmPlexSans, ibmPlexMono } from '@/lib/fonts';
 import '@/styles/globals.css';
 
@@ -42,6 +43,7 @@ export default async function RootLayout({
       >
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
