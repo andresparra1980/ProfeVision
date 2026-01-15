@@ -7,10 +7,10 @@ import '@/styles/globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'ProfeVisión - La Mejor Aplicación para Escanear y Calificar Exámenes en Papel con IA',
-    template: '%s | ProfeVisión'
+    default: 'ProfeVision - The Best App to Scan and Grade Paper Exams with AI',
+    template: '%s | ProfeVision'
   },
-  description: 'ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Regístrate gratis!',
+  description: "ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students' education. Sign up for free!",
   metadataBase: new URL('https://profevision.com'),
   icons: {
     icon: [
@@ -22,11 +22,12 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   alternates: {
-    canonical: '/',
+    canonical: '/en',
     languages: {
-      'es-ES': '/es',
-      'es': '/',
       'en': '/en',
+      'es': '/es',
+      'fr': '/fr',
+      'pt': '/pt',
     },
   },
 };
