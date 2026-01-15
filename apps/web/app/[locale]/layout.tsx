@@ -8,6 +8,7 @@ import { CookieBanner } from '@/components/shared/cookie-banner';
 import { GoogleTagManager } from '@next/third-parties/google';
 import Script from 'next/script';
 import type { Metadata } from 'next';
+import { HydrationErrorMonitor } from '@/components/shared/hydration-error-monitor';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -140,6 +141,7 @@ export default async function LocaleLayout({
 
   return (
     <>
+      <HydrationErrorMonitor />
       <GoogleTagManager gtmId="GTM-5SFVLZMG" />
       {/* Schema.org structured data */}
       <Script
