@@ -44,10 +44,11 @@ export function useExamResults(examId: string | string[]) {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
 
+  const examIdString = typeof examId === 'string' ? examId : Array.isArray(examId) ? examId[0] : '';
+
   const fetchExamResults = useCallback(async (groupIdOverride?: string) => {
     try {
       setLoading(true);
-      const examIdString = typeof examId === 'string' ? examId : Array.isArray(examId) ? examId[0] : '';
 
       // Usar el groupIdOverride si se proporciona, de lo contrario usar selectedGroupId
       const groupIdToUse = groupIdOverride || selectedGroupId;
@@ -355,7 +356,7 @@ export function useExamResults(examId: string | string[]) {
     } finally {
       setLoading(false);
     }
-  }, [examId, selectedGroupId, initializing, t]);
+  }, [examIdString, selectedGroupId, initializing, t]);
 
   useEffect(() => {
     fetchExamResults();

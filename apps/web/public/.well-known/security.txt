@@ -1,8 +1,8 @@
-# Security.txt for ProfeVision
-# Learn more: https://securitytxt.org/
+# Security.txt
+# This file serves as a guide for security researchers on how to report vulnerabilities.
 
-Contact: mailto:security@example.com
+Contact: mailto:security@profevision.com
 Preferred-Languages: es, en
 Expires: 2030-01-01T00:00:00Z
-Policy: https://example.com/security
-Acknowledgments: https://example.com/security#acknowledgments
+Policy: https://profevision.com/privacy
+Acknowledgments: https://profevision.com/privacy#acknowledgments
