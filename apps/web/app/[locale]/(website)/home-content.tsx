@@ -3,7 +3,12 @@
 import { Link } from "@/i18n/navigation"
 import { useTranslations, useLocale } from 'next-intl'
 import { Button } from "@/components/ui/button"
-import { FeatureSlideshow } from "@/components/shared/feature-slideshow"
+import dynamic from "next/dynamic";
+
+const FeatureSlideshow = dynamic(
+  () => import("@/components/shared/feature-slideshow").then((mod) => mod.FeatureSlideshow),
+  { ssr: false }
+);
 import {
   BookOpen,
   ScanText,
