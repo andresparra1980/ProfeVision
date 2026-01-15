@@ -358,7 +358,10 @@ export const config = {
     /*
      * Match all request paths except for the ones starting with:
      * - _next/ (all Next.js internal assets and HMR endpoints)
-     * - favicon.ico (favicon file)
+     * - favicon files (favicon.ico, favicon-*.png)
+     * - apple-touch-icon.png (iOS icon)
+     * - android-chrome-*.png (Android icons)
+     * - site.webmanifest (PWA manifest)
      * - assets/ (project specific assets)
      * - uploads/ (user uploads)
      * - images/ (static images)
@@ -367,6 +370,6 @@ export const config = {
      * - .git/ (ignore probes from browser extensions/scanners)
      * - opencv.js (OpenCV library for document capture)
      */
-    "/((?!_next/|favicon.ico|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/|opencv.js|turnstile.html).*)",
+    "/((?!_next/|favicon.*\\.(?:ico|png)|apple-touch-icon\\.png|android-chrome-.*\\.png|site\\.webmanifest|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/|opencv.js|turnstile.html).*)",
   ],
 };
