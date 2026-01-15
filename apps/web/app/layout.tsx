@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
+import { Analytics } from '@vercel/analytics/react';
 import { ibmPlexSans, ibmPlexMono } from '@/lib/fonts';
 import '@/styles/globals.css';
 
@@ -40,6 +41,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
