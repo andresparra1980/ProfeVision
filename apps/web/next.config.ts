@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
 
   // Optimize for modern browsers - remove unnecessary polyfills
+  productionBrowserSourceMaps: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
