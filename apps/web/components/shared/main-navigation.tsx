@@ -13,10 +13,10 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { 
-  BookOpen, 
-  FileText, 
-  Brain, 
+import {
+  BookOpen,
+  FileText,
+  Brain,
   ScanLine,
   Smartphone
 } from "lucide-react"
@@ -54,9 +54,9 @@ const ListItem = React.forwardRef<
             <div className="text-sm font-medium leading-none">{title}</div>
           </div>
           {children && (
-            <p className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors mt-1">
+            <div className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors mt-1">
               {children}
-            </p>
+            </div>
           )}
         </Link>
       </NavigationMenuLink>
@@ -79,9 +79,9 @@ const ExamenSubItem = ({ href, title, icon: Icon, children }: ListItemProps) => 
             <div className="text-xs font-medium leading-none">{title}</div>
           </div>
           {children && (
-            <p className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors mt-1">
+            <div className="line-clamp-4 text-xs leading-snug text-muted-foreground group-hover:text-accent-foreground transition-colors mt-1">
               {children}
-            </p>
+            </div>
           )}
         </Link>
       </NavigationMenuLink>
@@ -116,7 +116,7 @@ export function MainNavigation() {
                 {/* Columna 1 */}
                 <ul className="space-y-2">
                   {/* Cómo funciona - Primer item clickeable */}
-                  <ListItem 
+                  <ListItem
                     href={'/how-it-works'}
                     title={t('navigation.howItWorks')}
                     icon={BookOpen}
@@ -141,16 +141,16 @@ export function MainNavigation() {
                       </div>
                     </div>
                   </li>
-                  
+
                   {/* Sub-items de Exámenes */}
-                  <ExamenSubItem 
+                  <ExamenSubItem
                     href={'/exams-with-ai'}
                     title={t('navigation.aiGenerator')}
                     icon={Brain}
                   >
                     {t('navigation.aiGeneratorDescription')}
                   </ExamenSubItem>
-                  <ExamenSubItem 
+                  <ExamenSubItem
                     href={'/paper-exams'}
                     title={t('navigation.paperExams')}
                     icon={ScanLine}
@@ -161,7 +161,7 @@ export function MainNavigation() {
 
                 {/* Columna 3 */}
                 <ul className="space-y-2">
-                  <ListItem 
+                  <ListItem
                     href={'/mobile-app'}
                     title={t('navigation.mobileApp')}
                     icon={Smartphone}
