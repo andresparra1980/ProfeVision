@@ -19,15 +19,15 @@ export default function MathText({ text, className, inline }: Props) {
 
   const components: MarkdownComponents = inline
     ? {
-        p: ({ children }) => (
-          <span className="m-0 p-0 leading-normal align-middle">{children}</span>
-        ),
-      }
+      p: ({ children }) => (
+        <span className="m-0 p-0 leading-normal align-middle">{children}</span>
+      ),
+    }
     : {
-        p: ({ children }) => (
-          <p className="my-1 leading-relaxed">{children}</p>
-        ),
-      };
+      p: ({ children }) => (
+        <div className="my-1 leading-relaxed">{children}</div>
+      ),
+    };
 
   const Wrapper = inline ? "span" : "div";
   return (

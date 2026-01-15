@@ -41,11 +41,45 @@ export default async function RootLayout({
   // 🌍 Detectar locale desde middleware para SEO correcto
   const headersList = await headers();
   const locale = headersList.get('x-locale') || 'es';
-  
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <script
+          id="hydration-monitor"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var originalConsoleError = console.error;
+                console.error = function() {
+                  var args = Array.prototype.slice.call(arguments);
+                  var msg = args[0];
+                  var isHydrationError = typeof msg === 'string' && (
+                    msg.includes('Minified React error #418') ||
+                    msg.includes('Minified React error #423') ||
+                    msg.includes('Hydration failed')
+                  );
+                  if (isHydrationError) {
+                    originalConsoleError.apply(console, ['🚨 EARLY HYDRATION ERROR:', args]);
+                    // Store in global var for later inspection if needed
+                    window._hydrationErrors = window._hydrationErrors || [];
+                    window._hydrationErrors.push(args);
+                  }
+                  originalConsoleError.apply(console, args);
+                };
+                window.addEventListener('error', function(event) {
+                  if (event.message && (
+                    event.message.includes('Minified React error #418') || 
+                    event.message.includes('#418')
+                  )) {
+                    console.error('🚨 WINDOW HYDRATION ERROR:', event.message);
+                  }
+                });
+              })();
+            `
+          }}
+        />
       </head>
       <body
         className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
