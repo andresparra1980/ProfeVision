@@ -80,10 +80,19 @@ export function FeatureSlideshow({
     return () => clearInterval(timer)
   }, [slides.length, autoAdvanceInterval])
 
-  const currentSlideData = slides[currentSlide]
+  // Hydration fix: ensure consistent initial render
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // During SSR and initial client render, always show the first slide
+  // This ensures the server HTML matches the initial client HTML
+  const displaySlideIndex = mounted ? currentSlide : 0
+  const currentSlideData = slides[displaySlideIndex]
 
   return (
-    <div className={`relative flex items-center justify-center ${className}`} suppressHydrationWarning>
+    <div className={`relative flex items-center justify-center ${className}`}>
       {showNeonEffect ? (
         <>
           {/* Neon gradient border container */}
@@ -99,12 +108,12 @@ export function FeatureSlideshow({
               <div className="p-4 border-b">
                 <div className="flex items-center justify-between">
                   <div className="font-medium text-base">{currentSlideData.title}</div>
-                  <div className="flex gap-1" role="status" aria-label={`Slide ${currentSlide + 1} of ${slides.length}`}>
+                  <div className="flex gap-1" role="status" aria-label={`Slide ${displaySlideIndex + 1} of ${slides.length}`}>
                     {slides.map((_, index) => (
                       <div
                         key={index}
                         className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                          index === currentSlide 
+                          index === displaySlideIndex 
                             ? 'bg-[#0b890f] w-6' 
                             : 'bg-muted-foreground/30'
                         }`}
@@ -146,12 +155,12 @@ export function FeatureSlideshow({
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
               <div className="font-medium text-base">{currentSlideData.title}</div>
-              <div className="flex gap-1" role="status" aria-label={`Slide ${currentSlide + 1} of ${slides.length}`}>
+              <div className="flex gap-1" role="status" aria-label={`Slide ${displaySlideIndex + 1} of ${slides.length}`}>
                 {slides.map((_, index) => (
                   <div
                     key={index}
                     className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentSlide 
+                      index === displaySlideIndex 
                         ? 'bg-[#0b890f] w-6' 
                         : 'bg-muted-foreground/30'
                     }`}
