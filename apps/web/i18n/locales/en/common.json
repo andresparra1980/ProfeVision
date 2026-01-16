@@ -573,85 +573,66 @@
   },
   "exams": {
     "hero": {
-      "badge": "Exam Generator",
-      "title": "Create Exams with",
-      "titleHighlight": "Artificial Intelligence",
-      "titleEnd": "in seconds",
-      "description": "Transform any educational content into complete and personalized assessments. ProfeVision uses advanced AI to generate multiple choice, true/false and open-ended questions from your class materials.",
-      "cta": "Start Now"
-    },
-    "features": {
-      "badge": "Creation Methods",
-      "title": "Key Features",
-      "aiCreation": {
-        "title": "AI Creation",
-        "description": "Use advanced artificial intelligence to generate personalized questions automatically.",
-        "item1": "Generate multiple choice, true/false and open-ended questions",
-        "item2": "Customize theme, difficulty and style",
-        "item3": "Select number of answer options",
-        "item4": "Adjust according to curriculum section",
-        "item5": "Save time and improve quality"
-      },
-      "manualCreation": {
-        "title": "Manual Creation",
-        "description": "Friendly and intuitive platform to create completely personalized exams.",
-        "item1": "Easy-to-use and navigable interface",
-        "item2": "Full control over each question",
-        "item3": "Configure title, subject and group",
-        "item4": "Set duration and total score",
-        "item5": "Add custom instructions"
-      },
-      "fileImport": {
-        "title": "File Import",
-        "description": "Upload and convert your existing exams from multiple file formats.",
-        "item1": "Compatible with PDF, DOC and DOCX",
-        "item2": "Process lecture notes",
-        "item3": "Convert textbooks",
-        "item4": "Import existing presentations",
-        "item5": "Reuse previous academic content"
+      "badge": "Pedagogical Assessment with AI",
+      "title": "More than generating questions,",
+      "titleHighlight": "we design assessment",
+      "titleEnd": "",
+      "description": "Not a simple AI chat. It is a pedagogical agent that orchestrates multiple language models to deliver a robust and methodologically valid educational solution.",
+      "cta": "Start Designing for Free",
+      "animation": {
+        "objective": "Objective",
+        "planning": "Planning",
+        "exam": "Exam",
+        "result": "Effective Assessment"
       }
     },
-    "process": {
-      "badge": "Step-by-Step Process",
-      "title": "How Does It Work?",
-      "step1": {
-        "title": "Choose Your Method",
-        "description": "Select between AI creation, manual or import existing files according to your specific needs."
+    "spotlight": {
+      "title": "The Assistant that thinks like an Instructional Designer",
+      "planning": {
+        "title": "Planning (Backward Design)",
+        "description": "First the objective, then the question. Our system creates a specification map before writing, ensuring you cover the entire syllabus consistently.",
+        "tag": "Content Validity"
       },
-      "step2": {
-        "title": "Configure Your Exam",
-        "description": "Define parameters such as theme, difficulty, number of questions and desired evaluation type."
+      "depth": {
+        "title": "Depth (Bloom's Taxonomy)",
+        "description": "Escape simple recall. We generate items that assess understanding, application, and analysis. You decide the cognitive level.",
+        "tag": "Cognitive Scaffolding"
       },
-      "step3": {
-        "title": "Generate and Download",
-        "description": "Get your ready-to-use exam with personalized PDF answer sheets for each student."
+      "learning": {
+        "title": "Learning (Formative Feedback)",
+        "description": "Each answer includes the 'why'. We transform error into a learning opportunity with automatic pedagogical justifications.",
+        "tag": "Metacognition"
       }
     },
-    "benefits": {
-      "badge": "Key Advantages",
-      "title": "Benefits for Educators",
-      "timeSaving": {
-        "title": "Save Time",
-        "description": "Reduce exam creation time from hours to minutes"
+    "ecosystem": {
+      "import": {
+        "title": "Intelligent Import",
+        "description": "We use OCR and AI engines to digitize your existing PDF or Word files instantly.",
+        "badge": "Digitization with AI"
       },
-      "precision": {
-        "title": "High Precision",
-        "description": "AI trained to generate relevant and well-structured questions"
-      },
-      "formats": {
-        "title": "Multiple Formats",
-        "description": "Support for different question types and evaluation styles"
-      },
-      "reusable": {
-        "title": "Reusable",
-        "description": "Import and adapt existing content easily"
+      "similar": {
+        "title": "Similar Generation",
+        "description": "Create psychometrically equivalent variants for different groups or to feed your question bank.",
+        "badge": "Living Question Bank"
       }
     },
-    "cta": {
-      "title": "Transform your content into engaging tests in seconds",
-      "description": "Generate multiple types of questions from text or uploaded files intelligently and efficiently.",
-      "startNow": "Start Now",
-      "learnMore": "Discover how ProfeVision works"
+    "socialProof": {
+      "nursing": {
+        "quote": "In Pharmacology, a dosage error is fatal. ProfeVision allows me to generate clinical cases where students must justify the dilution. The automatic feedback helps them understand real pharmacokinetics.",
+        "author": "Prof. Martha G., Nursing Faculty"
+      },
+      "economics": {
+        "quote": "For my Macroeconomics class, the AI created variable inflation scenarios for two different groups. Now I have equivalent but unique exams for each group.",
+        "author": "Dr. Roberto M., Economics"
+      },
+      "primary": {
+        "quote": "I used the tool to create short stories where children identify states of matter. The questions were perfectly adjusted to their reading level.",
+        "author": "Teacher Elena S., Science - Elementary Education"
+      }
+    },
+    "ctaFinal": {
+      "title": "Ready to evolve your assessment style?",
+      "button": "Create Exam Now"
     }
   },
   "contact": {

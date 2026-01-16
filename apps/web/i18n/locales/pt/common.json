@@ -547,94 +547,66 @@
   },
   "exams": {
     "hero": {
-      "badge": "Gerador de Provas",
-      "title": "Crie Provas com",
-      "titleHighlight": "Inteligência Artificial",
-      "titleEnd": "em segundos",
-      "description": "Transforme qualquer conteúdo educativo em avaliações completas e personalizadas. ProfeVisión utiliza IA avançada para gerar questões de múltipla escolha, verdadeiro/falso e abertas a partir dos seus materiais de aula.",
-      "cta": "Começar Agora"
-    },
-    "features": {
-      "badge": "Métodos de Criação",
-      "title": "Principais Características",
-      "aiCreation": {
-        "title": "Criação com IA",
-        "description": "Utiliza inteligência artificial avançada para gerar perguntas personalizadas automaticamente.",
-        "item1": "Gera perguntas de múltipla escolha, verdadeiro/falso e abertas",
-        "item2": "Personaliza tema, dificuldade e estilo",
-        "item3": "Seleciona o número de opções de resposta",
-        "item4": "Ajusta conforme a seção do currículo",
-        "item5": "Economiza tempo e melhora a qualidade"
-      },
-      "manualCreation": {
-        "title": "Criação Manual",
-        "description": "Plataforma amigável e intuitiva para criar exames completamente personalizados.",
-        "item1": "Interface fácil de usar e navegável",
-        "item2": "Controle total sobre cada pergunta",
-        "item3": "Configure título, matéria e grupo",
-        "item4": "Estabeleça duração e pontuação total",
-        "item5": "Adicione instruções personalizadas"
-      },
-      "fileImport": {
-        "title": "Importação de Arquivos",
-        "description": "Faça o upload e converta seus exames existentes a partir de múltiplos formatos de arquivo.",
-        "item1": "Compatível com PDF, DOC e DOCX",
-        "item2": "Processa anotações de palestras",
-        "item3": "Converta livros didáticos",
-        "item4": "Importar apresentações existentes",
-        "item5": "Reutilize conteúdo acadêmico anterior"
+      "badge": "Avaliação Pedagógica com IA",
+      "title": "Mais que gerar perguntas,",
+      "titleHighlight": "projetamos avaliação",
+      "titleEnd": "",
+      "description": "Não é um simples chat de IA. É um agente pedagógico que orquestra múltiplos modelos de linguagem para entregar uma solução educativa robusta e metodologicamente válida.",
+      "cta": "Começar a Projetar Grátis",
+      "animation": {
+        "objective": "Objetivo",
+        "planning": "Planejamento",
+        "exam": "Exame",
+        "result": "Avaliação Efetiva"
       }
     },
-    "process": {
-      "badge": "Processo Passo a Passo",
-      "title": "Como Funciona?",
-      "step1": {
-        "title": "Escolha seu Método",
-        "description": "Selecione entre criar com IA, manual ou importar arquivos existentes de acordo com suas necessidades específicas."
+    "spotlight": {
+      "title": "O Assistente que pensa como um Designer Instrucional",
+      "planning": {
+        "title": "Planejamento (Design Reverso)",
+        "description": "Primeiro o objetivo, depois a pergunta. Nosso sistema cria um mapa de especificações antes de redigir, garantindo que você cubra todo o conteúdo de forma equilibrada.",
+        "tag": "Validade de Conteúdo"
       },
-      "step2": {
-        "title": "Configure seu Exame",
-        "description": "Define parâmetros como tema, dificuldade, número de perguntas e tipo de avaliação desejada."
+      "depth": {
+        "title": "Profundidade (Taxonomia de Bloom)",
+        "description": "Escape da simples memorização. Geramos itens que avaliam compreensão, aplicação e análise. Você decide o nível cognitivo.",
+        "tag": "Andaime Cognitivo"
       },
-      "step3": {
-        "title": "Gere e Baixe",
-        "description": "Obtenha seu exame pronto para usar com folhas de resposta em PDF personalizadas para cada aluno."
+      "learning": {
+        "title": "Aprendizagem (Feedback Formativo)",
+        "description": "Cada resposta inclui o 'porquê'. Transformamos o erro em uma oportunidade de aprendizagem com justificativas pedagógicas automáticas.",
+        "tag": "Metacognição"
       }
     },
-    "benefits": {
-      "badge": "Vantagens Principais",
-      "title": "Benefícios para Educadores",
-      "timeSaving": {
-        "title": "Economize Tempo",
-        "description": "Reduza o tempo de criação de exames de horas para minutos"
+    "ecosystem": {
+      "import": {
+        "title": "Importação Inteligente",
+        "description": "Utilizamos motores de OCR e IA para digitalizar seus arquivos PDF ou Word existentes instantaneamente.",
+        "badge": "Digitalização com IA"
       },
-      "precision": {
-        "title": "Alta Precisão",
-        "description": "IA treinada para gerar perguntas relevantes e bem estruturadas"
-      },
-      "formats": {
-        "title": "Formatos Múltiplos",
-        "description": "Suporte para diferentes tipos de perguntas e estilos de avaliação"
-      },
-      "reusable": {
-        "title": "Reutilizável",
-        "description": "Importa e adapta conteúdo existente facilmente"
+      "similar": {
+        "title": "Geração de Similares",
+        "description": "Crie variantes psicometricamente equivalentes para diferentes grupos ou para alimentar seu banco de perguntas.",
+        "badge": "Banco de Perguntas Vivo"
       }
     },
-    "cta": {
-      "title": "Transforme seu conteúdo em testes interessantes em segundos",
-      "description": "Gere múltiplos tipos de perguntas a partir de texto ou arquivos carregados de maneira inteligente e eficiente.",
-      "startNow": "Começar Agora",
-      "learnMore": "Descubra como funciona o ProfeVision"
+    "socialProof": {
+      "nursing": {
+        "quote": "Em Farmacologia, um erro de dosagem é fatal. ProfeVision me permite gerar casos clínicos onde os estudantes devem justificar a diluição. O feedback automático os ajuda a entender a farmacocinética real.",
+        "author": "Prof. Martha G., Faculdade de Enfermagem"
+      },
+      "economics": {
+        "quote": "Para minha aula de Macroeconomia, a IA criou cenários de inflação variáveis para dois grupos diferentes. Agora tenho exames equivalentes mas únicos para cada grupo.",
+        "author": "Dr. Roberto M., Economia"
+      },
+      "primary": {
+        "quote": "Usei a ferramenta para criar contos curtos onde as crianças identificam os estados da matéria. As perguntas ficaram perfeitamente ajustadas ao seu nível de leitura.",
+        "author": "Profa. Elena S., Ciências - Ensino Fundamental"
+      }
     },
-    "results": {
-      "na": "N/D"
-    },
-    "export": {
-      "a4": "A4 (210mm x 297mm)"
-    },
-    "linkGradeComponent": {
-      "exam": "Exame"
+    "ctaFinal": {
+      "title": "Pronto para evoluir sua forma de avaliar?",
+      "button": "Criar Exame Agora"
     }
   },
   "contact": {

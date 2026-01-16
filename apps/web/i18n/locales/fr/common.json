@@ -547,94 +547,66 @@
   },
   "exams": {
     "hero": {
-      "badge": "Générateur d'Examens",
-      "title": "Créez des Examens avec l'",
-      "titleHighlight": "Intelligence Artificielle",
-      "titleEnd": "en quelques secondes",
-      "description": "Transformez n'importe quel contenu éducatif en évaluations complètes et personnalisées. ProfeVisión utilise une IA avancée pour générer des questions à choix multiples, vrai/faux et ouvertes à partir de vos supports de cours.",
-      "cta": "Commencer Maintenant"
-    },
-    "features": {
-      "badge": "Méthodes de Création",
-      "title": "Caractéristiques Principales",
-      "aiCreation": {
-        "title": "Création avec IA",
-        "description": "Utilise l'intelligence artificielle avancée pour générer automatiquement des questions personnalisées.",
-        "item1": "Génère des questions à choix multiples, vrai/faux et ouvertes",
-        "item2": "Personnalise le thème, la difficulté et le style",
-        "item3": "Sélectionne le nombre d'options de réponse",
-        "item4": "Ajuste selon la section du programme d'études",
-        "item5": "Gagne du temps et améliore la qualité"
-      },
-      "manualCreation": {
-        "title": "Création Manuelle",
-        "description": "Plateforme conviviale et intuitive pour créer des examens entièrement personnalisés.",
-        "item1": "Interface facile à utiliser et navigable",
-        "item2": "Contrôle total sur chaque question",
-        "item3": "Configurez le titre, la matière et le groupe",
-        "item4": "Établissez la durée et le score total",
-        "item5": "Ajoutez des instructions personnalisées"
-      },
-      "fileImport": {
-        "title": "Importation de Fichiers",
-        "description": "Téléchargez et convertissez vos examens existants à partir de multiples formats de fichiers.",
-        "item1": "Compatible avec PDF, DOC et DOCX",
-        "item2": "Traite les notes de conférences",
-        "item3": "Convertit des manuels scolaires",
-        "item4": "Importez des présentations existantes",
-        "item5": "Réutilisez du contenu académique précédent"
+      "badge": "Évaluation Pédagogique avec IA",
+      "title": "Plus que générer des questions,",
+      "titleHighlight": "nous concevons l'évaluation",
+      "titleEnd": "",
+      "description": "Ce n'est pas un simple chat IA. C'est un agent pédagogique qui orchestre plusieurs modèles linguistiques pour vous offrir une solution éducative robuste et méthodologiquement valide.",
+      "cta": "Commencer à Concevoir Gratuitement",
+      "animation": {
+        "objective": "Objectif",
+        "planning": "Planification",
+        "exam": "Examen",
+        "result": "Évaluation Efficace"
       }
     },
-    "process": {
-      "badge": "Processus Étape par Étape",
-      "title": "Comment ça Marche ?",
-      "step1": {
-        "title": "Choisissez votre Méthode",
-        "description": "Sélectionnez entre créer avec IA, manuel ou importer des fichiers existants selon vos besoins spécifiques."
+    "spotlight": {
+      "title": "L'Assistant qui pense comme un Concepteur Pédagogique",
+      "planning": {
+        "title": "Planification (Conception à Rebours)",
+        "description": "D'abord l'objectif, ensuite la question. Notre système crée une carte de spécifications avant de rédiger, assurant une couverture équilibrée du programme.",
+        "tag": "Validité de Contenu"
       },
-      "step2": {
-        "title": "Configurez votre Examen",
-        "description": "Définissez des paramètres tels que le sujet, la difficulté, le nombre de questions et le type d'évaluation souhaité."
+      "depth": {
+        "title": "Profondeur (Taxonomie de Bloom)",
+        "description": "Échappez à la simple mémorisation. Nous générons des items qui évaluent la compréhension, l'application et l'analyse. Vous décidez du niveau cognitif.",
+        "tag": "Étayage Cognitif"
       },
-      "step3": {
-        "title": "Générer et Télécharger",
-        "description": "Obtenez votre examen prêt à l'emploi avec des feuilles de réponses en PDF personnalisées pour chaque étudiant."
+      "learning": {
+        "title": "Apprentissage (Feedback Formatif)",
+        "description": "Chaque réponse inclut le 'pourquoi'. Nous transformons l'erreur en opportunité d'apprentissage avec des justifications pédagogiques automatiques.",
+        "tag": "Métacognition"
       }
     },
-    "benefits": {
-      "badge": "Avantages Clés",
-      "title": "Avantages pour les Éducateurs",
-      "timeSaving": {
-        "title": "Gagnez du Temps",
-        "description": "Réduisez le temps de création d'examens de quelques heures à quelques minutes"
+    "ecosystem": {
+      "import": {
+        "title": "Importation Intelligente",
+        "description": "Nous utilisons des moteurs OCR et IA pour numériser vos fichiers PDF ou Word existants instantanément.",
+        "badge": "Numérisation avec IA"
       },
-      "precision": {
-        "title": "Haute Précision",
-        "description": "IA entraînée pour générer des questions pertinentes et bien structurées"
-      },
-      "formats": {
-        "title": "Formats Multiples",
-        "description": "Prise en charge de différents types de questions et styles d'évaluation"
-      },
-      "reusable": {
-        "title": "Réutilisable",
-        "description": "Importez et adaptez facilement le contenu existant"
+      "similar": {
+        "title": "Génération de Similaires",
+        "description": "Créez des variantes psychométriquement équivalentes pour différents groupes ou pour alimenter votre banque de questions.",
+        "badge": "Banque de Questions Vivante"
       }
     },
-    "cta": {
-      "title": "Transformez votre contenu en quiz captivants en quelques secondes",
-      "description": "Générez plusieurs types de questions à partir de textes ou de fichiers téléchargés de manière intelligente et efficace.",
-      "startNow": "Commencer maintenant",
-      "learnMore": "Découvrez comment fonctionne ProfeVision"
+    "socialProof": {
+      "nursing": {
+        "quote": "En Pharmacologie, une erreur de dosage est fatale. ProfeVision me permet de générer des cas cliniques où les étudiants doivent justifier la dilution. Le feedback automatique les aide à comprendre la pharmacocinétique réelle.",
+        "author": "Prof. Martha G., Faculté de Soins Infirmiers"
+      },
+      "economics": {
+        "quote": "Pour mon cours de Macroéconomie, l'IA a créé des scénarios d'inflation variables pour deux groupes différents. J'ai maintenant des examens équivalents mais uniques pour chaque groupe.",
+        "author": "Dr. Roberto M., Économie"
+      },
+      "primary": {
+        "quote": "J'ai utilisé l'outil pour créer des histoires courtes où les enfants identifient les états de la matière. Les questions étaient parfaitement ajustées à leur niveau de lecture.",
+        "author": "Maîtresse Elena S., Sciences - École Primaire"
+      }
     },
-    "results": {
-      "na": "S/O"
-    },
-    "export": {
-      "a4": "A4 (210mm x 297mm)"
-    },
-    "linkGradeComponent": {
-      "exam": "Examen"
+    "ctaFinal": {
+      "title": "Prêt à faire évoluer votre façon d'évaluer ?",
+      "button": "Créer un Examen Maintenant"
     }
   },
   "contact": {
