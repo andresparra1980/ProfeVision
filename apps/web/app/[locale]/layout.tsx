@@ -74,16 +74,9 @@ export async function generateMetadata({
     },
     description: meta.description,
     keywords: meta.keywords,
-    alternates: {
-      canonical: `${BASE_URL}/${locale}`,
-      languages: {
-        'x-default': `${BASE_URL}/en`,
-        'en': `${BASE_URL}/en`,
-        'es': `${BASE_URL}/es`,
-        'fr': `${BASE_URL}/fr`,
-        'pt': `${BASE_URL}/pt`,
-      },
-    },
+    // NOTE: alternates (canonical/hreflang) are NOT defined here
+    // Each page defines its own via generatePageMetadata() in lib/seo/page-metadata.ts
+    // Defining them here would override page-specific canonicals, causing SEO issues
     openGraph: {
       type: 'website',
       locale: meta.ogLocale,
