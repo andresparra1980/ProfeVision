@@ -161,7 +161,7 @@ export function ExamsWithAIContent() {
           <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-6 text-white">
             {t('exams.ctaFinal.title')}
           </h2>
-          <Button asChild size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
+          <Button asChild size="lg" variant="secondary" className="bg-white text-[#0b890f] hover:bg-white/90">
             <Link href={'/auth/register'}>{t('exams.ctaFinal.button')}</Link>
           </Button>
         </div>

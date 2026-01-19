@@ -408,12 +408,12 @@ export function MobileAppContent() {
             </div>
 
             {/* Plus Plan */}
-            <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/30 p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border-purple-500 border-2 p-6 shadow-lg">
               <div className="flex items-center gap-2 mb-4">
                 <Zap className="h-5 w-5 text-primary" />
                 <h3 className="text-xl font-bold">{t('plans.plus.title')}</h3>
               </div>
-              <p className="text-muted-foreground">{t('plans.plus.description')}</p>
+              <p className="text-muted-foreground font-semibold">{t('plans.plus.description')}</p>
             </div>
           </div>
         </div>
@@ -434,15 +434,14 @@ export function MobileAppContent() {
                 asChild
                 size="lg"
                 variant="secondary"
-                className="bg-white text-primary hover:bg-white/90"
+                className="bg-white text-[#0b890f] hover:bg-white/90"
               >
                 <Link href="/auth/register">{t('cta.register')}</Link>
               </Button>
               <Button
                 asChild
                 size="lg"
-                variant="outline"
-                className="text-white border-white/20 hover:bg-white/20 backdrop-blur-sm"
+                className="bg-white/10 text-white hover:bg-white/20 border border-white/20 backdrop-blur-sm"
               >
                 <a href="#beta-access">
                   {t('cta.download')}
