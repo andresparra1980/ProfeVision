@@ -57,37 +57,38 @@ export function WorkflowAnimation() {
 }
 
 function ScaleUpText({ text }: { text: string }) {
-    // Split text into characters including spaces
-    const characters = text.toUpperCase().split('');
+    // Split text into words for proper wrapping
+    const words = text.toUpperCase().split(' ');
 
     return (
-        <div className="flex overflow-hidden">
-            {characters.map((char, index) => (
+        <div className="flex flex-wrap justify-center items-center gap-x-6 md:gap-x-8 gap-y-2 px-4 max-w-full">
+            {words.map((word, wordIndex) => (
                 <span
-                    key={index}
-                    className="text-2xl md:text-4xl font-bold text-primary inline-block animate-scale-up"
+                    key={wordIndex}
+                    className="text-4xl md:text-7xl font-bold text-primary inline-block animate-scale-up-glow"
                     style={{
-                        animationDelay: `${index * 0.01}s`,
+                        animationDelay: `${wordIndex * 0.1}s`,
                         animationFillMode: 'both',
-                        whiteSpace: 'pre'
                     }}
                 >
-                    {char}
+                    {word}
                 </span>
             ))}
             <style jsx global>{`
-        @keyframes scale-up {
+        @keyframes scale-up-glow {
           0% {
             transform: scale(0);
             opacity: 0;
+            text-shadow: 0 0 0px hsl(var(--primary));
           }
           100% {
             transform: scale(1);
             opacity: 1;
+            text-shadow: 0 0 20px hsl(var(--primary)), 0 0 40px hsl(var(--primary) / 0.5);
           }
         }
-        .animate-scale-up {
-          animation: scale-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        .animate-scale-up-glow {
+          animation: scale-up-glow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
       `}</style>
         </div>

@@ -22,7 +22,7 @@ export function ExamsWithAIContent() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden">
+      <section className="relative py-12 md:py-20 overflow-hidden">
         {/* Background Elements */}
         {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5 -z-10" />
@@ -32,7 +32,7 @@ export function ExamsWithAIContent() {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-8 text-center">
 
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-[#0b890f] text-white hover:bg-[#0b890f]/80 w-fit">
+            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80 w-fit">
               {t('exams.hero.badge')}
             </div>
 
@@ -50,7 +50,7 @@ export function ExamsWithAIContent() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" className="rounded-full px-8 text-base h-12">
+              <Button asChild size="lg">
                 <Link href={'/auth/register'}>{t('exams.hero.cta')}</Link>
               </Button>
             </div>
@@ -161,7 +161,7 @@ export function ExamsWithAIContent() {
           <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-6 text-white">
             {t('exams.ctaFinal.title')}
           </h2>
-          <Button asChild size="lg" variant="secondary" className="rounded-full px-8 text-lg h-14 bg-white text-[#0b890f] hover:bg-white/90">
+          <Button asChild size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
             <Link href={'/auth/register'}>{t('exams.ctaFinal.button')}</Link>
           </Button>
         </div>

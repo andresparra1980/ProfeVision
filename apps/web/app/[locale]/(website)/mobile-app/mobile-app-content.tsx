@@ -85,24 +85,24 @@ export function MobileAppContent() {
           <div className="grid gap-8 lg:grid-cols-2 items-center">
             {/* Left: Text content */}
             <div className="flex flex-col space-y-4 text-center lg:text-left">
-              <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-[#0b890f] text-white w-fit mx-auto lg:mx-0">
+              <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-primary text-primary-foreground w-fit mx-auto lg:mx-0">
                 <Smartphone className="h-3 w-3 mr-1" />
                 {t('hero.badge')}
               </div>
               <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                 {t('hero.title')}{" "}
-                <span className="text-[#0b890f]">{t('hero.titleHighlight')}</span>{" "}
+                <span className="text-primary">{t('hero.titleHighlight')}</span>{" "}
                 {t('hero.titleEnd')}
               </h1>
               <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mx-auto lg:mx-0">
                 {t('hero.description')}{" "}
-                <span className="font-semibold text-[#0b890f]">{t('hero.descriptionHighlight')}</span>{" "}
+                <span className="font-semibold text-primary">{t('hero.descriptionHighlight')}</span>{" "}
                 {t('hero.descriptionEnd')}
               </p>
 
               {/* Availability badges */}
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start pt-2">
-                <div className="flex items-center gap-2 bg-[#0b890f]/10 border border-[#0b890f]/20 rounded-full px-4 py-2">
+                <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
                   <AndroidIcon className="h-5 w-5 text-[#3DDC84]" />
                   <div className="text-sm">
                     <span className="font-semibold">{t('availability.android')}</span>
@@ -122,7 +122,6 @@ export function MobileAppContent() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                 >
                   <a href="#beta-access">
                     {t('hero.ctaAndroid')}
@@ -157,10 +156,10 @@ export function MobileAppContent() {
       </section>
 
       {/* Beta Access Section */}
-      <section id="beta-access" className="py-16 md:py-24 bg-gradient-to-br from-[#0b890f]/10 to-[#ffd60a]/10 scroll-mt-20">
+      <section id="beta-access" className="py-16 md:py-24 bg-muted/50 scroll-mt-20">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border border-[#0b890f]/30 bg-[#0b890f]/10 px-2.5 py-0.5 text-xs font-semibold text-[#0b890f]">
+            <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
               {t('betaAccess.badge')}
             </div>
             <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
@@ -174,17 +173,17 @@ export function MobileAppContent() {
           <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto mt-12">
             {/* Step 1: Join Group */}
             <div className="bg-card rounded-lg border border-border p-6 shadow-lg text-center relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-[#0b890f] w-8 h-8 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">1</span>
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary w-8 h-8 flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">1</span>
               </div>
-              <div className="mx-auto rounded-full bg-[#0b890f]/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
-                <Users className="h-7 w-7 text-[#0b890f]" />
+              <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
+                <Users className="h-7 w-7 text-primary" />
               </div>
               <h3 className="font-bold text-lg mb-2">{t('betaAccess.step1.title')}</h3>
               <p className="text-sm text-muted-foreground mb-4">{t('betaAccess.step1.description')}</p>
               <Button
                 asChild
-                className="w-full bg-[#0b890f] hover:bg-[#0b890f]/90"
+                className="w-full"
               >
                 <a href="https://groups.google.com/g/profevision-beta-testers" target="_blank" rel="noopener noreferrer">
                   {t('betaAccess.ctaGroup')}
@@ -194,18 +193,18 @@ export function MobileAppContent() {
 
             {/* Step 2: Accept Testing */}
             <div className="bg-card rounded-lg border border-border p-6 shadow-lg text-center relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-[#0b890f] w-8 h-8 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">2</span>
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary w-8 h-8 flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">2</span>
               </div>
-              <div className="mx-auto rounded-full bg-[#0b890f]/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
-                <ShieldCheck className="h-7 w-7 text-[#0b890f]" />
+              <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
+                <ShieldCheck className="h-7 w-7 text-primary" />
               </div>
               <h3 className="font-bold text-lg mb-2">{t('betaAccess.step2.title')}</h3>
               <p className="text-sm text-muted-foreground mb-4">{t('betaAccess.step2.description')}</p>
               <Button
                 asChild
                 variant="outline"
-                className="w-full border-[#0b890f] text-[#0b890f] hover:bg-[#0b890f] hover:text-white"
+                className="w-full border-primary text-primary hover:bg-primary hover:text-white"
               >
                 <a href="https://play.google.com/apps/testing/com.profevision.mobile" target="_blank" rel="noopener noreferrer">
                   {t('betaAccess.ctaTesting')}
@@ -215,11 +214,11 @@ export function MobileAppContent() {
 
             {/* Step 3: Download */}
             <div className="bg-card rounded-lg border border-border p-6 shadow-lg text-center relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-[#0b890f] w-8 h-8 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">3</span>
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary w-8 h-8 flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">3</span>
               </div>
-              <div className="mx-auto rounded-full bg-[#0b890f]/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
-                <Download className="h-7 w-7 text-[#0b890f]" />
+              <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
+                <Download className="h-7 w-7 text-primary" />
               </div>
               <h3 className="font-bold text-lg mb-2">{t('betaAccess.step3.title')}</h3>
               <p className="text-sm text-muted-foreground mb-4">{t('betaAccess.step3.description')}</p>
@@ -244,7 +243,8 @@ export function MobileAppContent() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 md:py-24 bg-muted/50">
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#ffd60a]/5 to-[#0b890f]/5 -z-10" />
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
@@ -259,10 +259,10 @@ export function MobileAppContent() {
             {benefits.map(({ key, icon: Icon }) => (
               <div
                 key={key}
-                className="bg-card backdrop-blur-sm rounded-lg border border-[#0b890f]/20 p-6 shadow-lg text-center"
+                className="bg-card backdrop-blur-sm rounded-lg border border-primary/20 p-6 shadow-lg text-center"
               >
-                <div className="mx-auto rounded-full bg-[#0b890f]/10 p-3 w-14 h-14 flex items-center justify-center mb-4">
-                  <Icon className="h-7 w-7 text-[#0b890f]" />
+                <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4">
+                  <Icon className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="font-bold text-lg mb-2">{t(`benefits.${key}.title`)}</h3>
                 <p className="text-sm text-muted-foreground">{t(`benefits.${key}.description`)}</p>
@@ -273,8 +273,8 @@ export function MobileAppContent() {
       </section>
 
       {/* Features Section with Screenshots Carousel */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#ffd60a]/5 to-[#0b890f]/5 -z-10" />
+      <section className="py-16 md:py-24 bg-muted/50">
+
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
@@ -309,7 +309,7 @@ export function MobileAppContent() {
               {features.map(({ key, icon: Icon, image }) => (
                 <div
                   key={key}
-                  className="flex-none w-[280px] sm:w-[320px] snap-center bg-card backdrop-blur-sm rounded-lg border border-border p-4 shadow-lg group hover:border-[#0b890f]/40 transition-colors"
+                  className="flex-none w-[280px] sm:w-[320px] snap-center bg-card backdrop-blur-sm rounded-lg border border-border p-4 shadow-lg group hover:border-primary/40 transition-colors"
                 >
                   <div className="relative aspect-[9/16] mb-4 rounded-lg overflow-hidden bg-muted">
                     <Image
@@ -321,8 +321,8 @@ export function MobileAppContent() {
                     />
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="rounded-full bg-[#0b890f]/10 p-2 shrink-0">
-                      <Icon className="h-5 w-5 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-2 shrink-0">
+                      <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <div className="min-w-0">
                       <h3 className="font-bold truncate">{t(`features.${key}.title`)}</h3>
@@ -343,7 +343,8 @@ export function MobileAppContent() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 md:py-24 bg-muted/50">
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/5 to-[#ffd60a]/5 -z-10" />
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
@@ -360,8 +361,8 @@ export function MobileAppContent() {
                 key={step}
                 className="flex items-center gap-3 bg-card rounded-lg border border-border p-4 min-w-[200px]"
               >
-                <div className="rounded-full bg-[#0b890f] w-10 h-10 flex items-center justify-center shrink-0">
-                  <span className="text-white font-bold">{index + 1}</span>
+                <div className="rounded-full bg-primary w-10 h-10 flex items-center justify-center shrink-0">
+                  <span className="text-primary-foreground font-bold">{index + 1}</span>
                 </div>
                 <div>
                   <h4 className="font-semibold">{t(`howItWorks.${step}.title`)}</h4>
@@ -374,8 +375,8 @@ export function MobileAppContent() {
       </section>
 
       {/* Plans Section */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/5 to-[#ffd60a]/5 -z-10" />
+      <section className="py-16 md:py-24 bg-muted/50">
+
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
@@ -392,24 +393,24 @@ export function MobileAppContent() {
               <h3 className="text-xl font-bold mb-4">{t('plans.free.title')}</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-[#0b890f]" />
+                  <CheckCircle className="h-4 w-4 text-primary" />
                   {t('plans.free.scans')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-[#0b890f]" />
+                  <CheckCircle className="h-4 w-4 text-primary" />
                   {t('plans.free.students')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-[#0b890f]" />
+                  <CheckCircle className="h-4 w-4 text-primary" />
                   {t('plans.free.groups')}
                 </li>
               </ul>
             </div>
 
             {/* Plus Plan */}
-            <div className="bg-gradient-to-br from-[#0b890f]/10 to-[#0b890f]/5 rounded-lg border border-[#0b890f]/30 p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/30 p-6 shadow-lg">
               <div className="flex items-center gap-2 mb-4">
-                <Zap className="h-5 w-5 text-[#0b890f]" />
+                <Zap className="h-5 w-5 text-primary" />
                 <h3 className="text-xl font-bold">{t('plans.plus.title')}</h3>
               </div>
               <p className="text-muted-foreground">{t('plans.plus.description')}</p>
@@ -433,14 +434,15 @@ export function MobileAppContent() {
                 asChild
                 size="lg"
                 variant="secondary"
-                className="bg-white text-[#0b890f] hover:bg-white/90"
+                className="bg-white text-primary hover:bg-white/90"
               >
                 <Link href="/auth/register">{t('cta.register')}</Link>
               </Button>
               <Button
                 asChild
                 size="lg"
-                className="bg-white/10 text-white hover:bg-white/20 border border-white/20 backdrop-blur-sm"
+                variant="outline"
+                className="text-white border-white/20 hover:bg-white/20 backdrop-blur-sm"
               >
                 <a href="#beta-access">
                   {t('cta.download')}
