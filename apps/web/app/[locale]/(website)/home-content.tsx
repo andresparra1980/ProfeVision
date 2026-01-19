@@ -35,11 +35,11 @@ export function HomeContent() {
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4">
-                <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-[#0b890f] text-white hover:bg-[#0b890f]/80 w-fit">
+                <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80 w-fit">
                   {t('homepage.hero.badge')}
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                  {t('homepage.hero.title')} <span className="text-[#0b890f]">{t('homepage.hero.titleHighlight')}</span>
+                  {t('homepage.hero.title')} <span className="text-primary">{t('homepage.hero.titleHighlight')}</span>
                 </h1>
                 <p className="max-w-[600px] text-foreground/80 md:text-xl">
                   {t('homepage.hero.description')}
@@ -48,7 +48,6 @@ export function HomeContent() {
                   <Button
                     asChild
                     size="lg"
-                    className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
                     <Link href={'/auth/register'} title={t('homepage.hero.registerTitle')}>
                       {t('homepage.hero.startFree')}
@@ -87,8 +86,8 @@ export function HomeContent() {
             </div>
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md">
-                <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
-                  <BookOpen className="h-6 w-6 text-[#0b890f]" />
+                <div className="rounded-full bg-primary/10 p-4">
+                  <BookOpen className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl text-center font-bold">{t('homepage.features.examCreation.title')}</h3>
                 <p className="text-center text-muted-foreground">
@@ -96,8 +95,8 @@ export function HomeContent() {
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md">
-                <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
-                  <Smartphone className="h-6 w-6 text-[#0b890f]" />
+                <div className="rounded-full bg-primary/10 p-4">
+                  <Smartphone className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl text-center font-bold">{t('homepage.features.aiGrading.title')}</h3>
                 <p className="text-center text-muted-foreground">
@@ -105,8 +104,8 @@ export function HomeContent() {
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md">
-                <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
-                  <BarChart3 className="h-6 w-6 text-[#0b890f]" />
+                <div className="rounded-full bg-primary/10 p-4">
+                  <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl text-center font-bold">{t('homepage.features.resultAnalysis.title')}</h3>
                 <p className="text-center text-muted-foreground">
@@ -135,22 +134,22 @@ export function HomeContent() {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-[#0b890f]/10 p-3">
-                      <School className="h-5 w-5 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-3">
+                      <School className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">{t('homepage.modules.institutions.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.institutions.feature1')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.institutions.feature2')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.institutions.feature3')}</span>
                     </li>
                   </ul>
@@ -159,7 +158,7 @@ export function HomeContent() {
                       href={`https://docs.profevision.com/${locale}/docs/organization-setup/create-institution`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
-                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-primary hover:bg-muted"
                       title={t('homepage.modules.institutions.linkTitle')}
                     >
                       <span>{t('homepage.modules.moreInfo')}</span>
@@ -172,22 +171,22 @@ export function HomeContent() {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-[#0b890f]/10 p-3">
-                      <BookOpen className="h-5 w-5 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-3">
+                      <BookOpen className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">{t('homepage.modules.subjects.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.subjects.feature1')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.subjects.feature2')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.subjects.feature3')}</span>
                     </li>
                   </ul>
@@ -196,7 +195,7 @@ export function HomeContent() {
                       href={`https://docs.profevision.com/${locale}/docs/organization-setup/create-subject`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
-                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-primary hover:bg-muted"
                       title={t('homepage.modules.subjects.linkTitle')}
                     >
                       <span>{t('homepage.modules.moreInfo')}</span>
@@ -209,22 +208,22 @@ export function HomeContent() {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-[#0b890f]/10 p-3">
-                      <Users className="h-5 w-5 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-3">
+                      <Users className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">{t('homepage.modules.groups.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.groups.feature1')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.groups.feature2')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.groups.feature3')}</span>
                     </li>
                   </ul>
@@ -233,7 +232,7 @@ export function HomeContent() {
                       href={`https://docs.profevision.com/${locale}/docs/organization-setup/create-group`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
-                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-primary hover:bg-muted"
                       title={t('homepage.modules.groups.linkTitle')}
                     >
                       <span>{t('homepage.modules.moreInfo')}</span>
@@ -246,22 +245,22 @@ export function HomeContent() {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-[#0b890f]/10 p-3">
-                      <FileSpreadsheet className="h-5 w-5 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-3">
+                      <FileSpreadsheet className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">{t('homepage.modules.grading.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.grading.feature1')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.grading.feature2')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.grading.feature3')}</span>
                     </li>
                   </ul>
@@ -270,7 +269,7 @@ export function HomeContent() {
                       href={`https://docs.profevision.com/${locale}/docs/organization-setup/grading-schemes`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
-                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-primary hover:bg-muted"
                       title={t('homepage.modules.grading.linkTitle')}
                     >
                       <span>{t('homepage.modules.moreInfo')}</span>
@@ -283,22 +282,22 @@ export function HomeContent() {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-[#0b890f]/10 p-3">
-                      <ScanText className="h-5 w-5 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-3">
+                      <ScanText className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">{t('homepage.modules.exams.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.exams.feature1')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.exams.feature2')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.exams.feature3')}</span>
                     </li>
                   </ul>
@@ -307,7 +306,7 @@ export function HomeContent() {
                       href={`https://docs.profevision.com/${locale}/docs/exam-creation`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
-                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-primary hover:bg-muted"
                       title={t('homepage.modules.exams.linkTitle')}
                     >
                       <span>{t('homepage.modules.moreInfo')}</span>
@@ -320,22 +319,22 @@ export function HomeContent() {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-[#0b890f]/10 p-3">
-                      <BarChart3 className="h-5 w-5 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-3">
+                      <BarChart3 className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">{t('homepage.modules.analysis.title')}</h3>
                   </div>
                   <ul className="mt-4 space-y-2">
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.analysis.feature1')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.analysis.feature2')}</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <span className="text-sm">{t('homepage.modules.analysis.feature3')}</span>
                     </li>
                   </ul>
@@ -344,7 +343,7 @@ export function HomeContent() {
                       href={`https://docs.profevision.com/${locale}/docs/results`}
                       target="_blank"
                       rel="nofollow noopener noreferrer"
-                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-[#0b890f] hover:bg-muted"
+                      className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors group-hover:text-primary hover:bg-muted"
                       title={t('homepage.modules.analysis.linkTitle')}
                     >
                       <span>{t('homepage.modules.moreInfo')}</span>
@@ -373,8 +372,8 @@ export function HomeContent() {
                 </p>
                 <ul className="space-y-2">
                   <li className="flex items-start gap-3">
-                    <div className="rounded-full bg-[#0b890f]/10 p-1 mt-0.5">
-                      <CheckCircle className="h-4 w-4 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-1 mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-medium">{t('homepage.benefits.automation.title')}</h3>
@@ -384,8 +383,8 @@ export function HomeContent() {
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="rounded-full bg-[#0b890f]/10 p-1 mt-0.5">
-                      <CheckCircle className="h-4 w-4 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-1 mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-medium">{t('homepage.benefits.organization.title')}</h3>
@@ -395,8 +394,8 @@ export function HomeContent() {
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="rounded-full bg-[#0b890f]/10 p-1 mt-0.5">
-                      <CheckCircle className="h-4 w-4 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-1 mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-medium">{t('homepage.benefits.insights.title')}</h3>
@@ -406,8 +405,8 @@ export function HomeContent() {
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="rounded-full bg-[#0b890f]/10 p-1 mt-0.5">
-                      <CheckCircle className="h-4 w-4 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-1 mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-medium">{t('homepage.benefits.flexibility.title')}</h3>
@@ -417,8 +416,8 @@ export function HomeContent() {
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="rounded-full bg-[#0b890f]/10 p-1 mt-0.5">
-                      <CheckCircle className="h-4 w-4 text-[#0b890f]" />
+                    <div className="rounded-full bg-primary/10 p-1 mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-medium">{t('homepage.benefits.gradingSpeed.title')}</h3>
@@ -432,7 +431,6 @@ export function HomeContent() {
                   <Button
                     asChild
                     size="lg"
-                    className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
                   >
                     <Link href={'/auth/register'} title={t('homepage.benefits.startFreeTitle')}>
                       {t('homepage.benefits.startFree')}
@@ -449,7 +447,7 @@ export function HomeContent() {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <h4 className="font-medium">{t('homepage.benefits.gradingTable.subject')}</h4>
-                        <span className="text-xs bg-[#0b890f]/10 text-[#087a0c] px-2 py-1 rounded-full font-medium">{t('homepage.benefits.gradingTable.period')}</span>
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">{t('homepage.benefits.gradingTable.period')}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">{t('homepage.benefits.gradingTable.stats')}</div>
                     </div>

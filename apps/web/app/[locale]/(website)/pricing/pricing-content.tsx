@@ -22,13 +22,13 @@ export function PricingContent() {
         <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5 -z-10" />
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <Badge className="bg-[#0b890f] text-white hover:bg-[#0b890f]/80">
+            <Badge className="bg-primary text-primary-foreground hover:bg-primary/80">
               <Zap className="h-3 w-3 mr-1" />
               {t("pricing.hero.badge", { defaultValue: "Precios de Lanzamiento" })}
             </Badge>
             <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               {t("pricing.hero.title", { defaultValue: "Comienza gratis" })}{" "}
-              <span className="text-[#0b890f]">
+              <span className="text-primary">
                 {t("pricing.hero.titleHighlight", { defaultValue: "hoy mismo" })}
               </span>
               !
@@ -62,10 +62,10 @@ export function PricingContent() {
       </section>
 
       {/* Pricing Cards */}
-       <section className="py-8 md:py-12">
-         <div className="container px-4 md:px-6">
-           <div className="flex flex-col items-center justify-center space-y-8">
-             {/* Cards */}
+      <section className="py-8 md:py-12">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-8">
+            {/* Cards */}
             <div className="grid gap-8 md:grid-cols-2 max-w-5xl w-full">
               <PricingCardV2
                 tier="free"
@@ -111,37 +111,37 @@ export function PricingContent() {
               <div className="grid md:grid-cols-2 gap-4">
                 <ul className="space-y-3">
                   <li className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-[#0b890f]" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                     <span>Creación de exámenes</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-[#0b890f]" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                     <span>Gestión de estudiantes</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-[#0b890f]" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                     <span>Gestión de grupos</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-[#0b890f]" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                     <span>Esquemas de calificación</span>
                   </li>
                 </ul>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-[#0b890f]" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                     <span>Exportar a PDF y LaTeX</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-[#0b890f]" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                     <span>Reportes de desempeño</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-[#0b890f]" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                     <span>Interfaz intuitiva</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-[#0b890f]" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                     <span>Actualizaciones constantes</span>
                   </li>
                 </ul>

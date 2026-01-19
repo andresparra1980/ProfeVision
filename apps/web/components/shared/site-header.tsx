@@ -163,7 +163,7 @@ export function SiteHeader() {
                       {t('buttons.login')}
                     </Link>
                   </Button>
-                  <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90">
+                  <Button asChild size="sm" className="bg-primary justify-center">
                     <Link href="/auth/register" title={`${t('buttons.register')} - ProfeVision`}>
                       {t('buttons.register')}
                     </Link>
@@ -271,7 +271,7 @@ export function SiteHeader() {
                           {t('buttons.login')}
                         </Link>
                       </Button>
-                      <Button asChild size="sm" className="bg-[#0b890f] hover:bg-[#0b890f]/90 text-base">
+                      <Button asChild size="sm" className="bg-primary justify-center">
                         <Link href="/auth/register" onClick={closeMenu} title={`${t('buttons.register')} - ProfeVision`}>
                           {t('buttons.register')}
                         </Link>

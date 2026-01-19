@@ -12,6 +12,7 @@ import {
 type PageMeta = {
   title: string;
   description: string;
+  keywords?: string[];
 };
 
 const pageMetadata: Record<string, Record<Locale, PageMeta>> = {
@@ -161,20 +162,24 @@ const pageMetadata: Record<string, Record<Locale, PageMeta>> = {
   },
   '/exams-with-ai': {
     en: {
-      title: 'Create Exams with AI - ProfeVision',
-      description: 'Generate professional exams in minutes using artificial intelligence. Multiple choice, true/false, and more question types.',
+      title: 'Create Exams with AI & Bloom\'s Taxonomy - ProfeVision',
+      description: 'Pedagogical AI assistant that thinks like an instructional designer. Generate valid assessments with automated scaffolding and feedback.',
+      keywords: ['AI exam generator', 'Bloom taxonomy', 'instructional design', 'pedagogical AI', 'automated rubrics', 'teacher tools'],
     },
     es: {
-      title: 'Crear Exámenes con IA - ProfeVisión',
-      description: 'Genera exámenes profesionales en minutos usando inteligencia artificial. Opción múltiple, verdadero/falso y más.',
+      title: 'Crear Exámenes con IA y Taxonomía de Bloom - ProfeVisión',
+      description: 'Asistente pedagógico que piensa como un diseñador instruccional. Genera evaluaciones válidas con andamiaje y retroalimentación automática.',
+      keywords: ['generador de exámenes IA', 'taxonomía de Bloom', 'diseño instruccional', 'IA pedagógica', 'rúbricas automatizadas', 'herramientas docentes'],
     },
     fr: {
-      title: "Créer des Examens avec l'IA - ProfeVision",
-      description: "Générez des examens professionnels en minutes grâce à l'intelligence artificielle. QCM, vrai/faux et plus.",
+      title: "Créer des Exámenes avec l'IA et la Taxonomie de Bloom - ProfeVision",
+      description: "Assistant pédagogique qui pense comme un concepteur pédagogique. Générez des évaluations valides avec échafaudage et rétroaction automatisés.",
+      keywords: ['générateur d examen IA', 'taxonomie de Bloom', 'conception pédagogique', 'IA pédagogique', 'rubriques automatisées'],
     },
     pt: {
-      title: 'Criar Provas com IA - ProfeVision',
-      description: 'Gere provas profissionais em minutos usando inteligência artificial. Múltipla escolha, verdadeiro/falso e mais.',
+      title: 'Criar Provas com IA e Taxonomía de Bloom - ProfeVision',
+      description: 'Assistente pedagógico que pensa como um designer instrucional. Gere avaliações válidas com andaimes e feedback automático.',
+      keywords: ['gerador de provas IA', 'taxonomia de Bloom', 'design instrucional', 'IA pedagógica', 'rubricas automatizadas'],
     },
   },
   '/paper-exams': {
@@ -287,20 +292,24 @@ const pageMetadata: Record<string, Record<Locale, PageMeta>> = {
   },
   '/mobile-app': {
     en: {
-      title: 'Mobile App - Grade Exams 96% Faster with Camera | ProfeVision',
-      description: 'Scan and grade multiple choice exams automatically with your phone or browser. OMR technology, instant results, synced with web. Android beta available.',
+      title: 'OMR Exam Scanner App - Grade in Seconds | ProfeVision',
+      description: 'Professional OMR scanner for Android & iOS. Grade 30-question exams in seconds with 99.9% accuracy. Syncs instantly with your gradebook.',
+      keywords: ['OMR app', 'grade exams with phone', 'optical mark recognition', 'exam scanner', 'android exam grader', 'iOS exam scanner', 'teacher grading app'],
     },
     es: {
-      title: 'App Móvil - Califica Exámenes 96% Más Rápido con Cámara | ProfeVisión',
-      description: 'Escanea y califica exámenes de opción múltiple automáticamente desde tu celular o navegador. Tecnología OMR, resultados instantáneos. Beta Android disponible.',
+      title: 'App Escáner de Exámenes OMR - Califica en Segundos | ProfeVisión',
+      description: 'Escáner OMR profesional para Android e iOS. Califica exámenes de 30 preguntas en segundos con 99.9% de precisión. Sincronización instantánea.',
+      keywords: ['app OMR', 'calificar exámenes con celular', 'reconocimiento óptico de marcas', 'escáner de exámenes', 'calificador android', 'app para profesores'],
     },
     fr: {
-      title: 'App Mobile - Notez les Examens 96% Plus Vite | ProfeVision',
-      description: 'Scannez et notez les examens QCM automatiquement depuis votre téléphone ou navigateur. Technologie OMR, résultats instantanés. Beta Android disponible.',
+      title: 'App Scanner OMR - Notez les Examens en Secondes | ProfeVision',
+      description: 'Scanner OMR professionnel pour Android et iOS. Notez des examens de 30 questions en quelques secondes. Synchronisation instantanée.',
+      keywords: ['app OMR', 'noter examens téléphone', 'scanner examens', 'correction automatique', 'application enseignants'],
     },
     pt: {
-      title: 'App Móvel - Corrija Provas 96% Mais Rápido com Câmera | ProfeVision',
-      description: 'Escaneie e corrija provas de múltipla escolha automaticamente pelo celular ou navegador. Tecnologia OMR, resultados instantâneos. Beta Android disponível.',
+      title: 'App Scanner OMR - Corrija Provas em Segundos | ProfeVision',
+      description: 'Scanner OMR profissional para Android e iOS. Corrija provas de 30 questões em segundos com 99.9% de precisão. Sincronização instantânea.',
+      keywords: ['app OMR', 'corrigir provas celular', 'scanner de provas', 'correção automática', 'aplicativo professores'],
     },
   },
   '/data-deletion': {
@@ -364,6 +373,7 @@ export function generatePageMetadata(
   return {
     title: meta.title,
     description: meta.description,
+    keywords: meta.keywords,
     alternates: {
       canonical: currentUrl,
       languages: alternates,

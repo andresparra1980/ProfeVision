@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
-import { 
+import {
   FileText,
   CheckCircle,
   QrCode,
@@ -32,25 +32,24 @@ export function PaperExamsContent() {
 
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-[#0b890f] text-white hover:bg-[#0b890f]/80 w-fit">
+            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80 w-fit">
               <Zap className="h-3 w-3 mr-1" />
               {t('paperExams.hero.badge')}
             </div>
             <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               {t('paperExams.hero.title')}{" "}
-              <span className="text-[#0b890f]">{t('paperExams.hero.titleHighlight')}</span>{" "}
+              <span className="text-primary">{t('paperExams.hero.titleHighlight')}</span>{" "}
               {t('paperExams.hero.titleEnd')}
             </h1>
             <p className="max-w-[800px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               {t('paperExams.hero.description')}{" "}
-              <span className="font-semibold text-[#0b890f]">{t('paperExams.hero.descriptionHighlight')}</span>{" "}
+              <span className="font-semibold text-primary">{t('paperExams.hero.descriptionHighlight')}</span>{" "}
               {t('paperExams.hero.descriptionEnd')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button
                 asChild
                 size="lg"
-                className="bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90 hover:from-[#0b890f]/90 hover:to-[#0b890f]"
               >
                 <Link href={'/auth/register'}>{t('paperExams.hero.cta')}</Link>
               </Button>
@@ -70,7 +69,7 @@ export function PaperExamsContent() {
               {t('paperExams.features.title')}
             </h2>
           </div>
-          
+
           {/* Primera fila: Imagen y Formato Personalizado */}
           <div className="grid gap-8 lg:grid-cols-2 items-center mt-12">
             {/* Imagen de la hoja de respuesta */}
@@ -87,14 +86,14 @@ export function PaperExamsContent() {
             </div>
 
             {/* Formato Personalizado */}
-            <div className="bg-card backdrop-blur-sm rounded-lg border border-[#0b890f]/20 p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-[#0b890f] mb-6">
+            <div className="bg-card backdrop-blur-sm rounded-lg border border-primary/20 p-6 shadow-lg">
+              <h3 className="text-2xl font-bold text-primary mb-6">
                 {t('paperExams.features.customFormat.title')}
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold">{t('paperExams.features.customFormat.uniqueId.title')}</h4>
                     <p className="text-sm text-muted-foreground">
@@ -102,9 +101,9 @@ export function PaperExamsContent() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
-                  <QrCode className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                  <QrCode className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold">{t('paperExams.features.customFormat.qrCode.title')}</h4>
                     <p className="text-sm text-muted-foreground">
@@ -112,9 +111,9 @@ export function PaperExamsContent() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
-                  <FileText className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                  <FileText className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold">{t('paperExams.features.customFormat.adaptableFormat.title')}</h4>
                     <p className="text-sm text-muted-foreground">
@@ -129,36 +128,36 @@ export function PaperExamsContent() {
           {/* Segunda fila: Instrucciones y Áreas Restringidas */}
           <div className="grid gap-8 lg:grid-cols-2 mt-12">
             {/* Instrucciones */}
-            <div className="bg-card backdrop-blur-sm rounded-lg border border-[#0b890f]/20 p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-[#0b890f] mb-6">
+            <div className="bg-card backdrop-blur-sm rounded-lg border border-primary/20 p-6 shadow-lg">
+              <h3 className="text-2xl font-bold text-primary mb-6">
                 {t('paperExams.instructions.title')}
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-[#0b890f] mb-2">{t('paperExams.instructions.penUse.title')}</h4>
+                    <h4 className="font-semibold text-primary mb-2">{t('paperExams.instructions.penUse.title')}</h4>
                     <p className="text-sm text-muted-foreground">
                       {t('paperExams.instructions.penUse.description')}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
-                  <XCircle className="h-5 w-5 text-[#bc152b] shrink-0 mt-0.5" />
+                  <XCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-[#bc152b] mb-2">{t('paperExams.instructions.avoidPencil.title')}</h4>
+                    <h4 className="font-semibold text-secondary mb-2">{t('paperExams.instructions.avoidPencil.title')}</h4>
                     <p className="text-sm text-muted-foreground">
                       {t('paperExams.instructions.avoidPencil.description')}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-[#0b890f] shrink-0 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-[#0b890f] mb-2">{t('paperExams.instructions.correction.title')}</h4>
+                    <h4 className="font-semibold text-primary mb-2">{t('paperExams.instructions.correction.title')}</h4>
                     <p className="text-sm text-muted-foreground">
                       {t('paperExams.instructions.correction.description')}
                     </p>
@@ -168,31 +167,31 @@ export function PaperExamsContent() {
             </div>
 
             {/* Áreas Restringidas */}
-            <div className="bg-card backdrop-blur-sm rounded-lg border border-[#bc152b]/20 p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-[#bc152b] mb-6">
+            <div className="bg-card backdrop-blur-sm rounded-lg border border-secondary/20 p-6 shadow-lg">
+              <h3 className="text-2xl font-bold text-secondary mb-6">
                 {t('paperExams.restrictedAreas.title')}
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-[#bc152b] shrink-0 mt-0.5" />
+                    <AlertCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-semibold text-[#bc152b]">{t('paperExams.restrictedAreas.qrCode')}</h4>
+                      <h4 className="font-semibold text-secondary">{t('paperExams.restrictedAreas.qrCode')}</h4>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-[#bc152b] shrink-0 mt-0.5" />
+                    <AlertCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-semibold text-[#bc152b]">{t('paperExams.restrictedAreas.borders')}</h4>
+                      <h4 className="font-semibold text-secondary">{t('paperExams.restrictedAreas.borders')}</h4>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-[#bc152b] shrink-0 mt-0.5" />
+                    <AlertCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-semibold text-[#bc152b]">{t('paperExams.restrictedAreas.answersSection')}</h4>
+                      <h4 className="font-semibold text-secondary">{t('paperExams.restrictedAreas.answersSection')}</h4>
                     </div>
                   </div>
                 </div>
@@ -226,7 +225,7 @@ export function PaperExamsContent() {
               {t('paperExams.autoGrading.title')}
             </h2>
           </div>
-          
+
           <div className="grid gap-8 lg:grid-cols-2 items-center mt-12">
             {/* Imagen del proceso */}
             <div className="flex justify-center">
@@ -242,19 +241,19 @@ export function PaperExamsContent() {
             </div>
 
             {/* Proceso */}
-            <div className="bg-card backdrop-blur-sm rounded-lg border border-[#0b890f]/20 p-6 shadow-lg space-y-8">
-              <h3 className="text-2xl font-bold text-[#0b890f] mb-6">
+            <div className="bg-card backdrop-blur-sm rounded-lg border border-primary/20 p-6 shadow-lg space-y-8">
+              <h3 className="text-2xl font-bold text-primary mb-6">
                 {t('paperExams.autoGrading.processTitle')}
               </h3>
-              
+
               {/* Paso 1 */}
               <div className="flex items-start gap-4">
-                <div className="rounded-full bg-[#0b890f] p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
-                  <span className="text-lg font-bold text-white">1</span>
+                <div className="rounded-full bg-primary p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
+                  <span className="text-lg font-bold text-primary-foreground">1</span>
                 </div>
                 <div>
                   <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
-                    <Camera className="h-5 w-5 text-[#0b890f]" />
+                    <Camera className="h-5 w-5 text-primary" />
                     {t('paperExams.autoGrading.step1.title')}
                   </h4>
                   <ul className="space-y-1 text-sm text-muted-foreground">
@@ -267,12 +266,12 @@ export function PaperExamsContent() {
 
               {/* Paso 2 */}
               <div className="flex items-start gap-4">
-                <div className="rounded-full bg-[#0b890f] p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
-                  <span className="text-lg font-bold text-white">2</span>
+                <div className="rounded-full bg-primary p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
+                  <span className="text-lg font-bold text-primary-foreground">2</span>
                 </div>
                 <div>
                   <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
-                    <ScanLine className="h-5 w-5 text-[#0b890f]" />
+                    <ScanLine className="h-5 w-5 text-primary" />
                     {t('paperExams.autoGrading.step2.title')}
                   </h4>
                   <p className="text-sm text-muted-foreground mb-2">
@@ -288,12 +287,12 @@ export function PaperExamsContent() {
 
               {/* Paso 3 */}
               <div className="flex items-start gap-4">
-                <div className="rounded-full bg-[#0b890f] p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
-                  <span className="text-lg font-bold text-white">3</span>
+                <div className="rounded-full bg-primary p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
+                  <span className="text-lg font-bold text-primary-foreground">3</span>
                 </div>
                 <div>
                   <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-[#0b890f]" />
+                    <Shield className="h-5 w-5 text-primary" />
                     {t('paperExams.autoGrading.step3.title')}
                   </h4>
                   <ul className="space-y-1 text-sm text-muted-foreground">
@@ -320,18 +319,18 @@ export function PaperExamsContent() {
               {t('paperExams.benefits.title')}
             </h2>
           </div>
-          
+
           <div className="max-w-4xl mx-auto mt-12">
             <p className="text-lg text-muted-foreground mb-6 text-center">
               {t('paperExams.benefits.description')}{" "}
-              <span className="font-bold text-[#0b890f]">{t('paperExams.benefits.descriptionHighlight')}</span>{" "}
+              <span className="font-bold text-primary">{t('paperExams.benefits.descriptionHighlight')}</span>{" "}
               {t('paperExams.benefits.descriptionEnd')}
             </p>
-            
-            <div className="bg-gradient-to-r from-[#0b890f]/10 to-[#0b890f]/5 rounded-lg p-6 border border-[#0b890f]/20">
+
+            <div className="bg-gradient-to-r from-[#0b890f]/10 to-[#0b890f]/5 rounded-lg p-6 border border-primary/20">
               <div className="flex items-center justify-center gap-3 mb-4">
-                <Zap className="h-6 w-6 text-[#0b890f]" />
-                <h3 className="text-xl font-bold text-[#0b890f]">{t('paperExams.benefits.advantage.title')}</h3>
+                <Zap className="h-6 w-6 text-primary" />
+                <h3 className="text-xl font-bold text-primary">{t('paperExams.benefits.advantage.title')}</h3>
               </div>
               <p className="text-lg font-semibold text-center">
                 {t('paperExams.benefits.advantage.description')}
