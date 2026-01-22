@@ -1491,5 +1491,19 @@
       "previous": "Précédent",
       "next": "Suivant"
     }
+  },
+  "credits": {
+    "aiGenerations": "Générations IA",
+    "exams": "Scans",
+    "upgradeToPlus": "Passer à Plus"
+  },
+  "upgrade": {
+    "title": "Passez au plan Plus",
+    "description": "Débloquez tout le potentiel de ProfeVision et supprimez les limites.",
+    "benefits": "Avantages inclus :",
+    "benefit1": "Générations IA illimitées",
+    "benefit2": "Scans et notations illimités",
+    "benefit3": "Accès prioritaire aux nouvelles fonctionnalités",
+    "cta": "Obtenir Plus maintenant"
   }
 }
