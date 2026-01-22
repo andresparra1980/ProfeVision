@@ -21,9 +21,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Shield,
-  Sparkles,
   Check,
-  Zap,
 } from 'lucide-react';
 import {
   Dialog,
@@ -66,7 +64,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
   const t = useTranslations('dashboard');
   const locale = useLocale();
   const [isAdmin, setIsAdmin] = useState(false);
-  const { usage, loading: usageLoading } = useTierLimits();
+  const { usage } = useTierLimits();
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
 
   const handleUpgradeClick = () => {
