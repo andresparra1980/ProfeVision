@@ -42,7 +42,11 @@ import { StepProgressList } from "./StepProgressList";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { LimitReachedModal } from "@/components/shared/limit-reached-modal";
 
-export default function ChatPanel() {
+interface ChatPanelProps {
+  onOpenSaveDraft: () => void;
+}
+
+export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   const t = useTranslations('ai_exams_chat');
   const tTiers = useTranslations('tiers');
   const settings = useMemo(() => loadSettings(), []);
@@ -240,6 +244,15 @@ export default function ChatPanel() {
     });
   };
 
+  // Auto-open results drawer when generation finishes
+  const prevIsSending = useRef(isSending);
+  useEffect(() => {
+    if (prevIsSending.current && !isSending && hasResults) {
+      setResultsOpen(true);
+    }
+    prevIsSending.current = isSending;
+  }, [isSending, hasResults]);
+
   return (
     <div ref={rootRef} className="flex flex-col overflow-x-clip overflow-y-hidden space-y-0" style={{ minHeight }}>
       <div className="flex w-full justify-center">
@@ -432,7 +445,7 @@ export default function ChatPanel() {
 
       {/* Results Drawer (bottom sheet) */}
       <Dialog open={resultsOpen} onOpenChange={setResultsOpen}>
-        <DialogContent 
+        <DialogContent
           className="bottom-sheet sm:max-w-3xl p-4 sm:p-6 data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom"
           style={{
             position: 'fixed',
@@ -450,7 +463,7 @@ export default function ChatPanel() {
             <DialogDescription>{t('results.description')}</DialogDescription>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto">
-            <ResultsView isSending={isSending} />
+            <ResultsView isSending={isSending} onOpenSaveDraft={onOpenSaveDraft} />
           </div>
         </DialogContent>
       </Dialog>

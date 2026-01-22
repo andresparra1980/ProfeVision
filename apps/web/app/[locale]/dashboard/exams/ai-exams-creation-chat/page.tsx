@@ -107,7 +107,7 @@ export default function AIExamsCreationChatPage() {
       {/* Chat and dialogs inside Provider */}
       <AIChatProvider languageOverride={languageOverride}>
         <NewExamCleaner />
-        <ChatPanel />
+        <ChatPanel onOpenSaveDraft={() => setShowSaveDraftDialog(true)} />
 
         <SaveDraftDialog
           open={showSaveDraftDialog}

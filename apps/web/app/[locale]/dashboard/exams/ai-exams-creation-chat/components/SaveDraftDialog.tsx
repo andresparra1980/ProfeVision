@@ -130,6 +130,20 @@ export function SaveDraftDialog({
     [grupos, materiaId]
   );
 
+  // Auto-select subject if only one available
+  React.useEffect(() => {
+    if (!isEditing && materias.length === 1) {
+      form.setValue("materia_id", materias[0].id);
+    }
+  }, [isEditing, materias.length, materias, form]);
+
+  // Auto-select group if only one available
+  React.useEffect(() => {
+    if (!isEditing && gruposFiltrados.length === 1) {
+      form.setValue("grupo_id", gruposFiltrados[0].id);
+    }
+  }, [isEditing, gruposFiltrados.length, gruposFiltrados, form]);
+
   const handleSubmit = React.useCallback(
     async (values: DraftFormValues) => {
       try {
@@ -216,12 +230,12 @@ export function SaveDraftDialog({
               : t("saveDraftDialog.toasts.savedDesc"),
           }
         );
-        
+
         // Mark onboarding checklist item as completed (only for new exams)
         if (!isEditing) {
           completeChecklistItem('exam_created');
         }
-        
+
         router.push("/dashboard/exams");
       } catch (e) {
         toast.error(t("saveDraftDialog.toasts.error"), {
@@ -400,23 +414,12 @@ export function SaveDraftDialog({
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="duracion">
-                  {t("saveDraftDialog.form.duration")}*
-                </Label>
-                <Input
-                  id="duracion"
-                  type="number"
-                  min={1}
-                  max={240}
-                  {...form.register("duracion", { valueAsNumber: true })}
-                />
-                {form.formState.errors.duracion && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.duracion.message as string}
-                  </p>
-                )}
-              </div>
+            </div>
+
+            {/* Duration hidden but kept in form state */}
+            <input type="hidden" {...form.register("duracion", { valueAsNumber: true })} />
+
+            <div className="space-y-2">
 
               <div className="space-y-2">
                 <Label htmlFor="puntaje_total">
