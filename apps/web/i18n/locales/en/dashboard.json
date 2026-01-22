@@ -1491,5 +1491,19 @@
       "previous": "Previous",
       "next": "Next"
     }
+  },
+  "credits": {
+    "aiGenerations": "AI Generations",
+    "exams": "Scans",
+    "upgradeToPlus": "Upgrade to Plus"
+  },
+  "upgrade": {
+    "title": "Upgrade to Plus",
+    "description": "Unlock ProfeVision's full potential and remove limits.",
+    "benefits": "Benefits included:",
+    "benefit1": "Unlimited AI Generations",
+    "benefit2": "Unlimited Scans and Grading",
+    "benefit3": "Priority access to new features",
+    "cta": "Get Plus Now"
   }
 }

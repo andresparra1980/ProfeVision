@@ -1491,5 +1491,19 @@
     "retry": "Repetir",
     "refresh": "Atualizar",
     "viewUsers": "Ver usuários"
+  },
+  "credits": {
+    "aiGenerations": "Gerações de IA",
+    "exams": "Digitalizações",
+    "upgradeToPlus": "Atualizar para Plus"
+  },
+  "upgrade": {
+    "title": "Faça upgrade para o Plano Plus",
+    "description": "Desbloqueie todo o potencial do ProfeVision e remova os limites.",
+    "benefits": "Benefícios incluídos:",
+    "benefit1": "Gerações de IA ilimitadas",
+    "benefit2": "Digitalizações e correções ilimitadas",
+    "benefit3": "Acesso prioritário a novos recursos",
+    "cta": "Obter Plus Agora"
   }
 }

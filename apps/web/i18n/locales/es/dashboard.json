@@ -55,7 +55,6 @@
     "create": "Crear Examen",
     "createNewDesc": "Diseña un nuevo examen para tus estudiantes",
     "createDesc": "Define la información básica del examen",
-
     "backToExams": "Volver a Exámenes",
     "questions": "preguntas",
     "subjectRequired": "Materia Requerida",
@@ -1492,5 +1491,19 @@
       "previous": "Anterior",
       "next": "Siguiente"
     }
+  },
+  "credits": {
+    "aiGenerations": "Generaciones IA",
+    "exams": "Escaneos",
+    "upgradeToPlus": "Actualizar a Plus"
+  },
+  "upgrade": {
+    "title": "Mejora tu Plan a Plus",
+    "description": "Desbloquea todo el potencial de ProfeVision y elimina los límites.",
+    "benefits": "Beneficios incluidos:",
+    "benefit1": "Generaciones IA Ilimitadas",
+    "benefit2": "Escaneos y Calificaciones Ilimitadas",
+    "benefit3": "Acceso prioritario a nuevas funciones",
+    "cta": "Obtener Plus Ahora"
   }
 }

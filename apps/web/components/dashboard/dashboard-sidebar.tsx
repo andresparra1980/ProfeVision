@@ -21,7 +21,19 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Shield,
+  Check,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { UsageIndicator } from "@/components/shared/usage-indicator";
+import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/sidebar-context';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -52,6 +64,15 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
   const t = useTranslations('dashboard');
   const locale = useLocale();
   const [isAdmin, setIsAdmin] = useState(false);
+  const { usage } = useTierLimits();
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
+
+  const handleUpgradeClick = () => {
+    if (!user.email) return;
+    const productId = process.env.NEXT_PUBLIC_POLAR_PRODUCT_ID_MONTHLY;
+    const checkoutUrl = `/api/polar/checkout?products=${productId}&customerEmail=${encodeURIComponent(user.email)}`;
+    window.location.href = checkoutUrl;
+  };
 
   // Check if user is admin
   useEffect(() => {
@@ -153,7 +174,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex flex-col justify-between bg-card transition-all duration-200 md:static md:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex flex-col justify-between bg-card transition-all duration-200 md:static md:translate-x-0 overflow-y-auto",
           isOpen ? "translate-x-0" : "-translate-x-full",
           isCollapsed ? "w-16" : "w-64"
         )}
@@ -287,6 +308,80 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
         <div>
           {(!isCollapsed || isMobile) ? (
             <>
+              {/* Credits & Usage Section */}
+              {usage && (
+                <div className="px-4 py-3 border-t border-border/50">
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <UsageIndicator
+                        label={t('credits.aiGenerations', { defaultValue: 'Generaciones AI' })}
+                        used={usage.ai_generation.used}
+                        limit={usage.ai_generation.limit}
+                        hideLabel={false}
+                        className="text-xs"
+                      />
+                      <UsageIndicator
+                        label={t('credits.exams', { defaultValue: 'Escaneos' })}
+                        used={usage.scans.used}
+                        limit={usage.scans.limit}
+                        hideLabel={false}
+                        className="text-xs"
+                      />
+                    </div>
+
+                    {usage.tier.name === 'free' && (
+                      <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button
+                            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 border-0"
+                            size="sm"
+                          >
+                            {t('credits.upgradeToPlus', { defaultValue: 'Actualizar a Plus' })}
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2 text-xl">
+                              <Crown className="h-6 w-6 text-purple-500" />
+                              {t('upgrade.title', { defaultValue: 'Mejora tu Plan a Plus' })}
+                            </DialogTitle>
+                            <DialogDescription>
+                              {t('upgrade.description', { defaultValue: 'Desbloquea todo el potencial de ProfeVision y elimina los límites.' })}
+                            </DialogDescription>
+                          </DialogHeader>
+
+                          <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                              <h4 className="font-medium leading-none">{t('upgrade.benefits', { defaultValue: 'Beneficios incluidos:' })}</h4>
+                              <ul className="text-sm text-muted-foreground space-y-2 mt-2">
+                                <li className="flex items-center gap-2">
+                                  <Check className="h-4 w-4 text-green-500" />
+                                  {t('upgrade.benefit1', { defaultValue: 'Generaciones AI Ilimitadas' })}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Check className="h-4 w-4 text-green-500" />
+                                  {t('upgrade.benefit2', { defaultValue: 'Escaneos y Calificaciones Ilimitadas' })}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Check className="h-4 w-4 text-green-500" />
+                                  {t('upgrade.benefit3', { defaultValue: 'Acceso prioritario a nuevas funciones' })}
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+
+                          <DialogFooter>
+                            <Button onClick={handleUpgradeClick} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 border-0">
+                              {t('upgrade.cta', { defaultValue: 'Obtener Plus Ahora' })}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Language Switcher */}
               <div className="px-4 py-3">
                 <LanguageSwitcherDashboard />
