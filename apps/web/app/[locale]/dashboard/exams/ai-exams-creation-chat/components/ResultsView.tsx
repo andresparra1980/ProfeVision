@@ -28,9 +28,10 @@ import MathText from "@/components/MathText";
 
 interface ResultsViewProps {
   isSending?: boolean;
+  onOpenSaveDraft?: () => void;
 }
 
-export default function ResultsView({ isSending = false }: ResultsViewProps) {
+export default function ResultsView({ isSending = false, onOpenSaveDraft }: ResultsViewProps) {
   const { result, setResult } = useAIChat();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -42,7 +43,7 @@ export default function ResultsView({ isSending = false }: ResultsViewProps) {
     return (result?.exam?.questions ?? []) as ExamQuestion[];
   }, [result]);
 
-  
+
 
   function randomizeOptions() {
     if (!result) return;
@@ -148,6 +149,15 @@ export default function ResultsView({ isSending = false }: ResultsViewProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {onOpenSaveDraft && (
+            <Button
+              size="sm"
+              onClick={onOpenSaveDraft}
+              disabled={!questions.length || isSending}
+            >
+              {t('header.saveDraft', { fallback: 'Guardar Borrador' })}
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -198,50 +208,50 @@ export default function ResultsView({ isSending = false }: ResultsViewProps) {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-4 pb-4 pt-2 border-t bg-muted/20">
-                  {/* Body: options and controls */}
-                  {isMC && (
-                    <div className="space-y-3">
-                      <div className="text-sm font-medium">{t('results.selectCorrect')}</div>
-                      <RadioGroup value={String(correctIdx)} onValueChange={(v) => setCorrectAnswer(idx, Number(v))} className="grid gap-2">
-                        {options.map((opt, i) => (
-                          <div key={i} className={`flex items-start gap-2 rounded border p-2 ${i === correctIdx ? "border-primary bg-primary/5" : ""}`}>
-                            <RadioGroupItem id={`q${idx}-opt${i}`} value={String(i)} />
-                            <Label htmlFor={`q${idx}-opt${i}`} className="font-normal flex-1">
-                              <span className="mr-2">{String.fromCharCode(65 + i)}.</span>
-                              <span className="prose prose-sm dark:prose-invert max-w-none inline-block align-middle">
-                                <MathText text={opt || `Opción ${i + 1}`} />
-                              </span>
-                            </Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
-                  )}
-
-                  {isTF && (
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium">{t('results.selectCorrect')}</div>
-                      <RadioGroup value={String(q?.answer)} onValueChange={(v) => setCorrectAnswer(idx, v === "true")} className="grid gap-2">
-                        <div className={`flex items-center gap-2 rounded border p-2 ${q?.answer === true ? "border-primary bg-primary/5" : ""}`}>
-                          <RadioGroupItem id={`q${idx}-tf-true`} value="true" />
-                          <Label htmlFor={`q${idx}-tf-true`} className="font-normal">{t('results.true')}</Label>
-                        </div>
-                        <div className={`flex items-center gap-2 rounded border p-2 ${q?.answer === false ? "border-primary bg-primary/5" : ""}`}>
-                          <RadioGroupItem id={`q${idx}-tf-false`} value="false" />
-                          <Label htmlFor={`q${idx}-tf-false`} className="font-normal">{t('results.false')}</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                  )}
-
-                  {rationale && (
-                    <div className="mt-4">
-                      <div className="text-sm font-medium mb-1">{t('results.rationale')}</div>
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground italic">
-                        <MathText text={rationale} />
+                    {/* Body: options and controls */}
+                    {isMC && (
+                      <div className="space-y-3">
+                        <div className="text-sm font-medium">{t('results.selectCorrect')}</div>
+                        <RadioGroup value={String(correctIdx)} onValueChange={(v) => setCorrectAnswer(idx, Number(v))} className="grid gap-2">
+                          {options.map((opt, i) => (
+                            <div key={i} className={`flex items-start gap-2 rounded border p-2 ${i === correctIdx ? "border-primary bg-primary/5" : ""}`}>
+                              <RadioGroupItem id={`q${idx}-opt${i}`} value={String(i)} />
+                              <Label htmlFor={`q${idx}-opt${i}`} className="font-normal flex-1">
+                                <span className="mr-2">{String.fromCharCode(65 + i)}.</span>
+                                <span className="prose prose-sm dark:prose-invert max-w-none inline-block align-middle">
+                                  <MathText text={opt || `Opción ${i + 1}`} />
+                                </span>
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
                       </div>
-                    </div>
-                  )}
+                    )}
+
+                    {isTF && (
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">{t('results.selectCorrect')}</div>
+                        <RadioGroup value={String(q?.answer)} onValueChange={(v) => setCorrectAnswer(idx, v === "true")} className="grid gap-2">
+                          <div className={`flex items-center gap-2 rounded border p-2 ${q?.answer === true ? "border-primary bg-primary/5" : ""}`}>
+                            <RadioGroupItem id={`q${idx}-tf-true`} value="true" />
+                            <Label htmlFor={`q${idx}-tf-true`} className="font-normal">{t('results.true')}</Label>
+                          </div>
+                          <div className={`flex items-center gap-2 rounded border p-2 ${q?.answer === false ? "border-primary bg-primary/5" : ""}`}>
+                            <RadioGroupItem id={`q${idx}-tf-false`} value="false" />
+                            <Label htmlFor={`q${idx}-tf-false`} className="font-normal">{t('results.false')}</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    )}
+
+                    {rationale && (
+                      <div className="mt-4">
+                        <div className="text-sm font-medium mb-1">{t('results.rationale')}</div>
+                        <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground italic">
+                          <MathText text={rationale} />
+                        </div>
+                      </div>
+                    )}
 
                     {/* Edit button inside accordion content, aligned to end */}
                     <div className="mt-4 flex justify-end">
