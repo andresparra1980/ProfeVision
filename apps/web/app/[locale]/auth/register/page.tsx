@@ -15,6 +15,7 @@ import { signUpWithRedirect } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { getAuthErrorMessage } from "@/lib/utils/auth-errors";
+import { getBrowserMetadata } from "@/lib/utils/browser-metadata";
 import {
   Card,
   CardContent,
@@ -69,14 +70,18 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
+      // 📊 Recopilar metadata para analítica
+      const browserMetadata = await getBrowserMetadata();
+
       const { error } = await signUpWithRedirect(
-        data.email, 
-        data.password, 
+        data.email,
+        data.password,
         {
           nombre: data.nombres,
           apellido: data.apellidos,
           full_name: `${data.nombres} ${data.apellidos}`,
           preferred_locale: locale,
+          signin_metadata: browserMetadata,
         },
         captchaToken,
         locale as 'es' | 'en'
@@ -89,14 +94,14 @@ export default function RegisterPage() {
       toast.success(t('success'), {
         description: t('successDescription'),
       });
-      
+
       // 🔄 Redirección localizada
       router.push(routes.auth.verifyEmail());
     } catch (error: unknown) {
       toast.error(t('error'), {
         description: getAuthErrorMessage(error, tErrors),
       });
-      
+
       if (turnstileRef.current) {
         turnstileRef.current.reset();
       }
@@ -117,7 +122,7 @@ export default function RegisterPage() {
           {t('description')}
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
@@ -132,7 +137,7 @@ export default function RegisterPage() {
               <p className="text-sm text-destructive">{form.formState.errors.nombres.message}</p>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="apellidos">{t('lastName')}</Label>
             <Input
@@ -145,7 +150,7 @@ export default function RegisterPage() {
               <p className="text-sm text-destructive">{form.formState.errors.apellidos.message}</p>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="email">{t('email')}</Label>
             <Input
@@ -159,7 +164,7 @@ export default function RegisterPage() {
               <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="password">{t('password')}</Label>
             <Input
@@ -173,7 +178,7 @@ export default function RegisterPage() {
               <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
             <Input
@@ -189,7 +194,7 @@ export default function RegisterPage() {
               </p>
             )}
           </div>
-          
+
           <div className="flex justify-center mt-6 mb-6">
             <Turnstile
               ref={turnstileRef}
@@ -207,13 +212,13 @@ export default function RegisterPage() {
               }}
             />
           </div>
-          
+
           <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
             {isLoading ? t('submitting') : t('submit')}
           </Button>
         </form>
       </CardContent>
-      
+
       <CardFooter className="flex justify-center">
         <div className="text-center text-sm">
           {t('hasAccount')}{" "}
