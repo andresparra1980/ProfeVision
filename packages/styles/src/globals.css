@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --text: #040316;
+    --background: #e8ecee;
+    --primary: #0b890f;
+    --secondary: #bc152b;
+    --accent: #ffd60a;
+    --feature: #890B85;
+
+    --foreground: var(--text);
+    --card: #f8f9fa;
+    --card-foreground: #1e293b;
+
+    --popover: #ffffff;
+    --popover-foreground: #1e293b;
+
+    --primary-foreground: #f8fafc;
+    --secondary-foreground: #1e293b;
+
+    --muted: #f5f3ee;
+    --input: #f5f3ee;
+    --muted-foreground: #475569;
+
+    --accent-foreground: #1e293b;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #f8fafc;
+
+    --border: #e9e6e0;
+    --ring: #1e293b;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --text: #f0e9d9;
+    --background: #171717;
+    --primary: #76f47a;
+    --secondary: #ea4359;
+    --accent: #f5cc00;
+    --feature: #F476F0;
+
+    --foreground: var(--text);
+    --card: #333334;
+    --card-foreground: #f0e9d9;
+
+    --popover: #222223;
+    --popover-foreground: #f0e9d9;
+
+    --primary-foreground: #171717;
+    --secondary-foreground: #171717;
+
+    --muted: #222223;
+    --muted-foreground: #d5cbb8;
+
+    --accent-foreground: #171717;
+
+    --destructive: #991b1b;
+    --destructive-foreground: #fecaca;
+
+    --border: #555555;
+    --input: #222223;
+    --ring: #d4d4d8;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    line-height: 28px;
+  }
+}
+
+@layer utilities {
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
