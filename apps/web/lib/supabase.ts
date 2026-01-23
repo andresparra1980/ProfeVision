@@ -33,6 +33,7 @@ export const siteUrl = getSiteUrl();
 interface UserSignupData {
   nombre: string;
   apellido: string;
+  signin_metadata?: Record<string, unknown>;
   [key: string]: unknown;
 }
 
