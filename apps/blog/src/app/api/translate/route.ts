@@ -31,10 +31,47 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const targetLocales = ['en', 'fr', 'pt'].filter(l => l !== sourceLocale);
+        const allLocales = ['es', 'en', 'fr', 'pt'];
+        const targetLocales = allLocales.filter(l => l !== sourceLocale);
         const model = process.env.OPENAI_MODEL || 'openai/gpt-4o-mini';
 
-        const translations: Record<string, { title: string; excerpt: string; content?: unknown }> = {};
+        interface TranslationData {
+            title: string;
+            excerpt: string;
+            content?: unknown;
+            seoTitle?: string;
+            seoDescription?: string;
+        }
+
+        const translations: Record<string, TranslationData> = {};
+
+        // Generate SEO for source locale first
+        console.log(`[SEO] Generating SEO for source locale ${sourceLocale}...`);
+        const sourceLocaleName = { es: 'Spanish', en: 'English', fr: 'French', pt: 'Portuguese' }[sourceLocale];
+
+        const seoPrompt = `Generate SEO-optimized metadata in ${sourceLocaleName} for this blog post. Return valid JSON only.
+
+RULES:
+- metaTitle: 50-60 characters, compelling, no site name
+- metaDescription: 100-150 characters, clear value proposition
+
+Title: ${title}
+Excerpt: ${excerpt || ''}
+
+Return: {"metaTitle": "...", "metaDescription": "..."}`;
+
+        const { text: seoText } = await generateText({
+            model: openrouter(model),
+            prompt: seoPrompt,
+        });
+
+        let sourceSeo = { metaTitle: title.slice(0, 60), metaDescription: (excerpt || '').slice(0, 150) };
+        try {
+            sourceSeo = JSON.parse(cleanJsonResponse(seoText));
+            console.log(`[SEO] Generated for ${sourceLocale}: title=${sourceSeo.metaTitle.length}chars, desc=${sourceSeo.metaDescription.length}chars`);
+        } catch {
+            console.error('[SEO] Failed to parse source SEO');
+        }
 
         // Translate to each target locale
         for (const locale of targetLocales) {
@@ -42,25 +79,43 @@ export async function POST(req: Request) {
                 en: 'English',
                 fr: 'French',
                 pt: 'Portuguese',
+                es: 'Spanish',
             }[locale];
 
-            // Prompt for title and excerpt
-            const metaPrompt = `Translate from Spanish to ${localeName}. Return ONLY valid JSON, no markdown.
+            // Combined prompt for translation + SEO
+            const combinedPrompt = `Translate this blog post metadata from Spanish to ${localeName} AND generate SEO-optimized versions.
 
-{"title": "${title}", "excerpt": "${excerpt || ''}"}`;
+Return valid JSON only, no markdown:
+{
+  "title": "translated title",
+  "excerpt": "translated excerpt", 
+  "metaTitle": "SEO title 50-60 chars, compelling",
+  "metaDescription": "SEO description 100-150 chars"
+}
 
-            console.log(`[Translation] Translating metadata to ${locale}...`);
+Original:
+- Title: ${title}
+- Excerpt: ${excerpt || 'No excerpt'}`;
+
+            console.log(`[Translation] Processing ${locale}...`);
 
             const { text: metaText } = await generateText({
                 model: openrouter(model),
-                prompt: metaPrompt,
+                prompt: combinedPrompt,
             });
 
             try {
                 const cleanedMeta = cleanJsonResponse(metaText);
-                translations[locale] = JSON.parse(cleanedMeta);
+                const parsed = JSON.parse(cleanedMeta);
+                translations[locale] = {
+                    title: parsed.title,
+                    excerpt: parsed.excerpt,
+                    seoTitle: parsed.metaTitle,
+                    seoDescription: parsed.metaDescription,
+                };
+                console.log(`[Translation] Parsed ${locale}: SEO title=${parsed.metaTitle?.length}chars`);
             } catch {
-                console.error(`[Translation] Failed to parse metadata for ${locale}`);
+                console.error(`[Translation] Failed to parse for ${locale}`);
                 translations[locale] = { title, excerpt: excerpt || '' };
             }
 
@@ -68,15 +123,10 @@ export async function POST(req: Request) {
             if (content && typeof content === 'object') {
                 console.log(`[Translation] Translating content to ${locale}...`);
 
-                const contentPrompt = `You are a JSON translator. Translate this Lexical editor JSON from Spanish to ${localeName}.
+                const contentPrompt = `Translate this Lexical editor JSON from Spanish to ${localeName}.
+Only translate "text" field values. Keep ALL other fields exactly the same.
+Return valid JSON only, no markdown.
 
-RULES:
-1. Only translate the "text" field values
-2. Keep ALL other fields exactly the same (type, format, mode, style, version, etc.)
-3. Return valid JSON only, no markdown code blocks
-4. Preserve the exact structure
-
-JSON to translate:
 ${JSON.stringify(content)}`;
 
                 const { text: contentText } = await generateText({
@@ -85,20 +135,33 @@ ${JSON.stringify(content)}`;
                 });
 
                 try {
-                    const cleanedContent = cleanJsonResponse(contentText);
-                    translations[locale].content = JSON.parse(cleanedContent);
-                    console.log(`[Translation] Content translated for ${locale}`);
-                } catch (e) {
-                    console.error(`[Translation] Failed to parse content for ${locale}:`, e);
-                    // Keep original content if translation fails
+                    translations[locale].content = JSON.parse(cleanJsonResponse(contentText));
+                } catch {
                     translations[locale].content = content;
                 }
             }
         }
 
-        // Update post with translations in database
+        // Update database
         const payload = await getPayloadClient();
 
+        // Update source locale with SEO
+        try {
+            await payload.update({
+                collection: 'blog_posts',
+                id: postId,
+                locale: sourceLocale as 'es' | 'en' | 'fr' | 'pt',
+                data: {
+                    'meta.title': sourceSeo.metaTitle,
+                    'meta.description': sourceSeo.metaDescription,
+                },
+            });
+            console.log(`[SEO] Updated source locale ${sourceLocale}`);
+        } catch (e) {
+            console.error(`[SEO] Failed to update source:`, e);
+        }
+
+        // Update translated locales
         for (const [locale, translation] of Object.entries(translations)) {
             try {
                 const updateData: Record<string, unknown> = {
@@ -110,7 +173,12 @@ ${JSON.stringify(content)}`;
                     updateData.content = translation.content;
                 }
 
-                console.log(`[Translation] Updating post ${postId} locale ${locale}...`);
+                if (translation.seoTitle) {
+                    updateData['meta.title'] = translation.seoTitle;
+                }
+                if (translation.seoDescription) {
+                    updateData['meta.description'] = translation.seoDescription;
+                }
 
                 await payload.update({
                     collection: 'blog_posts',
@@ -119,17 +187,13 @@ ${JSON.stringify(content)}`;
                     data: updateData,
                 });
 
-                console.log(`[Translation] Updated post ${postId} for locale ${locale}`);
+                console.log(`[Translation] Updated ${locale}`);
             } catch (updateError) {
                 console.error(`[Translation] Failed to update ${locale}:`, updateError);
             }
         }
 
-        return NextResponse.json({
-            success: true,
-            postId,
-            translations,
-        });
+        return NextResponse.json({ success: true, postId });
     } catch (error) {
         console.error('[Translation] Error:', error);
         return NextResponse.json({ error: 'Translation failed' }, { status: 500 });
