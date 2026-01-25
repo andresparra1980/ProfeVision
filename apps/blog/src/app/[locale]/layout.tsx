@@ -1,3 +1,4 @@
+import '@profevision/styles/globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -39,6 +40,7 @@ export async function generateMetadata({
             template: `%s | ${titles[locale] || titles.es}`,
         },
         description: descriptions[locale] || descriptions.es,
+        metadataBase: new URL(BASE_URL),
         openGraph: {
             type: 'website',
             locale,
@@ -69,15 +71,17 @@ export default async function LocaleLayout({
     const messages = await getMessages();
 
     return (
-        <div
-            lang={locale}
-            className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
-        >
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                <NextIntlClientProvider locale={locale} messages={messages}>
-                    {children}
-                </NextIntlClientProvider>
-            </ThemeProvider>
-        </div>
+        <html lang={locale} suppressHydrationWarning>
+            <body
+                className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+                suppressHydrationWarning
+            >
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                    <NextIntlClientProvider locale={locale} messages={messages}>
+                        {children}
+                    </NextIntlClientProvider>
+                </ThemeProvider>
+            </body>
+        </html>
     );
 }

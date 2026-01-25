@@ -10,18 +10,14 @@ export const metadata: Metadata = {
     metadataBase: new URL('https://blog.profevision.com'),
 };
 
-// Root layout - provides minimal html/body shell
-// Next.js requires these tags in the root layout
+// Root layout - minimal shell that just passes children
+// Each route group provides its own html/body:
+// - (payload) admin routes use Payload's RootLayout
+// - [locale] frontend routes use their own layout with html/body
 export default function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    return (
-        <html lang="es" suppressHydrationWarning>
-            <body suppressHydrationWarning>
-                {children}
-            </body>
-        </html>
-    );
+    return children;
 }

@@ -32,7 +32,7 @@ export const Posts: CollectionConfig = {
                 position: 'sidebar',
                 description: 'Slug en inglés para URLs. Usa el botón para generar con IA.',
                 components: {
-                    Field: '/components/admin/SlugField#SlugField',
+                    Field: '@/components/admin/SlugField#SlugField',
                 },
             },
         },
