@@ -2,6 +2,7 @@ import type { CollectionAfterChangeHook } from 'payload';
 
 export const translatePostHook: CollectionAfterChangeHook = async ({
     doc,
+    previousDoc,
     operation,
     req,
 }) => {
@@ -14,6 +15,19 @@ export const translatePostHook: CollectionAfterChangeHook = async ({
 
     // Skip if no title (required field)
     if (!doc.title) return doc;
+
+    // On update, check if only slug changed (don't retranslate)
+    if (operation === 'update' && previousDoc) {
+        const titleChanged = doc.title !== previousDoc.title;
+        const excerptChanged = doc.excerpt !== previousDoc.excerpt;
+        const contentChanged = JSON.stringify(doc.content) !== JSON.stringify(previousDoc.content);
+
+        // If only slug or other non-content fields changed, skip translation
+        if (!titleChanged && !excerptChanged && !contentChanged) {
+            console.log('[Translation] Skipping - no content changes detected');
+            return doc;
+        }
+    }
 
     const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3002';
 
@@ -29,7 +43,7 @@ export const translatePostHook: CollectionAfterChangeHook = async ({
                     postId: doc.id,
                     title: doc.title,
                     excerpt: doc.excerpt || '',
-                    content: doc.content || null,  // Include Lexical content
+                    content: doc.content || null,
                     sourceLocale: 'es',
                 }),
             });

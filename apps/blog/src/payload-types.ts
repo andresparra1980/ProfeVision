@@ -132,6 +132,9 @@ export interface BlogAuthorAuthOperations {
 export interface BlogPost {
   id: number;
   title: string;
+  /**
+   * Slug en inglés para URLs. Usa el botón para generar con IA.
+   */
   slug: string;
   content?: {
     root: {
@@ -158,7 +161,7 @@ export interface BlogPost {
   publishedAt?: string | null;
   status?: ('draft' | 'published') | null;
   /**
-   * Traducir automáticamente a otros idiomas al guardar
+   * Traducir automáticamente al guardar contenido
    */
   autoTranslate?: boolean | null;
   meta?: {

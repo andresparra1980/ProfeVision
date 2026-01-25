@@ -9,8 +9,6 @@ export const Posts: CollectionConfig = {
     },
     access: {
         read: ({ req }) => {
-            // Published: todos pueden leer
-            // Draft: solo usuarios autenticados
             if (req.user) return true;
             return { status: { equals: 'published' } };
         },
@@ -32,6 +30,10 @@ export const Posts: CollectionConfig = {
             unique: true,
             admin: {
                 position: 'sidebar',
+                description: 'Slug en inglés para URLs. Usa el botón para generar con IA.',
+                components: {
+                    Field: '/components/admin/SlugField#SlugField',
+                },
             },
         },
         {
@@ -90,7 +92,7 @@ export const Posts: CollectionConfig = {
             defaultValue: true,
             admin: {
                 position: 'sidebar',
-                description: 'Traducir automáticamente a otros idiomas al guardar',
+                description: 'Traducir automáticamente al guardar contenido',
             },
         },
     ],
