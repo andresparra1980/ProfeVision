@@ -1,0 +1,43 @@
+{
+    "blog": {
+        "title": "ProfeVision Blog",
+        "subtitle": "Articles and resources on education, technology, and AI-powered assessment",
+        "backToHome": "Back to ProfeVision",
+        "readMore": "Read more",
+        "publishedAt": "Published on",
+        "categories": "Categories",
+        "allPosts": "All articles",
+        "notFound": "Article not found"
+    },
+    "common": {
+        "home": "Home",
+        "categories": "Categories",
+        "authors": "Authors",
+        "mainSite": "Visit ProfeVision",
+        "navigation": "Navigation",
+        "footerDescription": "Articles and resources on education, technology, and AI-powered assessment.",
+        "copyright": "All rights reserved.",
+        "cookies": "Cookies",
+        "terms": "Terms",
+        "privacy": "Privacy",
+        "language": "Language"
+    },
+    "header": {
+        "home": "Home",
+        "blog": "Blog",
+        "features": "Features",
+        "pricing": "Pricing",
+        "about": "About"
+    },
+    "footer": {
+        "copyright": "© 2026 ProfeVision. All rights reserved.",
+        "privacy": "Privacy",
+        "terms": "Terms"
+    },
+    "ui": {
+        "language": "Language",
+        "theme": "Theme",
+        "lightMode": "Light mode",
+        "darkMode": "Dark mode"
+    }
+}

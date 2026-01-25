@@ -1,3 +1,7 @@
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     experimental: {
@@ -7,7 +11,7 @@ const nextConfig = {
     images: {
         remotePatterns: [
             {
-                protocol: 'https',
+                protocol: 'https' as const,
                 hostname: 'assets.profevision.com',
                 pathname: '/**',
             },
@@ -17,4 +21,5 @@ const nextConfig = {
     transpilePackages: ['@profevision/styles', '@profevision/ui'],
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
+
