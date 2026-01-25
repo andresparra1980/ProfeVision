@@ -2,6 +2,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { ibmPlexSans, ibmPlexMono } from '@profevision/styles/fonts';
+import { ThemeProvider } from 'next-themes';
 import type { Metadata } from 'next';
 
 export function generateStaticParams() {
@@ -67,8 +69,15 @@ export default async function LocaleLayout({
     const messages = await getMessages();
 
     return (
-        <NextIntlClientProvider locale={locale} messages={messages}>
-            {children}
-        </NextIntlClientProvider>
+        <div
+            lang={locale}
+            className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+        >
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                <NextIntlClientProvider locale={locale} messages={messages}>
+                    {children}
+                </NextIntlClientProvider>
+            </ThemeProvider>
+        </div>
     );
 }

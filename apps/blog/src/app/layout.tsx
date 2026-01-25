@@ -1,7 +1,5 @@
 import '@profevision/styles/globals.css';
 import type { Metadata } from 'next';
-import { ibmPlexSans, ibmPlexMono } from '@profevision/styles/fonts';
-import { ThemeProvider } from 'next-themes';
 
 export const metadata: Metadata = {
     title: {
@@ -12,6 +10,8 @@ export const metadata: Metadata = {
     metadataBase: new URL('https://blog.profevision.com'),
 };
 
+// Root layout - provides minimal html/body shell
+// Next.js requires these tags in the root layout
 export default function RootLayout({
     children,
 }: {
@@ -19,12 +19,8 @@ export default function RootLayout({
 }) {
     return (
         <html lang="es" suppressHydrationWarning>
-            <body
-                className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
-            >
-                <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                    {children}
-                </ThemeProvider>
+            <body suppressHydrationWarning>
+                {children}
             </body>
         </html>
     );

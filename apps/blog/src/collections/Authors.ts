@@ -19,15 +19,6 @@ export const Authors: CollectionConfig = {
             required: true,
         },
         {
-            name: 'supabaseUserId',
-            type: 'text',
-            unique: true,
-            admin: {
-                description: 'ID del usuario en Supabase (profesores.id)',
-                position: 'sidebar',
-            },
-        },
-        {
             name: 'bio',
             type: 'textarea',
             localized: true,

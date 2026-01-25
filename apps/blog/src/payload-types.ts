@@ -206,10 +206,6 @@ export interface BlogCategory {
 export interface BlogAuthor {
   id: number;
   name: string;
-  /**
-   * ID del usuario en Supabase (profesores.id)
-   */
-  supabaseUserId?: string | null;
   bio?: string | null;
   avatar?: (number | null) | BlogMedia;
   role?: ('editor' | 'admin') | null;
@@ -353,7 +349,6 @@ export interface BlogCategoriesSelect<T extends boolean = true> {
  */
 export interface BlogAuthorsSelect<T extends boolean = true> {
   name?: T;
-  supabaseUserId?: T;
   bio?: T;
   avatar?: T;
   role?: T;
