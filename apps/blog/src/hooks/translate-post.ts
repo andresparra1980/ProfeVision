@@ -17,8 +17,7 @@ export const translatePostHook: CollectionAfterChangeHook = async ({
 
     const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3002';
 
-    // Fire and forget - don't await, run in background
-    // This prevents blocking the save operation and avoids lock conflicts
+    // Fire and forget - run in background
     setImmediate(async () => {
         try {
             console.log(`[Translation] Starting background translation for post ${doc.id}`);
@@ -30,7 +29,7 @@ export const translatePostHook: CollectionAfterChangeHook = async ({
                     postId: doc.id,
                     title: doc.title,
                     excerpt: doc.excerpt || '',
-                    content: '', // Skip content translation for now
+                    content: doc.content || null,  // Include Lexical content
                     sourceLocale: 'es',
                 }),
             });
