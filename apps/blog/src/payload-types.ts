@@ -157,6 +157,10 @@ export interface BlogPost {
   author?: (number | null) | BlogAuthor;
   publishedAt?: string | null;
   status?: ('draft' | 'published') | null;
+  /**
+   * Traducir automáticamente a otros idiomas al guardar
+   */
+  autoTranslate?: boolean | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -323,6 +327,7 @@ export interface BlogPostsSelect<T extends boolean = true> {
   author?: T;
   publishedAt?: T;
   status?: T;
+  autoTranslate?: T;
   meta?:
     | T
     | {

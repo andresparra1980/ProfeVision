@@ -1,4 +1,5 @@
 import { CollectionConfig } from 'payload';
+import { translatePostHook } from '../hooks/translate-post';
 
 export const Posts: CollectionConfig = {
     slug: 'blog_posts',
@@ -83,16 +84,17 @@ export const Posts: CollectionConfig = {
                 position: 'sidebar',
             },
         },
+        {
+            name: 'autoTranslate',
+            type: 'checkbox',
+            defaultValue: true,
+            admin: {
+                position: 'sidebar',
+                description: 'Traducir automáticamente a otros idiomas al guardar',
+            },
+        },
     ],
     hooks: {
-        afterChange: [
-            async ({ doc, operation, req }) => {
-                // Trigger AI translation on create (only for Spanish locale)
-                if (operation === 'create' && req.locale === 'es') {
-                    // Translation will be triggered via API route
-                    console.log('Post created, translation pending:', doc.id);
-                }
-            },
-        ],
+        afterChange: [translatePostHook],
     },
 };

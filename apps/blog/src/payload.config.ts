@@ -50,6 +50,9 @@ export default buildConfig({
             collections: {
                 blog_media: {
                     prefix: 'blog/',
+                    generateFileURL: ({ filename, prefix }) => {
+                        return `${process.env.R2_PUBLIC_URL}/${prefix}${filename}`;
+                    },
                 },
             },
             bucket: process.env.R2_BUCKET_NAME || '',
@@ -61,7 +64,6 @@ export default buildConfig({
                     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
                 },
             },
-            // Public URL will be constructed as: R2_PUBLIC_URL + /blog/filename
             acl: 'public-read',
         }),
 
