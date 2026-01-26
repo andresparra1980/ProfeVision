@@ -243,6 +243,7 @@
   "pricing": {
     "hero": {
       "badge": "Lanzamiento Especial",
+      "seoTitle": "Planes de Precios de ProfeVision",
       "title": "¡Gratis Durante el",
       "titleHighlight": "Lanzamiento",
       "description": "Aprovecha el acceso gratuito a ProfeVisión mientras estamos en fase de lanzamiento. Todas las funciones disponibles sin costo.",
@@ -302,12 +303,12 @@
   },
   "howItWorks": {
     "hero": {
-      "badge": "¿Cómo Funciona?",
-      "title": "Crea y califica exámenes en",
-      "titleHighlight": "segundos",
-      "titleEnd": "con ProfeVision",
+      "badge": "¡Nuevo! Calificación con IA (OMR)",
+      "title": "Crea y Califica",
+      "titleHighlight": "Exámenes de papel",
+      "titleEnd": "con tu celular",
       "subtitle": "La forma más rápida y moderna de evaluar a tus estudiantes",
-      "description": "¿Te gustaría crear exámenes en minutos y calificarlos en segundos? Con ProfeVision puedes hacerlo. Nuestra plataforma está diseñada para profesores y escuelas que buscan ahorrar tiempo y obtener resultados precisos. Crea exámenes con inteligencia artificial, sube tus pruebas en PDF y califica automáticamente escaneando las hojas de respuesta impresas con tu celular. Además, organiza todo por instituciones, materias y clases, y accede a un dashboard con métricas detalladas de los resultados.",
+      "description": "Transforma tu teléfono en un potente escáner de calificación. Diseña exámenes, escanea hojas de respuesta y obtén resultados instantáneos. Nuestra plataforma está diseñada para profesores y escuelas que buscan ahorrar tiempo y obtener resultados precisos. Crea exámenes con inteligencia artificial, sube tus pruebas en PDF y califica automáticamente escaneando las hojas de respuesta impresas con tu celular. Además, organiza todo por instituciones, materias y clases, y accede a un dashboard con métricas detalladas de los resultados.",
       "cta": "Empieza ahora gratis"
     },
     "features": {
@@ -546,9 +547,9 @@
   "exams": {
     "hero": {
       "badge": "Evaluación Pedagógica con IA",
-      "title": "Más que generar preguntas,",
-      "titleHighlight": "diseñamos evaluación",
-      "titleEnd": "",
+      "title": "Crea exámenes completos",
+      "titleHighlight": "rápidamente",
+      "titleEnd": "con Inteligencia Artificial",
       "description": "No es un simple chat de IA. Es un agente pedagógico que orquesta múltiples modelos de lenguaje para entregarte una solución educativa robusta y metodológicamente válida.",
       "cta": "Comenzar a Diseñar Gratis",
       "animation": {
@@ -559,7 +560,7 @@
       }
     },
     "spotlight": {
-      "title": "El Asistente que piensa como un Diseñador Instruccional",
+      "title": "Con nuestro agente de IA puedes crear exámenes efectivos para la evaluación de tus estudiantes",
       "planning": {
         "title": "Planificación (Diseño Inverso)",
         "description": "Primero el objetivo, luego la pregunta. Nuestro sistema crea un mapa de especificaciones antes de redactar, asegurando que cubras todo el temario equilibradamente.",
@@ -577,6 +578,7 @@
       }
     },
     "ecosystem": {
+      "mainTitle": "Puedes importar exámenes creados manualmente y generar exámenes similares automáticamente",
       "import": {
         "title": "Importación Inteligente",
         "description": "Utilizamos motores de OCR e IA para digitalizar tus archivos PDF o Word existentes al instante.",
@@ -589,6 +591,7 @@
       }
     },
     "socialProof": {
+      "title": "Testimonios de algunos de nuestros profesores",
       "nursing": {
         "quote": "En Farmacología, un error de dosificación es fatal. ProfeVision me permite generar casos clínicos donde los estudiantes deben justificar la dilución. El feedback automático les ayuda a entender la farmacocinética real.",
         "author": "Prof. Martha G., Facultad de Enfermería"
@@ -622,8 +625,19 @@
       "email": "Email:",
       "liveChat": "Chat en vivo:",
       "liveChatAvailable": "Disponible en la plataforma",
-      "knowledge": "Base de conocimientos:",
-      "knowledgeBase": "FAQ y guías"
+      "knowledge": "Documentación:",
+      "knowledgeBase": "Ir a la página de documentación"
+    },
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "q1": "¿Como puedo restablecer mi contraseña?",
+      "a1": "Puedes restablecer tu contraseña haciendo clic en 'Olvidé mi contraseña' en la pantalla de inicio de sesión.",
+      "q2": "¿Dónde puedo encontrar la documentación?",
+      "a2": "Puedes encontrar toda la documentación oficial y guías de uso en https://docs.profevision.com",
+      "q3": "¿Hay una prueba gratuita?",
+      "a3": "Sí, ofrecemos un nivel gratuito con escaneos y créditos de IA limitados por mes.",
+      "q4": "¿Cómo exporto las calificaciones?",
+      "a4": "Puedes exportar las calificaciones a CSV o Excel desde la sección de Reportes en tu panel."
     }
   },
   "studentsManagement": {

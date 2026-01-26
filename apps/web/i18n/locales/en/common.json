@@ -103,40 +103,14 @@
     },
     "copyright": "All rights reserved."
   },
-  "howItWorks": {
-    "title": "How It Works",
-    "description": "Discover how ProfeVision simplifies exam creation, grading, and management in just a few steps",
-    "stepsTitle": "4 Simple Steps to Transform Your Teaching",
-    "stepsDescription": "Follow our intuitive process to create, apply, and grade exams efficiently",
-    "steps": {
-      "step1": {
-        "title": "Create Your Exams",
-        "description": "Use our AI-powered tools to generate questions or create them manually. Choose from multiple formats and customize according to your needs."
-      },
-      "step2": {
-        "title": "Apply to Students",
-        "description": "Print personalized formats for each student with unique QR codes. Assign digital exams or distribute physical answer sheets."
-      },
-      "step3": {
-        "title": "Scan and Grade",
-        "description": "Use your smartphone to scan answer sheets. Our OMR technology automatically processes responses and calculates grades instantly."
-      },
-      "step4": {
-        "title": "Analyze Results",
-        "description": "Access detailed reports on student performance, identify improvement areas, and make data-driven educational decisions."
-      }
-    },
-    "ctaTitle": "Ready to revolutionize your teaching?",
-    "ctaDescription": "Join thousands of educators who are already saving time and improving their students' results.",
-    "getStarted": "Get Started",
-    "learnMore": "Learn More"
-  },
   "homepage": {
     "hero": {
-      "badge": "New! AI-Powered Grading (OMR)",
-      "title": "The Best App",
-      "titleHighlight": "for Scanning and Grading Paper Exams",
-      "description": "At ProfeVision, we understand the challenges of modern education. We've developed an all-in-one solution that automates exam creation, grading, and management with AI, freeing up your valuable time to focus on what really matters: teaching and empowering your students' learning.",
+      "badge": "Computer Vision Grading",
+      "title": "Create and Grade",
+      "titleHighlight": "Paper Exams",
+      "titleEnd": "with your phone",
+      "subtitle": "The fastest and most modern way to assess your students",
+      "description": "Transform your phone into a powerful grading scanner. Design exams, scan answer sheets, and get instant results.",
       "startFree": "Start Free!",
       "learnMore": "Discover how ProfeVision works",
       "registerTitle": "Sign up for free with ProfeVision - Create account at no cost",
@@ -271,6 +245,7 @@
   "pricing": {
     "hero": {
       "badge": "Special Launch",
+      "seoTitle": "ProfeVision Pricing Plans",
       "title": "Free During the",
       "titleHighlight": "Launch",
       "description": "Take advantage of free access to ProfeVision while we're in the launch phase. All features available at no cost.",
@@ -574,9 +549,9 @@
   "exams": {
     "hero": {
       "badge": "Pedagogical Assessment with AI",
-      "title": "More than generating questions,",
-      "titleHighlight": "we design assessment",
-      "titleEnd": "",
+      "title": "Create complete exams",
+      "titleHighlight": "rapidly",
+      "titleEnd": "with Artificial Intelligence",
       "description": "Not a simple AI chat. It is a pedagogical agent that orchestrates multiple language models to deliver a robust and methodologically valid educational solution.",
       "cta": "Start Designing for Free",
       "animation": {
@@ -587,7 +562,7 @@
       }
     },
     "spotlight": {
-      "title": "The Assistant that thinks like an Instructional Designer",
+      "title": "With our AI agent you can create effective exams for your students' evaluation",
       "planning": {
         "title": "Planning (Backward Design)",
         "description": "First the objective, then the question. Our system creates a specification map before writing, ensuring you cover the entire syllabus consistently.",
@@ -605,6 +580,7 @@
       }
     },
     "ecosystem": {
+      "title": "You can import manually created exams and generate similar exams automatically",
       "import": {
         "title": "Intelligent Import",
         "description": "We use OCR and AI engines to digitize your existing PDF or Word files instantly.",
@@ -617,6 +593,7 @@
       }
     },
     "socialProof": {
+      "title": "Testimonials from some of our teachers",
       "nursing": {
         "quote": "In Pharmacology, a dosage error is fatal. ProfeVision allows me to generate clinical cases where students must justify the dilution. The automatic feedback helps them understand real pharmacokinetics.",
         "author": "Prof. Martha G., Nursing Faculty"
@@ -650,8 +627,19 @@
       "email": "Email:",
       "liveChat": "Live chat:",
       "liveChatAvailable": "Available on the platform",
-      "knowledge": "Knowledge base:",
-      "knowledgeBase": "FAQ and guides"
+      "knowledge": "Documentation:",
+      "knowledgeBase": "Go to documentation page"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "How can I reset my password?",
+      "a1": "You can reset your password by clicking on 'Forgot Password' at the login screen.",
+      "q2": "Where can I find the documentation?",
+      "a2": "You can find all official documentation and user guides at https://docs.profevision.com",
+      "q3": "Is there a free trial?",
+      "a3": "Yes, we offer a free tier with limited scans and AI credits per month.",
+      "q4": "How do I export grades?",
+      "a4": "You can export grades to CSV or Excel from the Reports section in your dashboard."
     }
   },
   "studentsManagement": {

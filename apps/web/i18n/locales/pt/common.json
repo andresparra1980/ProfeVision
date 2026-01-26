@@ -245,6 +245,7 @@
   "pricing": {
     "hero": {
       "badge": "Lançamento Especial",
+      "seoTitle": "Planos de Preços ProfeVision",
       "title": "Grátis Durante o",
       "titleHighlight": "Lançamento",
       "description": "Aproveite o acesso gratuito ao ProfeVisión enquanto estamos na fase de lançamento. Todas as funções disponíveis sem custo.",
@@ -304,12 +305,12 @@
   },
   "howItWorks": {
     "hero": {
-      "badge": "Como Funciona?",
-      "title": "Crie e corrija exames em",
-      "titleHighlight": "segundos",
-      "titleEnd": "com ProfeVision",
+      "badge": "Correção com Visão Computacional",
+      "title": "Crie e Corrija",
+      "titleHighlight": "Provas em Papel",
+      "titleEnd": "com seu celular",
       "subtitle": "A forma mais rápida e moderna de avaliar seus alunos",
-      "description": "Você gostaria de criar exames em minutos e corrigi-los em segundos? Com o ProfeVision você pode. Nossa plataforma foi projetada para professores e escolas que buscam economizar tempo e obter resultados precisos. Crie exames com inteligência artificial, envie suas provas em PDF e corrija automaticamente digitalizando as folhas de resposta impressas com seu celular. Além disso, organize tudo por instituições, disciplinas e turmas, e acesse um dashboard com métricas detalhadas dos resultados.",
+      "description": "Transforme seu telefone em um poderoso scanner de correção. Crie provas, escaneie folhas de resposta e obtenha resultados instantâneos.",
       "cta": "Comece agora gratuitamente"
     },
     "features": {
@@ -548,20 +549,20 @@
   "exams": {
     "hero": {
       "badge": "Avaliação Pedagógica com IA",
-      "title": "Mais que gerar perguntas,",
-      "titleHighlight": "projetamos avaliação",
-      "titleEnd": "",
-      "description": "Não é um simples chat de IA. É um agente pedagógico que orquestra múltiplos modelos de linguagem para entregar uma solução educativa robusta e metodologicamente válida.",
+      "title": "Crie exames completos",
+      "titleHighlight": "rapidamente",
+      "titleEnd": "com Inteligência Artificial",
+      "description": "Não é um simples chat de IA. É um agente pedagógico que orquestra múltiplos modelos de linguagem para entregar a você uma solução educacional robusta e metodologicamente válida.",
       "cta": "Começar a Projetar Grátis",
       "animation": {
         "objective": "Objetivo",
         "planning": "Planejamento",
         "exam": "Exame",
-        "result": "Avaliação Efetiva"
+        "result": "Avaliação Eficaz"
       }
     },
     "spotlight": {
-      "title": "O Assistente que pensa como um Designer Instrucional",
+      "title": "Com nosso agente de IA você pode criar exames eficazes para a avaliação de seus alunos",
       "planning": {
         "title": "Planejamento (Design Reverso)",
         "description": "Primeiro o objetivo, depois a pergunta. Nosso sistema cria um mapa de especificações antes de redigir, garantindo que você cubra todo o conteúdo de forma equilibrada.",
@@ -569,16 +570,17 @@
       },
       "depth": {
         "title": "Profundidade (Taxonomia de Bloom)",
-        "description": "Escape da simples memorização. Geramos itens que avaliam compreensão, aplicação e análise. Você decide o nível cognitivo.",
+        "description": "Fuja da memória simples. Geramos itens que avaliam compreensão, aplicação e análise. Você decide o nível cognitivo.",
         "tag": "Andaime Cognitivo"
       },
       "learning": {
         "title": "Aprendizagem (Feedback Formativo)",
-        "description": "Cada resposta inclui o 'porquê'. Transformamos o erro em uma oportunidade de aprendizagem com justificativas pedagógicas automáticas.",
+        "description": "Cada resposta inclui o 'porquê'. Transformamos o erro em uma oportunidade de aprendizado com justificativas pedagógicas automáticas.",
         "tag": "Metacognição"
       }
     },
     "ecosystem": {
+      "title": "Você pode importar exames criados manualmente e gerar exames similares automaticamente",
       "import": {
         "title": "Importação Inteligente",
         "description": "Utilizamos motores de OCR e IA para digitalizar seus arquivos PDF ou Word existentes instantaneamente.",
@@ -591,6 +593,7 @@
       }
     },
     "socialProof": {
+      "title": "Depoimentos de alguns de nossos professores",
       "nursing": {
         "quote": "Em Farmacologia, um erro de dosagem é fatal. ProfeVision me permite gerar casos clínicos onde os estudantes devem justificar a diluição. O feedback automático os ajuda a entender a farmacocinética real.",
         "author": "Prof. Martha G., Faculdade de Enfermagem"
@@ -624,8 +627,19 @@
       "email": "E-mail:",
       "liveChat": "Chat ao vivo:",
       "liveChatAvailable": "Disponível na plataforma",
-      "knowledge": "Base de conhecimento:",
-      "knowledgeBase": "FAQ e guias"
+      "knowledge": "Documentação:",
+      "knowledgeBase": "Ir para a página de documentação"
+    },
+    "faq": {
+      "title": "Perguntas Frequentes",
+      "q1": "Como posso redefinir minha senha?",
+      "a1": "Você pode redefinir sua senha clicando em 'Esqueci a senha' na tela de login.",
+      "q2": "Onde posso encontrar a documentação?",
+      "a2": "Você pode encontrar toda a documentação oficial e guias de uso em https://docs.profevision.com",
+      "q3": "Existe um teste gratuito?",
+      "a3": "Sim, oferecemos um nível gratuito com escaneamentos e créditos de IA limitados por mês.",
+      "q4": "Como exporto notas?",
+      "a4": "Você pode exportar notas para CSV ou Excel na seção de Relatórios do seu painel."
     }
   },
   "studentsManagement": {

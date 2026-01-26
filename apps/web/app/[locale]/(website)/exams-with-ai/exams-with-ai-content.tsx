@@ -82,8 +82,6 @@ export function ExamsWithAIContent() {
               title={t('exams.spotlight.depth.title')}
               description={t('exams.spotlight.depth.description', { defaultValue: "Aligned with Bloom's Taxonomy for deep learning." })}
               tag={t('exams.spotlight.depth.tag')}
-              externalLink="https://cft.vanderbilt.edu/guides-sub-pages/blooms-taxonomy/"
-              linkText="See Vanderbilt Guide"
             />
 
             {/* Learning */}
@@ -101,6 +99,11 @@ export function ExamsWithAIContent() {
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#ffd60a]/5 to-[#0b890f]/5 -z-10" />
         <div className="container px-4 md:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl max-w-4xl mx-auto">
+              {t('exams.ecosystem.mainTitle')}
+            </h2>
+          </div>
           <div className="grid gap-12 md:grid-cols-2">
             {/* Import */}
             <div className="flex flex-col space-y-4 rounded-2xl border p-8 bg-card shadow-sm hover:shadow-md transition-shadow">
@@ -140,6 +143,11 @@ export function ExamsWithAIContent() {
       {/* Social Proof */}
       <section className="py-20 bg-muted/50">
         <div className="container px-4 md:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              {t('exams.socialProof.title')}
+            </h2>
+          </div>
           <div className="grid gap-8 md:grid-cols-3">
             <TestimonialCard
               quote={t('exams.socialProof.nursing.quote')}

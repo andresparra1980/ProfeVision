@@ -39,7 +39,7 @@ export function HomeContent() {
                   {t('homepage.hero.badge')}
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                  {t('homepage.hero.title')} <span className="text-primary">{t('homepage.hero.titleHighlight')}</span>
+                  {t('homepage.hero.title')} <span className="text-primary">{t('homepage.hero.titleHighlight')}</span> {t('homepage.hero.titleEnd')}
                 </h1>
                 <p className="max-w-[600px] text-foreground/80 md:text-xl">
                   {t('homepage.hero.description')}
@@ -543,7 +543,7 @@ export function HomeContent() {
             </div>
           </div>
         </section>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 } 
