@@ -4,9 +4,10 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { AuthProvider } from '@/components/shared/auth-provider';
 import { ClientLayout } from '@/components/shared/client-layout';
+
+import { OrganizationSchema, WebSiteSchema } from '@/components/seo/json-ld';
 import { CookieBanner } from '@/components/shared/cookie-banner';
 import { GoogleTagManager } from '@next/third-parties/google';
-import Script from 'next/script';
 import type { Metadata } from 'next';
 
 export function generateStaticParams() {
@@ -134,39 +135,8 @@ export default async function LocaleLayout({
   return (
     <>
       <GoogleTagManager gtmId="GTM-5SFVLZMG" />
-      {/* Schema.org structured data */}
-      <Script
-        id="structured-data"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            "name": "ProfeVision",
-            "description": (metadataByLocale[locale] || metadataByLocale.en).description,
-            "url": `${BASE_URL}/${locale}`,
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "Web, iOS, Android",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD",
-              "priceValidUntil": "2027-12-31"
-            },
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "4.8",
-              "ratingCount": "1000"
-            },
-            "author": {
-              "@type": "Organization",
-              "name": "ProfeVision Team",
-              "url": BASE_URL
-            },
-            "inLanguage": locale
-          })
-        }}
-      />
+      <OrganizationSchema />
+      <WebSiteSchema />
       <NextIntlClientProvider locale={locale} messages={messages}>
         <AuthProvider>
           <ClientLayout>{children}</ClientLayout>

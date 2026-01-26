@@ -80,8 +80,10 @@ export function ExamsWithAIContent() {
             <SpotlightCard
               icon={<Layers className="h-10 w-10 text-primary" />}
               title={t('exams.spotlight.depth.title')}
-              description={t('exams.spotlight.depth.description')}
+              description={t('exams.spotlight.depth.description', { defaultValue: "Aligned with Bloom's Taxonomy for deep learning." })}
               tag={t('exams.spotlight.depth.tag')}
+              externalLink="https://cft.vanderbilt.edu/guides-sub-pages/blooms-taxonomy/"
+              linkText="See Vanderbilt Guide"
             />
 
             {/* Learning */}
@@ -170,10 +172,10 @@ export function ExamsWithAIContent() {
   );
 }
 
-function SpotlightCard({ icon, title, description, tag }: { icon: React.ReactNode, title: string, description: string, tag: string }) {
+function SpotlightCard({ icon, title, description, tag, externalLink, linkText }: { icon: React.ReactNode, title: string, description: string, tag: string, externalLink?: string, linkText?: string }) {
   return (
-    <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow h-full">
-      <CardContent className="p-8 flex flex-col items-center text-center space-y-4">
+    <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col">
+      <CardContent className="p-8 flex flex-col items-center text-center space-y-4 flex-grow">
         <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4 w-fit mx-auto">
           {icon}
         </div>
@@ -181,10 +183,15 @@ function SpotlightCard({ icon, title, description, tag }: { icon: React.ReactNod
         <p className="text-muted-foreground leading-relaxed">
           {description}
         </p>
-        <div className="pt-4">
+        <div className="pt-4 flex flex-col items-center gap-2 mt-auto">
           <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
             {tag}
           </div>
+          {externalLink && (
+            <a href={externalLink} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline mt-2">
+              {linkText || "Learn more"}
+            </a>
+          )}
         </div>
       </CardContent>
     </Card>

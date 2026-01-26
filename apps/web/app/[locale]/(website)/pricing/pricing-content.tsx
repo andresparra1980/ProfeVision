@@ -26,13 +26,16 @@ export function PricingContent() {
               <Zap className="h-3 w-3 mr-1" />
               {t("pricing.hero.badge", { defaultValue: "Precios de Lanzamiento" })}
             </Badge>
-            <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4">
+              {t("pricing.hero.seoTitle", { defaultValue: "ProfeVision Pricing Plans" })}
+            </h1>
+            <p className="text-xl font-medium text-foreground mb-2">
               {t("pricing.hero.title", { defaultValue: "Comienza gratis" })}{" "}
               <span className="text-primary">
                 {t("pricing.hero.titleHighlight", { defaultValue: "hoy mismo" })}
               </span>
               !
-            </h1>
+            </p>
             <p className="max-w-[800px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               {t("pricing.hero.description", {
                 defaultValue:

@@ -102,13 +102,13 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Prevent caching of HTML or anything else
+        // Cache public pages (HTML) - Allow caching for 1 hour, stale for 1 minute
         source:
-          '/((?!_next/static|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)).*)',
+          '/((?!_next/static|api/|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)).*)',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-store, must-revalidate',
+            value: 'public, max-age=3600, stale-while-revalidate=60',
           },
         ],
       },
