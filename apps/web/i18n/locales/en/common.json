@@ -449,9 +449,9 @@
   "paperExams": {
     "hero": {
       "badge": "Instant Grading",
-      "title": "Grade Exams Fast with",
-      "titleHighlight": "Answer Sheets",
-      "titleEnd": "from ProfeVision",
+      "title": "Grade paper exams",
+      "titleHighlight": "rapidly",
+      "titleEnd": "",
       "description": "Transform your students' assessment with cutting-edge technology.",
       "descriptionHighlight": "Grade exams in seconds",
       "descriptionEnd": "using only your smartphone or tablet.",

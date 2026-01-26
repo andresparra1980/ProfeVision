@@ -447,9 +447,9 @@
   "paperExams": {
     "hero": {
       "badge": "Calificación Instantánea",
-      "title": "Califica Exámenes Rápido con las",
-      "titleHighlight": "Hojas de Respuesta",
-      "titleEnd": "de ProfeVisión",
+      "title": "Califica exámenes de papel",
+      "titleHighlight": "rápidamente",
+      "titleEnd": "",
       "description": "Transforma la evaluación de tus estudiantes con tecnología de vanguardia.",
       "descriptionHighlight": "Califica exámenes en segundos",
       "descriptionEnd": "usando solo tu smartphone o tablet.",

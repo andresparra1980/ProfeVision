@@ -449,9 +449,9 @@
   "paperExams": {
     "hero": {
       "badge": "Correction Instantanée",
-      "title": "Corrigez vos Examens Rapidement avec les",
-      "titleHighlight": "Feuilles de Réponse",
-      "titleEnd": "de ProfeVisión",
+      "title": "Notez les examens papier",
+      "titleHighlight": "rapidement",
+      "titleEnd": "",
       "description": "Transformez l'évaluation de vos étudiants avec une technologie de pointe.",
       "descriptionHighlight": "Corrigez des examens en quelques secondes",
       "descriptionEnd": "en utilisant seulement votre smartphone ou tablette.",

@@ -3,6 +3,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -14,7 +15,11 @@ import {
   Quote,
   ScanText
 } from "lucide-react";
-import { WorkflowAnimation } from "./workflow-animation";
+
+const WorkflowAnimation = dynamic(() => import("./workflow-animation").then(mod => mod.WorkflowAnimation), {
+  ssr: false,
+  loading: () => <div className="w-full h-[400px] animate-pulse bg-muted rounded-xl" />
+});
 
 export function ExamsWithAIContent() {
   const t = useTranslations('common');

@@ -5,6 +5,9 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  // Enable compression for all assets
+  compress: true,
+
   // Disable strict mode in development for demo purposes
   reactStrictMode: false,
 
@@ -39,6 +42,7 @@ const nextConfig: NextConfig = {
 
   // Enable image optimization from external sources
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: "https",
