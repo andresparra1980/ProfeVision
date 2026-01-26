@@ -581,7 +581,7 @@
       }
     },
     "ecosystem": {
-      "title": "Vous pouvez importer des examens créés manuellement et générer des examens similaires automatiquement",
+      "mainTitle": "Vous pouvez importer des examens créés manuellement et générer des examens similaires automatiquement",
       "import": {
         "title": "Importation Intelligente",
         "description": "Nous utilisons des moteurs OCR et IA pour numériser vos fichiers PDF ou Word existants instantanément.",

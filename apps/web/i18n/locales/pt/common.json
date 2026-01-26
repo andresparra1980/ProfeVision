@@ -581,7 +581,7 @@
       }
     },
     "ecosystem": {
-      "title": "Você pode importar exames criados manualmente e gerar exames similares automaticamente",
+      "mainTitle": "Você pode importar exames criados manualmente e gerar exames similares automaticamente",
       "import": {
         "title": "Importação Inteligente",
         "description": "Utilizamos motores de OCR e IA para digitalizar seus arquivos PDF ou Word existentes instantaneamente.",

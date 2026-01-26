@@ -580,7 +580,7 @@
       }
     },
     "ecosystem": {
-      "title": "You can import manually created exams and generate similar exams automatically",
+      "mainTitle": "You can import manually created exams and generate similar exams automatically",
       "import": {
         "title": "Intelligent Import",
         "description": "We use OCR and AI engines to digitize your existing PDF or Word files instantly.",
