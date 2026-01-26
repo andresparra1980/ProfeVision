@@ -3,6 +3,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -14,7 +15,11 @@ import {
   Quote,
   ScanText
 } from "lucide-react";
-import { WorkflowAnimation } from "./workflow-animation";
+
+const WorkflowAnimation = dynamic(() => import("./workflow-animation").then(mod => mod.WorkflowAnimation), {
+  ssr: false,
+  loading: () => <div className="w-full h-[400px] animate-pulse bg-muted rounded-xl" />
+});
 
 export function ExamsWithAIContent() {
   const t = useTranslations('common');
@@ -80,7 +85,7 @@ export function ExamsWithAIContent() {
             <SpotlightCard
               icon={<Layers className="h-10 w-10 text-primary" />}
               title={t('exams.spotlight.depth.title')}
-              description={t('exams.spotlight.depth.description')}
+              description={t('exams.spotlight.depth.description', { defaultValue: "Aligned with Bloom's Taxonomy for deep learning." })}
               tag={t('exams.spotlight.depth.tag')}
             />
 
@@ -99,6 +104,11 @@ export function ExamsWithAIContent() {
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#ffd60a]/5 to-[#0b890f]/5 -z-10" />
         <div className="container px-4 md:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl max-w-4xl mx-auto">
+              {t('exams.ecosystem.mainTitle')}
+            </h2>
+          </div>
           <div className="grid gap-12 md:grid-cols-2">
             {/* Import */}
             <div className="flex flex-col space-y-4 rounded-2xl border p-8 bg-card shadow-sm hover:shadow-md transition-shadow">
@@ -138,6 +148,11 @@ export function ExamsWithAIContent() {
       {/* Social Proof */}
       <section className="py-20 bg-muted/50">
         <div className="container px-4 md:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              {t('exams.socialProof.title')}
+            </h2>
+          </div>
           <div className="grid gap-8 md:grid-cols-3">
             <TestimonialCard
               quote={t('exams.socialProof.nursing.quote')}
@@ -170,10 +185,10 @@ export function ExamsWithAIContent() {
   );
 }
 
-function SpotlightCard({ icon, title, description, tag }: { icon: React.ReactNode, title: string, description: string, tag: string }) {
+function SpotlightCard({ icon, title, description, tag, externalLink, linkText }: { icon: React.ReactNode, title: string, description: string, tag: string, externalLink?: string, linkText?: string }) {
   return (
-    <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow h-full">
-      <CardContent className="p-8 flex flex-col items-center text-center space-y-4">
+    <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col">
+      <CardContent className="p-8 flex flex-col items-center text-center space-y-4 flex-grow">
         <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4 w-fit mx-auto">
           {icon}
         </div>
@@ -181,10 +196,15 @@ function SpotlightCard({ icon, title, description, tag }: { icon: React.ReactNod
         <p className="text-muted-foreground leading-relaxed">
           {description}
         </p>
-        <div className="pt-4">
+        <div className="pt-4 flex flex-col items-center gap-2 mt-auto">
           <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
             {tag}
           </div>
+          {externalLink && (
+            <a href={externalLink} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline mt-2">
+              {linkText || "Learn more"}
+            </a>
+          )}
         </div>
       </CardContent>
     </Card>

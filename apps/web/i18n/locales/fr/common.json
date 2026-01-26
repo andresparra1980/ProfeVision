@@ -245,6 +245,7 @@
   "pricing": {
     "hero": {
       "badge": "Lancement Spécial",
+      "seoTitle": "Plans Tarifaires ProfeVision",
       "title": "Gratuit Pendant le",
       "titleHighlight": "Lancement",
       "description": "Profitez de l'accès gratuit à ProfeVisión pendant notre phase de lancement. Toutes les fonctionnalités sont disponibles sans frais.",
@@ -304,12 +305,12 @@
   },
   "howItWorks": {
     "hero": {
-      "badge": "Comment ça marche ?",
-      "title": "Créez et notez des examens en",
-      "titleHighlight": "quelques secondes",
-      "titleEnd": "avec ProfeVision",
+      "badge": "Notation par Vision par Ordinateur",
+      "title": "Créez et Notez",
+      "titleHighlight": "Examens Papier",
+      "titleEnd": "avec votre portable",
       "subtitle": "La méthode la plus rapide et moderne pour évaluer vos étudiants",
-      "description": "Souhaitez-vous créer des examens en quelques minutes et les noter en quelques secondes ? Avec ProfeVision, c'est possible. Notre plateforme est conçue pour les professeurs et les écoles qui cherchent à gagner du temps et à obtenir des résultats précis. Créez des examens grâce à l'intelligence artificielle, téléchargez vos épreuves en PDF et notez automatiquement en scannant les feuilles de réponses imprimées avec votre téléphone. De plus, organisez tout par établissements, matières et classes, et accédez à un tableau de bord avec des indicateurs détaillés des résultats.",
+      "description": "Transformez votre téléphone en un puissant scanner de notation. Concevez des examens, scannez des feuilles de réponses et obtenez des résultats instantanés.",
       "cta": "Commencez maintenant gratuitement"
     },
     "features": {
@@ -448,9 +449,9 @@
   "paperExams": {
     "hero": {
       "badge": "Correction Instantanée",
-      "title": "Corrigez vos Examens Rapidement avec les",
-      "titleHighlight": "Feuilles de Réponse",
-      "titleEnd": "de ProfeVisión",
+      "title": "Notez les examens papier",
+      "titleHighlight": "rapidement",
+      "titleEnd": "",
       "description": "Transformez l'évaluation de vos étudiants avec une technologie de pointe.",
       "descriptionHighlight": "Corrigez des examens en quelques secondes",
       "descriptionEnd": "en utilisant seulement votre smartphone ou tablette.",
@@ -548,10 +549,10 @@
   "exams": {
     "hero": {
       "badge": "Évaluation Pédagogique avec IA",
-      "title": "Plus que générer des questions,",
-      "titleHighlight": "nous concevons l'évaluation",
-      "titleEnd": "",
-      "description": "Ce n'est pas un simple chat IA. C'est un agent pédagogique qui orchestre plusieurs modèles linguistiques pour vous offrir une solution éducative robuste et méthodologiquement valide.",
+      "title": "Créez des examens complets",
+      "titleHighlight": "rapidement",
+      "titleEnd": "avec l'Intelligence Artificielle",
+      "description": "Pas un simple chat IA. C'est un agent pédagogique qui orchestre plusieurs modèles de langage pour vous offrir une solution éducative robuste et méthodologiquement valide.",
       "cta": "Commencer à Concevoir Gratuitement",
       "animation": {
         "objective": "Objectif",
@@ -561,24 +562,25 @@
       }
     },
     "spotlight": {
-      "title": "L'Assistant qui pense comme un Concepteur Pédagogique",
+      "title": "Avec notre agent IA, vous pouvez créer des examens efficaces pour l'évaluation de vos étudiants",
       "planning": {
-        "title": "Planification (Conception à Rebours)",
-        "description": "D'abord l'objectif, ensuite la question. Notre système crée une carte de spécifications avant de rédiger, assurant une couverture équilibrée du programme.",
-        "tag": "Validité de Contenu"
+        "title": "Planification (Conception Inversée)",
+        "description": "D'abord l'objectif, puis la question. Notre système crée une carte de spécifications avant la rédaction, garantissant que vous couvrez tout le programme de manière équilibrée.",
+        "tag": "Validité du Contenu"
       },
       "depth": {
         "title": "Profondeur (Taxonomie de Bloom)",
-        "description": "Échappez à la simple mémorisation. Nous générons des items qui évaluent la compréhension, l'application et l'analyse. Vous décidez du niveau cognitif.",
-        "tag": "Étayage Cognitif"
+        "description": "Échappez à la simple mémoire. Nous générons des items qui évaluent la compréhension, l'application et l'analyse. Vous décidez du niveau cognitif.",
+        "tag": "Scaffold Cognitif"
       },
       "learning": {
         "title": "Apprentissage (Feedback Formatif)",
-        "description": "Chaque réponse inclut le 'pourquoi'. Nous transformons l'erreur en opportunité d'apprentissage avec des justifications pédagogiques automatiques.",
+        "description": "Chaque réponse inclut le 'pourquoi'. Nous transformons l'erreur en une opportunité d'apprentissage avec des justifications pédagogiques automatiques.",
         "tag": "Métacognition"
       }
     },
     "ecosystem": {
+      "title": "Vous pouvez importer des examens créés manuellement et générer des examens similaires automatiquement",
       "import": {
         "title": "Importation Intelligente",
         "description": "Nous utilisons des moteurs OCR et IA pour numériser vos fichiers PDF ou Word existants instantanément.",
@@ -591,6 +593,7 @@
       }
     },
     "socialProof": {
+      "title": "Témoignages de certains de nos enseignants",
       "nursing": {
         "quote": "En Pharmacologie, une erreur de dosage est fatale. ProfeVision me permet de générer des cas cliniques où les étudiants doivent justifier la dilution. Le feedback automatique les aide à comprendre la pharmacocinétique réelle.",
         "author": "Prof. Martha G., Faculté de Soins Infirmiers"
@@ -624,8 +627,19 @@
       "email": "E-mail :",
       "liveChat": "Chat en direct :",
       "liveChatAvailable": "Disponible sur la plateforme",
-      "knowledge": "Base de connaissances :",
-      "knowledgeBase": "FAQ et guides"
+      "knowledge": "Documentation :",
+      "knowledgeBase": "Aller à la page de documentation"
+    },
+    "faq": {
+      "title": "Foire Aux Questions",
+      "q1": "Comment puis-je réinitialiser mon mot de passe ?",
+      "a1": "Vous pouvez réinitialiser votre mot de passe en cliquant sur 'Mot de passe oublié' sur l'écran de connexion.",
+      "q2": "Où puis-je trouver la documentation ?",
+      "a2": "Vous pouvez trouver toute la documentation officielle et les guides d'utilisation sur https://docs.profevision.com",
+      "q3": "Y a-t-il un essai gratuit ?",
+      "a3": "Oui, nous proposons un niveau gratuit avec des scans et des crédits IA limités par mois.",
+      "q4": "Comment exporter les notes ?",
+      "a4": "Vous pouvez exporter les notes au format CSV ou Excel depuis la section Rapports de votre tableau de bord."
     }
   },
   "studentsManagement": {

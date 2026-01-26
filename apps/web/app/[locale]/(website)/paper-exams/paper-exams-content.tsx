@@ -38,8 +38,8 @@ export function PaperExamsContent() {
             </div>
             <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               {t('paperExams.hero.title')}{" "}
-              <span className="text-primary">{t('paperExams.hero.titleHighlight')}</span>{" "}
-              {t('paperExams.hero.titleEnd')}
+              <span className="text-primary">{t('paperExams.hero.titleHighlight')}</span>
+              {t('paperExams.hero.titleEnd') && ` ${t('paperExams.hero.titleEnd')}`}
             </h1>
             <p className="max-w-[800px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               {t('paperExams.hero.description')}{" "}
