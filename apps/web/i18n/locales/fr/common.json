@@ -297,6 +297,17 @@
       "title": "Toutes les fonctionnalités dont vous avez besoin",
       "description": "Les deux forfaits incluent un accès complet à la plateforme"
     },
+    "commonFeatures": {
+      "title": "Fonctionnalités incluses dans tous les forfaits :",
+      "examCreation": "Création d'examens",
+      "studentManagement": "Gestion des étudiants",
+      "groupManagement": "Gestion des groupes",
+      "gradingSchemes": "Schémas de notation",
+      "exportPdfLatex": "Exporter vers PDF et LaTeX",
+      "performanceReports": "Rapports de performance",
+      "intuitiveInterface": "Interface intuitive",
+      "constantUpdates": "Mises à jour constantes"
+    },
     "cta": {
       "title": "Prêt à révolutionner vos évaluations ?",
       "description": "Rejoignez-nous maintenant et profitez d'un accès gratuit à toutes les fonctionnalités de ProfeVisión pendant notre période de lancement.",

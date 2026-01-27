@@ -109,43 +109,43 @@ export function PricingContent() {
           <div className="max-w-3xl mx-auto">
             <div className="bg-card p-8 rounded-lg border">
               <h3 className="text-xl font-semibold mb-6">
-                Funciones incluidas en todos los planes:
+                {t("pricing.commonFeatures.title")}
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <ul className="space-y-3">
                   <li className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>Creación de exámenes</span>
+                    <span>{t("pricing.commonFeatures.examCreation")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>Gestión de estudiantes</span>
+                    <span>{t("pricing.commonFeatures.studentManagement")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>Gestión de grupos</span>
+                    <span>{t("pricing.commonFeatures.groupManagement")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>Esquemas de calificación</span>
+                    <span>{t("pricing.commonFeatures.gradingSchemes")}</span>
                   </li>
                 </ul>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>Exportar a PDF y LaTeX</span>
+                    <span>{t("pricing.commonFeatures.exportPdfLatex")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>Reportes de desempeño</span>
+                    <span>{t("pricing.commonFeatures.performanceReports")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>Interfaz intuitiva</span>
+                    <span>{t("pricing.commonFeatures.intuitiveInterface")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>Actualizaciones constantes</span>
+                    <span>{t("pricing.commonFeatures.constantUpdates")}</span>
                   </li>
                 </ul>
               </div>

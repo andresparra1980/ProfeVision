@@ -297,6 +297,17 @@
       "title": "Todas as funções que você precisa",
       "description": "Ambos os planos incluem acesso completo à plataforma"
     },
+    "commonFeatures": {
+      "title": "Recursos incluídos em todos os planos:",
+      "examCreation": "Criação de exames",
+      "studentManagement": "Gestão de estudantes",
+      "groupManagement": "Gestão de grupos",
+      "gradingSchemes": "Esquemas de qualificação",
+      "exportPdfLatex": "Exportar para PDF e LaTeX",
+      "performanceReports": "Relatórios de desempenho",
+      "intuitiveInterface": "Interface intuitiva",
+      "constantUpdates": "Atualizações constantes"
+    },
     "cta": {
       "title": "Pronto para Revolucionar suas Avaliações?",
       "description": "Participe agora e ganhe acesso gratuito a todas as funções do ProfeVisión durante nosso período de lançamento.",
