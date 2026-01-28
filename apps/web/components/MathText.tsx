@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useMemo } from "react";
-import ReactMarkdown, { type Components as MarkdownComponents } from "react-markdown";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import "katex/dist/katex.min.css";
+import dynamic from "next/dynamic";
+import React from "react";
+
+// Dynamically import the actual component with SSR disabled to prevent 
+// ESM module evaluation errors with remark/rehype plugins during server rendering or initial client bundle load.
+const MathTextContent = dynamic(() => import("./MathTextContent"), {
+  ssr: false,
+  loading: () => <span className="animate-pulse bg-muted h-4 w-24 rounded inline-block" />
+});
 
 type Props = {
   text: string | null | undefined;
@@ -12,40 +16,6 @@ type Props = {
   inline?: boolean;
 };
 
-export default function MathText({ text, className, inline }: Props) {
-  const raw = typeof text === "string" ? text : "";
-  // Normalize common escaping issue: double backslashes appear in content ($\\Delta x$) -> ($\Delta x$)
-  const normalized = useMemo(() => raw.replace(/\\\\/g, "\\"), [raw]);
-
-  const components: MarkdownComponents = inline
-    ? {
-      p: ({ children }) => (
-        <span className="m-0 p-0 leading-normal align-middle">{children}</span>
-      ),
-    }
-    : {
-      p: ({ children }) => (
-        <div className="my-1 leading-relaxed">{children}</div>
-      ),
-    };
-
-  const Wrapper = inline ? "span" : "div";
-  return (
-    <Wrapper
-      className={[
-        className || "",
-        inline
-          ? "[&_.katex-display]:my-0 [&_.katex-display]:inline-block"
-          : "[&_.katex-display]:my-1",
-      ].join(" ")}
-    >
-      <ReactMarkdown
-        remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeKatex]}
-        components={components}
-      >
-        {normalized}
-      </ReactMarkdown>
-    </Wrapper>
-  );
+export default function MathText(props: Props) {
+  return <MathTextContent {...props} />;
 }
