@@ -28,7 +28,7 @@ type LocaleMetadata = {
 const metadataByLocale: Record<string, LocaleMetadata> = {
   en: {
     title: 'ProfeVision - The Best App to Scan and Grade Paper Exams with AI',
-    titleTemplate: '%s | ProfeVision',
+    titleTemplate: '%s',
     description: "ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students' education. Sign up for free!",
     keywords: ['scan exams', 'grade exams', 'OMR', 'optical recognition', 'automatic correction', 'artificial intelligence education', 'exam management', 'educational application', 'teachers', 'student evaluation', 'mobile correction', 'computer vision', 'educational automation'],
     ogLocale: 'en_US',
@@ -36,7 +36,7 @@ const metadataByLocale: Record<string, LocaleMetadata> = {
   },
   es: {
     title: 'ProfeVisión - La Mejor Aplicación para Escanear y Calificar Exámenes en Papel con IA',
-    titleTemplate: '%s | ProfeVisión',
+    titleTemplate: '%s',
     description: 'ProfeVisión, la mejor aplicación para escanear y calificar exámenes en papel con IA. Automatiza la creación, corrección y gestión de exámenes, ahorra tiempo y mejora la educación de tus estudiantes. ¡Regístrate gratis!',
     keywords: ['escanear exámenes', 'calificar exámenes', 'OMR', 'reconocimiento óptico', 'corrección automática', 'inteligencia artificial educación', 'gestión de exámenes', 'aplicación educativa', 'profesores', 'evaluación estudiantil', 'corrección con celular', 'visión artificial', 'automatización educativa'],
     ogLocale: 'es_ES',
@@ -44,7 +44,7 @@ const metadataByLocale: Record<string, LocaleMetadata> = {
   },
   fr: {
     title: 'ProfeVision - La Meilleure Application pour Scanner et Noter les Examens Papier avec IA',
-    titleTemplate: '%s | ProfeVision',
+    titleTemplate: '%s',
     description: "ProfeVision, la meilleure application pour scanner et noter les examens papier avec l'IA. Automatisez la création, la correction et la gestion des examens, gagnez du temps et améliorez l'éducation de vos élèves. Inscrivez-vous gratuitement!",
     keywords: ['scanner examens', 'noter examens', 'OMR', 'reconnaissance optique', 'correction automatique', 'intelligence artificielle éducation', 'gestion examens', 'application éducative', 'enseignants', 'évaluation étudiants', 'correction mobile', 'vision artificielle', 'automatisation éducative'],
     ogLocale: 'fr_FR',
@@ -52,7 +52,7 @@ const metadataByLocale: Record<string, LocaleMetadata> = {
   },
   pt: {
     title: 'ProfeVision - O Melhor Aplicativo para Escanear e Corrigir Provas em Papel com IA',
-    titleTemplate: '%s | ProfeVision',
+    titleTemplate: '%s',
     description: 'ProfeVision, o melhor aplicativo para escanear e corrigir provas em papel com IA. Automatize a criação, correção e gestão de provas, economize tempo e melhore a educação dos seus alunos. Cadastre-se grátis!',
     keywords: ['escanear provas', 'corrigir provas', 'OMR', 'reconhecimento óptico', 'correção automática', 'inteligência artificial educação', 'gestão de provas', 'aplicativo educacional', 'professores', 'avaliação estudantes', 'correção móvel', 'visão artificial', 'automação educacional'],
     ogLocale: 'pt_BR',

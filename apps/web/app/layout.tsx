@@ -8,7 +8,7 @@ import '@/styles/globals.css';
 export const metadata: Metadata = {
   title: {
     default: 'ProfeVision - The Best App to Scan and Grade Paper Exams with AI',
-    template: '%s | ProfeVision'
+    template: '%s'
   },
   description: "ProfeVision, the best app to scan and grade paper exams with AI. Automate exam creation, correction and management, save time and improve your students' education. Sign up for free!",
   metadataBase: new URL('https://profevision.com'),
@@ -41,7 +41,7 @@ export default async function RootLayout({
   // 🌍 Detectar locale desde middleware para SEO correcto
   const headersList = await headers();
   const locale = headersList.get('x-locale') || 'es';
-  
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
