@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { monoFont } from '@/lib/fonts';
+
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Estudiante, ResultadoExamen } from '../utils/types';
 import { getStudentDisplayName } from '@/lib/utils/student-name';
@@ -62,7 +62,7 @@ export function StudentsResultsTable({
     const start = (currentPage - 1) * PAGE_SIZE;
     const end = start + PAGE_SIZE;
     const paginated = filteredStudents.slice(start, end);
-    
+
     return {
       totalPages: total,
       startIndex: start,
@@ -78,16 +78,15 @@ export function StudentsResultsTable({
 
     return (
       <div
-        className={`p-2 rounded-lg space-y-1.5 ${
-          isEven ? 'bg-muted/30' : 'bg-background'
-        } border`}
+        className={`p-2 rounded-lg space-y-1.5 ${isEven ? 'bg-muted/30' : 'bg-background'
+          } border`}
       >
         <div className="space-y-1">
           <div>
             <div className="text-xs font-medium text-muted-foreground mb-0.5">
               {t('table.name')}
             </div>
-            <div className={`text-sm font-medium ${monoFont}`}>
+            <div className={`text-sm font-medium font-mono`}>
               {getStudentDisplayName(estudiante, 'lastFirst')}
             </div>
           </div>
@@ -96,7 +95,7 @@ export function StudentsResultsTable({
             <div className="text-xs font-medium text-muted-foreground mb-0.5">
               {t('table.identification')}
             </div>
-            <div className={`text-sm ${monoFont}`}>
+            <div className={`text-sm font-mono`}>
               {estudiante.identificacion}
             </div>
           </div>
@@ -106,7 +105,7 @@ export function StudentsResultsTable({
               <div className="text-xs font-medium text-muted-foreground mb-0.5">
                 {t('table.score')}
               </div>
-              <div className={`text-sm font-medium ${monoFont}`}>
+              <div className={`text-sm font-medium font-mono`}>
                 {resultado ? resultado.puntaje_obtenido.toFixed(2) : '-'}
               </div>
             </div>
@@ -115,7 +114,7 @@ export function StudentsResultsTable({
               <div className="text-xs font-medium text-muted-foreground mb-0.5">
                 {t('table.percentage')}
               </div>
-              <div className={`text-sm font-medium ${monoFont}`}>
+              <div className={`text-sm font-medium font-mono`}>
                 {resultado ? resultado.porcentaje.toFixed(1) + '%' : '-'}
               </div>
             </div>
@@ -222,25 +221,24 @@ export function StudentsResultsTable({
                         return (
                           <tr
                             key={estudiante.id}
-                            className={`border-b hover:bg-muted/70 transition-colors ${
-                              isEven ? 'bg-muted/30' : 'bg-background'
-                            }`}
+                            className={`border-b hover:bg-muted/70 transition-colors ${isEven ? 'bg-muted/30' : 'bg-background'
+                              }`}
                           >
                             <td className="py-3 px-4">
-                              <div className={`${monoFont}`}>
+                              <div className={`font-mono`}>
                                 {getStudentDisplayName(estudiante, 'lastFirst')}
                               </div>
                             </td>
                             <td className="py-3 px-4">
-                              <div className={`${monoFont}`}>{estudiante.identificacion}</div>
+                              <div className={`font-mono`}>{estudiante.identificacion}</div>
                             </td>
                             <td className="py-3 px-4 text-center">
-                              <div className={`${monoFont} font-medium`}>
+                              <div className={`font-mono font-medium`}>
                                 {resultado ? resultado.puntaje_obtenido.toFixed(2) : '-'}
                               </div>
                             </td>
                             <td className="py-3 px-4 text-center">
-                              <div className={`${monoFont} font-medium`}>
+                              <div className={`font-mono font-medium`}>
                                 {resultado ? resultado.porcentaje.toFixed(1) + '%' : '-'}
                               </div>
                             </td>

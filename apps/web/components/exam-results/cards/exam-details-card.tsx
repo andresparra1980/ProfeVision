@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
-import { monoFont } from '@/lib/fonts';
+
 import type { ExamDetails } from '../utils/types';
 
 interface ExamDetailsCardProps {
@@ -21,19 +21,19 @@ export function ExamDetailsCard({ examDetails }: ExamDetailsCardProps) {
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <div className="font-medium">{t('subject')}:</div>
-            <div className={`${monoFont} mono-data`}>{examDetails.materias?.nombre || t('noSubject')}</div>
+            <div className={`font-mono mono-data`}>{examDetails.materias?.nombre || t('noSubject')}</div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="font-medium">{t('totalScore')}:</div>
-            <div className={`${monoFont} mono-data`}>{examDetails.puntaje_total}</div>
+            <div className={`font-mono mono-data`}>{examDetails.puntaje_total}</div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="font-medium">{t('group')}:</div>
-            <div className={`${monoFont} mono-data`}>{examDetails.grupos?.nombre || t('noGroup')}</div>
+            <div className={`font-mono mono-data`}>{examDetails.grupos?.nombre || t('noGroup')}</div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="font-medium">{t('creationDate')}:</div>
-            <div className={`${monoFont} mono-data`}>{examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : t('notAvailable')}</div>
+            <div className={`font-mono mono-data`}>{examDetails.created_at ? new Date(examDetails.created_at as string).toLocaleDateString() : t('notAvailable')}</div>
           </div>
         </div>
       </CardContent>

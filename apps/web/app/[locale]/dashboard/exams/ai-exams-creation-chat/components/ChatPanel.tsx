@@ -20,7 +20,7 @@ import {
   PromptInputTools,
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
-import { notoSans } from "@/lib/fonts";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -258,7 +258,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
       <div className="flex w-full justify-center">
         <div className="w-full sm:w-[62vw] sm:min-w-[640px] max-w-[1200px]">
           <Conversation
-            className={`${notoSans.className} relative w-full rounded-xl bg-transparent backdrop-blur-sm shadow-none overflow-y-auto`}
+            className={`font-noto relative w-full rounded-xl bg-transparent backdrop-blur-sm shadow-none overflow-y-auto`}
             style={{ height: convHeight, maxHeight: convHeight }}
           >
             <ConversationContent>
@@ -306,7 +306,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
             onSubmit={(_message, _event) => {
               handleSend();
             }}
-            className={`${notoSans.className} relative rounded-2xl border bg-card shadow-sm`}
+            className={`font-noto relative rounded-2xl border bg-card shadow-sm`}
           >
             <PromptInputBody>
               <div className="relative">

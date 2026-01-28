@@ -2,7 +2,7 @@
 
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
-import { logoFont } from '@/lib/fonts'
+
 
 export function SiteFooter() {
   const t = useTranslations('common')
@@ -14,10 +14,10 @@ export function SiteFooter() {
           <div className="col-span-1 md:col-span-2 lg:col-span-2 text-center md:text-left">
             <Link href="/" className="flex items-center gap-2 mb-3 hover:opacity-80 transition-opacity justify-center md:justify-start w-fit mx-auto md:mx-0" title={`ProfeVisión - ${t('navigation.home')}`}>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#bc152b] to-[#ea4359]/70 flex items-center justify-center">
-                <span className={`font-bold text-white ${logoFont}`}>PV</span>
+                <span className={`font-bold text-white font-logo`}>PV</span>
               </div>
               <div className="relative">
-                <span className={`font-bold text-secondary dark:text-white text-xl ${logoFont}`}>ProfeVision</span>
+                <span className={`font-bold text-secondary dark:text-white text-xl font-logo`}>ProfeVision</span>
                 <div className="absolute -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full leading-none">
                   Beta
                 </div>
@@ -47,7 +47,7 @@ export function SiteFooter() {
               info@profevision.com
             </a>
             <div className="flex gap-4 justify-center md:justify-start">
-            <a href="#" className="text-muted-foreground hover:text-foreground" aria-label="Facebook">
+              <a href="#" className="text-muted-foreground hover:text-foreground" aria-label="Facebook">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -64,7 +64,7 @@ export function SiteFooter() {
                 </svg>
                 <span className="sr-only">Facebook</span>
               </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground" aria-label="Twitter/X">
+              <a href="#" className="text-muted-foreground hover:text-foreground" aria-label="Twitter/X">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -81,7 +81,7 @@ export function SiteFooter() {
                 </svg>
                 <span className="sr-only">Twitter/X</span>
               </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground" aria-label="Instagram">
+              <a href="#" className="text-muted-foreground hover:text-foreground" aria-label="Instagram">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -171,7 +171,7 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="border-t mt-8 md:mt-12 pt-4 md:pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className={`text-xs text-muted-foreground ${logoFont}`}>
+          <p className={`text-xs text-muted-foreground font-logo`}>
             &copy; 2026 ProfeVision. {t('footer.copyright')}
           </p>
           <div className="flex gap-4 mt-2 md:mt-0">

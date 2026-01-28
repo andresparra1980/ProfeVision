@@ -82,6 +82,8 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'monospace'],
+        logo: ['var(--font-inter)', 'sans-serif'],
+        noto: ['var(--font-noto)', 'sans-serif'],
       },
       lineHeight: {
         'base': '28px',

@@ -32,7 +32,7 @@ import { supabase } from "@/lib/supabase";
 import SimilarExamModal from "./SimilarExamModal";
 import SimilarExamMetadataDialog, { SimilarExamMeta } from "./SimilarExamMetadataDialog";
 import EditableExamTitle from "./EditableExamTitle";
-import { monoFont } from "@/lib/fonts";
+
 import { ExamsPageSkeleton } from "./ExamsPageSkeleton";
 
 // Reusable components
@@ -55,7 +55,7 @@ function ExamCardHeader({ exam, t, onTitleSave }: ExamCardHeaderProps) {
       </div>
 
       {/* Subject */}
-      <p className={`${monoFont}`}>
+      <p className={`font-mono`}>
         {exam.materias?.nombre || "Sin materia"}
       </p>
 
@@ -108,7 +108,7 @@ function ExamCardContent({
   onPublish,
 }: ExamCardContentProps) {
   const t = useTranslations('dashboard.exams');
-  
+
   return (
     <div className="space-y-1">
       <TooltipProvider>
@@ -158,7 +158,7 @@ function ExamCardContent({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400" 
+              className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400"
               onClick={() => onStartSimilar(exam.id)}
             >
               <WandSparkles className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
@@ -190,8 +190,8 @@ function ExamCardContent({
             </span>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="max-w-xs">
-            <p>{(exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0) 
-              ? t('tooltips.exportRequiresPublishedAndGroup') 
+            <p>{(exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0)
+              ? t('tooltips.exportRequiresPublishedAndGroup')
               : t('tooltips.exportAndPrint')}</p>
           </TooltipContent>
         </Tooltip>
@@ -468,9 +468,9 @@ export default function ExamsTableMobile({
         .from("examenes")
         .update({ titulo: newTitle })
         .eq("id", examId);
-      
+
       if (error) throw error;
-      
+
       // Trigger a refresh or update local state if needed
       window.location.reload();
     } catch (error) {
@@ -547,7 +547,7 @@ export default function ExamsTableMobile({
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full bg-card dark:bg-card placeholder:text-muted-foreground max-w-sm"
       />
-      
+
       {/* Checkbox for showing exams from archived groups */}
       <div className="flex items-center gap-2">
         <input

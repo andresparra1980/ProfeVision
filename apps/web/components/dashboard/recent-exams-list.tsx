@@ -13,7 +13,7 @@ import { useDashboardStats } from '@/lib/hooks/use-dashboard-stats';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { monoFont } from '@/lib/fonts';
+
 
 // Helper para formatear fecha relativa
 function formatRelativeDate(dateString: string, locale: string): string {
@@ -185,7 +185,7 @@ export function RecentExamsList() {
       {/* Línea 2: Materia en monofont + Tiempo relativo */}
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         {examen.materia_nombre && (
-          <span className={`${monoFont}`}>{examen.materia_nombre}</span>
+          <span className={`font-mono`}>{examen.materia_nombre}</span>
         )}
         <span className="shrink-0">•</span>
         <span className="shrink-0">{formatRelativeDate(examen.fecha_creacion, locale)}</span>

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTranslations, useLocale } from 'next-intl';
-import { logoFont } from "@/lib/fonts";
+
 
 export default function DashboardHeader() {
   const { isCollapsed, isMobile } = useSidebar();
@@ -20,18 +20,18 @@ export default function DashboardHeader() {
   // Cargar estado de la notificación desde localStorage
   useEffect(() => {
     const dismissedData = localStorage.getItem('mobile-grading-notification-dismissed');
-    
+
     if (!dismissedData) {
       // Si no existe, mostrar la notificación
       setNotificationDismissed(false);
       return;
     }
-    
+
     try {
       const dismissedTimestamp = parseInt(dismissedData);
       const now = Date.now();
       const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // 7 días en milisegundos
-      
+
       if (now - dismissedTimestamp > sevenDaysInMs) {
         // Han pasado más de 7 días, mostrar la notificación nuevamente
         setNotificationDismissed(false);
@@ -67,26 +67,26 @@ export default function DashboardHeader() {
       )}>
         {/* Logo para móviles - siempre en el centro */}
         <span className="absolute left-1/2 transform -translate-x-1/2 text-xl font-bold text-secondary md:hidden">
-            <div className="relative">
-              <span className={`font-bold text-xl text-secondary dark:text-secondary ${logoFont}`}>ProfeVision</span>
-              <div className="absolute  -right-1 text-[8px] text-black dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
-                Beta
-              </div>
+          <div className="relative">
+            <span className={`font-bold text-xl text-secondary dark:text-secondary font-logo`}>ProfeVision</span>
+            <div className="absolute  -right-1 text-[8px] text-black dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
+              Beta
             </div>
+          </div>
         </span>
-        
+
         {/* Logo para desktop - visible y centrado solo cuando el sidebar está contraído */}
         {isCollapsed && !isMobile && (
           <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
             <div className="relative">
-              <span className={`font-bold text-xl text-secondary dark:text-secondary ${logoFont}`}>ProfeVision</span>
+              <span className={`font-bold text-xl text-secondary dark:text-secondary font-logo`}>ProfeVision</span>
               <div className="absolute  -right-1 text-[8px] dark:text-white font-bold px-1 py-0.5 rounded-full leading-none">
                 Beta
               </div>
             </div>
           </div>
         )}
-        
+
         {/* Contenedor derecho para íconos */}
         <div className="ml-auto flex items-center space-x-2">
           <a href={`https://docs.profevision.com/${locale}/docs`} target="_blank" rel="noopener noreferrer" className="hidden md:block">
@@ -123,9 +123,9 @@ export default function DashboardHeader() {
               <Bell className="h-4 w-4 text-primary" />
               <AlertDescription className="text-sm text-foreground pr-8">
                 <strong>{t('header.notification.reminder', { defaultValue: 'Recordatorio' })}:</strong> {t('header.notification.message', { defaultValue: 'Para calificar exámenes en papel, accede a' })}{' '}
-                <a 
-                  href="https://www.profevision.com" 
-                  target="_blank" 
+                <a
+                  href="https://www.profevision.com"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="underline font-medium text-primary hover:text-primary/80 transition-colors"
                 >

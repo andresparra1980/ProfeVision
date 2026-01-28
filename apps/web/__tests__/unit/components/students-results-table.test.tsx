@@ -8,10 +8,7 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }))
 
-// Mock fonts
-vi.mock('@/lib/fonts', () => ({
-  monoFont: { className: 'font-mono' },
-}))
+
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
@@ -70,37 +67,37 @@ describe('StudentsResultsTable', () => {
   it('filters by search query', () => {
     render(<StudentsResultsTable {...defaultProps} />)
     const searchInput = screen.getByPlaceholderText('searchPlaceholder')
-    
+
     fireEvent.change(searchInput, { target: { value: 'Maria' } })
-    
+
     expect(screen.getAllByText('Gomez, Maria')[0]).toBeInTheDocument()
     expect(screen.queryByText('Perez, Juan')).not.toBeInTheDocument()
   })
 
   it('filters by "verSoloConExamen"', () => {
     render(<StudentsResultsTable {...defaultProps} verSoloConExamen={true} />)
-    
+
     expect(screen.getAllByText('Perez, Juan')[0]).toBeInTheDocument()
     expect(screen.queryByText('Gomez, Maria')).not.toBeInTheDocument()
   })
 
   it('calls onShowDetails when viewing a graded student', () => {
     render(<StudentsResultsTable {...defaultProps} />)
-    
+
     // Find the "View Details" button for Juan
     const detailsButtons = screen.getAllByText('viewDetailsButton')
     fireEvent.click(detailsButtons[0])
-    
+
     expect(defaultProps.onShowDetails).toHaveBeenCalledWith(mockResultados[0])
   })
 
   it('calls onShowManualGrade when viewing an ungraded student', () => {
     render(<StudentsResultsTable {...defaultProps} />)
-    
+
     // Find the "Enter Grade" button for Maria or Carlos
     const gradeButtons = screen.getAllByText('dialogs.enterGrade')
     fireEvent.click(gradeButtons[0])
-    
+
     expect(defaultProps.onShowManualGrade).toHaveBeenCalled()
   })
 
@@ -113,7 +110,7 @@ describe('StudentsResultsTable', () => {
     render(<StudentsResultsTable {...defaultProps} />)
     const searchInput = screen.getByPlaceholderText('searchPlaceholder')
     fireEvent.change(searchInput, { target: { value: 'XYZ123' } })
-    
+
     expect(screen.getByText('emptyState.noSearchResults')).toBeInTheDocument()
   })
 
@@ -125,18 +122,18 @@ describe('StudentsResultsTable', () => {
       apellidos: 'Test',
       identificacion: `${i}`
     }))
-    
+
     render(<StudentsResultsTable {...defaultProps} todosEstudiantes={manyStudents} />)
-    
+
     // First page should show 10 items
     // Using getAllByText because of mobile/desktop duplication
     expect(screen.getAllByText('Test, Student 0')[0]).toBeInTheDocument()
     expect(screen.queryByText('Test, Student 10')).not.toBeInTheDocument()
-    
+
     // Click next
     const nextButton = screen.getAllByText('pagination.next')[0].closest('button')
     fireEvent.click(nextButton!)
-    
+
     // Second page should show remaining items
     expect(screen.getAllByText('Test, Student 10')[0]).toBeInTheDocument()
     expect(screen.queryByText('Test, Student 0')).not.toBeInTheDocument()

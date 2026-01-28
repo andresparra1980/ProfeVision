@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
-import { monoFont } from '@/lib/fonts';
+
 import type { ResultadoExamen, Estudiante } from '../utils/types';
 
 interface StatisticsCardProps {
@@ -20,11 +20,11 @@ export function StatisticsCard({ resultados, todosEstudiantes }: StatisticsCardP
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <div className="font-medium">{t('studentsWithExam')}:</div>
-            <div className={`${monoFont} mono-data`}>{resultados.length} {t('of')} {todosEstudiantes.length}</div>
+            <div className={`font-mono mono-data`}>{resultados.length} {t('of')} {todosEstudiantes.length}</div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="font-medium">{t('average')}:</div>
-            <div className={`${monoFont} mono-data`}>
+            <div className={`font-mono mono-data`}>
               {resultados.length > 0
                 ? (resultados.reduce((sum, r) => sum + r.puntaje_obtenido, 0) / resultados.length).toFixed(2)
                 : t('na')
@@ -33,7 +33,7 @@ export function StatisticsCard({ resultados, todosEstudiantes }: StatisticsCardP
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="font-medium">{t('highestScore')}:</div>
-            <div className={`${monoFont} mono-data`}>
+            <div className={`font-mono mono-data`}>
               {resultados.length > 0
                 ? Math.max(...resultados.map((r) => r.puntaje_obtenido)).toFixed(2)
                 : t('na')
@@ -42,7 +42,7 @@ export function StatisticsCard({ resultados, todosEstudiantes }: StatisticsCardP
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="font-medium">{t('lowestScore')}:</div>
-            <div className={`${monoFont} mono-data`}>
+            <div className={`font-mono mono-data`}>
               {resultados.length > 0
                 ? Math.min(...resultados.map((r) => r.puntaje_obtenido)).toFixed(2)
                 : t('na')

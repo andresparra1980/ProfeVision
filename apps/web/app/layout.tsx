@@ -2,8 +2,35 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { ibmPlexSans, ibmPlexMono } from '@/lib/fonts';
+import { IBM_Plex_Mono, IBM_Plex_Sans, Inter, Noto_Sans } from 'next/font/google';
 import '@/styles/globals.css';
+
+const ibmPlexSans = IBM_Plex_Sans({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const notoSans = Noto_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-noto',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -48,7 +75,7 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body
-        className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+        className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable} ${inter.variable} ${notoSans.variable}`}
         suppressHydrationWarning
       >
         {children}

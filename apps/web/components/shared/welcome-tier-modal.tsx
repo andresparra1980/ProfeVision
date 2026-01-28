@@ -15,7 +15,7 @@ import { logger } from "@/lib/utils/logger";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { logoFont } from "@/lib/fonts";
+
 import { LanguageSwitcherDropdownSuspense } from "./language-switcher-dropdown";
 
 interface WelcomeTierModalProps {
@@ -99,10 +99,10 @@ export function WelcomeTierModal({
       }
 
       // Redirigir al checkout de Polar
-      const productId = billingPeriod === "monthly" 
+      const productId = billingPeriod === "monthly"
         ? process.env.NEXT_PUBLIC_POLAR_PRODUCT_ID_MONTHLY
         : process.env.NEXT_PUBLIC_POLAR_PRODUCT_ID_ANNUAL;
-      
+
       const checkoutUrl = `/api/polar/checkout?products=${productId}&customerEmail=${encodeURIComponent(user.email)}`;
       window.location.href = checkoutUrl;
     } catch (error) {
@@ -123,7 +123,7 @@ export function WelcomeTierModal({
               <Sparkles className="h-8 w-8 text-white" />
             </div>
           </div>
-          <DialogTitle className={`text-3xl ${logoFont}`}>
+          <DialogTitle className={`text-3xl font-logo`}>
             {t("welcome.title", { defaultValue: "Welcome to ProfeVision!" })}
           </DialogTitle>
           <DialogDescription className="text-base mt-2">

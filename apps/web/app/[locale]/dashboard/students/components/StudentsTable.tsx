@@ -5,7 +5,7 @@ import { Users, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useTranslations } from "next-intl";
-import { monoFont } from "@/lib/fonts";
+
 import { hasNombresSeparados } from "@/lib/utils/student-name";
 
 interface Student {
@@ -55,7 +55,7 @@ export function StudentsTable({
     const start = (currentPage - 1) * PAGE_SIZE;
     const end = start + PAGE_SIZE;
     const paginated = filteredStudents.slice(start, end);
-    
+
     return {
       totalPages: total,
       startIndex: start,
@@ -75,16 +75,15 @@ export function StudentsTable({
 
     return (
       <div
-        className={`p-2 rounded-lg space-y-1.5 ${
-          isEven ? 'bg-muted/30' : 'bg-background'
-        } border`}
+        className={`p-2 rounded-lg space-y-1.5 ${isEven ? 'bg-muted/30' : 'bg-background'
+          } border`}
       >
         <div className="space-y-1">
           <div>
             <div className="text-xs font-medium text-muted-foreground mb-0.5">
               {t('table.headers.surnames')}
             </div>
-            <div className={`text-sm font-medium ${monoFont}`}>
+            <div className={`text-sm font-medium font-mono`}>
               {student.apellidos}
             </div>
           </div>
@@ -93,7 +92,7 @@ export function StudentsTable({
             <div className="text-xs font-medium text-muted-foreground mb-0.5">
               {t('table.headers.names')}
             </div>
-            <div className={`text-sm ${monoFont}`}>
+            <div className={`text-sm font-mono`}>
               {student.nombres}
             </div>
           </div>
@@ -102,7 +101,7 @@ export function StudentsTable({
             <div className="text-xs font-medium text-muted-foreground mb-0.5">
               {t('table.headers.identification')}
             </div>
-            <div className={`text-sm ${monoFont}`}>
+            <div className={`text-sm font-mono`}>
               {student.identificacion}
             </div>
           </div>
@@ -111,7 +110,7 @@ export function StudentsTable({
             <div className="text-xs font-medium text-muted-foreground mb-0.5">
               {t('table.headers.email')}
             </div>
-            <div className={`text-sm ${monoFont}`}>
+            <div className={`text-sm font-mono`}>
               {student.email || '-'}
             </div>
           </div>
@@ -175,20 +174,19 @@ export function StudentsTable({
                   return (
                     <TableRow
                       key={student.id}
-                      className={`hover:bg-muted/70 transition-colors ${
-                        isEven ? 'bg-muted/30' : 'bg-background'
-                      }`}
+                      className={`hover:bg-muted/70 transition-colors ${isEven ? 'bg-muted/30' : 'bg-background'
+                        }`}
                     >
                       {nombresSeparados ? (
                         <>
-                          <TableCell className={`font-medium ${monoFont}`}>{student.apellidos}</TableCell>
-                          <TableCell className={monoFont}>{student.nombres || ''}</TableCell>
+                          <TableCell className={`font-medium font-mono`}>{student.apellidos}</TableCell>
+                          <TableCell className="font-mono">{student.nombres || ''}</TableCell>
                         </>
                       ) : (
-                        <TableCell className={`font-medium ${monoFont}`}>{student.apellidos}</TableCell>
+                        <TableCell className={`font-medium font-mono`}>{student.apellidos}</TableCell>
                       )}
-                      <TableCell className={monoFont}>{student.identificacion}</TableCell>
-                      <TableCell className={monoFont}>{student.email || "-"}</TableCell>
+                      <TableCell className="font-mono">{student.identificacion}</TableCell>
+                      <TableCell className="font-mono">{student.email || "-"}</TableCell>
                       <TableCell>
                         <Button
                           variant="link"
