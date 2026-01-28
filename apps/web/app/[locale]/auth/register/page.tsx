@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { getAuthErrorMessage } from "@/lib/utils/auth-errors";
 import { getBrowserMetadata } from "@/lib/utils/browser-metadata";
+import posthog from "posthog-js";
 import {
   Card,
   CardContent,
@@ -91,6 +92,12 @@ export default function RegisterPage() {
         throw error;
       }
 
+      // PostHog: Capture signup event (user not yet confirmed, so no identify)
+      posthog.capture('user_signed_up', {
+        method: 'email',
+        locale,
+      });
+
       toast.success(t('success'), {
         description: t('successDescription'),
       });
@@ -98,6 +105,9 @@ export default function RegisterPage() {
       // 🔄 Redirección localizada
       router.push(routes.auth.verifyEmail());
     } catch (error: unknown) {
+      // PostHog: Capture signup error
+      posthog.captureException(error);
+
       toast.error(t('error'), {
         description: getAuthErrorMessage(error, tErrors),
       });

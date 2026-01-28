@@ -78,11 +78,11 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/") {
     // 1. Verificar cookie NEXT_LOCALE
     const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
-    
+
     // 2. Detectar idioma del navegador desde Accept-Language
     const acceptLanguage = request.headers.get('accept-language');
     let detectedLocale = defaultLocale;
-    
+
     if (cookieLocale && supportedLocales.includes(cookieLocale as any)) {
       detectedLocale = cookieLocale;
       console.log(`[Middleware] Using locale from cookie: ${detectedLocale}`);
@@ -91,22 +91,22 @@ export async function middleware(request: NextRequest) {
       const browserLocales = acceptLanguage
         .split(',')
         .map(lang => lang.split(';')[0].trim().toLowerCase().substring(0, 2));
-      
-      const matched = browserLocales.find(lang => 
+
+      const matched = browserLocales.find(lang =>
         supportedLocales.includes(lang as any)
       );
-      
+
       if (matched) {
         detectedLocale = matched;
         console.log(`[Middleware] Auto-detected locale from browser: ${detectedLocale}`);
       }
     }
-    
+
     const redirectUrl = new URL(`/${detectedLocale}`, request.url);
     console.log(
       `[Middleware] Redirecting root to detected locale: ${redirectUrl.pathname}`,
     );
-    
+
     // Establecer cookie si no existe
     const response = NextResponse.redirect(redirectUrl);
     if (!cookieLocale) {
@@ -116,7 +116,7 @@ export async function middleware(request: NextRequest) {
         path: '/'
       });
     }
-    
+
     return response;
   }
 
@@ -129,7 +129,7 @@ export async function middleware(request: NextRequest) {
     const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
     const acceptLanguage = request.headers.get('accept-language');
     let targetLocale = defaultLocale;
-    
+
     if (cookieLocale && supportedLocales.includes(cookieLocale as any)) {
       targetLocale = cookieLocale;
     } else if (acceptLanguage) {
@@ -139,13 +139,13 @@ export async function middleware(request: NextRequest) {
       const matched = browserLocales.find(lang => supportedLocales.includes(lang as any));
       if (matched) targetLocale = matched;
     }
-    
+
     const redirectUrl = new URL(request.url);
     redirectUrl.pathname = `/${targetLocale}${pathname}`;
     console.log(
       `[Middleware] Redirecting non-localized path '${pathname}' to detected locale: ${redirectUrl.pathname}${redirectUrl.search}`,
     );
-    
+
     const response = NextResponse.redirect(redirectUrl);
     if (!cookieLocale) {
       response.cookies.set('NEXT_LOCALE', targetLocale, {
@@ -370,6 +370,6 @@ export const config = {
      * - .git/ (ignore probes from browser extensions/scanners)
      * - opencv.js (OpenCV library for document capture)
      */
-    "/((?!_next/|favicon.*\\.(?:ico|png)|apple-touch-icon\\.png|android-chrome-.*\\.png|site\\.webmanifest|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/|opencv.js|turnstile.html).*)",
+    "/((?!_next/|favicon.*\\.(?:ico|png)|apple-touch-icon\\.png|android-chrome-.*\\.png|site\\.webmanifest|assets/|uploads/|images/|.well-known/|security.txt|robots.txt|sitemap.xml|.git/|opencv.js|turnstile.html|ingest/).*)",
   ],
 };

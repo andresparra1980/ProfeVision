@@ -27,7 +27,7 @@ describe('StudentsResultsTable', () => {
   const mockResultados: ResultadoExamen[] = [
     {
       id: 'r1',
-      estudiante_id: '1',
+
       puntaje_obtenido: 80,
       porcentaje: 80,
       fecha_calificacion: '2023-01-01',

@@ -13,6 +13,7 @@ import { SidebarProvider } from "@/lib/contexts/sidebar-context";
 import { OnboardingProvider } from "@/lib/contexts/onboarding-context";
 import logger from "@/lib/utils/logger";
 import { useTranslations, useLocale } from 'next-intl';
+import posthog from "posthog-js";
 import { useWelcomeModal } from "@/lib/hooks/useWelcomeModal";
 import { WelcomeTierModal } from "@/components/shared/welcome-tier-modal";
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
@@ -85,7 +86,15 @@ export default function DashboardLayout({
       
       // Manually clear Supabase cookies before redirecting
       deleteSupabaseCookies();
-      
+
+      // PostHog: Reset user identity on logout
+      try {
+        posthog.capture('user_logged_out');
+        posthog.reset();
+      } catch (e) {
+        logger.error('[DashboardLayout] PostHog reset error:', e);
+      }
+
       // Always redirect to clear client state
       logger.log('[DashboardLayout] Redirecting to login after logout attempt.');
       router.push({ pathname: '/auth/login' });

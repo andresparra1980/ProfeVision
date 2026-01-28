@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { IBM_Plex_Mono, IBM_Plex_Sans, Inter, Noto_Sans } from 'next/font/google';
 import '@/styles/globals.css';
+import { CSPostHogProvider } from './providers/csp-posthog-provider';
 
 const ibmPlexSans = IBM_Plex_Sans({
   weight: '400',
@@ -78,10 +79,12 @@ export default async function RootLayout({
         className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable} ${inter.variable} ${notoSans.variable}`}
         suppressHydrationWarning
       >
-        {children}
-        <Analytics />
-        <SpeedInsights />
+        <CSPostHogProvider>
+          {children}
+          <Analytics />
+          <SpeedInsights />
+        </CSPostHogProvider>
       </body>
     </html>
   );
-} 
+}

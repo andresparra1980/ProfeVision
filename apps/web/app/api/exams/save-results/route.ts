@@ -7,6 +7,7 @@ import logger from "@/lib/utils/logger";
 import { getApiTranslator } from '@/i18n/api';
 import TierService from '@/lib/services/tier-service';
 import { createAdminSupabaseClient } from '@/lib/supabase/server';
+import { getPostHogClient } from '@/lib/posthog-server';
 
 // Configuración de Vercel
 export const dynamic = "force-dynamic";
@@ -1032,6 +1033,29 @@ export async function POST(req: NextRequest) {
           logger.error('Error incrementing scan usage:', tierError);
         }
         // Don't fail the request if usage increment fails
+      }
+    }
+
+    // PostHog: Capture exam_scan_saved event
+    try {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: profesorId,
+        event: 'exam_scan_saved',
+        properties: {
+          exam_id: examId,
+          student_id: studentId,
+          score: notaFinal,
+          percentage: porcentajeCorrectas,
+          correct_answers: respuestasCorrectas,
+          total_questions: preguntasHabilitadas.length,
+          is_duplicate_replacement: !!isDuplicate,
+          source: 'api',
+        },
+      });
+    } catch (posthogError) {
+      if (DEBUG) {
+        logger.error("PostHog capture error:", posthogError);
       }
     }
 

@@ -6,13 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Zap } from "lucide-react";
 import { PricingCardV2 } from "@/components/shared/pricing-card-v2";
+import posthog from "posthog-js";
 
 export function PricingContent() {
   const t = useTranslations("common");
   const billingPeriod = "monthly" as const;
 
   const handleUpgrade = () => {
+    posthog.capture('pricing_plan_clicked', { tier: 'plus', source: 'pricing_page' });
     window.location.href = "/dashboard";
+  };
+
+  const handleFreeSignup = () => {
+    posthog.capture('pricing_plan_clicked', { tier: 'free', source: 'pricing_page' });
+    window.location.href = "/auth/register";
   };
 
   return (
@@ -73,10 +80,7 @@ export function PricingContent() {
               <PricingCardV2
                 tier="free"
                 billingPeriod={billingPeriod}
-                onUpgrade={() => {
-                  // Scroll to register or redirect
-                  window.location.href = "/auth/register";
-                }}
+                onUpgrade={handleFreeSignup}
               />
               <PricingCardV2
                 tier="plus"
