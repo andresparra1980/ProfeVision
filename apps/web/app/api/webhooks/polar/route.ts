@@ -1,6 +1,7 @@
 import { Webhooks } from "@polar-sh/nextjs";
 import { createClient } from "@supabase/supabase-js";
 import logger from "@/lib/utils/logger";
+import { getPostHogClient } from '@/lib/posthog-server';
 
 // Validar que el webhook secret está configurado
 if (!process.env.POLAR_WEBHOOK_SECRET) {
@@ -141,6 +142,23 @@ export const POST = Webhooks({
       }
     }
 
+    // PostHog: Capture subscription_created event
+    try {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: profesorId,
+        event: 'subscription_created',
+        properties: {
+          tier: 'plus',
+          polar_subscription_id: subscription.id,
+          is_retry: isRetry,
+          source: 'polar_webhook',
+        },
+      });
+    } catch (posthogError) {
+      logger.error("PostHog capture error:", posthogError);
+    }
+
     logger.log(`Upgrade a Plus completado para profesor: ${profesorId}`);
   },
 
@@ -172,6 +190,22 @@ export const POST = Webhooks({
       subscription_status: "cancelled",
       // subscription_tier permanece "plus" hasta que expire
     });
+
+    // PostHog: Capture subscription_cancelled event
+    try {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: profesorId,
+        event: 'subscription_cancelled',
+        properties: {
+          polar_subscription_id: subscription.id,
+          maintains_access: true,
+          source: 'polar_webhook',
+        },
+      });
+    } catch (posthogError) {
+      logger.error("PostHog capture error:", posthogError);
+    }
 
     logger.log(`Suscripción cancelada (mantiene acceso): ${profesorId}`);
   },

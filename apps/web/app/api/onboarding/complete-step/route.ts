@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyTeacherAuth } from '@/lib/auth/verify-teacher';
 import { createClient } from '@/lib/supabase/server';
 import logger from '@/lib/utils/logger';
+import { getPostHogClient } from '@/lib/posthog-server';
 
 type ChecklistItem = 'exam_created' | 'exam_published' | 'pdf_exported' | 'first_scan';
 
@@ -86,6 +87,26 @@ export async function POST(req: NextRequest) {
         { error: 'Error al completar paso de onboarding' },
         { status: 500 }
       );
+    }
+
+    // PostHog: Capture onboarding_step_completed event
+    try {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: user.id,
+        event: 'onboarding_step_completed',
+        properties: {
+          step_type: step,
+          wizard_step: wizard_step,
+          checklist_item: checklist_item,
+          skipped: !!skip,
+          skip_reason: skip_reason,
+          wizard_completed: statusUpdate.wizard_completed || false,
+          source: 'api',
+        },
+      });
+    } catch (posthogError) {
+      logger.error("PostHog capture error:", posthogError);
     }
 
     return NextResponse.json({

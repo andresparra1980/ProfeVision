@@ -15,6 +15,7 @@ import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { getAuthErrorMessage } from "@/lib/utils/auth-errors";
+import posthog from "posthog-js";
 import {
   Card,
   CardContent,
@@ -60,7 +61,7 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
         options: {
@@ -72,14 +73,28 @@ export default function LoginPage() {
         throw error;
       }
 
+      // PostHog: Identify user and capture login event
+      if (authData.user) {
+        posthog.identify(authData.user.id, {
+          email: authData.user.email,
+        });
+        posthog.capture('user_logged_in', {
+          method: 'email',
+          locale,
+        });
+      }
+
       // 🔄 Redirección localizada
       router.push(routes.dashboard.home());
       router.refresh();
     } catch (error: unknown) {
+      // PostHog: Capture login error
+      posthog.captureException(error);
+
       toast.error(t('loginError'), {
         description: getAuthErrorMessage(error, tErrors),
       });
-      
+
       // Resetear el CAPTCHA en caso de error
       if (turnstileRef.current) {
         turnstileRef.current.reset();

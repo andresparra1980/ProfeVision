@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { usePostHog } from 'posthog-js/react';
 import { useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -140,8 +141,21 @@ export default function ExamResultsPage() {
     availableGroups,
     selectedGroupId,
     onGroupChange: fetchExamResults,
-    setLoading: () => {}, // Loading is handled by fetchExamResults
+    setLoading: () => { }, // Loading is handled by fetchExamResults
   });
+
+  // PostHog Tracking
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    if (examDetails) {
+      posthog?.capture('exam_results_viewed', {
+        exam_id: examDetails.id,
+        exam_title: examDetails.titulo,
+        subject: examDetails.materias?.nombre,
+      });
+    }
+  }, [examDetails, posthog]);
 
   // Handlers
   const handleShowDetails = (resultado: ResultadoExamen) => {
@@ -164,7 +178,7 @@ export default function ExamResultsPage() {
         ...todosEstudiantes
       ];
       const separados = hasNombresSeparados(allStudents);
-      
+
       // Crear datos para exportar con estructura dinámica (orden de columnas garantizado)
       const dataToExport = resultados.map(resultado => {
         if (separados) {
@@ -243,20 +257,20 @@ export default function ExamResultsPage() {
       // Crear cabeceras de columnas (localizadas) - dinámico según formato de nombres
       const columnsRow = separados
         ? [
-            t('excel.lastName'),
-            t('excel.firstName'),
-            t('excel.identification'),
-            t('excel.score'),
-            t('excel.percentage'),
-            t('excel.gradedDate')
-          ]
+          t('excel.lastName'),
+          t('excel.firstName'),
+          t('excel.identification'),
+          t('excel.score'),
+          t('excel.percentage'),
+          t('excel.gradedDate')
+        ]
         : [
-            t('excel.fullName'),
-            t('excel.identification'),
-            t('excel.score'),
-            t('excel.percentage'),
-            t('excel.gradedDate')
-          ];
+          t('excel.fullName'),
+          t('excel.identification'),
+          t('excel.score'),
+          t('excel.percentage'),
+          t('excel.gradedDate')
+        ];
 
       // Combinar todo en una matriz
       const allData = [...headerData, columnsRow];

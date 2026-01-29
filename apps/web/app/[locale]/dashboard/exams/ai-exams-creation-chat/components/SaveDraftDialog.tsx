@@ -32,6 +32,7 @@ import { clearLastDocumentContext } from "@/lib/persistence/browser";
 import { clearIndexedDBStores } from "../utils/indexeddb-helpers";
 import { useExamMapper } from "../hooks/useExamMapper";
 import type { Materia, Grupo, EditingExam } from "../hooks/useExamDraft";
+import posthog from "posthog-js";
 
 interface SaveDraftDialogProps {
   open: boolean;
@@ -235,6 +236,13 @@ export function SaveDraftDialog({
         if (!isEditing) {
           completeChecklistItem('exam_created');
         }
+
+        // PostHog: Track exam draft saved
+        posthog.capture('exam_draft_saved', {
+          is_editing: isEditing,
+          question_count: preguntas.length,
+          source: 'ai_exam_chat',
+        });
 
         router.push("/dashboard/exams");
       } catch (e) {

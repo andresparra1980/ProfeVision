@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Database } from "@/lib/types/database";
 import logger from "@/lib/utils/logger";
 import { getApiTranslator } from '@/i18n/api';
+import { getPostHogClient } from '@/lib/posthog-server';
 
 // Endpoint de diagnóstico para verificar que las rutas base de API están accesibles
 export async function GET() {
@@ -270,6 +271,23 @@ export async function POST(request: Request) {
           }
         }
       }
+    }
+
+    // PostHog: Capture server-side exam_created event
+    try {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: profesor_id,
+        event: 'exam_created',
+        properties: {
+          exam_id: examenId,
+          question_count: preguntas?.length || 0,
+          has_description: !!descripcion,
+          source: 'api',
+        },
+      });
+    } catch (posthogError) {
+      logger.error("PostHog capture error:", posthogError);
     }
 
     return NextResponse.json(data);

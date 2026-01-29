@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getPolarEndpoint } from "@/lib/polar/config";
+import { getPostHogClient } from '@/lib/posthog-server';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -43,7 +44,23 @@ export async function GET(req: NextRequest) {
   }
 
   const checkout = await response.json();
-  
+
+  // PostHog: Capture checkout_initiated event
+  try {
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: user.id,
+      event: 'checkout_initiated',
+      properties: {
+        product_id: productId,
+        checkout_id: checkout.id,
+        source: 'polar_checkout',
+      },
+    });
+  } catch (posthogError) {
+    console.error("PostHog capture error:", posthogError);
+  }
+
   // Redirigir al checkout de Polar
   return NextResponse.redirect(checkout.url);
 }

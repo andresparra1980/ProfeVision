@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Pencil, Loader2, Trash2 } from "lucide-react";
+import posthog from "posthog-js";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -80,6 +81,12 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
         q.answer = newCorrectIndex >= 0 ? newCorrectIndex : q.answer;
       }
       setResult(cloned);
+
+      // PostHog: Track options randomized
+      posthog.capture('options_randomized', {
+        question_count: qs.length,
+        source: 'ai_exam_chat',
+      });
     } catch (_e) {
       void _e; // ignore failures while randomizing
     }
@@ -110,6 +117,13 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
       qs[editingIndex] = updated;
       return cloned;
     });
+
+    // PostHog: Track question edited
+    posthog.capture('question_edited', {
+      question_index: editingIndex,
+      question_type: updated.type,
+      source: 'ai_exam_chat',
+    });
   }
 
   function openDeleteDialog(idx: number) {
@@ -119,6 +133,10 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
 
   function handleDeleteConfirm() {
     if (deleteIndex === null) return;
+
+    // Get question type before deletion for tracking
+    const deletedQuestion = questions[deleteIndex];
+
     setResult((prev) => {
       if (!prev) return prev;
       const cloned = JSON.parse(JSON.stringify(prev));
@@ -127,6 +145,14 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
       qs.splice(deleteIndex, 1);
       return cloned;
     });
+
+    // PostHog: Track question deleted
+    posthog.capture('question_deleted', {
+      question_index: deleteIndex,
+      question_type: deletedQuestion?.type,
+      source: 'ai_exam_chat',
+    });
+
     setShowDeleteAlert(false);
     setDeleteIndex(null);
   }
