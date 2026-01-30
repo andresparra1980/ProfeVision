@@ -2,7 +2,6 @@ import type { Block } from 'payload';
 
 export const CodeBlock: Block = {
     slug: 'code',
-    imageURL: '/blocks/code.svg',
     interfaceName: 'CodeBlock',
     fields: [
         {

@@ -3,7 +3,6 @@ import { lexicalEditor, FixedToolbarFeature } from '@payloadcms/richtext-lexical
 
 export const CardBlock: Block = {
     slug: 'card',
-    imageURL: '/blocks/card.svg',
     interfaceName: 'CardBlock',
     fields: [
         {

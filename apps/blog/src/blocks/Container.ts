@@ -3,7 +3,6 @@ import { lexicalEditor, FixedToolbarFeature } from '@payloadcms/richtext-lexical
 
 export const ContainerBlock: Block = {
     slug: 'container',
-    imageURL: '/blocks/container.svg',
     interfaceName: 'ContainerBlock',
     fields: [
         {

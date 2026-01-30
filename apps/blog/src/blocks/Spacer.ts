@@ -2,7 +2,6 @@ import type { Block } from 'payload';
 
 export const SpacerBlock: Block = {
     slug: 'spacer',
-    imageURL: '/blocks/spacer.svg',
     interfaceName: 'SpacerBlock',
     fields: [
         {
