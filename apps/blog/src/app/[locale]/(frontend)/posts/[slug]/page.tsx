@@ -7,7 +7,10 @@ import { Button } from '@profevision/ui/button';
 import { Card, CardContent } from '@profevision/ui/card';
 import { LexicalRenderer } from '@/components/lexical-renderer';
 import { PreviewBanner } from '@/components/preview-banner';
+import dynamic from 'next/dynamic';
 import type { Metadata } from 'next';
+
+const TableOfContents = dynamic(() => import('@/components/table-of-contents').then(mod => mod.TableOfContents));
 
 interface PageProps {
     params: Promise<{ locale: string; slug: string }>;
@@ -114,7 +117,9 @@ export default async function PostPage({ params }: PageProps) {
             <article>
                 {/* Preview Mode Banner */}
                 {isDraft && <PreviewBanner locale={locale} />}
-                
+
+                <TableOfContents locale={locale} />
+
                 {/* Header */}
                 <header className="mb-8">
                     {post.category && typeof post.category === 'object' && (

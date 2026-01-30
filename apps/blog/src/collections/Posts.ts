@@ -1,5 +1,7 @@
 import { CollectionConfig } from 'payload';
+import { lexicalEditor, FixedToolbarFeature, BlocksFeature } from '@payloadcms/richtext-lexical';
 import { translatePostHook } from '../hooks/translate-post';
+import { ColumnsBlock, HeroBlock, CardBlock, CodeBlock, ContainerBlock, SpacerBlock } from '../blocks';
 
 export const Posts: CollectionConfig = {
     slug: 'blog_posts',
@@ -40,6 +42,22 @@ export const Posts: CollectionConfig = {
             name: 'content',
             type: 'richText',
             localized: true,
+            editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                    ...defaultFeatures,
+                    FixedToolbarFeature(),
+                    BlocksFeature({
+                        blocks: [
+                            ColumnsBlock,
+                            HeroBlock,
+                            CardBlock,
+                            CodeBlock,
+                            ContainerBlock,
+                            SpacerBlock,
+                        ],
+                    }),
+                ],
+            }),
         },
         {
             name: 'excerpt',

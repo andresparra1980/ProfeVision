@@ -438,6 +438,183 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ColumnsBlock".
+ */
+export interface ColumnsBlock {
+  columns?:
+    | {
+        /**
+         * Ancho de esta columna (solo visible en desktop)
+         */
+        width?: ('equal' | 'oneThird' | 'twoThirds' | 'oneQuarter' | 'threeQuarters') | null;
+        content?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  gap?: ('none' | 'small' | 'medium' | 'large') | null;
+  verticalAlign?: ('top' | 'center' | 'bottom') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'columns';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBlock".
+ */
+export interface HeroBlock {
+  /**
+   * Imagen de fondo del hero
+   */
+  media: number | BlogMedia;
+  heading: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  alignment?: ('left' | 'center' | 'right') | null;
+  /**
+   * Opacidad del overlay oscuro sobre la imagen
+   */
+  overlayOpacity?: ('0' | '20' | '40' | '50' | '60' | '80') | null;
+  height?: ('small' | 'medium' | 'large' | 'fullscreen') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardBlock".
+ */
+export interface CardBlock {
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Imagen opcional para el card
+   */
+  media?: (number | null) | BlogMedia;
+  variant?: ('default' | 'outline' | 'filled' | 'elevated') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'card';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CodeBlock".
+ */
+export interface CodeBlock {
+  code: string;
+  language?:
+    | (
+        | 'typescript'
+        | 'javascript'
+        | 'python'
+        | 'java'
+        | 'css'
+        | 'html'
+        | 'json'
+        | 'sql'
+        | 'bash'
+        | 'markdown'
+        | 'yaml'
+        | 'rust'
+        | 'go'
+        | 'php'
+        | 'ruby'
+      )
+    | null;
+  showLineNumbers?: boolean | null;
+  /**
+   * Ejemplo: config.ts
+   */
+  filename?: string | null;
+  /**
+   * Ejemplo: 1,3,5-7 (líneas 1, 3 y 5 a 7)
+   */
+  highlightLines?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'code';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContainerBlock".
+ */
+export interface ContainerBlock {
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  backgroundColor?: ('white' | 'gray100' | 'gray200' | 'primary' | 'secondary' | 'accent' | 'dark') | null;
+  padding?: ('none' | 'small' | 'medium' | 'large' | 'xlarge') | null;
+  borderRadius?: ('none' | 'small' | 'medium' | 'large') | null;
+  border?: boolean | null;
+  maxWidth?: ('default' | 'narrow' | 'medium') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'container';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SpacerBlock".
+ */
+export interface SpacerBlock {
+  height?: ('xs' | 'small' | 'medium' | 'large' | 'xlarge') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'spacer';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
