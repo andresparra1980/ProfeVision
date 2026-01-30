@@ -1,6 +1,6 @@
 import { buildConfig } from 'payload';
 import { postgresAdapter } from '@payloadcms/db-postgres';
-import { lexicalEditor } from '@payloadcms/richtext-lexical';
+import { lexicalEditor, FixedToolbarFeature, BlocksFeature, EXPERIMENTAL_TableFeature, UploadFeature, LinkFeature, RelationshipFeature } from '@payloadcms/richtext-lexical';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { s3Storage } from '@payloadcms/storage-s3';
 import path from 'path';
@@ -21,7 +21,44 @@ export default buildConfig({
         pool: { connectionString: process.env.DATABASE_URL || '' },
     }),
 
-    editor: lexicalEditor(),
+    editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+            ...defaultFeatures,
+            // Fixed toolbar for better UX
+            FixedToolbarFeature(),
+            // Upload feature for media
+            UploadFeature({
+                collections: {
+                    blog_media: {
+                        fields: [
+                            {
+                                name: 'alt',
+                                type: 'text',
+                                label: 'Alt Text',
+                            },
+                            {
+                                name: 'caption',
+                                type: 'text',
+                                label: 'Caption',
+                            },
+                        ],
+                    },
+                },
+            }),
+            // Enhanced link feature
+            LinkFeature({
+                enabledCollections: ['blog_posts', 'blog_categories', 'blog_authors'],
+                maxDepth: 2,
+            }),
+            // Relationship feature
+            RelationshipFeature({
+                enabledCollections: ['blog_posts', 'blog_categories', 'blog_authors'],
+                maxDepth: 2,
+            }),
+            // Table feature (experimental)
+            EXPERIMENTAL_TableFeature(),
+        ],
+    }),
 
     collections: [Posts, Categories, Authors, Media],
 
