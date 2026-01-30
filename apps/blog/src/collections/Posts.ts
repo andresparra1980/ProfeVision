@@ -1,6 +1,7 @@
 import { CollectionConfig } from 'payload';
 import { lexicalEditor, FixedToolbarFeature, BlocksFeature } from '@payloadcms/richtext-lexical';
 import { translatePostHook } from '../hooks/translate-post';
+import { populateMetaImageHook } from '../hooks/populate-meta-image';
 import { ColumnsBlock, HeroBlock, CardBlock, CodeBlock, ContainerBlock, SpacerBlock } from '../blocks';
 
 export const Posts: CollectionConfig = {
@@ -125,6 +126,6 @@ export const Posts: CollectionConfig = {
         },
     ],
     hooks: {
-        afterChange: [translatePostHook],
+        afterChange: [populateMetaImageHook, translatePostHook],
     },
 };
