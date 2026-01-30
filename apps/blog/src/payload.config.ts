@@ -109,6 +109,10 @@ export default buildConfig({
             collections: ['blog_posts'],
             generateTitle: ({ doc }) => `${doc.title} | ProfeVision Blog`,
             generateDescription: ({ doc }) => doc.excerpt,
+            generateURL: ({ doc, collectionSlug }) => {
+                const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://profevision.com';
+                return `${baseUrl}/${collectionSlug}/${doc.slug}`;
+            },
             generateImage: ({ doc }) => {
                 // Use featuredImage if available, otherwise use default ProfeVision logo
                 const featuredImage = doc.featuredImage;
