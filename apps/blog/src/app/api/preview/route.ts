@@ -1,27 +1,24 @@
 import { draftMode } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { NextRequest } from 'next/server';
-import { checkAdminAccess } from '@/lib/supabase';
+import { getPayloadClient } from '@/lib/payload';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get('slug');
-    const secret = searchParams.get('secret');
     const locale = searchParams.get('locale') || 'es';
-
-    // Validate secret
-    if (secret !== process.env.PREVIEW_SECRET) {
-        return new Response('Invalid secret', { status: 401 });
-    }
-
-    // Check if user is admin
-    const admin = await checkAdminAccess();
-    if (!admin) {
-        return new Response('Unauthorized', { status: 401 });
-    }
 
     if (!slug) {
         return new Response('Missing slug', { status: 400 });
+    }
+
+    // Verify user is authenticated via Payload
+    const payload = await getPayloadClient();
+    const headers = new Headers(request.headers);
+    const { user } = await payload.auth({ headers });
+
+    if (!user) {
+        return new Response('Unauthorized - Please login to the admin first', { status: 401 });
     }
 
     // Enable draft mode

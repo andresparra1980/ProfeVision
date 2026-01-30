@@ -16,7 +16,7 @@ export const PreviewButton: React.FC = () => {
             return;
         }
 
-        const previewUrl = `/api/preview?slug=${encodeURIComponent(slug)}&secret=${process.env.PREVIEW_SECRET || 'your-preview-secret'}`;
+        const previewUrl = `/api/preview?slug=${encodeURIComponent(slug)}`;
         
         // Open preview in new tab
         window.open(previewUrl, '_blank', 'noopener,noreferrer');
