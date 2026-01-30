@@ -16,7 +16,7 @@
   "devDependencies": {
     "turbo": "^2.5.4"
   },
-  "packageManager": "pnpm@9.15.9",
+  "packageManager": "pnpm@10.28.2",
   "pnpm": {
     "overrides": {
       "pg": "8.16.3"
