@@ -109,7 +109,14 @@ export default buildConfig({
             collections: ['blog_posts'],
             generateTitle: ({ doc }) => `${doc.title} | ProfeVision Blog`,
             generateDescription: ({ doc }) => doc.excerpt,
-            generateImage: ({ doc }) => 'https://assets.profevision.com/android-chrome-512x512.png',
+            generateImage: ({ doc }) => {
+                // Use featured image if available, otherwise use default ProfeVision logo
+                const featuredImage = doc.featuredImage;
+                if (featuredImage && typeof featuredImage === 'object' && featuredImage.url) {
+                    return featuredImage.url;
+                }
+                return 'https://assets.profevision.com/android-chrome-512x512.png';
+            },
         }),
     ],
 
