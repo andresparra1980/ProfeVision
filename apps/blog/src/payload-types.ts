@@ -477,7 +477,7 @@ export interface ColumnsBlock {
  */
 export interface HeroBlock {
   /**
-   * Imagen de fondo del hero
+   * Imagen de fondo del hero. Se recomienda formato 16:9 (1920x1080) o 21:9 para mejor visualización
    */
   media: number | BlogMedia;
   heading: string;

@@ -11,7 +11,7 @@ export const HeroBlock: Block = {
             relationTo: 'blog_media',
             required: true,
             admin: {
-                description: 'Imagen de fondo del hero',
+                description: 'Imagen de fondo del hero. Se recomienda formato 16:9 (1920x1080) o 21:9 para mejor visualización',
             },
         },
         {

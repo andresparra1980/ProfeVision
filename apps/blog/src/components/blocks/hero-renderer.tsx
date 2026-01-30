@@ -32,12 +32,12 @@ export function HeroBlockRenderer({ media, heading, content, alignment = 'center
     const overlayOpacityValue = parseInt(overlayOpacity) / 100;
 
     return (
-        <div className={`relative ${heightClasses[height] || 'min-h-[500px]'} flex items-center justify-center overflow-hidden rounded-lg my-8`}>
+        <div className={`relative ${heightClasses[height] || 'min-h-[500px]'} flex items-center justify-center overflow-hidden rounded-lg my-8 bg-gray-900`}>
             {/* Background Image */}
             <img
                 src={media.url}
                 alt={media.alt || heading || 'Hero image'}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover object-center"
             />
             
             {/* Overlay */}
