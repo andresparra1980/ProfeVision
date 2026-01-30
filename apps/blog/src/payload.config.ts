@@ -109,6 +109,7 @@ export default buildConfig({
             collections: ['blog_posts'],
             generateTitle: ({ doc }) => `${doc.title} | ProfeVision Blog`,
             generateDescription: ({ doc }) => doc.excerpt,
+            generateImage: ({ doc }) => 'https://assets.profevision.com/android-chrome-512x512.png',
         }),
     ],
 
