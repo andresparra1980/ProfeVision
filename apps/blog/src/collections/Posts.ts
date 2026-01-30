@@ -126,6 +126,7 @@ export const Posts: CollectionConfig = {
         },
     ],
     hooks: {
-        afterChange: [populateMetaImageHook, translatePostHook],
+        beforeChange: [populateMetaImageHook],
+        afterChange: [translatePostHook],
     },
 };
