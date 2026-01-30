@@ -118,8 +118,6 @@ export default async function PostPage({ params }: PageProps) {
                 {/* Preview Mode Banner */}
                 {isDraft && <PreviewBanner locale={locale} />}
 
-                <TableOfContents locale={locale} />
-
                 {/* Header */}
                 <header className="mb-8">
                     {post.category && typeof post.category === 'object' && (
@@ -167,6 +165,9 @@ export default async function PostPage({ params }: PageProps) {
                         <LexicalRenderer content={post.content} />
                     </CardContent>
                 </Card>
+
+                {/* Table of Contents */}
+                <TableOfContents locale={locale} />
 
                 {/* Navigation */}
                 <div className="mt-8">
