@@ -73,6 +73,20 @@ export const Posts: CollectionConfig = {
             relationTo: 'blog_media',
         },
         {
+            name: 'meta',
+            type: 'group',
+            fields: [
+                {
+                    name: 'image',
+                    type: 'upload',
+                    relationTo: 'blog_media',
+                    admin: {
+                        description: 'Imagen para redes sociales (Open Graph)',
+                    },
+                },
+            ],
+        },
+        {
             name: 'category',
             type: 'relationship',
             relationTo: 'blog_categories',
