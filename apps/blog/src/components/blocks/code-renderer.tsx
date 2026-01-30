@@ -1,8 +1,8 @@
-'use server';
+'use client';
 
+import { useState, useEffect } from 'react';
 import { codeToHtml } from 'shiki';
 import { transformerNotationHighlight, transformerNotationDiff } from '@shikijs/transformers';
-import type { CodeBlock } from '@/payload-types';
 
 interface CodeBlockProps {
     code: string;
@@ -12,23 +12,43 @@ interface CodeBlockProps {
     highlightLines?: string;
 }
 
-export async function CodeRenderer({ 
+export function CodeRenderer({ 
     code, 
     language, 
     showLineNumbers, 
     filename,
     highlightLines 
 }: CodeBlockProps) {
-    const transformers = [
-        transformerNotationHighlight(),
-        transformerNotationDiff(),
-    ];
+    const [html, setHtml] = useState<string>('');
+    const [loading, setLoading] = useState(true);
 
-    const html = await codeToHtml(code, {
-        lang: language,
-        theme: 'github-dark',
-        transformers,
-    });
+    useEffect(() => {
+        let mounted = true;
+        
+        async function highlight() {
+            const transformers = [
+                transformerNotationHighlight(),
+                transformerNotationDiff(),
+            ];
+
+            const highlighted = await codeToHtml(code, {
+                lang: language,
+                theme: 'github-dark',
+                transformers,
+            });
+
+            if (mounted) {
+                setHtml(highlighted);
+                setLoading(false);
+            }
+        }
+
+        highlight();
+        
+        return () => {
+            mounted = false;
+        };
+    }, [code, language]);
 
     return (
         <div className="my-6 overflow-hidden rounded-lg border border-border bg-[#0d1117]">
@@ -38,10 +58,16 @@ export async function CodeRenderer({
                     <span className="text-xs text-gray-500 uppercase">{language}</span>
                 </div>
             )}
-            <div 
-                className="overflow-x-auto"
-                dangerouslySetInnerHTML={{ __html: html }}
-            />
+            {loading ? (
+                <div className="p-4 text-gray-500">
+                    <pre className="font-mono text-sm"><code>{code}</code></pre>
+                </div>
+            ) : (
+                <div 
+                    className="overflow-x-auto"
+                    dangerouslySetInnerHTML={{ __html: html }}
+                />
+            )}
         </div>
     );
 }
