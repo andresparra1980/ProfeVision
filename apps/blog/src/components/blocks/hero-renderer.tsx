@@ -54,7 +54,7 @@ export function HeroBlockRenderer({ media, heading, content, alignment = 'center
                     </h2>
                 )}
                 {content && (
-                    <div className="prose prose-invert prose-lg">
+                    <div className="prose prose-lg [&_p]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_a]:text-white [&_strong]:text-white [&_em]:text-white [&_li]:text-white [&_blockquote]:text-white [&_blockquote]:border-white/30">
                         <LexicalRenderer content={content} />
                     </div>
                 )}
