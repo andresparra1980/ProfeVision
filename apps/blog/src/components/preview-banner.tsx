@@ -1,31 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-
 interface PreviewBannerProps {
     locale: string;
 }
 
 export function PreviewBanner({ locale }: PreviewBannerProps) {
-    const [isExiting, setIsExiting] = useState(false);
+    const closeText = locale === 'es' ? 'Cerrar' :
+        locale === 'en' ? 'Close' :
+            locale === 'fr' ? 'Fermer' :
+                'Fechar';
 
-    const exitText = locale === 'es' ? 'Salir de vista previa' :
-        locale === 'en' ? 'Exit preview' :
-            locale === 'fr' ? 'Quitter l\'aperçu' :
-                'Sair da pré-visualização';
-
-    const handleExit = async () => {
-        setIsExiting(true);
-        try {
-            const response = await fetch('/api/preview/exit', { method: 'POST' });
-            if (response.ok) {
-                window.location.reload();
-            }
-        } catch (error) {
-            console.error('Failed to exit preview mode:', error);
-        } finally {
-            setIsExiting(false);
-        }
+    const handleClose = () => {
+        window.close();
     };
 
     return (
@@ -59,11 +45,10 @@ export function PreviewBanner({ locale }: PreviewBannerProps) {
                     </span>
                 </div>
                 <button
-                    onClick={handleExit}
-                    disabled={isExiting}
-                    className="px-3 py-1 text-sm bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-700 dark:text-yellow-400 rounded transition-colors disabled:opacity-50"
+                    onClick={handleClose}
+                    className="px-3 py-1 text-sm bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-700 dark:text-yellow-400 rounded transition-colors"
                 >
-                    {isExiting ? '...' : exitText}
+                    {closeText}
                 </button>
             </div>
         </div>
