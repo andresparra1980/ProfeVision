@@ -203,6 +203,7 @@ export interface BlogCategory {
   name: string;
   slug: string;
   description?: string | null;
+  autoTranslationProcessed?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -348,6 +349,7 @@ export interface BlogCategoriesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   description?: T;
+  autoTranslationProcessed?: T;
   updatedAt?: T;
   createdAt?: T;
 }
