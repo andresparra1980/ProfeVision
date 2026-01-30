@@ -1,5 +1,8 @@
 import type { CollectionAfterChangeHook } from 'payload';
 
+// Flag to prevent infinite loops
+const PROCESSING_FLAG = 'populateMetaImageProcessing';
+
 export const populateMetaImageHook: CollectionAfterChangeHook = async ({
     doc,
     req,
@@ -8,7 +11,10 @@ export const populateMetaImageHook: CollectionAfterChangeHook = async ({
     // Only run on create or update
     if (!['create', 'update'].includes(operation)) return doc;
 
-    // Check if meta.image is empty
+    // Prevent infinite loop - if we're already processing this hook, skip
+    if (req.context?.[PROCESSING_FLAG]) return doc;
+
+    // Check if meta.image is already populated
     const hasMetaImage = doc.meta?.image && 
         (typeof doc.meta.image === 'object' || typeof doc.meta.image === 'string');
     
@@ -36,6 +42,10 @@ export const populateMetaImageHook: CollectionAfterChangeHook = async ({
     }
 
     try {
+        // Mark as processing to prevent infinite loop
+        if (!req.context) req.context = {};
+        req.context[PROCESSING_FLAG] = true;
+
         // Update the document with meta.image
         const updateData: Record<string, unknown> = {
             meta: {
@@ -55,6 +65,11 @@ export const populateMetaImageHook: CollectionAfterChangeHook = async ({
         console.log(`[populateMetaImage] Updated post ${doc.id} with meta.image`);
     } catch (error) {
         console.error(`[populateMetaImage] Failed to update post ${doc.id}:`, error);
+    } finally {
+        // Clear the flag
+        if (req.context) {
+            delete req.context[PROCESSING_FLAG];
+        }
     }
 
     return doc;
