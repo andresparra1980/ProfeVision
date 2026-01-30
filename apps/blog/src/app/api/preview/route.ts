@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get('slug');
     const secret = searchParams.get('secret');
+    const locale = searchParams.get('locale') || 'es';
 
     // Validate secret
     if (secret !== process.env.PREVIEW_SECRET) {
@@ -27,6 +28,6 @@ export async function GET(request: NextRequest) {
     const draft = await draftMode();
     draft.enable();
 
-    // Redirect to the post
-    redirect(`/${slug}`);
+    // Redirect to the post with locale
+    redirect(`/${locale}/posts/${slug}`);
 }

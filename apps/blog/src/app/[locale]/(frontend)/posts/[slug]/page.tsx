@@ -1,10 +1,12 @@
 import { getPayloadClient } from '@/lib/payload';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
+import { draftMode } from 'next/headers';
 import Link from 'next/link';
 import { Button } from '@profevision/ui/button';
 import { Card, CardContent } from '@profevision/ui/card';
 import { LexicalRenderer } from '@/components/lexical-renderer';
+import { PreviewBanner } from '@/components/preview-banner';
 import type { Metadata } from 'next';
 
 interface PageProps {
@@ -15,20 +17,45 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { locale, slug } = await params;
     const payload = await getPayloadClient();
+    
+    // Check if we're in draft mode (preview)
+    const draft = await draftMode();
+    const isDraft = draft.isEnabled;
 
-    const { docs } = await payload.find({
-        collection: 'blog_posts',
-        where: { slug: { equals: slug } },
-        locale: locale as 'es' | 'en' | 'fr' | 'pt',
-        limit: 1,
-    });
+    // Query based on draft mode
+    let docs;
+    if (isDraft) {
+        // In draft mode, find any post with this slug
+        const result = await payload.find({
+            collection: 'blog_posts',
+            where: { slug: { equals: slug } },
+            locale: locale as 'es' | 'en' | 'fr' | 'pt',
+            limit: 1,
+        });
+        docs = result.docs;
+    } else {
+        // In production, only find published posts
+        const result = await payload.find({
+            collection: 'blog_posts',
+            where: {
+                and: [
+                    { slug: { equals: slug } },
+                    { status: { equals: 'published' } },
+                ],
+            },
+            locale: locale as 'es' | 'en' | 'fr' | 'pt',
+            limit: 1,
+        });
+        docs = result.docs;
+    }
 
     const post = docs[0];
     if (!post) return { title: 'Post not found' };
 
     return {
-        title: post.title,
+        title: isDraft ? `[PREVIEW] ${post.title}` : post.title,
         description: post.excerpt || undefined,
+        robots: isDraft ? { index: false, follow: false } : undefined,
     };
 }
 
@@ -37,14 +64,39 @@ export default async function PostPage({ params }: PageProps) {
     setRequestLocale(locale);
 
     const payload = await getPayloadClient();
+    
+    // Check if we're in draft mode (preview)
+    const draft = await draftMode();
+    const isDraft = draft.isEnabled;
 
-    const { docs } = await payload.find({
-        collection: 'blog_posts',
-        where: { slug: { equals: slug } },
-        locale: locale as 'es' | 'en' | 'fr' | 'pt',
-        depth: 2,
-        limit: 1,
-    });
+    // Query based on draft mode
+    let docs;
+    if (isDraft) {
+        // In draft mode, find any post with this slug
+        const result = await payload.find({
+            collection: 'blog_posts',
+            where: { slug: { equals: slug } },
+            locale: locale as 'es' | 'en' | 'fr' | 'pt',
+            depth: 2,
+            limit: 1,
+        });
+        docs = result.docs;
+    } else {
+        // In production, only find published posts
+        const result = await payload.find({
+            collection: 'blog_posts',
+            where: {
+                and: [
+                    { slug: { equals: slug } },
+                    { status: { equals: 'published' } },
+                ],
+            },
+            locale: locale as 'es' | 'en' | 'fr' | 'pt',
+            depth: 2,
+            limit: 1,
+        });
+        docs = result.docs;
+    }
 
     const post = docs[0];
 
@@ -60,6 +112,9 @@ export default async function PostPage({ params }: PageProps) {
     return (
         <main className="container mx-auto py-12 px-4 max-w-4xl">
             <article>
+                {/* Preview Mode Banner */}
+                {isDraft && <PreviewBanner locale={locale} />}
+                
                 {/* Header */}
                 <header className="mb-8">
                     {post.category && typeof post.category === 'object' && (

@@ -95,6 +95,16 @@ export const Posts: CollectionConfig = {
                 description: 'Traducir automáticamente al guardar contenido',
             },
         },
+        {
+            name: 'preview',
+            type: 'ui',
+            admin: {
+                position: 'sidebar',
+                components: {
+                    Field: '@/components/admin/PreviewButton#PreviewButton',
+                },
+            },
+        },
     ],
     hooks: {
         afterChange: [translatePostHook],

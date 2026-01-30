@@ -16,12 +16,13 @@ export async function POST(req: Request) {
 
         const model = process.env.OPENAI_MODEL || 'openai/gpt-4o-mini';
 
-        const localeName = {
+        const localeNames: Record<string, string> = {
             es: 'Spanish',
             en: 'English',
             fr: 'French',
             pt: 'Portuguese',
-        }[locale] || 'English';
+        };
+        const localeName = localeNames[locale as string] || 'English';
 
         let prompt = '';
 

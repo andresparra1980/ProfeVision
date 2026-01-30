@@ -47,7 +47,8 @@ export async function POST(req: Request) {
 
         // Generate SEO for source locale first
         console.log(`[SEO] Generating SEO for source locale ${sourceLocale}...`);
-        const sourceLocaleName = { es: 'Spanish', en: 'English', fr: 'French', pt: 'Portuguese' }[sourceLocale];
+        const localeNames: Record<string, string> = { es: 'Spanish', en: 'English', fr: 'French', pt: 'Portuguese' };
+        const sourceLocaleName = localeNames[sourceLocale as string];
 
         const seoPrompt = `Generate SEO-optimized metadata in ${sourceLocaleName} for this blog post. Return valid JSON only.
 
@@ -75,15 +76,10 @@ Return: {"metaTitle": "...", "metaDescription": "..."}`;
 
         // Translate to each target locale
         for (const locale of targetLocales) {
-            const localeName = {
-                en: 'English',
-                fr: 'French',
-                pt: 'Portuguese',
-                es: 'Spanish',
-            }[locale];
+            const targetLocaleName = localeNames[locale];
 
             // Combined prompt for translation + SEO
-            const combinedPrompt = `Translate this blog post metadata from Spanish to ${localeName} AND generate SEO-optimized versions.
+            const combinedPrompt = `Translate this blog post metadata from Spanish to ${targetLocaleName} AND generate SEO-optimized versions.
 
 Return valid JSON only, no markdown:
 {
@@ -123,7 +119,7 @@ Original:
             if (content && typeof content === 'object') {
                 console.log(`[Translation] Translating content to ${locale}...`);
 
-                const contentPrompt = `Translate this Lexical editor JSON from Spanish to ${localeName}.
+                const contentPrompt = `Translate this Lexical editor JSON from Spanish to ${targetLocaleName}.
 Only translate "text" field values. Keep ALL other fields exactly the same.
 Return valid JSON only, no markdown.
 
@@ -146,20 +142,9 @@ ${JSON.stringify(content)}`;
         const payload = await getPayloadClient();
 
         // Update source locale with SEO
-        try {
-            await payload.update({
-                collection: 'blog_posts',
-                id: postId,
-                locale: sourceLocale as 'es' | 'en' | 'fr' | 'pt',
-                data: {
-                    'meta.title': sourceSeo.metaTitle,
-                    'meta.description': sourceSeo.metaDescription,
-                },
-            });
-            console.log(`[SEO] Updated source locale ${sourceLocale}`);
-        } catch (e) {
-            console.error(`[SEO] Failed to update source:`, e);
-        }
+        // Note: meta.title and meta.description are managed by the SEO plugin automatically
+        // based on the title and excerpt fields, so we don't need to update them manually
+        console.log(`[SEO] Source locale ${sourceLocale} SEO generated (managed by plugin)`);
 
         // Update translated locales
         for (const [locale, translation] of Object.entries(translations)) {
@@ -173,12 +158,8 @@ ${JSON.stringify(content)}`;
                     updateData.content = translation.content;
                 }
 
-                if (translation.seoTitle) {
-                    updateData['meta.title'] = translation.seoTitle;
-                }
-                if (translation.seoDescription) {
-                    updateData['meta.description'] = translation.seoDescription;
-                }
+                // Note: meta.title and meta.description are managed by the SEO plugin automatically
+                // based on the title and excerpt fields
 
                 await payload.update({
                     collection: 'blog_posts',
