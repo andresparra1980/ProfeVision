@@ -110,11 +110,7 @@ export default buildConfig({
             generateTitle: ({ doc }) => `${doc.title} | ProfeVision Blog`,
             generateDescription: ({ doc }) => doc.excerpt,
             generateImage: ({ doc }) => {
-                // Priority: 1. meta.image, 2. featuredImage, 3. default logo
-                const metaImage = doc.meta?.image;
-                if (metaImage && typeof metaImage === 'object' && metaImage.url) {
-                    return metaImage.url;
-                }
+                // Use featuredImage if available, otherwise use default ProfeVision logo
                 const featuredImage = doc.featuredImage;
                 if (featuredImage && typeof featuredImage === 'object' && featuredImage.url) {
                     return featuredImage.url;
