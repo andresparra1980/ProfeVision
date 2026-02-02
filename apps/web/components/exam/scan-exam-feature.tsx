@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useOnboarding } from '@/lib/contexts/onboarding-context';
 import { FloatingActionButton } from '../ui/floating-action-button';
 import { ScanWizard } from './scan-wizard';
 
@@ -7,20 +7,20 @@ interface ScanExamFeatureProps {
 }
 
 export function ScanExamFeature({ hideForWelcome = false }: ScanExamFeatureProps) {
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const { isScanWizardOpen, setScanWizardOpen } = useOnboarding();
 
   const openWizard = () => {
-    setIsWizardOpen(true);
+    setScanWizardOpen(true);
   };
 
   const closeWizard = () => {
-    setIsWizardOpen(false);
+    setScanWizardOpen(false);
   };
 
   return (
     <>
-      {!isWizardOpen && <FloatingActionButton onClick={openWizard} hideForWelcome={hideForWelcome} />}
-      <ScanWizard isOpen={isWizardOpen} onClose={closeWizard} />
+      {!isScanWizardOpen && <FloatingActionButton onClick={openWizard} hideForWelcome={hideForWelcome} />}
+      <ScanWizard isOpen={isScanWizardOpen} onClose={closeWizard} />
     </>
   );
 } 

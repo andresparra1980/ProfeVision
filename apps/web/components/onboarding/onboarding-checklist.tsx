@@ -25,6 +25,14 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ExamCreationDrawer } from "./exam-creation-drawer";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import Image from "next/image";
 
 type ChecklistItemKey = "exam_created" | "exam_published" | "pdf_exported" | "first_scan";
 
@@ -40,14 +48,15 @@ export function OnboardingChecklist() {
   const router = useRouter();
   const pathname = usePathname();
   const { isOpen: isSidebarOpen } = useSidebar();
-  const { 
-    onboardingStatus, 
-    isLegacyUser, 
+  const {
+    onboardingStatus,
+    isLegacyUser,
     checklistComplete,
     completeChecklistItem,
     isLoading,
+    setScanWizardOpen,
   } = useOnboarding();
-  
+
   // Check if FAB (Califica Ya button) is visible - same logic as FloatingActionButton
   const isFabVisible = useMemo(() => {
     if (isSidebarOpen) return false;
@@ -57,10 +66,10 @@ export function OnboardingChecklist() {
     const depthAfterDashboard = isInDashboard ? segments.length - (dashIndex + 1) : 0;
     return isInDashboard && depthAfterDashboard <= 1;
   }, [pathname, isSidebarOpen]);
-  
+
   const [isMinimized, setIsMinimized] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
-  
+
   // Load dismissed state from localStorage after mount
   useEffect(() => {
     const dismissed = localStorage.getItem("onboarding_checklist_dismissed") === "true";
@@ -68,13 +77,14 @@ export function OnboardingChecklist() {
   }, []);
   const [checkingProgress, setCheckingProgress] = useState(true);
   const [showExamDrawer, setShowExamDrawer] = useState(false);
+  const [showDesktopScanDialog, setShowDesktopScanDialog] = useState(false);
   const [itemsStatus, setItemsStatus] = useState<Record<ChecklistItemKey, boolean>>({
     exam_created: false,
     exam_published: false,
     pdf_exported: false,
     first_scan: false,
   });
-  
+
   const lastCheckedPathRef = useRef<string | null>(null);
   const dismissedOnPathRef = useRef<string | null>(null);
   const isCheckingRef = useRef(false);
@@ -85,7 +95,7 @@ export function OnboardingChecklist() {
     // Prevent concurrent checks
     if (isCheckingRef.current) return;
     isCheckingRef.current = true;
-    
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -150,7 +160,7 @@ export function OnboardingChecklist() {
     if (lastCheckedPathRef.current !== pathname) {
       lastCheckedPathRef.current = pathname;
       checkProgress(isLegacyUser);
-      
+
       // Reappear if dismissed and navigated to different route (unless steps 1-3 complete)
       if (isDismissed && dismissedOnPathRef.current && dismissedOnPathRef.current !== pathname) {
         const firstThreeComplete = itemsStatus.exam_created && itemsStatus.exam_published && itemsStatus.pdf_exported;
@@ -229,6 +239,19 @@ export function OnboardingChecklist() {
       setShowExamDrawer(true);
       return;
     }
+
+    if (item.key === "first_scan") {
+      // Check if mobile (using 768px as breakpoint, matching standard md)
+      const isMobile = window.innerWidth < 768;
+
+      if (isMobile) {
+        setScanWizardOpen(true);
+      } else {
+        setShowDesktopScanDialog(true);
+      }
+      return;
+    }
+
     if (item.route) {
       router.push(item.route as "/dashboard/exams/create" | "/dashboard/exams");
     }
@@ -237,7 +260,7 @@ export function OnboardingChecklist() {
   const handleDismiss = () => {
     setIsDismissed(true);
     dismissedOnPathRef.current = pathname;
-    
+
     // Only persist to localStorage if steps 1-3 are complete (permanent dismiss)
     const firstThreeComplete = itemsStatus.exam_created && itemsStatus.exam_published && itemsStatus.pdf_exported;
     if (firstThreeComplete) {
@@ -300,205 +323,222 @@ export function OnboardingChecklist() {
 
   return (
     <>
-    {/* Desktop: right edge, vertically centered */}
-    <Card className="hidden md:block fixed right-0 top-1/2 -translate-y-1/2 z-40 w-80 shadow-lg border-feature bg-card/95 backdrop-blur rounded-l-lg rounded-r-none">
-      {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">{t("title")}</h3>
+      {/* Desktop: right edge, vertically centered */}
+      <Card className="hidden md:block fixed right-0 top-1/2 -translate-y-1/2 z-40 w-80 shadow-lg border-feature bg-card/95 backdrop-blur rounded-l-lg rounded-r-none">
+        {/* Header */}
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">{t("title")}</h3>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMinimized(true)}
+                className="h-7 w-7"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDismiss}
+                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMinimized(true)}
-              className="h-7 w-7"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDismiss}
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          <p className="text-xs text-muted-foreground mb-3">{t("subtitle")}</p>
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">
+                {t("progress", { completed: completedCount, total: items.length })}
+              </span>
+              <span className="font-medium">{Math.round(progressPercent)}%</span>
+            </div>
+            <Progress value={progressPercent} className="h-1.5" />
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mb-3">{t("subtitle")}</p>
-        <div className="space-y-1">
-          <div className="flex justify-between text-xs">
-            <span className="text-muted-foreground">
-              {t("progress", { completed: completedCount, total: items.length })}
-            </span>
-            <span className="font-medium">{Math.round(progressPercent)}%</span>
-          </div>
-          <Progress value={progressPercent} className="h-1.5" />
-        </div>
-      </div>
 
-      {/* Items */}
-      <div className="p-2">
-        {items.map((item, index) => {
-          const translationKey = {
-            exam_created: "createExam",
-            exam_published: "publishExam",
-            pdf_exported: "exportPdf",
-            first_scan: "scanExam",
-          }[item.key] as "createExam" | "publishExam" | "exportPdf" | "scanExam";
-          
-          const firstIncompleteIndex = items.findIndex(i => !i.completed);
-          const isNextStep = index === firstIncompleteIndex;
-          const isDisabled = !item.completed && !isNextStep;
-          
-          return (
-            <button
-              key={item.key}
-              onClick={() => !isDisabled && handleItemClick(item)}
-              disabled={item.completed || isDisabled}
-              className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors",
-                item.completed 
-                  ? "bg-muted/50 opacity-60" 
-                  : isNextStep
-                    ? "hover:bg-muted cursor-pointer"
-                    : "opacity-40 cursor-not-allowed"
-              )}
-            >
-              <div className={cn(
-                "flex items-center justify-center h-8 w-8 rounded-full flex-shrink-0",
-                item.completed 
-                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                  : isNextStep
-                    ? "bg-primary/10 text-primary"
-                    : "bg-muted text-muted-foreground"
-              )}>
-                {item.completed ? <Check className="h-4 w-4" /> : item.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={cn(
-                  "text-sm font-medium",
-                  item.completed && "line-through text-muted-foreground",
-                  isDisabled && "text-muted-foreground"
+        {/* Items */}
+        <div className="p-2">
+          {items.map((item, index) => {
+            const translationKey = {
+              exam_created: "createExam",
+              exam_published: "publishExam",
+              pdf_exported: "exportPdf",
+              first_scan: "scanExam",
+            }[item.key] as "createExam" | "publishExam" | "exportPdf" | "scanExam";
+
+            const firstIncompleteIndex = items.findIndex(i => !i.completed);
+            const isNextStep = index === firstIncompleteIndex;
+            const isDisabled = !item.completed && !isNextStep;
+
+            return (
+              <button
+                key={item.key}
+                onClick={() => !isDisabled && handleItemClick(item)}
+                disabled={item.completed || isDisabled}
+                className={cn(
+                  "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors",
+                  item.completed
+                    ? "bg-muted/50 opacity-60"
+                    : isNextStep
+                      ? "hover:bg-muted cursor-pointer"
+                      : "opacity-40 cursor-not-allowed"
+                )}
+              >
+                <div className={cn(
+                  "flex items-center justify-center h-8 w-8 rounded-full flex-shrink-0",
+                  item.completed
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                    : isNextStep
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground"
                 )}>
-                  {t(`items.${translationKey}.title`)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t(`items.${translationKey}.description`)}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </Card>
+                  {item.completed ? <Check className="h-4 w-4" /> : item.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn(
+                    "text-sm font-medium",
+                    item.completed && "line-through text-muted-foreground",
+                    isDisabled && "text-muted-foreground"
+                  )}>
+                    {t(`items.${translationKey}.title`)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t(`items.${translationKey}.description`)}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
 
-    {/* Mobile: bottom positioned - above FAB if visible, at bottom otherwise */}
-    <Card className={cn(
-      "md:hidden fixed right-4 left-4 z-40 shadow-lg border-feature bg-card",
-      isFabVisible ? "bottom-20" : "bottom-4"
-    )}>
-      {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">{t("title")}</h3>
+      {/* Mobile: bottom positioned - above FAB if visible, at bottom otherwise */}
+      <Card className={cn(
+        "md:hidden fixed right-4 left-4 z-40 shadow-lg border-feature bg-card",
+        isFabVisible ? "bottom-20" : "bottom-4"
+      )}>
+        {/* Header */}
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">{t("title")}</h3>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMinimized(true)}
+                className="h-7 w-7"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDismiss}
+                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMinimized(true)}
-              className="h-7 w-7"
-            >
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDismiss}
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          <p className="text-xs text-muted-foreground mb-3">{t("subtitle")}</p>
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">
+                {t("progress", { completed: completedCount, total: items.length })}
+              </span>
+              <span className="font-medium">{Math.round(progressPercent)}%</span>
+            </div>
+            <Progress value={progressPercent} className="h-1.5" />
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mb-3">{t("subtitle")}</p>
-        <div className="space-y-1">
-          <div className="flex justify-between text-xs">
-            <span className="text-muted-foreground">
-              {t("progress", { completed: completedCount, total: items.length })}
-            </span>
-            <span className="font-medium">{Math.round(progressPercent)}%</span>
-          </div>
-          <Progress value={progressPercent} className="h-1.5" />
-        </div>
-      </div>
 
-      {/* Items */}
-      <div className="p-2">
-        {items.map((item, index) => {
-          const translationKey = {
-            exam_created: "createExam",
-            exam_published: "publishExam",
-            pdf_exported: "exportPdf",
-            first_scan: "scanExam",
-          }[item.key] as "createExam" | "publishExam" | "exportPdf" | "scanExam";
-          
-          const firstIncompleteIndex = items.findIndex(i => !i.completed);
-          const isNextStep = index === firstIncompleteIndex;
-          const isDisabled = !item.completed && !isNextStep;
-          
-          return (
-            <button
-              key={item.key}
-              onClick={() => !isDisabled && handleItemClick(item)}
-              disabled={item.completed || isDisabled}
-              className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors",
-                item.completed 
-                  ? "bg-muted/50 opacity-60" 
-                  : isNextStep
-                    ? "hover:bg-muted cursor-pointer"
-                    : "opacity-40 cursor-not-allowed"
-              )}
-            >
-              <div className={cn(
-                "flex items-center justify-center h-8 w-8 rounded-full flex-shrink-0",
-                item.completed 
-                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                  : isNextStep
-                    ? "bg-primary/10 text-primary"
-                    : "bg-muted text-muted-foreground"
-              )}>
-                {item.completed ? <Check className="h-4 w-4" /> : item.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={cn(
-                  "text-sm font-medium",
-                  item.completed && "line-through text-muted-foreground",
-                  isDisabled && "text-muted-foreground"
+        {/* Items */}
+        <div className="p-2">
+          {items.map((item, index) => {
+            const translationKey = {
+              exam_created: "createExam",
+              exam_published: "publishExam",
+              pdf_exported: "exportPdf",
+              first_scan: "scanExam",
+            }[item.key] as "createExam" | "publishExam" | "exportPdf" | "scanExam";
+
+            const firstIncompleteIndex = items.findIndex(i => !i.completed);
+            const isNextStep = index === firstIncompleteIndex;
+            const isDisabled = !item.completed && !isNextStep;
+
+            return (
+              <button
+                key={item.key}
+                onClick={() => !isDisabled && handleItemClick(item)}
+                disabled={item.completed || isDisabled}
+                className={cn(
+                  "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors",
+                  item.completed
+                    ? "bg-muted/50 opacity-60"
+                    : isNextStep
+                      ? "hover:bg-muted cursor-pointer"
+                      : "opacity-40 cursor-not-allowed"
+                )}
+              >
+                <div className={cn(
+                  "flex items-center justify-center h-8 w-8 rounded-full flex-shrink-0",
+                  item.completed
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                    : isNextStep
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground"
                 )}>
-                  {t(`items.${translationKey}.title`)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t(`items.${translationKey}.description`)}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </Card>
+                  {item.completed ? <Check className="h-4 w-4" /> : item.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn(
+                    "text-sm font-medium",
+                    item.completed && "line-through text-muted-foreground",
+                    isDisabled && "text-muted-foreground"
+                  )}>
+                    {t(`items.${translationKey}.title`)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t(`items.${translationKey}.description`)}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
 
-    <ExamCreationDrawer
-      open={showExamDrawer}
-      onOpenChange={setShowExamDrawer}
-    />
-  </>
+      <ExamCreationDrawer
+        open={showExamDrawer}
+        onOpenChange={setShowExamDrawer}
+      />
+
+      <Dialog open={showDesktopScanDialog} onOpenChange={setShowDesktopScanDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("desktopScanDialog.title")}</DialogTitle>
+            <DialogDescription>{t("desktopScanDialog.description")}</DialogDescription>
+          </DialogHeader>
+          <div className="relative w-full aspect-[4/3] mt-4">
+            <Image
+              src="/images/onboarding/start_scan_wizard.webp"
+              alt={t("desktopScanDialog.imageAlt")}
+              fill
+              className="object-contain rounded-lg"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

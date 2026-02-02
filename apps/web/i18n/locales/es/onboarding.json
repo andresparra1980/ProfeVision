@@ -180,6 +180,11 @@
         "description": "Usa la cámara de tu celular para calificar automaticamente",
         "cta": "Escanear"
       }
+    },
+    "desktopScanDialog": {
+      "title": "Escanea con tu celular",
+      "description": "Para calificar exámenes, necesitas usar la cámara de tu dispositivo móvil. Por favor inicia sesión en ProfeVision desde tu celular.",
+      "imageAlt": "Ilustración de escaneo con móvil"
     }
   }
 }

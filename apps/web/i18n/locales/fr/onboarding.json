@@ -180,6 +180,11 @@
         "description": "Utilisez l'appareil photo de votre téléphone pour corriger automatiquement",
         "cta": "Scanner"
       }
+    },
+    "desktopScanDialog": {
+      "title": "Scannez avec votre téléphone",
+      "description": "Pour corriger des examens, vous devez utiliser la caméra de votre appareil mobile. Veuillez vous connecter à ProfeVision depuis votre téléphone.",
+      "imageAlt": "Illustration de scan avec mobile"
     }
   }
 }

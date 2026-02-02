@@ -180,6 +180,11 @@
         "description": "Use a câmera do seu celular para corrigir automaticamente",
         "cta": "Escanear"
       }
+    },
+    "desktopScanDialog": {
+      "title": "Escaneie com seu celular",
+      "description": "Para corrigir provas, você precisa usar a câmera do seu dispositivo móvel. Por favor, faça login no ProfeVision pelo seu celular.",
+      "imageAlt": "Ilustração de escaneamento com celular"
     }
   }
 }

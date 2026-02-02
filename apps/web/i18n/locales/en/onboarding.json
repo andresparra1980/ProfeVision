@@ -180,6 +180,11 @@
         "description": "Use camera of your phone to grade automatically",
         "cta": "Scan"
       }
+    },
+    "desktopScanDialog": {
+      "title": "Scan with your phone",
+      "description": "To grade exams, you need to use the camera on your mobile device. Please log in to ProfeVision from your phone.",
+      "imageAlt": "Scan with mobile illustration"
     }
   }
 }

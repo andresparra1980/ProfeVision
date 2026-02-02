@@ -15,6 +15,7 @@ interface OnboardingState {
   shouldShowWizard: boolean;
   checklistComplete: boolean;
   error: string | null;
+  isScanWizardOpen: boolean;
 }
 
 interface OnboardingContextType extends OnboardingState {
@@ -25,6 +26,7 @@ interface OnboardingContextType extends OnboardingState {
   skipWizard: (_reason?: string) => Promise<boolean>;
   completeChecklistItem: (_item: ChecklistItem) => Promise<boolean>;
   dismissWizard: () => void;
+  setScanWizardOpen: (_open: boolean) => void;
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
@@ -37,7 +39,9 @@ const initialState: OnboardingState = {
   shouldShowWizard: false,
   checklistComplete: false,
   error: null,
+  isScanWizardOpen: false,
 };
+
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<OnboardingState>(initialState);
@@ -56,15 +60,15 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const fetchStatus = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
-      
+
       const headers = await getAuthHeaders();
       if (!headers) {
         setState({ ...initialState, isLoading: false });
         return;
       }
-      
+
       const response = await fetch('/api/onboarding/status', { headers });
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           setState({ ...initialState, isLoading: false });
@@ -74,7 +78,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
-      
+
       setState({
         isLoading: false,
         isLegacyUser: data.is_legacy_user,
@@ -83,6 +87,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         shouldShowWizard: data.should_show_wizard,
         checklistComplete: data.checklist_complete,
         error: null,
+        isScanWizardOpen: false,
       });
     } catch (error) {
       setState(prev => ({
@@ -128,7 +133,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         ...prev,
         onboardingStatus: data.onboarding_status,
       }));
-      
+
       return true;
     } catch (error) {
       console.error('Error updating onboarding status:', error);
@@ -153,16 +158,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
       const data = await response.json();
       const newStatus = data.onboarding_status as OnboardingStatus;
-      
+
       // Force close wizard if step >= 6 (completion step action)
       const shouldClose = step >= 6 || newStatus?.wizard_completed;
-      
+
       setState(prev => ({
         ...prev,
         onboardingStatus: newStatus,
         shouldShowWizard: !shouldClose,
       }));
-      
+
       return true;
     } catch (error) {
       console.error('Error completing wizard step:', error);
@@ -186,13 +191,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
-      
+
       setState(prev => ({
         ...prev,
         onboardingStatus: data.onboarding_status,
         shouldShowWizard: false,
       }));
-      
+
       return true;
     } catch (error) {
       console.error('Error skipping wizard:', error);
@@ -217,20 +222,20 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
       const data = await response.json();
       const newStatus = data.onboarding_status as OnboardingStatus;
-      
+
       // Check if all 4 checklist items are complete
       const requiredItems = ['exam_created', 'exam_published', 'pdf_exported', 'first_scan'];
       const items = newStatus.checklist_items || {};
       const allComplete = requiredItems.every(
         item => items[item as keyof typeof items] === true
       );
-      
+
       setState(prev => ({
         ...prev,
         onboardingStatus: newStatus,
         checklistComplete: allComplete,
       }));
-      
+
       return true;
     } catch (error) {
       console.error('Error completing checklist item:', error);
@@ -252,6 +257,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     skipWizard,
     completeChecklistItem,
     dismissWizard,
+    isScanWizardOpen: state.isScanWizardOpen,
+    setScanWizardOpen: (open: boolean) => setState(prev => ({ ...prev, isScanWizardOpen: open })),
   };
 
   return (
@@ -274,14 +281,14 @@ export function useOnboarding() {
  */
 export function useOnboardingStep(stepIndex: number) {
   const { onboardingStatus, completeWizardStep } = useOnboarding();
-  
+
   const isCompleted = (onboardingStatus?.wizard_step ?? -1) > stepIndex;
   const isCurrent = onboardingStatus?.wizard_step === stepIndex;
-  
+
   const complete = useCallback(async () => {
     return completeWizardStep(stepIndex);
   }, [completeWizardStep, stepIndex]);
-  
+
   return {
     isCompleted,
     isCurrent,
@@ -294,16 +301,16 @@ export function useOnboardingStep(stepIndex: number) {
  */
 export function useChecklistItem(item: ChecklistItem) {
   const { onboardingStatus, completeChecklistItem, isLegacyUser } = useOnboarding();
-  
+
   const isCompleted = onboardingStatus?.checklist_items?.[item] ?? false;
-  
+
   const complete = useCallback(async () => {
     if (isCompleted) return true;
     // Skip DB writes for legacy users to avoid creating partial onboarding_status blobs
     if (isLegacyUser) return true;
     return completeChecklistItem(item);
   }, [completeChecklistItem, item, isCompleted, isLegacyUser]);
-  
+
   return {
     isCompleted,
     complete,
