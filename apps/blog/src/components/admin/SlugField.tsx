@@ -1,6 +1,7 @@
 'use client';
 
 import { useField, useFormFields } from '@payloadcms/ui';
+import { Wand2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 export const SlugField: React.FC<{
@@ -70,7 +71,7 @@ export const SlugField: React.FC<{
                         whiteSpace: 'nowrap',
                     }}
                 >
-                    {loading ? '...' : '🪄 Sugerir'}
+                    {loading ? '...' : <><Wand2 size={16} style={{ marginRight: '4px' }} /> Sugerir</>}
                 </button>
             </div>
             <div className="field-description" style={{ marginTop: '4px', fontSize: '12px', color: '#666' }}>

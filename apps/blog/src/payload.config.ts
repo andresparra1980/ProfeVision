@@ -75,6 +75,9 @@ export default buildConfig({
 
     admin: {
         user: 'blog_authors',
+        components: {
+            actions: ['/components/admin/ModeToggle#ModeToggle'],
+        },
     },
 
     typescript: {
