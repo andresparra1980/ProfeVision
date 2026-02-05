@@ -181,6 +181,8 @@ export interface BlogMedia {
    * Texto alternativo para accesibilidad y SEO
    */
   alt?: string | null;
+  altTextProcessed?: boolean | null;
+  altTextProcessing?: boolean | null;
   prefix?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -385,6 +387,8 @@ export interface BlogAuthorsSelect<T extends boolean = true> {
  */
 export interface BlogMediaSelect<T extends boolean = true> {
   alt?: T;
+  altTextProcessed?: T;
+  altTextProcessing?: T;
   prefix?: T;
   updatedAt?: T;
   createdAt?: T;
