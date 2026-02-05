@@ -33,7 +33,6 @@ import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 }
 import { AutoTranslateButton as AutoTranslateButton_02dc2ea48120144c5139fa69d9ee430e } from '@/components/admin/AutoTranslateButton'
 import { AltFieldWithRegenerate as AltFieldWithRegenerate_a715f96c23895dac92ae3d09e5423f76 } from '@/components/admin/AltFieldWithRegenerate'
 import { MediaAltStatusButton as MediaAltStatusButton_bb5836903907a07066ae64cb6faf5599 } from '@/components/admin/MediaAltStatusButton'
-import { ModeToggle as ModeToggle_5c8ea494e6512ded27ac1e5c483ec43e } from '@/components/admin/ModeToggle'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 
@@ -73,7 +72,6 @@ export const importMap = {
   "@/components/admin/AutoTranslateButton#AutoTranslateButton": AutoTranslateButton_02dc2ea48120144c5139fa69d9ee430e,
   "@/components/admin/AltFieldWithRegenerate#AltFieldWithRegenerate": AltFieldWithRegenerate_a715f96c23895dac92ae3d09e5423f76,
   "@/components/admin/MediaAltStatusButton#MediaAltStatusButton": MediaAltStatusButton_bb5836903907a07066ae64cb6faf5599,
-  "@/components/admin/ModeToggle#ModeToggle": ModeToggle_5c8ea494e6512ded27ac1e5c483ec43e,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@payloadcms/ui/rsc#CollectionCards": CollectionCards_ab83ff7e88da8d3530831f296ec4756a
 }

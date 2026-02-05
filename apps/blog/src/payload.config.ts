@@ -75,10 +75,6 @@ export default buildConfig({
 
     admin: {
         user: 'blog_authors',
-        suppressHydrationWarning: true,
-        components: {
-            actions: ['@/components/admin/ModeToggle#ModeToggle'],
-        },
     },
 
     typescript: {
