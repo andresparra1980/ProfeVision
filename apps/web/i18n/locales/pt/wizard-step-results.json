@@ -9,7 +9,9 @@
       "student": "Estudante:",
       "group": "Grupo:"
     },
-    "notAvailable": "Não disponível"
+    "notAvailable": "Não disponível",
+    "groupLabel": "Grupo {id}",
+    "groupIdLabel": "ID do Grupo: {id}"
   },
   "answers": {
     "title": "Respostas"
@@ -33,7 +35,9 @@
     "resultsUpdated": "Resultados atualizados",
     "resultsSaved": "Resultados salvos",
     "saveError": "Erro ao salvar",
-    "saveErrorDescription": "Ocorreu um erro ao salvar os resultados"
+    "saveErrorDescription": "Ocorreu um erro ao salvar os resultados",
+    "resultsUpdatedDesc": "A nota anterior foi substituída com sucesso.",
+    "resultsSavedDesc": "A nota do exame foi registrada com sucesso."
   },
   "errors": {
     "calculatingGrade": "Erro ao calcular a nota",
@@ -45,6 +49,10 @@
     "formatError": "Erro de formato",
     "unknownError": "Erro desconhecido",
     "unauthorized": "Não autorizado. Faça login para continuar.",
-    "notOwner": "Este exame pertence a outra conta. Você não pode salvar resultados de exames que não são seus."
+    "notOwner": "Este exame pertence a outra conta. Você não pode salvar resultados de exames que não são seus.",
+    "incompleteQR": "Dados QR incompletos. Falta identificador para: {fields}.",
+    "loadingExam": "Não foi possível carregar as informações do exame ({status}): {statusText}",
+    "loadingStudent": "Não foi possível carregar as informações do estudante ({status}): {statusText}",
+    "imageTooLarge": "Imagem muito grande. Por favor, tente com uma imagem menor."
   }
 }

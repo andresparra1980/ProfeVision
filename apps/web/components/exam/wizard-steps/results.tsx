@@ -8,12 +8,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { OMRForm } from '@/components/exam/omr-form';
-import { 
-  QRData, 
-  Answer, 
-  EntityNames, 
-  ExamScore, 
-  DEFAULT_NUM_OPTIONS, 
+import {
+  QRData,
+  Answer,
+  EntityNames,
+  ExamScore,
+  DEFAULT_NUM_OPTIONS,
   OPTION_LETTERS,
   DuplicateInfo
 } from '../types';
@@ -81,18 +81,18 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   const t = useTranslations('wizard-step-results');
   // Usar una ref para registrar si ya se ha mostrado el log
   const loggedRef = useRef(false);
-  
+
   // Log solo cuando no se haya mostrado antes
   if (DEBUG && !loggedRef.current) {
-    logger.log("Results component received:", { 
-      qrData, 
-      initialAnswersCount: initialAnswers?.length, 
+    logger.log("Results component received:", {
+      qrData,
+      initialAnswersCount: initialAnswers?.length,
       processedImage: processedImage ? `${processedImage.substring(0, 50)}...` : null,
       originalImage: originalImage ? `${originalImage.substring(0, 50)}...` : null
     });
     loggedRef.current = true;
   }
-  
+
   const [entityNames, setEntityNames] = useState<EntityNames>({
     materia: '',
     examen: '',
@@ -164,24 +164,24 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   const calculateExamScore = useCallback(async (examId: string) => {
     try {
       setExamScore(prev => ({ ...prev, loading: true, error: null }));
-      
+
       // Obtener preguntas y puntaje total del examen
       const [questionsRes, examRes] = await Promise.all([
         fetch(`/api/exams/${examId}/questions`),
         fetch(`/api/exams/${examId}/details`)
       ]);
-      
+
       if (!questionsRes.ok) throw new Error(`Error al obtener preguntas del examen: ${questionsRes.statusText}`);
       if (!examRes.ok) throw new Error(`Error al obtener detalles del examen: ${examRes.statusText}`);
-      
+
       const [questions, examData] = await Promise.all([
         questionsRes.json(),
         examRes.json()
       ]);
-      
+
       // Obtener respuestas correctas para TODAS las preguntas
       const questionIds = questions.map((q: { id: string }) => q.id);
-      
+
       // Obtener respuestas correctas para cada pregunta
       const correctAnswersRes = await fetch('/api/opciones-respuesta/correct', {
         method: 'POST',
@@ -190,10 +190,10 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         },
         body: JSON.stringify({ questionIds }),
       });
-      
+
       if (!correctAnswersRes.ok) throw new Error(`Error al obtener respuestas correctas: ${correctAnswersRes.statusText}`);
       const correctAnswersData = await correctAnswersRes.json();
-      
+
       // Mapear respuestas correctas por orden de pregunta
       const correctAnswersMap = new Map();
       correctAnswersData.forEach((option: OpcionRespuesta) => {
@@ -220,36 +220,36 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       setAnswers(prevAnswers => {
         // Normalizar las respuestas actuales para procesamiento
         const currentAnswers = normalizeAnswers(prevAnswers);
-        
+
         const answersWithIds = currentAnswers.map((answer: Answer): Answer => {
           const question = questions.find((q: { orden: number, id: string, habilitada: boolean }) => q.orden === answer.number);
-          
+
           // Encontrar la opción seleccionada basada en la letra de respuesta
           let opcionId = null;
           let esCorrecta = false;
-          
+
           if (question) {
             // Obtener el orden basado en la letra de respuesta (A=1, B=2, etc)
             const orden = OPTION_LETTERS.indexOf(answer.value.toUpperCase()) + 1;
-            
+
             // Buscar la opción correspondiente independientemente de si está habilitada o no
             const opcionesParaPregunta = correctAnswersData.filter(
               (opt: OpcionRespuesta) => opt.pregunta_id === question.id
             );
-            
+
             // Encontrar la opción específica que corresponde a la respuesta del estudiante
             const opcionSeleccionada = opcionesParaPregunta.find(
               (opt: OpcionRespuesta) => opt.orden === orden
             );
-            
+
             // Asignar el ID de la opción seleccionada
             opcionId = opcionSeleccionada?.id;
-            
+
             // Encontrar la opción correcta para esta pregunta
             const opcionCorrecta = opcionesParaPregunta.find(
               (opt: OpcionRespuesta) => opt.es_correcta
             );
-            
+
             // Determinar si la respuesta es correcta
             esCorrecta = opcionCorrecta?.orden === orden;
           }
@@ -266,11 +266,11 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             es_correcta: esCorrecta
           };
         });
-        
+
         // Cálculos para la calificación
         const puntajeTotal = parseFloat(examData.puntaje_total);
         const preguntasHabilitadas = questions.filter((q: { habilitada: boolean }) => q.habilitada);
-        
+
         // Contar respuestas correctas (solo de preguntas habilitadas)
         let correctCount = 0;
         answersWithIds.forEach(answer => {
@@ -278,12 +278,12 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             correctCount++;
           }
         });
-        
+
         // Calcular porcentaje y puntaje obtenido
         const totalQuestions = preguntasHabilitadas.length;
         const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
         const puntajeObtenido = (percentage / 100) * puntajeTotal;
-        
+
         // Actualizar el estado con los nuevos cálculos
         setExamScore(prev => ({
           ...prev,
@@ -295,11 +295,11 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           loading: false,
           error: null
         }));
-        
+
         // Devolver las respuestas actualizadas
         return answersWithIds;
       });
-      
+
     } catch (error: unknown) {
       if (DEBUG) {
         logger.error("Error calculating exam score:", error);
@@ -320,89 +320,89 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
     const fetchEntityNames = async () => {
       try {
         setEntityNames(prev => ({ ...prev, loading: true, error: null }));
-        
+
         // Validar que tenemos datos QR
         if (!qrData) {
           throw new Error(t('errors.noQRData'));
         }
-        
+
         // Extraer IDs usando optional chaining para mejor type safety
         const examId = qrData.examId;
         const studentId = qrData.studentId;
         const groupId = qrData.groupId;
-        
+
         // Validar IDs requeridos
         const missingIds = [];
         if (!examId) missingIds.push('examen');
         if (!studentId) missingIds.push('estudiante');
-        
+
         if (missingIds.length > 0) {
-          throw new Error(`Datos QR incompletos. Falta identificador de: ${missingIds.join(', ')}.`);
+          throw new Error(t('errors.incompleteQR', { fields: missingIds.join(', ') }));
         }
-        
+
         // Preparar las promesas para cargar los datos
         const promises = [
           fetch(`/api/exams/${examId}/details`),
           fetch(`/api/students/${studentId}`)
         ];
-        
+
         // Si hay ID de grupo, añadir la petición para obtener datos del grupo
         if (groupId) {
           promises.push(fetch(`/api/groups/${groupId}`));
         }
-        
+
         // Ejecutar las promesas en paralelo
         const responses = await Promise.all(promises);
-        
+
         // Verificar respuestas y preparar mensajes de error específicos
         if (!responses[0].ok) {
-          throw new Error(`No se pudo cargar la información del examen (${responses[0].status}): ${responses[0].statusText}`);
+          throw new Error(t('errors.loadingExam', { status: responses[0].status, statusText: responses[0].statusText }));
         }
         if (!responses[1].ok) {
-          throw new Error(`No se pudo cargar la información del estudiante (${responses[1].status}): ${responses[1].statusText}`);
+          throw new Error(t('errors.loadingStudent', { status: responses[1].status, statusText: responses[1].statusText }));
         }
         if (groupId && responses[2] && !responses[2].ok) {
           logger.warn(`No se pudo cargar la información del grupo (${responses[2].status}): ${responses[2].statusText}`);
         }
-        
+
         // Preparar promesas para extraer los datos JSON
         const dataPromises = [responses[0].json(), responses[1].json()];
         if (groupId && responses.length > 2) {
           dataPromises.push(responses[2].ok ? responses[2].json() : Promise.resolve(null));
         }
-        
+
         // Obtener los datos
         const data = await Promise.all(dataPromises);
         const examData = data[0];
         const studentData = data[1];
         const groupData = data.length > 2 ? data[2] : null;
-        
+
         // Para depuración: registrar los datos recibidos
         if (DEBUG) {
           logger.log('Datos del examen recibidos:', examData);
           logger.log('Datos del estudiante recibidos:', studentData);
           if (groupData) logger.log('Datos del grupo recibidos:', groupData);
         }
-        
+
         // Calcular puntaje del examen
         if (examId && typeof examId === 'string') {
           calculateExamScore(examId);
         }
-        
+
         // Actualizar los nombres de las entidades con manejo de casos nulos
         setEntityNames({
-                  materia: examData.materia?.nombre || t('examInfo.notAvailable'),
-        examen: examData.nombre || examData.titulo || examData.title || t('examInfo.notAvailable'),
-                      estudiante: studentData.nombres && studentData.apellidos 
-              ? `${studentData.nombres} ${studentData.apellidos}`
-              : studentData.nombres || studentData.apellidos || t('examInfo.notAvailable'),
-          grupo: groupData 
-            ? (groupData.nombre || groupData.name || `Grupo ${groupData.id}`)
-            : (examData.grupo_id 
-                ? `Grupo ID: ${examData.grupo_id}`
-                : (qrData.grupo_id || qrData.groupId 
-                    ? `Grupo ID: ${qrData.grupo_id || qrData.groupId}` 
-                    : t('examInfo.notAvailable'))),
+          materia: examData.materia?.nombre || t('examInfo.notAvailable'),
+          examen: examData.nombre || examData.titulo || examData.title || t('examInfo.notAvailable'),
+          estudiante: studentData.nombres && studentData.apellidos
+            ? `${studentData.nombres} ${studentData.apellidos}`
+            : studentData.nombres || studentData.apellidos || t('examInfo.notAvailable'),
+          grupo: groupData
+            ? (groupData.nombre || groupData.name || t('examInfo.groupLabel', { id: groupData.id }))
+            : (examData.grupo_id
+              ? t('examInfo.groupIdLabel', { id: examData.grupo_id })
+              : (qrData.grupo_id || qrData.groupId
+                ? t('examInfo.groupIdLabel', { id: String(qrData.grupo_id || qrData.groupId) })
+                : t('examInfo.notAvailable'))),
           loading: false,
           error: null
         });
@@ -410,7 +410,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         if (DEBUG) {
           logger.error("Error al cargar entidades:", error);
         }
-        
+
         setEntityNames(prev => ({
           ...prev,
           loading: false,
@@ -418,7 +418,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         }));
       }
     };
-    
+
     if (qrData) {
       fetchEntityNames();
     }
@@ -456,7 +456,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
 
         if (DEBUG) {
           logger.log('Data URL comprimida:', compressedBlob.size, 'bytes',
-                    `(${((compressedBlob.size / blob.size) * 100).toFixed(1)}%)`);
+            `(${((compressedBlob.size / blob.size) * 100).toFixed(1)}%)`);
         }
 
         // Convertir a base64
@@ -467,14 +467,14 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           reader.readAsDataURL(compressedBlob);
         });
       }
-      
+
       if (DEBUG) {
         logger.log('Procesando imagen para convertir a base64:', url);
       }
-      
+
       // Determinar la URL final para cargar la imagen
       let finalUrl = url;
-      
+
       // Caso 1: URLs absolutas con localhost
       if (url.includes('localhost:3000') && typeof window !== 'undefined') {
         // Reemplazar localhost con el origen actual
@@ -482,7 +482,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         if (DEBUG) {
           logger.log('URL de localhost reescrita:', finalUrl);
         }
-      } 
+      }
       // Caso 2: URLs relativas que empiezan con /uploads
       else if (url.startsWith('/uploads/') && typeof window !== 'undefined') {
         // Convertir a URL absoluta
@@ -499,32 +499,32 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           logger.log('URL parcial convertida a absoluta:', finalUrl);
         }
       }
-      
+
       try {
         // Intentar fetch con la URL corregida
         if (DEBUG) {
           logger.log('Intentando fetch de la imagen desde:', finalUrl);
         }
-        
-        const response = await fetch(finalUrl, { 
+
+        const response = await fetch(finalUrl, {
           mode: 'cors',
           cache: 'no-cache',
           headers: { 'Access-Control-Allow-Origin': '*' }
         });
-        
+
         if (!response.ok) {
           throw new Error(`Error al cargar imagen: ${response.status} ${response.statusText}`);
         }
-        
+
         const blob = await response.blob();
-        
+
         if (DEBUG) {
           logger.log('Imagen cargada correctamente, tamaño:', blob.size, 'bytes, tipo:', blob.type);
         }
-        
+
         // Comprimir la imagen antes de convertirla a base64
         const compressedBlob = await compressImage(blob);
-        
+
         // Convertir a base64
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -537,7 +537,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         if (DEBUG) {
           logger.log('Fetch falló, intentando método alternativo con Image:', fetchError);
         }
-        
+
         return new Promise((resolve, reject) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
@@ -572,7 +572,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             ctx.drawImage(img, 0, 0, width, height);
             resolve(canvas.toDataURL('image/jpeg', 0.8)); // 80% - misma calidad que backend
           };
-          
+
           img.onerror = () => {
             // Si falla la carga de imagen, intentar con una variante de la URL como último recurso
             if (finalUrl !== url && !finalUrl.includes('localhost')) {
@@ -581,13 +581,13 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
               img.src = url;
               return;
             }
-            
+
             if (DEBUG) {
               logger.error('No se pudo cargar la imagen:', finalUrl);
             }
             reject(new Error(`No se pudo cargar la imagen: ${finalUrl}`));
           };
-          
+
           img.src = finalUrl;
         });
       }
@@ -598,14 +598,14 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
       throw new Error(`Error al cargar imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   };
-  
+
   // Función para comprimir una imagen
   const compressImage = async (blob: Blob): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        
+
         // Escalar la imagen si es muy grande
         let width = img.width;
         let height = img.height;
@@ -647,9 +647,9 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           0.8 // 80% - misma calidad que backend usa para WebP
         );
       };
-      
+
       img.onerror = () => reject(new Error('Error al cargar la imagen para compresión'));
-      
+
       // Crear URL a partir del Blob
       img.src = URL.createObjectURL(blob);
     });
@@ -659,15 +659,15 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
   const handleSaveResults = async () => {
     try {
       setSaving(true);
-      
+
       // Verificar que tenemos todos los datos necesarios
       if (!qrData || !answers.length || !processedImage || !originalImage || !examScore) {
         throw new Error(t('errors.saveResults'));
       }
-      
+
       // Verificar si tenemos URLs diferentes para las imágenes
       const imagesAreSame = originalImage === processedImage;
-      
+
       // Convertir imágenes a base64 si son URLs
       if (DEBUG) {
         logger.log('Preparando imágenes para guardar...', {
@@ -679,33 +679,33 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           environment: process.env.NODE_ENV
         });
       }
-      
+
       // Comprobación adicional: si las imágenes son iguales cuando no deberían serlo
       if (imagesAreSame && !originalImage?.startsWith('data:')) {
-        logger.warn('¡Advertencia! Las URLs de la imagen original y procesada son idénticas:', 
+        logger.warn('¡Advertencia! Las URLs de la imagen original y procesada son idénticas:',
           originalImage?.substring(0, 50)
         );
-        
+
         // En producción, intentar usar diferentes métodos para cargar las imágenes
         if (process.env.NODE_ENV === 'production') {
           logger.log('Estamos en producción, intentando trabajar con la misma imagen de forma diferente');
         }
       }
-      
+
       let originalImageBase64, processedImageBase64;
       try {
         // Cargar la imagen original
         originalImageBase64 = await loadImageAsBase64(originalImage);
-        
+
         // Si las imágenes son diferentes, cargar la procesada normalmente
         if (!imagesAreSame) {
           processedImageBase64 = await loadImageAsBase64(processedImage);
-        } 
+        }
         // Si son la misma imagen pero ya es un data URL, intentar modificar ligeramente la procesada
         else if (originalImage?.startsWith('data:')) {
           logger.log('Las imágenes son idénticas data URLs, intentando diferenciar la procesada');
           processedImageBase64 = originalImageBase64;
-        } 
+        }
         // Si son la misma imagen pero son URLs, intentar forzar que sean diferentes
         else {
           logger.log('Las imágenes son idénticas URLs, intentando cargar la procesada con parámetros diferentes');
@@ -713,11 +713,11 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           const processedWithParams = `${processedImage}${processedImage.includes('?') ? '&' : '?'}t=${Date.now()}`;
           processedImageBase64 = await loadImageAsBase64(processedWithParams);
         }
-        
+
         if (DEBUG) {
           const originalPrefix = originalImageBase64.substring(0, 30);
           const processedPrefix = processedImageBase64.substring(0, 30);
-          
+
           logger.log('Imágenes preparadas correctamente', {
             originalLength: originalImageBase64.length,
             processedLength: processedImageBase64.length,
@@ -726,20 +726,20 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             areEqual: originalImageBase64 === processedImageBase64
           });
         }
-        
+
         // Verificación adicional: si las imágenes convertidas son idénticas pero las URLs originales no lo eran
         if (originalImageBase64 === processedImageBase64 && !imagesAreSame) {
           logger.warn('¡Advertencia! Las imágenes convertidas son idénticas aunque las URLs no lo eran');
         }
-        
+
       } catch (imageError) {
         logger.error('Error al procesar imágenes:', imageError);
         throw new Error(`Error al preparar imágenes: ${imageError instanceof Error ? imageError.message : 'Error desconocido'}`);
       }
-      
+
       // Crear una copia de las respuestas normalizadas para enviar
       const answersToSend = answers.filter(a => a.number > 0 && a.value !== '').sort((a, b) => a.number - b.number);
-      
+
       // Preparar datos para enviar al endpoint
       const data = {
         qrData,
@@ -750,22 +750,22 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         isDuplicate,
         duplicateInfo
       };
-      
+
       if (DEBUG) {
         logger.log('Enviando datos al servidor...');
       }
-      
+
       try {
         // Obtener token de autenticación
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.access_token) {
           throw new Error(t('errors.unauthorized'));
         }
-        
+
         // Enviar datos al endpoint con timeout para evitar esperas indefinidas
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 segundos
-        
+
         const response = await fetch('/api/exams/save-results', {
           method: 'POST',
           headers: {
@@ -775,10 +775,10 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           body: JSON.stringify(data),
           signal: controller.signal
         });
-        
+
         // Limpiar timeout
         clearTimeout(timeoutId);
-        
+
         // Verificar si la respuesta es exitosa
         if (!response.ok) {
           let errorMessage = t('errors.saveResults');
@@ -799,7 +799,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
 
               // Mensajes específicos según status code
               if (response.status === 413) {
-                errorMessage = 'Imagen demasiado grande. Intenta con una imagen más pequeña.';
+                errorMessage = t('errors.imageTooLarge');
               } else if (errorText) {
                 errorMessage = `Error ${response.status}: ${errorText.substring(0, 100)}`;
               }
@@ -808,7 +808,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
               errorMessage = `Error ${response.status}: ${errorMessage}`;
             }
           }
-          
+
           // Error específico para examen de otra cuenta
           if (errorCode === 'NOT_OWNER') {
             toast.error(t('errors.notOwner'));
@@ -816,16 +816,16 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             setSaving(false);
             return;
           }
-          
+
           throw new Error(errorMessage);
         }
-        
+
         // Leer la respuesta como texto primero para validar
         const responseText = await response.text();
         if (!responseText) {
           throw new Error(t('errors.serverEmptyResponse'));
         }
-        
+
         // Parsear la respuesta JSON después de verificar que no está vacía
         let result;
         try {
@@ -833,22 +833,22 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         } catch (parseError) {
           throw new Error(`Error al procesar respuesta: ${parseError instanceof Error ? parseError.message : t('errors.formatError')}`);
         }
-        
+
         if (DEBUG) {
           logger.log('Respuesta del servidor:', result);
         }
-        
+
         // Mostrar notificación de éxito
         toast.success(isDuplicate ? t('toasts.resultsUpdated') : t('toasts.resultsSaved'), {
-          description: isDuplicate 
-            ? `La calificación anterior ha sido reemplazada correctamente.`
-            : `La calificación del examen ha sido registrada correctamente.`,
+          description: isDuplicate
+            ? t('toasts.resultsUpdatedDesc')
+            : t('toasts.resultsSavedDesc'),
         });
-        
+
         // Marcar como guardado
         setSaved(true);
         setSaving(false);
-        
+
         // Notificar al padre que se guardó y pasar el ID del resultado
         if (result && result.resultado_id) {
           onSaved(result.resultado_id);
@@ -860,17 +860,17 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
         }
         throw fetchError;
       }
-      
+
     } catch (error: unknown) {
       if (DEBUG) {
         logger.error("Error al guardar resultados:", error);
       }
-      
+
       // Mostrar notificación de error
       toast.error(t('toasts.saveError'), {
         description: (error as Error).message || t('toasts.saveErrorDescription'),
       });
-      
+
       setSaving(false);
     }
   };
@@ -882,7 +882,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           {t('description')}
         </p>
       </div>
-      
+
       {entityNames.error && (
         <Alert variant="destructive">
           <AlertDescription>
@@ -890,7 +890,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           </AlertDescription>
         </Alert>
       )}
-      
+
       {ownershipError && (
         <Alert variant="destructive">
           <AlertDescription>
@@ -898,37 +898,37 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           </AlertDescription>
         </Alert>
       )}
-      
+
       <div className="rounded-lg border p-4">
         <h4 className="font-medium mb-2">{t('examInfo.title')}</h4>
-        
+
         {entityNames.loading ? (
           <div className="flex items-center justify-center py-4">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             <span className="ml-2 text-sm text-muted-foreground">{t('examInfo.loading')}</span>
           </div>
         ) : (
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-muted-foreground">{t('examInfo.fields.subject')}</p>
-                <p className="font-medium">{entityNames.materia}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">{t('examInfo.fields.exam')}</p>
-                <p className="font-medium">{entityNames.examen}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">{t('examInfo.fields.student')}</p>
-                <p className="font-medium">{entityNames.estudiante}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">{t('examInfo.fields.group')}</p>
-                <p className="font-medium">{entityNames.grupo}</p>
-              </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-muted-foreground">{t('examInfo.fields.subject')}</p>
+              <p className="font-medium">{entityNames.materia}</p>
             </div>
+            <div>
+              <p className="text-muted-foreground">{t('examInfo.fields.exam')}</p>
+              <p className="font-medium">{entityNames.examen}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">{t('examInfo.fields.student')}</p>
+              <p className="font-medium">{entityNames.estudiante}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">{t('examInfo.fields.group')}</p>
+              <p className="font-medium">{entityNames.grupo}</p>
+            </div>
+          </div>
         )}
       </div>
-      
+
       <div className="rounded-lg border p-4">
         <h4 className="font-medium mb-2">{t('answers.title')}</h4>
         <div className="flex justify-center mb-2 text-sm">
@@ -949,7 +949,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
             <span>D</span>
           </div>
         </div>
-        
+
         <OMRForm
           title=""
           numQuestions={omrDisplayNumQuestions}
@@ -960,7 +960,7 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           correctnessMap={correctnessMap}
           showHeaders={false}
         />
-        
+
         {examScore.loading ? (
           <div className="flex items-center justify-center py-4 mt-4">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -981,18 +981,18 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
           </div>
         )}
       </div>
-      
+
       <Separator />
-      
+
       <div className="flex justify-between mt-6 pt-4 border-t">
         <Button variant="outline" onClick={onPrevious} disabled={saving}>
           {t('buttons.back')}
         </Button>
-        
+
         {!saved ? (
-          <Button 
-            variant="default" 
-            onClick={handleSaveResults} 
+          <Button
+            variant="default"
+            onClick={handleSaveResults}
             disabled={saving || examScore.loading || entityNames.loading || examScore.error !== null || ownershipError}
             className="bg-primary"
           >
@@ -1011,16 +1011,16 @@ export function Results({ qrData, answers: initialAnswers, processedImage, origi
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
               <span className="text-green-700 text-sm font-medium">{t('buttons.savedSuccessfully')}</span>
             </div>
-                          <Button 
-                variant="secondary" 
-                onClick={onContinue}>
-                {t('buttons.scanAnother')}
-              </Button>
-              <Button 
-                variant="default" 
-                onClick={onComplete}>
-                {t('buttons.finish')}
-              </Button>
+            <Button
+              variant="secondary"
+              onClick={onContinue}>
+              {t('buttons.scanAnother')}
+            </Button>
+            <Button
+              variant="default"
+              onClick={onComplete}>
+              {t('buttons.finish')}
+            </Button>
           </div>
         )}
       </div>

@@ -9,7 +9,9 @@
       "student": "Étudiant :",
       "group": "Groupe :"
     },
-    "notAvailable": "Non disponible"
+    "notAvailable": "Non disponible",
+    "groupLabel": "Groupe {id}",
+    "groupIdLabel": "ID du groupe : {id}"
   },
   "answers": {
     "title": "Réponses"
@@ -33,7 +35,9 @@
     "resultsUpdated": "Résultats mis à jour",
     "resultsSaved": "Résultats enregistrés",
     "saveError": "Erreur lors de l'enregistrement",
-    "saveErrorDescription": "Une erreur est survenue lors de l'enregistrement des résultats"
+    "saveErrorDescription": "Une erreur est survenue lors de l'enregistrement des résultats",
+    "resultsUpdatedDesc": "La note précédente a été remplacée avec succès.",
+    "resultsSavedDesc": "La note de l'examen a été enregistrée avec succès."
   },
   "errors": {
     "calculatingGrade": "Erreur lors du calcul de la note",
@@ -45,6 +49,10 @@
     "formatError": "Erreur de format",
     "unknownError": "Erreur inconnue",
     "unauthorized": "Non autorisé. Connectez-vous pour continuer.",
-    "notOwner": "Cet examen appartient à un autre compte. Vous ne pouvez pas enregistrer de résultats pour des examens qui ne vous appartiennent pas."
+    "notOwner": "Cet examen appartient à un autre compte. Vous ne pouvez pas enregistrer de résultats pour des examens qui ne vous appartiennent pas.",
+    "incompleteQR": "Données QR incomplètes. Identifiant manquant pour : {fields}.",
+    "loadingExam": "Impossible de charger les informations de l'examen ({status}) : {statusText}",
+    "loadingStudent": "Impossible de charger les informations de l'étudiant ({status}) : {statusText}",
+    "imageTooLarge": "Image trop grande. Veuillez essayer avec une image plus petite."
   }
 }

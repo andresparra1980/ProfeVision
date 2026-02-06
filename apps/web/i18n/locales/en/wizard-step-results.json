@@ -9,7 +9,9 @@
       "student": "Student:",
       "group": "Group:"
     },
-    "notAvailable": "Not available"
+    "notAvailable": "Not available",
+    "groupLabel": "Group {id}",
+    "groupIdLabel": "Group ID: {id}"
   },
   "answers": {
     "title": "Answers"
@@ -33,7 +35,9 @@
     "resultsUpdated": "Results updated",
     "resultsSaved": "Results saved",
     "saveError": "Save error",
-    "saveErrorDescription": "An error occurred while saving the results"
+    "saveErrorDescription": "An error occurred while saving the results",
+    "resultsUpdatedDesc": "The previous grade has been successfully replaced.",
+    "resultsSavedDesc": "The exam grade has been successfully recorded."
   },
   "errors": {
     "calculatingGrade": "Error calculating grade",
@@ -45,6 +49,10 @@
     "formatError": "Format error",
     "unknownError": "Unknown error",
     "unauthorized": "Unauthorized. Please log in to continue.",
-    "notOwner": "This exam belongs to another account. You cannot save results for exams that are not yours."
+    "notOwner": "This exam belongs to another account. You cannot save results for exams that are not yours.",
+    "incompleteQR": "Incomplete QR data. Missing identifier for: {fields}.",
+    "loadingExam": "Could not load exam information ({status}): {statusText}",
+    "loadingStudent": "Could not load student information ({status}): {statusText}",
+    "imageTooLarge": "Image too large. Please try with a smaller image."
   }
-} 
+}
