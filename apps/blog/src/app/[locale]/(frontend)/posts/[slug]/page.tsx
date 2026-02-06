@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const metaTitle = post.meta?.title || post.title;
     const metaDescription = post.meta?.description || post.excerpt;
     const keywords = post.meta?.keywords ? String(post.meta.keywords).split(',').map(k => k.trim()).filter(Boolean) : undefined;
-    const canonicalURL = post.meta?.canonicalURL || `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://profevision.com'}/posts/${slug}`;
+    const canonicalURL = post.meta?.canonicalURL || `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://blog.profevision.com'}/${locale}/posts/${slug}`;
 
     return {
         title: { absolute: isDraft ? `[PREVIEW] ${metaTitle}` : metaTitle },
@@ -185,6 +185,7 @@ export default async function PostPage({ params }: PageProps) {
                             width={1200}
                             height={500}
                             className="w-full h-auto object-cover max-h-[500px]"
+                            priority
                         />
                     </div>
                 )}
