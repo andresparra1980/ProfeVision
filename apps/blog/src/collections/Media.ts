@@ -66,7 +66,7 @@ async function verifyImageAccessible(imageUrl: string, maxRetries = 3): Promise<
             if (response.ok) {
                 return true;
             }
-        } catch (e) {
+        } catch {
             console.log(`[Image Verification] Attempt ${i + 1} failed, retrying...`);
         }
         // Wait 1 second before retry
@@ -244,7 +244,7 @@ export const Media: CollectionConfig = {
                         // Try to parse JSON body
                         const clonedReq = req.clone ? req.clone() : req;
                         body = await clonedReq.json?.() || {};
-                    } catch (e) {
+                    } catch {
                         // Fallback to req.body if available and is an object
                         if (req.body && typeof req.body === 'object' && !Array.isArray(req.body)) {
                             body = req.body as { id?: string };

@@ -1,6 +1,6 @@
 import { buildConfig } from 'payload';
 import { postgresAdapter } from '@payloadcms/db-postgres';
-import { lexicalEditor, FixedToolbarFeature, BlocksFeature, EXPERIMENTAL_TableFeature, UploadFeature, LinkFeature, RelationshipFeature } from '@payloadcms/richtext-lexical';
+import { lexicalEditor, FixedToolbarFeature, EXPERIMENTAL_TableFeature, UploadFeature, LinkFeature, RelationshipFeature } from '@payloadcms/richtext-lexical';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { s3Storage } from '@payloadcms/storage-s3';
 import path from 'path';

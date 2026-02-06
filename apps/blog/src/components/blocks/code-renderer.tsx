@@ -16,9 +16,7 @@ interface CodeBlockProps {
 export function CodeRenderer({
     code,
     language,
-    showLineNumbers,
     filename,
-    highlightLines
 }: CodeBlockProps) {
     const [html, setHtml] = useState<string>('');
     const [loading, setLoading] = useState(true);

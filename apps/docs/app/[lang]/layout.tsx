@@ -1,7 +1,6 @@
 import '@/app/global.css';
 import { RootProvider } from 'fumadocs-ui/provider';
 import { I18nProvider } from 'fumadocs-ui/i18n';
-import { i18n } from '@/lib/i18n';
 import type { ReactNode } from 'react';
 
 const translations = {

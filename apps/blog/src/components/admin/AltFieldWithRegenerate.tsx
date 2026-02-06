@@ -33,7 +33,7 @@ export const AltFieldWithRegenerate: React.FC = () => {
                 throw new Error(`Error ${response.status}`);
             }
 
-            const result = await response.json();
+            await response.json();
             setMessage('Alt regenerado exitosamente');
             
             // Reload page after 1.5 seconds to show new alt

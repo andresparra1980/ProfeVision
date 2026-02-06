@@ -2,7 +2,6 @@ import type { CollectionBeforeChangeHook } from 'payload';
 
 export const populateMetaImageHook: CollectionBeforeChangeHook = async ({
     data,
-    req,
 }) => {
     // Check if meta.image is already populated
     const hasMetaImage = data.meta?.image && 

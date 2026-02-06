@@ -6,7 +6,6 @@ import type { ServerFunctionClient } from 'payload';
 import React from 'react';
 
 
-// @ts-ignore - Payload generated file
 import { importMap } from '../importMap.js';
 
 type Args = {

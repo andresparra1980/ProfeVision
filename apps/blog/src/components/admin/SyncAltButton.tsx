@@ -6,7 +6,7 @@ import { useDocumentInfo } from '@payloadcms/ui';
 import { RefreshCw, Check, AlertCircle, Image as ImageIcon } from 'lucide-react';
 
 export function SyncAltButton() {
-    const { id, docConfig } = useDocumentInfo();
+    const { id } = useDocumentInfo();
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<{
         success: boolean;

@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook, CollectionAfterChangeHook } from 'payload';
+import type { CollectionBeforeChangeHook } from 'payload';
 import sharp from 'sharp';
 
 const shouldConvertToWebP = (mimeType: string): boolean => {
