@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { draftMode } from 'next/headers';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@profevision/ui/button';
 import { Card, CardContent } from '@profevision/ui/card';
 import { LexicalRenderer } from '@/components/lexical-renderer';
@@ -14,6 +15,14 @@ const TableOfContents = dynamic(() => import('@/components/table-of-contents').t
 
 interface PageProps {
     params: Promise<{ locale: string; slug: string }>;
+}
+
+// Valid locales supported by the app
+const VALID_LOCALES = ['es', 'en', 'fr', 'pt'] as const;
+type ValidLocale = typeof VALID_LOCALES[number];
+
+function isValidLocale(locale: string): locale is ValidLocale {
+    return VALID_LOCALES.includes(locale as ValidLocale);
 }
 
 // Generate metadata for SEO
@@ -64,10 +73,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PostPage({ params }: PageProps) {
     const { locale, slug } = await params;
-    setRequestLocale(locale);
+    // Validate locale and fallback to 'es' if invalid
+    const validLocale = isValidLocale(locale) ? locale : 'es';
+    setRequestLocale(validLocale);
 
     const payload = await getPayloadClient();
-    
+
     // Check if we're in draft mode (preview)
     const draft = await draftMode();
     const isDraft = draft.isEnabled;
@@ -79,7 +90,7 @@ export default async function PostPage({ params }: PageProps) {
         const result = await payload.find({
             collection: 'blog_posts',
             where: { slug: { equals: slug } },
-            locale: locale as 'es' | 'en' | 'fr' | 'pt',
+            locale: validLocale as 'es' | 'en' | 'fr' | 'pt',
             depth: 2,
             limit: 1,
         });
@@ -94,7 +105,7 @@ export default async function PostPage({ params }: PageProps) {
                     { status: { equals: 'published' } },
                 ],
             },
-            locale: locale as 'es' | 'en' | 'fr' | 'pt',
+            locale: validLocale as 'es' | 'en' | 'fr' | 'pt',
             depth: 2,
             limit: 1,
         });
@@ -107,16 +118,16 @@ export default async function PostPage({ params }: PageProps) {
         notFound();
     }
 
-    const backText = locale === 'es' ? '← Volver al blog' :
-        locale === 'en' ? '← Back to blog' :
-            locale === 'fr' ? '← Retour au blog' :
+    const backText = validLocale === 'es' ? '← Volver al blog' :
+        validLocale === 'en' ? '← Back to blog' :
+            validLocale === 'fr' ? '← Retour au blog' :
                 '← Voltar ao blog';
 
     return (
         <main className="container mx-auto py-12 px-4 max-w-4xl">
             <article>
                 {/* Preview Mode Banner */}
-                {isDraft && <PreviewBanner locale={locale} />}
+                {isDraft && <PreviewBanner locale={validLocale} />}
 
                 {/* Header */}
                 <header className="mb-8">
@@ -138,7 +149,7 @@ export default async function PostPage({ params }: PageProps) {
                         )}
                         {post.publishedAt && (
                             <time>
-                                {new Date(post.publishedAt).toLocaleDateString(locale, {
+                                {new Date(post.publishedAt).toLocaleDateString(validLocale, {
                                     year: 'numeric',
                                     month: 'long',
                                     day: 'numeric',
@@ -151,9 +162,11 @@ export default async function PostPage({ params }: PageProps) {
                 {/* Featured Image */}
                 {post.featuredImage && typeof post.featuredImage === 'object' && post.featuredImage.url && (
                     <div className="mb-8 rounded-lg overflow-hidden">
-                        <img
+                        <Image
                             src={post.featuredImage.url}
                             alt={post.featuredImage.alt || post.title}
+                            width={1200}
+                            height={500}
                             className="w-full h-auto object-cover max-h-[500px]"
                         />
                     </div>
@@ -167,7 +180,7 @@ export default async function PostPage({ params }: PageProps) {
                 </Card>
 
                 {/* Table of Contents */}
-                <TableOfContents locale={locale} />
+                <TableOfContents locale={validLocale} />
 
                 {/* Navigation */}
                 <div className="mt-8">

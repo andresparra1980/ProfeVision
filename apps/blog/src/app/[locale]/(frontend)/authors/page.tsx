@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription } from '@profevision/ui/card';
 import { getPayloadClient } from '@/lib/payload';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -47,9 +48,11 @@ export default async function AuthorsPage({ params }: PageProps) {
                             <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                                 <CardHeader className="flex flex-row gap-4 items-center">
                                     {author.avatar && typeof author.avatar === 'object' && author.avatar.url && (
-                                        <img
+                                        <Image
                                             src={author.avatar.url}
                                             alt={author.name}
+                                            width={64}
+                                            height={64}
                                             className="w-16 h-16 rounded-full object-cover"
                                         />
                                     )}

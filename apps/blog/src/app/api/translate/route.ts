@@ -25,8 +25,6 @@ export async function POST(req: Request) {
     try {
         const { postId, title, excerpt, content, sourceLocale = 'es' } = await req.json();
 
-        console.log('[Translation] Received request for post:', postId);
-
         if (!postId || !title) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
@@ -46,34 +44,7 @@ export async function POST(req: Request) {
         const translations: Record<string, TranslationData> = {};
 
         // Generate SEO for source locale first
-        console.log(`[SEO] Generating SEO for source locale ${sourceLocale}...`);
         const localeNames: Record<string, string> = { es: 'Spanish', en: 'English', fr: 'French', pt: 'Portuguese' };
-        const sourceLocaleName = localeNames[sourceLocale as string];
-
-        const seoPrompt = `Generate SEO-optimized metadata in ${sourceLocaleName} for this blog post. Return valid JSON only.
-
-RULES:
-- metaTitle: 50-60 characters, compelling, no site name
-- metaDescription: 100-150 characters, clear value proposition
-
-Title: ${title}
-Excerpt: ${excerpt || ''}
-
-Return: {"metaTitle": "...", "metaDescription": "..."}`;
-
-        const { text: seoText } = await generateText({
-            model: openrouter(model),
-            prompt: seoPrompt,
-        });
-
-        let sourceSeo = { metaTitle: title.slice(0, 60), metaDescription: (excerpt || '').slice(0, 150) };
-        try {
-            sourceSeo = JSON.parse(cleanJsonResponse(seoText));
-            console.log(`[SEO] Generated for ${sourceLocale}: title=${sourceSeo.metaTitle.length}chars, desc=${sourceSeo.metaDescription.length}chars`);
-        } catch {
-            console.error('[SEO] Failed to parse source SEO');
-        }
-
         // Translate to each target locale
         for (const locale of targetLocales) {
             const targetLocaleName = localeNames[locale];
@@ -84,7 +55,7 @@ Return: {"metaTitle": "...", "metaDescription": "..."}`;
 Return valid JSON only, no markdown:
 {
   "title": "translated title",
-  "excerpt": "translated excerpt", 
+  "excerpt": "translated excerpt",
   "metaTitle": "SEO title 50-60 chars, compelling",
   "metaDescription": "SEO description 100-150 chars"
 }
@@ -92,8 +63,6 @@ Return valid JSON only, no markdown:
 Original:
 - Title: ${title}
 - Excerpt: ${excerpt || 'No excerpt'}`;
-
-            console.log(`[Translation] Processing ${locale}...`);
 
             const { text: metaText } = await generateText({
                 model: openrouter(model),
@@ -109,7 +78,6 @@ Original:
                     seoTitle: parsed.metaTitle,
                     seoDescription: parsed.metaDescription,
                 };
-                console.log(`[Translation] Parsed ${locale}: SEO title=${parsed.metaTitle?.length}chars`);
             } catch {
                 console.error(`[Translation] Failed to parse for ${locale}`);
                 translations[locale] = { title, excerpt: excerpt || '' };
@@ -117,8 +85,6 @@ Original:
 
             // Translate content if provided
             if (content && typeof content === 'object') {
-                console.log(`[Translation] Translating content to ${locale}...`);
-
                 const contentPrompt = `Translate this Lexical editor JSON from Spanish to ${targetLocaleName}.
 Only translate "text" field values. Keep ALL other fields exactly the same.
 Return valid JSON only, no markdown.
@@ -141,11 +107,6 @@ ${JSON.stringify(content)}`;
         // Update database
         const payload = await getPayloadClient();
 
-        // Update source locale with SEO
-        // Note: meta.title and meta.description are managed by the SEO plugin automatically
-        // based on the title and excerpt fields, so we don't need to update them manually
-        console.log(`[SEO] Source locale ${sourceLocale} SEO generated (managed by plugin)`);
-
         // Update translated locales
         for (const [locale, translation] of Object.entries(translations)) {
             try {
@@ -167,8 +128,6 @@ ${JSON.stringify(content)}`;
                     locale: locale as 'en' | 'fr' | 'pt',
                     data: updateData,
                 });
-
-                console.log(`[Translation] Updated ${locale}`);
             } catch (updateError) {
                 console.error(`[Translation] Failed to update ${locale}:`, updateError);
             }

@@ -37,8 +37,6 @@ export async function POST(req: Request) {
     try {
         const { categoryId, name, description, currentSlug, sourceLocale = 'es' } = await req.json();
 
-        console.log('[Category Translation] Received request for category:', categoryId);
-
         if (!categoryId || !name) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
@@ -54,7 +52,6 @@ export async function POST(req: Request) {
         let finalSlug = currentSlug;
 
         if (sourceLocale !== 'en') {
-            console.log('[Category Translation] Translating to English for slug generation...');
             const englishPrompt = `Translate this category name from ${localeNames[sourceLocale]} to English. Return ONLY the English translation, nothing else.
 
 Category name: "${name}"
@@ -68,7 +65,6 @@ English translation:`;
 
             englishName = englishText.trim();
             finalSlug = toSlug(englishName);
-            console.log(`[Category Translation] English translation: "${englishName}" -> slug: "${finalSlug}"`);
         } else {
             // If source is already English, just convert to slug format
             finalSlug = currentSlug || toSlug(name);
@@ -97,8 +93,6 @@ Source:
 - Name: "${name}"
 - Description: "${description || ''}"`;
 
-            console.log(`[Category Translation] Processing ${locale}...`);
-
             const { text: translationText } = await generateText({
                 model: openrouter(model),
                 prompt: translationPrompt,
@@ -111,7 +105,6 @@ Source:
                     name: parsed.name,
                     description: parsed.description || '',
                 };
-                console.log(`[Category Translation] Parsed ${locale}: "${parsed.name}"`);
             } catch (parseError) {
                 console.error(`[Category Translation] Failed to parse for ${locale}:`, parseError);
                 // Fallback: use original name
@@ -134,7 +127,6 @@ Source:
                         autoTranslationProcessed: true,
                     },
                 });
-                console.log(`[Category Translation] Updated slug to: ${finalSlug}`);
             } catch (updateError) {
                 console.error('[Category Translation] Failed to update slug:', updateError);
             }
@@ -161,8 +153,6 @@ Source:
                     locale: locale as 'es' | 'en' | 'fr' | 'pt',
                     data: updateData,
                 });
-
-                console.log(`[Category Translation] Updated ${locale}`);
             } catch (updateError) {
                 console.error(`[Category Translation] Failed to update ${locale}:`, updateError);
             }

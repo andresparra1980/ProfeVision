@@ -10,6 +10,14 @@ interface PageProps {
     params: Promise<{ locale: string; slug: string }>;
 }
 
+// Valid locales supported by the app
+const VALID_LOCALES = ['es', 'en', 'fr', 'pt'] as const;
+type ValidLocale = typeof VALID_LOCALES[number];
+
+function isValidLocale(locale: string): locale is ValidLocale {
+    return VALID_LOCALES.includes(locale as ValidLocale);
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { locale, slug } = await params;
     const payload = await getPayloadClient();
@@ -32,7 +40,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CategoryPage({ params }: PageProps) {
     const { locale, slug } = await params;
-    setRequestLocale(locale);
+    // Validate locale and fallback to 'es' if invalid
+    const validLocale = isValidLocale(locale) ? locale : 'es';
+    setRequestLocale(validLocale);
 
     const payload = await getPayloadClient();
 
@@ -40,7 +50,7 @@ export default async function CategoryPage({ params }: PageProps) {
     const { docs: categories } = await payload.find({
         collection: 'blog_categories',
         where: { slug: { equals: slug } },
-        locale: locale as 'es' | 'en' | 'fr' | 'pt',
+        locale: validLocale as 'es' | 'en' | 'fr' | 'pt',
         limit: 1,
     });
 
@@ -54,15 +64,15 @@ export default async function CategoryPage({ params }: PageProps) {
             category: { equals: category.id },
             status: { equals: 'published' },
         },
-        locale: locale as 'es' | 'en' | 'fr' | 'pt',
+        locale: validLocale as 'es' | 'en' | 'fr' | 'pt',
         sort: '-publishedAt',
         limit: 20,
         depth: 1,
     });
 
-    const backText = locale === 'es' ? '← Todas las categorías' :
-        locale === 'en' ? '← All categories' :
-            locale === 'fr' ? '← Toutes les catégories' :
+    const backText = validLocale === 'es' ? '← Todas las categorías' :
+        validLocale === 'en' ? '← All categories' :
+            validLocale === 'fr' ? '← Toutes les catégories' :
                 '← Todas as categorias';
 
     return (
@@ -79,9 +89,9 @@ export default async function CategoryPage({ params }: PageProps) {
             {posts.length === 0 ? (
                 <div className="text-center py-12">
                     <p className="text-muted-foreground">
-                        {locale === 'es' ? 'No hay artículos en esta categoría.' :
-                            locale === 'en' ? 'No articles in this category.' :
-                                locale === 'fr' ? 'Aucun article dans cette catégorie.' :
+                        {validLocale === 'es' ? 'No hay artículos en esta categoría.' :
+                            validLocale === 'en' ? 'No articles in this category.' :
+                                validLocale === 'fr' ? 'Aucun article dans cette catégorie.' :
                                     'Nenhum artigo nesta categoria.'}
                     </p>
                 </div>
@@ -97,7 +107,7 @@ export default async function CategoryPage({ params }: PageProps) {
                                 <CardContent>
                                     {post.publishedAt && (
                                         <time className="text-sm text-muted-foreground">
-                                            {new Date(post.publishedAt).toLocaleDateString(locale, {
+                                            {new Date(post.publishedAt).toLocaleDateString(validLocale, {
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',

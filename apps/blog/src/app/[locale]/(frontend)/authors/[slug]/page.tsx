@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@profevision/ui/card';
 import { Button } from '@profevision/ui/button';
 import { getPayloadClient } from '@/lib/payload';
@@ -8,6 +9,14 @@ import type { Metadata } from 'next';
 
 interface PageProps {
     params: Promise<{ locale: string; slug: string }>;
+}
+
+// Valid locales supported by the app
+const VALID_LOCALES = ['es', 'en', 'fr', 'pt'] as const;
+type ValidLocale = typeof VALID_LOCALES[number];
+
+function isValidLocale(locale: string): locale is ValidLocale {
+    return VALID_LOCALES.includes(locale as ValidLocale);
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -30,7 +39,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function AuthorPage({ params }: PageProps) {
     const { locale, slug } = await params;
-    setRequestLocale(locale);
+    // Validate locale and fallback to 'es' if invalid
+    const validLocale = isValidLocale(locale) ? locale : 'es';
+    setRequestLocale(validLocale);
 
     const payload = await getPayloadClient();
 
@@ -38,7 +49,7 @@ export default async function AuthorPage({ params }: PageProps) {
     const author = await payload.findByID({
         collection: 'blog_authors',
         id: slug,
-        locale: locale as 'es' | 'en' | 'fr' | 'pt',
+        locale: validLocale as 'es' | 'en' | 'fr' | 'pt',
         depth: 1,
     }).catch(() => null);
 
@@ -51,7 +62,7 @@ export default async function AuthorPage({ params }: PageProps) {
             author: { equals: author.id },
             status: { equals: 'published' },
         },
-        locale: locale as 'es' | 'en' | 'fr' | 'pt',
+        locale: validLocale as 'es' | 'en' | 'fr' | 'pt',
         sort: '-publishedAt',
         limit: 20,
         depth: 1,
@@ -72,9 +83,11 @@ export default async function AuthorPage({ params }: PageProps) {
             {/* Author Header */}
             <header className="mb-12 text-center">
                 {author.avatar && typeof author.avatar === 'object' && author.avatar.url && (
-                    <img
+                    <Image
                         src={author.avatar.url}
                         alt={author.name}
+                        width={128}
+                        height={128}
                         className="w-32 h-32 rounded-full object-cover mx-auto mb-4"
                     />
                 )}
@@ -116,7 +129,7 @@ export default async function AuthorPage({ params }: PageProps) {
                                     <CardContent>
                                         {post.publishedAt && (
                                             <time className="text-sm text-muted-foreground">
-                                                {new Date(post.publishedAt).toLocaleDateString(locale, {
+                                                {new Date(post.publishedAt).toLocaleDateString(validLocale, {
                                                     year: 'numeric',
                                                     month: 'long',
                                                     day: 'numeric',

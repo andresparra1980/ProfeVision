@@ -24,7 +24,6 @@ export const translatePostHook: CollectionAfterChangeHook = async ({
 
         // If only slug or other non-content fields changed, skip translation
         if (!titleChanged && !excerptChanged && !contentChanged) {
-            console.log('[Translation] Skipping - no content changes detected');
             return doc;
         }
     }
@@ -34,8 +33,6 @@ export const translatePostHook: CollectionAfterChangeHook = async ({
     // Fire and forget - run in background
     setImmediate(async () => {
         try {
-            console.log(`[Translation] Starting background translation for post ${doc.id}`);
-
             const response = await fetch(`${serverUrl}/api/translate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -52,8 +49,6 @@ export const translatePostHook: CollectionAfterChangeHook = async ({
                 console.error('[Translation] API error:', response.statusText);
                 return;
             }
-
-            console.log(`[Translation] Completed for post ${doc.id}`);
         } catch (error) {
             console.error('[Translation] Background error:', error);
         }

@@ -22,7 +22,6 @@ export const translateCategoryHook: CollectionAfterChangeHook = async ({
         const nameChanged = doc.name !== previousDoc.name;
 
         if (!nameChanged) {
-            console.log('[Category Translation] Skipping - no name change detected');
             return doc;
         }
     }
@@ -32,8 +31,6 @@ export const translateCategoryHook: CollectionAfterChangeHook = async ({
     // Fire and forget - run in background
     setImmediate(async () => {
         try {
-            console.log(`[Category Translation] Starting background translation for category ${doc.id}`);
-
             const response = await fetch(`${serverUrl}/api/translate-category`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -50,8 +47,6 @@ export const translateCategoryHook: CollectionAfterChangeHook = async ({
                 console.error('[Category Translation] API error:', response.statusText);
                 return;
             }
-
-            console.log(`[Category Translation] Completed for category ${doc.id}`);
         } catch (error) {
             console.error('[Category Translation] Background error:', error);
         }

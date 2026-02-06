@@ -8,9 +8,19 @@ interface PageProps {
     params: Promise<{ locale: string }>;
 }
 
+// Valid locales supported by the app
+const VALID_LOCALES = ['es', 'en', 'fr', 'pt'] as const;
+type ValidLocale = typeof VALID_LOCALES[number];
+
+function isValidLocale(locale: string): locale is ValidLocale {
+    return VALID_LOCALES.includes(locale as ValidLocale);
+}
+
 export default async function BlogHomePage({ params }: PageProps) {
     const { locale } = await params;
-    setRequestLocale(locale);
+    // Validate locale and fallback to 'es' if invalid
+    const validLocale = isValidLocale(locale) ? locale : 'es';
+    setRequestLocale(validLocale);
     const t = await getTranslations('common');
 
     // Fetch published posts from Payload
@@ -22,7 +32,7 @@ export default async function BlogHomePage({ params }: PageProps) {
         },
         sort: '-publishedAt',
         limit: 12,
-        locale: locale as 'es' | 'en' | 'fr' | 'pt',
+        locale: validLocale as 'es' | 'en' | 'fr' | 'pt',
         depth: 1, // Include related docs (categories, authors)
     });
 
@@ -38,9 +48,9 @@ export default async function BlogHomePage({ params }: PageProps) {
             {posts.length === 0 ? (
                 <div className="text-center py-12">
                     <p className="text-muted-foreground text-lg">
-                        {locale === 'es' ? 'No hay artículos publicados aún.' :
-                            locale === 'en' ? 'No published articles yet.' :
-                                locale === 'fr' ? 'Aucun article publié pour le moment.' :
+                        {validLocale === 'es' ? 'No hay artículos publicados aún.' :
+                            validLocale === 'en' ? 'No published articles yet.' :
+                                validLocale === 'fr' ? 'Aucun article publié pour le moment.' :
                                     'Nenhum artigo publicado ainda.'}
                     </p>
                 </div>
@@ -61,7 +71,7 @@ export default async function BlogHomePage({ params }: PageProps) {
                                 <CardContent>
                                     {post.publishedAt && (
                                         <time className="text-sm text-muted-foreground">
-                                            {new Date(post.publishedAt).toLocaleDateString(locale, {
+                                            {new Date(post.publishedAt).toLocaleDateString(validLocale, {
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
@@ -77,7 +87,7 @@ export default async function BlogHomePage({ params }: PageProps) {
 
             <div className="mt-12 text-center">
                 <Button variant="outline" asChild>
-                    <a href={`https://profevision.com/${locale}`}>← {t('mainSite')}</a>
+                    <a href={`https://profevision.com/${validLocale}`}>← {t('mainSite')}</a>
                 </Button>
             </div>
         </main>

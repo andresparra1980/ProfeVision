@@ -39,8 +39,6 @@ Return ONLY the slug, nothing else. Example: how-to-create-effective-exams`,
             .replace(/-+/g, '-')
             .replace(/^-|-$/g, '');
 
-        console.log('[Slug Suggestion] Generated:', slug);
-
         return NextResponse.json({ slug });
     } catch (error) {
         console.error('[Slug Suggestion] Error:', error);

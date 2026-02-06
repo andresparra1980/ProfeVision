@@ -57,15 +57,12 @@ Return ONLY the optimized description, nothing else.`;
             return NextResponse.json({ error: 'Invalid field' }, { status: 400 });
         }
 
-        console.log(`[SEO] Generating ${field} for locale ${locale}...`);
-
         const { text } = await generateText({
             model: openrouter(model),
             prompt,
         });
 
         const result = text.trim();
-        console.log(`[SEO] Generated ${field}: ${result} (${result.length} chars)`);
 
         return NextResponse.json({
             result,

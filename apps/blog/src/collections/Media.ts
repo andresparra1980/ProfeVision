@@ -67,7 +67,7 @@ async function verifyImageAccessible(imageUrl: string, maxRetries = 3): Promise<
                 return true;
             }
         } catch {
-            console.log(`[Image Verification] Attempt ${i + 1} failed, retrying...`);
+            // Retry on failure
         }
         // Wait 1 second before retry
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -211,17 +211,15 @@ export const Media: CollectionConfig = {
                     if (req?.file && req.file.name) {
                         const originalName = req.file.name;
                         const newFilename = generateHashFilename(originalName);
-                        console.log(`[Media Upload] Renaming ${originalName.substring(0, 50)}... -> ${newFilename}`);
                         req.file.name = newFilename;
                         if (data) data.filename = newFilename;
                         return;
                     }
-                    
+
                     // Case 2: URL upload (external image) - backup check
                     if (data?.url && typeof data.url === 'string' && !data.filename) {
                         const url = data.url;
                         const newFilename = generateHashFilename(url);
-                        console.log(`[Media Upload] Setting hash filename for URL: ${newFilename}`);
                         data.filename = newFilename;
                     }
                 } catch (error) {
@@ -250,9 +248,7 @@ export const Media: CollectionConfig = {
                             body = req.body as { id?: string };
                         }
                     }
-                    
-                    console.log('[sync-alt endpoint] Received body:', body);
-                    
+
                     const { id } = body;
 
                     if (!id) {

@@ -28,11 +28,8 @@ export const convertToWebPHook: CollectionBeforeChangeHook = async ({
 
     // Skip if not convertible
     if (!shouldConvertToWebP(mimeType)) {
-        console.log(`[WebP Conversion] Skipping - mime type ${mimeType} not convertible`);
         return data;
     }
-
-    console.log(`[WebP Conversion] Converting ${req.file.name} to WebP`);
 
     try {
         // Convert to WebP with Next.js optimized settings
@@ -62,9 +59,6 @@ export const convertToWebPHook: CollectionBeforeChangeHook = async ({
         data.filename = webpFilename;
         data.mimeType = 'image/webp';
         data.filesize = webpBuffer.length;
-
-        console.log(`[WebP Conversion] Completed: ${originalName} -> ${webpFilename}`);
-        console.log(`[WebP Conversion] Size: ${req.file.size} bytes`);
 
     } catch (error) {
         console.error(`[WebP Conversion] Error converting to WebP:`, error);

@@ -1,4 +1,5 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical';
+import Image from 'next/image';
 import { LexicalRenderer } from '../lexical-renderer';
 
 interface HeroBlockProps {
@@ -34,10 +35,12 @@ export function HeroBlockRenderer({ media, heading, content, alignment = 'center
     return (
         <div className={`relative ${heightClasses[height] || 'min-h-[500px]'} flex items-center justify-center overflow-hidden rounded-lg bg-gray-900`}>
             {/* Background Image */}
-            <img
+            <Image
                 src={media.url}
                 alt={media.alt || heading || 'Hero image'}
-                className="absolute inset-0 w-full h-full object-cover object-center !m-0"
+                fill
+                className="object-cover object-center"
+                priority
             />
 
             {/* Overlay */}

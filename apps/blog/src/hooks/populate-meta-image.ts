@@ -34,7 +34,5 @@ export const populateMetaImageHook: CollectionBeforeChangeHook = async ({
         image: imageId || imageUrl,
     };
 
-    console.log(`[populateMetaImage] Will set meta.image for post`);
-
     return data;
 };
