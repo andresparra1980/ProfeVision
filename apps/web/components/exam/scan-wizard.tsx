@@ -55,7 +55,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
         }
       };
     });
-    
+
     return () => {
       // Clean up the callback on unmount
       setOnProcessingComplete(null);
@@ -68,7 +68,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
       if (DEBUG) {
         logger.log('Actualización desde finalOutput:', finalOutput);
       }
-      
+
       // Update local state with results from context
       setScanData((prev) => ({
         ...prev,
@@ -77,7 +77,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
         qrData: finalOutput.qrData,
         answers: Array.isArray(finalOutput.answers) ? finalOutput.answers : [],
       }));
-      
+
       // If we're on processing step, move to results
       if (step === 3) {
         setStep(4);
@@ -89,7 +89,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
     // Reset processing flags when retaking
     processingImage.current = false;
     processedImageId.current = null;
-    
+
     // Reset any existing results data
     setScanData((prev) => ({
       ...prev,
@@ -100,10 +100,10 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
       isDuplicate: false,
       duplicateInfo: null,
     }));
-    
+
     // Asegurarse de limpiar la imagen en el contexto también
     clearImageData();
-    
+
     // Go back to the capture step
     setStep(2);
   }, [setScanData, setStep, clearImageData]);
@@ -154,21 +154,21 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
       }
       return;
     }
-    
+
     // Generate a unique ID for this image
     const imageId = `image-${Date.now()}`;
     processedImageId.current = imageId;
     processingImage.current = true;
-    
+
     if (DEBUG) {
       logger.log(`Starting image processing for new capture: ${imageId}`);
     }
-    
+
     // Convertir la imagen capturada a una URL de datos (data URL)
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
-      
+
       // Only update the state if this is still the current image being processed
       if (processedImageId.current === imageId) {
         // Update both the local state and the ImageContext
@@ -176,20 +176,20 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
           ...prev,
           originalImage: dataUrl,
         }));
-        
+
         // Set the image data in the ImageContext
         setProcessedImageData(dataUrl);
-        
+
         // Move to the next step
         setStep(3);
       } else if (DEBUG) {
         logger.warn(`Ignoring stale image processing result for ${imageId}`);
       }
-      
+
       // Clear the processing flag
       processingImage.current = false;
     };
-    
+
     reader.onerror = (event) => {
       const errorMsg = `FileReader error: ${reader.error?.message || 'Unknown error'}`;
       console.error('FileReader error:', reader.error);
@@ -201,7 +201,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
       }
       processingImage.current = false;
     };
-    
+
     reader.readAsDataURL(imageFile);
   };
 
@@ -214,7 +214,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
       isDuplicate: data.isDuplicate,
       duplicateInfo: data.duplicateInfo,
     }));
-    
+
     // Move to results step
     setStep(4);
   };
@@ -338,7 +338,7 @@ function ScanWizardContent({ onClose }: { onClose: () => void }) {
 export function ScanWizard({ isOpen, onClose }: ScanWizardProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose} modal={true}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+      <DialogContent className="max-w-4xl h-[100dvh] sm:h-[90vh] w-full sm:w-auto sm:max-w-4xl flex flex-col p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] rounded-none sm:rounded-lg !left-0 !top-0 !translate-x-0 !translate-y-0 sm:!left-[50%] sm:!top-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%]">
         <ImageProvider>
           <ScanWizardContent onClose={onClose} />
         </ImageProvider>
