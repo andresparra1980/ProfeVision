@@ -1,6 +1,6 @@
 import { getPayloadClient } from '@/lib/payload';
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { draftMode } from 'next/headers';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -76,6 +76,7 @@ export default async function PostPage({ params }: PageProps) {
     // Validate locale and fallback to 'es' if invalid
     const validLocale = isValidLocale(locale) ? locale : 'es';
     setRequestLocale(validLocale);
+    const t = await getTranslations('blog');
 
     const payload = await getPayloadClient();
 
@@ -145,7 +146,7 @@ export default async function PostPage({ params }: PageProps) {
                     )}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         {post.author && typeof post.author === 'object' && (
-                            <span>Por {post.author.name}</span>
+                            <span>{t('byAuthor')} {post.author.name}</span>
                         )}
                         {post.publishedAt && (
                             <time>
