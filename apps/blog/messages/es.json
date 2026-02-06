@@ -1,0 +1,43 @@
+{
+    "blog": {
+        "title": "ProfeVision Blog",
+        "subtitle": "Artículos y recursos sobre educación, tecnología y evaluación con IA",
+        "backToHome": "Volver a ProfeVision",
+        "readMore": "Leer más",
+        "publishedAt": "Publicado el",
+        "categories": "Categorías",
+        "allPosts": "Todos los artículos",
+        "notFound": "Artículo no encontrado"
+    },
+    "common": {
+        "home": "Inicio",
+        "categories": "Categorías",
+        "authors": "Autores",
+        "mainSite": "Visitar ProfeVision",
+        "navigation": "Navegación",
+        "footerDescription": "Artículos y recursos sobre educación, tecnología y evaluación con IA.",
+        "copyright": "Todos los derechos reservados.",
+        "cookies": "Cookies",
+        "terms": "Términos",
+        "privacy": "Privacidad",
+        "language": "Idioma"
+    },
+    "header": {
+        "home": "Inicio",
+        "blog": "Blog",
+        "features": "Funciones",
+        "pricing": "Precios",
+        "about": "Nosotros"
+    },
+    "footer": {
+        "copyright": "© 2026 ProfeVision. Todos los derechos reservados.",
+        "privacy": "Privacidad",
+        "terms": "Términos"
+    },
+    "ui": {
+        "language": "Idioma",
+        "theme": "Tema",
+        "lightMode": "Modo claro",
+        "darkMode": "Modo oscuro"
+    }
+}
