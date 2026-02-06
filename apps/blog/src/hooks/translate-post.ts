@@ -16,14 +16,17 @@ export const translatePostHook: CollectionAfterChangeHook = async ({
     // Skip if no title (required field)
     if (!doc.title) return doc;
 
-    // On update, check if only slug changed (don't retranslate)
+    // On update, check if content or SEO fields changed
     if (operation === 'update' && previousDoc) {
         const titleChanged = doc.title !== previousDoc.title;
         const excerptChanged = doc.excerpt !== previousDoc.excerpt;
         const contentChanged = JSON.stringify(doc.content) !== JSON.stringify(previousDoc.content);
+        const keywordsChanged = doc.meta?.keywords !== previousDoc.meta?.keywords;
+        const metaTitleChanged = doc.meta?.title !== previousDoc.meta?.title;
+        const metaDescriptionChanged = doc.meta?.description !== previousDoc.meta?.description;
 
         // If only slug or other non-content fields changed, skip translation
-        if (!titleChanged && !excerptChanged && !contentChanged) {
+        if (!titleChanged && !excerptChanged && !contentChanged && !keywordsChanged && !metaTitleChanged && !metaDescriptionChanged) {
             return doc;
         }
     }
@@ -41,6 +44,9 @@ export const translatePostHook: CollectionAfterChangeHook = async ({
                     title: doc.title,
                     excerpt: doc.excerpt || '',
                     content: doc.content || null,
+                    keywords: doc.meta?.keywords || '',
+                    metaTitle: doc.meta?.title || '',
+                    metaDescription: doc.meta?.description || '',
                     sourceLocale: 'es',
                 }),
             });

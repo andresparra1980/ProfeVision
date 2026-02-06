@@ -167,6 +167,14 @@ export interface BlogPost {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Palabras clave separadas por comas (ej: educación, exámenes, estudio)
+     */
+    keywords?: string | null;
+    /**
+     * URL canónica (dejar vacío para usar la URL por defecto)
+     */
+    canonicalURL?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -339,6 +347,8 @@ export interface BlogPostsSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        keywords?: T;
+        canonicalURL?: T;
       };
   updatedAt?: T;
   createdAt?: T;

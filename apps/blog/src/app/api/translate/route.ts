@@ -23,7 +23,7 @@ function cleanJsonResponse(text: string): string {
 
 export async function POST(req: Request) {
     try {
-        const { postId, title, excerpt, content, sourceLocale = 'es' } = await req.json();
+        const { postId, title, excerpt, content, keywords, metaTitle, metaDescription, sourceLocale = 'es' } = await req.json();
 
         if (!postId || !title) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -37,17 +37,20 @@ export async function POST(req: Request) {
             title: string;
             excerpt: string;
             content?: unknown;
-            seoTitle?: string;
-            seoDescription?: string;
+            metaTitle?: string;
+            metaDescription?: string;
+            keywords?: string;
         }
 
         const translations: Record<string, TranslationData> = {};
 
-        // Generate SEO for source locale first
         const localeNames: Record<string, string> = { es: 'Spanish', en: 'English', fr: 'French', pt: 'Portuguese' };
+
         // Translate to each target locale
         for (const locale of targetLocales) {
             const targetLocaleName = localeNames[locale];
+            const currentMetaTitle = metaTitle || '';
+            const currentMetaDescription = metaDescription || '';
 
             // Combined prompt for translation + SEO
             const combinedPrompt = `Translate this blog post metadata from Spanish to ${targetLocaleName} AND generate SEO-optimized versions.
@@ -56,13 +59,17 @@ Return valid JSON only, no markdown:
 {
   "title": "translated title",
   "excerpt": "translated excerpt",
-  "metaTitle": "SEO title 50-60 chars, compelling",
-  "metaDescription": "SEO description 100-150 chars"
+  "metaTitle": "SEO-optimized title EXACTLY 50-60 chars, compelling, NO suffix or brand name",
+  "metaDescription": "SEO-optimized description EXACTLY 150-160 chars, persuasive",
+  "keywords": "5-8 relevant keywords, comma-separated"
 }
 
 Original:
 - Title: ${title}
-- Excerpt: ${excerpt || 'No excerpt'}`;
+- Excerpt: ${excerpt || 'No excerpt'}
+- Keywords: ${keywords || 'No keywords provided'}
+${currentMetaTitle ? `- Current metaTitle: ${currentMetaTitle}` : ''}
+${currentMetaDescription ? `- Current metaDescription: ${currentMetaDescription}` : ''}`;
 
             const { text: metaText } = await generateText({
                 model: openrouter(model),
@@ -75,8 +82,9 @@ Original:
                 translations[locale] = {
                     title: parsed.title,
                     excerpt: parsed.excerpt,
-                    seoTitle: parsed.metaTitle,
-                    seoDescription: parsed.metaDescription,
+                    metaTitle: parsed.metaTitle,
+                    metaDescription: parsed.metaDescription,
+                    keywords: parsed.keywords && parsed.keywords.trim() ? parsed.keywords.trim() : undefined,
                 };
             } catch {
                 console.error(`[Translation] Failed to parse for ${locale}`);
@@ -119,8 +127,29 @@ ${JSON.stringify(content)}`;
                     updateData.content = translation.content;
                 }
 
-                // Note: meta.title and meta.description are managed by the SEO plugin automatically
-                // based on the title and excerpt fields
+                // Get existing document to merge meta fields
+                const existingDoc = await payload.findByID({
+                    collection: 'blog_posts',
+                    id: postId,
+                    locale: locale as 'en' | 'fr' | 'pt',
+                    depth: 0,
+                });
+
+                // Build merged meta object
+                const existingMeta = existingDoc.meta || {};
+                const metaFields: Record<string, unknown> = { ...existingMeta };
+
+                if (translation.metaTitle) {
+                    metaFields.title = translation.metaTitle;
+                }
+                if (translation.metaDescription) {
+                    metaFields.description = translation.metaDescription;
+                }
+                if (translation.keywords !== undefined) {
+                    metaFields.keywords = translation.keywords;
+                }
+
+                updateData.meta = metaFields;
 
                 await payload.update({
                     collection: 'blog_posts',

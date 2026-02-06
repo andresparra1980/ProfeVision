@@ -64,10 +64,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const post = docs[0];
     if (!post) return { title: 'Post not found' };
 
+    // Use SEO meta fields if available, fallback to post fields
+    const metaTitle = post.meta?.title || post.title;
+    const metaDescription = post.meta?.description || post.excerpt;
+    const keywords = post.meta?.keywords ? String(post.meta.keywords).split(',').map(k => k.trim()).filter(Boolean) : undefined;
+    const canonicalURL = post.meta?.canonicalURL || `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://profevision.com'}/posts/${slug}`;
+
     return {
-        title: isDraft ? `[PREVIEW] ${post.title}` : post.title,
-        description: post.excerpt || undefined,
-        robots: isDraft ? { index: false, follow: false } : undefined,
+        title: isDraft ? `[PREVIEW] ${metaTitle}` : metaTitle,
+        description: metaDescription || undefined,
+        keywords: keywords,
+        alternates: {
+            canonical: canonicalURL,
+        },
+        authors: post.author && typeof post.author === 'object' ? [{ name: post.author.name }] : [{ name: 'ProfeVision' }],
+        robots: isDraft 
+            ? { index: false, follow: false } 
+            : { index: true, follow: true },
+        other: {
+            'publisher': 'ProfeVision',
+        },
     };
 }
 

@@ -107,8 +107,19 @@ export default buildConfig({
         // SEO plugin
         seoPlugin({
             collections: ['blog_posts'],
-            generateTitle: ({ doc }) => `${doc.title} | ProfeVision Blog`,
-            generateDescription: ({ doc }) => doc.excerpt,
+            generateTitle: ({ doc }) => {
+                // If meta.title exists, use it directly (already optimized by translation)
+                // Otherwise generate from doc.title
+                if (doc.meta?.title) {
+                    return doc.meta.title;
+                }
+                return doc.title;
+            },
+            generateDescription: ({ doc }) => {
+                // If meta.description exists, use it directly (already optimized by translation)
+                // Otherwise use excerpt
+                return doc.meta?.description || doc.excerpt || '';
+            },
             generateURL: ({ doc, collectionSlug }) => {
                 const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://profevision.com';
                 return `${baseUrl}/${collectionSlug}/${doc.slug}`;
@@ -121,6 +132,26 @@ export default buildConfig({
                 }
                 return 'https://assets.profevision.com/android-chrome-512x512.png';
             },
+            fields: ({ defaultFields }) => [
+                ...defaultFields,
+                {
+                    name: 'keywords',
+                    type: 'text',
+                    label: 'SEO Keywords',
+                    localized: true,
+                    admin: {
+                        description: 'Palabras clave separadas por comas (ej: educación, exámenes, estudio)',
+                    },
+                },
+                {
+                    name: 'canonicalURL',
+                    type: 'text',
+                    label: 'Canonical URL',
+                    admin: {
+                        description: 'URL canónica (dejar vacío para usar la URL por defecto)',
+                    },
+                },
+            ],
         }),
     ],
 
