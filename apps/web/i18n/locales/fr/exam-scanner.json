@@ -1,0 +1,36 @@
+{
+    "toasts": {
+        "connectionError": "Problème de connexion. Vérifiez votre connexion Internet.",
+        "cameraNotSupported": "Cet appareil ne prend pas en charge l'accès à la caméra",
+        "serverConnectionError": "Impossible de se connecter au serveur. Vérifiez votre connexion Internet.",
+        "cameraStartError": "Impossible de démarrer la caméra. Vérifiez les permissions du navigateur.",
+        "invalidFileType": "Type de fichier invalide",
+        "invalidFileTypeDesc": "Veuillez sélectionner une image (JPG, PNG, etc.)",
+        "fileTooLarge": "Fichier trop volumineux",
+        "fileTooLargeDesc": "L'image doit faire moins de 10 Mo",
+        "fileReadError": "Erreur de lecture du fichier",
+        "fileReadErrorDesc": "Impossible de traiter l'image sélectionnée",
+        "noCameraStream": "Aucun flux de caméra actif",
+        "captureError": "Erreur lors de la capture de l'image",
+        "processingError": "Erreur de traitement : {message}",
+        "noImageToProcess": "Aucune image à traiter"
+    },
+    "results": {
+        "detected": "Résultats détectés",
+        "question": "Question {number}",
+        "confidence": "{percent}% de confiance",
+        "noAnswersDetected": "Aucune réponse détectée",
+        "noAnswersHint": "Impossible de détecter les marques sur la feuille. Essayez d'améliorer les conditions d'éclairage et assurez-vous que les marques sont claires.",
+        "processingErrorHint": "Impossible de traiter les réponses en raison d'une erreur. Vérifiez la qualité de l'image et assurez-vous que la feuille entière est visible."
+    },
+    "qr": {
+        "title": "Données du code QR",
+        "examId": "ID Examen",
+        "studentId": "ID Étudiant",
+        "group": "Groupe",
+        "validation": "Validation",
+        "valid": "Valide",
+        "invalid": "Invalide",
+        "notAvailable": "Non disponible"
+    }
+}

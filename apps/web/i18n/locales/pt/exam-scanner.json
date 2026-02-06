@@ -1,0 +1,36 @@
+{
+    "toasts": {
+        "connectionError": "Problema de conexão. Verifique sua conexão com a Internet.",
+        "cameraNotSupported": "Este dispositivo não suporta acesso à câmera",
+        "serverConnectionError": "Não foi possível conectar ao servidor. Verifique sua conexão com a Internet.",
+        "cameraStartError": "Não foi possível iniciar a câmera. Verifique as permissões do navegador.",
+        "invalidFileType": "Tipo de arquivo inválido",
+        "invalidFileTypeDesc": "Por favor, selecione uma imagem (JPG, PNG, etc.)",
+        "fileTooLarge": "Arquivo muito grande",
+        "fileTooLargeDesc": "A imagem deve ter menos de 10MB",
+        "fileReadError": "Erro ao ler arquivo",
+        "fileReadErrorDesc": "Não foi possível processar a imagem selecionada",
+        "noCameraStream": "Nenhum fluxo de câmera ativo",
+        "captureError": "Erro ao capturar imagem",
+        "processingError": "Erro ao processar: {message}",
+        "noImageToProcess": "Nenhuma imagem para processar"
+    },
+    "results": {
+        "detected": "Resultados detectados",
+        "question": "Questão {number}",
+        "confidence": "{percent}% confiança",
+        "noAnswersDetected": "Nenhuma resposta detectada",
+        "noAnswersHint": "Não foi possível detectar as marcas na folha. Tente melhorar as condições de iluminação e certifique-se de que as marcas estejam claras.",
+        "processingErrorHint": "Não foi possível processar as respostas devido a um erro. Verifique a qualidade da imagem e certifique-se de que toda a folha esteja visível."
+    },
+    "qr": {
+        "title": "Dados do código QR",
+        "examId": "ID Exame",
+        "studentId": "ID Estudante",
+        "group": "Grupo",
+        "validation": "Validação",
+        "valid": "Válido",
+        "invalid": "Inválido",
+        "notAvailable": "Não disponível"
+    }
+}

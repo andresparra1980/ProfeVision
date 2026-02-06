@@ -1,0 +1,36 @@
+{
+    "toasts": {
+        "connectionError": "Connection problem. Check your internet connection.",
+        "cameraNotSupported": "This device does not support camera access",
+        "serverConnectionError": "Could not connect to server. Check your internet connection.",
+        "cameraStartError": "Could not start camera. Check browser permissions.",
+        "invalidFileType": "Invalid file type",
+        "invalidFileTypeDesc": "Please select an image (JPG, PNG, etc.)",
+        "fileTooLarge": "File too large",
+        "fileTooLargeDesc": "Image must be less than 10MB",
+        "fileReadError": "Error reading file",
+        "fileReadErrorDesc": "Could not process selected image",
+        "noCameraStream": "No active camera stream",
+        "captureError": "Error capturing image",
+        "processingError": "Processing error: {message}",
+        "noImageToProcess": "No image to process"
+    },
+    "results": {
+        "detected": "Results detected",
+        "question": "Question {number}",
+        "confidence": "{percent}% confidence",
+        "noAnswersDetected": "No answers detected",
+        "noAnswersHint": "Could not detect marks on the sheet. Try improving lighting conditions and ensure marks are clear.",
+        "processingErrorHint": "Could not process answers due to an error. Check image quality and ensure the entire sheet is visible."
+    },
+    "qr": {
+        "title": "QR Code Data",
+        "examId": "Exam ID",
+        "studentId": "Student ID",
+        "group": "Group",
+        "validation": "Validation",
+        "valid": "Valid",
+        "invalid": "Invalid",
+        "notAvailable": "Not available"
+    }
+}
