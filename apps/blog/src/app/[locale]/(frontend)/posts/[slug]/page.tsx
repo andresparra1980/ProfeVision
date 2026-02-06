@@ -29,7 +29,7 @@ function isValidLocale(locale: string): locale is ValidLocale {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { locale, slug } = await params;
     const payload = await getPayloadClient();
-    
+
     // Check if we're in draft mode (preview)
     const draft = await draftMode();
     const isDraft = draft.isEnabled;
@@ -71,15 +71,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const canonicalURL = post.meta?.canonicalURL || `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://profevision.com'}/posts/${slug}`;
 
     return {
-        title: isDraft ? `[PREVIEW] ${metaTitle}` : metaTitle,
+        title: { absolute: isDraft ? `[PREVIEW] ${metaTitle}` : metaTitle },
         description: metaDescription || undefined,
         keywords: keywords,
         alternates: {
             canonical: canonicalURL,
         },
         authors: post.author && typeof post.author === 'object' ? [{ name: post.author.name }] : [{ name: 'ProfeVision' }],
-        robots: isDraft 
-            ? { index: false, follow: false } 
+        robots: isDraft
+            ? { index: false, follow: false }
             : { index: true, follow: true },
         other: {
             'publisher': 'ProfeVision',
