@@ -28,7 +28,6 @@ describe('QuestionAnalysisCard', () => {
   const mockResultados: ResultadoExamen[] = [
     {
       id: '1',
-      estudiante_id: 'est-1',
       puntaje_obtenido: 80,
       porcentaje: 80,
       fecha_calificacion: '2023-01-01',
@@ -61,7 +60,6 @@ describe('QuestionAnalysisCard', () => {
     },
     {
       id: '2',
-      estudiante_id: 'est-2',
       puntaje_obtenido: 50,
       porcentaje: 50,
       fecha_calificacion: '2023-01-01',
@@ -102,7 +100,7 @@ describe('QuestionAnalysisCard', () => {
 
   it('renders chart and statistics when data is provided', () => {
     render(<QuestionAnalysisCard resultados={mockResultados} totalPreguntas={2} />)
-    
+
     expect(screen.getByText('title')).toBeInTheDocument()
     expect(screen.getByText('description')).toBeInTheDocument()
     expect(screen.getByTestId('bar-chart')).toBeInTheDocument()
@@ -124,12 +122,12 @@ describe('QuestionAnalysisCard', () => {
 
   it('passes correct data to chart', () => {
     render(<QuestionAnalysisCard resultados={mockResultados} totalPreguntas={2} />)
-    
+
     const chart = screen.getByTestId('bar-chart')
     const data = JSON.parse(chart.getAttribute('data-chart-data') || '[]')
 
     expect(data).toHaveLength(2)
-    
+
     // Check Q1 (100%)
     const q1 = data.find((d: any) => d.question === 'axis.questionPrefix1')
     expect(q1.percentage).toBe(100)
@@ -151,7 +149,7 @@ describe('QuestionAnalysisCard', () => {
     disabledResults[0].respuestas_estudiante[0].pregunta.habilitada = false
 
     render(<QuestionAnalysisCard resultados={disabledResults} totalPreguntas={2} />)
-    
+
     const chart = screen.getByTestId('bar-chart')
     const data = JSON.parse(chart.getAttribute('data-chart-data') || '[]')
 

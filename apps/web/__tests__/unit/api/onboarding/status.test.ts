@@ -32,13 +32,9 @@ describe('API: /api/onboarding/status', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Default auth mock
-    vi.mocked(verifyTeacherAuth).mockResolvedValue({ 
+    vi.mocked(verifyTeacherAuth).mockResolvedValue({
       user: { id: 'teacher-123' },
-      aud: 'authenticated',
-      role: 'authenticated',
-      app_metadata: {},
-      user_metadata: {},
-      created_at: '',
+      profesor: { id: 'teacher-123' },
     })
   })
 
@@ -46,18 +42,18 @@ describe('API: /api/onboarding/status', () => {
     it('returns 401 if unauthorized', async () => {
       vi.mocked(verifyTeacherAuth).mockRejectedValue(new Error('Auth failed'))
       const req = new NextRequest('http://localhost/api/onboarding/status')
-      
+
       const res = await GET(req)
-      
+
       expect(res.status).toBe(401)
     })
 
     it('identifies legacy user (null status)', async () => {
-      mockSingle.mockResolvedValue({ 
-        data: { first_login_completed: false, onboarding_status: null }, 
-        error: null 
+      mockSingle.mockResolvedValue({
+        data: { first_login_completed: false, onboarding_status: null },
+        error: null
       })
-      
+
       const req = new NextRequest('http://localhost/api/onboarding/status')
       const res = await GET(req)
       const data = await res.json()
@@ -67,14 +63,14 @@ describe('API: /api/onboarding/status', () => {
     })
 
     it('identifies new incomplete user', async () => {
-      mockSingle.mockResolvedValue({ 
-        data: { 
-          first_login_completed: false, 
-          onboarding_status: { wizard_step: 1, wizard_completed: false } 
-        }, 
-        error: null 
+      mockSingle.mockResolvedValue({
+        data: {
+          first_login_completed: false,
+          onboarding_status: { wizard_step: 1, wizard_completed: false }
+        },
+        error: null
       })
-      
+
       const req = new NextRequest('http://localhost/api/onboarding/status')
       const res = await GET(req)
       const data = await res.json()
@@ -84,14 +80,14 @@ describe('API: /api/onboarding/status', () => {
     })
 
     it('identifies completed user', async () => {
-      mockSingle.mockResolvedValue({ 
-        data: { 
-          first_login_completed: true, 
-          onboarding_status: { wizard_completed: true } 
-        }, 
-        error: null 
+      mockSingle.mockResolvedValue({
+        data: {
+          first_login_completed: true,
+          onboarding_status: { wizard_completed: true }
+        },
+        error: null
       })
-      
+
       const req = new NextRequest('http://localhost/api/onboarding/status')
       const res = await GET(req)
       const data = await res.json()
@@ -100,20 +96,20 @@ describe('API: /api/onboarding/status', () => {
     })
 
     it('calculates checklist completion correctly', async () => {
-      mockSingle.mockResolvedValue({ 
-        data: { 
-          onboarding_status: { 
+      mockSingle.mockResolvedValue({
+        data: {
+          onboarding_status: {
             checklist_items: {
               exam_created: true,
               exam_published: true,
               pdf_exported: true,
               first_scan: true
             }
-          } 
-        }, 
-        error: null 
+          }
+        },
+        error: null
       })
-      
+
       const req = new NextRequest('http://localhost/api/onboarding/status')
       const res = await GET(req)
       const data = await res.json()
@@ -126,12 +122,12 @@ describe('API: /api/onboarding/status', () => {
     it('calls update_onboarding_status RPC', async () => {
       const updateData = { wizard_step: 2 }
       mockRpc.mockResolvedValue({ data: { ...updateData }, error: null })
-      
+
       const req = new NextRequest('http://localhost/api/onboarding/status', {
         method: 'PATCH',
         body: JSON.stringify(updateData)
       })
-      
+
       const res = await PATCH(req)
       const data = await res.json()
 

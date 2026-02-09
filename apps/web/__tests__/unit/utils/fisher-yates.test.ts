@@ -112,9 +112,9 @@ describe('shuffleInSync', () => {
     const scores = [1, 2, 3]
 
     const [shuffledQ, shuffledA, shuffledS] = shuffleInSync(
-      [questions, answers, scores],
+      [questions, answers, scores] as string[][],
       42 // Use seed for reproducibility
-    )
+    ) as [string[], string[], number[]]
 
     // Verify correspondence is maintained
     for (let i = 0; i < questions.length; i++) {
@@ -128,8 +128,8 @@ describe('shuffleInSync', () => {
     const arr1 = [1, 2, 3, 4]
     const arr2 = ['a', 'b', 'c', 'd']
 
-    const result1 = shuffleInSync([arr1, arr2], 999)
-    const result2 = shuffleInSync([arr1, arr2], 999)
+    const result1 = shuffleInSync([arr1, arr2] as (number | string)[][], 999)
+    const result2 = shuffleInSync([arr1, arr2] as (number | string)[][], 999)
 
     expect(result1).toEqual(result2)
   })
@@ -138,7 +138,7 @@ describe('shuffleInSync', () => {
     const arr1 = [1, 2, 3]
     const arr2 = ['a', 'b', 'c']
 
-    const [shuffled1, shuffled2] = shuffleInSync([arr1, arr2])
+    const [shuffled1, shuffled2] = shuffleInSync([arr1, arr2] as (number | string)[][]) as [number[], string[]]
 
     expect(hasSameElements(arr1, shuffled1)).toBe(true)
     expect(hasSameElements(arr2, shuffled2)).toBe(true)

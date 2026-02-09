@@ -6,7 +6,7 @@ import { OnboardingProvider, useOnboarding } from '@/lib/contexts/onboarding-con
 const { mockGetSession, mockSubscription, mockOnAuthStateChange } = vi.hoisted(() => ({
   mockGetSession: vi.fn(),
   mockSubscription: { unsubscribe: vi.fn() },
-  mockOnAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } }))
+  mockOnAuthStateChange: vi.fn((callback: (event: string, session: unknown) => void) => ({ data: { subscription: { unsubscribe: vi.fn() } } }))
 }))
 
 vi.mock('@/lib/supabase/client', () => ({
@@ -29,8 +29,8 @@ describe('useOnboarding', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockGetSession.mockResolvedValue({ 
-      data: { session: { access_token: 'fake-token' } } 
+    mockGetSession.mockResolvedValue({
+      data: { session: { access_token: 'fake-token' } }
     })
   })
 
@@ -45,12 +45,12 @@ describe('useOnboarding', () => {
       // Note: The mockGetSession setup in beforeEach returns 'fake-token'
       // But the context logic uses the session from getSession inside getAuthHeaders
       // So we should expect 'fake-token' OR update mockGetSession
-      
+
       // The context implementation:
       // 1. Calls supabase.auth.getSession() inside getAuthHeaders
-      
+
       // So we should expect 'fake-token' based on beforeEach
-      
+
       // Trigger the listener
       callback('SIGNED_IN', { access_token: 'ignored-by-getAuthHeaders-logic' })
       return { data: { subscription: mockSubscription } }
