@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 import { LanguageSwitcherDropdownSuspense } from "@/components/shared/language-switcher-dropdown";
 
 // Steps
-import { 
+import {
   WelcomeStep,
   InstitutionStep,
   SubjectStep,
@@ -65,13 +65,13 @@ interface OnboardingWizardProps {
 export function OnboardingWizard({ waitForWelcome = false }: OnboardingWizardProps) {
   const t = useTranslations("onboarding");
   const { shouldShowWizard, completeWizardStep, onboardingStatus } = useOnboarding();
-  
+
   // Initialize step from DB status, default to 0
   const initialStep = onboardingStatus?.wizard_step ?? 0;
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [wizardData, setWizardData] = useState<WizardData>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Sync with DB when onboardingStatus loads
   useEffect(() => {
     if (onboardingStatus?.wizard_step !== undefined && onboardingStatus.wizard_step !== currentStep) {
@@ -172,8 +172,8 @@ export function OnboardingWizard({ waitForWelcome = false }: OnboardingWizardPro
 
   return (
     <Dialog open={shouldShowWizard}>
-      <DialogContent 
-        className="max-w-2xl max-h-[90vh] overflow-hidden p-0 md:max-w-2xl md:max-h-[90vh] max-md:!fixed max-md:!inset-0 max-md:!translate-x-0 max-md:!translate-y-0 max-md:!top-0 max-md:!left-0 max-md:w-screen max-md:h-[100dvh] max-md:max-w-none max-md:max-h-none max-md:rounded-none max-md:border-0 max-md:!z-50 max-md:flex max-md:flex-col" 
+      <DialogContent
+        className="flex flex-col max-w-2xl max-h-[90vh] overflow-hidden p-0 md:max-w-2xl md:max-h-[90vh] max-md:!fixed max-md:!inset-0 max-md:!translate-x-0 max-md:!translate-y-0 max-md:!top-0 max-md:!left-0 max-md:w-screen max-md:h-[100dvh] max-md:max-w-none max-md:max-h-none max-md:rounded-none max-md:border-0 max-md:!z-50"
         hideCloseButton
         onCloseAutoFocus={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -182,18 +182,18 @@ export function OnboardingWizard({ waitForWelcome = false }: OnboardingWizardPro
           <DialogTitle>{t("wizard.title")}</DialogTitle>
           <DialogDescription>{t("wizard.subtitle")}</DialogDescription>
         </VisuallyHidden>
-         {/* Header with progress - fixed height, never scrolls */}
-         <div className="p-4 md:p-6 pb-4 border-b flex-shrink-0">
-           <div className="mb-4 flex items-start justify-between gap-4">
-             <div>
-               <h2 className="text-xl font-semibold">{t("wizard.title")}</h2>
-               <p className="text-sm text-muted-foreground">{t("wizard.subtitle")}</p>
-             </div>
-             <div className="flex-shrink-0">
-               <LanguageSwitcherDropdownSuspense variant="outline" size="sm" withTooltip tooltipSide="left" />
-             </div>
-           </div>
-          
+        {/* Header with progress - fixed height, never scrolls */}
+        <div className="p-4 md:p-6 pb-4 border-b flex-shrink-0">
+          <div className="mb-4 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold">{t("wizard.title")}</h2>
+              <p className="text-sm text-muted-foreground">{t("wizard.subtitle")}</p>
+            </div>
+            <div className="flex-shrink-0">
+              <LanguageSwitcherDropdownSuspense variant="outline" size="sm" withTooltip tooltipSide="left" />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
