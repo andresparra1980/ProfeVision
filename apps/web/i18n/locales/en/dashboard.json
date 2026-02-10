@@ -1134,6 +1134,7 @@
       },
       "actions": {
         "edit": "Edit",
+        "exportAndPrint": "Export PDFs and Print",
         "viewResults": "View Results"
       }
     },

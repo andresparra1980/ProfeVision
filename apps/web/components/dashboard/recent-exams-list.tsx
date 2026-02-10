@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Edit, BarChart3 } from 'lucide-react';
+import { Edit, BarChart3, Printer } from 'lucide-react';
 import { useDashboardStats } from '@/lib/hooks/use-dashboard-stats';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations, useLocale } from 'next-intl';
@@ -225,15 +225,26 @@ export function RecentExamsList() {
         {t('actions.edit')}
       </Button>
       {examen.estado !== 'borrador' && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/results`)}
-          className="w-full justify-start"
-        >
-          <BarChart3 className="h-3.5 w-3.5 mr-2" />
-          {t('actions.viewResults')}
-        </Button>
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/export`)}
+            className="w-full justify-start"
+          >
+            <Printer className="h-3.5 w-3.5 mr-2" />
+            {t('actions.exportAndPrint')}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/results`)}
+            className="w-full justify-start"
+          >
+            <BarChart3 className="h-3.5 w-3.5 mr-2" />
+            {t('actions.viewResults')}
+          </Button>
+        </>
       )}
     </div>
   );
