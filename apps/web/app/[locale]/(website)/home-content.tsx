@@ -1,9 +1,9 @@
 "use client"
 
+import Image from "next/image"
 import { Link } from "@/i18n/navigation"
 import { useTranslations, useLocale } from 'next-intl'
 import { Button } from "@/components/ui/button"
-import { FeatureSlideshow } from "@/components/shared/feature-slideshow"
 import {
   BookOpen,
   ScanText,
@@ -65,7 +65,18 @@ export function HomeContent() {
                   </p>
                 </div>
               </div>
-              <FeatureSlideshow />
+              <div className="relative flex items-center justify-center">
+              <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src="/images/hero/ProfeEscaneo_1_1.webp"
+                  alt="Profesor usando ProfeVision para escanear exámenes"
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
+            </div>
             </div>
           </div>
         </section>
