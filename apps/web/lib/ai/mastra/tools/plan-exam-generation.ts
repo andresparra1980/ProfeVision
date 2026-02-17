@@ -126,7 +126,7 @@ export const planExamGenerationTool = createTool({
     });
 
     const model = openrouter(
-      process.env.OPENAI_FALLBACK_MODEL || "mistralai/ministral-8b"
+      process.env.OPENAI_MODEL || "google/gemini-2.5-flash"
     );
 
     try {
@@ -207,9 +207,9 @@ function buildPlanPrompt(params: {
     topicDistributionSection = `
 **CRITICAL - TOPIC DISTRIBUTION (MUST FOLLOW EXACTLY):**
 ${topicDistribution.map((td) => {
-  const difficultyNote = td.difficulty ? ` (difficulty: ${td.difficulty})` : "";
-  return `- ${td.topic}: EXACTLY ${td.count} questions${difficultyNote}`;
-}).join("\n")}
+      const difficultyNote = td.difficulty ? ` (difficulty: ${td.difficulty})` : "";
+      return `- ${td.topic}: EXACTLY ${td.count} questions${difficultyNote}`;
+    }).join("\n")}
 
 TOTAL MUST BE EXACTLY ${numQuestions} questions (current distribution: ${totalDistributed}).
 ${totalDistributed !== numQuestions ? `⚠️  WARNING: Distribution total (${totalDistributed}) does not match required total (${numQuestions}). Adjust proportionally.` : ""}
