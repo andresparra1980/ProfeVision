@@ -118,7 +118,11 @@
       "avatarTitle": "Profesor que confía en ProfeVisión para automatizar la calificación de exámenes",
       "trustText": "Más de",
       "trustNumber": "1,000+",
-      "trustSuffix": "profesores confían en nosotros"
+      "trustSuffix": "profesores confían en nosotros",
+      "floatingBadge": {
+        "label": "Exámenes corregidos",
+        "count": "+50,000"
+      }
     },
     "features": {
       "badge": "Características Principales",

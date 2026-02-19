@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { IBM_Plex_Mono, IBM_Plex_Sans, Inter, Noto_Sans } from 'next/font/google';
+import { IBM_Plex_Mono, IBM_Plex_Sans, Inter, Noto_Sans, Outfit, DM_Sans } from 'next/font/google';
 import '@/styles/globals.css';
 import { CSPostHogProvider } from './providers/csp-posthog-provider';
 
@@ -30,6 +30,20 @@ const notoSans = Noto_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '700'],
   variable: '--font-noto',
+  display: 'swap',
+});
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-body',
   display: 'swap',
 });
 
@@ -76,7 +90,7 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body
-        className={`min-h-screen bg-background font-sans antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable} ${inter.variable} ${notoSans.variable}`}
+        className={`min-h-screen bg-background font-body antialiased ${ibmPlexSans.variable} ${ibmPlexMono.variable} ${inter.variable} ${notoSans.variable} ${outfit.variable} ${dmSans.variable}`}
         suppressHydrationWarning
       >
         <CSPostHogProvider>

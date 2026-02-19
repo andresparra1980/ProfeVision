@@ -120,7 +120,11 @@
       "avatarTitle": "Enseignant qui fait confiance à ProfeVisión pour automatiser la notation des examens",
       "trustText": "Plus de",
       "trustNumber": "1 000+",
-      "trustSuffix": "enseignants nous font confiance"
+      "trustSuffix": "enseignants nous font confiance",
+      "floatingBadge": {
+        "label": "Examens notés",
+        "count": "+50 000"
+      }
     },
     "features": {
       "badge": "Caractéristiques Principales",

@@ -119,7 +119,11 @@
       "avatarTitle": "Teacher who trusts ProfeVision to automate exam grading",
       "trustText": "Over",
       "trustNumber": "1,000+",
-      "trustSuffix": "teachers trust us"
+      "trustSuffix": "teachers trust us",
+      "floatingBadge": {
+        "label": "Exams graded",
+        "count": "+50,000"
+      }
     },
     "features": {
       "badge": "Key Features",

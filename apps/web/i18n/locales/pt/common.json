@@ -120,7 +120,11 @@
       "avatarTitle": "Professor que confia na ProfeVisión para automatizar a correção de provas",
       "trustText": "Mais de",
       "trustNumber": "1.000+",
-      "trustSuffix": "professores confiam em nós"
+      "trustSuffix": "professores confiam em nós",
+      "floatingBadge": {
+        "label": "Provas corrigidas",
+        "count": "+50.000"
+      }
     },
     "features": {
       "badge": "Principais Características",
