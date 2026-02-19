@@ -9,6 +9,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { FAQSchema } from "@/components/seo/json-ld";
+import { ScrollAnimation } from "@/components/ui/scroll-animation";
 
 export function ContactContent() {
   const t = useTranslations('common');
@@ -62,56 +63,93 @@ export function ContactContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <FAQSchema data={faqs} />
-      <h1 className="text-4xl font-bold text-center mb-8">{t('contact.title')}</h1>
-      <div className="max-w-4xl mx-auto">
-        <p className="text-lg text-muted-foreground text-center mb-8">
-          {t('contact.subtitle')}
-        </p>
+    <div className="flex min-h-screen flex-col">
+      {/* Hero / Header Section */}
+      <section className="py-12 md:py-20 relative overflow-hidden">
+        {/* Mesh Gradient Background */}
+        <div className="mesh-gradient" aria-hidden="true" />
 
-        <div className="flex justify-center mb-16">
-          <div className="w-full max-w-lg">
-            <div className="bg-card p-6 rounded-lg border shadow-sm">
-              <h2 className="text-2xl font-semibold mb-4">{t('contact.support.title')}</h2>
-              <div className="space-y-4">
-                <div>
-                  <strong>{t('contact.support.email')}</strong> soporte@profevision.com
+        {/* Floating decorative elements */}
+        <div className="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full animate-float hidden md:block" style={{ animationDelay: '0s' }} />
+        <div className="absolute top-40 right-20 w-12 h-12 bg-accent/20 rounded-lg rotate-45 animate-float-rotate hidden md:block" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-secondary/10 rounded-full animate-float-slow hidden md:block" style={{ animationDelay: '1s' }} />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <FAQSchema data={faqs} />
+
+          <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-6 font-display">
+              {t('contact.title')}
+            </h1>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+              <p className="text-lg md:text-xl text-muted-foreground text-center mb-12">
+                {t('contact.subtitle')}
+              </p>
+            </div>
+
+            <div className="flex justify-center mb-16">
+              <ScrollAnimation delay={300} className="w-full max-w-lg">
+                <div className="bg-card p-8 rounded-xl border border-primary/20 shadow-lg card-hover gradient-border relative z-20">
+                  <h2 className="text-2xl font-semibold mb-6">{t('contact.support.title')}</h2>
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <strong className="text-primary">{t('contact.support.email')}</strong>
+                      <a href="mailto:soporte@profevision.com" className="hover:underline">soporte@profevision.com</a>
+                    </div>
+                    <div>
+                      <strong>{t('contact.support.knowledge')}</strong>{' '}
+                      <a
+                        href={`https://docs.profevision.com/${locale}/docs`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {t('contact.support.knowledgeBase')}
+                      </a>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <strong>{t('contact.support.knowledge')}</strong>{' '}
-                  <a
-                    href={`https://docs.profevision.com/${locale}/docs`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    {t('contact.support.knowledgeBase')}
-                  </a>
-                </div>
-              </div>
+              </ScrollAnimation>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* FAQ Section */}
-        <div className="max-w-3xl mx-auto mt-12">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            {t('contact.faq.title', { defaultValue: "Frequently Asked Questions" })}
-          </h2>
-          <Accordion type="single" collapsible className="w-full space-y-4">
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`} className="border-0 bg-popover-foreground rounded-lg shadow-sm">
-                <AccordionTrigger className="text-left px-6 py-4 text-popover hover:no-underline hover:opacity-80 rounded-lg font-medium">{faq.question}</AccordionTrigger>
-                <AccordionContent className="px-6 pb-4">
-                  <p className="text-popover opacity-80">{renderAnswer(faq.answer)}</p>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+      {/* FAQ Section */}
+      <section className="py-16 bg-muted/50 relative">
+        <div className="absolute inset-0 dots-pattern opacity-30" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-3xl mx-auto">
+            <ScrollAnimation>
+              <h2 className="text-3xl font-bold text-center mb-10 font-display">
+                {t('contact.faq.title', { defaultValue: "Frequently Asked Questions" })}
+              </h2>
+            </ScrollAnimation>
+
+            <ScrollAnimation delay={100}>
+              <Accordion type="single" collapsible className="w-full space-y-4">
+                {faqs.map((faq, index) => (
+                  <AccordionItem
+                    key={index}
+                    value={`item-${index}`}
+                    className="border border-border bg-card rounded-xl shadow-sm overflow-hidden"
+                  >
+                    <AccordionTrigger className="text-left px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors font-medium">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-4 pt-2">
+                      <p className="text-muted-foreground">{renderAnswer(faq.answer)}</p>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </ScrollAnimation>
+          </div>
         </div>
-
-      </div>
+      </section>
     </div>
-  )
-} 
+  );
+}
