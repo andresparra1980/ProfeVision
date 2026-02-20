@@ -11,7 +11,6 @@ import {
   Zap,
   XCircle,
   AlertCircle,
-  Lightbulb,
   Camera,
   ScanLine,
   Shield,
