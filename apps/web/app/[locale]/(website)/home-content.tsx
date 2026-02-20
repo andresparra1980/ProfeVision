@@ -200,7 +200,7 @@ export function HomeContent() {
                 <ScrollAnimation key={item.key} delay={index * 100}>
                   <div className="card-hover gradient-border group relative overflow-hidden rounded-lg border bg-card shadow-sm">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                    <div className="p-6">
+                    <div className="p-6 relative z-10">
                       <div className="flex items-center gap-4">
                         <div className="rounded-full bg-primary/10 p-3">
                           <item.icon className="h-5 w-5 text-primary" />
