@@ -497,11 +497,11 @@
       "title": "Instructions de Remplissage",
       "penUse": {
         "title": "Utiliser un stylo noir ou bleu",
-        "description": "pour remplir complètement les bulles"
+        "description": "Pour remplir complètement les bulles"
       },
       "avoidPencil": {
         "title": "Éviter le crayon",
-        "description": "peut générer des reflets et causer des erreurs de notation"
+        "description": "Peut générer des reflets et causer des erreurs de notation"
       },
       "correction": {
         "title": "À corriger",

@@ -495,11 +495,11 @@
       "title": "Instrucciones de Llenado",
       "penUse": {
         "title": "Usar bolígrafo negro o azul",
-        "description": "para rellenar completamente las burbujas"
+        "description": "Para rellenar completamente las burbujas"
       },
       "avoidPencil": {
         "title": "Evitar lápiz",
-        "description": "puede generar brillos y causar errores en la calificación"
+        "description": "Puede generar brillos y causar errores en la calificación"
       },
       "correction": {
         "title": "Para corregir",

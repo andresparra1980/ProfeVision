@@ -217,19 +217,19 @@ export function PaperExamsContent() {
                       </div>
                       <ul className="space-y-3 mb-4">
                         <li className="flex items-start gap-3">
-                          <AlertCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                          <XCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                           <div>
                             <h4 className="font-semibold text-secondary">{t('paperExams.restrictedAreas.qrCode')}</h4>
                           </div>
                         </li>
                         <li className="flex items-start gap-3">
-                          <AlertCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                          <XCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                           <div>
                             <h4 className="font-semibold text-secondary">{t('paperExams.restrictedAreas.borders')}</h4>
                           </div>
                         </li>
                         <li className="flex items-start gap-3">
-                          <AlertCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                          <XCircle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                           <div>
                             <h4 className="font-semibold text-secondary">{t('paperExams.restrictedAreas.answersSection')}</h4>
                           </div>

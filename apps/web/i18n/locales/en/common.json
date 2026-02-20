@@ -496,11 +496,11 @@
       "title": "Filling Instructions",
       "penUse": {
         "title": "Use black or blue pen",
-        "description": "to completely fill the bubbles"
+        "description": "To completely fill the bubbles"
       },
       "avoidPencil": {
         "title": "Avoid pencil",
-        "description": "can generate glares and cause grading errors"
+        "description": "Can generate glares and cause grading errors"
       },
       "correction": {
         "title": "To correct",

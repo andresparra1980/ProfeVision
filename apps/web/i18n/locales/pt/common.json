@@ -497,11 +497,11 @@
       "title": "Instruções de Preenchimento",
       "penUse": {
         "title": "Use caneta preta ou azul",
-        "description": "para preencher completamente os círculos"
+        "description": "Para preencher completamente os círculos"
       },
       "avoidPencil": {
         "title": "Evitar lápis",
-        "description": "pode gerar reflexos e causar erros na correção"
+        "description": "Pode gerar reflexos e causar erros na correção"
       },
       "correction": {
         "title": "Para corrigir",
