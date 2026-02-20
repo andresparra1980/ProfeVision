@@ -16,11 +16,7 @@ import {
   School,
   CheckCircle,
   X,
-  Clock,
-  Target,
-  Building,
-  Smartphone,
-  BarChart3
+  Smartphone
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollAnimation } from "@/components/ui/scroll-animation"
