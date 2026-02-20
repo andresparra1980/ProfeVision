@@ -118,7 +118,11 @@
       "avatarTitle": "Profesor que confía en ProfeVisión para automatizar la calificación de exámenes",
       "trustText": "Más de",
       "trustNumber": "1,000+",
-      "trustSuffix": "profesores confían en nosotros"
+      "trustSuffix": "profesores confían en nosotros",
+      "floatingBadge": {
+        "label": "Exámenes corregidos",
+        "count": "+50,000"
+      }
     },
     "features": {
       "badge": "Características Principales",
@@ -243,13 +247,13 @@
   },
   "pricing": {
     "hero": {
-      "badge": "Lanzamiento Especial",
+      "badge": "Planes Simples",
       "seoTitle": "Planes de Precios de ProfeVision",
-      "title": "¡Gratis Durante el",
-      "titleHighlight": "Lanzamiento",
-      "description": "Aprovecha el acceso gratuito a ProfeVisión mientras estamos en fase de lanzamiento. Todas las funciones disponibles sin costo.",
-      "foundersButton": "Iniciar ahora en nuestro Plan Fundador",
-      "foundersNote": "Plan gratuito con generación de IA y escaneos ilimitados por tiempo limitado. No se requiere tarjeta de crédito."
+      "title": "Comienza a usar el servicio",
+      "titleHighlight": "¡Gratis!",
+      "description": "Elige el plan perfecto para ti. Puedes actualizar a un plan de pago cuando lo necesites.",
+      "foundersButton": "",
+      "foundersNote": ""
     },
     "launch": {
       "title": "Plan de Lanzamiento",
@@ -308,7 +312,7 @@
     },
     "cta": {
       "title": "¿Listo para Revolucionar tus Evaluaciones?",
-      "description": "Únete ahora y obtén acceso gratuito a todas las funciones de ProfeVisión durante nuestro período de lanzamiento.",
+      "description": "Únete ahora y obtén acceso a todas las funciones de ProfeVisión.",
       "startFree": "Comenzar Gratis",
       "learnMore": "Descubre cómo funciona ProfeVision"
     }
@@ -491,11 +495,11 @@
       "title": "Instrucciones de Llenado",
       "penUse": {
         "title": "Usar bolígrafo negro o azul",
-        "description": "para rellenar completamente las burbujas"
+        "description": "Para rellenar completamente las burbujas"
       },
       "avoidPencil": {
         "title": "Evitar lápiz",
-        "description": "puede generar brillos y causar errores en la calificación"
+        "description": "Puede generar brillos y causar errores en la calificación"
       },
       "correction": {
         "title": "Para corregir",
@@ -638,10 +642,11 @@
       "liveChat": "Chat en vivo:",
       "liveChatAvailable": "Disponible en la plataforma",
       "knowledge": "Documentación:",
-      "knowledgeBase": "Ir a la página de documentación"
+      "knowledgeBase": "Ir a nuestra página de documentación"
     },
     "faq": {
-      "title": "Preguntas Frecuentes",
+      "badge": "Preguntas Frecuentes",
+      "title": "Preguntas Frecuentes (FAQ)",
       "q1": "¿Como puedo restablecer mi contraseña?",
       "a1": "Puedes restablecer tu contraseña haciendo clic en 'Olvidé mi contraseña' en la pantalla de inicio de sesión.",
       "q2": "¿Dónde puedo encontrar la documentación?",

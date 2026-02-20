@@ -25,6 +25,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
+import { ScrollAnimation } from "@/components/ui/scroll-animation"
 
 function AndroidIcon({ className }: { className?: string }) {
   return (
@@ -77,68 +78,84 @@ export function MobileAppContent() {
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
       <section className="py-12 md:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/10 to-[#bc152b]/5 dark:from-[#76f47a]/5 dark:to-[#ea4359]/5 -z-10" />
-        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#ffd60a]/10 rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[#0b890f]/10 rounded-full blur-3xl -z-10 transform -translate-x-1/2 translate-y-1/2" />
+        {/* Mesh Gradient Background */}
+        <div className="mesh-gradient" aria-hidden="true" />
 
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-8 lg:grid-cols-2 items-center">
+        {/* Floating decorative elements */}
+        <div className="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full animate-float hidden md:block" style={{ animationDelay: '0s' }} />
+        <div className="absolute top-40 right-20 w-12 h-12 bg-accent/20 rounded-lg rotate-45 animate-float-rotate hidden md:block" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-secondary/10 rounded-full animate-float-slow hidden md:block" style={{ animationDelay: '1s' }} />
+
+        <div className="container px-4 md:px-6 relative z-10">
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
             {/* Left: Text content */}
-            <div className="flex flex-col space-y-4 text-center lg:text-left">
-              <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-primary text-primary-foreground w-fit mx-auto lg:mx-0">
-                <Smartphone className="h-3 w-3 mr-1" />
-                {t('hero.badge')}
+            <div className="flex flex-col justify-center space-y-6 text-center lg:text-left">
+              <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
+                <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80 w-fit mx-auto lg:mx-0">
+                  <Smartphone className="h-3 w-3 mr-1" />
+                  {t('hero.badge')}
+                </div>
               </div>
-              <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                {t('hero.title')}{" "}
-                <span className="text-primary">{t('hero.titleHighlight')}</span>{" "}
-                {t('hero.titleEnd')}
-              </h1>
-              <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mx-auto lg:mx-0">
-                {t('hero.description')}{" "}
-                <span className="font-semibold text-primary">{t('hero.descriptionHighlight')}</span>{" "}
-                {t('hero.descriptionEnd')}
-              </p>
+              <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+                <h1 className="text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl font-display leading-tight">
+                  {t('hero.title')}{" "}
+                  <span className="text-gradient-slow">{t('hero.titleHighlight')}</span>{" "}
+                  {t('hero.titleEnd')}
+                </h1>
+              </div>
+              <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
+                <p className="max-w-[600px] text-foreground/80 md:text-xl mx-auto lg:mx-0">
+                  {t('hero.description')}{" "}
+                  <span className="font-semibold text-primary">{t('hero.descriptionHighlight')}</span>{" "}
+                  {t('hero.descriptionEnd')}
+                </p>
+              </div>
 
               {/* Availability badges */}
-              <div className="flex flex-wrap gap-3 justify-center lg:justify-start pt-2">
-                <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
-                  <AndroidIcon className="h-5 w-5 text-[#3DDC84]" />
-                  <div className="text-sm">
-                    <span className="font-semibold">{t('availability.android')}</span>
-                    <span className="text-muted-foreground ml-1">- {t('availability.androidStatus')}</span>
+              <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
+                <div className="flex flex-wrap gap-3 justify-center lg:justify-start pt-2">
+                  <div className="flex items-center gap-2 bg-muted border border-border rounded-full px-4 py-2">
+                    <AndroidIcon className="h-5 w-5" />
+                    <div className="text-sm">
+                      <span className="font-semibold">{t('availability.android')}</span>
+                      <span className="text-muted-foreground ml-1">- {t('availability.androidStatus')}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 bg-muted border border-border rounded-full px-4 py-2">
-                  <AppleIcon className="h-5 w-5" />
-                  <div className="text-sm">
-                    <span className="font-semibold">{t('availability.ios')}</span>
-                    <span className="text-muted-foreground ml-1">- {t('availability.iosStatus')}</span>
+                  <div className="flex items-center gap-2 bg-muted border border-border rounded-full px-4 py-2">
+                    <AppleIcon className="h-5 w-5" />
+                    <div className="text-sm">
+                      <span className="font-semibold">{t('availability.ios')}</span>
+                      <span className="text-muted-foreground ml-1">- {t('availability.iosStatus')}</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
-                <Button
-                  asChild
-                  size="lg"
-                >
-                  <a href="#beta-access">
-                    {t('hero.ctaAndroid')}
-                  </a>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                >
-                  <Link href="/contact">{t('hero.ctaIos')}</Link>
-                </Button>
+              <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}>
+                <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="btn-glow"
+                  >
+                    <a href="#beta-access">
+                      {t('hero.ctaAndroid')}
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="gradient-border"
+                  >
+                    <Link href="/contact">{t('hero.ctaIos')}</Link>
+                  </Button>
+                </div>
               </div>
             </div>
 
             {/* Right: App icon */}
-            <div className="flex justify-center lg:justify-end">
+            <div className="relative flex items-center justify-center animate-fade-in-up opacity-0" style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/20 to-[#ffd60a]/20 rounded-3xl blur-2xl" />
                 <Image
@@ -156,89 +173,112 @@ export function MobileAppContent() {
       </section>
 
       {/* Beta Access Section */}
-      <section id="beta-access" className="py-16 md:py-24 bg-muted/50 scroll-mt-20">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-              {t('betaAccess.badge')}
+      <section id="beta-access" className="py-16 md:py-24 bg-muted/50 scroll-mt-20 relative">
+        <div className="absolute inset-0 dots-pattern opacity-30" />
+        <div className="container px-4 md:px-6 relative z-10">
+          <ScrollAnimation>
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                {t('betaAccess.badge')}
+              </div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-display">
+                {t('betaAccess.title')}
+              </h2>
+              <p className="max-w-[600px] text-muted-foreground">
+                {t('betaAccess.description')}
+              </p>
             </div>
-            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
-              {t('betaAccess.title')}
-            </h2>
-            <p className="max-w-[600px] text-muted-foreground">
-              {t('betaAccess.description')}
-            </p>
-          </div>
+          </ScrollAnimation>
 
           <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto mt-12">
             {/* Step 1: Join Group */}
-            <div className="bg-card rounded-lg border border-border p-6 shadow-lg text-center relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary w-8 h-8 flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">1</span>
-              </div>
-              <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
-                <Users className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="font-bold text-lg mb-2">{t('betaAccess.step1.title')}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{t('betaAccess.step1.description')}</p>
-              <Button
-                asChild
-                className="w-full"
-              >
-                <a href="https://groups.google.com/g/profevision-beta-testers" target="_blank" rel="noopener noreferrer">
-                  {t('betaAccess.ctaGroup')}
-                </a>
-              </Button>
-            </div>
+            <ScrollAnimation delay={100} className="h-full">
+              <a href="https://groups.google.com/g/profevision-beta-testers" target="_blank" rel="noopener noreferrer" className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
+                <div className="bg-card rounded-xl border border-border p-6 shadow-lg text-center relative card-hover gradient-border h-full flex flex-col justify-between z-10">
+                  <div className="flex-1 flex flex-col">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary w-8 h-8 flex items-center justify-center shadow-md">
+                      <span className="text-primary-foreground font-bold text-sm">1</span>
+                    </div>
+                    <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
+                      <Users className="h-7 w-7 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{t('betaAccess.step1.title')}</h3>
+                    <p className="text-sm text-muted-foreground mb-6 flex-1">{t('betaAccess.step1.description')}</p>
+                    <Button
+                      asChild
+                      className="w-full mt-auto relative z-20 pointer-events-none"
+                    >
+                      <span>
+                        {t('betaAccess.ctaGroup')}
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              </a>
+            </ScrollAnimation>
 
             {/* Step 2: Accept Testing */}
-            <div className="bg-card rounded-lg border border-border p-6 shadow-lg text-center relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary w-8 h-8 flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">2</span>
-              </div>
-              <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
-                <ShieldCheck className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="font-bold text-lg mb-2">{t('betaAccess.step2.title')}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{t('betaAccess.step2.description')}</p>
-              <Button
-                asChild
-                variant="outline"
-                className="w-full border-primary text-primary hover:bg-primary hover:text-white"
-              >
-                <a href="https://play.google.com/apps/testing/com.profevision.mobile" target="_blank" rel="noopener noreferrer">
-                  {t('betaAccess.ctaTesting')}
-                </a>
-              </Button>
-            </div>
+            <ScrollAnimation delay={200} className="h-full">
+              <a href="https://play.google.com/apps/testing/com.profevision.mobile" target="_blank" rel="noopener noreferrer" className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
+                <div className="bg-card rounded-xl border border-border p-6 shadow-lg text-center relative card-hover gradient-border h-full flex flex-col justify-between z-10">
+                  <div className="flex-1 flex flex-col">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary w-8 h-8 flex items-center justify-center shadow-md">
+                      <span className="text-primary-foreground font-bold text-sm">2</span>
+                    </div>
+                    <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
+                      <ShieldCheck className="h-7 w-7 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{t('betaAccess.step2.title')}</h3>
+                    <p className="text-sm text-muted-foreground mb-6 flex-1">{t('betaAccess.step2.description')}</p>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full border-primary text-primary hover:bg-primary hover:text-white mt-auto relative z-20 pointer-events-none"
+                    >
+                      <span>
+                        {t('betaAccess.ctaTesting')}
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              </a>
+            </ScrollAnimation>
 
             {/* Step 3: Download */}
-            <div className="bg-card rounded-lg border border-border p-6 shadow-lg text-center relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary w-8 h-8 flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">3</span>
-              </div>
-              <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
-                <Download className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="font-bold text-lg mb-2">{t('betaAccess.step3.title')}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{t('betaAccess.step3.description')}</p>
-              <Button
-                asChild
-                variant="outline"
-                className="w-full"
-              >
-                <a href="https://play.google.com/store/apps/details?id=com.profevision.mobile" target="_blank" rel="noopener noreferrer">
-                  {t('betaAccess.ctaDownload')}
-                </a>
-              </Button>
-            </div>
+            <ScrollAnimation delay={300} className="h-full">
+              <a href="https://play.google.com/store/apps/details?id=com.profevision.mobile" target="_blank" rel="noopener noreferrer" className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
+                <div className="bg-card rounded-xl border border-border p-6 shadow-lg text-center relative card-hover gradient-border h-full flex flex-col justify-between z-10">
+                  <div className="flex-1 flex flex-col">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary w-8 h-8 flex items-center justify-center shadow-md">
+                      <span className="text-primary-foreground font-bold text-sm">3</span>
+                    </div>
+                    <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4 mt-2">
+                      <Download className="h-7 w-7 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{t('betaAccess.step3.title')}</h3>
+                    <p className="text-sm text-muted-foreground mb-6 flex-1">{t('betaAccess.step3.description')}</p>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full mt-auto relative z-20 pointer-events-none"
+                    >
+                      <span>
+                        {t('betaAccess.ctaDownload')}
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              </a>
+            </ScrollAnimation>
           </div>
 
           {/* Note */}
-          <div className="flex items-center justify-center gap-2 mt-8 text-sm text-muted-foreground">
-            <AlertCircle className="h-4 w-4" />
-            <span>{t('betaAccess.note')}</span>
-          </div>
+          <ScrollAnimation delay={400}>
+            <div className="flex items-center justify-center gap-2 mt-8 text-sm text-muted-foreground">
+              <AlertCircle className="h-4 w-4" />
+              <span>{t('betaAccess.note')}</span>
+            </div>
+          </ScrollAnimation>
         </div>
       </section>
 
@@ -246,99 +286,106 @@ export function MobileAppContent() {
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#ffd60a]/5 to-[#0b890f]/5 -z-10" />
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
-              {t('benefits.badge')}
+          <ScrollAnimation>
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
+                {t('benefits.badge')}
+              </div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-display">
+                {t('benefits.title')}
+              </h2>
             </div>
-            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
-              {t('benefits.title')}
-            </h2>
-          </div>
+          </ScrollAnimation>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mt-12">
-            {benefits.map(({ key, icon: Icon }) => (
-              <div
-                key={key}
-                className="bg-card backdrop-blur-sm rounded-lg border border-primary/20 p-6 shadow-lg text-center"
-              >
-                <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4">
-                  <Icon className="h-7 w-7 text-primary" />
+            {benefits.map(({ key, icon: Icon }, i) => (
+              <ScrollAnimation key={key} delay={100 * (i + 1)} className="h-full">
+                <div
+                  className="bg-card backdrop-blur-sm rounded-xl border border-primary/20 p-6 shadow-lg text-center card-hover h-full flex flex-col items-center"
+                >
+                  <div className="mx-auto rounded-full bg-primary/10 p-3 w-14 h-14 flex items-center justify-center mb-4">
+                    <Icon className="h-7 w-7 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-lg mb-2">{t(`benefits.${key}.title`)}</h3>
+                  <p className="text-sm text-muted-foreground">{t(`benefits.${key}.description`)}</p>
                 </div>
-                <h3 className="font-bold text-lg mb-2">{t(`benefits.${key}.title`)}</h3>
-                <p className="text-sm text-muted-foreground">{t(`benefits.${key}.description`)}</p>
-              </div>
+              </ScrollAnimation>
             ))}
           </div>
         </div>
       </section>
 
       {/* Features Section with Screenshots Carousel */}
-      <section className="py-16 md:py-24 bg-muted/50">
-
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
-              {t('features.badge')}
+      <section className="py-16 md:py-24 bg-muted/50 relative">
+        <div className="absolute inset-0 dots-pattern opacity-30" />
+        <div className="container px-4 md:px-6 relative z-10">
+          <ScrollAnimation>
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
+                {t('features.badge')}
+              </div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-display">
+                {t('features.title')}
+              </h2>
             </div>
-            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
-              {t('features.title')}
-            </h2>
-          </div>
+          </ScrollAnimation>
 
           {/* Carousel */}
-          <div className="mt-12 -mx-4 px-4 relative group/carousel">
-            {/* Navigation buttons - visible on desktop */}
-            <button
-              onClick={() => scrollCarousel('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-12 h-12 bg-background/90 border border-border rounded-full shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-muted"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              onClick={() => scrollCarousel('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-12 h-12 bg-background/90 border border-border rounded-full shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-muted"
-              aria-label="Next"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
+          <ScrollAnimation delay={100} animation="fade-scale">
+            <div className="mt-12 -mx-4 px-4 relative group/carousel">
+              {/* Navigation buttons - visible on desktop */}
+              <button
+                onClick={() => scrollCarousel('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-12 h-12 bg-background/90 border border-border rounded-full shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-muted"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                onClick={() => scrollCarousel('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center w-12 h-12 bg-background/90 border border-border rounded-full shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-muted"
+                aria-label="Next"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
 
-            <div
-              ref={carouselRef}
-              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 scrollbar-hide">
-              {features.map(({ key, icon: Icon, image }) => (
-                <div
-                  key={key}
-                  className="flex-none w-[280px] sm:w-[320px] snap-center bg-card backdrop-blur-sm rounded-lg border border-border p-4 shadow-lg group hover:border-primary/40 transition-colors"
-                >
-                  <div className="relative aspect-[9/16] mb-4 rounded-lg overflow-hidden bg-muted">
-                    <Image
-                      src={`/images/mobile-app/${image}`}
-                      alt={t(`imageAlt.${key}`)}
-                      fill
-                      sizes="320px"
-                      className="object-contain"
-                    />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-full bg-primary/10 p-2 shrink-0">
-                      <Icon className="h-5 w-5 text-primary" />
+              <div
+                ref={carouselRef}
+                className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 scrollbar-hide">
+                {features.map(({ key, icon: Icon, image }) => (
+                  <div
+                    key={key}
+                    className="flex-none w-[280px] sm:w-[320px] snap-center bg-card backdrop-blur-sm rounded-lg border border-border p-4 shadow-lg group hover:border-primary/40 transition-colors"
+                  >
+                    <div className="relative aspect-[9/16] mb-4 rounded-lg overflow-hidden bg-muted">
+                      <Image
+                        src={`/images/mobile-app/${image}`}
+                        alt={t(`imageAlt.${key}`)}
+                        fill
+                        sizes="320px"
+                        className="object-contain"
+                      />
                     </div>
-                    <div className="min-w-0">
-                      <h3 className="font-bold truncate">{t(`features.${key}.title`)}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{t(`features.${key}.description`)}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-full bg-primary/10 p-2 shrink-0">
+                        <Icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-bold truncate">{t(`features.${key}.title`)}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{t(`features.${key}.description`)}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              {/* Scroll hint */}
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mt-4">
+                <ChevronLeft className="h-4 w-4" />
+                <span>{t('features.scrollHint')}</span>
+                <ChevronRight className="h-4 w-4" />
+              </div>
             </div>
-            {/* Scroll hint */}
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mt-4">
-              <ChevronLeft className="h-4 w-4" />
-              <span>{t('features.scrollHint')}</span>
-              <ChevronRight className="h-4 w-4" />
-            </div>
-          </div>
+          </ScrollAnimation>
         </div>
       </section>
 
@@ -346,90 +393,111 @@ export function MobileAppContent() {
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/5 to-[#ffd60a]/5 -z-10" />
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
-              {t('howItWorks.badge')}
-            </div>
-            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
-              {t('howItWorks.title')}
-            </h2>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4 mt-12">
-            {steps.map((step, index) => (
-              <div
-                key={step}
-                className="flex items-center gap-3 bg-card rounded-lg border border-border p-4 min-w-[200px]"
-              >
-                <div className="rounded-full bg-primary w-10 h-10 flex items-center justify-center shrink-0">
-                  <span className="text-primary-foreground font-bold">{index + 1}</span>
-                </div>
-                <div>
-                  <h4 className="font-semibold">{t(`howItWorks.${step}.title`)}</h4>
-                  <p className="text-xs text-muted-foreground">{t(`howItWorks.${step}.description`)}</p>
-                </div>
+          <ScrollAnimation>
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
+                {t('howItWorks.badge')}
               </div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-display">
+                {t('howItWorks.title')}
+              </h2>
+            </div>
+          </ScrollAnimation>
+
+          <div className="grid grid-cols-1 sm:flex sm:flex-wrap justify-center gap-4 mt-12 max-w-5xl mx-auto">
+            {steps.map((step, index) => (
+              <ScrollAnimation key={step} delay={100 * (index + 1)} className="w-full sm:w-auto">
+                <div
+                  className="flex items-center gap-3 bg-card rounded-xl border border-border p-4 w-full sm:min-w-[240px] shadow-md card-hover h-full"
+                >
+                  <div className="rounded-full bg-primary w-10 h-10 flex items-center justify-center shrink-0">
+                    <span className="text-primary-foreground font-bold">{index + 1}</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{t(`howItWorks.${step}.title`)}</h4>
+                    <p className="text-xs text-muted-foreground">{t(`howItWorks.${step}.description`)}</p>
+                  </div>
+                </div>
+              </ScrollAnimation>
             ))}
           </div>
         </div>
       </section>
 
       {/* Plans Section */}
-      <section className="py-16 md:py-24 bg-muted/50">
-
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
-              {t('plans.badge')}
+      <section className="py-16 md:py-24 bg-muted/50 relative">
+        <div className="absolute inset-0 dots-pattern opacity-30" />
+        <div className="container px-4 md:px-6 relative z-10">
+          <ScrollAnimation>
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
+                {t('plans.badge')}
+              </div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-display">
+                {t('plans.title')}
+              </h2>
             </div>
-            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
-              {t('plans.title')}
-            </h2>
-          </div>
+          </ScrollAnimation>
 
           <div className="grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto mt-12">
             {/* Free Plan */}
-            <div className="bg-card rounded-lg border border-border p-6 shadow-lg">
-              <h3 className="text-xl font-bold mb-4">{t('plans.free.title')}</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary" />
-                  {t('plans.free.scans')}
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary" />
-                  {t('plans.free.students')}
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary" />
-                  {t('plans.free.groups')}
-                </li>
-              </ul>
-            </div>
+            <ScrollAnimation delay={100} className="h-full">
+              <div className="bg-card rounded-xl border border-border p-8 shadow-lg card-hover h-full">
+                <h3 className="text-xl font-bold mb-4">{t('plans.free.title')}</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                    {t('plans.free.scans')}
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                    {t('plans.free.students')}
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                    {t('plans.free.groups')}
+                  </li>
+                </ul>
+              </div>
+            </ScrollAnimation>
 
             {/* Plus Plan */}
-            <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border-purple-500 border-2 p-6 shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <Zap className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-bold">{t('plans.plus.title')}</h3>
+            <ScrollAnimation delay={200} className="h-full">
+              <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border-purple-500 border-2 p-8 shadow-lg card-hover gradient-border h-full">
+                <div className="flex items-center gap-2 mb-4">
+                  <Zap className="h-6 w-6 text-primary" />
+                  <h3 className="text-xl font-bold">{t('plans.plus.title')}</h3>
+                </div>
+                <p className="text-muted-foreground font-semibold">{t('plans.plus.description')}</p>
               </div>
-              <p className="text-muted-foreground font-semibold">{t('plans.plus.description')}</p>
-            </div>
+            </ScrollAnimation>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-[#0b890f] to-[#0b890f]/90">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-white">
-              {t('cta.title')}
-            </h2>
-            <p className="max-w-[600px] text-white/90 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              {t('cta.description')}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        {/* Animated gradient background */}
+        <div className="animated-gradient absolute inset-0" />
+
+        {/* Floating shapes */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full animate-float" />
+        <div className="absolute bottom-10 right-10 w-24 h-24 bg-white/10 rounded-lg rotate-45 animate-float-rotate" />
+        <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-white/5 rounded-full animate-float-slow" />
+
+        <div className="container px-4 md:px-6 relative z-10">
+          <ScrollAnimation>
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-white font-display">
+                {t('cta.title')}
+              </h2>
+              <p className="max-w-[600px] text-white/90 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                {t('cta.description')}
+              </p>
+            </div>
+          </ScrollAnimation>
+          <ScrollAnimation delay={200}>
+            <div className="flex flex-col sm:flex-row gap-4 pt-8 justify-center">
               <Button
                 asChild
                 size="lg"
@@ -448,7 +516,7 @@ export function MobileAppContent() {
                 </a>
               </Button>
             </div>
-          </div>
+          </ScrollAnimation>
         </div>
       </section>
     </div>

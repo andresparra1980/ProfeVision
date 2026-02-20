@@ -120,7 +120,11 @@
       "avatarTitle": "Enseignant qui fait confiance à ProfeVisión pour automatiser la notation des examens",
       "trustText": "Plus de",
       "trustNumber": "1 000+",
-      "trustSuffix": "enseignants nous font confiance"
+      "trustSuffix": "enseignants nous font confiance",
+      "floatingBadge": {
+        "label": "Examens notés",
+        "count": "+50 000"
+      }
     },
     "features": {
       "badge": "Caractéristiques Principales",
@@ -245,13 +249,13 @@
   },
   "pricing": {
     "hero": {
-      "badge": "Lancement Spécial",
+      "badge": "Des Plans Simples",
       "seoTitle": "Plans Tarifaires ProfeVision",
-      "title": "Gratuit Pendant le",
-      "titleHighlight": "Lancement",
-      "description": "Profitez de l'accès gratuit à ProfeVisión pendant notre phase de lancement. Toutes les fonctionnalités sont disponibles sans frais.",
-      "foundersButton": "Commencer maintenant avec notre Plan Fondateur",
-      "foundersNote": "Plan gratuit avec génération IA et scans illimités pour une durée limitée. Aucune carte de crédit requise."
+      "title": "Commencez à utiliser le service",
+      "titleHighlight": "Gratuitement !",
+      "description": "Choisissez le plan parfait pour vous. Mettez à niveau vers un plan payant quand vous en avez besoin.",
+      "foundersButton": "",
+      "foundersNote": ""
     },
     "launch": {
       "title": "Plan de Lancement",
@@ -310,7 +314,7 @@
     },
     "cta": {
       "title": "Prêt à révolutionner vos évaluations ?",
-      "description": "Rejoignez-nous maintenant et profitez d'un accès gratuit à toutes les fonctionnalités de ProfeVisión pendant notre période de lancement.",
+      "description": "Rejoignez-nous maintenant et profitez de l'accès à toutes les fonctionnalités de ProfeVisión.",
       "startFree": "Commencer gratuitement",
       "learnMore": "Découvrez comment fonctionne ProfeVision"
     }
@@ -493,11 +497,11 @@
       "title": "Instructions de Remplissage",
       "penUse": {
         "title": "Utiliser un stylo noir ou bleu",
-        "description": "pour remplir complètement les bulles"
+        "description": "Pour remplir complètement les bulles"
       },
       "avoidPencil": {
         "title": "Éviter le crayon",
-        "description": "peut générer des reflets et causer des erreurs de notation"
+        "description": "Peut générer des reflets et causer des erreurs de notation"
       },
       "correction": {
         "title": "À corriger",
@@ -640,10 +644,11 @@
       "liveChat": "Chat en direct :",
       "liveChatAvailable": "Disponible sur la plateforme",
       "knowledge": "Documentation :",
-      "knowledgeBase": "Aller à la page de documentation"
+      "knowledgeBase": "Aller à notre page de documentation"
     },
     "faq": {
-      "title": "Foire Aux Questions",
+      "badge": "Foire Aux Questions",
+      "title": "Foire Aux Questions (FAQ)",
       "q1": "Comment puis-je réinitialiser mon mot de passe ?",
       "a1": "Vous pouvez réinitialiser votre mot de passe en cliquant sur 'Mot de passe oublié' sur l'écran de connexion.",
       "q2": "Où puis-je trouver la documentation ?",

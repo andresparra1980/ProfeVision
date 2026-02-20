@@ -119,7 +119,11 @@
       "avatarTitle": "Teacher who trusts ProfeVision to automate exam grading",
       "trustText": "Over",
       "trustNumber": "1,000+",
-      "trustSuffix": "teachers trust us"
+      "trustSuffix": "teachers trust us",
+      "floatingBadge": {
+        "label": "Exams graded",
+        "count": "+50,000"
+      }
     },
     "features": {
       "badge": "Key Features",
@@ -244,13 +248,13 @@
   },
   "pricing": {
     "hero": {
-      "badge": "Special Launch",
+      "badge": "Simple Plans",
       "seoTitle": "ProfeVision Pricing Plans",
-      "title": "Free During the",
-      "titleHighlight": "Launch",
-      "description": "Take advantage of free access to ProfeVision while we're in the launch phase. All features available at no cost.",
-      "foundersButton": "Start now with our Founders Plan",
-      "foundersNote": "Free plan with unlimited AI generation and scans for a limited time. No credit card required."
+      "title": "Start Using the service",
+      "titleHighlight": "for Free!",
+      "description": "Choose the perfect plan for you. Upgrade to a paid plan whenever you need.",
+      "foundersButton": "",
+      "foundersNote": ""
     },
     "launch": {
       "title": "Launch Plan",
@@ -309,7 +313,7 @@
     },
     "cta": {
       "title": "Ready to Revolutionize Your Assessments?",
-      "description": "Join now and get free access to all ProfeVision features during our launch period.",
+      "description": "Join now and get access to all ProfeVision features.",
       "startFree": "Start Free",
       "learnMore": "Discover how ProfeVision works"
     }
@@ -492,11 +496,11 @@
       "title": "Filling Instructions",
       "penUse": {
         "title": "Use black or blue pen",
-        "description": "to completely fill the bubbles"
+        "description": "To completely fill the bubbles"
       },
       "avoidPencil": {
         "title": "Avoid pencil",
-        "description": "can generate glares and cause grading errors"
+        "description": "Can generate glares and cause grading errors"
       },
       "correction": {
         "title": "To correct",
@@ -639,10 +643,11 @@
       "liveChat": "Live chat:",
       "liveChatAvailable": "Available on the platform",
       "knowledge": "Documentation:",
-      "knowledgeBase": "Go to documentation page"
+      "knowledgeBase": "Go to our documentation page"
     },
     "faq": {
-      "title": "Frequently Asked Questions",
+      "badge": "Frequently Asked Questions",
+      "title": "Frequently Asked Questions (FAQ)",
       "q1": "How can I reset my password?",
       "a1": "You can reset your password by clicking on 'Forgot Password' at the login screen.",
       "q2": "Where can I find the documentation?",
