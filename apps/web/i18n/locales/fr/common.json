@@ -249,13 +249,13 @@
   },
   "pricing": {
     "hero": {
-      "badge": "Lancement Spécial",
+      "badge": "Des Plans Simples",
       "seoTitle": "Plans Tarifaires ProfeVision",
-      "title": "Gratuit Pendant le",
-      "titleHighlight": "Lancement",
-      "description": "Profitez de l'accès gratuit à ProfeVisión pendant notre phase de lancement. Toutes les fonctionnalités sont disponibles sans frais.",
-      "foundersButton": "Commencer maintenant avec notre Plan Fondateur",
-      "foundersNote": "Plan gratuit avec génération IA et scans illimités pour une durée limitée. Aucune carte de crédit requise."
+      "title": "Commencez à utiliser le service",
+      "titleHighlight": "Gratuitement !",
+      "description": "Choisissez le plan parfait pour vous. Mettez à niveau vers un plan payant quand vous en avez besoin.",
+      "foundersButton": "",
+      "foundersNote": ""
     },
     "launch": {
       "title": "Plan de Lancement",
@@ -314,7 +314,7 @@
     },
     "cta": {
       "title": "Prêt à révolutionner vos évaluations ?",
-      "description": "Rejoignez-nous maintenant et profitez d'un accès gratuit à toutes les fonctionnalités de ProfeVisión pendant notre période de lancement.",
+      "description": "Rejoignez-nous maintenant et profitez de l'accès à toutes les fonctionnalités de ProfeVisión.",
       "startFree": "Commencer gratuitement",
       "learnMore": "Découvrez comment fonctionne ProfeVision"
     }

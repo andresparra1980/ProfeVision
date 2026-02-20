@@ -247,13 +247,13 @@
   },
   "pricing": {
     "hero": {
-      "badge": "Lanzamiento Especial",
+      "badge": "Planes Simples",
       "seoTitle": "Planes de Precios de ProfeVision",
-      "title": "¡Gratis Durante el",
-      "titleHighlight": "Lanzamiento",
-      "description": "Aprovecha el acceso gratuito a ProfeVisión mientras estamos en fase de lanzamiento. Todas las funciones disponibles sin costo.",
-      "foundersButton": "Iniciar ahora en nuestro Plan Fundador",
-      "foundersNote": "Plan gratuito con generación de IA y escaneos ilimitados por tiempo limitado. No se requiere tarjeta de crédito."
+      "title": "Comienza a usar el servicio",
+      "titleHighlight": "¡Gratis!",
+      "description": "Elige el plan perfecto para ti. Puedes actualizar a un plan de pago cuando lo necesites.",
+      "foundersButton": "",
+      "foundersNote": ""
     },
     "launch": {
       "title": "Plan de Lanzamiento",
@@ -312,7 +312,7 @@
     },
     "cta": {
       "title": "¿Listo para Revolucionar tus Evaluaciones?",
-      "description": "Únete ahora y obtén acceso gratuito a todas las funciones de ProfeVisión durante nuestro período de lanzamiento.",
+      "description": "Únete ahora y obtén acceso a todas las funciones de ProfeVisión.",
       "startFree": "Comenzar Gratis",
       "learnMore": "Descubre cómo funciona ProfeVision"
     }

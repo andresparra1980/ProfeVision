@@ -40,50 +40,29 @@ export function PricingContent() {
             <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
               <Badge className="bg-primary text-primary-foreground hover:bg-primary/80">
                 <Zap className="h-3 w-3 mr-1" />
-                {t("pricing.hero.badge", { defaultValue: "Precios de Lanzamiento" })}
+                {t("pricing.hero.badge", { defaultValue: "Planes Simples" })}
               </Badge>
             </div>
 
             <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl font-display leading-tight mb-4 text-foreground">
-                {t("pricing.hero.seoTitle", { defaultValue: "ProfeVision Pricing Plans" })}
+                {t("pricing.hero.seoTitle", { defaultValue: "Planes de Precios de ProfeVision" })}
               </h1>
             </div>
 
             <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
               <p className="text-xl font-medium text-foreground mb-2">
-                {t("pricing.hero.title", { defaultValue: "Comienza gratis" })}{" "}
+                {t("pricing.hero.title", { defaultValue: "Comienza a usar el servicio" })}{" "}
                 <span className="text-gradient-slow">
-                  {t("pricing.hero.titleHighlight", { defaultValue: "hoy mismo" })}
+                  {t("pricing.hero.titleHighlight", { defaultValue: "¡Gratis!" })}
                 </span>
-                !
               </p>
-              <p className="max-w-[800px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mx-auto">
+              <p className="max-w-[800px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mx-auto mt-4">
                 {t("pricing.hero.description", {
                   defaultValue:
-                    "Elige el plan perfecto para ti. Actualiza en cualquier momento.",
+                    "Elige el plan perfecto para ti. Puedes actualizar a un plan de pago cuando lo necesites.",
                 })}
               </p>
-            </div>
-
-            {/* Founders Plan CTA */}
-            <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
-              <div className="flex flex-col items-center gap-3 pt-4">
-                <Button
-                  asChild
-                  size="lg"
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold shadow-lg shadow-orange-500/20 btn-glow"
-                >
-                  <Link href="/auth/register">
-                    {t("pricing.hero.foundersButton", { defaultValue: "Iniciar ahora en nuestro Plan Fundador" })}
-                  </Link>
-                </Button>
-                <p className="text-xs text-muted-foreground max-w-md">
-                  {t("pricing.hero.foundersNote", {
-                    defaultValue: "Plan gratuito con generación de IA y escaneos ilimitados por tiempo limitado."
-                  })}
-                </p>
-              </div>
             </div>
           </div>
         </div>

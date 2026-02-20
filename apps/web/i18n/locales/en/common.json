@@ -248,13 +248,13 @@
   },
   "pricing": {
     "hero": {
-      "badge": "Special Launch",
+      "badge": "Simple Plans",
       "seoTitle": "ProfeVision Pricing Plans",
-      "title": "Free During the",
-      "titleHighlight": "Launch",
-      "description": "Take advantage of free access to ProfeVision while we're in the launch phase. All features available at no cost.",
-      "foundersButton": "Start now with our Founders Plan",
-      "foundersNote": "Free plan with unlimited AI generation and scans for a limited time. No credit card required."
+      "title": "Start Using the service",
+      "titleHighlight": "for Free!",
+      "description": "Choose the perfect plan for you. Upgrade to a paid plan whenever you need.",
+      "foundersButton": "",
+      "foundersNote": ""
     },
     "launch": {
       "title": "Launch Plan",
@@ -313,7 +313,7 @@
     },
     "cta": {
       "title": "Ready to Revolutionize Your Assessments?",
-      "description": "Join now and get free access to all ProfeVision features during our launch period.",
+      "description": "Join now and get access to all ProfeVision features.",
       "startFree": "Start Free",
       "learnMore": "Discover how ProfeVision works"
     }

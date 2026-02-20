@@ -274,67 +274,79 @@ export function PaperExamsContent() {
 
               {/* Proceso */}
               <ScrollAnimation delay={200}>
-                <div className="bg-card backdrop-blur-sm rounded-xl border border-primary/20 p-8 shadow-lg space-y-8 card-hover card-tilt gradient-border">
-                  <h3 className="text-2xl font-bold text-primary mb-6">
-                    {t('paperExams.autoGrading.processTitle')}
-                  </h3>
+                <div className="flex flex-col gap-6">
+                  <div className="bg-card backdrop-blur-sm rounded-xl border border-primary/20 p-8 shadow-lg space-y-8 card-hover card-tilt gradient-border">
+                    <h3 className="text-2xl font-bold text-primary mb-6">
+                      {t('paperExams.autoGrading.processTitle')}
+                    </h3>
 
-                  {/* Paso 1 */}
-                  <div className="flex items-start gap-4">
-                    <div className="rounded-full bg-primary p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
-                      <span className="text-lg font-bold text-primary-foreground">1</span>
+                    {/* Paso 1 */}
+                    <div className="flex items-start gap-4">
+                      <div className="rounded-full bg-primary p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
+                        <span className="text-lg font-bold text-primary-foreground">1</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+                          <Camera className="h-5 w-5 text-primary" />
+                          {t('paperExams.autoGrading.step1.title')}
+                        </h4>
+                        <ul className="space-y-1 text-sm text-muted-foreground">
+                          <li>• {t('paperExams.autoGrading.step1.item1')}</li>
+                          <li>• {t('paperExams.autoGrading.step1.item2')}</li>
+                          <li>• {t('paperExams.autoGrading.step1.item3')}</li>
+                        </ul>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
-                        <Camera className="h-5 w-5 text-primary" />
-                        {t('paperExams.autoGrading.step1.title')}
-                      </h4>
-                      <ul className="space-y-1 text-sm text-muted-foreground">
-                        <li>• {t('paperExams.autoGrading.step1.item1')}</li>
-                        <li>• {t('paperExams.autoGrading.step1.item2')}</li>
-                        <li>• {t('paperExams.autoGrading.step1.item3')}</li>
-                      </ul>
+
+                    {/* Paso 2 */}
+                    <div className="flex items-start gap-4">
+                      <div className="rounded-full bg-primary p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
+                        <span className="text-lg font-bold text-primary-foreground">2</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+                          <ScanLine className="h-5 w-5 text-primary" />
+                          {t('paperExams.autoGrading.step2.title')}
+                        </h4>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {t('paperExams.autoGrading.step2.description')}
+                        </p>
+                        <ul className="space-y-1 text-sm text-muted-foreground">
+                          <li>• ✓ {t('paperExams.autoGrading.step2.item1')}</li>
+                          <li>• ✓ {t('paperExams.autoGrading.step2.item2')}</li>
+                          <li>• ✓ {t('paperExams.autoGrading.step2.item3')}</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* Paso 3 */}
+                    <div className="flex items-start gap-4">
+                      <div className="rounded-full bg-primary p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
+                        <span className="text-lg font-bold text-primary-foreground">3</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+                          <Shield className="h-5 w-5 text-primary" />
+                          {t('paperExams.autoGrading.step3.title')}
+                        </h4>
+                        <ul className="space-y-1 text-sm text-muted-foreground">
+                          <li>• {t('paperExams.autoGrading.step3.item1')}</li>
+                          <li>• <span className="font-semibold">{t('paperExams.autoGrading.step3.item2')}</span></li>
+                          <li className="ml-4">○ {t('paperExams.autoGrading.step3.item3')}</li>
+                          <li className="ml-4">○ {t('paperExams.autoGrading.step3.item4')}</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Paso 2 */}
-                  <div className="flex items-start gap-4">
-                    <div className="rounded-full bg-primary p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
-                      <span className="text-lg font-bold text-primary-foreground">2</span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
-                        <ScanLine className="h-5 w-5 text-primary" />
-                        {t('paperExams.autoGrading.step2.title')}
-                      </h4>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {t('paperExams.autoGrading.step2.description')}
-                      </p>
-                      <ul className="space-y-1 text-sm text-muted-foreground">
-                        <li>• ✓ {t('paperExams.autoGrading.step2.item1')}</li>
-                        <li>• ✓ {t('paperExams.autoGrading.step2.item2')}</li>
-                        <li>• ✓ {t('paperExams.autoGrading.step2.item3')}</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Paso 3 */}
-                  <div className="flex items-start gap-4">
-                    <div className="rounded-full bg-primary p-3 w-12 h-12 flex items-center justify-center shadow-lg shrink-0">
-                      <span className="text-lg font-bold text-primary-foreground">3</span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
-                        <Shield className="h-5 w-5 text-primary" />
-                        {t('paperExams.autoGrading.step3.title')}
-                      </h4>
-                      <ul className="space-y-1 text-sm text-muted-foreground">
-                        <li>• {t('paperExams.autoGrading.step3.item1')}</li>
-                        <li>• <span className="font-semibold">{t('paperExams.autoGrading.step3.item2')}</span></li>
-                        <li className="ml-4">○ {t('paperExams.autoGrading.step3.item3')}</li>
-                        <li className="ml-4">○ {t('paperExams.autoGrading.step3.item4')}</li>
-                      </ul>
-                    </div>
+                  <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                    <Button
+                      asChild
+                      size="lg"
+                      className="btn-glow"
+                    >
+                      <Link href={'/auth/register'}>{t('paperExams.hero.cta')}</Link>
+                    </Button>
                   </div>
                 </div>
               </ScrollAnimation>
