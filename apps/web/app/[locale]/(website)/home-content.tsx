@@ -25,12 +25,12 @@ export function HomeContent() {
   return (
     <div className="flex min-h-screen flex-col">
       <div className="flex-1 transition-all duration-200">
-        
+
         {/* Hero Section */}
         <section className="py-12 md:py-20 relative overflow-hidden">
           {/* Mesh Gradient Background */}
           <div className="mesh-gradient" aria-hidden="true" />
-          
+
           {/* Floating decorative elements */}
           <div className="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full animate-float hidden md:block" style={{ animationDelay: '0s' }} />
           <div className="absolute top-40 right-20 w-12 h-12 bg-accent/20 rounded-lg rotate-45 animate-float-rotate hidden md:block" style={{ animationDelay: '2s' }} />
@@ -45,19 +45,19 @@ export function HomeContent() {
                     {t('homepage.hero.badge')}
                   </div>
                 </div>
-                
+
                 <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
                   <h1 className="text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl font-display leading-tight">
                     {t('homepage.hero.title')} <span className="text-gradient-slow">{t('homepage.hero.titleHighlight')}</span> {t('homepage.hero.titleEnd')}
                   </h1>
                 </div>
-                
+
                 <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
                   <p className="max-w-[600px] text-foreground/80 md:text-xl">
                     {t('homepage.hero.description')}
                   </p>
                 </div>
-                
+
                 <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Button
@@ -76,7 +76,7 @@ export function HomeContent() {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}>
                   <div className="flex items-center pt-4">
                     <p className="text-sm text-muted-foreground">
@@ -85,7 +85,7 @@ export function HomeContent() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="relative flex items-center justify-center animate-fade-in-up opacity-0" style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
                 <div className="hero-image-wrapper relative h-full w-full">
                   <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden shadow-2xl" style={{ aspectRatio: '1 / 1' }}>
@@ -131,7 +131,7 @@ export function HomeContent() {
                 </p>
               </div>
             </ScrollAnimation>
-            
+
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
               <ScrollAnimation delay={100}>
                 <div className="card-hover card-tilt gradient-border flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm">
@@ -144,7 +144,7 @@ export function HomeContent() {
                   </p>
                 </div>
               </ScrollAnimation>
-              
+
               <ScrollAnimation delay={200}>
                 <div className="card-hover card-tilt gradient-border flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm">
                   <div className="rounded-full bg-primary/10 p-4">
@@ -156,7 +156,7 @@ export function HomeContent() {
                   </p>
                 </div>
               </ScrollAnimation>
-              
+
               <ScrollAnimation delay={300}>
                 <div className="card-hover card-tilt gradient-border flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm">
                   <div className="rounded-full bg-primary/10 p-4">
@@ -187,7 +187,7 @@ export function HomeContent() {
                 </p>
               </div>
             </ScrollAnimation>
-            
+
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-12">
               {[
                 { icon: School, key: 'institutions' },
@@ -239,27 +239,41 @@ export function HomeContent() {
         <section id="beneficios" className="py-16 md:py-24 bg-muted/50 relative">
           <div className="absolute inset-0 dots-pattern opacity-30" />
           <div className="container px-4 md:px-6 relative z-10">
-            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_500px]">
-              <div className="flex flex-col justify-center space-y-4">
-                <ScrollAnimation>
-                  <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground w-fit">
-                    {t('homepage.benefits.badge')}
+            <ScrollAnimation>
+              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+                  {t('homepage.benefits.badge')}
+                </div>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-display">
+                  {t('homepage.benefits.title')}
+                </h2>
+              </div>
+            </ScrollAnimation>
+
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 md:items-center">
+              <ScrollAnimation delay={200} animation="fade-scale">
+                <div className="relative flex items-center justify-center">
+                  <div className="relative bg-card backdrop-blur-sm border rounded-2xl shadow-xl overflow-hidden w-full max-w-md mx-auto aspect-[4/3] md:aspect-square">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-secondary z-10" />
+                    <Image
+                      src="/images/key-benefits/keybenefits.webp"
+                      alt="ProfeVision Key Benefits"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
                   </div>
-                </ScrollAnimation>
-                
-                <ScrollAnimation delay={100}>
-                  <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-display">
-                    {t('homepage.benefits.title')}
-                  </h2>
-                </ScrollAnimation>
-                
+                </div>
+              </ScrollAnimation>
+
+              <div className="flex flex-col justify-center space-y-6">
                 <ScrollAnimation delay={200}>
                   <p className="max-w-[600px] text-foreground/80 md:text-xl">
                     {t('homepage.benefits.description')}
                   </p>
                 </ScrollAnimation>
-                
-                <ul className="space-y-2">
+
+                <ul className="space-y-4">
                   {[
                     'automation', 'organization', 'insights', 'flexibility', 'gradingSpeed'
                   ].map((item, index) => (
@@ -278,7 +292,7 @@ export function HomeContent() {
                     </ScrollAnimation>
                   ))}
                 </ul>
-                
+
                 <ScrollAnimation delay={800}>
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     <Button asChild size="lg" className="btn-glow">
@@ -289,61 +303,6 @@ export function HomeContent() {
                   </div>
                 </ScrollAnimation>
               </div>
-              
-              <ScrollAnimation delay={200} animation="fade-scale" className="lg:order-first">
-                <div className="relative flex items-center justify-center">
-                  <div className="relative bg-card backdrop-blur-sm border rounded-2xl shadow-xl overflow-hidden w-full max-w-md mx-auto">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-secondary" />
-                    <div className="p-4 border-b">
-                      <h3 className="font-medium">{t('homepage.benefits.gradingTable.title')}</h3>
-                    </div>
-                    <div className="p-6 space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <h4 className="font-medium">{t('homepage.benefits.gradingTable.subject')}</h4>
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">{t('homepage.benefits.gradingTable.period')}</span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">{t('homepage.benefits.gradingTable.stats')}</div>
-                      </div>
-                      <div className="border rounded-lg overflow-hidden">
-                        <table className="w-full text-sm">
-                          <thead className="bg-muted/50">
-                            <tr>
-                              <th className="px-4 py-2 text-left font-medium">{t('homepage.benefits.gradingTable.student')}</th>
-                              <th className="px-4 py-2 text-center font-medium">{t('homepage.benefits.gradingTable.exam1')}</th>
-                              <th className="px-4 py-2 text-center font-medium">{t('homepage.benefits.gradingTable.exam2')}</th>
-                              <th className="px-4 py-2 text-center font-medium">{t('homepage.benefits.gradingTable.final')}</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y">
-                            <tr>
-                              <td className="px-4 py-2">Ana García</td>
-                              <td className="px-4 py-2 text-center">4.8</td>
-                              <td className="px-4 py-2 text-center">4.9</td>
-                              <td className="px-4 py-2 text-center font-medium">4.9</td>
-                            </tr>
-                            <tr>
-                              <td className="px-4 py-2">Carlos Pérez</td>
-                              <td className="px-4 py-2 text-center">4.0</td>
-                              <td className="px-4 py-2 text-center">4.2</td>
-                              <td className="px-4 py-2 text-center font-medium">4.1</td>
-                            </tr>
-                            <tr>
-                              <td className="px-4 py-2">María López</td>
-                              <td className="px-4 py-2 text-center">3.7</td>
-                              <td className="px-4 py-2 text-center">4.0</td>
-                              <td className="px-4 py-2 text-center font-medium">3.9</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <Button variant="outline" className="w-full">
-                        {t('homepage.benefits.gradingTable.export')}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </ScrollAnimation>
             </div>
           </div>
         </section>
@@ -352,7 +311,7 @@ export function HomeContent() {
         <section id="contacto" className="py-16 md:py-24 relative overflow-hidden">
           {/* Animated gradient background */}
           <div className="animated-gradient absolute inset-0" />
-          
+
           {/* Floating shapes */}
           <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full animate-float" />
           <div className="absolute bottom-10 right-10 w-24 h-24 bg-white/10 rounded-lg rotate-45 animate-float-rotate" />
@@ -369,7 +328,7 @@ export function HomeContent() {
                 </p>
               </div>
             </ScrollAnimation>
-            
+
             <ScrollAnimation delay={200}>
               <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center">
                 <Button
@@ -391,7 +350,7 @@ export function HomeContent() {
                 </Button>
               </div>
             </ScrollAnimation>
-            
+
             <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
               {[
                 { value: t('homepage.cta.stats.teachers'), label: t('homepage.cta.stats.teachersLabel') },
