@@ -1,6 +1,7 @@
 'use client'
 
 import { Link } from "@/i18n/navigation"
+import Image from "next/image"
 import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -221,66 +222,52 @@ export function HowItWorksContent() {
             </div>
           </ScrollAnimation>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-12">
-            <ScrollAnimation delay={100}>
-              <div className="card-hover gradient-border flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm h-full">
-                <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
-                  <Clock className="h-6 w-6 text-primary" />
+
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 md:items-center mt-12">
+            <ScrollAnimation delay={200} animation="fade-scale">
+              <div className="relative flex items-center justify-center">
+                <div className="relative bg-card backdrop-blur-sm border rounded-2xl shadow-xl overflow-hidden w-full max-w-md mx-auto aspect-[4/3] md:aspect-square">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-secondary z-10" />
+                  <Image
+                    src="/images/how-it-works/benefits_results.webp"
+                    alt={t('howItWorks.benefits.title')}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
                 </div>
-                <h3 className="text-lg text-center font-bold">{t('howItWorks.benefits.timeSaving.title')}</h3>
-                <p className="text-center text-muted-foreground">
-                  {t('howItWorks.benefits.timeSaving.description')}
-                </p>
               </div>
             </ScrollAnimation>
 
-            <ScrollAnimation delay={200}>
-              <div className="card-hover gradient-border flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm h-full">
-                <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
-                  <Target className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-lg text-center font-bold">{t('howItWorks.benefits.accuracy.title')}</h3>
-                <p className="text-center text-muted-foreground">
-                  {t('howItWorks.benefits.accuracy.description')}
-                </p>
-              </div>
-            </ScrollAnimation>
+            <div className="flex flex-col justify-center space-y-6">
+              <ul className="space-y-4">
+                {[
+                  'timeSaving', 'accuracy', 'organization', 'accessibility', 'analytics'
+                ].map((item, index) => (
+                  <ScrollAnimation key={item} delay={100 + index * 100}>
+                    <li className="flex items-start gap-3">
+                      <div className="rounded-full bg-primary/10 p-1 mt-0.5 shrink-0">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{t(`howItWorks.benefits.${item}.title`)}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {t(`howItWorks.benefits.${item}.description`)}
+                        </p>
+                      </div>
+                    </li>
+                  </ScrollAnimation>
+                ))}
+              </ul>
 
-            <ScrollAnimation delay={300}>
-              <div className="card-hover gradient-border flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm h-full">
-                <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
-                  <Building className="h-6 w-6 text-primary" />
+              <ScrollAnimation delay={600}>
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <Button asChild size="lg" className="btn-glow">
+                    <Link href={'/auth/register'}>{t('howItWorks.hero.cta')}</Link>
+                  </Button>
                 </div>
-                <h3 className="text-lg text-center font-bold">{t('howItWorks.benefits.organization.title')}</h3>
-                <p className="text-center text-muted-foreground">
-                  {t('howItWorks.benefits.organization.description')}
-                </p>
-              </div>
-            </ScrollAnimation>
-
-            <ScrollAnimation delay={400}>
-              <div className="card-hover gradient-border flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm h-full">
-                <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
-                  <Smartphone className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-lg text-center font-bold">{t('howItWorks.benefits.accessibility.title')}</h3>
-                <p className="text-center text-muted-foreground">
-                  {t('howItWorks.benefits.accessibility.description')}
-                </p>
-              </div>
-            </ScrollAnimation>
-
-            <ScrollAnimation delay={500}>
-              <div className="card-hover gradient-border flex flex-col items-center space-y-4 rounded-lg border bg-card p-6 shadow-sm h-full">
-                <div className="rounded-full bg-gradient-to-br from-[#0b890f]/20 to-[#0b890f]/10 p-4">
-                  <BarChart3 className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-lg text-center font-bold">{t('howItWorks.benefits.analytics.title')}</h3>
-                <p className="text-center text-muted-foreground">
-                  {t('howItWorks.benefits.analytics.description')}
-                </p>
-              </div>
-            </ScrollAnimation>
+              </ScrollAnimation>
+            </div>
           </div>
         </div>
       </section>

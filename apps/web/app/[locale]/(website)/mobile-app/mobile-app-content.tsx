@@ -404,11 +404,11 @@ export function MobileAppContent() {
             </div>
           </ScrollAnimation>
 
-          <div className="flex flex-wrap justify-center gap-4 mt-12">
+          <div className="grid grid-cols-1 sm:flex sm:flex-wrap justify-center gap-4 mt-12 max-w-5xl mx-auto">
             {steps.map((step, index) => (
-              <ScrollAnimation key={step} delay={100 * (index + 1)}>
+              <ScrollAnimation key={step} delay={100 * (index + 1)} className="w-full sm:w-auto">
                 <div
-                  className="flex items-center gap-3 bg-card rounded-xl border border-border p-4 min-w-[200px] shadow-md card-hover"
+                  className="flex items-center gap-3 bg-card rounded-xl border border-border p-4 w-full sm:min-w-[240px] shadow-md card-hover h-full"
                 >
                   <div className="rounded-full bg-primary w-10 h-10 flex items-center justify-center shrink-0">
                     <span className="text-primary-foreground font-bold">{index + 1}</span>

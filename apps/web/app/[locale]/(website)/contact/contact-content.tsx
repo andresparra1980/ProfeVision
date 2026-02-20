@@ -93,22 +93,24 @@ export function ContactContent() {
             <div className="flex justify-center mb-16">
               <ScrollAnimation delay={300} className="w-full max-w-lg">
                 <div className="bg-card p-8 rounded-xl border border-primary/20 shadow-lg card-hover gradient-border relative z-20">
-                  <h2 className="text-2xl font-semibold mb-6">{t('contact.support.title')}</h2>
-                  <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                      <strong className="text-primary">{t('contact.support.email')}</strong>
-                      <a href="mailto:soporte@profevision.com" className="hover:underline">soporte@profevision.com</a>
-                    </div>
-                    <div>
-                      <strong>{t('contact.support.knowledge')}</strong>{' '}
-                      <a
-                        href={`https://docs.profevision.com/${locale}/docs`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {t('contact.support.knowledgeBase')}
-                      </a>
+                  <div className="relative z-10">
+                    <h2 className="text-2xl font-semibold mb-6">{t('contact.support.title')}</h2>
+                    <div className="space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <strong className="text-primary">{t('contact.support.email')}</strong>
+                        <a href="mailto:help@profevision.com" className="hover:underline">help@profevision.com</a>
+                      </div>
+                      <div>
+                        <strong>{t('contact.support.knowledge')}</strong>{' '}
+                        <a
+                          href={`https://docs.profevision.com/${locale}/docs`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {t('contact.support.knowledgeBase')}
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>

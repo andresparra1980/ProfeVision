@@ -288,6 +288,7 @@
   inset: 0;
   overflow: hidden;
   z-index: -1;
+  pointer-events: none;
 }
 
 .mesh-gradient::before,
@@ -377,6 +378,7 @@
   mask-composite: exclude;
   opacity: 0;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .gradient-border:hover::before {
