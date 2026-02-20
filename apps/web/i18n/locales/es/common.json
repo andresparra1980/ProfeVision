@@ -642,10 +642,11 @@
       "liveChat": "Chat en vivo:",
       "liveChatAvailable": "Disponible en la plataforma",
       "knowledge": "Documentación:",
-      "knowledgeBase": "Ir a la página de documentación"
+      "knowledgeBase": "Ir a nuestra página de documentación"
     },
     "faq": {
-      "title": "Preguntas Frecuentes",
+      "badge": "Preguntas Frecuentes",
+      "title": "Preguntas Frecuentes (FAQ)",
       "q1": "¿Como puedo restablecer mi contraseña?",
       "a1": "Puedes restablecer tu contraseña haciendo clic en 'Olvidé mi contraseña' en la pantalla de inicio de sesión.",
       "q2": "¿Dónde puedo encontrar la documentación?",

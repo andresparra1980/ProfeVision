@@ -52,7 +52,7 @@ export function ContactContent() {
             href={finalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary hover:underline font-medium"
+            className="underline hover:opacity-80 font-medium"
           >
             {part}
           </a>
@@ -126,9 +126,14 @@ export function ContactContent() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto">
             <ScrollAnimation>
-              <h2 className="text-3xl font-bold text-center mb-10 font-display">
-                {t('contact.faq.title', { defaultValue: "Frequently Asked Questions" })}
-              </h2>
+              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-10">
+                <div className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+                  {t('contact.faq.badge')}
+                </div>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-display">
+                  {t('contact.faq.title')}
+                </h2>
+              </div>
             </ScrollAnimation>
 
             <ScrollAnimation delay={100}>
@@ -137,13 +142,13 @@ export function ContactContent() {
                   <AccordionItem
                     key={index}
                     value={`item-${index}`}
-                    className="border border-border bg-card rounded-xl shadow-sm overflow-hidden"
+                    className="border-0 bg-popover-foreground rounded-lg shadow-sm"
                   >
-                    <AccordionTrigger className="text-left px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors font-medium">
+                    <AccordionTrigger className="text-left px-6 py-4 text-popover hover:no-underline hover:opacity-80 rounded-lg font-medium">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="px-6 pb-4 pt-2">
-                      <p className="text-muted-foreground">{renderAnswer(faq.answer)}</p>
+                      <p className="text-popover opacity-80">{renderAnswer(faq.answer)}</p>
                     </AccordionContent>
                   </AccordionItem>
                 ))}

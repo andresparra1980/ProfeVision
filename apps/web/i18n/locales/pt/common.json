@@ -647,7 +647,8 @@
       "knowledgeBase": "Ir para nossa página de documentação"
     },
     "faq": {
-      "title": "Perguntas Frequentes",
+      "badge": "Perguntas Frequentes",
+      "title": "Perguntas Frequentes (FAQ)",
       "q1": "Como posso redefinir minha senha?",
       "a1": "Você pode redefinir sua senha clicando em 'Esqueci a senha' na tela de login.",
       "q2": "Onde posso encontrar a documentação?",

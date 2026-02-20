@@ -646,7 +646,8 @@
       "knowledgeBase": "Go to our documentation page"
     },
     "faq": {
-      "title": "Frequently Asked Questions",
+      "badge": "Frequently Asked Questions",
+      "title": "Frequently Asked Questions (FAQ)",
       "q1": "How can I reset my password?",
       "a1": "You can reset your password by clicking on 'Forgot Password' at the login screen.",
       "q2": "Where can I find the documentation?",

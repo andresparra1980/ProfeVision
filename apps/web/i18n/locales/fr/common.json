@@ -647,7 +647,8 @@
       "knowledgeBase": "Aller à notre page de documentation"
     },
     "faq": {
-      "title": "Foire Aux Questions",
+      "badge": "Foire Aux Questions",
+      "title": "Foire Aux Questions (FAQ)",
       "q1": "Comment puis-je réinitialiser mon mot de passe ?",
       "a1": "Vous pouvez réinitialiser votre mot de passe en cliquant sur 'Mot de passe oublié' sur l'écran de connexion.",
       "q2": "Où puis-je trouver la documentation ?",
