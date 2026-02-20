@@ -209,10 +209,12 @@ export function HomeContent() {
                       </div>
                       <ul className="mt-4 space-y-2">
                         {[1, 2, 3].map((i) => (
-                          <li key={i} className="flex items-start gap-2">
-                            <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                            <span className="text-sm">{t(`homepage.modules.${item.key}.feature${i}`)}</span>
-                          </li>
+                          <ScrollAnimation key={i} delay={300 + i * 100}>
+                            <li className="flex items-start gap-2">
+                              <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                              <span className="text-sm">{t(`homepage.modules.${item.key}.feature${i}`)}</span>
+                            </li>
+                          </ScrollAnimation>
                         ))}
                       </ul>
                       <div className="mt-6 flex justify-end">
@@ -277,19 +279,21 @@ export function HomeContent() {
                   {[
                     'automation', 'organization', 'insights', 'flexibility', 'gradingSpeed'
                   ].map((item, index) => (
-                    <ScrollAnimation key={item} delay={300 + index * 100}>
-                      <li className="flex items-start gap-3">
-                        <div className="rounded-full bg-primary/10 p-1 mt-0.5 shrink-0">
-                          <CheckCircle className="h-4 w-4 text-primary" />
+                    <li key={item}>
+                      <ScrollAnimation delay={300 + index * 100}>
+                        <div className="flex items-start gap-3">
+                          <div className="rounded-full bg-primary/10 p-1 mt-0.5 shrink-0">
+                            <CheckCircle className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">{t(`homepage.benefits.${item}.title`)}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {t(`homepage.benefits.${item}.description`)}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium">{t(`homepage.benefits.${item}.title`)}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {t(`homepage.benefits.${item}.description`)}
-                          </p>
-                        </div>
-                      </li>
-                    </ScrollAnimation>
+                      </ScrollAnimation>
+                    </li>
                   ))}
                 </ul>
 
