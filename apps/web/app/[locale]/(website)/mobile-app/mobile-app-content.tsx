@@ -87,24 +87,24 @@ export function MobileAppContent() {
         <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-secondary/10 rounded-full animate-float-slow hidden md:block" style={{ animationDelay: '1s' }} />
 
         <div className="container px-4 md:px-6 relative z-10">
-          <div className="grid gap-8 lg:grid-cols-2 items-center">
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
             {/* Left: Text content */}
-            <div className="flex flex-col space-y-4 text-center lg:text-left">
+            <div className="flex flex-col justify-center space-y-6 text-center lg:text-left">
               <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
-                <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-primary text-primary-foreground w-fit mx-auto lg:mx-0">
+                <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80 w-fit mx-auto lg:mx-0">
                   <Smartphone className="h-3 w-3 mr-1" />
                   {t('hero.badge')}
                 </div>
               </div>
               <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
-                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl font-display leading-tight">
+                <h1 className="text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl font-display leading-tight">
                   {t('hero.title')}{" "}
                   <span className="text-gradient-slow">{t('hero.titleHighlight')}</span>{" "}
                   {t('hero.titleEnd')}
                 </h1>
               </div>
               <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
-                <p className="max-w-[600px] text-foreground/80 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mx-auto lg:mx-0">
+                <p className="max-w-[600px] text-foreground/80 md:text-xl mx-auto lg:mx-0">
                   {t('hero.description')}{" "}
                   <span className="font-semibold text-primary">{t('hero.descriptionHighlight')}</span>{" "}
                   {t('hero.descriptionEnd')}
@@ -114,8 +114,8 @@ export function MobileAppContent() {
               {/* Availability badges */}
               <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
                 <div className="flex flex-wrap gap-3 justify-center lg:justify-start pt-2">
-                  <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
-                    <AndroidIcon className="h-5 w-5 text-[#3DDC84]" />
+                  <div className="flex items-center gap-2 bg-muted border border-border rounded-full px-4 py-2">
+                    <AndroidIcon className="h-5 w-5" />
                     <div className="text-sm">
                       <span className="font-semibold">{t('availability.android')}</span>
                       <span className="text-muted-foreground ml-1">- {t('availability.androidStatus')}</span>
@@ -155,7 +155,7 @@ export function MobileAppContent() {
             </div>
 
             {/* Right: App icon */}
-            <div className="flex justify-center lg:justify-end">
+            <div className="relative flex items-center justify-center animate-fade-in-up opacity-0" style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b890f]/20 to-[#ffd60a]/20 rounded-3xl blur-2xl" />
                 <Image
