@@ -507,11 +507,11 @@ export default function ExamsTableMobile({
         throw new Error('Error publishing exam');
       }
 
-      toast.success(t('messages.examPublished'));
+      toast.success(t('edit.messages.examPublished'));
       window.location.reload();
     } catch (error) {
       console.error("Error publishing exam:", error);
-      toast.error(t('messages.publishError'));
+      toast.error(t('edit.messages.publishError'));
     }
   };
 
