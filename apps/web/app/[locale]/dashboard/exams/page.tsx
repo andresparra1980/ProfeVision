@@ -106,8 +106,8 @@ export default function ExamsPage() {
       const examIds = (data || []).map((e: Exam) => e.id);
       if (examIds.length > 0) {
         const { data: appsWithResponses } = await supabase
-          .from('aplicaciones_examen')
-          .select('examen_id, respuestas_estudiante!inner(id)')
+          .from('resultados_examen')
+          .select('examen_id')
           .in('examen_id', examIds);
         setExamsWithGrades(new Set((appsWithResponses || []).map((a: { examen_id: string }) => a.examen_id)));
       } else {
