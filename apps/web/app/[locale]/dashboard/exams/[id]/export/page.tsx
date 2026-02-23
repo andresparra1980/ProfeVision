@@ -105,7 +105,7 @@ interface GroupWithEstudiantes {
 export default function ExportExamPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const examId = resolvedParams.id;
-  
+
   const router = useRouter();
   const t = useTranslations('dashboard');
   const locale = useLocale();
@@ -118,13 +118,13 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
   const [textExportContent, setTextExportContent] = useState("");
   const [textExportHtmlContent, setTextExportHtmlContent] = useState("");
   // LaTeX export options
-  const [latexFontSize, setLatexFontSize] = useState<"8pt"|"10pt"|"12pt">("8pt");
-  const [latexColumns, setLatexColumns] = useState<1|2|3>(2);
-  const [latexOrientation, setLatexOrientation] = useState<"portrait"|"landscape">("portrait");
-  const [latexPaper, setLatexPaper] = useState<"letter"|"a4"|"legal">("letter");
+  const [latexFontSize, setLatexFontSize] = useState<"8pt" | "10pt" | "12pt">("8pt");
+  const [latexColumns, setLatexColumns] = useState<1 | 2 | 3>(2);
+  const [latexOrientation, setLatexOrientation] = useState<"portrait" | "landscape">("portrait");
+  const [latexPaper, setLatexPaper] = useState<"letter" | "a4" | "legal">("letter");
   const [compiling, setCompiling] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  
+
   // Onboarding checklist
   const { complete: completePdfExported, isCompleted: pdfAlreadyExported } = useChecklistItem('pdf_exported');
   const { refetch } = useOnboarding();
@@ -202,7 +202,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
         .single();
 
       if (error) throw error;
-      
+
       // Ordenar preguntas por orden
       if (data.preguntas) {
         data.preguntas.sort((a: { orden: number }, b: { orden: number }) => a.orden - b.orden);
@@ -213,7 +213,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
           }
         });
       }
-      
+
       setExam(data as ExamDetails);
 
       // Cargar grupos con estudiantes
@@ -303,11 +303,11 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     const parts: string[] = [];
     parts.push(
       '<!DOCTYPE html><html><head><meta charset="utf-8">' +
-        '<style>' +
-          'p{margin:0;}' +
-          '.q{font-weight:700;margin:0 0 6px 0;}' +
-          '.opt{margin:0 0 0 20px;line-height:1;}' +
-        '</style>' +
+      '<style>' +
+      'p{margin:0;}' +
+      '.q{font-weight:700;margin:0 0 6px 0;}' +
+      '.opt{margin:0 0 0 20px;line-height:1;}' +
+      '</style>' +
       '</head><body>'
     );
     examData.preguntas.forEach((q, idx) => {
@@ -428,7 +428,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
         opts
       );
 
-      const jobName = exam.titulo.toLowerCase().replace(/\s+/g, "-");
+      const jobName = exam.titulo.toLowerCase().replace(/\s+/g, "-").substring(0, 50).replace(/-$/, "");
       const res = await fetch("/api/latex/compile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -486,7 +486,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     return (
       <div className="text-center py-8">
         <p>{t('exams.export.notFound')}</p>
-        <Button 
+        <Button
           className="mt-4"
           onClick={() => router.push("/dashboard/exams")}
         >
@@ -502,8 +502,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => router.push("/dashboard/exams")}
             className="mb-2"
@@ -533,8 +533,8 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             {!hasGroups ? (
               <div className="text-center py-4">
                 <p className="text-muted-foreground">{t('exams.export.answerSheets.noGroups')}</p>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="mt-2"
                   onClick={() => router.push({ pathname: '/dashboard/exams/[id]/assign', params: { id: examId } })}
                 >
@@ -621,7 +621,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
             <div className="grid md:grid-cols-2 gap-4 w-full">
               <div className="space-y-2">
                 <Label>{t('exams.export.fontSize')}</Label>
-                <RadioGroup value={latexFontSize} onValueChange={(v: string) => setLatexFontSize(v as "8pt"|"10pt"|"12pt")}>
+                <RadioGroup value={latexFontSize} onValueChange={(v: string) => setLatexFontSize(v as "8pt" | "10pt" | "12pt")}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="8pt" id="l8" /><Label htmlFor="l8">8pt</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="10pt" id="l10" /><Label htmlFor="l10">10pt</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="12pt" id="l12" /><Label htmlFor="l12">12pt</Label></div>
@@ -630,7 +630,7 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               <div className="space-y-2">
                 <Label>{t('exams.export.columns')}</Label>
                 <RadioGroup value={String(latexColumns)} onValueChange={(v: string) => {
-                  const n = Number(v) as 1|2|3;
+                  const n = Number(v) as 1 | 2 | 3;
                   setLatexColumns(n);
                 }}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="1" id="c1" /><Label htmlFor="c1">1</Label></div>
@@ -640,14 +640,14 @@ export default function ExportExamPage({ params }: { params: Promise<{ id: strin
               </div>
               <div className="space-y-2">
                 <Label>{t('exams.export.orientation')}</Label>
-                <RadioGroup value={latexOrientation} onValueChange={(v: string) => setLatexOrientation(v as "portrait"|"landscape")}>
+                <RadioGroup value={latexOrientation} onValueChange={(v: string) => setLatexOrientation(v as "portrait" | "landscape")}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="portrait" id="op" /><Label htmlFor="op">{t('exams.export.portrait')}</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="landscape" id="ol" /><Label htmlFor="ol">{t('exams.export.landscape')}</Label></div>
                 </RadioGroup>
               </div>
               <div className="space-y-2">
                 <Label>{t('exams.export.paper')}</Label>
-                <RadioGroup value={latexPaper} onValueChange={(v: string) => setLatexPaper(v as "letter"|"a4"|"legal")}>
+                <RadioGroup value={latexPaper} onValueChange={(v: string) => setLatexPaper(v as "letter" | "a4" | "legal")}>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="letter" id="pl" /><Label htmlFor="pl">{t('exams.export.letter')}</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="a4" id="pa4" /><Label htmlFor="pa4">{t('exams.export.a4')}</Label></div>
                   <div className="flex items-center space-x-2"><RadioGroupItem value="legal" id="plegal" /><Label htmlFor="plegal">{t('exams.export.legal')}</Label></div>
