@@ -79,6 +79,7 @@ export default function ExamsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showArchivedGroups, setShowArchivedGroups] = useState(false);
+  const [examsWithGrades, setExamsWithGrades] = useState<Set<string>>(new Set());
 
   const fetchExams = useCallback(async () => {
     try {
@@ -100,6 +101,18 @@ export default function ExamsPage() {
 
       if (error) throw error;
       setRawExams(data || []);
+
+      // Check which exams have graded student responses
+      const examIds = (data || []).map((e: Exam) => e.id);
+      if (examIds.length > 0) {
+        const { data: appsWithResponses } = await supabase
+          .from('aplicaciones_examen')
+          .select('examen_id, respuestas_estudiante!inner(id)')
+          .in('examen_id', examIds);
+        setExamsWithGrades(new Set((appsWithResponses || []).map((a: { examen_id: string }) => a.examen_id)));
+      } else {
+        setExamsWithGrades(new Set());
+      }
     } catch (error) {
       const err = error as AuthError | Error;
       const code = "code" in err ? err.code : undefined;
@@ -114,8 +127,7 @@ export default function ExamsPage() {
         errorObject: err,
       });
       toast.error(
-        `${t("exams.messages.loadingError")}${
-          status ? ` (${t("common.error")}: ${status})` : ""
+        `${t("exams.messages.loadingError")}${status ? ` (${t("common.error")}: ${status})` : ""
         }: ${err.message}`,
       );
     } finally {
@@ -298,17 +310,18 @@ export default function ExamsPage() {
       />
 
 
-        <ExamsTableMobile
-          filteredExams={filteredExams}
-          loading={loading}
-          onOpenDeleteDialog={handleOpenDeleteDialog}
-          setShowImportDialog={setShowImportDialog}
-          handleCreateExam={handleCreateExam}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          showArchivedGroups={showArchivedGroups}
-          setShowArchivedGroups={setShowArchivedGroups}
-        />
+      <ExamsTableMobile
+        filteredExams={filteredExams}
+        loading={loading}
+        onOpenDeleteDialog={handleOpenDeleteDialog}
+        setShowImportDialog={setShowImportDialog}
+        handleCreateExam={handleCreateExam}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        showArchivedGroups={showArchivedGroups}
+        setShowArchivedGroups={setShowArchivedGroups}
+        examsWithGrades={examsWithGrades}
+      />
 
       <ImportExamDialog
         _open={showImportDialog}
@@ -330,7 +343,9 @@ export default function ExamsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>{t("exams.delete.title")}</AlertDialogTitle>
               <AlertDialogDescription>
-                {t("exams.delete.description")}
+                {examToDelete && rawExams.find(e => e.id === examToDelete)?.estado === 'publicado'
+                  ? t("exams.delete.publishedDescription", { defaultValue: "Este examen publicado será eliminado permanentemente junto con sus preguntas y asignaciones de grupo. Esta acción no se puede deshacer." })
+                  : t("exams.delete.description")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

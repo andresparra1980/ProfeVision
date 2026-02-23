@@ -143,7 +143,8 @@
       "cancel": "Cancel",
       "loading": "Deleting exam...",
       "success": "Exam deleted successfully.",
-      "error": "Error deleting exam."
+      "error": "Error deleting exam.",
+      "publishedDescription": "This published exam will be permanently deleted along with its questions and group assignments. This action cannot be undone."
     },
     "validation": {
       "titleRequired": "Title is required",
@@ -177,7 +178,8 @@
       "assignGroups": "Assign this exam to the group that will take it. This allows you to print personalized answer sheets for each student.",
       "linkComponent": "Optionally link this exam's grades to a grade component created in Groups → Grading Scheme. Grades will automatically populate in the grade table for all students.",
       "exportAndPrint": "Print all personalized answer sheets for each student and export the exam questions as PDF.",
-      "viewResults": "View statistics and all exam results, including detection images and original answer sheets filled out by students once you scan the forms."
+      "viewResults": "View statistics and all exam results, including detection images and original answer sheets filled out by students once you scan the forms.",
+      "noResults": "No results available for this exam yet."
     },
     "details": {
       "title": "Exam Details",

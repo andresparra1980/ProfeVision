@@ -143,7 +143,8 @@
       "cancel": "Cancelar",
       "loading": "Eliminando examen...",
       "success": "Examen eliminado exitosamente.",
-      "error": "Error al eliminar el examen."
+      "error": "Error al eliminar el examen.",
+      "publishedDescription": "Este examen publicado será eliminado permanentemente junto con sus preguntas y asignaciones de grupo. Esta acción no se puede deshacer."
     },
     "validation": {
       "titleRequired": "El título es requerido",
@@ -177,7 +178,8 @@
       "assignGroups": "Asigna este examen al grupo que lo presentará. Esto permite imprimir hojas de respuesta personalizadas para cada estudiante.",
       "linkComponent": "Opcionalmente, vincula las notas de este examen a un componente de nota creado en Grupos → Esquema de Calificaciones. Las notas se llenarán automáticamente en el tabulado para todos los estudiantes.",
       "exportAndPrint": "Imprime todas las hojas de respuesta personalizadas para cada estudiante y exporta las preguntas del examen en PDF.",
-      "viewResults": "Observa las estadísticas y todos los resultados del examen, incluyendo las imágenes de detección y las hojas de respuesta originales diligenciadas por los estudiantes una vez escanees los formatos."
+      "viewResults": "Observa las estadísticas y todos los resultados del examen, incluyendo las imágenes de detección y las hojas de respuesta originales diligenciadas por los estudiantes una vez escanees los formatos.",
+      "noResults": "No hay resultados disponibles para este examen aún."
     },
     "details": {
       "title": "Detalles del Examen",

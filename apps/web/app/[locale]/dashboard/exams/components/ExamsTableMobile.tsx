@@ -98,6 +98,7 @@ interface ExamCardContentProps {
   onOpenDeleteDialog: (_examId: string) => void;
   onStartSimilar: (_examId: string) => void;
   onPublish: (_examId: string) => void;
+  examsWithGrades: Set<string>;
 }
 
 function ExamCardContent({
@@ -106,6 +107,7 @@ function ExamCardContent({
   onOpenDeleteDialog,
   onStartSimilar,
   onPublish,
+  examsWithGrades,
 }: ExamCardContentProps) {
   const t = useTranslations('dashboard.exams');
 
@@ -240,7 +242,7 @@ function ExamCardContent({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      {exam.estado === "borrador" && (
+      {(exam.estado === "borrador" || (exam.estado === "publicado" && !examsWithGrades.has(exam.id))) && (
         <Button
           variant="ghost"
           size="sm"
@@ -254,22 +256,25 @@ function ExamCardContent({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start h-auto py-2 px-2 text-primary font-semibold"
-                onClick={() => {
-                  router.push({
-                    pathname: '/dashboard/exams/[id]/results',
-                    params: { id: exam.id },
-                  });
-                }}
-              >
-                <Eye className="mr-2 h-4 w-4" /> {t('actions.viewResults')}
-              </Button>
+              <span className="w-full">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start h-auto py-2 px-2 text-primary font-semibold"
+                  disabled={!examsWithGrades.has(exam.id)}
+                  onClick={() => {
+                    router.push({
+                      pathname: '/dashboard/exams/[id]/results',
+                      params: { id: exam.id },
+                    });
+                  }}
+                >
+                  <Eye className="mr-2 h-4 w-4" /> {t('actions.viewResults')}
+                </Button>
+              </span>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs">
-              <p>{t('tooltips.viewResults')}</p>
+              <p>{examsWithGrades.has(exam.id) ? t('tooltips.viewResults') : t('tooltips.noResults', { defaultValue: 'No hay resultados disponibles para este examen aún.' })}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -310,6 +315,7 @@ interface ExamsTableMobileProps {
   setSearchQuery: (_query: string) => void;
   showArchivedGroups: boolean;
   setShowArchivedGroups: (_show: boolean) => void;
+  examsWithGrades: Set<string>;
 }
 
 // Helper to check if exam belongs to archived group(s)
@@ -440,6 +446,7 @@ export default function ExamsTableMobile({
   setSearchQuery,
   showArchivedGroups,
   setShowArchivedGroups,
+  examsWithGrades,
 }: ExamsTableMobileProps) {
   const router = useRouter();
   const t = useTranslations('dashboard.exams');
@@ -604,6 +611,7 @@ export default function ExamsTableMobile({
                   onOpenDeleteDialog={onOpenDeleteDialog}
                   onStartSimilar={startSimilarJob}
                   onPublish={handlePublish}
+                  examsWithGrades={examsWithGrades}
                 />
               </div>
             </div>
@@ -629,6 +637,7 @@ export default function ExamsTableMobile({
                   onOpenDeleteDialog={onOpenDeleteDialog}
                   onStartSimilar={startSimilarJob}
                   onPublish={handlePublish}
+                  examsWithGrades={examsWithGrades}
                 />
               </AccordionContent>
             </AccordionItem>

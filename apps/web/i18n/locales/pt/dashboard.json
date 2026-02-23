@@ -143,7 +143,8 @@
       "cancel": "Cancelar",
       "loading": "Excluindo exame...",
       "success": "Exame excluído com sucesso.",
-      "error": "Erro ao excluir o exame."
+      "error": "Erro ao excluir o exame.",
+      "publishedDescription": "Este exame publicado será excluído permanentemente junto com suas perguntas e atribuições de grupo. Esta ação não pode ser desfeita."
     },
     "validation": {
       "titleRequired": "O título é obrigatório",
@@ -177,7 +178,8 @@
       "assignGroups": "Atribua este exame ao grupo que irá realizá-lo. Isso permite imprimir folhas de resposta personalizadas para cada estudante.",
       "linkComponent": "Opcionalmente, vincule as notas deste exame a um componente de nota criado em Grupos → Esquema de Qualificações. As notas serão preenchidas automaticamente na planilha para todos os estudantes.",
       "exportAndPrint": "Imprima todas as folhas de resposta personalizadas para cada estudante e exporte as perguntas do exame em PDF.",
-      "viewResults": "Observe as estatísticas e todos os resultados do exame, incluindo as imagens de detecção e as folhas de resposta originais preenchidas pelos estudantes assim que você escanear os formatos."
+      "viewResults": "Observe as estatísticas e todos os resultados do exame, incluindo as imagens de detecção e as folhas de resposta originais preenchidas pelos estudantes assim que você escanear os formatos.",
+      "noResults": "Nenhum resultado disponível para este exame ainda."
     },
     "details": {
       "deleteConfirm": {
