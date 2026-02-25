@@ -43,10 +43,14 @@ The project uses a modern architecture based on a monorepo managed with **Turbor
 - `apps/blog`: The ProfeVision blog application (Payload CMS), designed for publishing educational articles, platform updates, and resources for teachers.
 - `apps/docs`: Documentation site built with Fumadocs, containing static resources, guides, and tutorials for the project.
 - `packages/*`: (Optional) Shared libraries for UI, TS/ESLint configurations, etc.
+- `services/*`: Dedicated microservices for external processing. These services run inside Docker containers using FastAPI, exposed through an NGINX reverse proxy.
+  - `services/omr-service-direct`: The active OMR (Optical Mark Recognition) microservice. It handles high-resolution image processing directly between the client and the service, bypassing Vercel's body limits and timeouts.
+  - `services/latex-service`: Microservice responsible for rendering and compiling LaTeX documents (e.g., generating PDFs of the exams).
+  - `services/omr-service`: **[DEPRECATED]** Previous OMR service. Deprecated because routing high-resolution images through Vercel resulted in payload/timeout limits.
 
 ### Mobile Application
 The native application (React Native) for Android and iOS is managed in a separate repository:
-**[andresparra1980/profevision-mobile-app](https://github.com/andresparra1980/profevision-mobile-app)**
+**[andresparra1980/profevision-mobile-app](https://github.com/andresparra1980/profevision-mobile-app)** to avoid versioning issues with React Native
 
 ### Frontend
 - **Framework**: Next.js 15 (App Router, Turbopack)
