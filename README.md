@@ -1,115 +1,115 @@
-# ProfeVision 📚✨
+# ProfeVision
 
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![React 19](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-green)](https://supabase.com/)
 [![Powered by AI](https://img.shields.io/badge/AI-Powered-purple)](https://vercel.com/ai)
 
+Comprehensive AI-powered platform transforming how teachers create, manage, and grade exams. With ProfeVision, educators can design multiple-choice assessments with AI assistance, generate custom formats, and automatically grade in seconds using smartphone scanning.
 
-Plataforma integral impulsada por IA que transforma la forma en que los profesores crean, administran y califican exámenes. Con ProfeVision, los docentes pueden diseñar evaluaciones de opción múltiple con asistencia de IA, generar formatos personalizados, y calificar automáticamente en segundos mediante escaneo con smartphone.
+## Main Features
 
-## 🚀 Características Principales
+### AI-Powered (Mastra + Vercel AI SDK)
+- **Exam Generation**: Create complete assessments in seconds using advanced models like **Gemini 3.1 Pro/Flash**, **GPT-5**, and **Claude 4.5**.
+- **Virtual Assistant (Mastra Chat)**: Integrated smart chat to help teachers improve questions, suggest topics, and refine content.
+- **Predictive Analytics**: Insights into student performance and question quality.
 
-### 🤖 Potenciado por IA (Mastra + Vercel AI SDK)
-- **Generación de Exámenes**: Crea evaluaciones completas en segundos utilizando modelos avanzados como **Gemini 1.5 Pro/Flash**, **GPT-4o** y **Claude 3.5 Sonnet**.
-- **Asistente Virtual (Mastra Chat)**: Chat inteligente integrado para ayudar a los profesores a mejorar preguntas, sugerir temas y refinar el contenido.
-- **Análisis Predictivo**: Insights profundos sobre el rendimiento de los estudiantes y la calidad de las preguntas.
+### Smart Scanning and Grading
+- **Digital OMR**: Optical Mark Recognition technology using `opencv-js` and `jsqr`.
+- **Real-Time Grading**: Scan answer sheets with your device's camera and get instant results.
+- **Mobile Support**: Optimized interface for smartphones and tablets.
 
-### 📱 Escaneo y Calificación Inteligente
-- **OMR Digital**: Tecnología de reconocimiento óptico de marcas (Optical Mark Recognition) usando `opencv-js` y `jsqr`.
-- **Calificación en Tiempo Real**: Escanea las hojas de respuesta con la cámara de tu dispositivo y obtén resultados instantáneos.
-- **Soporte Móvil**: Interfaz optimizada para uso en smartphones y tablets.
+### Subscriptions and Monetization (Polar.sh)
+- **Plan Management**: Fully integrated with **Polar.sh** to manage subscriptions (Free vs ProfeVision Plus).
+- **Flexible Billing**: Support for monthly and annual billing.
+- **Tier Limits**: Access control to advanced features based on subscription level.
 
-### 💰 Suscripciones y Monetización (Polar.sh)
-- **Gestión de Planes**: Integración completa con **Polar.sh** para gestionar suscripciones (Free vs ProfeVision Plus).
-- **Billing Flexible**: Soporte para facturación mensual y anual.
-- **Límites por Tier**: Control de acceso a features avanzadas basado en el nivel de suscripción.
+### Internationalization (i18n)
+- **Native Multilingual**: Full support for multiple languages (Spanish, English, Portuguese, French) using `next-intl`.
+- **Cultural Adaptation**: Content and formats adapted to different educational regions.
 
-### 🌍 Internacionalización (i18n)
-- **Multilenguaje Nativo**: Soporte completo para múltiples idiomas (Español, Inglés, Portugués, Francés) mediante `next-intl`.
-- **Adaptación Cultural**: Contenidos y formatos adaptados a diferentes regiones educativas.
+### Dashboard and Analytics
+- **Detailed Reports**: Interactive charts with **Tremor** and **Recharts**.
+- **Course and Student Management**: Complete administrative panel to organize groups and students.
+- **Academic History**: Longitudinal tracking of performance.
 
-### 📊 Dashboard y Análisis
-- **Reportes Detallados**: Gráficos interactivos con **Tremor** y **Recharts**.
-- **Gestión de Cursos y Estudiantes**: Panel administrativo completo para organizar grupos y alumnos.
-- **Historial Académico**: Seguimiento longitudinal del desempeño.
+## Technology Stack
 
-## 💻 Stack Tecnológico
+The project uses a modern architecture based on a monorepo managed with **Turborepo**, allowing us to efficiently scale and maintain multiple applications and packages in a single repository.
 
-El proyecto utiliza una arquitectura moderna basada en un monorepo gestionado con **Turborepo**, lo que nos permite escalar y mantener múltiples aplicaciones y paquetes en un solo repositorio de manera eficiente.
+### Monorepo Structure
 
-### Estructura del Monorepo
+- `apps/web`: The main ProfeVision application (Next.js 15), where the platform for teachers and students resides.
+- `apps/blog`: The ProfeVision blog application (Payload CMS), designed for publishing educational articles, platform updates, and resources for teachers.
+- `apps/docs`: Documentation site built with Fumadocs, containing static resources, guides, and tutorials for the project.
+- `packages/*`: (Optional) Shared libraries for UI, TS/ESLint configurations, etc.
 
-- `apps/web`: La aplicación principal de ProfeVision (Next.js 15), donde reside la plataforma para profesores y estudiantes.
-- `apps/docs`: Sitio de documentación (si aplica) o recursos estáticos adicionales para el proyecto.
-- `packages/*`: (Opcional) Librerías compartidas de UI, configuraciones de TS/ESLint, etc.
-
-### 📱 Aplicación Móvil
-La aplicación nativa (React Native) para Android e iOS se gestiona en un repositorio independiente:
-👉 **[andresparra1980/profevision-mobile-app](https://github.com/andresparra1980/profevision-mobile-app)**
+### Mobile Application
+The native application (React Native) for Android and iOS is managed in a separate repository:
+**[andresparra1980/profevision-mobile-app](https://github.com/andresparra1980/profevision-mobile-app)**
 
 ### Frontend
 - **Framework**: Next.js 15 (App Router, Turbopack)
 - **Core**: React 19 RC
-- **Estilos**: Tailwind CSS 3.4, Shadcn/UI (Radix Primitives)
-- **Visualización**: Tremor, Recharts
-- **Edición**: Tiptap Editor
+- **Styling**: Tailwind CSS 3.4, Shadcn/UI (Radix Primitives)
+- **Visualization**: Tremor, Recharts
+- **Editor**: Tiptap Editor
 
-### Backend & Servicios
-- **Base de Datos**: Supabase (PostgreSQL)
-- **Autenticación**: Supabase Auth
+### Backend & Services
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
 - **AI Engine**: Mastra Core, Vercel AI SDK, LangChain
-- **Pagos**: Polar.sh SDK
+- **Payments**: Polar.sh SDK
 - **Edge Functions**: Supabase Edge Functions
 
-### Calidad y Testing
+### Quality and Testing
 - **Unit & Integration**: Vitest
-- **Linting**: ESLint (Configuración Next.js + Prettier)
+- **Linting**: ESLint (Next.js config + Prettier)
 - **Type Checking**: TypeScript 5
 
-## 🛠️ Desarrollo Local
+## Local Development
 
-### Requisitos Previos
+### Prerequisites
 - Node.js 20+
 - pnpm 9+
 - Git
 
-### Instalación
+### Installation
 
-1.  **Clonar el repositorio**
+1.  **Clone the repository**
     ```bash
-    git clone https://github.com/tu-usuario/profevision.git
+    git clone https://github.com/your-username/profevision.git
     cd profevision
     ```
 
-2.  **Instalar dependencias**
+2.  **Install dependencies**
     ```bash
     pnpm install
     ```
 
-3.  **Configurar Variables de Entorno**
-    Copia el archivo de ejemplo y completa tus credenciales:
+3.  **Configure Environment Variables**
+    Copy the example file and fill in your credentials:
     ```bash
     cp apps/web/.env.example apps/web/.env.local
     ```
-    *Necesitarás API Keys de: Supabase, OpenRouter (o OpenAI/Anthropic), y Polar.sh (para pagos).*
+    *You will need API Keys for: Supabase, OpenRouter (or OpenAI/Anthropic), and Polar.sh (for payments).*
 
-4.  **Iniciar Servidor de Desarrollo**
-    Utilizamos Turbopack para una experiencia de desarrollo ultra rápida:
+4.  **Start Development Server**
+    We use Turbopack for lightning-fast development experience:
     ```bash
     pnpm dev
     ```
-    La aplicación estará disponible en `http://localhost:3000`.
+    The application will be available at `http://localhost:3000`.
 
-### Comandos Útiles
+### Useful Commands
 
-- `pnpm build` - Compilar el proyecto para producción.
-- `pnpm test` - Ejecutar suite de pruebas con Vitest.
-- `pnpm test:ui` - Abrir interfaz gráfica de pruebas.
-- `pnpm lint` - Verificar calidad de código.
+- `pnpm build` - Build the project for production.
+- `pnpm test` - Run test suite with Vitest.
+- `pnpm test:ui` - Open graphical test interface.
+- `pnpm lint` - Check code quality.
 
 
-## 📄 Licencia
+## License
 
-Propiedad de **ProfeVision**.
-Todos los derechos reservados. No está permitida la distribución ni modificación de este código sin autorización previa.
+Property of **ProfeVision**.
+All rights reserved. Distribution or modification of this code without prior authorization is not permitted.
