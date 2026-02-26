@@ -7,17 +7,22 @@
 
 Comprehensive AI-powered platform transforming how teachers create, manage, and grade exams. With ProfeVision, educators can design multiple-choice assessments with AI assistance, generate custom formats, and automatically grade in seconds using smartphone scanning.
 
+## 🎥 See it in Action
+
+https://youtube.com/shorts/ZceuTIpAzWk?si=zAsGTM6rwNX9mQV8
+
 ## Main Features
 
-### AI-Powered (Mastra + Vercel AI SDK)
-- **Exam Generation**: Create complete assessments in seconds using advanced models like **Gemini 3.1 Pro/Flash**, **GPT-5**, and **Claude 4.5**.
-- **Virtual Assistant (Mastra Chat)**: Integrated smart chat to help teachers improve questions, suggest topics, and refine content.
-- **Predictive Analytics**: Insights into student performance and question quality.
+### 🤖 Agentic Architecture & LLM Orchestration
+- **Agentic Workflows**: Multi-step execution and sophisticated tool calling orchestrated via **Mastra AI**.
+- **Context & State**: Advanced RAG and memory management ensuring persistent context retention across multi-turn interactions.
+- **Dynamic Routing**: Context-aware, multi-model routing via **Vercel AI SDK**, dynamically selecting between **Gemini 3.1**, **GPT-5**, and **Claude 4.5** based on task complexity.
+- **Observability**: Deep observability, tracing, and LLM cost optimization powered by **LangSmith**.
 
-### Smart Scanning and Grading
-- **Digital OMR**: Optical Mark Recognition technology using `opencv-js` and `jsqr`.
-- **Real-Time Grading**: Scan answer sheets with your device's camera and get instant results.
-- **Mobile Support**: Optimized interface for smartphones and tablets.
+### 👁️ Computer Vision & Real-Time Grading
+- **Custom Microservices Architecture**: Engineered a dedicated, containerized **FastAPI + NGINX** microservice (`omr-service-direct`) for highly concurrent, real-time image processing.
+- **High-Resolution Computer Vision**: Advanced Optical Mark Recognition (OMR) handling high-resolution payloads without degradation.
+- **Infrastructure Optimization**: Deliberate architectural decoupling to bypass Vercel's serverless payload and timeout boundaries, ensuring sub-second grading performance at scale.
 
 ### Subscriptions and Monetization (Polar.sh)
 - **Plan Management**: Fully integrated with **Polar.sh** to manage subscriptions (Free vs ProfeVision Plus).
