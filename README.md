@@ -120,5 +120,4 @@ The native application (React Native) for Android and iOS is managed in a separa
 
 ## License
 
-Property of **ProfeVision**.
-All rights reserved. Distribution or modification of this code without prior authorization is not permitted.
+This project is licensed under the [GNU Affero General Public License v3.0 (AGPLv3)](https://www.gnu.org/licenses/agpl-3.0.html).
