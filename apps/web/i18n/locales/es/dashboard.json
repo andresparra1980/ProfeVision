@@ -1270,6 +1270,13 @@
         "cancel": "Cancelar",
         "create": "Crear Estudiante",
         "creating": "Creando..."
+      },
+      "errors": {
+        "requiredFields": "Por favor completa todos los campos requeridos",
+        "noSession": "No hay sesión activa",
+        "invalidGroup": "El grupo seleccionado no es válido",
+        "noStudentToLink": "No se encontró el estudiante a vincular",
+        "generic": "Ha ocurrido un error al agregar el estudiante"
       }
     },
     "table": {

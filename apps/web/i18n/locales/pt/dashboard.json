@@ -1270,6 +1270,13 @@
       "email": "E-mail",
       "group": "Grupo"
     },
+    "errors": {
+      "requiredFields": "Por favor preencha todos os campos obrigatórios",
+      "noSession": "Nenhuma sessão ativa",
+      "invalidGroup": "O grupo selecionado não é válido",
+      "noStudentToLink": "Não foi possível encontrar o estudante para vincular",
+      "generic": "Ocorreu um erro ao adicionar o estudante"
+    },
     "table": {
       "headers": {
         "surnames": "Sobrenomes",

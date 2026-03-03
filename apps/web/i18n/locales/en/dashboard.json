@@ -1270,6 +1270,13 @@
         "cancel": "Cancel",
         "create": "Create Student",
         "creating": "Creating..."
+      },
+      "errors": {
+        "requiredFields": "Please complete all required fields",
+        "noSession": "No active session",
+        "invalidGroup": "The selected group is not valid",
+        "noStudentToLink": "Could not find the student to link",
+        "generic": "An error occurred while adding the student"
       }
     },
     "table": {

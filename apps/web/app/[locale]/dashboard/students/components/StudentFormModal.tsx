@@ -91,7 +91,7 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
       const emailValue = includeEmails ? trimmedData.email : '';
 
       if ((separateNames && (!firstNamesValue || !lastNamesValue)) || (!separateNames && !trimmedData.fullName) || !trimmedData.identificacion || !trimmedData.grupo_id) {
-        setError('Por favor completa todos los campos requeridos');
+        setError(t('form.errors.requiredFields'));
         setIsSubmitting(false);
         return;
       }
@@ -99,7 +99,7 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
       // Verificar que el grupo pertenece al profesor
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        setError('No hay sesión activa');
+        setError(t('form.errors.noSession'));
         setIsSubmitting(false);
         return;
       }
@@ -112,7 +112,7 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
         .single();
 
       if (grupoError || !grupoCheck) {
-        setError('El grupo seleccionado no es válido');
+        setError(t('form.errors.invalidGroup'));
         setIsSubmitting(false);
         return;
       }
@@ -148,7 +148,7 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
         }
 
         if (!newStudentId) {
-          throw new Error('No se pudo crear el estudiante');
+          throw new Error(t('form.errors.generic'));
         }
 
         studentId = newStudentId;
@@ -164,7 +164,7 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
 
       // Vincular estudiante al grupo
       if (!studentId) {
-        throw new Error('No se encontró el estudiante a vincular');
+        throw new Error(t('form.errors.noStudentToLink'));
       }
 
       const { error: linkError } = await supabase
@@ -191,7 +191,7 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
       onSuccess();
     } catch (error: unknown) {
       const err = error as { message?: string };
-      setError(err.message || 'Ha ocurrido un error al agregar el estudiante');
+      setError(err.message || t('form.errors.generic'));
     } finally {
       setIsSubmitting(false);
     }
