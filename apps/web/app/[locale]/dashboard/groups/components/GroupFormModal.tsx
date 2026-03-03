@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format, isWithinInterval, startOfYear, endOfYear, addYears, startOfMonth, endOfMonth, setMonth, setYear } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS, ptBR, fr } from "date-fns/locale";
 import Link from "next/link";
 import type { Database } from "@/lib/types/database";
 
@@ -67,6 +67,19 @@ export function GroupFormModal({
   mostrarArchivados
 }: GroupFormModalProps) {
   const t = useTranslations('dashboard.groups.form');
+  const locale = useLocale();
+  const dateFnsLocale = useMemo(() => {
+    switch (locale) {
+      case 'en':
+        return enUS;
+      case 'pt':
+        return ptBR;
+      case 'fr':
+        return fr;
+      default:
+        return es;
+    }
+  }, [locale]);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
@@ -90,10 +103,12 @@ export function GroupFormModal({
   });
 
   const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i);
-  const months = Array.from({ length: 12 }, (_, i) => ({
-    value: i,
-    label: format(setMonth(new Date(), i), 'MMMM', { locale: es })
-  }));
+  const months = useMemo(() => (
+    Array.from({ length: 12 }, (_, i) => ({
+      value: i,
+      label: format(setMonth(new Date(), i), 'MMMM', { locale: dateFnsLocale })
+    }))
+  ), [dateFnsLocale]);
 
   // Función para interpretar el período escolar
   const interpretarPeriodoEscolar = (desde?: Date, hasta?: Date): string => {
@@ -108,9 +123,9 @@ export function GroupFormModal({
     // Verificar si es un año lectivo (cruza dos años)
     if (
       isWithinInterval(desde, { start: startOfMonth(inicioAno), end: endOfMonth(finAno) }) &&
-      isWithinInterval(hasta, { start: startOfMonth(inicioSiguienteAno), end: endOfMonth(finSiguienteAno) })
+        isWithinInterval(hasta, { start: startOfMonth(inicioSiguienteAno), end: endOfMonth(finSiguienteAno) })
     ) {
-      return `Año lectivo ${format(desde, 'yyyy')}-${format(hasta, 'yyyy')}`;
+      return t('periodInterpretation.schoolYear', { start: format(desde, 'yyyy'), end: format(hasta, 'yyyy') });
     }
 
     // Verificar si es un semestre
@@ -119,16 +134,19 @@ export function GroupFormModal({
     
     // Primer semestre: Enero/Febrero a Mayo/Junio
     if ((mesInicio === 0 || mesInicio === 1) && (mesFin === 4 || mesFin === 5)) {
-      return `${format(desde, 'yyyy')} Primer semestre`;
+      return t('periodInterpretation.firstSemester', { year: format(desde, 'yyyy') });
     }
     
     // Segundo semestre: Julio/Agosto a Noviembre/Diciembre
     if ((mesInicio === 6 || mesInicio === 7) && (mesFin === 10 || mesFin === 11)) {
-      return `${format(desde, 'yyyy')} Segundo semestre`;
+      return t('periodInterpretation.secondSemester', { year: format(desde, 'yyyy') });
     }
 
     // Si no coincide con ningún patrón, devolver solo mes y año
-    return `${format(desde, 'MMMM yyyy', { locale: es })} - ${format(hasta, 'MMMM yyyy', { locale: es })}`;
+    return t('periodInterpretation.range', {
+      start: format(desde, 'MMMM yyyy', { locale: dateFnsLocale }),
+      end: format(hasta, 'MMMM yyyy', { locale: dateFnsLocale })
+    });
   };
 
   const updatePeriodoEscolar = (inicio?: Date | null, fin?: Date | null) => {

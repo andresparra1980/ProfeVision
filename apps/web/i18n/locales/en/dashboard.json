@@ -1023,6 +1023,12 @@
       "month": "Month",
       "year": "Year",
       "interpretedPeriod": "Interpreted period",
+      "periodInterpretation": {
+        "schoolYear": "School year {start}-{end}",
+        "firstSemester": "{year} First semester",
+        "secondSemester": "{year} Second semester",
+        "range": "{start} - {end}"
+      },
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Additional information about the group",
       "cancel": "Cancel",
@@ -1264,6 +1270,13 @@
         "cancel": "Cancel",
         "create": "Create Student",
         "creating": "Creating..."
+      },
+      "errors": {
+        "requiredFields": "Please complete all required fields",
+        "noSession": "No active session",
+        "invalidGroup": "The selected group is not valid",
+        "noStudentToLink": "Could not find the student to link",
+        "generic": "An error occurred while adding the student"
       }
     },
     "table": {
@@ -1272,6 +1285,7 @@
       "search": "Search student...",
       "refreshList": "Refresh List",
       "studentsFound": "students found",
+      "noStudents": "No students found",
       "headers": {
         "surnames": "Surnames",
         "names": "Names",

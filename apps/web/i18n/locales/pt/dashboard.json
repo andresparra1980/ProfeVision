@@ -1018,6 +1018,12 @@
       "month": "Mês",
       "year": "Ano",
       "interpretedPeriod": "Período interpretado",
+      "periodInterpretation": {
+        "schoolYear": "Ano letivo {start}-{end}",
+        "firstSemester": "{year} Primeiro semestre",
+        "secondSemester": "{year} Segundo semestre",
+        "range": "{start} - {end}"
+      },
       "descriptionLabel": "Descrição",
       "descriptionPlaceholder": "Informações adicionais sobre o grupo",
       "cancel": "Cancelar",
@@ -1262,7 +1268,14 @@
       "surnames": "Sobrenomes",
       "identification": "Identificação",
       "email": "E-mail",
-      "group": "Grupo"
+      "group": "Grupo",
+      "errors": {
+        "requiredFields": "Por favor preencha todos os campos obrigatórios",
+        "noSession": "Nenhuma sessão ativa",
+        "invalidGroup": "O grupo selecionado não é válido",
+        "noStudentToLink": "Não foi possível encontrar o estudante para vincular",
+        "generic": "Ocorreu um erro ao adicionar o estudante"
+      }
     },
     "table": {
       "headers": {
@@ -1280,7 +1293,8 @@
       "description": "Estudantes atribuídos aos grupos que você gerencia",
       "search": "Buscar estudante...",
       "refreshList": "Atualizar Lista",
-      "studentsFound": "estudantes encontrados"
+      "studentsFound": "estudantes encontrados",
+      "noStudents": "Nenhum estudante encontrado"
     },
     "pagination": {
       "showing": "Mostrando",

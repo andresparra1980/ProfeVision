@@ -1023,6 +1023,12 @@
       "month": "Mes",
       "year": "Año",
       "interpretedPeriod": "Periodo interpretado",
+      "periodInterpretation": {
+        "schoolYear": "Año lectivo {start}-{end}",
+        "firstSemester": "{year} Primer semestre",
+        "secondSemester": "{year} Segundo semestre",
+        "range": "{start} - {end}"
+      },
       "descriptionLabel": "Descripción",
       "descriptionPlaceholder": "Información adicional sobre el grupo",
       "cancel": "Cancelar",
@@ -1264,6 +1270,13 @@
         "cancel": "Cancelar",
         "create": "Crear Estudiante",
         "creating": "Creando..."
+      },
+      "errors": {
+        "requiredFields": "Por favor completa todos los campos requeridos",
+        "noSession": "No hay sesión activa",
+        "invalidGroup": "El grupo seleccionado no es válido",
+        "noStudentToLink": "No se encontró el estudiante a vincular",
+        "generic": "Ha ocurrido un error al agregar el estudiante"
       }
     },
     "table": {
@@ -1272,6 +1285,7 @@
       "search": "Buscar estudiante...",
       "refreshList": "Actualizar Lista",
       "studentsFound": "estudiantes encontrados",
+      "noStudents": "No se encontraron estudiantes",
       "headers": {
         "surnames": "Apellidos",
         "names": "Nombres",
