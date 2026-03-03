@@ -48,6 +48,7 @@ const initialFormData: FormData = {
 export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: StudentFormModalProps) {
   const t = useTranslations('dashboard.students');
   const tCommon = useTranslations('common');
+  const tGroupStudents = useTranslations('dashboard.groups.students');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -153,8 +154,8 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
 
         studentId = newStudentId;
 
-        toast.success('Estudiante agregado', {
-          description: 'El estudiante ha sido agregado al grupo exitosamente',
+        toast.success(tGroupStudents('success.studentAdded'), {
+          description: tGroupStudents('success.studentAddedDescription'),
         });
         setFormData(initialFormData);
         onOpenChange(false);
@@ -182,8 +183,8 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
       }
 
       // Éxito
-      toast.success("Estudiante agregado", {
-        description: "El estudiante ha sido agregado al grupo exitosamente",
+      toast.success(tGroupStudents('success.studentAdded'), {
+        description: tGroupStudents('success.studentAddedDescription'),
       });
 
       setFormData(initialFormData);

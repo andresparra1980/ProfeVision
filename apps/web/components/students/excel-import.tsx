@@ -107,10 +107,14 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
     return typeof value === "string" ? value.trim() : "";
   };
 
+  const normalizeIdentification = (value: string) => {
+    return value.replace(/\s+/g, "");
+  };
+
   const normalizeStudent = (student: Student): Student => ({
     nombres: student.nombres === null ? null : cleanValue(student.nombres),
     apellidos: cleanValue(student.apellidos),
-    identificacion: cleanValue(student.identificacion),
+    identificacion: normalizeIdentification(cleanValue(student.identificacion)),
     email: cleanValue(student.email).toLowerCase(),
     id: student.id,
   });

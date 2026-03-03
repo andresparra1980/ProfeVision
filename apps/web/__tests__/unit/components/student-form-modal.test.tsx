@@ -10,6 +10,7 @@ const translationMap: Record<string, string> = {
   'dashboard.students.form.placeholders.identification': 'Número de identificación',
   'dashboard.students.form.placeholders.email': 'Correo del estudiante',
   'dashboard.students.form.actions.create': 'Crear Estudiante',
+  'dashboard.students.form.errors.noSession': 'No hay sesión activa',
   'common.components.excelImport.columns.fullName': 'Apellidos y Nombres',
   'common.components.excelImport.options.title': 'Opciones de importación',
   'common.components.excelImport.options.separateNames': 'Separar nombres',
@@ -234,5 +235,30 @@ describe('StudentFormModal', () => {
         ignoreDuplicates: true,
       }
     )
+  })
+
+  it('shows localized error when there is no active session', async () => {
+    mockGetSession.mockResolvedValueOnce({ data: { session: null } })
+
+    const props = createDefaultProps()
+    render(<StudentFormModal {...props} />)
+
+    fireEvent.change(screen.getByPlaceholderText('Apellidos y Nombres'), {
+      target: { value: 'Estudiante Demo' },
+    })
+
+    fireEvent.change(screen.getByPlaceholderText('Número de identificación'), {
+      target: { value: 'ABC123' },
+    })
+
+    fireEvent.click(screen.getByTestId('select-item-group-1'))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Crear Estudiante' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('No hay sesión activa')).toBeInTheDocument()
+    })
+
+    expect(props.onSuccess).not.toHaveBeenCalled()
   })
 })
