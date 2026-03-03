@@ -191,8 +191,8 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
       onOpenChange(false);
       onSuccess();
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      setError(err.message || t('form.errors.generic'));
+      console.error('Error adding student to group', error);
+      setError(t('form.errors.generic'));
     } finally {
       setIsSubmitting(false);
     }

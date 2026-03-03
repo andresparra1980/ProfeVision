@@ -235,6 +235,11 @@ describe('StudentFormModal', () => {
         ignoreDuplicates: true,
       }
     )
+
+    await waitFor(() => {
+      expect(props.onSuccess).toHaveBeenCalled()
+      expect(props.onOpenChange).toHaveBeenCalledWith(false)
+    })
   })
 
   it('shows localized error when there is no active session', async () => {
