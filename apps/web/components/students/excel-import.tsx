@@ -103,6 +103,18 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
       );
   };
   
+  const cleanValue = (value: string | null | undefined) => {
+    return typeof value === "string" ? value.trim() : "";
+  };
+
+  const normalizeStudent = (student: Student): Student => ({
+    nombres: student.nombres === null ? null : cleanValue(student.nombres),
+    apellidos: cleanValue(student.apellidos),
+    identificacion: cleanValue(student.identificacion),
+    email: cleanValue(student.email).toLowerCase(),
+    id: student.id,
+  });
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -168,7 +180,9 @@ export function ExcelImport({ onImportComplete, groupId }: ExcelImportProps) {
         }
       });
 
-      setPreview(mappedData);
+      const sanitizedData = mappedData.map(normalizeStudent);
+
+      setPreview(sanitizedData);
       setFile(file);
     } catch (error) {
       logger.error('Error reading file:', error);

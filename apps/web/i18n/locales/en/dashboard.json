@@ -1272,6 +1272,7 @@
       "search": "Search student...",
       "refreshList": "Refresh List",
       "studentsFound": "students found",
+      "noStudents": "No students found",
       "headers": {
         "surnames": "Surnames",
         "names": "Names",

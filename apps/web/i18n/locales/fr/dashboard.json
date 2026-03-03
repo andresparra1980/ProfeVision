@@ -1272,6 +1272,7 @@
       "search": "Rechercher un étudiant...",
       "refreshList": "Actualiser la Liste",
       "studentsFound": "étudiants trouvés",
+      "noStudents": "Aucun étudiant trouvé",
       "headers": {
         "surnames": "Noms de famille",
         "names": "Prénoms",

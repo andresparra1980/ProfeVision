@@ -1280,7 +1280,8 @@
       "description": "Estudantes atribuídos aos grupos que você gerencia",
       "search": "Buscar estudante...",
       "refreshList": "Atualizar Lista",
-      "studentsFound": "estudantes encontrados"
+      "studentsFound": "estudantes encontrados",
+      "noStudents": "Nenhum estudante encontrado"
     },
     "pagination": {
       "showing": "Mostrando",

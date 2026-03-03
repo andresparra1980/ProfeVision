@@ -1272,6 +1272,7 @@
       "search": "Buscar estudiante...",
       "refreshList": "Actualizar Lista",
       "studentsFound": "estudiantes encontrados",
+      "noStudents": "No se encontraron estudiantes",
       "headers": {
         "surnames": "Apellidos",
         "names": "Nombres",
