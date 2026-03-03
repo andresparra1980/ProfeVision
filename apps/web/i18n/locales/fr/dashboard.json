@@ -1023,6 +1023,12 @@
       "month": "Mois",
       "year": "Année",
       "interpretedPeriod": "Période interprétée",
+      "periodInterpretation": {
+        "schoolYear": "Année scolaire {start}-{end}",
+        "firstSemester": "{year} Premier semestre",
+        "secondSemester": "{year} Deuxième semestre",
+        "range": "{start} - {end}"
+      },
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Informations complémentaires sur le groupe",
       "cancel": "Annuler",
