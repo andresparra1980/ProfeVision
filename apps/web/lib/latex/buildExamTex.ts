@@ -79,11 +79,6 @@ function escapeLatexOutsideMath(input: string): string {
     .replace(/&nbsp;/g, ' ')
     .replace(/&quot;/g, '"');
 
-  // Normalize repeated backslash escaping that comes from DB/JSON (e.g. `$\\Delta$`, `$\\\\beta$`, `$\\\\\\text{}`)
-  // Collapse any run of 2+ backslashes followed by a letter down to a single backslash so LaTeX commands survive
-  // while keeping `\\[` or `\\(` intact because `[`/`(` are not letters
-  s = s.replace(/\\{2,}(?=[A-Za-z])/g, '\\');
-
   // 1) Protect $$...$$ (display math)
   s = s.replace(/\$\$([\s\S]*?)\$\$/g, (_m, inner) => {
     const idx = segments.push('$$' + inner + '$$') - 1;
@@ -114,7 +109,10 @@ function escapeLatexOutsideMath(input: string): string {
 
   // Restore math segments
   s = s.replace(/MATHPH(\d+)X/g, (_m, i) => segments[Number(i)] || '');
-  return s;
+  // Normalize repeated backslash escaping that comes from DB/JSON (e.g. `$\\Delta$`, `$\\\\beta$`, `$\\\\\\text{}`)
+  // Collapse any run of 2+ backslashes followed by a letter down to a single backslash so LaTeX commands survive
+  // while keeping `\\[` or `\\(` intact because `[`/`(` are not letters
+  return s.replace(/\\{2,}(?=[A-Za-z])/g, '\\');
 }
 
 function latexPreamble(opts: LatexOptions): string {
