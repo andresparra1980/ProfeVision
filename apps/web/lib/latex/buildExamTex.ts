@@ -61,11 +61,14 @@ function escapeLatexOutsideMath(input: string): string {
     12: '\\f',
     13: '\\r'
   };
-  Object.entries(controlCharMap).forEach(([code, replacement]) => {
-    const char = String.fromCharCode(Number(code));
-    if (s.includes(char)) {
-      s = s.split(char).join(replacement);
-    }
+  const controlCodes = Object.keys(controlCharMap).map((code) => Number(code));
+  const controlSeqRegex = new RegExp(
+    `[${controlCodes.map((code) => `\\u${code.toString(16).padStart(4, '0')}`).join('')}](?=[A-Za-z])`,
+    'g'
+  );
+  s = s.replace(controlSeqRegex, (match) => {
+    const replacement = controlCharMap[match.charCodeAt(0)];
+    return replacement ?? match;
   });
 
   // Strip HTML tags (e.g. <p>, </p>) that may leak from rich text
@@ -79,19 +82,24 @@ function escapeLatexOutsideMath(input: string): string {
     .replace(/&nbsp;/g, ' ')
     .replace(/&quot;/g, '"');
 
+  const normalizeMathSegment = (segment: string) => segment.replace(/\\{2,}(?=[A-Za-z])/g, '\\');
+
   // 1) Protect $$...$$ (display math)
   s = s.replace(/\$\$([\s\S]*?)\$\$/g, (_m, inner) => {
-    const idx = segments.push('$$' + inner + '$$') - 1;
+    const normalized = normalizeMathSegment(inner);
+    const idx = segments.push('$$' + normalized + '$$') - 1;
     return makePh(idx);
   });
   // 2) Protect \[ ... \]
   s = s.replace(/\\\[([\s\S]*?)\\\]/g, (_m, inner) => {
-    const idx = segments.push('\\[' + inner + '\\]') - 1;
+    const normalized = normalizeMathSegment(inner);
+    const idx = segments.push('\\[' + normalized + '\\]') - 1;
     return makePh(idx);
   });
   // 3) Protect $...$ (inline math)
   s = s.replace(/\$([\s\S]*?)\$/g, (_m, inner) => {
-    const idx = segments.push('$' + inner + '$') - 1;
+    const normalized = normalizeMathSegment(inner);
+    const idx = segments.push('$' + normalized + '$') - 1;
     return makePh(idx);
   });
 
@@ -109,10 +117,7 @@ function escapeLatexOutsideMath(input: string): string {
 
   // Restore math segments
   s = s.replace(/MATHPH(\d+)X/g, (_m, i) => segments[Number(i)] || '');
-  // Normalize repeated backslash escaping that comes from DB/JSON (e.g. `$\\Delta$`, `$\\\\beta$`, `$\\\\\\text{}`)
-  // Collapse any run of 2+ backslashes followed by a letter down to a single backslash so LaTeX commands survive
-  // while keeping `\\[` or `\\(` intact because `[`/`(` are not letters
-  return s.replace(/\\{2,}(?=[A-Za-z])/g, '\\');
+  return s;
 }
 
 function latexPreamble(opts: LatexOptions): string {
