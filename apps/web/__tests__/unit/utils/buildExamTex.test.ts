@@ -295,7 +295,7 @@ describe('buildExamTex', () => {
         preguntas: [
           {
             id: 'q1',
-            texto: 'El receptor $\u0008eta$ abre un canal de $\\text{Na}^+$',
+            texto: 'El receptor $\u0008eta$ abre un canal de $\\text{Na}^+$ y calcula $\u000Crac{1}{2}$',
             puntaje: 10,
             opciones_respuesta: [],
           },
@@ -304,6 +304,7 @@ describe('buildExamTex', () => {
       const tex = buildExamTex(exam)
       expect(tex).toContain('$\\beta$')
       expect(tex).toContain('$\\text{Na}^+$')
+      expect(tex).toContain('$\\frac{1}{2}$')
     })
 
     it('strips HTML tags', () => {
