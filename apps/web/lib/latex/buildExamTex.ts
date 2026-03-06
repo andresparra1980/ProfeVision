@@ -55,11 +55,18 @@ function escapeLatexOutsideMath(input: string): string {
 
   // Undo JSON escape sequences (\b, \t, \f, \r) that turn into literal control chars
   // when questions pass through JSON payloads. This restores LaTeX commands like \beta, \text, etc.
-  s = s
-    .replace(/\u0008/g, '\\b')
-    .replace(/\u0009/g, '\\t')
-    .replace(/\u000c/g, '\\f')
-    .replace(/\u000d/g, '\\r');
+  const controlCharMap: Record<number, string> = {
+    8: '\\b',
+    9: '\\t',
+    12: '\\f',
+    13: '\\r'
+  };
+  Object.entries(controlCharMap).forEach(([code, replacement]) => {
+    const char = String.fromCharCode(Number(code));
+    if (s.includes(char)) {
+      s = s.split(char).join(replacement);
+    }
+  });
 
   // Strip HTML tags (e.g. <p>, </p>) that may leak from rich text
   s = s.replace(/<[^>]+>/g, '');
