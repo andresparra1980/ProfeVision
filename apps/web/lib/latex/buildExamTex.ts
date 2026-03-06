@@ -53,6 +53,27 @@ function escapeLatexOutsideMath(input: string): string {
     // unify Windows newlines
     .replace(/\r\n/g, '\n');
 
+  // Undo JSON escape sequences (\b, \t, \f, \r) that turn into literal control chars
+  // when questions pass through JSON payloads. This restores LaTeX commands like \beta, \text, etc.
+  const controlCharMap: Record<number, string> = {
+    8: '\\b',
+    12: '\\f'
+  };
+  const controlChars = Object.keys(controlCharMap)
+    .map((code) => String.fromCharCode(Number(code)))
+    .join('');
+  if (controlChars.length > 0) {
+    const escapedSet = controlChars
+      .split('')
+      .map((char) => (char === '\\' || char === ']' || char === '[' ? `\\${char}` : char))
+      .join('');
+    const controlSeqRegex = new RegExp(`[${escapedSet}](?=[A-Za-z])`, 'g');
+    s = s.replace(controlSeqRegex, (match) => {
+      const replacement = controlCharMap[match.charCodeAt(0)];
+      return replacement ?? match;
+    });
+  }
+
   // Strip HTML tags (e.g. <p>, </p>) that may leak from rich text
   s = s.replace(/<[^>]+>/g, '');
 
@@ -64,24 +85,24 @@ function escapeLatexOutsideMath(input: string): string {
     .replace(/&nbsp;/g, ' ')
     .replace(/&quot;/g, '"');
 
-  // Normalize common double-backslash escaping that comes from DB or JSON encoding
-  // Example: `$\\Delta p$` -> `$\Delta p$` so LaTeX renders Greek Delta instead of the word "Delta"
-  // Only normalize when the double backslash is followed by a letter, to keep constructs like `\\[` intact
-  s = s.replace(/\\\\(?=[A-Za-z])/g, '\\');
+  const normalizeMathSegment = (segment: string) => segment.replace(/\\{2,}(?=[A-Za-z])/g, '\\');
 
   // 1) Protect $$...$$ (display math)
   s = s.replace(/\$\$([\s\S]*?)\$\$/g, (_m, inner) => {
-    const idx = segments.push('$$' + inner + '$$') - 1;
+    const normalized = normalizeMathSegment(inner);
+    const idx = segments.push('$$' + normalized + '$$') - 1;
     return makePh(idx);
   });
   // 2) Protect \[ ... \]
   s = s.replace(/\\\[([\s\S]*?)\\\]/g, (_m, inner) => {
-    const idx = segments.push('\\[' + inner + '\\]') - 1;
+    const normalized = normalizeMathSegment(inner);
+    const idx = segments.push('\\[' + normalized + '\\]') - 1;
     return makePh(idx);
   });
   // 3) Protect $...$ (inline math)
   s = s.replace(/\$([\s\S]*?)\$/g, (_m, inner) => {
-    const idx = segments.push('$' + inner + '$') - 1;
+    const normalized = normalizeMathSegment(inner);
+    const idx = segments.push('$' + normalized + '$') - 1;
     return makePh(idx);
   });
 
