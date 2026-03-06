@@ -63,7 +63,10 @@ function escapeLatexOutsideMath(input: string): string {
     .map((code) => String.fromCharCode(Number(code)))
     .join('');
   if (controlChars.length > 0) {
-    const escapedSet = controlChars.replace(/[\\\]\[]/g, '\\$&');
+    const escapedSet = controlChars
+      .split('')
+      .map((char) => (char === '\\' || char === ']' || char === '[' ? `\\${char}` : char))
+      .join('');
     const controlSeqRegex = new RegExp(`[${escapedSet}](?=[A-Za-z])`, 'g');
     s = s.replace(controlSeqRegex, (match) => {
       const replacement = controlCharMap[match.charCodeAt(0)];
