@@ -273,6 +273,39 @@ describe('buildExamTex', () => {
       expect(tex).toContain('$\\alpha$')
     })
 
+
+    it('normalizes long escaped backslashes in math commands', () => {
+      const exam = createMockExam({
+        preguntas: [
+          {
+            id: 'q1',
+            texto: 'Un receptor $\\\\\\beta$ activa un canal de $\\\\\\text{Na}^+$',
+            puntaje: 10,
+            opciones_respuesta: [],
+          },
+        ],
+      })
+      const tex = buildExamTex(exam)
+      expect(tex).toContain('$\\beta$')
+      expect(tex).toContain('$\\text{Na}^+$')
+    })
+
+    it('restores control characters produced by JSON escape sequences (\\b, \\t, etc.)', () => {
+      const exam = createMockExam({
+        preguntas: [
+          {
+            id: 'q1',
+            texto: 'El receptor $\u0008eta$ abre un canal de $\u0009ext{Na}^+$',
+            puntaje: 10,
+            opciones_respuesta: [],
+          },
+        ],
+      })
+      const tex = buildExamTex(exam)
+      expect(tex).toContain('$\\beta$')
+      expect(tex).toContain('$\\text{Na}^+$')
+    })
+
     it('strips HTML tags', () => {
       const exam = createMockExam({
         preguntas: [

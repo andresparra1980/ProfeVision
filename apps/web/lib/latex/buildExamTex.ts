@@ -53,6 +53,14 @@ function escapeLatexOutsideMath(input: string): string {
     // unify Windows newlines
     .replace(/\r\n/g, '\n');
 
+  // Undo JSON escape sequences (\b, \t, \f, \r) that turn into literal control chars
+  // when questions pass through JSON payloads. This restores LaTeX commands like \beta, \text, etc.
+  s = s
+    .replace(/\u0008/g, '\\b')
+    .replace(/\u0009/g, '\\t')
+    .replace(/\u000c/g, '\\f')
+    .replace(/\u000d/g, '\\r');
+
   // Strip HTML tags (e.g. <p>, </p>) that may leak from rich text
   s = s.replace(/<[^>]+>/g, '');
 
@@ -64,10 +72,10 @@ function escapeLatexOutsideMath(input: string): string {
     .replace(/&nbsp;/g, ' ')
     .replace(/&quot;/g, '"');
 
-  // Normalize common double-backslash escaping that comes from DB or JSON encoding
-  // Example: `$\\Delta p$` -> `$\Delta p$` so LaTeX renders Greek Delta instead of the word "Delta"
-  // Only normalize when the double backslash is followed by a letter, to keep constructs like `\\[` intact
-  s = s.replace(/\\\\(?=[A-Za-z])/g, '\\');
+  // Normalize repeated backslash escaping that comes from DB/JSON (e.g. `$\\Delta$`, `$\\\\beta$`, `$\\\\\\text{}`)
+  // Collapse any run of 2+ backslashes followed by a letter down to a single backslash so LaTeX commands survive
+  // while keeping `\\[` or `\\(` intact because `[`/`(` are not letters
+  s = s.replace(/\\{2,}(?=[A-Za-z])/g, '\\');
 
   // 1) Protect $$...$$ (display math)
   s = s.replace(/\$\$([\s\S]*?)\$\$/g, (_m, inner) => {
