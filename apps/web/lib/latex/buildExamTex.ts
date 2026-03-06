@@ -57,19 +57,19 @@ function escapeLatexOutsideMath(input: string): string {
   // when questions pass through JSON payloads. This restores LaTeX commands like \beta, \text, etc.
   const controlCharMap: Record<number, string> = {
     8: '\\b',
-    9: '\\t',
-    12: '\\f',
-    13: '\\r'
+    12: '\\f'
   };
-  const controlCodes = Object.keys(controlCharMap).map((code) => Number(code));
-  const controlSeqRegex = new RegExp(
-    `[${controlCodes.map((code) => `\\u${code.toString(16).padStart(4, '0')}`).join('')}](?=[A-Za-z])`,
-    'g'
-  );
-  s = s.replace(controlSeqRegex, (match) => {
-    const replacement = controlCharMap[match.charCodeAt(0)];
-    return replacement ?? match;
-  });
+  const controlChars = Object.keys(controlCharMap)
+    .map((code) => String.fromCharCode(Number(code)))
+    .join('');
+  if (controlChars.length > 0) {
+    const escapedSet = controlChars.replace(/[\\\]\[]/g, '\\$&');
+    const controlSeqRegex = new RegExp(`[${escapedSet}](?=[A-Za-z])`, 'g');
+    s = s.replace(controlSeqRegex, (match) => {
+      const replacement = controlCharMap[match.charCodeAt(0)];
+      return replacement ?? match;
+    });
+  }
 
   // Strip HTML tags (e.g. <p>, </p>) that may leak from rich text
   s = s.replace(/<[^>]+>/g, '');

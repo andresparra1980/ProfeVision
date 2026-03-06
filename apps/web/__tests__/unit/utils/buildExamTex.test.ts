@@ -290,12 +290,12 @@ describe('buildExamTex', () => {
       expect(tex).toContain('$\\text{Na}^+$')
     })
 
-    it('restores control characters produced by JSON escape sequences (\\b, \\t, etc.)', () => {
+    it('restores control characters produced by JSON escape sequences (\\b, \\f, etc.)', () => {
       const exam = createMockExam({
         preguntas: [
           {
             id: 'q1',
-            texto: 'El receptor $\u0008eta$ abre un canal de $\u0009ext{Na}^+$',
+            texto: 'El receptor $\u0008eta$ abre un canal de $\\text{Na}^+$',
             puntaje: 10,
             opciones_respuesta: [],
           },
