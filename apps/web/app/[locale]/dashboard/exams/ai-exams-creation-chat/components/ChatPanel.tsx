@@ -24,12 +24,21 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Paperclip, ListChecks, FileText, Sparkles } from "lucide-react";
+import { Paperclip, ListChecks, FileText } from "lucide-react";
 import ResultsView from "./ResultsView";
 import {
   DOCUMENT_UPLOAD_MAX_SIZE_BYTES,
@@ -71,6 +80,9 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   // Tier limits hook
   const { usage, loading: tierLoading, canUseAI } = useTierLimits();
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [resultsHasUnsavedChanges, setResultsHasUnsavedChanges] = useState(false);
+  const [resultsIsEditingQuestion, setResultsIsEditingQuestion] = useState(false);
+  const [showResultsCloseAlert, setShowResultsCloseAlert] = useState(false);
   const toastShownRef = useRef(false);
 
   // Custom hooks for managing state
@@ -94,6 +106,38 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   const hasResults = resultsCount > 0;
   const hasDocuments = documentContext.documentIds.length > 0 || !!documentContext.pendingUploadFileName;
   const summaryReadyCount = summaryDialog.availableSummaryDocIds.length;
+  const documentCount = documentContext.documentIds.length;
+  const questionsLabel = resultsCount === 1
+    ? t('kpis.question', { fallback: 'Question' })
+    : t('kpis.questions', { fallback: 'Questions' });
+  const documentsLabel = documentCount === 1
+    ? t('kpis.document', { fallback: 'Document' })
+    : t('kpis.documents', { fallback: 'Documents' });
+
+  function handleResultsOpenChange(open: boolean) {
+    if (!open && resultsHasUnsavedChanges) {
+      setShowResultsCloseAlert(true);
+      return;
+    }
+
+    setResultsOpen(open);
+
+    if (!open) {
+      setResultsHasUnsavedChanges(false);
+      setResultsIsEditingQuestion(false);
+    }
+  }
+
+  function confirmResultsClose() {
+    setShowResultsCloseAlert(false);
+    setResultsHasUnsavedChanges(false);
+    setResultsIsEditingQuestion(false);
+    setResultsOpen(false);
+  }
+
+  function cancelResultsClose() {
+    setShowResultsCloseAlert(false);
+  }
 
   const convHeight = useMemo(() => {
     const mh = typeof minHeight === 'number' ? minHeight : 0;
@@ -240,33 +284,20 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   }, [isSending, hasResults]);
 
   return (
-    <div ref={rootRef} className="flex flex-col gap-4 overflow-x-clip overflow-y-hidden sm:gap-6" style={{ minHeight }}>
+    <div ref={rootRef} className="flex flex-1 flex-col gap-4 overflow-x-clip overflow-y-hidden sm:gap-6" style={{ minHeight }}>
       <div className="flex w-full justify-center">
         <div className="w-full max-w-[1200px]">
           <div className="rounded-[30px] border border-black/10 bg-gradient-to-b from-white via-white to-[rgb(var(--chat-accent-soft))] p-3 shadow-[0_28px_90px_-52px_rgba(15,23,42,0.35)] dark:border-white/10 dark:from-zinc-950 dark:via-zinc-950 dark:to-[rgb(var(--chat-accent-soft))] sm:p-5">
-            <div className="mb-4 flex flex-col gap-3 border-b border-black/5 px-1 pb-4 dark:border-white/10 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--chat-accent-border))] bg-[rgb(var(--chat-accent-soft))] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-[rgb(var(--chat-accent-ink))] dark:border-[rgb(var(--chat-accent-border))] dark:bg-[rgb(var(--chat-accent-soft))]">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  {t('header.title')}
-                </div>
-                <h3 className="mt-3 text-lg font-semibold tracking-tight text-foreground sm:text-2xl">
-                  {t('empty.title')}
-                </h3>
-                <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-[15px]">
-                  {t('empty.subtitle')}
-                </p>
-              </div>
-
+            <div className="mb-4 flex justify-end border-b border-black/5 px-1 pb-4 dark:border-white/10">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs text-muted-foreground shadow-sm dark:border-white/10 dark:bg-zinc-900/80">
                   {messages.length} msgs
                 </div>
                 <div className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs text-muted-foreground shadow-sm dark:border-white/10 dark:bg-zinc-900/80">
-                  {resultsCount} {t('results.title', { fallback: 'resultados' }).toLowerCase()}
+                  {resultsCount} {questionsLabel}
                 </div>
                 <div className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs text-muted-foreground shadow-sm dark:border-white/10 dark:bg-zinc-900/80">
-                  {documentContext.documentIds.length} {t('context.document', { fallback: 'documentos' }).toLowerCase()}
+                  {documentCount} {documentsLabel}
                 </div>
               </div>
             </div>
@@ -314,7 +345,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
       <div className="flex w-full justify-center">
         <div
           ref={promptWrapRef}
-          className="sticky bottom-0 z-30 w-full max-w-[980px] px-0 sm:px-2"
+          className="sticky bottom-0 z-30 mt-auto w-full max-w-[980px] px-0 pb-1 sm:px-2"
           style={{ bottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
           <div className="rounded-[30px] border border-black/10 bg-white/75 p-3 shadow-[0_28px_100px_-50px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/75 sm:p-4">
@@ -337,12 +368,12 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className={`rounded-full border-black/10 bg-white/80 shadow-sm hover:bg-white dark:border-white/10 dark:bg-zinc-900/80 dark:hover:bg-zinc-900 ${hasResults ? 'border-[rgb(var(--chat-accent-border))] text-[rgb(var(--chat-accent-ink))]' : ''}`}
+                  className={`gap-2 rounded-full border-black/10 bg-white/80 shadow-sm hover:bg-white dark:border-white/10 dark:bg-zinc-900/80 dark:hover:text-white ${hasResults ? 'border-[rgb(var(--chat-accent-border))] text-[rgb(var(--chat-accent-ink))]' : ''}`}
                   onClick={() => setResultsOpen(true)}
                   aria-label={t('results.title')}
                 >
                   <ListChecks className="h-4 w-4" />
-                  <span>{t('results.title')}</span>
+                  <span>{questionsLabel}</span>
                   <span className="rounded-full bg-[rgb(var(--chat-accent-soft))] px-2 py-0.5 text-[11px] text-[rgb(var(--chat-accent-ink))] dark:bg-[rgb(var(--chat-accent-soft))]">
                     {resultsCount}
                   </span>
@@ -354,7 +385,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                   size="sm"
                   onClick={() => summaryDialog.openSummaryDialog()}
                   disabled={summaryReadyCount === 0}
-                  className="rounded-full text-muted-foreground hover:bg-white hover:text-foreground dark:hover:bg-zinc-900"
+                  className="gap-2 rounded-full text-muted-foreground hover:bg-white hover:text-foreground dark:hover:bg-zinc-900"
                 >
                   <FileText className="h-4 w-4" />
                   <span>{t('context.viewSummary', { fallback: 'Ver resumen' })}</span>
@@ -387,33 +418,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
             className="font-noto relative border-transparent bg-transparent shadow-none"
           >
             <PromptInputBody>
-              <div className="relative">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={documentContext.triggerFilePicker}
-                        className="absolute left-3 top-3 rounded-full border border-black/10 bg-white/90 p-2 text-muted-foreground shadow-sm transition-colors hover:text-foreground dark:border-white/10 dark:bg-zinc-900/90"
-                        disabled={isSending || documentContext.isUploading || documentContext.documentIds.length >= 5}
-                      >
-                        <Paperclip className="h-4 w-4" />
-                        <span className="sr-only">
-                          {documentContext.documentIds.length >= 5
-                            ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
-                            : t('context.attach', { fallback: 'Adjuntar documento' })}
-                        </span>
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {documentContext.documentIds.length >= 5
-                          ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
-                          : t('context.attach', { fallback: 'Adjuntar documento' })}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <div>
                 <PromptInputTextarea
                   placeholder={
                     isSending
@@ -425,12 +430,40 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                   ref={inputRef}
                   autoFocus
                   disabled={isSending}
-                  className="pl-16 pr-4"
+                  className="px-4"
                 />
               </div>
             </PromptInputBody>
             <PromptInputToolbar className="border-t-0 px-1 pb-0 pt-2 sm:px-1">
               <PromptInputTools>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={documentContext.triggerFilePicker}
+                        className="rounded-full border border-black/10 bg-white/90 text-muted-foreground shadow-sm transition-colors hover:bg-white hover:text-foreground dark:border-white/10 dark:bg-zinc-900/90 dark:hover:bg-zinc-900"
+                        disabled={isSending || documentContext.isUploading || documentContext.documentIds.length >= 5}
+                      >
+                        <Paperclip className="h-4 w-4" />
+                        <span className="sr-only">
+                          {documentContext.documentIds.length >= 5
+                            ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
+                            : t('context.attach', { fallback: 'Adjuntar documento' })}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {documentContext.documentIds.length >= 5
+                          ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
+                          : t('context.attach', { fallback: 'Adjuntar documento' })}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 {/* Hidden file input */}
                 <input
                   ref={documentContext.fileInputRef}
@@ -453,21 +486,52 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
       </div>
 
       {/* Results review panel */}
-      <Dialog open={resultsOpen} onOpenChange={setResultsOpen}>
+      <Dialog open={resultsOpen} onOpenChange={handleResultsOpenChange}>
         <DialogContent
           className="w-full max-w-5xl overflow-hidden border border-black/10 bg-[#fcfcfb] p-0 shadow-[0_36px_120px_-56px_rgba(15,23,42,0.5)] dark:border-white/10 dark:bg-zinc-950 max-sm:!left-0 max-sm:bottom-0 max-sm:!top-auto max-sm:max-h-[88dvh] max-sm:w-full max-sm:max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-t-[30px] max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0"
         >
-          <DialogHeader className="border-b border-black/5 px-5 py-5 text-left dark:border-white/10 sm:px-8 sm:py-6">
-            <DialogTitle className="text-2xl font-semibold tracking-tight">{t('results.title')}</DialogTitle>
-            <DialogDescription className="mt-1 max-w-2xl text-sm leading-6">
-              {t('results.description')}
-            </DialogDescription>
+          <DialogHeader className="sr-only">
+            <DialogTitle>{t('results.title')}</DialogTitle>
+            <DialogDescription>{t('results.description')}</DialogDescription>
           </DialogHeader>
+          <div className="border-b border-black/5 px-3 pb-3 pt-3 dark:border-white/10 sm:px-6 sm:pb-4 sm:pt-5">
+            <Button
+              onClick={onOpenSaveDraft}
+              variant="default"
+              disabled={resultsIsEditingQuestion}
+              className={`rounded-full bg-[rgb(14,116,144)] text-white hover:bg-[rgb(15,118,110)] ${resultsIsEditingQuestion ? 'cursor-not-allowed opacity-60 blur-[0.4px]' : ''}`}
+            >
+              {t('header.saveDraft')}
+            </Button>
+          </div>
           <div className="max-h-[75vh] overflow-y-auto px-3 py-3 sm:px-6 sm:py-5">
-            <ResultsView isSending={isSending} onOpenSaveDraft={onOpenSaveDraft} />
+            <ResultsView
+              isSending={isSending}
+              onEditorDirtyChange={setResultsHasUnsavedChanges}
+              onEditingStateChange={setResultsIsEditingQuestion}
+            />
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={showResultsCloseAlert} onOpenChange={setShowResultsCloseAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('editor.discardDialog.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('editor.discardDialog.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel onClick={cancelResultsClose} className="mt-0">
+              {t('editor.discardDialog.cancel')}
+            </AlertDialogCancel>
+            <Button variant="destructive" onClick={confirmResultsClose}>
+              {t('editor.discardDialog.discard')}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Document Summary Dialog (bottom sheet) */}
       <SummaryDialog

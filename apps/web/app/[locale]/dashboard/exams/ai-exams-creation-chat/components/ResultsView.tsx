@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAIChat } from "./AIChatContext";
 import type { AIExamResult } from "./AIChatContext";
@@ -29,12 +29,16 @@ import MathText from "@/components/MathText";
 
 interface ResultsViewProps {
   isSending?: boolean;
-  onOpenSaveDraft?: () => void;
+  onEditorDirtyChange?: (_dirty: boolean) => void;
+  onEditingStateChange?: (_editing: boolean) => void;
 }
 
-export default function ResultsView({ isSending = false, onOpenSaveDraft }: ResultsViewProps) {
+export default function ResultsView({
+  isSending = false,
+  onEditorDirtyChange,
+  onEditingStateChange,
+}: ResultsViewProps) {
   const { result, setResult } = useAIChat();
-  const [editorOpen, setEditorOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
@@ -43,6 +47,12 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
   const questions = useMemo(() => {
     return (result?.exam?.questions ?? []) as ExamQuestion[];
   }, [result]);
+
+  const editingQuestion = editingIndex != null ? (questions[editingIndex] as ExamQuestion | undefined) : undefined;
+
+  useEffect(() => {
+    onEditingStateChange?.(Boolean(editingQuestion));
+  }, [editingQuestion, onEditingStateChange]);
 
 
 
@@ -105,7 +115,6 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
 
   function openEditor(idx: number) {
     setEditingIndex(idx);
-    setEditorOpen(true);
   }
 
   function saveEdited(updated: ExamQuestion) {
@@ -124,6 +133,12 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
       question_type: updated.type,
       source: 'ai_exam_chat',
     });
+
+    setEditingIndex(null);
+  }
+
+  function closeEditor() {
+    setEditingIndex(null);
   }
 
   function openDeleteDialog(idx: number) {
@@ -164,10 +179,21 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
 
   return (
     <div className="space-y-5 rounded-[28px] border border-black/10 bg-white/70 p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950/60 sm:p-6">
+      {editingQuestion ? (
+        <QuestionEditorDialog
+          question={editingQuestion}
+          questionNumber={editingIndex != null ? editingIndex + 1 : undefined}
+          onSave={saveEdited}
+          onCancel={closeEditor}
+          onDirtyChange={onEditorDirtyChange}
+        />
+      ) : (
+        <>
       {/* Toolbar */}
-      <div className="flex flex-col gap-4 border-b border-black/5 pb-5 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 border-b border-black/5 pb-5 dark:border-white/10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
+          <div className="inline-flex items-center rounded-full border border-[rgb(var(--chat-accent-border))] bg-[rgb(var(--chat-accent-soft))] px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-[rgb(var(--chat-accent-ink))] dark:border-[rgb(var(--chat-accent-border))] dark:bg-[rgb(var(--chat-accent-soft))]">
             {t('results.generatedQuestions')}
           </div>
           <div className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
@@ -180,16 +206,6 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {onOpenSaveDraft && (
-            <Button
-              size="sm"
-              onClick={onOpenSaveDraft}
-              disabled={!questions.length || isSending}
-              className="rounded-full bg-[rgb(var(--chat-accent))] text-white hover:bg-[rgb(var(--chat-accent-ink))]"
-            >
-              {t('header.saveDraft', { fallback: 'Guardar Borrador' })}
-            </Button>
-          )}
           <Button
             variant="outline"
             size="sm"
@@ -199,6 +215,7 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
           >
             {t('results.randomizeOptions')}
           </Button>
+        </div>
         </div>
       </div>
 
@@ -349,14 +366,8 @@ export default function ResultsView({ isSending = false, onOpenSaveDraft }: Resu
           )}
         </Accordion>
       )}
-
-      {/* Editor modal */}
-      <QuestionEditorDialog
-        open={editorOpen}
-        onOpenChange={setEditorOpen}
-        question={editingIndex != null ? (questions[editingIndex] as unknown as ExamQuestion) : null}
-        onSave={saveEdited}
-      />
+        </>
+      )}
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>

@@ -4,8 +4,14 @@
     "title": "Créer des examens avec IA",
     "description": "Expérience de chat pour générer des banques de questions et des résumés.",
     "clearChat": "Effacer le Chat",
-    "saveDraft": "Enregistrer le brouillon",
+    "saveDraft": "Enregistrer l'examen",
     "examLanguageLabel": "Langue de l'examen :"
+  },
+  "kpis": {
+    "question": "Question",
+    "questions": "Questions",
+    "document": "Document",
+    "documents": "Documents"
   },
   "language": {
     "label": "Générer en :",
@@ -81,6 +87,7 @@
     },
     "cancel": "Annuler",
     "save": "Enregistrer",
+    "saveQuestion": "Enregistrer la question",
     "discardDialog": {
       "title": "Abandonner les modifications ?",
       "description": "Vous avez des modifications non enregistrées. Si vous fermez l'éditeur, ces modifications seront perdues.",
@@ -163,14 +170,14 @@
       "modifying_batch": "Modification de plusieurs questions",
       "completed": "Génération terminée"
     },
-    "examGenerated": "✨ Examen généré avec succès avec {count} questions. Consultez les résultats dans le panneau de Résultats.",
+    "examGenerated": "✨ Examen généré avec succès avec {count} questions. Consultez les questions dans le panneau Questions.",
     "error": {
       "generation": "Erreur lors de la génération de l'examen",
       "connection": "Erreur de connexion"
     },
     "toasts": {
       "successTitle": "Résultats générés",
-      "successDesc": "Consultez l'examen généré dans le panneau de Résultats.",
+      "successDesc": "Consultez l'examen généré dans le panneau Questions.",
       "errorTitle": "Erreur",
       "errorDesc": "Une erreur inattendue est survenue. Réessayez.",
       "invalidJson": "Erreur dans la réponse de l'assistant. Réessayez.",

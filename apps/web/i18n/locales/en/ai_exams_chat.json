@@ -4,8 +4,14 @@
     "title": "Create exams with AI",
     "description": "Chat experience to generate question banks and summaries.",
     "clearChat": "Clear Chat",
-    "saveDraft": "Save Draft",
+    "saveDraft": "Save Exam",
     "examLanguageLabel": "Exam Language:"
+  },
+  "kpis": {
+    "question": "Question",
+    "questions": "Questions",
+    "document": "Document",
+    "documents": "Documents"
   },
   "language": {
     "label": "Generate in:",
@@ -81,6 +87,7 @@
     },
     "cancel": "Cancel",
     "save": "Save",
+    "saveQuestion": "Save Question",
     "discardDialog": {
       "title": "Discard changes?",
       "description": "You have unsaved changes. If you close the editor, these changes will be lost.",
@@ -163,14 +170,14 @@
       "modifying_batch": "Modifying multiple questions",
       "completed": "Generation completed"
     },
-    "examGenerated": "✨ Exam generated successfully with {count} questions. Review the results in the Results panel.",
+    "examGenerated": "✨ Exam generated successfully with {count} questions. Review the questions in the Questions panel.",
     "error": {
       "generation": "Error generating exam",
       "connection": "Connection error"
     },
     "toasts": {
       "successTitle": "Results generated",
-      "successDesc": "Review the generated exam on the Results panel.",
+      "successDesc": "Review the generated exam on the Questions panel.",
       "errorTitle": "Error",
       "errorDesc": "An unexpected error occurred. Please try again.",
       "invalidJson": "Error in the assistant's response. Try again.",

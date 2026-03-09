@@ -4,8 +4,14 @@
     "title": "Criar exames com IA",
     "description": "Experiência de chat para gerar bancos de questões e resumos.",
     "clearChat": "Limpar Chat",
-    "saveDraft": "Salvar Rascunho",
+    "saveDraft": "Salvar Exame",
     "examLanguageLabel": "Idioma do Exame:"
+  },
+  "kpis": {
+    "question": "Questao",
+    "questions": "Questoes",
+    "document": "Documento",
+    "documents": "Documentos"
   },
   "language": {
     "label": "Gerar em:",
@@ -81,6 +87,7 @@
     },
     "cancel": "Cancelar",
     "save": "Salvar",
+    "saveQuestion": "Salvar Questao",
     "discardDialog": {
       "title": "Descartar alterações?",
       "description": "Você tem alterações não salvas. Se fechar o editor, estas alterações serão perdidas.",
@@ -163,14 +170,14 @@
       "modifying_batch": "Modificando múltiplas questões",
       "completed": "Geração concluída"
     },
-    "examGenerated": "✨ Exame gerado com sucesso com {count} questões. Revise os resultados no painel de Resultados.",
+    "examGenerated": "✨ Exame gerado com sucesso com {count} questões. Revise as questões no painel de Perguntas.",
     "error": {
       "generation": "Erro ao gerar o exame",
       "connection": "Erro de conexão"
     },
     "toasts": {
       "successTitle": "Resultados gerados",
-      "successDesc": "Revise o exame gerado no painel de Resultados.",
+      "successDesc": "Revise o exame gerado no painel de Perguntas.",
       "errorTitle": "Erro",
       "errorDesc": "Ocorreu um erro inesperado. Tente novamente.",
       "invalidJson": "Erro na resposta do assistente. Tente novamente.",
