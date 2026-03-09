@@ -40,6 +40,7 @@ export function useExamResults(examId: string | string[]) {
   const [resultados, setResultados] = useState<ResultadoExamen[]>([]);
   const [todosEstudiantes, setTodosEstudiantes] = useState<Estudiante[]>([]);
   const [totalPreguntas, setTotalPreguntas] = useState<number>(0);
+  const [enabledQuestionOrders, setEnabledQuestionOrders] = useState<number[]>([]);
   const [availableGroups, setAvailableGroups] = useState<GrupoExamen[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
@@ -75,21 +76,30 @@ export function useExamResults(examId: string | string[]) {
 
       setExamDetails(examData);
 
-      // Obtener el número total de preguntas del examen
+      // Obtener metadata de preguntas para numeración canónica
       const { data: preguntasData, error: preguntasError } = await supabase
         .from('preguntas')
-        .select('orden')
+        .select('orden, habilitada')
         .eq('examen_id', examIdString)
-        .order('orden', { ascending: false })
-        .limit(1);
+        .order('orden', { ascending: true });
 
       if (preguntasError) {
         if (DEBUG) {
           // Registramos el error en un logger en lugar de la consola
         }
       } else if (preguntasData && preguntasData.length > 0) {
-        // El orden más alto representa el número total de preguntas
-        setTotalPreguntas(preguntasData[0].orden);
+        const preguntas = preguntasData as Array<{ orden: number; habilitada: boolean }>;
+        const highestQuestionOrder = Math.max(...preguntas.map((pregunta) => pregunta.orden));
+        setTotalPreguntas(highestQuestionOrder);
+
+        const enabledOrders = preguntas
+          .filter((pregunta) => pregunta.habilitada)
+          .map((pregunta) => pregunta.orden);
+
+        setEnabledQuestionOrders(enabledOrders);
+      } else {
+        setTotalPreguntas(0);
+        setEnabledQuestionOrders([]);
       }
 
       // Obtener todas las relaciones con grupos a través de examen_grupo
@@ -368,6 +378,7 @@ export function useExamResults(examId: string | string[]) {
     resultados,
     todosEstudiantes,
     totalPreguntas,
+    enabledQuestionOrders,
     availableGroups,
     selectedGroupId,
     setResultados,

@@ -7,6 +7,7 @@ import type { ExamDetails, ResultadoExamen } from '../utils/types';
 interface ResultsPageActionsProps {
   examDetails: ExamDetails | null;
   resultados: ResultadoExamen[];
+  enabledQuestionOrders: number[];
   selectedGroupId: string | null;
   onExportExcel: () => void;
 }
@@ -14,6 +15,7 @@ interface ResultsPageActionsProps {
 export function ResultsPageActions({
   examDetails,
   resultados,
+  enabledQuestionOrders,
   selectedGroupId,
   onExportExcel
 }: ResultsPageActionsProps) {
@@ -38,6 +40,7 @@ export function ResultsPageActions({
               groupId={selectedGroupId}
               fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
               buttonText={t('generatePDFReport')}
+              enabledQuestionOrders={enabledQuestionOrders}
               resultados={resultados}
               examDetails={examDetails}
             />
@@ -47,6 +50,7 @@ export function ResultsPageActions({
               groupId={selectedGroupId}
               fileName={`examenes_anonimizados_${examDetails?.titulo?.replace(/[^a-zA-Z0-9]/g, '_') || 'examen'}.pdf`}
               buttonText={t('pdfReport')}
+              enabledQuestionOrders={enabledQuestionOrders}
               resultados={resultados}
               examDetails={examDetails}
             />

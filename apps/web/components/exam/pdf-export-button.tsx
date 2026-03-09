@@ -92,6 +92,7 @@ interface PDFExportButtonProps {
   groupId?: string | null;
   fileName: string;
   buttonText?: string;
+  enabledQuestionOrders: number[];
   resultados: ResultadoExamen[];
   examDetails: ExamDetails | null;
 }
@@ -106,6 +107,7 @@ export function PDFExportButton({
   groupId,
   fileName,
   buttonText = 'Reporte en PDF',
+  enabledQuestionOrders,
   resultados,
   examDetails
 }: PDFExportButtonProps) {
@@ -124,16 +126,8 @@ export function PDFExportButton({
   const t = useTranslations('dashboard.exams.results.pdfExport');
 
   const visibleQuestionNumbers = useMemo(() => {
-    const enabledQuestionNumbers = new Set(
-      resultados.flatMap((resultado) =>
-        (resultado.respuestas_estudiante || [])
-          .filter((respuesta) => respuesta?.pregunta?.habilitada)
-          .map((respuesta) => respuesta.pregunta.orden)
-      )
-    );
-
-    return Array.from(enabledQuestionNumbers).sort((a, b) => a - b);
-  }, [resultados]);
+    return Array.from(new Set(enabledQuestionOrders)).sort((a, b) => a - b);
+  }, [enabledQuestionOrders]);
 
   const styles = useMemo(() => {
     if (!pdfLib) return null as unknown as Record<string, never>;
