@@ -78,6 +78,9 @@
     "delete": "Supprimer",
     "correctAnswer": "Réponse correcte",
     "mustSelectCorrectAnswer": "* Vous devez sélectionner une option correcte",
+    "preview": "Aperçu",
+    "previewHint": "Aperçu du contenu formaté.",
+    "latexHint": "Utilisez la syntaxe LaTeX pour les formules dans ce champ.",
     "rationale": "Rationale (optionnel)",
     "difficulty": "Difficulté",
     "difficulties": {

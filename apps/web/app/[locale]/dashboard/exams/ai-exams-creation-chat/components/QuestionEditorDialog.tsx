@@ -2,12 +2,14 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, Eye, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { LatexIcon } from "@/components/icons/latex-icon";
+import MathText from "@/components/MathText";
 import {
   Tooltip,
   TooltipContent,
@@ -31,12 +33,50 @@ export interface ExamQuestion {
   [key: string]: unknown;
 }
 
+function hasLatexText(text: string): boolean {
+  return /\$[^$]+\$|\$\$[\s\S]+\$\$|\\\(|\\\)|\\\[|\\\]|\\[a-zA-Z]+/.test(text);
+}
+
 interface Props {
   question: ExamQuestion | null;
   questionNumber?: number;
   onCancel: () => void;
   onSave: (_updated: ExamQuestion) => void;
   onDirtyChange?: (_dirty: boolean) => void;
+}
+
+function LatexFieldHint({ hint }: { hint: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="absolute left-3 top-3 z-10 inline-flex cursor-help rounded-md border border-black/10 bg-white/80 p-1 text-muted-foreground dark:border-white/10 dark:bg-zinc-900/80">
+            <LatexIcon className="h-3.5 w-3.5" />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{hint}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+function PreviewFieldHint({ hint }: { hint: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="absolute left-3 top-3 z-10 inline-flex cursor-help rounded-md border border-black/10 bg-white/80 p-1 text-muted-foreground dark:border-white/10 dark:bg-zinc-900/80">
+            <Eye className="h-3.5 w-3.5" />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{hint}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }
 
 export default function QuestionEditorDialog({
@@ -165,6 +205,13 @@ export default function QuestionEditorDialog({
 
   if (!local) return null;
 
+  const promptPreview = (local.prompt || "").trim();
+  const rationalePreview = (local.rationale || "").trim();
+  const showPromptPreview = hasLatexText(promptPreview);
+  const showRationalePreview = hasLatexText(rationalePreview);
+  const latexHint = t("editor.latexHint", { fallback: "Use LaTeX syntax for formulas in this field." });
+  const previewHint = t("editor.previewHint", { fallback: "Preview of formatted content." });
+
   return (
     <div className="animate-in fade-in duration-200">
       <div className="flex flex-col gap-4 border-b border-black/5 pb-5 dark:border-white/10 sm:flex-row sm:items-start sm:justify-between">
@@ -214,7 +261,26 @@ export default function QuestionEditorDialog({
       <div className="mt-5 space-y-5 rounded-[24px] border border-black/10 bg-white/70 p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950/60 sm:p-5">
         <div className="grid gap-2">
           <Label>{t("editor.prompt")}</Label>
-          <Textarea value={local.prompt || ""} onChange={(e) => update("prompt", e.target.value)} rows={5} />
+          <div className="relative">
+            <LatexFieldHint hint={latexHint} />
+            <Textarea
+              value={local.prompt || ""}
+              onChange={(e) => update("prompt", e.target.value)}
+              rows={5}
+              className="pl-12"
+            />
+          </div>
+          {showPromptPreview && (
+            <div className="relative rounded-2xl border border-black/10 bg-white/80 p-3 pl-12 dark:border-white/10 dark:bg-zinc-900/70">
+              <PreviewFieldHint hint={previewHint} />
+              <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                {t("editor.preview")}
+              </div>
+              <div className="prose prose-sm max-w-none text-foreground dark:prose-invert">
+                <MathText text={promptPreview} />
+              </div>
+            </div>
+          )}
         </div>
 
         {isMC && (
@@ -233,12 +299,45 @@ export default function QuestionEditorDialog({
               {(local.options || []).map((opt, idx) => (
                 <div key={idx} className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white/80 p-3 dark:border-white/10 dark:bg-zinc-900/70">
                   <RadioGroupItem id={`opt-${idx}`} value={String(idx)} />
-                  <Input
-                    value={opt}
-                    onChange={(e) => updateOption(idx, e.target.value)}
-                    className="flex-1"
-                    placeholder={`Opcion ${idx + 1}`}
-                  />
+                  <div className="flex-1 space-y-2">
+                    <div className="relative">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="absolute left-2.5 top-1/2 z-10 inline-flex -translate-y-1/2 cursor-help rounded-md border border-black/10 bg-white/80 p-1 text-muted-foreground dark:border-white/10 dark:bg-zinc-900/80">
+                              <LatexIcon className="h-3 w-3" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{latexHint}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <Input
+                        value={opt}
+                        onChange={(e) => updateOption(idx, e.target.value)}
+                        className="flex-1 pl-10"
+                        placeholder={`Opcion ${idx + 1}`}
+                      />
+                    </div>
+                    {hasLatexText(opt.trim()) && (
+                      <div className="relative rounded-xl border border-black/10 bg-black/[0.02] px-2 py-1.5 pl-10 text-sm dark:border-white/10 dark:bg-white/[0.02]">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="absolute left-2 top-1/2 z-10 inline-flex -translate-y-1/2 cursor-help rounded-md border border-black/10 bg-white/80 p-1 text-muted-foreground dark:border-white/10 dark:bg-zinc-900/80">
+                                <Eye className="h-3 w-3" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{previewHint}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <MathText text={opt} />
+                      </div>
+                    )}
+                  </div>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -289,7 +388,26 @@ export default function QuestionEditorDialog({
 
         <div className="grid gap-2">
           <Label>{t("editor.rationale")}</Label>
-          <Textarea value={local.rationale || ""} onChange={(e) => update("rationale", e.target.value)} rows={4} />
+          <div className="relative">
+            <LatexFieldHint hint={latexHint} />
+            <Textarea
+              value={local.rationale || ""}
+              onChange={(e) => update("rationale", e.target.value)}
+              rows={4}
+              className="pl-12"
+            />
+          </div>
+          {showRationalePreview && (
+            <div className="relative rounded-2xl border border-black/10 bg-white/80 p-3 pl-12 dark:border-white/10 dark:bg-zinc-900/70">
+              <PreviewFieldHint hint={previewHint} />
+              <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                {t("editor.preview")}
+              </div>
+              <div className="prose prose-sm max-w-none text-foreground dark:prose-invert">
+                <MathText text={rationalePreview} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
