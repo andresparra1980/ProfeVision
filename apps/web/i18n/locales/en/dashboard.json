@@ -151,7 +151,8 @@
       "subjectRequired": "Subject is required",
       "groupRequired": "Group is required",
       "durationRequired": "Duration is required",
-      "durationMin": "Duration must be greater than 0 minutes"
+      "durationMin": "Duration must be greater than 0 minutes",
+      "optionCountRange": "Question {question} must have between {min} and {max} answer options."
     },
     "messages": {
       "loadingError": "Error loading exams",
@@ -322,6 +323,7 @@
       "validation": {
         "questionRequired": "Question text is required",
         "optionsRequired": "You must add at least one option with text",
+        "optionCountRange": "Question {question} must have between {min} and {max} answer options.",
         "cantPublishNoQuestions": "You cannot publish an exam without questions"
       },
       "messages": {

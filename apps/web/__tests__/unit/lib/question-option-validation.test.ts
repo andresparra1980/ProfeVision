@@ -18,6 +18,17 @@ describe("question option validation", () => {
     ).toBeNull();
   });
 
+  it("accepts questions with exactly 4 non-empty options", () => {
+    expect(
+      getQuestionOptionCountError([
+        {
+          texto: "Pregunta valida 4 opciones",
+          opciones: [{ texto: "A" }, { texto: "B" }, { texto: "C" }, { texto: "D" }],
+        },
+      ])
+    ).toBeNull();
+  });
+
   it("rejects imported questions with more than 4 options", () => {
     expect(
       getImportedQuestionOptionCountError([
@@ -26,7 +37,7 @@ describe("question option validation", () => {
           opciones: { a: "A", b: "B", c: "C", d: "D", e: "E" },
         },
       ])
-    ).toContain("pregunta 1");
+    ).toEqual({ index: 0, optionCount: 5 });
   });
 
   it("returns all invalid imported questions", () => {

@@ -16,9 +16,11 @@ interface DocumentMeta {
   mime?: string;
 }
 
+export const DOCUMENT_UPLOAD_MAX_SIZE_MB = 10;
+export const DOCUMENT_UPLOAD_MAX_SIZE_BYTES = DOCUMENT_UPLOAD_MAX_SIZE_MB * 1024 * 1024;
+export const MAX_SIZE_ERROR_CODE = 'maxSizeError';
+
 export function useDocumentContext() {
-  const MAX_FILE_SIZE_MB = 10;
-  const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [documentIds, setDocumentIds] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -118,8 +120,8 @@ export function useDocumentContext() {
       return;
     }
 
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      onError(`El archivo supera el máximo permitido de ${MAX_FILE_SIZE_MB} MB`);
+    if (file.size > DOCUMENT_UPLOAD_MAX_SIZE_BYTES) {
+      onError(MAX_SIZE_ERROR_CODE);
       try {
         if (inputEl) inputEl.value = '';
       } catch {

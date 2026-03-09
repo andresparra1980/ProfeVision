@@ -31,7 +31,7 @@ interface ProcessResult {
 type RawImportedQuestion = {
   numero?: number;
   pregunta?: string;
-  opciones?: Record<string, string | undefined>;
+  opciones?: Record<string, unknown>;
   respuesta_correcta?: unknown;
   razon?: string;
 };
@@ -70,8 +70,11 @@ function normalizeCorrectKey(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const normalized = value.trim().toLowerCase();
   if (!normalized) return null;
-  const letter = normalized[0];
-  return /^[a-z]$/.test(letter) ? letter : null;
+
+  const match = normalized.match(/^(?:\(([a-z])\)|([a-z])\)?)$/);
+  if (!match) return null;
+
+  return match[1] || match[2] || null;
 }
 
 function optionHasMarker(optionText: string | undefined): boolean {
@@ -83,11 +86,17 @@ function sanitizeImportedQuestions(rawQuestions: unknown[]): ImportedQuestion[] 
   return rawQuestions.map((question, index) => {
     const raw = (question || {}) as RawImportedQuestion;
     const rawOptions = raw.opciones || {};
-    const opciones: ImportedQuestion["opciones"] = {
-      a: rawOptions.a || "",
-      b: rawOptions.b || "",
-      ...rawOptions,
-    };
+    const opciones = Object.entries(rawOptions).reduce(
+      (acc, [key, value]) => {
+        acc[key.toLowerCase()] = typeof value === "string" ? value : "";
+        return acc;
+      },
+      {} as ImportedQuestion["opciones"]
+    );
+
+    if (typeof opciones.a !== "string") opciones.a = "";
+    if (typeof opciones.b !== "string") opciones.b = "";
+
     const optionKeys = Object.keys(opciones).map((key) => key.toLowerCase());
 
     const markedKeys = optionKeys.filter((key) => optionHasMarker(opciones[key]));
@@ -511,7 +520,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof Error) {
       return NextResponse.json(
-        { message: `${t("errors.processingFile", "Error processing file")}: ${error.message}` },
+        { message: t("errors.processingFile", "Error processing file") },
         { status: 500 }
       );
     }

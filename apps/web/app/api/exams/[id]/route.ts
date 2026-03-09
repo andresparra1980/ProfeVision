@@ -2,9 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import _logger from '@/lib/utils/logger';
 import { getApiTranslator } from '@/i18n/api';
-import { getQuestionOptionCountError } from '@/lib/exams/question-option-validation';
+import {
+  MAX_QUESTION_OPTIONS,
+  MIN_QUESTION_OPTIONS,
+  getQuestionOptionCountError,
+} from '@/lib/exams/question-option-validation';
 
 const DEBUG = process.env.NODE_ENV === 'development';
+
+function interpolate(template: string, values: Record<string, string | number>) {
+  return Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{${key}}`, String(value)),
+    template
+  );
+}
 
 // Crear cliente de Supabase para el servidor usando SERVICE_ROLE_KEY
 const supabase = createClient(
@@ -308,9 +319,24 @@ export async function PUT(
       return NextResponse.json({ success: true, message: t('success.updated') });
     }
 
-    const optionCountError = getQuestionOptionCountError(preguntas);
-    if (optionCountError) {
-      return NextResponse.json({ error: optionCountError }, { status: 400 });
+    const optionCountIssue = getQuestionOptionCountError(preguntas);
+    if (optionCountIssue) {
+      return NextResponse.json(
+        {
+          error: interpolate(
+            t(
+              'errors.invalidOptionCount',
+              `Question {question} must have between {min} and {max} answer options.`
+            ),
+            {
+              question: optionCountIssue.index + 1,
+              min: MIN_QUESTION_OPTIONS,
+              max: MAX_QUESTION_OPTIONS,
+            }
+          ),
+        },
+        { status: 400 }
+      );
     }
 
     // 4) Obtener preguntas existentes para limpiar opciones y preguntas

@@ -6,6 +6,7 @@
     "onlyDraftDelete": "Only exams in draft status can be deleted",
     "serverConfig": "Server configuration error",
     "missingFields": "Missing required fields",
+    "invalidOptionCount": "Question {question} must have between {min} and {max} answer options.",
     "updateExam": "Failed to update exam",
     "updateState": "Failed to update exam status"
   },
@@ -15,5 +16,4 @@
     "updated": "Exam updated successfully"
   }
 }
-
 

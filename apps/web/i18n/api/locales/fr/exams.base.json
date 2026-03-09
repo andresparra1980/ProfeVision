@@ -6,6 +6,7 @@
     "noUser": "Impossible d'identifier l'utilisateur",
     "missingFields": "Champs requis manquants (titre ou materia_id)",
     "missingGroup": "Vous devez sélectionner un groupe",
+    "invalidOptionCount": "La question {question} doit avoir entre {min} et {max} options de réponse.",
     "createExam": "Erreur lors de la création de l'examen"
   }
 }

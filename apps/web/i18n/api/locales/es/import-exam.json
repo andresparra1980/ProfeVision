@@ -1,9 +1,9 @@
 {
   "errors": {
-    "missingApiKey": "La API Key de OpenRouter no esta configurada",
-    "missingFile": "No se proporciono ningun archivo",
+    "missingApiKey": "La API Key de OpenRouter no está configurada",
+    "missingFile": "No se proporcionó ningún archivo",
     "unsupportedFile": "Tipo de archivo no soportado. Usa PDF, DOC o DOCX.",
-    "fileTooLarge": "El archivo es demasiado grande. Maximo 10MB.",
+    "fileTooLarge": "El archivo es demasiado grande. Máximo 10MB.",
     "processingFile": "Error al procesar el archivo",
     "internal": "Error interno del servidor",
     "invalidOptionCount": "Cada pregunta debe tener entre {min} y {max} opciones de respuesta para poder importarse.",

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface UseSummaryDialogProps {
   documentIds: string[];
@@ -17,6 +17,7 @@ export function useSummaryDialog({
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryDocId, setSummaryDocId] = useState<string | null>(null);
   const [summaryContent, setSummaryContent] = useState<unknown | null>(null);
+  const requestVersionRef = useRef(0);
 
   const availableSummaryDocIds = useMemo(
     () => documentIds.filter((id) => summariesAvailability[id]),
@@ -30,7 +31,7 @@ export function useSummaryDialog({
     setSummaryContent(null);
   }, [summaryDocId, documentIds, availableSummaryDocIds]);
 
-  const openSummaryDialog = async (targetId?: string) => {
+  const openSummaryDialog = (targetId?: string) => {
     const safeCurrentId = summaryDocId && documentIds.includes(summaryDocId) ? summaryDocId : null;
     const id =
       targetId ??
@@ -38,33 +39,31 @@ export function useSummaryDialog({
       availableSummaryDocIds[0] ??
       documentIds[0] ??
       null;
-    setSummaryDocId(id);
     setSummaryOpen(true);
-    if (!id) return; // no documents yet
-    setSummaryLoading(true);
-    try {
-      const data = await getSummary(id);
-      setSummaryContent(data);
-    } catch (_e) {
-      setSummaryContent(null);
-    } finally {
-      setSummaryLoading(false);
-    }
+    setSummaryDocId(id);
   };
 
   // When dialog is open and jobs progress (or user changes selection), re-fetch the summary
   useEffect(() => {
     if (!summaryOpen || !summaryDocId) return;
     let cancelled = false;
+    const requestVersion = ++requestVersionRef.current;
+
     (async () => {
       setSummaryLoading(true);
       try {
         const data = await getSummary(summaryDocId);
-        if (!cancelled) setSummaryContent(data);
+        if (!cancelled && requestVersion === requestVersionRef.current) {
+          setSummaryContent(data);
+        }
       } catch {
-        if (!cancelled) setSummaryContent(null);
+        if (!cancelled && requestVersion === requestVersionRef.current) {
+          setSummaryContent(null);
+        }
       } finally {
-        if (!cancelled) setSummaryLoading(false);
+        if (!cancelled && requestVersion === requestVersionRef.current) {
+          setSummaryLoading(false);
+        }
       }
     })();
     return () => {

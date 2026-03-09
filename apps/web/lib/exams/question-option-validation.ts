@@ -69,10 +69,7 @@ export function getQuestionOptionCountError(
   preguntas: ExamQuestion[] | null | undefined
 ) {
   const [firstInvalidQuestion] = getQuestionOptionCountIssues(preguntas);
-
-  return firstInvalidQuestion
-    ? `La pregunta ${firstInvalidQuestion.index + 1} debe tener entre ${MIN_QUESTION_OPTIONS} y ${MAX_QUESTION_OPTIONS} opciones de respuesta.`
-    : null;
+  return firstInvalidQuestion || null;
 }
 
 export function getImportedQuestionOptionCountIssues(
@@ -89,10 +86,7 @@ export function getImportedQuestionOptionCountError(
   preguntas: ImportedQuestion[] | null | undefined
 ) {
   const [firstInvalidQuestion] = getImportedQuestionOptionCountIssues(preguntas);
-
-  return firstInvalidQuestion
-    ? `La pregunta ${firstInvalidQuestion.index + 1} debe tener entre ${MIN_QUESTION_OPTIONS} y ${MAX_QUESTION_OPTIONS} opciones de respuesta para poder importarse.`
-    : null;
+  return firstInvalidQuestion || null;
 }
 
 export function hasValidGeneratedOptionCount(opciones: ExamOption[] | null | undefined) {

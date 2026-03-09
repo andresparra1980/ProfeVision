@@ -1,12 +1,12 @@
 {
   "errors": {
-    "missingApiKey": "A chave de API do OpenRouter nao esta configurada",
+    "missingApiKey": "A chave de API do OpenRouter não está configurada",
     "missingFile": "Nenhum arquivo foi fornecido",
-    "unsupportedFile": "Tipo de arquivo nao suportado. Use PDF, DOC ou DOCX.",
-    "fileTooLarge": "O arquivo e muito grande. Maximo de 10MB.",
+    "unsupportedFile": "Tipo de arquivo não suportado. Use PDF, DOC ou DOCX.",
+    "fileTooLarge": "O arquivo é muito grande. Máximo de 10MB.",
     "processingFile": "Erro ao processar o arquivo",
     "internal": "Erro interno do servidor",
-    "invalidOptionCount": "Cada pergunta deve ter entre {min} e {max} opcoes de resposta para ser importada.",
-    "invalidOptionCountQuestion": "A pergunta {question} tem {count} opcoes de resposta. Ela deve ter entre {min} e {max}."
+    "invalidOptionCount": "Cada pergunta deve ter entre {min} e {max} opções de resposta para ser importada.",
+    "invalidOptionCountQuestion": "A pergunta {question} tem {count} opções de resposta. Ela deve ter entre {min} e {max}."
   }
 }

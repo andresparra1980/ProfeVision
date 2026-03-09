@@ -4,7 +4,18 @@ import { Database } from "@/lib/types/database";
 import logger from "@/lib/utils/logger";
 import { getApiTranslator } from '@/i18n/api';
 import { getPostHogClient } from '@/lib/posthog-server';
-import { getQuestionOptionCountError } from "@/lib/exams/question-option-validation";
+import {
+  MAX_QUESTION_OPTIONS,
+  MIN_QUESTION_OPTIONS,
+  getQuestionOptionCountError,
+} from "@/lib/exams/question-option-validation";
+
+function interpolate(template: string, values: Record<string, string | number>) {
+  return Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{${key}}`, String(value)),
+    template
+  );
+}
 
 // Endpoint de diagnóstico para verificar que las rutas base de API están accesibles
 export async function GET() {
@@ -156,10 +167,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const optionCountError = getQuestionOptionCountError(preguntas);
-    if (optionCountError) {
+    const optionCountIssue = getQuestionOptionCountError(preguntas);
+    if (optionCountIssue) {
+      const { t } = await getApiTranslator(request, 'exams.base');
       return NextResponse.json(
-        { error: optionCountError },
+        {
+          error: interpolate(
+            t(
+              'errors.invalidOptionCount',
+              `Question {question} must have between {min} and {max} answer options.`
+            ),
+            {
+              question: optionCountIssue.index + 1,
+              min: MIN_QUESTION_OPTIONS,
+              max: MAX_QUESTION_OPTIONS,
+            }
+          ),
+        },
         { status: 400 }
       );
     }

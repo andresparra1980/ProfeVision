@@ -6,6 +6,7 @@
     "onlyDraftDelete": "Seuls les examens en état de brouillon peuvent être supprimés",
     "serverConfig": "Erreur de configuration du serveur",
     "missingFields": "Champs obligatoires manquants",
+    "invalidOptionCount": "La question {question} doit avoir entre {min} et {max} options de réponse.",
     "updateExam": "Erreur lors de la mise à jour de l'examen",
     "updateState": "Erreur lors de la mise à jour de l'état de l'examen"
   },

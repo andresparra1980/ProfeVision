@@ -138,12 +138,14 @@ export default function ImportExamDialog({
     const sizeMultiplier = Math.min(fileSize * 2, 10); // Máximo 10 segundos extra por tamaño
     setEstimatedSeconds(Math.round(baseTime + sizeMultiplier));
 
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
+
     try {
       const formData = new FormData();
       formData.append('file', file);
 
       // Simular progreso de subida con etapas
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           // Crear saltos en el progreso para cada etapa
           if (prev < 25) return Math.min(prev + 2, 25);
@@ -160,9 +162,6 @@ export default function ImportExamDialog({
         },
         body: formData,
       });
-
-      clearInterval(progressInterval);
-      setUploadProgress(100);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -185,6 +184,10 @@ export default function ImportExamDialog({
       setError(error instanceof Error ? error.message : t('errors.unknown'));
       toast.error(error instanceof Error ? error.message : t('errors.processingFile'));
     } finally {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+      setUploadProgress(100);
       setIsUploading(false);
     }
   }, [locale, t]);
