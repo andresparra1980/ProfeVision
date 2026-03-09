@@ -207,6 +207,8 @@ export default function QuestionEditorDialog({
 
   const promptPreview = (local.prompt || "").trim();
   const rationalePreview = (local.rationale || "").trim();
+  const showPromptLatexHint = hasLatexText(promptPreview);
+  const showRationaleLatexHint = hasLatexText(rationalePreview);
   const showPromptPreview = hasLatexText(promptPreview);
   const showRationalePreview = hasLatexText(rationalePreview);
   const latexHint = t("editor.latexHint", { fallback: "Use LaTeX syntax for formulas in this field." });
@@ -262,12 +264,12 @@ export default function QuestionEditorDialog({
         <div className="grid gap-2">
           <Label>{t("editor.prompt")}</Label>
           <div className="relative">
-            <LatexFieldHint hint={latexHint} />
+            {showPromptLatexHint && <LatexFieldHint hint={latexHint} />}
             <Textarea
               value={local.prompt || ""}
               onChange={(e) => update("prompt", e.target.value)}
               rows={5}
-              className="pl-12"
+              className={showPromptLatexHint ? "pl-12" : undefined}
             />
           </div>
           {showPromptPreview && (
@@ -301,22 +303,24 @@ export default function QuestionEditorDialog({
                   <RadioGroupItem id={`opt-${idx}`} value={String(idx)} />
                   <div className="flex-1 space-y-2">
                     <div className="relative">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="absolute left-2.5 top-1/2 z-10 inline-flex -translate-y-1/2 cursor-help rounded-md border border-black/10 bg-white/80 p-1 text-muted-foreground dark:border-white/10 dark:bg-zinc-900/80">
-                              <LatexIcon className="h-3 w-3" />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{latexHint}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      {hasLatexText(opt.trim()) && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="absolute left-2.5 top-1/2 z-10 inline-flex -translate-y-1/2 cursor-help rounded-md border border-black/10 bg-white/80 p-1 text-muted-foreground dark:border-white/10 dark:bg-zinc-900/80">
+                                <LatexIcon className="h-3 w-3" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{latexHint}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                       <Input
                         value={opt}
                         onChange={(e) => updateOption(idx, e.target.value)}
-                        className="flex-1 pl-10"
+                        className={hasLatexText(opt.trim()) ? "flex-1 pl-10" : "flex-1"}
                         placeholder={`Opcion ${idx + 1}`}
                       />
                     </div>
@@ -389,12 +393,12 @@ export default function QuestionEditorDialog({
         <div className="grid gap-2">
           <Label>{t("editor.rationale")}</Label>
           <div className="relative">
-            <LatexFieldHint hint={latexHint} />
+            {showRationaleLatexHint && <LatexFieldHint hint={latexHint} />}
             <Textarea
               value={local.rationale || ""}
               onChange={(e) => update("rationale", e.target.value)}
               rows={4}
-              className="pl-12"
+              className={showRationaleLatexHint ? "pl-12" : undefined}
             />
           </div>
           {showRationalePreview && (

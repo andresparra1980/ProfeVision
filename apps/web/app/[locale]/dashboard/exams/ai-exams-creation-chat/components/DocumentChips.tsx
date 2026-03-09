@@ -33,28 +33,43 @@ export function DocumentChips({
   if (documentIds.length === 0 && !pendingUploadFileName) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {pendingUploadFileName && (
-        <div className="flex items-center gap-2 rounded-full border border-[rgb(var(--chat-accent-border))] bg-[rgb(var(--chat-accent-soft))] px-3 py-1.5 text-xs text-[rgb(var(--chat-accent-ink))] dark:bg-[rgb(var(--chat-accent-soft))]">
-          <FileText className="h-3.5 w-3.5" />
-          <span className="max-w-[160px] truncate" title={pendingUploadFileName}>
-            {formatFileName(pendingUploadFileName, 18)}
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.2em] text-[rgb(var(--chat-accent-ink))] dark:bg-black/20">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            {t('context.processingNow', { fallback: 'Procesando...' })}
-          </span>
-        </div>
-      )}
-      {documentIds.map((id) => (
-        <div key={id} className="flex items-center gap-2 rounded-full border border-black/10 bg-white/85 px-3 py-1.5 text-xs shadow-sm dark:border-white/10 dark:bg-zinc-950/75">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgb(var(--chat-accent-soft))] text-[rgb(var(--chat-accent-ink))] dark:bg-[rgb(var(--chat-accent-soft))]">
+    <TooltipProvider>
+      <div className="flex flex-wrap items-center gap-2">
+        {pendingUploadFileName && (
+          <div className="flex items-center gap-2 rounded-full border border-[rgb(var(--chat-accent-border))] bg-[rgb(var(--chat-accent-soft))] px-3 py-1.5 text-xs text-[rgb(var(--chat-accent-ink))] dark:bg-[rgb(var(--chat-accent-soft))]">
             <FileText className="h-3.5 w-3.5" />
-          </span>
-          <span className="max-w-[160px] truncate" title={docMeta[id]?.fileName || id}>
-            {formatFileName(docMeta[id]?.fileName || id.replace(/^local:/, ''), 18)}
-          </span>
-          {(() => {
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="max-w-[160px] cursor-help truncate">
+                  {formatFileName(pendingUploadFileName, 18)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{pendingUploadFileName}</p>
+              </TooltipContent>
+            </Tooltip>
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.2em] text-[rgb(var(--chat-accent-ink))] dark:bg-black/20">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              {t('context.processingNow', { fallback: 'Procesando...' })}
+            </span>
+          </div>
+        )}
+        {documentIds.map((id) => (
+          <div key={id} className="flex items-center gap-2 rounded-full border border-black/10 bg-white/85 px-3 py-1.5 text-xs shadow-sm dark:border-white/10 dark:bg-zinc-950/75">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgb(var(--chat-accent-soft))] text-[rgb(var(--chat-accent-ink))] dark:bg-[rgb(var(--chat-accent-soft))]">
+              <FileText className="h-3.5 w-3.5" />
+            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="max-w-[160px] cursor-help truncate">
+                  {formatFileName(docMeta[id]?.fileName || id.replace(/^local:/, ''), 18)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{docMeta[id]?.fileName || id}</p>
+              </TooltipContent>
+            </Tooltip>
+            {(() => {
             const hasSummary = !!summariesAvailability[id];
             const isFailed = jobs.some((j) => j.documentId === id && j.status === 'failed');
             const isProcessing = !hasSummary && !isFailed;
@@ -79,7 +94,6 @@ export function DocumentChips({
 
             return <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">—</span>;
           })()}
-          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -99,9 +113,9 @@ export function DocumentChips({
                 <p>{t('context.remove', { fallback: 'Quitar' })}</p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
-        </div>
-      ))}
-    </div>
+          </div>
+        ))}
+      </div>
+    </TooltipProvider>
   );
 }
