@@ -60,7 +60,7 @@ export function SummaryDialog({
             ))}
           </select>
         </div>
-        <div className="max-h-[60vh] overflow-y-auto rounded border p-3 bg-card text-sm prose prose-invert dark:prose-invert">
+        <div className="max-h-[60vh] overflow-y-auto rounded border bg-card p-3 text-sm prose prose-slate max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-ul:text-foreground prose-ol:text-foreground prose-code:text-foreground dark:prose-invert">
           {summaryLoading ? (
             <div className="text-muted-foreground">
               {t('context.loadingSummary', { fallback: 'Cargando resumen...' })}

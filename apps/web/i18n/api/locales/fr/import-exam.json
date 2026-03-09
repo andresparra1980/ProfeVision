@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "missingApiKey": "La cle API OpenRouter n'est pas configuree",
+    "missingFile": "Aucun fichier n'a ete fourni",
+    "unsupportedFile": "Type de fichier non pris en charge. Utilisez PDF, DOC ou DOCX.",
+    "fileTooLarge": "Le fichier est trop volumineux. Maximum 10 Mo.",
+    "processingFile": "Erreur lors du traitement du fichier",
+    "internal": "Erreur interne du serveur",
+    "invalidOptionCount": "Chaque question doit avoir entre {min} et {max} options de reponse pour etre importee.",
+    "invalidOptionCountQuestion": "La question {question} a {count} options de reponse. Elle doit en avoir entre {min} et {max}."
+  }
+}

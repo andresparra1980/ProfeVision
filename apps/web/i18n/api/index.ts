@@ -1,6 +1,6 @@
-export type ApiLocale = 'es' | 'en';
+export type ApiLocale = 'es' | 'en' | 'pt' | 'fr';
 
-const SUPPORTED_LOCALES: ApiLocale[] = ['es', 'en'];
+const SUPPORTED_LOCALES: ApiLocale[] = ['es', 'en', 'pt', 'fr'];
 
 function parseAcceptLanguage(headerValue: string | null): ApiLocale | null {
   if (!headerValue) return null;
@@ -8,6 +8,8 @@ function parseAcceptLanguage(headerValue: string | null): ApiLocale | null {
   for (const part of parts) {
     if (part.startsWith('en')) return 'en';
     if (part.startsWith('es')) return 'es';
+    if (part.startsWith('pt')) return 'pt';
+    if (part.startsWith('fr')) return 'fr';
   }
   return null;
 }
@@ -73,5 +75,4 @@ export async function getApiTranslator(request: Request, namespace: string) {
 
   return { t, locale };
 }
-
 

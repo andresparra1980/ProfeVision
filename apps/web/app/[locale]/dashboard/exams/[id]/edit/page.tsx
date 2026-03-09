@@ -17,6 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Switch } from "@/components/ui/switch";
 import logger from "@/lib/utils/logger";
 import { useChecklistItem } from "@/lib/contexts/onboarding-context";
+import { getQuestionOptionCountError } from "@/lib/exams/question-option-validation";
 
 interface TipoPregunta {
   id: string;
@@ -230,10 +231,15 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       }
 
       // Validar que al menos una opción tenga texto
-      const hasValidOptions = currentQuestion.opciones.some(opt => opt.texto.trim() !== "");
-      if (!hasValidOptions) {
+      const optionCountError = getQuestionOptionCountError([
+        {
+          texto: currentQuestion.texto,
+          opciones: currentQuestion.opciones.map((opcion) => ({ texto: opcion.texto })),
+        },
+      ]);
+      if (optionCountError) {
         toast.error("Error", {
-          description: t('validation.optionsRequired'),
+          description: optionCountError,
         });
         return;
       }

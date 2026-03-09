@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import mammoth from "mammoth";
 import logger from "@/lib/utils/logger";
+import { getApiTranslator } from "@/i18n/api";
+import {
+  MAX_QUESTION_OPTIONS,
+  MIN_QUESTION_OPTIONS,
+  getImportedQuestionOptionCountIssues,
+} from "@/lib/exams/question-option-validation";
 
 // Interfaces
 interface ImportedQuestion {
@@ -26,6 +32,16 @@ interface ProcessResult {
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const AI_MODEL = process.env.OPENAI_MODEL || "google/gemini-2.0-flash-lite-001";
+
+function interpolate(
+  template: string,
+  values: Record<string, string | number>
+) {
+  return Object.entries(values).reduce(
+    (message, [key, value]) => message.replaceAll(`{${key}}`, String(value)),
+    template
+  );
+}
 
 // Función para limpiar asteriscos de las opciones
 function cleanOptionsFromMarkers(preguntas: ImportedQuestion[]): ImportedQuestion[] {
@@ -77,11 +93,12 @@ async function processPDFWithAI(
             content: `Eres un asistente que ayuda a extraer preguntas de exámenes académicos y sus opciones de respuesta en formato JSON. 
                       Tu tarea es identificar las preguntas, todas sus opciones y marcar cuál es la respuesta correcta que está claramente marcada o resaltada en el documento.
                       
-                      IMPORTANTE:
-                      1. Si el documento adjunto está vacío o no contiene preguntas, devuelve un array vacío: []
-                      2. No inventes preguntas ni respuestas que no estén en el documento
-                      3. Si la respuesta correcta no está claramente marcada, establece "respuesta_correcta" como null
-                      4. Si la respuesta correcta está claramente marcada.
+                       IMPORTANTE:
+                       1. Si el documento adjunto está vacío o no contiene preguntas, devuelve un array vacío: []
+                       2. No inventes preguntas ni respuestas que no estén en el documento
+                       3. Si la respuesta correcta no está claramente marcada, establece "respuesta_correcta" como null
+                       4. Cada pregunta debe tener entre 2 y 4 opciones de respuesta, nunca menos ni más
+                       5. Si la respuesta correcta está claramente marcada.
                       
                       El formato de salida debe ser un array de objetos JSON con la siguiente estructura:
                       [
@@ -196,7 +213,8 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
     2. Si una opción está claramente marcada como correcta (con un asterisco * al inicio o final del texto de la respuesta), indícalo en 'respuesta_correcta' e INCLUYE el asterisco en el texto de la opción
     3. No analices el texto de las preguntas para identificar la respuesta correcta, solo analiza si alguna opción está marcada con asterisco. Si no está marcada ninguna, establece 'respuesta_correcta' como null
     4. Los asteriscos serán removidos automáticamente después, así que DEBES incluirlos en el texto de las opciones si están presentes
-    5. Devuelve SOLO un objeto JSON válido con el siguiente formato exacto:
+    5. Cada pregunta debe tener entre 2 y 4 opciones de respuesta, nunca menos ni más
+    6. Devuelve SOLO un objeto JSON válido con el siguiente formato exacto:
     
     {
       "preguntas": [
@@ -326,11 +344,13 @@ async function processPDF(
 }
 
 export async function POST(request: NextRequest) {
+  const { t } = await getApiTranslator(request, "import-exam");
+
   try {
     logger.api("Import Exam - Inicio de solicitud", { url: request.url });
     if (!OPENROUTER_API_KEY) {
       return NextResponse.json(
-        { message: "API Key de OpenRouter no configurada" },
+        { message: t("errors.missingApiKey", "OpenRouter API key is not configured") },
         { status: 500 }
       );
     }
@@ -340,7 +360,7 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
-        { message: "No se proporcionó archivo" },
+        { message: t("errors.missingFile", "No file provided") },
         { status: 400 }
       );
     }
@@ -354,7 +374,7 @@ export async function POST(request: NextRequest) {
 
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { message: "Tipo de archivo no soportado. Use PDF, DOC o DOCX." },
+        { message: t("errors.unsupportedFile", "Unsupported file type. Use PDF, DOC or DOCX.") },
         { status: 400 }
       );
     }
@@ -362,7 +382,7 @@ export async function POST(request: NextRequest) {
     // Validar tamaño (10MB max)
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { message: "El archivo es demasiado grande. Máximo 10MB." },
+        { message: t("errors.fileTooLarge", "The file is too large. Maximum 10MB.") },
         { status: 400 }
       );
     }
@@ -382,6 +402,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear el resultado final
+    const invalidQuestions = getImportedQuestionOptionCountIssues(preguntas);
+    if (invalidQuestions.length > 0) {
+      return NextResponse.json(
+        {
+          message: interpolate(
+            t(
+              "errors.invalidOptionCount",
+              `Each question must have between ${MIN_QUESTION_OPTIONS} and ${MAX_QUESTION_OPTIONS} answer options.`
+            ),
+            { min: MIN_QUESTION_OPTIONS, max: MAX_QUESTION_OPTIONS }
+          ),
+          invalidQuestions: invalidQuestions.map((question) => ({
+            numero: question.index + 1,
+            optionCount: question.optionCount,
+            message: interpolate(
+              t(
+                "errors.invalidOptionCountQuestion",
+                `Question ${question.index + 1} has ${question.optionCount} answer options. It must have between ${MIN_QUESTION_OPTIONS} and ${MAX_QUESTION_OPTIONS}.`
+              ),
+              {
+                question: question.index + 1,
+                count: question.optionCount,
+                min: MIN_QUESTION_OPTIONS,
+                max: MAX_QUESTION_OPTIONS,
+              }
+            ),
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
     const result: ProcessResult = {
       total_preguntas: preguntas.length,
       preguntas: preguntas,
@@ -403,13 +455,13 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof Error) {
       return NextResponse.json(
-        { message: `Error al procesar archivo: ${error.message}` },
+        { message: `${t("errors.processingFile", "Error processing file")}: ${error.message}` },
         { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { message: "Error interno del servidor" },
+      { message: t("errors.internal", "Internal server error") },
       { status: 500 }
     );
   }

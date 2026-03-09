@@ -37,6 +37,12 @@ interface ImportResult {
   preguntas: ImportedQuestion[];
 }
 
+interface ImportValidationIssue {
+  numero: number;
+  optionCount: number;
+  message: string;
+}
+
 interface ImportExamDialogProps {
   _open: boolean;
   onOpenChange: (_open: boolean) => void;
@@ -53,6 +59,7 @@ export default function ImportExamDialog({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [processedData, setProcessedData] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [invalidQuestions, setInvalidQuestions] = useState<ImportValidationIssue[]>([]);
   const [processingStage, setProcessingStage] = useState(0);
   const [tipIndex, setTipIndex] = useState(0);
   const [estimatedSeconds, setEstimatedSeconds] = useState(0);
@@ -116,6 +123,7 @@ export default function ImportExamDialog({
     setIsUploading(true);
     setUploadProgress(0);
     setError(null);
+    setInvalidQuestions([]);
     setProcessedData(null);
     setProcessingStage(0);
     setTipIndex(0);
@@ -154,16 +162,18 @@ export default function ImportExamDialog({
 
       if (!response.ok) {
         const errorData = await response.json();
+        setInvalidQuestions(Array.isArray(errorData.invalidQuestions) ? errorData.invalidQuestions : []);
         throw new Error(errorData.message || t('errors.processingFile'));
       }
 
       const result = await response.json();
+      setInvalidQuestions([]);
       setProcessedData(result);
       toast.success(t('success.examProcessed', { count: result.total_preguntas }));
     } catch (error) {
       console.error('Error uploading file:', error);
       setError(error instanceof Error ? error.message : t('errors.unknown'));
-      toast.error(t('errors.processingFile'));
+      toast.error(error instanceof Error ? error.message : t('errors.processingFile'));
     } finally {
       setIsUploading(false);
     }
@@ -203,6 +213,7 @@ export default function ImportExamDialog({
     onOpenChange(false);
     setProcessedData(null);
     setError(null);
+    setInvalidQuestions([]);
     setUploadProgress(0);
   };
 
@@ -211,6 +222,7 @@ export default function ImportExamDialog({
     // Reset state
     setProcessedData(null);
     setError(null);
+    setInvalidQuestions([]);
     setUploadProgress(0);
     setIsUploading(false);
   };
@@ -266,6 +278,16 @@ export default function ImportExamDialog({
         )}
 
         <div className="space-y-4">
+          {!processedData && !isUploading && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <span className="font-medium">{t('requirements.title')}</span>{' '}
+                {t('requirements.optionRange', { min: 2, max: 4 })}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {!processedData && !isUploading && (
             <div
               {...getRootProps()}
@@ -347,7 +369,24 @@ export default function ImportExamDialog({
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                <div className="space-y-2">
+                  <p>{error}</p>
+                  {invalidQuestions.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="font-medium">{t('errors.invalidQuestionsTitle')}</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {invalidQuestions.map((question) => (
+                          <li key={`invalid-question-${question.numero}`}>
+                            {question.message}
+                          </li>
+                        ))}
+                      </ul>
+                      <p>{t('errors.invalidQuestionsHelp')}</p>
+                    </div>
+                  )}
+                </div>
+              </AlertDescription>
             </Alert>
           )}
 

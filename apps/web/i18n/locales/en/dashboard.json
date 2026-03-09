@@ -739,7 +739,13 @@
       },
       "errors": {
         "processingFile": "Error processing file",
-        "unknown": "Unknown error"
+        "unknown": "Unknown error",
+        "invalidQuestionsTitle": "Questions with an invalid number of options",
+        "invalidQuestionsHelp": "Fix those questions in the source document so each one has between 2 and 4 answer options, then try importing again."
+      },
+      "requirements": {
+        "title": "Important:",
+        "optionRange": "each question must have between {min} and {max} answer options for the exam to be imported."
       },
       "success": {
         "examProcessed": "Exam processed successfully: {count} questions found",

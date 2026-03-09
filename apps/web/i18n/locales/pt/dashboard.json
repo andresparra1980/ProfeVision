@@ -737,7 +737,13 @@
       },
       "errors": {
         "processingFile": "Erro ao processar o arquivo",
-        "unknown": "Erro desconhecido"
+        "unknown": "Erro desconhecido",
+        "invalidQuestionsTitle": "Perguntas com quantidade invalida de opcoes",
+        "invalidQuestionsHelp": "Corrija essas perguntas no documento de origem para que cada uma tenha entre 2 e 4 opcoes de resposta e tente importar novamente."
+      },
+      "requirements": {
+        "title": "Importante:",
+        "optionRange": "cada pergunta deve ter entre {min} e {max} opcoes de resposta para que o exame possa ser importado."
       },
       "success": {
         "examProcessed": "Exame processado com sucesso: {count} perguntas encontradas",

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import logger from "@/lib/utils/logger";
+import { hasValidGeneratedOptionCount } from "@/lib/exams/question-option-validation";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4";
@@ -159,6 +160,14 @@ export async function POST(req: NextRequest) {
           )
         : [],
     };
+
+    if (!hasValidGeneratedOptionCount(pregunta.opciones)) {
+      return NextResponse.json(
+        { error: "La IA devolvio una cantidad invalida de opciones. Deben ser entre 2 y 4." },
+        { status: 422 }
+      );
+    }
+
     return NextResponse.json(pregunta);
   } catch (error) {
     logger.error("Error en generación IA", error);

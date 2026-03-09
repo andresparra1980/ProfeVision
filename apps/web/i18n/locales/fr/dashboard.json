@@ -739,7 +739,13 @@
       },
       "errors": {
         "processingFile": "Erreur lors du traitement du fichier",
-        "unknown": "Erreur inconnue"
+        "unknown": "Erreur inconnue",
+        "invalidQuestionsTitle": "Questions avec un nombre invalide d'options",
+        "invalidQuestionsHelp": "Corrigez ces questions dans le document source pour que chacune ait entre 2 et 4 options de reponse, puis reessayez l'importation."
+      },
+      "requirements": {
+        "title": "Important :",
+        "optionRange": "chaque question doit avoir entre {min} et {max} options de reponse pour que l'examen puisse etre importe."
       },
       "success": {
         "examProcessed": "Examen traité avec succès : {count} questions trouvées",
