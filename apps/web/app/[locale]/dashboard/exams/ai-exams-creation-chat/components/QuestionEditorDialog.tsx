@@ -177,7 +177,7 @@ export default function QuestionEditorDialog({
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" className="rounded-full" onClick={handleBack}>
             <ArrowLeft className="mr-1 h-4 w-4" />
-            {t("editor.cancel")}
+            {t("editor.back", { fallback: "Back" })}
           </Button>
           <Button
             variant="ghost"

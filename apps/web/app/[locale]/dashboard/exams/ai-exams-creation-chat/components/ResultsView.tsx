@@ -39,6 +39,8 @@ export default function ResultsView({
   onEditingStateChange,
 }: ResultsViewProps) {
   const { result, setResult } = useAIChat();
+  const [openAccordionItem, setOpenAccordionItem] = useState<string>("q-0");
+  const [accordionBeforeEdit, setAccordionBeforeEdit] = useState<string>("q-0");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
@@ -114,6 +116,7 @@ export default function ResultsView({
   }
 
   function openEditor(idx: number) {
+    setAccordionBeforeEdit(openAccordionItem || `q-${idx}`);
     setEditingIndex(idx);
   }
 
@@ -135,10 +138,12 @@ export default function ResultsView({
     });
 
     setEditingIndex(null);
+    setOpenAccordionItem(accordionBeforeEdit || `q-${editingIndex}`);
   }
 
   function closeEditor() {
     setEditingIndex(null);
+    setOpenAccordionItem(accordionBeforeEdit || "q-0");
   }
 
   function openDeleteDialog(idx: number) {
@@ -236,7 +241,13 @@ export default function ResultsView({
 
       {/* Accordion with questions */}
       {!!questions.length && (
-        <Accordion type="single" collapsible defaultValue={`q-0`} className="w-full space-y-3">
+        <Accordion
+          type="single"
+          collapsible
+          value={openAccordionItem}
+          onValueChange={setOpenAccordionItem}
+          className="w-full space-y-3"
+        >
           {questions.map((q: ExamQuestion, idx: number) => {
             const isMC = q?.type === "multiple_choice";
             const title = q?.prompt || `Pregunta ${idx + 1}`;
