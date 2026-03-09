@@ -324,6 +324,7 @@
         "questionRequired": "El texto de la pregunta es obligatorio",
         "optionsRequired": "Debes agregar al menos una opción con texto",
         "optionCountRange": "La pregunta {question} debe tener entre {min} y {max} opciones de respuesta.",
+        "correctOptionRequired": "Debes seleccionar una opción correcta con texto.",
         "cantPublishNoQuestions": "No puedes publicar un examen sin preguntas"
       },
       "messages": {

@@ -290,6 +290,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           orden: index + 1
         }));
 
+      if (!validOptions.some((option) => option.es_correcta)) {
+        toast.error("Error", {
+          description: t('validation.correctOptionRequired'),
+        });
+        return;
+      }
+
       // Insertar opciones de respuesta
       if (validOptions.length > 0) {
         const { error: optionsError } = await supabase

@@ -61,4 +61,39 @@ describe("question option validation", () => {
   it("rejects generated questions with fewer than 2 options", () => {
     expect(hasValidGeneratedOptionCount([{ texto: "A" }])).toBe(false);
   });
+
+  it("accepts generated questions with exactly 2 and 4 options", () => {
+    expect(
+      hasValidGeneratedOptionCount([{ texto: "A" }, { texto: "B" }])
+    ).toBe(true);
+    expect(
+      hasValidGeneratedOptionCount([
+        { texto: "A" },
+        { texto: "B" },
+        { texto: "C" },
+        { texto: "D" },
+      ])
+    ).toBe(true);
+  });
+
+  it("returns issue for a question with one option", () => {
+    expect(
+      getQuestionOptionCountError([
+        {
+          texto: "Pregunta invalida",
+          opciones: [{ texto: "A" }],
+        },
+      ])
+    ).toEqual({ index: 0, optionCount: 1 });
+  });
+
+  it("handles empty, null and undefined inputs", () => {
+    expect(hasValidGeneratedOptionCount([])).toBe(false);
+    expect(hasValidGeneratedOptionCount(null)).toBe(false);
+    expect(hasValidGeneratedOptionCount(undefined)).toBe(false);
+
+    expect(getQuestionOptionCountError([])).toBeNull();
+    expect(getQuestionOptionCountError(null)).toBeNull();
+    expect(getQuestionOptionCountError(undefined)).toBeNull();
+  });
 });

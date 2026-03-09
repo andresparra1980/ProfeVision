@@ -165,9 +165,9 @@ export default function ImportExamDialog({
 
       if (!response.ok) {
         const errorData = await response.json();
-        setInvalidQuestions(Array.isArray(errorData.invalidQuestions) ? errorData.invalidQuestions : []);
 
         if (response.status === 400 && Array.isArray(errorData.invalidQuestions)) {
+          setInvalidQuestions(errorData.invalidQuestions);
           setError(errorData.message || t('errors.processingFile'));
           return;
         }

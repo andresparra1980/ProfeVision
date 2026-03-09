@@ -111,12 +111,17 @@ function sanitizeImportedQuestions(rawQuestions: unknown[]): ImportedQuestion[] 
       respuestaCorrecta = llmCorrectKey;
     }
 
+    const normalizedNumber =
+      typeof raw.numero === "number" && Number.isFinite(raw.numero)
+        ? raw.numero
+        : index + 1;
+
     return {
-      numero: raw.numero ?? index + 1,
-      pregunta: raw.pregunta || "",
+      numero: normalizedNumber,
+      pregunta: String(raw.pregunta ?? ""),
       opciones,
       respuesta_correcta: respuestaCorrecta,
-      razon: raw.razon,
+      razon: String(raw.razon ?? ""),
     };
   });
 }
@@ -478,22 +483,26 @@ export async function POST(request: NextRequest) {
             ),
             { min: MIN_QUESTION_OPTIONS, max: MAX_QUESTION_OPTIONS }
           ),
-          invalidQuestions: invalidQuestions.map((question) => ({
-            numero: question.index + 1,
-            optionCount: question.optionCount,
-            message: interpolate(
-              t(
-                "errors.invalidOptionCountQuestion",
-                `Question ${question.index + 1} has ${question.optionCount} answer options. It must have between ${MIN_QUESTION_OPTIONS} and ${MAX_QUESTION_OPTIONS}.`
+          invalidQuestions: invalidQuestions.map((question) => {
+            const numero = preguntas[question.index]?.numero ?? question.index + 1;
+
+            return {
+              numero,
+              optionCount: question.optionCount,
+              message: interpolate(
+                t(
+                  "errors.invalidOptionCountQuestion",
+                  `Question ${numero} has ${question.optionCount} answer options. It must have between ${MIN_QUESTION_OPTIONS} and ${MAX_QUESTION_OPTIONS}.`
+                ),
+                {
+                  question: numero,
+                  count: question.optionCount,
+                  min: MIN_QUESTION_OPTIONS,
+                  max: MAX_QUESTION_OPTIONS,
+                }
               ),
-              {
-                question: question.index + 1,
-                count: question.optionCount,
-                min: MIN_QUESTION_OPTIONS,
-                max: MAX_QUESTION_OPTIONS,
-              }
-            ),
-          })),
+            };
+          }),
         },
         { status: 400 }
       );

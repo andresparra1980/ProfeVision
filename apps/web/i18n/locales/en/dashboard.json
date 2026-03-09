@@ -324,6 +324,7 @@
         "questionRequired": "Question text is required",
         "optionsRequired": "You must add at least one option with text",
         "optionCountRange": "Question {question} must have between {min} and {max} answer options.",
+        "correctOptionRequired": "You must select a correct option with text.",
         "cantPublishNoQuestions": "You cannot publish an exam without questions"
       },
       "messages": {

@@ -39,6 +39,9 @@ export function useSummaryDialog({
       availableSummaryDocIds[0] ??
       documentIds[0] ??
       null;
+
+    setSummaryContent(null);
+    setSummaryLoading(!!id);
     setSummaryOpen(true);
     setSummaryDocId(id);
   };
