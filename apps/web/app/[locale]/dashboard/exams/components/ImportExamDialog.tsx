@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useDropzone } from "react-dropzone";
 import { Upload, FileText, AlertCircle, CheckCircle, HelpCircle } from "lucide-react";
@@ -49,6 +49,30 @@ interface ImportExamDialogProps {
   onImportSuccess: (_examData: ImportResult & { importId: string }) => void;
 }
 
+function parseResponseBody(rawBody: string, contentType: string): unknown {
+  const trimmedBody = rawBody.trim();
+  if (!trimmedBody) return null;
+
+  const shouldParseAsJson = contentType.includes('application/json');
+  if (shouldParseAsJson) {
+    try {
+      return JSON.parse(trimmedBody);
+    } catch {
+      return trimmedBody;
+    }
+  }
+
+  try {
+    return JSON.parse(trimmedBody);
+  } catch {
+    return trimmedBody;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
 export default function ImportExamDialog({ 
   _open, 
   onOpenChange, 
@@ -65,6 +89,7 @@ export default function ImportExamDialog({
   const [tipIndex, setTipIndex] = useState(0);
   const [estimatedSeconds, setEstimatedSeconds] = useState(0);
   const [showFormatExample, setShowFormatExample] = useState(false);
+  const uploadAbortControllerRef = useRef<AbortController | null>(null);
   
   // Mensajes para cada etapa del procesamiento
   const stageMessages = [
@@ -117,9 +142,28 @@ export default function ImportExamDialog({
     };
   }, [isUploading, processingTips.length, stageMessages.length]);
 
+  const resetDialogState = useCallback(() => {
+    setProcessedData(null);
+    setError(null);
+    setInvalidQuestions([]);
+    setUploadProgress(0);
+    setIsUploading(false);
+  }, []);
+
+  const abortCurrentUpload = useCallback(() => {
+    if (uploadAbortControllerRef.current) {
+      uploadAbortControllerRef.current.abort();
+      uploadAbortControllerRef.current = null;
+    }
+  }, []);
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
+
+    abortCurrentUpload();
+    const uploadAbortController = new AbortController();
+    uploadAbortControllerRef.current = uploadAbortController;
 
     setIsUploading(true);
     setUploadProgress(0);
@@ -161,25 +205,59 @@ export default function ImportExamDialog({
           'x-next-intl-locale': locale,
         },
         body: formData,
+        signal: uploadAbortController.signal,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      const responseContentType = response.headers.get('content-type') || '';
+      const responseRawBody = await response.text();
+      const parsedBody = parseResponseBody(responseRawBody, responseContentType);
+      const parsedBodyRecord = isRecord(parsedBody) ? parsedBody : null;
+      const fallbackMessage = t('errors.processingFile');
+      const parsedMessage =
+        typeof parsedBodyRecord?.message === 'string' && parsedBodyRecord.message.trim()
+          ? parsedBodyRecord.message
+          : typeof parsedBody === 'string' && parsedBody.trim()
+          ? parsedBody
+          : fallbackMessage;
 
-        if (response.status === 400 && Array.isArray(errorData.invalidQuestions)) {
-          setInvalidQuestions(errorData.invalidQuestions);
-          setError(errorData.message || t('errors.processingFile'));
+      if (!response.ok) {
+        if (response.status === 400 && Array.isArray(parsedBodyRecord?.invalidQuestions)) {
+          setInvalidQuestions(parsedBodyRecord.invalidQuestions as ImportValidationIssue[]);
+          setError(parsedMessage);
           return;
         }
 
-        throw new Error(errorData.message || t('errors.processingFile'));
+        throw new Error(parsedMessage);
       }
 
-      const result = await response.json();
+      if (uploadAbortController.signal.aborted) {
+        return;
+      }
+
+      if (!parsedBodyRecord) {
+        throw new Error(fallbackMessage);
+      }
+
+      if (typeof parsedBodyRecord.total_preguntas !== 'number' || !Array.isArray(parsedBodyRecord.preguntas)) {
+        throw new Error(fallbackMessage);
+      }
+
+      const result: ImportResult = {
+        total_preguntas: parsedBodyRecord.total_preguntas as number,
+        preguntas: parsedBodyRecord.preguntas as ImportedQuestion[],
+      };
       setInvalidQuestions([]);
       setProcessedData(result);
       toast.success(t('success.examProcessed', { count: result.total_preguntas }));
     } catch (error) {
+      if (uploadAbortController.signal.aborted) {
+        return;
+      }
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+
       console.error('Error uploading file:', error);
       setError(error instanceof Error ? error.message : t('errors.unknown'));
       toast.error(error instanceof Error ? error.message : t('errors.processingFile'));
@@ -187,10 +265,16 @@ export default function ImportExamDialog({
       if (progressInterval) {
         clearInterval(progressInterval);
       }
-      setUploadProgress(100);
-      setIsUploading(false);
+      if (!uploadAbortController.signal.aborted) {
+        setUploadProgress(100);
+        setIsUploading(false);
+      }
+
+      if (uploadAbortControllerRef.current === uploadAbortController) {
+        uploadAbortControllerRef.current = null;
+      }
     }
-  }, [locale, t]);
+  }, [abortCurrentUpload, locale, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -224,24 +308,31 @@ export default function ImportExamDialog({
 
     // Cerrar el diálogo y restablecer estado
     onOpenChange(false);
-    setProcessedData(null);
-    setError(null);
-    setInvalidQuestions([]);
-    setUploadProgress(0);
+    resetDialogState();
   };
 
   const handleClose = () => {
+    abortCurrentUpload();
     onOpenChange(false);
-    // Reset state
-    setProcessedData(null);
-    setError(null);
-    setInvalidQuestions([]);
-    setUploadProgress(0);
-    setIsUploading(false);
+    resetDialogState();
   };
 
+  const handleDialogOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      abortCurrentUpload();
+      resetDialogState();
+    }
+    onOpenChange(open);
+  }, [abortCurrentUpload, onOpenChange, resetDialogState]);
+
+  useEffect(() => {
+    return () => {
+      abortCurrentUpload();
+    };
+  }, [abortCurrentUpload]);
+
   return (
-    <Dialog open={_open} onOpenChange={onOpenChange}>
+    <Dialog open={_open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <div className="flex items-center justify-between">

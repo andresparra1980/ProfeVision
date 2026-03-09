@@ -79,7 +79,8 @@ function normalizeCorrectKey(value: unknown): string | null {
 
 function optionHasMarker(optionText: string | undefined): boolean {
   if (!optionText) return false;
-  return /^\*+/.test(optionText.trim()) || /\*+$/.test(optionText.trim());
+  const text = optionText.trim();
+  return /^\*+/.test(text) || /\*+$/.test(text);
 }
 
 function sanitizeImportedQuestions(rawQuestions: unknown[]): ImportedQuestion[] {
