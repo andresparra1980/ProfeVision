@@ -26,8 +26,8 @@ function countNonEmptyTexts(values: Array<string | null | undefined>) {
 
 function getInvalidQuestionOptionCounts(
   preguntas: ExamQuestion[] | ImportedQuestion[] | null | undefined,
-  getQuestionText: (pregunta: ExamQuestion | ImportedQuestion) => string,
-  getOptionValues: (pregunta: ExamQuestion | ImportedQuestion) => Array<string | null | undefined>
+  getQuestionText: (_pregunta: ExamQuestion | ImportedQuestion) => string,
+  getOptionValues: (_pregunta: ExamQuestion | ImportedQuestion) => Array<string | null | undefined>
 ): InvalidQuestionOptionCount[] {
   if (!Array.isArray(preguntas)) return [];
 
