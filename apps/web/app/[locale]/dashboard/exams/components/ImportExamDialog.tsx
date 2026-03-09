@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useDropzone } from "react-dropzone";
 import { Upload, FileText, AlertCircle, CheckCircle, HelpCircle } from "lucide-react";
 import Image from "next/image";
@@ -55,6 +55,7 @@ export default function ImportExamDialog({
   onImportSuccess 
 }: ImportExamDialogProps) {
   const t = useTranslations('dashboard.exams.import');
+  const locale = useLocale();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [processedData, setProcessedData] = useState<ImportResult | null>(null);
@@ -152,8 +153,11 @@ export default function ImportExamDialog({
         });
       }, 200);
 
-      const response = await fetch('/api/import-exam', {
+      const response = await fetch(`/api/import-exam?locale=${locale}`, {
         method: 'POST',
+        headers: {
+          'x-next-intl-locale': locale,
+        },
         body: formData,
       });
 
@@ -163,6 +167,12 @@ export default function ImportExamDialog({
       if (!response.ok) {
         const errorData = await response.json();
         setInvalidQuestions(Array.isArray(errorData.invalidQuestions) ? errorData.invalidQuestions : []);
+
+        if (response.status === 400 && Array.isArray(errorData.invalidQuestions)) {
+          setError(errorData.message || t('errors.processingFile'));
+          return;
+        }
+
         throw new Error(errorData.message || t('errors.processingFile'));
       }
 
@@ -177,7 +187,7 @@ export default function ImportExamDialog({
     } finally {
       setIsUploading(false);
     }
-  }, [t]);
+  }, [locale, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

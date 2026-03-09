@@ -28,6 +28,14 @@ interface ProcessResult {
   preguntas: ImportedQuestion[];
 }
 
+type RawImportedQuestion = {
+  numero?: number;
+  pregunta?: string;
+  opciones?: Record<string, string | undefined>;
+  respuesta_correcta?: unknown;
+  razon?: string;
+};
+
 // Configuración de OpenRouter
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -56,6 +64,52 @@ function cleanOptionsFromMarkers(preguntas: ImportedQuestion[]): ImportedQuestio
       return acc;
     }, {} as typeof pregunta.opciones)
   }));
+}
+
+function normalizeCorrectKey(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return null;
+  const letter = normalized[0];
+  return /^[a-z]$/.test(letter) ? letter : null;
+}
+
+function optionHasMarker(optionText: string | undefined): boolean {
+  if (!optionText) return false;
+  return /^\*+/.test(optionText.trim()) || /\*+$/.test(optionText.trim());
+}
+
+function sanitizeImportedQuestions(rawQuestions: unknown[]): ImportedQuestion[] {
+  return rawQuestions.map((question, index) => {
+    const raw = (question || {}) as RawImportedQuestion;
+    const rawOptions = raw.opciones || {};
+    const opciones: ImportedQuestion["opciones"] = {
+      a: rawOptions.a || "",
+      b: rawOptions.b || "",
+      ...rawOptions,
+    };
+    const optionKeys = Object.keys(opciones).map((key) => key.toLowerCase());
+
+    const markedKeys = optionKeys.filter((key) => optionHasMarker(opciones[key]));
+    const llmCorrectKey = normalizeCorrectKey(raw.respuesta_correcta);
+    const hasValidLlmKey = !!llmCorrectKey && optionKeys.includes(llmCorrectKey);
+
+    let respuestaCorrecta: string | null = null;
+
+    if (markedKeys.length === 1 && (!hasValidLlmKey || llmCorrectKey === markedKeys[0])) {
+      respuestaCorrecta = markedKeys[0];
+    } else if (markedKeys.length === 0 && hasValidLlmKey) {
+      respuestaCorrecta = llmCorrectKey;
+    }
+
+    return {
+      numero: raw.numero ?? index + 1,
+      pregunta: raw.pregunta || "",
+      opciones,
+      respuesta_correcta: respuestaCorrecta,
+      razon: raw.razon,
+    };
+  });
 }
 
 // Función para procesar PDFs con OpenRouter
@@ -98,7 +152,8 @@ async function processPDFWithAI(
                        2. No inventes preguntas ni respuestas que no estén en el documento
                        3. Si la respuesta correcta no está claramente marcada, establece "respuesta_correcta" como null
                        4. Cada pregunta debe tener entre 2 y 4 opciones de respuesta, nunca menos ni más
-                       5. Si la respuesta correcta está claramente marcada.
+                       5. Si detectas mas de una opcion marcada como correcta en la misma pregunta, establece "respuesta_correcta" como null
+                       6. Si la respuesta correcta está claramente marcada.
                       
                       El formato de salida debe ser un array de objetos JSON con la siguiente estructura:
                       [
@@ -171,7 +226,7 @@ async function processPDFWithAI(
     const result = JSON.parse(jsonString);
 
     // Asegurarse de que el resultado sea un array
-    let preguntas = [];
+    let preguntas: unknown[] = [];
 
     if (result.preguntas && Array.isArray(result.preguntas)) {
       preguntas = result.preguntas;
@@ -187,8 +242,8 @@ async function processPDFWithAI(
       primer_pregunta: preguntas.length > 0 ? preguntas[0] : null,
     });
 
-    // Limpiar asteriscos de las opciones
-    return cleanOptionsFromMarkers(preguntas);
+    // Normalizar respuesta correcta y limpiar asteriscos
+    return cleanOptionsFromMarkers(sanitizeImportedQuestions(preguntas));
   } catch (error) {
     logger.error("OpenRouter OCR - Error crítico", error);
     console.error("Error al procesar PDF con IA:", error);
@@ -214,7 +269,8 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
     3. No analices el texto de las preguntas para identificar la respuesta correcta, solo analiza si alguna opción está marcada con asterisco. Si no está marcada ninguna, establece 'respuesta_correcta' como null
     4. Los asteriscos serán removidos automáticamente después, así que DEBES incluirlos en el texto de las opciones si están presentes
     5. Cada pregunta debe tener entre 2 y 4 opciones de respuesta, nunca menos ni más
-    6. Devuelve SOLO un objeto JSON válido con el siguiente formato exacto:
+    6. Si detectas mas de una opcion marcada como correcta en la misma pregunta, establece 'respuesta_correcta' como null
+    7. Devuelve SOLO un objeto JSON válido con el siguiente formato exacto:
     
     {
       "preguntas": [
@@ -279,7 +335,7 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
     // Parsear la respuesta JSON
     const result = JSON.parse(responseContent);
 
-    let preguntas = [];
+    let preguntas: unknown[] = [];
 
     if (result.preguntas && Array.isArray(result.preguntas)) {
       preguntas = result.preguntas;
@@ -291,8 +347,8 @@ async function processTextWithAI(text: string): Promise<ImportedQuestion[]> {
       num_preguntas: preguntas.length,
     });
 
-    // Limpiar asteriscos de las opciones
-    return cleanOptionsFromMarkers(preguntas);
+    // Normalizar respuesta correcta y limpiar asteriscos
+    return cleanOptionsFromMarkers(sanitizeImportedQuestions(preguntas));
   } catch (error) {
     logger.error("OpenRouter Text - Error crítico", error);
     console.error("Error al procesar texto con IA:", error);
