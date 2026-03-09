@@ -44,7 +44,11 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
-      <div className="h-full min-h-0 overflow-y-auto px-1">
+      <div
+        className="h-full min-h-0 overflow-y-auto px-1"
+        tabIndex={0}
+        aria-label="Dialog Content"
+      >
         {children}
       </div>
       {!hideCloseButton && (
