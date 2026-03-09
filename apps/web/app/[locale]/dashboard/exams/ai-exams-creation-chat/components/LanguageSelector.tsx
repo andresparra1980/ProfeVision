@@ -35,19 +35,19 @@ export function LanguageSelector({ value, onValueChange }: LanguageSelectorProps
 
   const dropdownComponent = (
     <div className="hidden sm:flex sm:items-center sm:gap-2">
-      <span className="text-sm font-medium">{t("header.examLanguageLabel")}</span>
+      <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">{t("header.examLanguageLabel")}</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 w-[120px]"
+            className="w-[132px] rounded-full border-black/10 bg-white/85 shadow-sm hover:bg-white dark:border-white/10 dark:bg-zinc-900/80 dark:hover:bg-zinc-900"
           >
             <Globe className="h-4 w-4" />
             <span>{languageOptions.find(opt => opt.value === value)?.label}</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="rounded-2xl border-black/10 bg-white/95 shadow-xl dark:border-white/10 dark:bg-zinc-950/95">
           {languageOptions.map((option) => (
             <DropdownMenuItem
               key={option.value}

@@ -83,7 +83,7 @@ export function ProgressMessages({ messages, className = '' }: ProgressMessagesP
         return (
           <div
             key={msg.id}
-            className={`flex items-center gap-2 text-xs sm:text-sm text-white dark:text-foreground transition-all duration-300 ${
+            className={`flex items-center gap-2 text-xs text-foreground transition-all duration-300 sm:text-sm ${
               isVisible
                 ? 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-2'
@@ -104,7 +104,7 @@ export function ProgressMessages({ messages, className = '' }: ProgressMessagesP
             )}
             <span className="flex-1">{msg.text}</span>
             <span
-              className={`text-xs text-white/70 dark:text-foreground/70 flex-shrink-0 transition-opacity duration-300 ${
+              className={`text-xs text-muted-foreground flex-shrink-0 transition-opacity duration-300 ${
                 isVisible ? 'opacity-70' : 'opacity-0'
               }`}
             >

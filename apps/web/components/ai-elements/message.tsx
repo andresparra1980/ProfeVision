@@ -15,7 +15,7 @@ export type MessageProps = HTMLAttributes<HTMLDivElement> & {
 export const Message = ({ className, from, ...props }: MessageProps) => (
   <div
     className={cn(
-      "group flex w-full items-end justify-end gap-2 py-4",
+      "group flex w-full items-end justify-end gap-3 py-3 sm:py-4",
       from === "user" ? "is-user" : "is-assistant flex-row-reverse justify-end",
       className
     )}
@@ -24,23 +24,19 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
 );
 
 const messageContentVariants = cva(
-  "is-user:dark flex flex-col gap-2 overflow-hidden rounded-lg text-xs sm:text-sm",
+  "flex flex-col gap-2 overflow-hidden rounded-[22px] border text-sm leading-6 shadow-sm backdrop-blur-sm",
   {
     variants: {
       variant: {
         contained: [
-          "max-w-[80%] px-4 py-3",
-          // User bubble: Light -> white bg with black text; Dark -> near-black bg with white text
-          "group-[.is-user]:bg-black group-[.is-user]:text-white dark:group-[.is-user]:bg-zinc-100 dark:group-[.is-user]:text-zinc-900",
-          // Assistant bubble (LLM):
-          // Light mode: purple emphasis with white text; Dark mode: lighter purple with foreground text
-          "group-[.is-assistant]:bg-purple-600 group-[.is-assistant]:text-white dark:group-[.is-assistant]:bg-purple-500 dark:group-[.is-assistant]:text-foreground",
+          "max-w-[88%] px-4 py-3.5 sm:max-w-[82%] sm:px-5",
+          "group-[.is-user]:border-transparent group-[.is-user]:bg-[rgb(var(--chat-accent))] group-[.is-user]:text-white",
+          "group-[.is-assistant]:border-black/8 group-[.is-assistant]:bg-white/92 group-[.is-assistant]:text-foreground dark:group-[.is-assistant]:border-white/10 dark:group-[.is-assistant]:bg-zinc-900/92",
         ],
         flat: [
-          // User flat bubble mirrors contained colors
-          "group-[.is-user]:max-w-[80%] group-[.is-user]:bg-black group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-black dark:group-[.is-user]:bg-zinc-100 dark:group-[.is-user]:text-zinc-900",
-          // Assistant flat variant: purple text emphasis in both themes
-          "group-[.is-assistant]:text-purple-700 dark:group-[.is-assistant]:text-purple-400",
+          "max-w-[88%] border-transparent px-1 py-1 shadow-none sm:max-w-[82%]",
+          "group-[.is-user]:bg-transparent group-[.is-user]:text-[rgb(var(--chat-accent))] dark:group-[.is-user]:text-[rgb(var(--chat-accent-ink))]",
+          "group-[.is-assistant]:bg-transparent group-[.is-assistant]:text-muted-foreground",
         ],
       },
     },

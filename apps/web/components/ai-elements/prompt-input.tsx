@@ -437,7 +437,7 @@ export const PromptInput = ({
       />
       <form
         className={cn(
-          "w-full divide-y divide-zinc-400 dark:divide-border overflow-hidden rounded-xl border bg-background shadow-sm",
+          "w-full overflow-hidden rounded-[28px] border border-black/10 bg-white/95 shadow-[0_22px_60px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/90",
           className
         )}
         onSubmit={handleSubmit}
@@ -515,9 +515,9 @@ export const PromptInputTextarea = ({
   return (
     <Textarea
       className={cn(
-        "w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0",
+        "w-full resize-none rounded-none border-none px-4 py-4 shadow-none outline-none ring-0 sm:px-5 sm:py-5",
         "field-sizing-content bg-transparent dark:bg-transparent",
-        "max-h-48 min-h-16",
+        "max-h-56 min-h-20 text-[15px] leading-7",
         "focus-visible:ring-0",
         className
       )}
@@ -540,7 +540,7 @@ export const PromptInputToolbar = ({
   ...props
 }: PromptInputToolbarProps) => (
   <div
-    className={cn("flex items-center justify-between p-1", className)}
+    className={cn("flex items-center justify-between border-t border-black/5 px-3 py-3 dark:border-white/10 sm:px-4", className)}
     {...props}
   />
 );
@@ -553,8 +553,7 @@ export const PromptInputTools = ({
 }: PromptInputToolsProps) => (
   <div
     className={cn(
-      "flex items-center gap-1",
-      "[&_button:first-child]:rounded-bl-xl",
+      "flex items-center gap-2",
       className
     )}
     {...props}
@@ -575,7 +574,7 @@ export const PromptInputButton = ({
   return (
     <Button
       className={cn(
-        "shrink-0 gap-1.5 rounded-lg",
+        "shrink-0 gap-1.5 rounded-full",
         variant === "ghost" && "text-muted-foreground",
         newSize === "default" && "px-3",
         className
@@ -655,7 +654,7 @@ export const PromptInputSubmit = ({
 
   return (
     <Button
-      className={cn("gap-1.5 rounded-lg", className)}
+      className={cn("gap-1.5 rounded-full", className)}
       size={size}
       type="submit"
       variant={variant}

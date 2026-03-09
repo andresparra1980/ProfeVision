@@ -89,9 +89,9 @@ export function StepProgressList({
           className={cn(
             'flex items-start gap-3 text-sm transition-all duration-300',
             'animate-in fade-in slide-in-from-bottom-2',
-            step.status === 'completed' && 'text-white/80 dark:text-foreground/80',
-            step.status === 'in_progress' && 'text-white dark:text-foreground',
-            step.status === 'pending' && 'text-white/50 dark:text-foreground/50'
+            step.status === 'completed' && 'text-foreground/80',
+            step.status === 'in_progress' && 'text-foreground',
+            step.status === 'pending' && 'text-muted-foreground'
           )}
           style={{
             animationDelay: `${index * 50}ms`,
@@ -110,7 +110,7 @@ export function StepProgressList({
               <Loader2 className="w-5 h-5 text-primary animate-spin" />
             )}
             {step.status === 'pending' && (
-              <div className="w-5 h-5 rounded-full border-2 border-white/30 dark:border-foreground/30" />
+              <div className="w-5 h-5 rounded-full border-2 border-black/20 dark:border-white/20" />
             )}
           </div>
 
@@ -123,8 +123,7 @@ export function StepProgressList({
       {llmResponse && (
         <div
           className={cn(
-            'mt-4 pt-4 border-t border-white/10 dark:border-foreground/10',
-            'text-sm text-white/90 dark:text-foreground/90',
+            'mt-4 border-t border-black/10 pt-4 text-sm text-foreground/90 dark:border-white/10',
             'animate-in fade-in slide-in-from-bottom-2'
           )}
           style={{
