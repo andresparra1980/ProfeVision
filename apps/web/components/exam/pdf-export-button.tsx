@@ -92,7 +92,6 @@ interface PDFExportButtonProps {
   groupId?: string | null;
   fileName: string;
   buttonText?: string;
-  totalPreguntas?: number;
   resultados: ResultadoExamen[];
   examDetails: ExamDetails | null;
 }
@@ -107,7 +106,6 @@ export function PDFExportButton({
   groupId,
   fileName,
   buttonText = 'Reporte en PDF',
-  totalPreguntas = 0,
   resultados,
   examDetails
 }: PDFExportButtonProps) {
