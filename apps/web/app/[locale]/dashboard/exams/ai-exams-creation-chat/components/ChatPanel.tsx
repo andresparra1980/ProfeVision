@@ -237,6 +237,21 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   };
 
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const maxFileSizeBytes = 10 * 1024 * 1024;
+
+    if (file && file.size > maxFileSizeBytes) {
+      toast.error(t('context.uploadErrorTitle', { fallback: 'Error al subir' }), {
+        description: t('context.maxSizeError', { fallback: 'El archivo supera el máximo permitido de 10 MB.' }),
+      });
+      try {
+        e.target.value = '';
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+
     documentContext.onFileSelected(e, (msg) => {
       toast.error(t('context.uploadErrorTitle', { fallback: 'Error al subir' }), {
         description: msg,
@@ -428,6 +443,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                   docMeta={documentContext.docMeta}
                   summariesAvailability={documentContext.summariesAvailability}
                   jobs={documentContext.jobs}
+                  pendingUploadFileName={documentContext.pendingUploadFileName}
                   onDelete={documentContext.onDeleteDoc}
                   isSending={isSending}
                   t={t}

@@ -27,8 +27,10 @@
     "loadingSummary": "Chargement du résumé...",
     "document": "Document",
     "limitDesc": "Seulement 5 documents sont autorisés.",
+    "processingNow": "Traitement...",
     "uploadErrorTitle": "Erreur lors du chargement du document",
-    "uploadError": "Impossible de charger le document. Vérifiez que le fichier est valide et qu'il possède un format pris en charge (PDF, DOCX, PPTX, images)."
+    "uploadError": "Impossible de charger le document. Vérifiez que le fichier est valide et qu'il possède un format pris en charge (PDF, DOCX, PPTX, images).",
+    "maxSizeError": "Le fichier dépasse la taille maximale autorisée de 10 Mo."
   },
   "results": {
     "title": "Résultats",

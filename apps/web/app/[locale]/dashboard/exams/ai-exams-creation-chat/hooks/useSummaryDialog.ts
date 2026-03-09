@@ -23,8 +23,21 @@ export function useSummaryDialog({
     [documentIds, summariesAvailability]
   );
 
+  useEffect(() => {
+    if (!summaryDocId) return;
+    if (documentIds.includes(summaryDocId)) return;
+    setSummaryDocId(availableSummaryDocIds[0] ?? documentIds[0] ?? null);
+    setSummaryContent(null);
+  }, [summaryDocId, documentIds, availableSummaryDocIds]);
+
   const openSummaryDialog = async (targetId?: string) => {
-    const id = targetId ?? (summaryDocId ?? documentIds[0] ?? null);
+    const safeCurrentId = summaryDocId && documentIds.includes(summaryDocId) ? summaryDocId : null;
+    const id =
+      targetId ??
+      safeCurrentId ??
+      availableSummaryDocIds[0] ??
+      documentIds[0] ??
+      null;
     setSummaryDocId(id);
     setSummaryOpen(true);
     if (!id) return; // no documents yet
