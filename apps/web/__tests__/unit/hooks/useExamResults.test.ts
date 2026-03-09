@@ -47,7 +47,7 @@ describe('useExamResults', () => {
     },
   }
 
-  const mockPreguntasData = [{ orden: 10 }]
+  const mockPreguntasData = [{ orden: 10, habilitada: true }]
 
   const mockExamenGruposData = [
     { id: 'eg-1', grupo_id: 'grupo-1', grupos: { id: 'grupo-1', nombre: 'Grupo A' } },
@@ -135,8 +135,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -193,8 +192,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -250,8 +248,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -306,8 +303,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -350,8 +346,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -393,8 +388,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -456,8 +450,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -513,8 +506,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
