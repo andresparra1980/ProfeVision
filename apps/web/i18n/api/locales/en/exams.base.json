@@ -6,8 +6,8 @@
     "noUser": "Could not identify user",
     "missingFields": "Missing required fields (title or materia_id)",
     "missingGroup": "You must select a group",
+    "invalidOptionCount": "Question {question} must have between {min} and {max} answer options.",
     "createExam": "Failed to create exam"
   }
 }
-
 

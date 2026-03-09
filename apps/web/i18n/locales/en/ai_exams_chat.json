@@ -27,8 +27,10 @@
     "loadingSummary": "Loading summary...",
     "document": "Document",
     "limitDesc": "Only 5 documents are allowed.",
+    "processingNow": "Processing...",
     "uploadErrorTitle": "Error uploading document",
-    "uploadError": "Could not upload the document. Please verify that the file is valid and has a supported format (PDF, DOCX, PPTX, images)."
+    "uploadError": "Could not upload the document. Please verify that the file is valid and has a supported format (PDF, DOCX, PPTX, images).",
+    "maxSizeError": "The file exceeds the maximum allowed size of 10 MB."
   },
   "results": {
     "title": "Results",

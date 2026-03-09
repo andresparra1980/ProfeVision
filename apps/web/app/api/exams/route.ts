@@ -4,6 +4,18 @@ import { Database } from "@/lib/types/database";
 import logger from "@/lib/utils/logger";
 import { getApiTranslator } from '@/i18n/api';
 import { getPostHogClient } from '@/lib/posthog-server';
+import {
+  MAX_QUESTION_OPTIONS,
+  MIN_QUESTION_OPTIONS,
+  getQuestionOptionCountError,
+} from "@/lib/exams/question-option-validation";
+
+function interpolate(template: string, values: Record<string, string | number>) {
+  return Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{${key}}`, String(value)),
+    template
+  );
+}
 
 // Endpoint de diagnóstico para verificar que las rutas base de API están accesibles
 export async function GET() {
@@ -155,6 +167,27 @@ export async function POST(request: Request) {
       );
     }
 
+    const optionCountIssue = getQuestionOptionCountError(preguntas);
+    if (optionCountIssue) {
+      const { t } = await getApiTranslator(request, 'exams.base');
+      return NextResponse.json(
+        {
+          error: interpolate(
+            t(
+              'errors.invalidOptionCount',
+              `Question {question} must have between {min} and {max} answer options.`
+            ),
+            {
+              question: optionCountIssue.index + 1,
+              min: MIN_QUESTION_OPTIONS,
+              max: MAX_QUESTION_OPTIONS,
+            }
+          ),
+        },
+        { status: 400 }
+      );
+    }
+
     logger.log("Creando examen con profesor_id:", profesor_id);
 
     // Insertar el examen con los nombres de columnas correctos
@@ -252,10 +285,13 @@ export async function POST(request: Request) {
 
         // Si hay opciones, las procesamos
         if (pregunta.opciones && Array.isArray(pregunta.opciones)) {
+          const opcionesValidas = pregunta.opciones.filter(
+            (opcion) => opcion.texto && opcion.texto.trim() !== ""
+          );
           let ordenActual = 1; // Inicializamos el contador de orden
 
-          for (let j = 0; j < pregunta.opciones.length; j++) {
-            const opcion = pregunta.opciones[j];
+          for (let j = 0; j < opcionesValidas.length; j++) {
+            const opcion = opcionesValidas[j];
 
             // Solo creamos la opción si tiene texto
             if (opcion.texto && opcion.texto.trim() !== "") {

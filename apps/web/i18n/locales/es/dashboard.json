@@ -151,7 +151,8 @@
       "subjectRequired": "La materia es requerida",
       "groupRequired": "El grupo es requerido",
       "durationRequired": "La duración es requerida",
-      "durationMin": "La duración debe ser mayor a 0 minutos"
+      "durationMin": "La duración debe ser mayor a 0 minutos",
+      "optionCountRange": "La pregunta {question} debe tener entre {min} y {max} opciones de respuesta."
     },
     "messages": {
       "loadingError": "Error al cargar exámenes",
@@ -322,6 +323,8 @@
       "validation": {
         "questionRequired": "El texto de la pregunta es obligatorio",
         "optionsRequired": "Debes agregar al menos una opción con texto",
+        "optionCountRange": "La pregunta {question} debe tener entre {min} y {max} opciones de respuesta.",
+        "correctOptionRequired": "Debes seleccionar una opción correcta con texto.",
         "cantPublishNoQuestions": "No puedes publicar un examen sin preguntas"
       },
       "messages": {
@@ -739,7 +742,13 @@
       },
       "errors": {
         "processingFile": "Error al procesar el archivo",
-        "unknown": "Error desconocido"
+        "unknown": "Error desconocido",
+        "invalidQuestionsTitle": "Preguntas con cantidad inválida de opciones",
+        "invalidQuestionsHelp": "Corrige esas preguntas en el documento para que cada una tenga entre 2 y 4 opciones de respuesta e intenta importar de nuevo."
+      },
+      "requirements": {
+        "title": "Importante:",
+        "optionRange": "cada pregunta debe tener entre {min} y {max} opciones de respuesta para que el examen pueda importarse."
       },
       "success": {
         "examProcessed": "Examen procesado exitosamente: {count} preguntas encontradas",

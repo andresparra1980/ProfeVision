@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "missingApiKey": "OpenRouter API key is not configured",
+    "missingFile": "No file was provided",
+    "unsupportedFile": "Unsupported file type. Use PDF, DOC or DOCX.",
+    "fileTooLarge": "The file is too large. Maximum 10MB.",
+    "processingFile": "Error processing file",
+    "internal": "Internal server error",
+    "invalidOptionCount": "Each question must have between {min} and {max} answer options to be imported.",
+    "invalidOptionCountQuestion": "Question {question} has {count} answer options. It must have between {min} and {max}."
+  }
+}

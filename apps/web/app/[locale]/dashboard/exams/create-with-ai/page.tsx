@@ -27,6 +27,11 @@ import { AuroraText } from "@/components/magicui/aurora-text";
 import { useTheme } from 'next-themes';
 import { ModalGenerateAI } from '@/components/exam/modal-generate-ai';
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
+import {
+  MAX_QUESTION_OPTIONS,
+  MIN_QUESTION_OPTIONS,
+  getQuestionOptionCountError,
+} from "@/lib/exams/question-option-validation";
 // Tipos
 type Materia = {
   id: string;
@@ -413,6 +418,17 @@ export default function CreateExamPage() {
   const onSubmit = async (data: ExamFormValues) => {
     try {
       setLoading(true);
+      const optionCountIssue = getQuestionOptionCountError(preguntas);
+      if (optionCountIssue) {
+        throw new Error(
+          t('validation.optionCountRange', {
+            question: optionCountIssue.index + 1,
+            min: MIN_QUESTION_OPTIONS,
+            max: MAX_QUESTION_OPTIONS,
+          })
+        );
+      }
+
       // Obtener la sesión actual
       const { data: { session } } = await supabase.auth.getSession();
       

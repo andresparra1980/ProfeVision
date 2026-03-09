@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useDropzone } from "react-dropzone";
 import { Upload, FileText, AlertCircle, CheckCircle, HelpCircle } from "lucide-react";
 import Image from "next/image";
@@ -37,10 +37,40 @@ interface ImportResult {
   preguntas: ImportedQuestion[];
 }
 
+interface ImportValidationIssue {
+  numero: number;
+  optionCount: number;
+  message: string;
+}
+
 interface ImportExamDialogProps {
   _open: boolean;
   onOpenChange: (_open: boolean) => void;
   onImportSuccess: (_examData: ImportResult & { importId: string }) => void;
+}
+
+function parseResponseBody(rawBody: string, contentType: string): unknown {
+  const trimmedBody = rawBody.trim();
+  if (!trimmedBody) return null;
+
+  const shouldParseAsJson = contentType.includes('application/json');
+  if (shouldParseAsJson) {
+    try {
+      return JSON.parse(trimmedBody);
+    } catch {
+      return trimmedBody;
+    }
+  }
+
+  try {
+    return JSON.parse(trimmedBody);
+  } catch {
+    return trimmedBody;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
 export default function ImportExamDialog({ 
@@ -49,14 +79,17 @@ export default function ImportExamDialog({
   onImportSuccess 
 }: ImportExamDialogProps) {
   const t = useTranslations('dashboard.exams.import');
+  const locale = useLocale();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [processedData, setProcessedData] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [invalidQuestions, setInvalidQuestions] = useState<ImportValidationIssue[]>([]);
   const [processingStage, setProcessingStage] = useState(0);
   const [tipIndex, setTipIndex] = useState(0);
   const [estimatedSeconds, setEstimatedSeconds] = useState(0);
   const [showFormatExample, setShowFormatExample] = useState(false);
+  const uploadAbortControllerRef = useRef<AbortController | null>(null);
   
   // Mensajes para cada etapa del procesamiento
   const stageMessages = [
@@ -109,13 +142,33 @@ export default function ImportExamDialog({
     };
   }, [isUploading, processingTips.length, stageMessages.length]);
 
+  const resetDialogState = useCallback(() => {
+    setProcessedData(null);
+    setError(null);
+    setInvalidQuestions([]);
+    setUploadProgress(0);
+    setIsUploading(false);
+  }, []);
+
+  const abortCurrentUpload = useCallback(() => {
+    if (uploadAbortControllerRef.current) {
+      uploadAbortControllerRef.current.abort();
+      uploadAbortControllerRef.current = null;
+    }
+  }, []);
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
 
+    abortCurrentUpload();
+    const uploadAbortController = new AbortController();
+    uploadAbortControllerRef.current = uploadAbortController;
+
     setIsUploading(true);
     setUploadProgress(0);
     setError(null);
+    setInvalidQuestions([]);
     setProcessedData(null);
     setProcessingStage(0);
     setTipIndex(0);
@@ -129,12 +182,14 @@ export default function ImportExamDialog({
     const sizeMultiplier = Math.min(fileSize * 2, 10); // Máximo 10 segundos extra por tamaño
     setEstimatedSeconds(Math.round(baseTime + sizeMultiplier));
 
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
+
     try {
       const formData = new FormData();
       formData.append('file', file);
 
       // Simular progreso de subida con etapas
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           // Crear saltos en el progreso para cada etapa
           if (prev < 25) return Math.min(prev + 2, 25);
@@ -144,30 +199,82 @@ export default function ImportExamDialog({
         });
       }, 200);
 
-      const response = await fetch('/api/import-exam', {
+      const response = await fetch(`/api/import-exam?locale=${locale}`, {
         method: 'POST',
+        headers: {
+          'x-next-intl-locale': locale,
+        },
         body: formData,
+        signal: uploadAbortController.signal,
       });
 
-      clearInterval(progressInterval);
-      setUploadProgress(100);
+      const responseContentType = response.headers.get('content-type') || '';
+      const responseRawBody = await response.text();
+      const parsedBody = parseResponseBody(responseRawBody, responseContentType);
+      const parsedBodyRecord = isRecord(parsedBody) ? parsedBody : null;
+      const fallbackMessage = t('errors.processingFile');
+      const parsedMessage =
+        typeof parsedBodyRecord?.message === 'string' && parsedBodyRecord.message.trim()
+          ? parsedBodyRecord.message
+          : typeof parsedBody === 'string' && parsedBody.trim()
+          ? parsedBody
+          : fallbackMessage;
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || t('errors.processingFile'));
+        if (response.status === 400 && Array.isArray(parsedBodyRecord?.invalidQuestions)) {
+          setInvalidQuestions(parsedBodyRecord.invalidQuestions as ImportValidationIssue[]);
+          setError(parsedMessage);
+          return;
+        }
+
+        throw new Error(parsedMessage);
       }
 
-      const result = await response.json();
+      if (uploadAbortController.signal.aborted) {
+        return;
+      }
+
+      if (!parsedBodyRecord) {
+        throw new Error(fallbackMessage);
+      }
+
+      if (typeof parsedBodyRecord.total_preguntas !== 'number' || !Array.isArray(parsedBodyRecord.preguntas)) {
+        throw new Error(fallbackMessage);
+      }
+
+      const result: ImportResult = {
+        total_preguntas: parsedBodyRecord.total_preguntas as number,
+        preguntas: parsedBodyRecord.preguntas as ImportedQuestion[],
+      };
+      setInvalidQuestions([]);
       setProcessedData(result);
       toast.success(t('success.examProcessed', { count: result.total_preguntas }));
     } catch (error) {
+      if (uploadAbortController.signal.aborted) {
+        return;
+      }
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+
       console.error('Error uploading file:', error);
       setError(error instanceof Error ? error.message : t('errors.unknown'));
-      toast.error(t('errors.processingFile'));
+      toast.error(error instanceof Error ? error.message : t('errors.processingFile'));
     } finally {
-      setIsUploading(false);
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+      if (!uploadAbortController.signal.aborted) {
+        setUploadProgress(100);
+        setIsUploading(false);
+      }
+
+      if (uploadAbortControllerRef.current === uploadAbortController) {
+        uploadAbortControllerRef.current = null;
+      }
     }
-  }, [t]);
+  }, [abortCurrentUpload, locale, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -201,22 +308,31 @@ export default function ImportExamDialog({
 
     // Cerrar el diálogo y restablecer estado
     onOpenChange(false);
-    setProcessedData(null);
-    setError(null);
-    setUploadProgress(0);
+    resetDialogState();
   };
 
   const handleClose = () => {
+    abortCurrentUpload();
     onOpenChange(false);
-    // Reset state
-    setProcessedData(null);
-    setError(null);
-    setUploadProgress(0);
-    setIsUploading(false);
+    resetDialogState();
   };
 
+  const handleDialogOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      abortCurrentUpload();
+      resetDialogState();
+    }
+    onOpenChange(open);
+  }, [abortCurrentUpload, onOpenChange, resetDialogState]);
+
+  useEffect(() => {
+    return () => {
+      abortCurrentUpload();
+    };
+  }, [abortCurrentUpload]);
+
   return (
-    <Dialog open={_open} onOpenChange={onOpenChange}>
+    <Dialog open={_open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -266,6 +382,16 @@ export default function ImportExamDialog({
         )}
 
         <div className="space-y-4">
+          {!processedData && !isUploading && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <span className="font-medium">{t('requirements.title')}</span>{' '}
+                {t('requirements.optionRange', { min: 2, max: 4 })}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {!processedData && !isUploading && (
             <div
               {...getRootProps()}
@@ -347,7 +473,24 @@ export default function ImportExamDialog({
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                <div className="space-y-2">
+                  <p>{error}</p>
+                  {invalidQuestions.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="font-medium">{t('errors.invalidQuestionsTitle')}</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {invalidQuestions.map((question) => (
+                          <li key={`invalid-question-${question.numero}`}>
+                            {question.message}
+                          </li>
+                        ))}
+                      </ul>
+                      <p>{t('errors.invalidQuestionsHelp')}</p>
+                    </div>
+                  )}
+                </div>
+              </AlertDescription>
             </Alert>
           )}
 

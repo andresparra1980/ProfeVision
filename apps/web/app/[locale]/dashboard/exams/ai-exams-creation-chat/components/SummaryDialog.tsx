@@ -42,16 +42,17 @@ export function SummaryDialog({
             {t('context.summaryDesc', { fallback: 'Vista previa del resumen generado por IA.' })}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex items-center gap-2 mb-3">
-          <label className="text-sm text-muted-foreground" htmlFor="summary-doc-select">
+        <div className="mb-3 flex min-w-0 items-center gap-2">
+          <label className="shrink-0 text-sm text-muted-foreground" htmlFor="summary-doc-select">
             {t('context.document', { fallback: 'Documento' })}:
           </label>
           <select
             id="summary-doc-select"
-            className="border bg-background rounded px-2 py-1 text-sm"
+            className="h-9 min-w-0 max-w-full flex-1 rounded border bg-background px-2 py-1 text-sm text-foreground"
             value={summaryDocId ?? availableSummaryDocIds[0] ?? ''}
             onChange={(e) => onDocumentChange(e.target.value)}
             disabled={availableSummaryDocIds.length === 0}
+            title={summaryDocId ? (docMeta[summaryDocId]?.fileName || summaryDocId.replace(/^local:/, '')) : ''}
           >
             {availableSummaryDocIds.map((id) => (
               <option key={id} value={id}>
@@ -60,7 +61,7 @@ export function SummaryDialog({
             ))}
           </select>
         </div>
-        <div className="max-h-[60vh] overflow-y-auto rounded border p-3 bg-card text-sm prose prose-invert dark:prose-invert">
+        <div className="max-h-[60vh] min-w-0 overflow-y-auto rounded border bg-card p-3 text-sm text-foreground [&_h1]:break-words [&_h1]:text-foreground [&_h2]:break-words [&_h2]:text-foreground [&_h3]:break-words [&_h3]:text-foreground [&_li]:break-words [&_li]:text-foreground [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:break-words [&_p]:text-foreground [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:text-foreground [&_strong]:text-foreground [&_em]:text-foreground [&_code]:break-words [&_code]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
           {summaryLoading ? (
             <div className="text-muted-foreground">
               {t('context.loadingSummary', { fallback: 'Cargando resumen...' })}

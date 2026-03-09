@@ -6,6 +6,7 @@
     "onlyDraftDelete": "Apenas exames em estado de rascunho podem ser excluídos",
     "serverConfig": "Erro de configuração do servidor",
     "missingFields": "Campos obrigatórios ausentes",
+    "invalidOptionCount": "A pergunta {question} deve ter entre {min} e {max} opções de resposta.",
     "updateExam": "Erro ao atualizar exame",
     "updateState": "Erro ao atualizar o estado do exame"
   },

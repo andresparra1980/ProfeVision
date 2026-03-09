@@ -6,6 +6,7 @@
     "onlyDraftDelete": "Solo se pueden eliminar exámenes en estado borrador",
     "serverConfig": "Error de configuración del servidor",
     "missingFields": "Faltan campos requeridos",
+    "invalidOptionCount": "La pregunta {question} debe tener entre {min} y {max} opciones de respuesta.",
     "updateExam": "Error al actualizar examen",
     "updateState": "Error al actualizar el estado del examen"
   },
@@ -15,5 +16,4 @@
     "updated": "Examen actualizado correctamente"
   }
 }
-
 

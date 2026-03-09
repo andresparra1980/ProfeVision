@@ -151,7 +151,8 @@
       "subjectRequired": "Subject is required",
       "groupRequired": "Group is required",
       "durationRequired": "Duration is required",
-      "durationMin": "Duration must be greater than 0 minutes"
+      "durationMin": "Duration must be greater than 0 minutes",
+      "optionCountRange": "Question {question} must have between {min} and {max} answer options."
     },
     "messages": {
       "loadingError": "Error loading exams",
@@ -322,6 +323,8 @@
       "validation": {
         "questionRequired": "Question text is required",
         "optionsRequired": "You must add at least one option with text",
+        "optionCountRange": "Question {question} must have between {min} and {max} answer options.",
+        "correctOptionRequired": "You must select a correct option with text.",
         "cantPublishNoQuestions": "You cannot publish an exam without questions"
       },
       "messages": {
@@ -739,7 +742,13 @@
       },
       "errors": {
         "processingFile": "Error processing file",
-        "unknown": "Unknown error"
+        "unknown": "Unknown error",
+        "invalidQuestionsTitle": "Questions with an invalid number of options",
+        "invalidQuestionsHelp": "Fix those questions in the source document so each one has between 2 and 4 answer options, then try importing again."
+      },
+      "requirements": {
+        "title": "Important:",
+        "optionRange": "each question must have between {min} and {max} answer options for the exam to be imported."
       },
       "success": {
         "examProcessed": "Exam processed successfully: {count} questions found",

@@ -6,6 +6,7 @@
     "noUser": "Não foi possível identificar o usuário",
     "missingFields": "Faltam campos obrigatórios (título ou materia_id)",
     "missingGroup": "Você deve selecionar um grupo",
+    "invalidOptionCount": "A pergunta {question} deve ter entre {min} e {max} opções de resposta.",
     "createExam": "Erro ao criar exame"
   }
 }

@@ -31,7 +31,11 @@ import {
 } from "@/components/ui/tooltip";
 import { Paperclip, ListChecks, FileText } from "lucide-react";
 import ResultsView from "./ResultsView";
-import { useDocumentContext } from "../hooks/useDocumentContext";
+import {
+  DOCUMENT_UPLOAD_MAX_SIZE_BYTES,
+  MAX_SIZE_ERROR_CODE,
+  useDocumentContext,
+} from "../hooks/useDocumentContext";
 import { useSummaryDialog } from "../hooks/useSummaryDialog";
 import { useChatMessages } from "../hooks/useChatMessages";
 import { DocumentChips } from "./DocumentChips";
@@ -237,9 +241,26 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   };
 
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file && file.size > DOCUMENT_UPLOAD_MAX_SIZE_BYTES) {
+      toast.error(t('context.uploadErrorTitle', { fallback: 'Error al subir' }), {
+        description: t('context.maxSizeError', { fallback: 'El archivo supera el máximo permitido de 10 MB.' }),
+      });
+      try {
+        e.target.value = '';
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+
     documentContext.onFileSelected(e, (msg) => {
       toast.error(t('context.uploadErrorTitle', { fallback: 'Error al subir' }), {
-        description: msg,
+        description:
+          msg === MAX_SIZE_ERROR_CODE
+            ? t('context.maxSizeError', { fallback: 'El archivo supera el máximo permitido de 10 MB.' })
+            : msg,
       });
     });
   };
@@ -428,6 +449,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                   docMeta={documentContext.docMeta}
                   summariesAvailability={documentContext.summariesAvailability}
                   jobs={documentContext.jobs}
+                  pendingUploadFileName={documentContext.pendingUploadFileName}
                   onDelete={documentContext.onDeleteDoc}
                   isSending={isSending}
                   t={t}

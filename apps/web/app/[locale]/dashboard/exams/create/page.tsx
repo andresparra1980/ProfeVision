@@ -24,6 +24,11 @@ import { Trash2, Info } from "lucide-react";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { useTranslations } from "next-intl";
 import { useChecklistItem } from "@/lib/contexts/onboarding-context";
+import {
+  MAX_QUESTION_OPTIONS,
+  MIN_QUESTION_OPTIONS,
+  getQuestionOptionCountError,
+} from "@/lib/exams/question-option-validation";
 
 // Tipos
 type Materia = {
@@ -428,6 +433,17 @@ export default function CreateExamPage() {
   const onSubmit = async (data: ExamFormValues) => {
     try {
       setLoading(true);
+      const optionCountIssue = getQuestionOptionCountError(preguntas);
+      if (optionCountIssue) {
+        throw new Error(
+          t('exams.validation.optionCountRange', {
+            question: optionCountIssue.index + 1,
+            min: MIN_QUESTION_OPTIONS,
+            max: MAX_QUESTION_OPTIONS,
+          })
+        );
+      }
+
       // Obtener la sesión actual
       const { data: { session } } = await supabase.auth.getSession();
       

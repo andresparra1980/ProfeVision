@@ -16,10 +16,15 @@ interface DocumentMeta {
   mime?: string;
 }
 
+export const DOCUMENT_UPLOAD_MAX_SIZE_MB = 10;
+export const DOCUMENT_UPLOAD_MAX_SIZE_BYTES = DOCUMENT_UPLOAD_MAX_SIZE_MB * 1024 * 1024;
+export const MAX_SIZE_ERROR_CODE = 'maxSizeError';
+
 export function useDocumentContext() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [documentIds, setDocumentIds] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [pendingUploadFileName, setPendingUploadFileName] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [docMeta, setDocMeta] = useState<Record<string, DocumentMeta>>({});
   const [summariesAvailability, setSummariesAvailability] = useState<Record<string, boolean>>({});
@@ -115,6 +120,17 @@ export function useDocumentContext() {
       return;
     }
 
+    if (file.size > DOCUMENT_UPLOAD_MAX_SIZE_BYTES) {
+      onError(MAX_SIZE_ERROR_CODE);
+      try {
+        if (inputEl) inputEl.value = '';
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+
+    setPendingUploadFileName(file.name);
     setIsUploading(true);
     try {
       const form = new FormData();
@@ -140,6 +156,7 @@ export function useDocumentContext() {
       onError(msg);
     } finally {
       setIsUploading(false);
+      setPendingUploadFileName(null);
       try {
         if (inputEl) inputEl.value = '';
       } catch {
@@ -167,6 +184,7 @@ export function useDocumentContext() {
     fileInputRef,
     documentIds,
     isUploading,
+    pendingUploadFileName,
     uploadError,
     docMeta,
     summariesAvailability,

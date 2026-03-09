@@ -17,6 +17,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Switch } from "@/components/ui/switch";
 import logger from "@/lib/utils/logger";
 import { useChecklistItem } from "@/lib/contexts/onboarding-context";
+import {
+  MAX_QUESTION_OPTIONS,
+  MIN_QUESTION_OPTIONS,
+  getQuestionOptionCountError,
+} from "@/lib/exams/question-option-validation";
 
 interface TipoPregunta {
   id: string;
@@ -230,10 +235,19 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       }
 
       // Validar que al menos una opción tenga texto
-      const hasValidOptions = currentQuestion.opciones.some(opt => opt.texto.trim() !== "");
-      if (!hasValidOptions) {
+      const optionCountIssue = getQuestionOptionCountError([
+        {
+          texto: currentQuestion.texto,
+          opciones: currentQuestion.opciones.map((opcion) => ({ texto: opcion.texto })),
+        },
+      ]);
+      if (optionCountIssue) {
         toast.error("Error", {
-          description: t('validation.optionsRequired'),
+          description: t('validation.optionCountRange', {
+            question: optionCountIssue.index + 1,
+            min: MIN_QUESTION_OPTIONS,
+            max: MAX_QUESTION_OPTIONS,
+          }),
         });
         return;
       }
@@ -275,6 +289,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           es_correcta: opt.es_correcta,
           orden: index + 1
         }));
+
+      if (!validOptions.some((option) => option.es_correcta)) {
+        toast.error("Error", {
+          description: t('validation.correctOptionRequired'),
+        });
+        return;
+      }
 
       // Insertar opciones de respuesta
       if (validOptions.length > 0) {
