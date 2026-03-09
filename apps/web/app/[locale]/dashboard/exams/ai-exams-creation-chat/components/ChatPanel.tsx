@@ -303,7 +303,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
             </div>
 
           <Conversation
-            className="font-noto relative w-full overflow-y-auto rounded-[24px] bg-transparent px-1 shadow-none sm:px-2"
+            className="relative w-full overflow-y-auto rounded-[24px] bg-transparent px-1 shadow-none sm:px-2"
             style={{ height: convHeight, maxHeight: convHeight }}
           >
             <ConversationContent className="px-0 pb-8 pt-2 sm:pb-10 sm:pt-4">
@@ -415,7 +415,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
             onSubmit={(_message, _event) => {
               handleSend();
             }}
-            className="font-noto relative border-transparent bg-transparent shadow-none"
+            className="relative border-transparent bg-transparent shadow-none"
           >
             <PromptInputBody>
               <div>
