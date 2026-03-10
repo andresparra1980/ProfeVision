@@ -170,6 +170,53 @@ describe('useExamResults', () => {
 
       expect(result.current.examDetails).toEqual(mockExamData)
       expect(result.current.totalPreguntas).toBe(10)
+      expect(result.current.enabledQuestionOrders).toEqual([10])
+    })
+
+    it('filters disabled questions from enabledQuestionOrders', async () => {
+      const examChain = createChainableMock({ data: mockExamData, error: null })
+      const mixedPreguntasData = [
+        { orden: 1, habilitada: true },
+        { orden: 2, habilitada: false },
+        { orden: 3, habilitada: true },
+      ]
+      const preguntasChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: mixedPreguntasData, error: null }),
+      }
+      const examenGruposChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+      }
+      const resultadosChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+      }
+
+      mockFrom.mockImplementation((table: string) => {
+        switch (table) {
+          case 'examenes':
+            return examChain
+          case 'preguntas':
+            return preguntasChain
+          case 'examen_grupo':
+            return examenGruposChain
+          case 'resultados_examen':
+            return resultadosChain
+          default:
+            return createChainableMock({ data: null, error: null })
+        }
+      })
+
+      const { result } = renderHook(() => useExamResults(mockExamId))
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(result.current.totalPreguntas).toBe(3)
+      expect(result.current.enabledQuestionOrders).toEqual([1, 3])
     })
 
     it('handles exam fetch error', async () => {
