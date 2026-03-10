@@ -4,21 +4,15 @@
     "title": "Créer des examens avec IA",
     "description": "Expérience de chat pour générer des banques de questions et des résumés.",
     "clearChat": "Effacer le Chat",
-    "saveDraft": "Enregistrer l'examen",
-    "examLanguageLabel": "Langue de l'examen :"
+    "saveDraft": "Enregistrer l'examen"
   },
   "kpis": {
+    "message": "Message",
+    "messages": "Messages",
     "question": "Question",
     "questions": "Questions",
     "document": "Document",
     "documents": "Documents"
-  },
-  "language": {
-    "label": "Générer en :",
-    "auto": "Automatique",
-    "spanish": "Español",
-    "english": "English",
-    "tooltip": "Automatique : L'agent détecte la langue\nautomatiquement selon le contexte,\nle sujet et le type d'examen.\nRecommandé pour de meilleurs résultats."
   },
   "context": {
     "title": "Contexte du document",
@@ -32,6 +26,7 @@
     "summaryDesc": "Aperçu du résumé généré par l'IA.",
     "loadingSummary": "Chargement du résumé...",
     "document": "Document",
+    "ready": "Prêt",
     "limitDesc": "Seulement 5 documents sont autorisés.",
     "processingNow": "Traitement...",
     "uploadErrorTitle": "Erreur lors du chargement du document",
@@ -61,6 +56,13 @@
       "confirm": "Supprimer"
     }
   },
+  "summary": {
+    "overviewTitle": "Résumé",
+    "academicLevelLabel": "Niveau académique",
+    "mainTopicsTitle": "Thèmes principaux",
+    "keyTermsLabel": "Termes clés",
+    "conceptsLabel": "Concepts"
+  },
   "editor": {
     "title": "Modifier la question",
     "description": "Ajustez l'énoncé, les options, la réponse correcte et les métadonnées.",
@@ -75,6 +77,7 @@
     "prompt": "Énoncé",
     "options": "Options",
     "addOption": "Ajouter une option",
+    "optionPlaceholder": "Option {number}",
     "delete": "Supprimer",
     "correctAnswer": "Réponse correcte",
     "mustSelectCorrectAnswer": "* Vous devez sélectionner une option correcte",

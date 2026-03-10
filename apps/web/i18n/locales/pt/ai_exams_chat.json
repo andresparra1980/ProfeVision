@@ -4,21 +4,15 @@
     "title": "Criar exames com IA",
     "description": "Experiência de chat para gerar bancos de questões e resumos.",
     "clearChat": "Limpar Chat",
-    "saveDraft": "Salvar Exame",
-    "examLanguageLabel": "Idioma do Exame:"
+    "saveDraft": "Salvar Exame"
   },
   "kpis": {
+    "message": "Mensagem",
+    "messages": "Mensagens",
     "question": "Questao",
     "questions": "Questoes",
     "document": "Documento",
     "documents": "Documentos"
-  },
-  "language": {
-    "label": "Gerar em:",
-    "auto": "Automático",
-    "spanish": "Espanhol",
-    "english": "Inglês",
-    "tooltip": "Automático: O agente detecta o idioma\nautomaticamente segundo o contexto,\no tema e tipo de exame.\nRecomendado para melhores resultados."
   },
   "context": {
     "title": "Contexto do documento",
@@ -32,6 +26,7 @@
     "summaryDesc": "Visualização prévia do resumo gerado por IA.",
     "loadingSummary": "Carregando resumo...",
     "document": "Documento",
+    "ready": "Pronto",
     "limitDesc": "São permitidos apenas 5 documentos.",
     "processingNow": "Processando...",
     "uploadErrorTitle": "Erro ao carregar documento",
@@ -61,6 +56,13 @@
       "confirm": "Excluir"
     }
   },
+  "summary": {
+    "overviewTitle": "Resumo",
+    "academicLevelLabel": "Nível acadêmico",
+    "mainTopicsTitle": "Temas principais",
+    "keyTermsLabel": "Termos-chave",
+    "conceptsLabel": "Conceitos"
+  },
   "editor": {
     "title": "Editar questão",
     "description": "Ajuste o enunciado, opções, resposta correta e metadados.",
@@ -75,6 +77,7 @@
     "prompt": "Enunciado",
     "options": "Opções",
     "addOption": "Adicionar opção",
+    "optionPlaceholder": "Opção {number}",
     "delete": "Excluir",
     "correctAnswer": "Resposta correta",
     "mustSelectCorrectAnswer": "* Deve selecionar uma opção correta",

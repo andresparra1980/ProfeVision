@@ -4,7 +4,15 @@
 
 import { escapeHtml } from './formatting';
 
-export function buildStructuredSummaryHtml(data: unknown): string | null {
+interface SummaryLabels {
+  overviewTitle: string;
+  academicLevelLabel: string;
+  mainTopicsTitle: string;
+  keyTermsLabel: string;
+  conceptsLabel: string;
+}
+
+export function buildStructuredSummaryHtml(data: unknown, labels: SummaryLabels): string | null {
   try {
     const base: unknown = (data as { summary?: unknown } | null | undefined)?.summary ?? data;
     if (!base || typeof base !== 'object') return null;
@@ -13,17 +21,17 @@ export function buildStructuredSummaryHtml(data: unknown): string | null {
 
     const generalOverview = typeof s.generalOverview === 'string' ? s.generalOverview : '';
     if (generalOverview.trim()) {
-      parts.push(`<h2>Resumen</h2><p>${escapeHtml(generalOverview)}</p>`);
+      parts.push(`<h2>${escapeHtml(labels.overviewTitle)}</h2><p>${escapeHtml(generalOverview)}</p>`);
     }
 
     const academicLevel = typeof s.academicLevel === 'string' ? s.academicLevel : '';
     if (academicLevel.trim()) {
-      parts.push(`<p><strong>Nivel académico:</strong> ${escapeHtml(academicLevel)}</p>`);
+      parts.push(`<p><strong>${escapeHtml(labels.academicLevelLabel)}:</strong> ${escapeHtml(academicLevel)}</p>`);
     }
 
     const macroTopics = Array.isArray(s.macroTopics) ? (s.macroTopics as unknown[]) : [];
     if (macroTopics.length) {
-      parts.push('<h2>Temas principales</h2>');
+      parts.push(`<h2>${escapeHtml(labels.mainTopicsTitle)}</h2>`);
       for (const mtRaw of macroTopics) {
         const mt = (mtRaw ?? {}) as Record<string, unknown>;
         parts.push('<div class="mt-3 mb-2">');
@@ -49,13 +57,13 @@ export function buildStructuredSummaryHtml(data: unknown): string | null {
             if (micDesc) parts.push(`<p>${escapeHtml(micDesc)}</p>`);
             const keyTerms = Array.isArray(mic.keyTerms) ? (mic.keyTerms as unknown[]) : [];
             if (keyTerms.length) {
-              parts.push('<p><em>Términos clave:</em></p><ul>');
+              parts.push(`<p><em>${escapeHtml(labels.keyTermsLabel)}:</em></p><ul>`);
               for (const t of keyTerms) parts.push(`<li>${escapeHtml(String(t as string))}</li>`);
               parts.push('</ul>');
             }
             const concepts = Array.isArray(mic.concepts) ? (mic.concepts as unknown[]) : [];
             if (concepts.length) {
-              parts.push('<p><em>Conceptos:</em></p><ul>');
+              parts.push(`<p><em>${escapeHtml(labels.conceptsLabel)}:</em></p><ul>`);
               for (const c of concepts) parts.push(`<li>${escapeHtml(String(c as string))}</li>`);
               parts.push('</ul>');
             }

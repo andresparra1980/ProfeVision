@@ -331,7 +331,7 @@ export default function QuestionEditorDialog({
                         value={opt}
                         onChange={(e) => updateOption(idx, e.target.value)}
                         className={hasLatexText(opt.trim()) ? "flex-1 pl-10" : "flex-1"}
-                        placeholder={`Opcion ${idx + 1}`}
+                        placeholder={t("editor.optionPlaceholder", { number: idx + 1, fallback: `Option ${idx + 1}` })}
                       />
                     </div>
                     {hasLatexText(opt.trim()) && (

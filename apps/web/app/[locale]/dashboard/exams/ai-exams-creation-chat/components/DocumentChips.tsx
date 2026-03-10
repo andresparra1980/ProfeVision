@@ -78,7 +78,7 @@ export function DocumentChips({
               return (
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
                   <CheckCircle2 className="h-3 w-3" />
-                  OK
+                  {t('context.ready', { fallback: 'Ready' })}
                 </span>
               );
             }

@@ -75,7 +75,13 @@ export function SummaryDialog({
                 </div>
               ) : summaryContent ? (
                 (() => {
-                  const structured = buildStructuredSummaryHtml(summaryContent);
+                  const structured = buildStructuredSummaryHtml(summaryContent, {
+                    overviewTitle: t('summary.overviewTitle', { fallback: 'Summary' }),
+                    academicLevelLabel: t('summary.academicLevelLabel', { fallback: 'Academic level' }),
+                    mainTopicsTitle: t('summary.mainTopicsTitle', { fallback: 'Main topics' }),
+                    keyTermsLabel: t('summary.keyTermsLabel', { fallback: 'Key terms' }),
+                    conceptsLabel: t('summary.conceptsLabel', { fallback: 'Concepts' }),
+                  });
                   const html = structured ?? mdToHtmlLite(String(getSummaryDisplayText(summaryContent)));
                   return <div dangerouslySetInnerHTML={{ __html: html }} />;
                 })()

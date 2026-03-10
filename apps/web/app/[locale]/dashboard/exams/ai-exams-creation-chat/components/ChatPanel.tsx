@@ -110,6 +110,9 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   const questionsLabel = resultsCount === 1
     ? t('kpis.question', { fallback: 'Question' })
     : t('kpis.questions', { fallback: 'Questions' });
+  const messagesLabel = messages.length === 1
+    ? t('kpis.message', { fallback: 'Message' })
+    : t('kpis.messages', { fallback: 'Messages' });
   const documentsLabel = documentCount === 1
     ? t('kpis.document', { fallback: 'Document' })
     : t('kpis.documents', { fallback: 'Documents' });
@@ -291,7 +294,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
             <div className="mb-4 flex justify-end border-b border-black/5 px-1 pb-4 dark:border-white/10">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs text-muted-foreground shadow-sm dark:border-white/10 dark:bg-zinc-900/80">
-                  {messages.length} msgs
+                  {messages.length} {messagesLabel}
                 </div>
                 <div className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs text-muted-foreground shadow-sm dark:border-white/10 dark:bg-zinc-900/80">
                   {resultsCount} {questionsLabel}
