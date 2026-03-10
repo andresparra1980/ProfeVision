@@ -62,7 +62,7 @@ export default function DashboardHeader() {
   return (
     <>
       <header className={cn(
-        "flex h-16 items-center bg-card px-6 relative",
+        "flex h-16 items-center bg-card px-6 relative dark:bg-transparent",
         isCollapsed && !isMobile ? "pl-4" : "pl-6" // Menos padding izquierdo cuando el sidebar está colapsado en desktop
       )}>
         {/* Logo para móviles - siempre en el centro */}
@@ -119,7 +119,7 @@ export default function DashboardHeader() {
       {(showNotification || (!notificationDismissed && !showNotification)) && !notificationDismissed && (
         <div className="fixed top-16 left-0 right-0 z-50 px-4 md:px-6">
           <div className="max-w-4xl mx-auto">
-            <Alert className="border bg-card shadow-lg">
+            <Alert className="border bg-card shadow-lg dark:border-white/10 dark:bg-gradient-to-r dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/90">
               <Bell className="h-4 w-4 text-primary" />
               <AlertDescription className="text-sm text-foreground pr-8">
                 <strong>{t('header.notification.reminder', { defaultValue: 'Recordatorio' })}:</strong> {t('header.notification.message', { defaultValue: 'Para calificar exámenes en papel, accede a' })}{' '}

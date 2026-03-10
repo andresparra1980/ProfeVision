@@ -122,6 +122,12 @@
     box-shadow: 0 30px 72px -42px rgba(0, 0, 0, 0.92);
   }
 
+  .dark .dashboard-ui main:not(.auth-main):not(.legal-main):not(.website-main),
+  .dark .dashboard-ui header,
+  .dark .dashboard-ui aside {
+    background-color: transparent !important;
+  }
+
   .dashboard-ui [data-slot="card-title"] {
     letter-spacing: -0.01em;
   }
