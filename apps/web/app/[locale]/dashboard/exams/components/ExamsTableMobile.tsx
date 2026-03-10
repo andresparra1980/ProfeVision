@@ -524,17 +524,17 @@ export default function ExamsTableMobile({
       />
 
       {/* Checkbox for showing exams from archived groups */}
-      <div className="flex items-center gap-2">
+      <label htmlFor="show-archived-groups" className="flex items-center gap-2 cursor-pointer">
         <Checkbox
           id="show-archived-groups"
           checked={showArchivedGroups}
           onCheckedChange={(checked) => setShowArchivedGroups(Boolean(checked))}
           className="rounded-md border-border"
         />
-        <label htmlFor="show-archived-groups" className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {t('filters.showArchivedGroups')}
-        </label>
-      </div>
+        </span>
+      </label>
 
       {loading ? (
         <ExamsPageSkeleton />

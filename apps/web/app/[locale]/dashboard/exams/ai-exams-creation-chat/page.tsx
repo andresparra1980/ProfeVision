@@ -14,8 +14,6 @@ import { NewExamCleaner } from "./components/NewExamCleaner";
 import { useExamDraft } from "./hooks/useExamDraft";
 import { useClearChat } from "./hooks/useClearChat";
 
-const LANGUAGE_OVERRIDE_KEY = 'ai_chat_language_override';
-
 export default function AIExamsCreationChatPage() {
   const t = useTranslations("ai_exams_chat");
   const { profesor } = useProfesor();
@@ -24,28 +22,7 @@ export default function AIExamsCreationChatPage() {
   const [showSaveDraftDialog, setShowSaveDraftDialog] = React.useState(false);
   const [_loadedExamId, setLoadedExamId] = React.useState<string | null>(null);
 
-  // Language override state with localStorage persistence
-  const [languageOverride, setLanguageOverride] = React.useState<'auto' | 'es' | 'en' | 'fr' | 'pt'>('auto');
-
-  // Load and persist language override from/to localStorage
-  React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem(LANGUAGE_OVERRIDE_KEY);
-      if (['auto', 'es', 'en', 'fr', 'pt'].includes(stored as string)) {
-        setLanguageOverride(stored as 'auto' | 'es' | 'en' | 'fr' | 'pt');
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  React.useEffect(() => {
-    try {
-      localStorage.setItem(LANGUAGE_OVERRIDE_KEY, languageOverride);
-    } catch {
-      // ignore
-    }
-  }, [languageOverride]);
+  const languageOverride = 'auto' as const;
 
   // Load materias, grupos, and editing exam state
   const { materias, grupos, editingExam, setEditingExam } = useExamDraft(profesor?.id);

@@ -413,17 +413,17 @@ export default function ExamResultsPage() {
       <AnswerAnalysisCard resultados={resultados} totalPreguntas={totalPreguntas} />
 
       {/* Filter checkbox */}
-      <div className="flex items-center space-x-2">
+      <label htmlFor="ver-solo-con-examen" className="flex items-center space-x-2 cursor-pointer">
         <Checkbox
           id="ver-solo-con-examen"
           checked={verSoloConExamen}
           onCheckedChange={(checked) => setVerSoloConExamen(Boolean(checked))}
           className="h-4 w-4 rounded-md border-border"
         />
-        <label htmlFor="ver-solo-con-examen" className="text-sm">
+        <span className="text-sm">
           {t('checkbox.showOnlyGraded')}
-        </label>
-      </div>
+        </span>
+      </label>
 
       {/* Students table */}
       <StudentsResultsTable
