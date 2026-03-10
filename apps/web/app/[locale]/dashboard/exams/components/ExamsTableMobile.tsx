@@ -598,7 +598,7 @@ export default function ExamsTableMobile({
           {filteredExams.map((exam) => (
             <div
               key={exam.id}
-              className="h-fit rounded-2xl border-2 bg-card shadow-sm"
+              className="h-fit overflow-hidden rounded-2xl border-2 bg-card shadow-sm"
               style={getStatusBorderStyle(exam.estado)}
             >
               <div className="p-4">
@@ -624,7 +624,7 @@ export default function ExamsTableMobile({
             <AccordionItem
               value={exam.id}
               key={exam.id}
-              className="h-fit rounded-2xl border bg-card shadow-sm"
+              className="h-fit overflow-hidden rounded-2xl border bg-card shadow-sm"
               style={getStatusBorderStyle(exam.estado)}
             >
               <AccordionTrigger className="p-4 hover:no-underline">
