@@ -43,34 +43,34 @@ export function StatsOverview() {
       title: t('totalInstitutions'),
       value: stats.totalInstituciones,
       icon: Building2,
-      iconColor: 'text-blue-600',
-      bgColor: 'bg-blue-100/90 dark:bg-blue-950/70',
-      glow: 'from-blue-500/20 to-cyan-400/5',
+      iconColor: 'text-sky-700 dark:text-sky-300',
+      bgColor: 'bg-sky-100/85 dark:border dark:border-sky-400/20 dark:bg-sky-500/10 dark:shadow-[0_0_24px_-12px_rgba(56,189,248,0.65)]',
+      glow: 'from-sky-500/18 via-cyan-400/8 to-transparent',
     },
     {
       title: t('totalSubjects'),
       value: stats.totalMaterias,
       icon: BookOpen,
-      iconColor: 'text-purple-600',
-      bgColor: 'bg-purple-100/90 dark:bg-purple-950/70',
-      glow: 'from-purple-500/20 to-fuchsia-400/5',
+      iconColor: 'text-cyan-700 dark:text-cyan-300',
+      bgColor: 'bg-cyan-100/85 dark:border dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:shadow-[0_0_24px_-12px_rgba(34,211,238,0.65)]',
+      glow: 'from-cyan-500/18 via-sky-400/8 to-transparent',
     },
     {
       title: t('activeGroups'),
       value: stats.gruposActivos,
       subtitle: `${stats.gruposArchivados} ${t('archivedGroups').toLowerCase()}`,
       icon: Folders,
-      iconColor: 'text-green-600',
-      bgColor: 'bg-green-100/90 dark:bg-green-950/70',
-      glow: 'from-emerald-500/20 to-lime-400/5',
+      iconColor: 'text-emerald-700 dark:text-emerald-300',
+      bgColor: 'bg-emerald-100/85 dark:border dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:shadow-[0_0_24px_-12px_rgba(52,211,153,0.65)]',
+      glow: 'from-emerald-500/18 via-teal-400/8 to-transparent',
     },
     {
       title: t('totalStudents'),
       value: stats.totalEstudiantes,
       icon: UsersRound,
-      iconColor: 'text-orange-600',
-      bgColor: 'bg-orange-100/90 dark:bg-orange-950/70',
-      glow: 'from-orange-500/20 to-amber-400/5',
+      iconColor: 'text-amber-700 dark:text-amber-300',
+      bgColor: 'bg-amber-100/85 dark:border dark:border-amber-400/20 dark:bg-amber-500/10 dark:shadow-[0_0_24px_-12px_rgba(251,191,36,0.6)]',
+      glow: 'from-amber-500/18 via-orange-400/8 to-transparent',
     },
   ];
 
@@ -88,7 +88,7 @@ export function StatsOverview() {
               <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 {stat.title}
               </CardTitle>
-              <div className={`rounded-xl p-2 ${stat.bgColor}`}>
+              <div className={`rounded-xl p-2 backdrop-blur-sm ${stat.bgColor}`}>
                 <Icon className={`h-4 w-4 ${stat.iconColor}`} />
               </div>
             </CardHeader>

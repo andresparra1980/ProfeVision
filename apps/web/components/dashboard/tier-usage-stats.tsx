@@ -54,7 +54,7 @@ export function TierUsageStats() {
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-purple-600 shrink-0" />
+            <TrendingUp className="h-5 w-5 text-sky-600 dark:text-cyan-300 shrink-0" />
             <span className="break-words">{tDashboard('title', { defaultValue: 'Plan Usage' })}</span>
           </div>
           <TierBadge tier={currentTier} size="sm" />
@@ -62,13 +62,13 @@ export function TierUsageStats() {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* AI Generations */}
-        <div className={dashboardInsetCardClassName + " p-4"}>
+        <div className={dashboardInsetCardClassName + " bg-gradient-to-br from-amber-50/80 via-background to-background dark:from-amber-500/8 dark:via-transparent dark:to-transparent p-4"}>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-amber-600" />
+            <Zap className="h-4 w-4 text-amber-600 dark:text-amber-300" />
             {t('features.ai_generations')}
           </p>
           {isUnlimited ? (
-            <div className="text-3xl font-bold text-amber-600">
+            <div className="text-3xl font-bold text-amber-600 dark:text-amber-300">
               {t('usage.unlimited')}
             </div>
           ) : (
@@ -87,13 +87,13 @@ export function TierUsageStats() {
         </div>
 
         {/* Exam Scans */}
-        <div className={dashboardInsetCardClassName + " p-4"}>
+        <div className={dashboardInsetCardClassName + " bg-gradient-to-br from-sky-50/80 via-background to-background dark:from-sky-500/8 dark:via-transparent dark:to-transparent p-4"}>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
-            <ScanLine className="h-4 w-4 text-blue-600" />
+            <ScanLine className="h-4 w-4 text-sky-600 dark:text-sky-300" />
             {t('features.scans')}
           </p>
           {isUnlimited ? (
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-sky-600 dark:text-sky-300">
               {t('usage.unlimited')}
             </div>
           ) : (
@@ -112,13 +112,13 @@ export function TierUsageStats() {
         </div>
 
         {/* Cycle Reset */}
-        <div className={dashboardInsetCardClassName + " p-4"}>
+        <div className={dashboardInsetCardClassName + " bg-gradient-to-br from-emerald-50/55 via-background to-background dark:from-emerald-500/6 dark:via-transparent dark:to-transparent p-4"}>
           <div className="flex items-center justify-between text-xs text-muted-foreground gap-2">
             <span className="flex items-center gap-1 shrink-0">
-              <Calendar className="h-3 w-3" />
+              <Calendar className="h-3 w-3 text-emerald-600 dark:text-emerald-300" />
               {tDashboard('cycleReset', { defaultValue: 'Cycle resets in' })}
             </span>
-            <span className="font-semibold text-primary text-right">
+            <span className="font-semibold text-emerald-600 dark:text-emerald-300 text-right">
               {usage.cycle.daysUntilReset} {usage.cycle.daysUntilReset === 1
                 ? tDashboard('day', { defaultValue: 'day' })
                 : tDashboard('days', { defaultValue: 'days' })}
