@@ -868,6 +868,8 @@
     "noEntitiesMessage": "Não há entidades educativas registradas."
   },
   "subjects": {
+    "title": "Disciplinas",
+    "subjectLabel": "Disciplina",
     "toast": {
       "createTitle": "Matéria criada",
       "createDescription": "A matéria foi criada corretamente.",
