@@ -75,7 +75,7 @@ export function DeleteGroupDialog({
       modal={true}
     >
       <DialogContent
-        className="sm:max-w-md border-red-500 dark:border-red-700 shadow-xl rounded-lg bg-card dark:bg-background"
+        className="sm:max-w-md rounded-2xl border-red-500 bg-card shadow-xl dark:border-red-700 dark:bg-background"
         onCloseAutoFocus={(e) => {
           // Prevent focus trap issues
           e.preventDefault();

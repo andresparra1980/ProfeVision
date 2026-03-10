@@ -869,6 +869,7 @@
   },
   "subjects": {
     "title": "Materias",
+    "subjectLabel": "Materia",
     "description": "Administra las materias que impartes",
     "addSubject": "Agregar materia",
     "noSubjectsMessage": "No hay materias registradas.",

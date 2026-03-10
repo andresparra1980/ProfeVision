@@ -209,7 +209,7 @@ export function StudentFormModal({ open, onOpenChange, grupos, onSuccess }: Stud
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+          <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/30 p-3">
             <p className="text-sm font-medium">{tCommon('components.excelImport.options.title')}</p>
             <div className="flex items-center space-x-2">
               <Checkbox

@@ -1,0 +1,1 @@
+export const chatAccentThemeClassName = "[--chat-accent:14_116_144] [--chat-accent-soft:240_253_250] [--chat-accent-border:167_243_208] [--chat-accent-ink:15_118_110] dark:[--chat-accent-soft:15_23_42] dark:[--chat-accent-border:31_41_55] dark:[--chat-accent-ink:153_246_228]";

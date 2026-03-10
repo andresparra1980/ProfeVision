@@ -151,6 +151,9 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
   ];
 
   const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || t('user.defaultName', { defaultValue: 'Usuario' });
+  const darkChromeSurface = "dark:bg-transparent";
+  const darkChromeHover = "dark:hover:bg-white/[0.04] dark:hover:text-white";
+  const darkChromeActive = "dark:bg-white/[0.05] dark:text-white";
 
   return (
     <TooltipProvider>
@@ -166,7 +169,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
 
       <div
         className={cn(
-          "fixed inset-0 z-40 transform bg-background/80 backdrop-blur-sm transition-all duration-200 md:hidden",
+          "fixed inset-0 z-40 transform bg-background/80 backdrop-blur-sm transition-all duration-200 md:hidden dark:bg-black/70",
           isOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
         )}
         onClick={() => setIsOpen(false)}
@@ -175,6 +178,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-40 flex flex-col justify-between bg-card transition-all duration-200 md:static md:translate-x-0 overflow-y-auto",
+          darkChromeSurface,
           isOpen ? "translate-x-0" : "-translate-x-full",
           isCollapsed ? "w-16" : "w-64"
         )}
@@ -232,7 +236,8 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                         className={cn(
                           "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
                           "justify-center px-2",
-                          "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                          "text-card-foreground hover:bg-accent hover:text-accent-foreground",
+                          darkChromeHover
                         )}
                       >
                         <item.icon className="h-5 w-5" />
@@ -252,7 +257,8 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                     className={cn(
                       "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
                       "space-x-2 px-3",
-                      "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                      "text-card-foreground hover:bg-accent hover:text-accent-foreground",
+                      darkChromeHover
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -271,8 +277,8 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                           "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
                           "justify-center px-2",
                           pathname === item.href
-                            ? "bg-primary/10 text-primary"
-                            : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                            ? `bg-primary/10 text-primary ${darkChromeActive}`
+                            : `text-card-foreground hover:bg-accent hover:text-accent-foreground ${darkChromeHover}`
                         )}
                       >
                         <item.icon className="h-5 w-5" />
@@ -292,8 +298,8 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                       "flex items-center rounded-md py-2 text-sm font-medium transition-colors",
                       "space-x-2 px-3",
                       pathname === item.href
-                        ? "bg-primary/10 text-primary"
-                        : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                        ? `bg-primary/10 text-primary ${darkChromeActive}`
+                        : `text-card-foreground hover:bg-accent hover:text-accent-foreground ${darkChromeHover}`
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -310,7 +316,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
             <>
               {/* Credits & Usage Section */}
               {usage && (
-                <div className="px-4 py-3 border-t border-border/50">
+                <div className="px-4 py-3 border-t border-border/50 dark:border-white/10">
                   <div className="space-y-3">
                     <div className="space-y-2">
                       <UsageIndicator
@@ -387,7 +393,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                 <LanguageSwitcherDashboard />
               </div>
 
-              <div className="border-t px-4 py-4">
+              <div className="border-t border-border/50 px-4 py-4 dark:border-white/10">
                 <div className="mb-3">
                   <p className="text-sm font-medium text-card-foreground truncate">{userName}</p>
                   <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
@@ -397,8 +403,8 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                   className={cn(
                     "flex items-center rounded-md px-2 py-1.5 text-sm font-medium transition-colors mb-2",
                     pathname === "/dashboard/profile"
-                      ? "bg-primary/10 text-primary"
-                      : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
+                      ? `bg-primary/10 text-primary ${darkChromeActive}`
+                      : `text-card-foreground hover:bg-accent hover:text-accent-foreground ${darkChromeHover}`
                   )}
                 >
                   <UserCircle className="mr-2 h-4 w-4" />
@@ -416,7 +422,7 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
                 </Button>
               </div>
 
-              <div className="border-t p-4">
+              <div className="border-t border-border/50 p-4 dark:border-white/10">
                 <p className={`text-xs text-card-foreground font-logo`}>
                   &copy; {new Date().getFullYear()} ProfeVision
                 </p>
@@ -427,17 +433,17 @@ export default function DashboardSidebar({ user, handleLogout, isLoggingOut }: D
               {/* Language Switcher - Collapsed Version */}
               <LanguageSwitcherDashboard collapsed />
 
-              <div className="border-t py-4 flex flex-col items-center gap-2">
+              <div className="border-t border-border/50 py-4 flex flex-col items-center gap-2 dark:border-white/10">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
                       href="/dashboard/profile"
-                      className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
-                        pathname === "/dashboard/profile"
-                          ? "bg-primary/10 text-primary"
-                          : "text-card-foreground hover:bg-accent hover:text-accent-foreground"
-                      )}
+                        className={cn(
+                          "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
+                          pathname === "/dashboard/profile"
+                            ? `bg-primary/10 text-primary ${darkChromeActive}`
+                            : `text-card-foreground hover:bg-accent hover:text-accent-foreground ${darkChromeHover}`
+                        )}
                     >
                       <UserCircle className="h-5 w-5" />
                     </Link>

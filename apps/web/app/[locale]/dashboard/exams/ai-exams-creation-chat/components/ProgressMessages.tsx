@@ -27,6 +27,9 @@ export interface ProgressMessage {
 interface ProgressMessagesProps {
   messages: ProgressMessage[];
   className?: string;
+  progressAriaLabel: string;
+  processingAriaLabel: string;
+  nowLabel: string;
 }
 
 /**
@@ -42,7 +45,13 @@ interface ProgressMessagesProps {
  * <ProgressMessages messages={messages} />
  * ```
  */
-export function ProgressMessages({ messages, className = '' }: ProgressMessagesProps) {
+export function ProgressMessages({
+  messages,
+  className = '',
+  progressAriaLabel,
+  processingAriaLabel,
+  nowLabel,
+}: ProgressMessagesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleMessages, setVisibleMessages] = useState<Set<string>>(new Set());
 
@@ -76,14 +85,14 @@ export function ProgressMessages({ messages, className = '' }: ProgressMessagesP
       className={`space-y-2 py-4 max-h-40 overflow-y-auto ${className}`}
       role="status"
       aria-live="polite"
-      aria-label="Progress updates"
+      aria-label={progressAriaLabel}
     >
       {messages.map((msg) => {
         const isVisible = visibleMessages.has(msg.id);
         return (
           <div
             key={msg.id}
-            className={`flex items-center gap-2 text-xs sm:text-sm text-white dark:text-foreground transition-all duration-300 ${
+            className={`flex items-center gap-2 text-xs text-foreground transition-all duration-300 sm:text-sm ${
               isVisible
                 ? 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-2'
@@ -104,11 +113,11 @@ export function ProgressMessages({ messages, className = '' }: ProgressMessagesP
             )}
             <span className="flex-1">{msg.text}</span>
             <span
-              className={`text-xs text-white/70 dark:text-foreground/70 flex-shrink-0 transition-opacity duration-300 ${
+              className={`text-xs text-muted-foreground flex-shrink-0 transition-opacity duration-300 ${
                 isVisible ? 'opacity-70' : 'opacity-0'
               }`}
             >
-              {formatTimestamp(msg.timestamp)}
+              {formatTimestamp(msg.timestamp, nowLabel)}
             </span>
           </div>
         );
@@ -116,7 +125,7 @@ export function ProgressMessages({ messages, className = '' }: ProgressMessagesP
 
       {/* Loading indicator (pulse) */}
       {messages.length > 0 && (
-        <div className="flex items-center gap-1.5 mt-2" aria-label="Processing">
+        <div className="flex items-center gap-1.5 mt-2" aria-label={processingAriaLabel}>
           {[0, 1, 2].map((i) => (
             <div
               key={i}
@@ -136,11 +145,11 @@ export function ProgressMessages({ messages, className = '' }: ProgressMessagesP
 /**
  * Format timestamp to relative time
  */
-function formatTimestamp(timestamp: number): string {
+function formatTimestamp(timestamp: number, nowLabel: string): string {
   const now = Date.now();
   const diff = now - timestamp;
 
-  if (diff < 1000) return 'now';
+  if (diff < 1000) return nowLabel;
   if (diff < 60000) return `${Math.floor(diff / 1000)}s`;
   if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
   return `${Math.floor(diff / 3600000)}h`;

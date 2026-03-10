@@ -259,7 +259,7 @@ export default function AssignExamPage({ params }: { params: Promise<{ id: strin
               return (
                 <div
                   key={grupo.id}
-                  className="flex items-start space-x-4 p-4 border rounded-lg"
+                  className="flex items-start space-x-4 rounded-2xl border p-4"
                 >
                   <Checkbox
                     id={grupo.id}

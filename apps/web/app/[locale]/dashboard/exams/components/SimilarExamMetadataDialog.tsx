@@ -81,7 +81,7 @@ export default function SimilarExamMetadataDialog({ open, onOpenChange, onConfir
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[560px] rounded-2xl">
         <DialogHeader>
           <DialogTitle>{t("createWithAI.form.createExam", { defaultValue: "Guardar borrador de examen" })}</DialogTitle>
           <DialogDescription>

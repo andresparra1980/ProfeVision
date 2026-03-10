@@ -869,6 +869,7 @@
   },
   "subjects": {
     "title": "Subjects",
+    "subjectLabel": "Subject",
     "description": "Manage the subjects you teach",
     "addSubject": "Add subject",
     "noSubjectsMessage": "No subjects registered.",

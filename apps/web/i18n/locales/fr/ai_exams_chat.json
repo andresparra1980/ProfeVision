@@ -4,15 +4,15 @@
     "title": "Créer des examens avec IA",
     "description": "Expérience de chat pour générer des banques de questions et des résumés.",
     "clearChat": "Effacer le Chat",
-    "saveDraft": "Enregistrer le brouillon",
-    "examLanguageLabel": "Langue de l'examen :"
+    "saveDraft": "Enregistrer l'examen"
   },
-  "language": {
-    "label": "Générer en :",
-    "auto": "Automatique",
-    "spanish": "Español",
-    "english": "English",
-    "tooltip": "Automatique : L'agent détecte la langue\nautomatiquement selon le contexte,\nle sujet et le type d'examen.\nRecommandé pour de meilleurs résultats."
+  "kpis": {
+    "message": "Message",
+    "messages": "Messages",
+    "question": "Question",
+    "questions": "Questions",
+    "document": "Document",
+    "documents": "Documents"
   },
   "context": {
     "title": "Contexte du document",
@@ -26,6 +26,7 @@
     "summaryDesc": "Aperçu du résumé généré par l'IA.",
     "loadingSummary": "Chargement du résumé...",
     "document": "Document",
+    "ready": "Prêt",
     "limitDesc": "Seulement 5 documents sont autorisés.",
     "processingNow": "Traitement...",
     "uploadErrorTitle": "Erreur lors du chargement du document",
@@ -55,6 +56,13 @@
       "confirm": "Supprimer"
     }
   },
+  "summary": {
+    "overviewTitle": "Résumé",
+    "academicLevelLabel": "Niveau académique",
+    "mainTopicsTitle": "Thèmes principaux",
+    "keyTermsLabel": "Termes clés",
+    "conceptsLabel": "Concepts"
+  },
   "editor": {
     "title": "Modifier la question",
     "description": "Ajustez l'énoncé, les options, la réponse correcte et les métadonnées.",
@@ -69,9 +77,13 @@
     "prompt": "Énoncé",
     "options": "Options",
     "addOption": "Ajouter une option",
+    "optionPlaceholder": "Option {number}",
     "delete": "Supprimer",
     "correctAnswer": "Réponse correcte",
     "mustSelectCorrectAnswer": "* Vous devez sélectionner une option correcte",
+    "preview": "Aperçu",
+    "previewHint": "Aperçu du contenu formaté.",
+    "latexHint": "Utilisez la syntaxe LaTeX pour les formules dans ce champ.",
     "rationale": "Rationale (optionnel)",
     "difficulty": "Difficulté",
     "difficulties": {
@@ -80,7 +92,9 @@
       "hard": "Difficile"
     },
     "cancel": "Annuler",
+    "back": "Retour",
     "save": "Enregistrer",
+    "saveQuestion": "Enregistrer la question",
     "discardDialog": {
       "title": "Abandonner les modifications ?",
       "description": "Vous avez des modifications non enregistrées. Si vous fermez l'éditeur, ces modifications seront perdues.",
@@ -152,6 +166,9 @@
     "assistant": "Assistant",
     "system": "Système",
     "progress": {
+      "ariaLabel": "Mises à jour de progression",
+      "processingLabel": "Traitement",
+      "nowLabel": "maintenant",
       "step": "Traitement...",
       "planning": "Planification de l'examen",
       "generating": "Génération des questions",
@@ -163,14 +180,14 @@
       "modifying_batch": "Modification de plusieurs questions",
       "completed": "Génération terminée"
     },
-    "examGenerated": "✨ Examen généré avec succès avec {count} questions. Consultez les résultats dans le panneau de Résultats.",
+    "examGenerated": "✨ Examen généré avec succès avec {count} questions. Consultez les questions dans le panneau Questions.",
     "error": {
       "generation": "Erreur lors de la génération de l'examen",
       "connection": "Erreur de connexion"
     },
     "toasts": {
       "successTitle": "Résultats générés",
-      "successDesc": "Consultez l'examen généré dans le panneau de Résultats.",
+      "successDesc": "Consultez l'examen généré dans le panneau Questions.",
       "errorTitle": "Erreur",
       "errorDesc": "Une erreur inattendue est survenue. Réessayez.",
       "invalidJson": "Erreur dans la réponse de l'assistant. Réessayez.",

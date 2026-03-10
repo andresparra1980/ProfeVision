@@ -96,7 +96,7 @@ export function EntityFormModal({ open, onOpenChange, onSuccess }: EntityFormMod
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
-      <DialogContent className="sm:max-w-[500px] bg-[#FAFAF4] dark:bg-[#171717]">
+      <DialogContent className="sm:max-w-[500px] rounded-2xl bg-[#FAFAF4] dark:bg-[#171717]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{t('form.addTitle')}</DialogTitle>

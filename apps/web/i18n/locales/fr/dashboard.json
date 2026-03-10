@@ -869,6 +869,7 @@
   },
   "subjects": {
     "title": "Matières",
+    "subjectLabel": "Matière",
     "description": "Gérez les matières que vous enseignez",
     "addSubject": "Ajouter une matière",
     "noSubjectsMessage": "Il n'y a pas de matières enregistrées.",

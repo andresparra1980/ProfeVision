@@ -92,7 +92,9 @@ export function useExamResults(examId: string | string[]) {
           logger.error('Error loading question metadata:', preguntasError);
         }
 
-        throw preguntasError;
+        toast.error(t('error'), {
+          description: t('loadingError'),
+        });
       } else if (preguntasData && preguntasData.length > 0) {
         const preguntas = preguntasData as Array<{ orden: number; habilitada: boolean }>;
         const highestQuestionOrder = Math.max(...preguntas.map((pregunta) => pregunta.orden));

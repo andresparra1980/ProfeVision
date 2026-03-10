@@ -1,4 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  dashboardCardClassName,
+  dashboardCardSectionClassName,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -94,12 +101,12 @@ function GroupCardActions({ grupo, onEditAction, onToggleArchiveAction, onDelete
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
-              onClick={() => onEditAction(grupo)}
-            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto w-full justify-start rounded-xl px-2 py-2"
+                onClick={() => onEditAction(grupo)}
+              >
               <Pencil className="mr-2 h-4 w-4" /> {t('editGroup')}
             </Button>
           </TooltipTrigger>
@@ -112,11 +119,11 @@ function GroupCardActions({ grupo, onEditAction, onToggleArchiveAction, onDelete
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
-              onClick={() => router.push({
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto w-full justify-start rounded-xl px-2 py-2"
+                onClick={() => router.push({
                 pathname: '/dashboard/groups/[id]/students',
                 params: { id: grupo.id },
               })}
@@ -133,11 +140,11 @@ function GroupCardActions({ grupo, onEditAction, onToggleArchiveAction, onDelete
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
-              onClick={() => router.push({
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto w-full justify-start rounded-xl px-2 py-2"
+                onClick={() => router.push({
                 pathname: '/dashboard/groups/[id]/grades',
                 params: { id: grupo.id },
               })}
@@ -154,11 +161,11 @@ function GroupCardActions({ grupo, onEditAction, onToggleArchiveAction, onDelete
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
-              onClick={() => router.push({
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto w-full justify-start rounded-xl px-2 py-2"
+                onClick={() => router.push({
                 pathname: '/dashboard/groups/[id]/grading-scheme',
                 params: { id: grupo.id },
               })}
@@ -175,12 +182,12 @@ function GroupCardActions({ grupo, onEditAction, onToggleArchiveAction, onDelete
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
-              onClick={() => onToggleArchiveAction(grupo)}
-            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto w-full justify-start rounded-xl px-2 py-2"
+                onClick={() => onToggleArchiveAction(grupo)}
+              >
               {grupo.estado === 'activo' ? (
                 <>
                   <Archive className="mr-2 h-4 w-4" /> {t('archive')}
@@ -201,7 +208,7 @@ function GroupCardActions({ grupo, onEditAction, onToggleArchiveAction, onDelete
       <Button
         variant="ghost"
         size="sm"
-        className="w-full justify-start h-auto py-2 px-2 text-red-500 dark:text-red-400"
+        className="h-auto w-full justify-start rounded-xl px-2 py-2 text-red-500 dark:text-red-400"
         onClick={() => onDeleteAction(grupo.id, grupo.nombre)}
       >
         <Trash2 className="mr-2 h-4 w-4" /> {t('delete')}
@@ -214,11 +221,11 @@ export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDelete
   const t = useTranslations('dashboard.groups.card');
   
   return (
-    <Card key={grupo.id} className="flex flex-col">
+    <Card key={grupo.id} className={dashboardCardClassName + " flex flex-col"}>
       <CardHeader className="pb-2">
         <GroupCardHeader grupo={grupo} t={t} />
       </CardHeader>
-      <CardContent className="flex-1 border-t bg-muted/20 pt-4">
+      <CardContent className={dashboardCardSectionClassName + " flex-1 pt-4"}>
         <GroupCardActions 
           grupo={grupo}
           onEditAction={onEditAction}

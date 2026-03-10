@@ -107,7 +107,7 @@ export function SubjectFormModal({
           {tSubjects('addSubject')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px] bg-[#FAFAF4] dark:bg-[#171717]">
+      <DialogContent className="sm:max-w-[525px] rounded-2xl bg-[#FAFAF4] dark:bg-[#171717]">
         <DialogHeader>
           <DialogTitle>
             {editingMateria ? t('editTitle') : t('newTitle')}

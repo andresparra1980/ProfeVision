@@ -24,6 +24,15 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -43,6 +52,7 @@ import { SummaryDialog } from "./SummaryDialog";
 import { EmptyState } from "./EmptyState";
 import { ProgressMessages } from "./ProgressMessages";
 import { StepProgressList } from "./StepProgressList";
+import { chatAccentThemeClassName } from "./chat-accent-theme";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { LimitReachedModal } from "@/components/shared/limit-reached-modal";
 
@@ -71,44 +81,10 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   // Tier limits hook
   const { usage, loading: tierLoading, canUseAI } = useTierLimits();
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [resultsHasUnsavedChanges, setResultsHasUnsavedChanges] = useState(false);
+  const [resultsIsEditingQuestion, setResultsIsEditingQuestion] = useState(false);
+  const [showResultsCloseAlert, setShowResultsCloseAlert] = useState(false);
   const toastShownRef = useRef(false);
-
-  // Add bottom sheet styles
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      .bottom-sheet[data-state="open"] {
-        animation: slideInFromBottom 0.3s ease-out;
-      }
-      .bottom-sheet[data-state="closed"] {
-        animation: slideOutToBottom 0.3s ease-in;
-      }
-      @keyframes slideInFromBottom {
-        from {
-          transform: translateX(-50%) translateY(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(-50%) translateY(0);
-          opacity: 1;
-        }
-      }
-      @keyframes slideOutToBottom {
-        from {
-          transform: translateX(-50%) translateY(0);
-          opacity: 1;
-        }
-        to {
-          transform: translateX(-50%) translateY(100%);
-          opacity: 0;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
 
   // Custom hooks for managing state
   const documentContext = useDocumentContext();
@@ -129,6 +105,43 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   // Derived counts for results glow
   const resultsCount = (result?.exam?.questions?.length ?? 0);
   const hasResults = resultsCount > 0;
+  const hasDocuments = documentContext.documentIds.length > 0 || !!documentContext.pendingUploadFileName;
+  const summaryReadyCount = summaryDialog.availableSummaryDocIds.length;
+  const documentCount = documentContext.documentIds.length;
+  const questionsLabel = resultsCount === 1
+    ? t('kpis.question', { fallback: 'Question' })
+    : t('kpis.questions', { fallback: 'Questions' });
+  const messagesLabel = messages.length === 1
+    ? t('kpis.message', { fallback: 'Message' })
+    : t('kpis.messages', { fallback: 'Messages' });
+  const documentsLabel = documentCount === 1
+    ? t('kpis.document', { fallback: 'Document' })
+    : t('kpis.documents', { fallback: 'Documents' });
+
+  function handleResultsOpenChange(open: boolean) {
+    if (!open && resultsHasUnsavedChanges) {
+      setShowResultsCloseAlert(true);
+      return;
+    }
+
+    setResultsOpen(open);
+
+    if (!open) {
+      setResultsHasUnsavedChanges(false);
+      setResultsIsEditingQuestion(false);
+    }
+  }
+
+  function confirmResultsClose() {
+    setShowResultsCloseAlert(false);
+    setResultsHasUnsavedChanges(false);
+    setResultsIsEditingQuestion(false);
+    setResultsOpen(false);
+  }
+
+  function cancelResultsClose() {
+    setShowResultsCloseAlert(false);
+  }
 
   const convHeight = useMemo(() => {
     const mh = typeof minHeight === 'number' ? minHeight : 0;
@@ -275,14 +288,29 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
   }, [isSending, hasResults]);
 
   return (
-    <div ref={rootRef} className="flex flex-col overflow-x-clip overflow-y-hidden space-y-0" style={{ minHeight }}>
+    <div ref={rootRef} className="flex flex-1 flex-col gap-4 overflow-x-clip overflow-y-hidden sm:gap-6" style={{ minHeight }}>
       <div className="flex w-full justify-center">
-        <div className="w-full sm:w-[62vw] sm:min-w-[640px] max-w-[1200px]">
+        <div className="w-full max-w-[1200px]">
+          <div className="rounded-[30px] border border-black/10 bg-gradient-to-b from-white via-white to-[rgb(var(--chat-accent-soft))] p-3 shadow-[0_28px_90px_-52px_rgba(15,23,42,0.35)] dark:border-white/10 dark:from-zinc-950 dark:via-zinc-950 dark:to-[rgb(var(--chat-accent-soft))] sm:p-5">
+            <div className="mb-4 flex justify-end border-b border-black/5 px-1 pb-4 dark:border-white/10">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs text-muted-foreground shadow-sm dark:border-white/10 dark:bg-zinc-900/80">
+                  {messages.length} {messagesLabel}
+                </div>
+                <div className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs text-muted-foreground shadow-sm dark:border-white/10 dark:bg-zinc-900/80">
+                  {resultsCount} {questionsLabel}
+                </div>
+                <div className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs text-muted-foreground shadow-sm dark:border-white/10 dark:bg-zinc-900/80">
+                  {documentCount} {documentsLabel}
+                </div>
+              </div>
+            </div>
+
           <Conversation
-            className={`font-noto relative w-full rounded-xl bg-transparent backdrop-blur-sm shadow-none overflow-y-auto`}
+            className="relative w-full overflow-y-auto rounded-[24px] bg-transparent px-1 shadow-none sm:px-2"
             style={{ height: convHeight, maxHeight: convHeight }}
           >
-            <ConversationContent>
+            <ConversationContent className="px-0 pb-8 pt-2 sm:pb-10 sm:pt-4">
               {messages.length === 0 && input.trim().length === 0 ? (
                 <ConversationEmptyState>
                   <EmptyState onExampleClick={handleExampleClick} t={t} />
@@ -296,15 +324,21 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
               )}
               {isSending && (
                 <Message from="assistant">
-                  <MessageContent>
+                  <MessageContent className="border-[rgb(var(--chat-accent-border))] bg-[rgb(var(--chat-accent-soft))] text-foreground dark:border-[rgb(var(--chat-accent-border))] dark:bg-[rgb(var(--chat-accent-soft))]">
                     {progressState.steps.length > 0 || progressState.llmResponse || progressState.successMessage ? (
                       <StepProgressList
                         steps={progressState.steps}
                         llmResponse={progressState.llmResponse}
                         successMessage={progressState.successMessage}
+                        progressAriaLabel={t('chat.progress.ariaLabel', { fallback: 'Progress updates' })}
                       />
                     ) : progressMessages.length > 0 ? (
-                      <ProgressMessages messages={progressMessages} />
+                      <ProgressMessages
+                        messages={progressMessages}
+                        progressAriaLabel={t('chat.progress.ariaLabel', { fallback: 'Progress updates' })}
+                        processingAriaLabel={t('chat.progress.processingLabel', { fallback: 'Processing' })}
+                        nowLabel={t('chat.progress.nowLabel', { fallback: 'now' })}
+                      />
                     ) : (
                       <ConversationTyping className="pl-2" />
                     )}
@@ -312,51 +346,89 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                 </Message>
               )}
             </ConversationContent>
-            <ConversationScrollButton />
+            <ConversationScrollButton className="border-black/10 bg-white/90 shadow-lg hover:bg-white dark:border-white/10 dark:bg-zinc-900/90 dark:hover:bg-zinc-900" />
           </Conversation>
+          </div>
         </div>
       </div>
 
       <div className="flex w-full justify-center">
         <div
           ref={promptWrapRef}
-          className="w-full max-w-[90vw] md:max-w-[720px] lg:max-w-[800px] xl:max-w-[960px] px-4 sticky bottom-0 z-30"
+          className="sticky bottom-0 z-30 mt-auto w-full max-w-[980px] px-0 pb-1 sm:px-2"
           style={{ bottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
+          <div className="rounded-[30px] border border-black/10 bg-white/75 p-3 shadow-[0_28px_100px_-50px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/75 sm:p-4">
+            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="rounded-full border border-[rgb(var(--chat-accent-border))] bg-[rgb(var(--chat-accent-soft))] px-3 py-1 text-xs font-medium text-[rgb(var(--chat-accent-ink))] dark:border-[rgb(var(--chat-accent-border))] dark:bg-[rgb(var(--chat-accent-soft))]">
+                  {isSending
+                    ? t('chat.waitingPlaceholder', { fallback: 'Esperando respuesta...' })
+                    : t('chat.inputPlaceholder')}
+                </div>
+                {documentContext.isUploading && (
+                  <div className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs text-muted-foreground dark:border-white/10 dark:bg-zinc-900/80">
+                    {t('context.processingNow', { fallback: 'Procesando...' })}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={`gap-2 rounded-full border-black/10 bg-white/80 shadow-sm hover:bg-white dark:border-white/10 dark:bg-zinc-900/80 dark:hover:text-white ${hasResults ? 'border-[rgb(var(--chat-accent-border))] text-[rgb(var(--chat-accent-ink))]' : ''}`}
+                  onClick={() => setResultsOpen(true)}
+                  aria-label={t('results.title')}
+                >
+                  <ListChecks className="h-4 w-4" />
+                  <span>{questionsLabel}</span>
+                  <span className="rounded-full bg-[rgb(var(--chat-accent-soft))] px-2 py-0.5 text-[11px] text-[rgb(var(--chat-accent-ink))] dark:bg-[rgb(var(--chat-accent-soft))]">
+                    {resultsCount}
+                  </span>
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => summaryDialog.openSummaryDialog()}
+                  disabled={summaryReadyCount === 0}
+                  className="gap-2 rounded-full text-muted-foreground hover:bg-white hover:text-foreground dark:hover:bg-zinc-900"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>{t('context.viewSummary', { fallback: 'Ver resumen' })}</span>
+                  <span className="rounded-full border border-black/10 px-2 py-0.5 text-[11px] dark:border-white/10">
+                    {summaryReadyCount}
+                  </span>
+                </Button>
+              </div>
+            </div>
+
+            {hasDocuments && (
+              <div className="mb-3 rounded-[24px] border border-black/8 bg-white/70 p-2.5 dark:border-white/10 dark:bg-zinc-900/60 sm:p-3">
+                <DocumentChips
+                  documentIds={documentContext.documentIds}
+                  docMeta={documentContext.docMeta}
+                  summariesAvailability={documentContext.summariesAvailability}
+                  jobs={documentContext.jobs}
+                  pendingUploadFileName={documentContext.pendingUploadFileName}
+                  onDelete={documentContext.onDeleteDoc}
+                  isSending={isSending}
+                  t={t}
+                />
+              </div>
+            )}
+
           <PromptInput
             onSubmit={(_message, _event) => {
               handleSend();
             }}
-            className={`font-noto relative rounded-2xl border bg-card shadow-sm`}
+            className="relative border-transparent bg-transparent shadow-none"
           >
             <PromptInputBody>
-              <div className="relative">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={documentContext.triggerFilePicker}
-                        className="absolute left-2 top-2 text-muted-foreground hover:text-foreground"
-                        disabled={isSending || documentContext.isUploading || documentContext.documentIds.length >= 5}
-                      >
-                        <Paperclip className="h-6 w-6 top-1 left-1 absolute" />
-                        <span className="sr-only">
-                          {documentContext.documentIds.length >= 5
-                            ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
-                            : t('context.attach', { fallback: 'Adjuntar documento' })}
-                        </span>
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {documentContext.documentIds.length >= 5
-                          ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
-                          : t('context.attach', { fallback: 'Adjuntar documento' })}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <div>
                 <PromptInputTextarea
                   placeholder={
                     isSending
@@ -368,38 +440,12 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                   ref={inputRef}
                   autoFocus
                   disabled={isSending}
-                  className="pl-12"
+                  className="px-4"
                 />
               </div>
             </PromptInputBody>
-            <PromptInputToolbar>
+            <PromptInputToolbar className="border-t-0 px-1 pb-0 pt-2 sm:px-1">
               <PromptInputTools>
-                {/* Results button at far left (priority) */}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className={`gap-2 ${hasResults ? 'border-primary text-primary' : ''}`}
-                        onClick={() => setResultsOpen(true)}
-                        aria-label={t('results.title')}
-                      >
-                        <ListChecks className="h-4 w-4" />
-                        <span>{t('results.title')}</span>
-                        <span className="ml-1">{resultsCount}</span>
-                      </Button>
-                    </TooltipTrigger>
-                    {hasResults && (
-                      <TooltipContent>
-                        <p>{t('results.hint')}</p>
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                </TooltipProvider>
-
-                {/* Documents summary icon (muted to not compete with Results) */}
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -407,28 +453,23 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => summaryDialog.openSummaryDialog()}
-                        disabled={summaryDialog.availableSummaryDocIds.length === 0}
-                        className={`relative text-muted-foreground hover:text-foreground`}
+                        onClick={documentContext.triggerFilePicker}
+                        className="rounded-full border border-black/10 bg-white/90 text-muted-foreground shadow-sm transition-colors hover:bg-white hover:text-foreground dark:border-white/10 dark:bg-zinc-900/90 dark:hover:bg-zinc-900"
+                        disabled={isSending || documentContext.isUploading || documentContext.documentIds.length >= 5}
                       >
-                        <FileText className="h-4 w-4" />
+                        <Paperclip className="h-4 w-4" />
                         <span className="sr-only">
-                          {summaryDialog.availableSummaryDocIds.length > 0
-                            ? t('context.viewSummary', { fallback: 'Ver resumen' })
-                            : t('context.summaryNotReady', { fallback: 'Resumen aún no disponible' })}
+                          {documentContext.documentIds.length >= 5
+                            ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
+                            : t('context.attach', { fallback: 'Adjuntar documento' })}
                         </span>
-                        {summaryDialog.availableSummaryDocIds.length > 0 && (
-                          <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] leading-none h-4 min-w-4 px-1">
-                            {summaryDialog.availableSummaryDocIds.length}
-                          </span>
-                        )}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>
-                        {summaryDialog.availableSummaryDocIds.length > 0
-                          ? t('context.viewSummary', { fallback: 'Ver resumen' })
-                          : t('context.summaryNotReady', { fallback: 'Resumen aún no disponible' })}
+                        {documentContext.documentIds.length >= 5
+                          ? t('context.limitDesc', { fallback: 'Máximo 5 documentos' })
+                          : t('context.attach', { fallback: 'Adjuntar documento' })}
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -442,53 +483,65 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                   disabled={documentContext.isUploading || documentContext.documentIds.length >= 5}
                   className="hidden"
                 />
-
-                {/* Inline chips for selected docs */}
-                <DocumentChips
-                  documentIds={documentContext.documentIds}
-                  docMeta={documentContext.docMeta}
-                  summariesAvailability={documentContext.summariesAvailability}
-                  jobs={documentContext.jobs}
-                  pendingUploadFileName={documentContext.pendingUploadFileName}
-                  onDelete={documentContext.onDeleteDoc}
-                  isSending={isSending}
-                  t={t}
-                />
               </PromptInputTools>
               <PromptInputSubmit
                 disabled={isSending || input.trim().length === 0 || (!tierLoading && usage ? !canUseAI() : false)}
                 status={isSending ? 'submitted' : undefined}
-                className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-11 w-11 bg-[rgb(var(--chat-accent))] text-white shadow-lg hover:bg-[rgb(var(--chat-accent-ink))] disabled:cursor-not-allowed disabled:opacity-50"
               />
             </PromptInputToolbar>
           </PromptInput>
+          </div>
         </div>
       </div>
 
-      {/* Results Drawer (bottom sheet) */}
-      <Dialog open={resultsOpen} onOpenChange={setResultsOpen}>
+      {/* Results review panel */}
+      <Dialog open={resultsOpen} onOpenChange={handleResultsOpenChange}>
         <DialogContent
-          className="bottom-sheet sm:max-w-3xl p-4 sm:p-6 data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom"
-          style={{
-            position: 'fixed',
-            bottom: 0,
-            left: '50%',
-            top: 'auto',
-            transform: 'translateX(-50%) translateY(0)',
-            width: '100%',
-            maxWidth: '48rem',
-            borderRadius: '1rem 1rem 0 0',
-          }}
+          className={`w-full max-w-5xl overflow-hidden border border-black/10 bg-[#fcfcfb] p-0 shadow-[0_36px_120px_-56px_rgba(15,23,42,0.5)] dark:border-white/10 dark:bg-zinc-950 max-sm:!left-0 max-sm:bottom-0 max-sm:!top-auto max-sm:max-h-[88dvh] max-sm:w-full max-sm:max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-t-[30px] max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 ${chatAccentThemeClassName}`}
         >
-          <DialogHeader>
+          <DialogHeader className="sr-only">
             <DialogTitle>{t('results.title')}</DialogTitle>
             <DialogDescription>{t('results.description')}</DialogDescription>
           </DialogHeader>
-          <div className="max-h-[70vh] overflow-y-auto">
-            <ResultsView isSending={isSending} onOpenSaveDraft={onOpenSaveDraft} />
+          <div className="border-b border-black/5 px-3 pb-3 pt-3 dark:border-white/10 sm:px-6 sm:pb-4 sm:pt-5">
+            <Button
+              onClick={onOpenSaveDraft}
+              variant="default"
+              disabled={resultsIsEditingQuestion}
+              className={`rounded-full bg-[rgb(14,116,144)] text-white hover:bg-[rgb(15,118,110)] ${resultsIsEditingQuestion ? 'cursor-not-allowed opacity-60 blur-[0.4px]' : ''}`}
+            >
+              {t('header.saveDraft')}
+            </Button>
+          </div>
+          <div className="max-h-[75vh] overflow-y-auto px-3 py-3 sm:px-6 sm:py-5">
+            <ResultsView
+              isSending={isSending}
+              onEditorDirtyChange={setResultsHasUnsavedChanges}
+              onEditingStateChange={setResultsIsEditingQuestion}
+            />
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={showResultsCloseAlert} onOpenChange={setShowResultsCloseAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('editor.discardDialog.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('editor.discardDialog.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel onClick={cancelResultsClose} className="mt-0">
+              {t('editor.discardDialog.cancel')}
+            </AlertDialogCancel>
+            <Button variant="destructive" onClick={confirmResultsClose}>
+              {t('editor.discardDialog.discard')}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Document Summary Dialog (bottom sheet) */}
       <SummaryDialog

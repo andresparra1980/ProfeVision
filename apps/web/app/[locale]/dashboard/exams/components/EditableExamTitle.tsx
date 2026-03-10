@@ -93,7 +93,7 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
               <span
                 role="button"
                 tabIndex={0}
-                className="inline-flex items-center justify-center h-8 w-8 p-0 text-green-600 hover:text-green-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
+                className="inline-flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-xl p-0 text-green-600 transition-colors hover:bg-accent hover:text-green-700"
                 onClick={handleSaveClick}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -117,7 +117,7 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
               <span
                 role="button"
                 tabIndex={0}
-                className="inline-flex items-center justify-center h-8 w-8 p-0 text-red-600 hover:text-red-700 flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
+                className="inline-flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-xl p-0 text-red-600 transition-colors hover:bg-accent hover:text-red-700"
                 onClick={handleCancelClick}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -148,7 +148,7 @@ const EditableExamTitle: React.FC<EditableExamTitleProps> = ({ examId, initialTi
             <span
               role="button"
               tabIndex={0}
-              className="inline-flex items-center justify-center h-8 w-8 p-0 text-muted-foreground hover:text-foreground flex-shrink-0 cursor-pointer rounded-md hover:bg-accent transition-colors"
+              className="inline-flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-xl p-0 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               onClick={handleEditClick}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {

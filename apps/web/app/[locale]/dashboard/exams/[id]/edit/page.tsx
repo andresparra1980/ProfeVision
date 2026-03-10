@@ -831,7 +831,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                               {exam && exam.estado === "publicado" ? (
                                 // Para exámenes publicados, mostrar las opciones como burbujas clickeables
                                 <div 
-                                  className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold
+                                  className={`h-5 w-5 shrink-0 rounded-full flex items-center justify-center text-white text-xs font-bold
                                     ${option.es_correcta 
                                       ? 'bg-green-500' 
                                       : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
@@ -855,7 +855,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                                 </div>
                               ) : (
                                 // Para borradores, mantener el estilo actual
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                                <div className={`h-5 w-5 shrink-0 rounded-full flex items-center justify-center ${
                                   option.es_correcta 
                                     ? 'bg-green-100 text-green-800 dark:bg-green-600 dark:text-white' 
                                     : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
@@ -863,18 +863,17 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                                   {String.fromCharCode(65 + optIndex)}
                                 </div>
                               )}
-                              <div className={option.es_correcta ? 'font-medium' : ''}>
+                              <div className={`min-w-0 ${option.es_correcta ? 'font-medium' : ''}`}>
                                 {(/[$\\]/.test(String(option.texto)) && !String(option.texto).includes('<')) ? (
-                                  <span className="prose prose-sm dark:prose-invert max-w-none">
+                                  <span className="prose prose-sm inline dark:prose-invert max-w-none">
                                     <MathText text={String(option.texto)} inline />
                                   </span>
                                 ) : (
-                                  <p>{option.texto}</p>
+                                  <p className="break-words">
+                                    {option.texto}
+                                  </p>
                                 )}
                               </div>
-                              {option.es_correcta && (
-                                <span className="text-xs text-green-600 dark:text-green-400">{t('correct')}</span>
-                              )}
                             </div>
                           ))}
                         </div>

@@ -106,6 +106,14 @@ export default function DashboardLayout({
   };
 
   useEffect(() => {
+    document.body.classList.add("dashboard-ui");
+
+    return () => {
+      document.body.classList.remove("dashboard-ui");
+    };
+  }, []);
+
+  useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
       
@@ -161,13 +169,13 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <OnboardingProvider>
-      <div className="flex h-screen overflow-hidden relative">
+      <div className="dashboard-ui relative flex h-screen overflow-hidden dark:bg-[radial-gradient(circle_at_top_right,rgba(24,24,27,0.9),transparent_28%),linear-gradient(180deg,rgba(9,9,11,1)_0%,rgba(9,9,11,1)_58%,rgba(24,24,27,0.92)_100%)]">
         {user ? (
           <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
         ) : (
-          <div className="w-64 bg-card border-r border-muted/20 dark:border-muted/40"></div>
+          <div className="w-64 bg-card border-r border-muted/20 dark:bg-transparent"></div>
         )}
-        <div className="flex flex-1 flex-col overflow-hidden bg-card transition-all duration-200">
+        <div className="flex flex-1 flex-col overflow-hidden bg-card transition-all duration-200 dark:bg-transparent">
           <DashboardHeader />
           <main className="flex-1 overflow-y-auto pl-2 pt-2 pr-2 pb-20 md:pb-2">
             <div className="bg-background dark:bg-background text-foreground rounded-2xl min-h-full p-4 md:p-6 shadow-sm">

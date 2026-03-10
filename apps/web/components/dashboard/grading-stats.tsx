@@ -1,6 +1,13 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  dashboardCardClassName,
+  dashboardInsetCardClassName,
+} from '@/components/ui/card';
 import { Clock, CheckCircle2 } from 'lucide-react';
 import { useDashboardStats } from '@/lib/hooks/use-dashboard-stats';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -60,50 +67,50 @@ export function GradingStats() {
   const timeSavedFormatted = formatTimeSaved(stats.tiempoAhorradoSegundos, locale);
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader>
+    <Card className={dashboardCardClassName}>
+      <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5 text-purple-600 shrink-0" />
+          <Clock className="h-5 w-5 shrink-0 text-sky-600 dark:text-cyan-300" />
           <span className="break-words">{t('gradedExams')}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Exámenes Calificados */}
-        <div>
+        <div className={dashboardInsetCardClassName + " bg-gradient-to-br from-emerald-50/80 via-background to-background dark:from-emerald-500/8 dark:via-transparent dark:to-transparent p-4"}>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
             {t('gradedExams')}
           </p>
-          <div className="text-3xl font-bold text-primary">
+          <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-300">
             {stats.examenesCalificados}
           </div>
         </div>
 
         {/* Tiempo Ahorrado */}
-        <div>
+        <div className={dashboardInsetCardClassName + " bg-gradient-to-br from-sky-50/80 via-background to-background dark:from-cyan-500/8 dark:via-transparent dark:to-transparent p-4"}>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
-            <Clock className="h-4 w-4 text-purple-600" />
+            <Clock className="h-4 w-4 text-sky-600 dark:text-cyan-300" />
             {t('timeSaved')}
           </p>
-          <div className="text-3xl font-bold text-purple-600">
+          <div className="text-3xl font-bold text-sky-600 dark:text-cyan-300">
             {timeSavedFormatted}
           </div>
         </div>
 
         {/* Barra de progreso visual - Eficiencia */}
         {stats.examenesCalificados > 0 && (
-          <div className="pt-4 border-t">
+          <div className={dashboardInsetCardClassName + " bg-gradient-to-br from-emerald-50/55 via-background to-background dark:from-emerald-500/6 dark:via-transparent dark:to-transparent p-4"}>
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 gap-2">
               <span className="shrink-0">
                 {locale === 'es' ? 'Eficiencia' : 'Efficiency'}
               </span>
-              <span className="font-semibold text-primary text-right">
+              <span className="font-semibold text-emerald-600 dark:text-emerald-300 text-right">
                 {locale === 'es' ? '93.3% más rápido' : '93.3% faster'}
               </span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden w-full">
               <div
-                className="h-full bg-primary transition-all duration-500 ease-out"
+                className="h-full bg-emerald-500 dark:bg-emerald-400 transition-all duration-500 ease-out"
                 style={{ width: '90%' }}
               />
             </div>

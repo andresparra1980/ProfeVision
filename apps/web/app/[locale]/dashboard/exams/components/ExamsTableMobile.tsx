@@ -3,12 +3,17 @@ import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from 'next-intl';
 import { Button } from "@/components/ui/button";
 import {
+  dashboardCardClassName,
+  dashboardCardSectionClassName,
+} from "@/components/ui/card";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Pencil,
   Trash2,
@@ -65,7 +70,7 @@ function ExamCardHeader({ exam, t, onTitleSave }: ExamCardHeaderProps) {
           {exam.examen_grupo.map((asignacion: Exam["examen_grupo"][number]) => (
             <span
               key={asignacion.grupo.id}
-              className="inline-flex items-center justify-center rounded-full bg-secondary text-white px-2 py-0.5 text-[10px] font-medium shadow-sm"
+            className="inline-flex items-center justify-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-white shadow-sm"
             >
               {asignacion.grupo.nombre}
             </span>
@@ -119,7 +124,7 @@ function ExamCardContent({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
+              className="h-auto w-full justify-start rounded-xl px-2 py-2"
               onClick={() => {
                 router.push({
                   pathname: '/dashboard/exams/[id]/edit',
@@ -142,7 +147,7 @@ function ExamCardContent({
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start h-auto py-2 px-2 text-primary"
+                className="h-auto w-full justify-start rounded-xl px-2 py-2 text-primary"
                 onClick={() => onPublish(exam.id)}
               >
                 <Send className="mr-2 h-4 w-4" /> {t('actions.publish')}
@@ -160,7 +165,7 @@ function ExamCardContent({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400"
+              className="h-auto w-full justify-start rounded-xl px-2 py-2 text-purple-600 dark:text-purple-400"
               onClick={() => onStartSimilar(exam.id)}
             >
               <WandSparkles className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
@@ -178,7 +183,7 @@ function ExamCardContent({
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start h-auto py-2 px-2"
+                className="h-auto w-full justify-start rounded-xl px-2 py-2"
                 disabled={exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0}
                 onClick={() => {
                   router.push({
@@ -204,7 +209,7 @@ function ExamCardContent({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
+              className="h-auto w-full justify-start rounded-xl px-2 py-2"
               onClick={() => {
                 router.push({
                   pathname: '/dashboard/exams/[id]/assign',
@@ -226,7 +231,7 @@ function ExamCardContent({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
+              className="h-auto w-full justify-start rounded-xl px-2 py-2"
               onClick={() => {
                 router.push({
                   pathname: '/dashboard/exams/[id]/link-grade-component',
@@ -246,7 +251,7 @@ function ExamCardContent({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start h-auto py-2 px-2 text-red-500 dark:text-red-400"
+          className="h-auto w-full justify-start rounded-xl px-2 py-2 text-red-500 dark:text-red-400"
           onClick={() => onOpenDeleteDialog(exam.id)}
         >
           <Trash2 className="mr-2 h-4 w-4" /> {t('actions.delete')}
@@ -260,7 +265,7 @@ function ExamCardContent({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start h-auto py-2 px-2 text-primary font-semibold"
+                  className="h-auto w-full justify-start rounded-xl px-2 py-2 font-semibold text-primary"
                   disabled={!examsWithGrades.has(exam.id)}
                   onClick={() => {
                     router.push({
@@ -324,116 +329,79 @@ const isExamArchived = (exam: Exam): boolean => {
   return exam.examen_grupo.every((eg) => eg.grupo?.estado === 'archivado');
 };
 
+type ExamStatusTone = {
+  badgeClassName: string;
+  glowColor: string;
+  borderColor: string;
+};
+
+const EXAM_STATUS_TONES: Record<string, ExamStatusTone> = {
+  archived: {
+    badgeClassName: "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200",
+    glowColor: "rgba(100, 116, 139, 0.34)",
+    borderColor: "rgba(100, 116, 139, 0.64)",
+  },
+  borrador: {
+    badgeClassName: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-900/30 dark:text-amber-300",
+    glowColor: "rgba(245, 158, 11, 0.34)",
+    borderColor: "rgba(245, 158, 11, 0.72)",
+  },
+  publicado: {
+    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-900/30 dark:text-emerald-300",
+    glowColor: "rgba(16, 185, 129, 0.34)",
+    borderColor: "rgba(16, 185, 129, 0.72)",
+  },
+  cerrado: {
+    badgeClassName: "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/70 dark:bg-rose-900/30 dark:text-rose-300",
+    glowColor: "rgba(244, 63, 94, 0.3)",
+    borderColor: "rgba(244, 63, 94, 0.68)",
+  },
+  default: {
+    badgeClassName: "border-border bg-muted text-muted-foreground",
+    glowColor: "rgba(148, 163, 184, 0.22)",
+    borderColor: "rgba(148, 163, 184, 0.38)",
+  },
+};
+
+const getExamStatusTone = (status: string, archived?: boolean): ExamStatusTone => {
+  if (archived) return EXAM_STATUS_TONES.archived;
+  return EXAM_STATUS_TONES[status] || EXAM_STATUS_TONES.default;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getStatusBadge = (status: string, t: any, archived?: boolean) => {
-  const baseStyle: React.CSSProperties = {
-    padding: "3px 8px",
-    fontSize: "12px",
-    fontWeight: "800",
-    letterSpacing: "0.025em",
-    transform: "rotate(-5deg)",
-    display: "inline-block",
-    position: "relative",
-    borderRadius: "3px",
-    textTransform: "uppercase" as const,
-  };
+  const baseClass = "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em]";
+  const tone = getExamStatusTone(status, archived);
 
-  // If archived, show archived badge regardless of status
   if (archived) {
-    return (
-      <span
-        style={{
-          ...baseStyle,
-          background: "var(--foreground)",
-          color: "var(--background)",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-        }}
-      >
-        {t('status.archived')}
-      </span>
-    );
+    return <span className={`${baseClass} ${tone.badgeClassName}`}>{t('status.archived')}</span>;
   }
 
   switch (status) {
     case "borrador":
-      return (
-        <span
-          style={{
-            ...baseStyle,
-            background: "color-mix(in srgb, var(--accent) 80%, transparent)",
-            color: "black",
-            boxShadow:
-              "inset 0 -2px 0 color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
-          {t('status.draft')}
-        </span>
-      );
+      return <span className={`${baseClass} ${tone.badgeClassName}`}>{t('status.draft')}</span>;
     case "publicado":
-      return (
-        <span
-          style={{
-            ...baseStyle,
-            background: "color-mix(in srgb, var(--primary) 80%, transparent)",
-            color: "black",
-            boxShadow:
-              "inset 0 -2px 0 color-mix(in srgb, var(--primary) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
-          {t('status.published')}
-        </span>
-      );
+      return <span className={`${baseClass} ${tone.badgeClassName}`}>{t('status.published')}</span>;
     case "cerrado":
-      return (
-        <span
-          style={{
-            ...baseStyle,
-            background:
-              "color-mix(in srgb, var(--destructive) 80%, transparent)",
-            color: "black",
-            boxShadow:
-              "inset 0 -2px 0 color-mix(in srgb, var(--destructive) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
-          {t('status.completed')}
-        </span>
-      );
+      return <span className={`${baseClass} ${tone.badgeClassName}`}>{t('status.completed')}</span>;
     default:
-      return (
-        <span
-          style={{
-            ...baseStyle,
-            background: "color-mix(in srgb, var(--muted) 80%, transparent)",
-            color: "black",
-            boxShadow:
-              "inset 0 -2px 0 color-mix(in srgb, var(--muted) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
-          {status}
-        </span>
-      );
+      return <span className={`${baseClass} ${tone.badgeClassName}`}>{status}</span>;
   }
 };
 
-const getStatusBorderStyle = (status: string): React.CSSProperties => {
-  switch (status) {
-    case "borrador":
-      return {
-        borderColor: `color-mix(in srgb, var(--accent) 50%, transparent)`,
-      };
-    case "publicado":
-      return {
-        borderColor: `color-mix(in srgb, var(--primary) 50%, transparent)`,
-      };
-    case "cerrado":
-      return {
-        borderColor: `color-mix(in srgb, var(--destructive) 50%, transparent)`,
-      };
-    default:
-      return {
-        borderColor: `color-mix(in srgb, var(--muted) 50%, transparent)`,
-      };
-  }
+const getStatusCardStyle = (status: string, archived?: boolean): React.CSSProperties => {
+  const tone = getExamStatusTone(status, archived);
+
+  return {
+    borderColor: `color-mix(in srgb, ${tone.borderColor} 42%, transparent)`,
+    boxShadow: [
+      "0 26px 58px -36px rgba(15,23,42,0.42)",
+      `0 0 0 1px color-mix(in srgb, ${tone.borderColor} 46%, transparent)`,
+      `0 0 0 4px color-mix(in srgb, ${tone.glowColor} 24%, transparent)`,
+      `0 0 32px -10px ${tone.glowColor}`,
+      `0 18px 38px -24px ${tone.glowColor}`,
+    ].join(", "),
+  };
 };
 
 export default function ExamsTableMobile({
@@ -552,22 +520,21 @@ export default function ExamsTableMobile({
         placeholder={t('table.search')}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full bg-card dark:bg-card placeholder:text-muted-foreground max-w-sm"
+        className="w-full max-w-sm bg-card dark:bg-card placeholder:text-muted-foreground"
       />
 
       {/* Checkbox for showing exams from archived groups */}
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
+      <label htmlFor="show-archived-groups" className="flex items-center gap-2 cursor-pointer">
+        <Checkbox
           id="show-archived-groups"
           checked={showArchivedGroups}
-          onChange={(e) => setShowArchivedGroups(e.target.checked)}
-          className="rounded border-gray-300 text-primary focus:ring-primary"
+          onCheckedChange={(checked) => setShowArchivedGroups(Boolean(checked))}
+          className="rounded-md border-border"
         />
-        <label htmlFor="show-archived-groups" className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {t('filters.showArchivedGroups')}
-        </label>
-      </div>
+        </span>
+      </label>
 
       {loading ? (
         <ExamsPageSkeleton />
@@ -598,13 +565,13 @@ export default function ExamsTableMobile({
           {filteredExams.map((exam) => (
             <div
               key={exam.id}
-              className="border-2 rounded-md shadow-sm bg-card h-fit"
-              style={getStatusBorderStyle(exam.estado)}
+              className={dashboardCardClassName + " h-fit border-2"}
+              style={getStatusCardStyle(exam.estado, isExamArchived(exam))}
             >
               <div className="p-4">
                 <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </div>
-              <div className="p-4 border-t bg-muted/20">
+              <div className={dashboardCardSectionClassName + " p-4"}>
                 <ExamCardContent
                   exam={exam}
                   router={router}
@@ -624,13 +591,13 @@ export default function ExamsTableMobile({
             <AccordionItem
               value={exam.id}
               key={exam.id}
-              className="border rounded-md shadow-sm bg-card h-fit"
-              style={getStatusBorderStyle(exam.estado)}
+              className={dashboardCardClassName + " h-fit"}
+              style={getStatusCardStyle(exam.estado, isExamArchived(exam))}
             >
               <AccordionTrigger className="p-4 hover:no-underline">
                 <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </AccordionTrigger>
-              <AccordionContent className="p-4 border-t bg-muted/20">
+              <AccordionContent className={dashboardCardSectionClassName + " p-4"}>
                 <ExamCardContent
                   exam={exam}
                   router={router}

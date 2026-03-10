@@ -104,7 +104,7 @@ export function StudentDetailsDialog({ open, onOpenChange, studentId }: StudentD
         ) : (
           <div className="space-y-4">
             {student?.grupos.map((grupo) => (
-              <div key={grupo.id} className="flex items-start space-x-2 p-4 rounded-lg border">
+              <div key={grupo.id} className="flex items-start space-x-2 rounded-2xl border p-4">
                 <School className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <h4 className="font-medium">{grupo.nombre}</h4>
