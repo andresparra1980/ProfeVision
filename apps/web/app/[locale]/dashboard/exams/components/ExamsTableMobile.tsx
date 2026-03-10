@@ -3,6 +3,10 @@ import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from 'next-intl';
 import { Button } from "@/components/ui/button";
 import {
+  dashboardCardClassName,
+  dashboardCardSectionClassName,
+} from "@/components/ui/card";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -548,13 +552,13 @@ export default function ExamsTableMobile({
           {filteredExams.map((exam) => (
             <div
               key={exam.id}
-              className="h-fit overflow-hidden rounded-2xl border-2 border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80"
+              className={dashboardCardClassName + " h-fit border-2"}
               style={getStatusBorderStyle(exam.estado)}
             >
               <div className="p-4">
                 <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </div>
-              <div className="border-t border-border/35 bg-muted/25 p-4 dark:border-border/45 dark:bg-muted/15">
+              <div className={dashboardCardSectionClassName + " p-4"}>
                 <ExamCardContent
                   exam={exam}
                   router={router}
@@ -574,13 +578,13 @@ export default function ExamsTableMobile({
             <AccordionItem
               value={exam.id}
               key={exam.id}
-              className="h-fit overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80"
+              className={dashboardCardClassName + " h-fit"}
               style={getStatusBorderStyle(exam.estado)}
             >
               <AccordionTrigger className="p-4 hover:no-underline">
                 <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </AccordionTrigger>
-              <AccordionContent className="border-t border-border/35 bg-muted/25 p-4 dark:border-border/45 dark:bg-muted/15">
+              <AccordionContent className={dashboardCardSectionClassName + " p-4"}>
                 <ExamCardContent
                   exam={exam}
                   router={router}

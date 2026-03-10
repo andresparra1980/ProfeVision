@@ -1,6 +1,14 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  dashboardCardClassName,
+  dashboardCardSectionClassName,
+  dashboardInsetCardClassName,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -211,7 +219,7 @@ export function RecentExamsList() {
   const recentExams = stats.examenesRecientes.slice(0, 5);
 
   return (
-    <Card className="overflow-hidden border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80">
+    <Card className={dashboardCardClassName}>
       <CardHeader>
         <CardTitle className="break-words text-xl font-semibold tracking-tight">{t('recentExams')}</CardTitle>
       </CardHeader>
@@ -222,12 +230,12 @@ export function RecentExamsList() {
             <AccordionItem
               value={examen.id}
               key={examen.id}
-              className="overflow-hidden rounded-2xl border border-border/35 bg-background/75 shadow-sm dark:border-border/45 dark:bg-zinc-900/80"
+              className={dashboardInsetCardClassName + " overflow-hidden"}
             >
               <AccordionTrigger className="p-3 hover:no-underline [&>svg]:shrink-0">
                 <ExamHeader examen={examen} />
               </AccordionTrigger>
-              <AccordionContent className="overflow-hidden border-t border-border/35 bg-muted/25 p-3 dark:border-border/45 dark:bg-muted/15">
+              <AccordionContent className={dashboardCardSectionClassName + " overflow-hidden p-3"}>
                 <ExamActions examen={examen} />
               </AccordionContent>
             </AccordionItem>

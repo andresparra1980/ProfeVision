@@ -1,4 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  dashboardCardClassName,
+  dashboardCardSectionClassName,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -214,11 +221,11 @@ export function GroupCard({ grupo, onEditAction, onToggleArchiveAction, onDelete
   const t = useTranslations('dashboard.groups.card');
   
   return (
-    <Card key={grupo.id} className="flex flex-col overflow-hidden border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80">
+    <Card key={grupo.id} className={dashboardCardClassName + " flex flex-col"}>
       <CardHeader className="pb-2">
         <GroupCardHeader grupo={grupo} t={t} />
       </CardHeader>
-      <CardContent className="flex-1 border-t border-border/35 bg-muted/25 pt-4 dark:border-border/45 dark:bg-muted/15">
+      <CardContent className={dashboardCardSectionClassName + " flex-1 pt-4"}>
         <GroupCardActions 
           grupo={grupo}
           onEditAction={onEditAction}

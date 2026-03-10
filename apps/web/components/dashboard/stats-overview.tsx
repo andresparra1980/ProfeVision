@@ -1,6 +1,12 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  dashboardCardClassName,
+} from '@/components/ui/card';
 import { Building2, BookOpen, Folders, UsersRound } from 'lucide-react';
 import { useDashboardStats } from '@/lib/hooks/use-dashboard-stats';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -75,7 +81,7 @@ export function StatsOverview() {
         return (
           <Card
             key={index}
-            className="group relative overflow-hidden border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80"
+            className={`${dashboardCardClassName} group`}
           >
             <div className={`pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-r ${stat.glow} opacity-70 blur-xl`} />
             <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
