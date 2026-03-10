@@ -195,6 +195,16 @@ export default function QuestionEditorDialog({
     onDirtyChange?.(false);
   }
 
+  function handleDiscard() {
+    if (original) {
+      const reset = JSON.parse(JSON.stringify(original)) as ExamQuestion;
+      setLocal(reset);
+    }
+    setShowDiscardPrompt(false);
+    onDirtyChange?.(false);
+    onCancel();
+  }
+
   function handleBack() {
     if (hasChanges) {
       setShowDiscardPrompt(true);
@@ -250,7 +260,7 @@ export default function QuestionEditorDialog({
             <Button variant="outline" size="sm" className="rounded-full" onClick={() => setShowDiscardPrompt(false)}>
               {t("editor.discardDialog.cancel")}
             </Button>
-            <Button variant="ghost" size="sm" className="rounded-full" onClick={onCancel}>
+            <Button variant="ghost" size="sm" className="rounded-full" onClick={handleDiscard}>
               {t("editor.discardDialog.discard")}
             </Button>
             <Button size="sm" className="rounded-full" onClick={handleSave} disabled={!hasValidAnswer}>

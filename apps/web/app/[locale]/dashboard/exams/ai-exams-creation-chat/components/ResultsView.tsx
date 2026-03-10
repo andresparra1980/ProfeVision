@@ -142,6 +142,7 @@ export default function ResultsView({
   }
 
   function closeEditor() {
+    onEditorDirtyChange?.(false);
     setEditingIndex(null);
     setOpenAccordionItem(accordionBeforeEdit || "q-0");
   }
