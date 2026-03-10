@@ -11,6 +11,7 @@ import { SaveDraftDialog } from "./components/SaveDraftDialog";
 import { ClearChatDialog } from "./components/ClearChatDialog";
 import { DraftLoader } from "./components/DraftLoader";
 import { NewExamCleaner } from "./components/NewExamCleaner";
+import { chatAccentThemeClassName } from "./components/chat-accent-theme";
 import { useExamDraft } from "./hooks/useExamDraft";
 import { useClearChat } from "./hooks/useClearChat";
 
@@ -31,7 +32,7 @@ export default function AIExamsCreationChatPage() {
   const { clearing, handleClearChat } = useClearChat();
 
   return (
-    <div className="space-y-4 sm:space-y-6 [--chat-accent:14_116_144] [--chat-accent-soft:240_253_250] [--chat-accent-border:167_243_208] [--chat-accent-ink:15_118_110] dark:[--chat-accent-soft:15_23_42] dark:[--chat-accent-border:31_41_55] dark:[--chat-accent-ink:153_246_228]">
+    <div className={`space-y-4 sm:space-y-6 ${chatAccentThemeClassName}`}>
       <div className="rounded-[28px] border border-black/10 bg-gradient-to-br from-white via-white to-[rgb(var(--chat-accent-soft))] px-4 py-4 shadow-sm dark:border-white/10 dark:from-zinc-950 dark:via-zinc-950 dark:to-[rgb(var(--chat-accent-soft))] sm:px-6 sm:py-5">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">

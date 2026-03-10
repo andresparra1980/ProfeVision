@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { chatAccentThemeClassName } from './chat-accent-theme';
 import { buildStructuredSummaryHtml, getSummaryDisplayText } from '../utils/summaryFormatters';
 import { mdToHtmlLite } from '../utils/formatting';
 
@@ -30,7 +31,7 @@ export function SummaryDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-full max-w-3xl border border-black/10 bg-[#fcfcfb] p-0 shadow-[0_36px_120px_-56px_rgba(15,23,42,0.5)] dark:border-white/10 dark:bg-zinc-950 max-sm:!left-0 max-sm:bottom-0 max-sm:!top-auto max-sm:max-h-[88dvh] max-sm:w-full max-sm:max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-t-[30px] max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0"
+        className={`w-full max-w-3xl border border-black/10 bg-[#fcfcfb] p-0 shadow-[0_36px_120px_-56px_rgba(15,23,42,0.5)] dark:border-white/10 dark:bg-zinc-950 max-sm:!left-0 max-sm:bottom-0 max-sm:!top-auto max-sm:max-h-[88dvh] max-sm:w-full max-sm:max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-t-[30px] max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 ${chatAccentThemeClassName}`}
       >
         <DialogHeader className="sr-only">
           <DialogTitle>{t('context.summaryTitle', { fallback: 'Resumen del documento' })}</DialogTitle>

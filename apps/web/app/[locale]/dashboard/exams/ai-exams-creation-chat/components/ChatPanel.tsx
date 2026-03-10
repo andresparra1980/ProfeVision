@@ -52,6 +52,7 @@ import { SummaryDialog } from "./SummaryDialog";
 import { EmptyState } from "./EmptyState";
 import { ProgressMessages } from "./ProgressMessages";
 import { StepProgressList } from "./StepProgressList";
+import { chatAccentThemeClassName } from "./chat-accent-theme";
 import { useTierLimits } from "@/lib/hooks/useTierLimits";
 import { LimitReachedModal } from "@/components/shared/limit-reached-modal";
 
@@ -497,7 +498,7 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
       {/* Results review panel */}
       <Dialog open={resultsOpen} onOpenChange={handleResultsOpenChange}>
         <DialogContent
-          className="w-full max-w-5xl overflow-hidden border border-black/10 bg-[#fcfcfb] p-0 shadow-[0_36px_120px_-56px_rgba(15,23,42,0.5)] dark:border-white/10 dark:bg-zinc-950 max-sm:!left-0 max-sm:bottom-0 max-sm:!top-auto max-sm:max-h-[88dvh] max-sm:w-full max-sm:max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-t-[30px] max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0"
+          className={`w-full max-w-5xl overflow-hidden border border-black/10 bg-[#fcfcfb] p-0 shadow-[0_36px_120px_-56px_rgba(15,23,42,0.5)] dark:border-white/10 dark:bg-zinc-950 max-sm:!left-0 max-sm:bottom-0 max-sm:!top-auto max-sm:max-h-[88dvh] max-sm:w-full max-sm:max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-t-[30px] max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 ${chatAccentThemeClassName}`}
         >
           <DialogHeader className="sr-only">
             <DialogTitle>{t('results.title')}</DialogTitle>
