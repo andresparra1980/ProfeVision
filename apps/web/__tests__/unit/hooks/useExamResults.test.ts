@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { useExamResults } from '@/components/exam-results/hooks/use-exam-results'
+import { toast } from 'sonner'
 
 // Mock dependencies
 const mockT = (key: string) => key
@@ -183,6 +184,36 @@ describe('useExamResults', () => {
 
       // Should handle error gracefully
       expect(result.current.examDetails).toBeNull()
+    })
+
+    it('handles question metadata fetch error and surfaces it', async () => {
+      const examChain = createChainableMock({ data: mockExamData, error: null })
+      const preguntasChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: null, error: new Error('Preguntas failed') }),
+      }
+
+      mockFrom.mockImplementation((table: string) => {
+        switch (table) {
+          case 'examenes':
+            return examChain
+          case 'preguntas':
+            return preguntasChain
+          default:
+            return createChainableMock({ data: null, error: null })
+        }
+      })
+
+      const { result } = renderHook(() => useExamResults(mockExamId))
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(result.current.totalPreguntas).toBe(0)
+      expect(result.current.enabledQuestionOrders).toEqual([])
+      expect(toast.error).toHaveBeenCalled()
     })
   })
 

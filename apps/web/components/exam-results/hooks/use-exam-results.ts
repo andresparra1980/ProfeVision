@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import logger from '@/lib/utils/logger';
 import type {
   ExamDetails,
   ResultadoExamen,
@@ -84,9 +85,14 @@ export function useExamResults(examId: string | string[]) {
         .order('orden', { ascending: true });
 
       if (preguntasError) {
+        setTotalPreguntas(0);
+        setEnabledQuestionOrders([]);
+
         if (DEBUG) {
-          // Registramos el error en un logger en lugar de la consola
+          logger.error('Error loading question metadata:', preguntasError);
         }
+
+        throw preguntasError;
       } else if (preguntasData && preguntasData.length > 0) {
         const preguntas = preguntasData as Array<{ orden: number; habilitada: boolean }>;
         const highestQuestionOrder = Math.max(...preguntas.map((pregunta) => pregunta.orden));
@@ -356,9 +362,9 @@ export function useExamResults(examId: string | string[]) {
         .filter((resultado: ResultadoExamen | null): resultado is ResultadoExamen => resultado !== null);
 
       setResultados(typedResults);
-    } catch (_error) {
+    } catch (error) {
       if (DEBUG) {
-        // Registramos el error en un logger en lugar de la consola
+        logger.error('Error loading exam results:', error);
       }
       toast.error(t('error'), {
         description: t('loadingError'),
