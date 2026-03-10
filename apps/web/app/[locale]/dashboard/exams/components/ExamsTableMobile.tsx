@@ -329,66 +329,79 @@ const isExamArchived = (exam: Exam): boolean => {
   return exam.examen_grupo.every((eg) => eg.grupo?.estado === 'archivado');
 };
 
+type ExamStatusTone = {
+  badgeClassName: string;
+  glowColor: string;
+  borderColor: string;
+};
+
+const EXAM_STATUS_TONES: Record<string, ExamStatusTone> = {
+  archived: {
+    badgeClassName: "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200",
+    glowColor: "rgba(100, 116, 139, 0.34)",
+    borderColor: "rgba(100, 116, 139, 0.64)",
+  },
+  borrador: {
+    badgeClassName: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-900/30 dark:text-amber-300",
+    glowColor: "rgba(245, 158, 11, 0.34)",
+    borderColor: "rgba(245, 158, 11, 0.72)",
+  },
+  publicado: {
+    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-900/30 dark:text-emerald-300",
+    glowColor: "rgba(16, 185, 129, 0.34)",
+    borderColor: "rgba(16, 185, 129, 0.72)",
+  },
+  cerrado: {
+    badgeClassName: "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/70 dark:bg-rose-900/30 dark:text-rose-300",
+    glowColor: "rgba(244, 63, 94, 0.3)",
+    borderColor: "rgba(244, 63, 94, 0.68)",
+  },
+  default: {
+    badgeClassName: "border-border bg-muted text-muted-foreground",
+    glowColor: "rgba(148, 163, 184, 0.22)",
+    borderColor: "rgba(148, 163, 184, 0.38)",
+  },
+};
+
+const getExamStatusTone = (status: string, archived?: boolean): ExamStatusTone => {
+  if (archived) return EXAM_STATUS_TONES.archived;
+  return EXAM_STATUS_TONES[status] || EXAM_STATUS_TONES.default;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getStatusBadge = (status: string, t: any, archived?: boolean) => {
   const baseClass = "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em]";
+  const tone = getExamStatusTone(status, archived);
 
-  // If archived, show archived badge regardless of status
   if (archived) {
-    return (
-      <span className={`${baseClass} border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200`}>
-        {t('status.archived')}
-      </span>
-    );
+    return <span className={`${baseClass} ${tone.badgeClassName}`}>{t('status.archived')}</span>;
   }
 
   switch (status) {
     case "borrador":
-      return (
-        <span className={`${baseClass} border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-900/30 dark:text-amber-300`}>
-          {t('status.draft')}
-        </span>
-      );
+      return <span className={`${baseClass} ${tone.badgeClassName}`}>{t('status.draft')}</span>;
     case "publicado":
-      return (
-        <span className={`${baseClass} border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-900/30 dark:text-emerald-300`}>
-          {t('status.published')}
-        </span>
-      );
+      return <span className={`${baseClass} ${tone.badgeClassName}`}>{t('status.published')}</span>;
     case "cerrado":
-      return (
-        <span className={`${baseClass} border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/70 dark:bg-rose-900/30 dark:text-rose-300`}>
-          {t('status.completed')}
-        </span>
-      );
+      return <span className={`${baseClass} ${tone.badgeClassName}`}>{t('status.completed')}</span>;
     default:
-      return (
-        <span className={`${baseClass} border-border bg-muted text-muted-foreground`}>
-          {status}
-        </span>
-      );
+      return <span className={`${baseClass} ${tone.badgeClassName}`}>{status}</span>;
   }
 };
 
-const getStatusBorderStyle = (status: string): React.CSSProperties => {
-  switch (status) {
-    case "borrador":
-      return {
-        borderColor: `color-mix(in srgb, var(--accent) 50%, transparent)`,
-      };
-    case "publicado":
-      return {
-        borderColor: `color-mix(in srgb, var(--primary) 50%, transparent)`,
-      };
-    case "cerrado":
-      return {
-        borderColor: `color-mix(in srgb, var(--destructive) 50%, transparent)`,
-      };
-    default:
-      return {
-        borderColor: `color-mix(in srgb, var(--muted) 50%, transparent)`,
-      };
-  }
+const getStatusCardStyle = (status: string, archived?: boolean): React.CSSProperties => {
+  const tone = getExamStatusTone(status, archived);
+
+  return {
+    borderColor: `color-mix(in srgb, ${tone.borderColor} 42%, transparent)`,
+    boxShadow: [
+      "0 26px 58px -36px rgba(15,23,42,0.42)",
+      `0 0 0 1px color-mix(in srgb, ${tone.borderColor} 46%, transparent)`,
+      `0 0 0 4px color-mix(in srgb, ${tone.glowColor} 24%, transparent)`,
+      `0 0 32px -10px ${tone.glowColor}`,
+      `0 18px 38px -24px ${tone.glowColor}`,
+    ].join(", "),
+  };
 };
 
 export default function ExamsTableMobile({
@@ -553,7 +566,7 @@ export default function ExamsTableMobile({
             <div
               key={exam.id}
               className={dashboardCardClassName + " h-fit border-2"}
-              style={getStatusBorderStyle(exam.estado)}
+              style={getStatusCardStyle(exam.estado, isExamArchived(exam))}
             >
               <div className="p-4">
                 <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
@@ -579,7 +592,7 @@ export default function ExamsTableMobile({
               value={exam.id}
               key={exam.id}
               className={dashboardCardClassName + " h-fit"}
-              style={getStatusBorderStyle(exam.estado)}
+              style={getStatusCardStyle(exam.estado, isExamArchived(exam))}
             >
               <AccordionTrigger className="p-4 hover:no-underline">
                 <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
