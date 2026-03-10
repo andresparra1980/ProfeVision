@@ -106,6 +106,14 @@ export default function DashboardLayout({
   };
 
   useEffect(() => {
+    document.body.classList.add("dashboard-ui");
+
+    return () => {
+      document.body.classList.remove("dashboard-ui");
+    };
+  }, []);
+
+  useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
       
