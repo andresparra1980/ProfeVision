@@ -161,7 +161,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <OnboardingProvider>
-      <div className="flex h-screen overflow-hidden relative">
+      <div className="dashboard-ui flex h-screen overflow-hidden relative">
         {user ? (
           <DashboardSidebar user={user} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
         ) : (

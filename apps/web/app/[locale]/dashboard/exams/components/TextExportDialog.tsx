@@ -197,7 +197,7 @@ export default function TextExportDialog({
             tabIndex={0}
             onClick={handleCopy}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopy(); } }}
-            className="w-full h-[380px] overflow-auto rounded-md border p-4 text-sm bg-background prose prose-sm dark:prose-invert max-w-none focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
+            className="h-[380px] w-full cursor-pointer overflow-auto rounded-2xl border bg-background p-4 text-sm prose prose-sm max-w-none focus:outline-none focus:ring-2 focus:ring-primary/50 dark:prose-invert"
           >
             <MathText text={formattedContent} />
           </div>
@@ -207,7 +207,7 @@ export default function TextExportDialog({
               readOnly
               value={formattedContent}
               onClick={handleCopy}
-              className="w-full h-24 rounded-md border p-3 font-mono text-xs whitespace-pre leading-5 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="h-24 w-full rounded-xl border p-3 font-mono text-xs leading-5 whitespace-pre focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           )}
           <p className="text-xs text-muted-foreground">
@@ -223,4 +223,3 @@ export default function TextExportDialog({
     </Dialog>
   );
 }
-

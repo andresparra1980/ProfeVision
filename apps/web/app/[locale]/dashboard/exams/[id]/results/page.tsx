@@ -71,6 +71,7 @@ import { TitleCardWithDepth } from '@/components/shared/title-card-with-depth';
 // UI Components
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // Types
 import type { ResultadoExamen } from '@/components/exam-results/utils/types';
@@ -318,7 +319,7 @@ export default function ExamResultsPage() {
       <div className="space-y-4">
         {/* Header skeleton */}
         <div className="flex items-center gap-2">
-          <Skeleton className="h-9 w-9 rounded-md" />
+          <Skeleton className="h-9 w-9 rounded-lg" />
           <Skeleton className="h-9 w-32" />
           <Skeleton className="ml-auto h-9 w-48" />
         </div>
@@ -413,12 +414,11 @@ export default function ExamResultsPage() {
 
       {/* Filter checkbox */}
       <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
+        <Checkbox
           id="ver-solo-con-examen"
           checked={verSoloConExamen}
-          onChange={(e) => setVerSoloConExamen(e.target.checked)}
-          className="rounded border-gray-300 text-primary focus:ring-primary"
+          onCheckedChange={(checked) => setVerSoloConExamen(Boolean(checked))}
+          className="h-4 w-4 rounded-md border-border"
         />
         <label htmlFor="ver-solo-con-examen" className="text-sm">
           {t('checkbox.showOnlyGraded')}

@@ -101,6 +101,26 @@
   }
 }
 
+@layer components {
+  .dashboard-ui [data-slot="button"]:not(.rounded-full):not(.rounded-xl):not(.rounded-2xl):not([class*="rounded-["]) {
+    border-radius: 0.875rem;
+  }
+
+  .dashboard-ui [data-slot="card"]:not(.rounded-full):not(.rounded-xl):not(.rounded-2xl):not([class*="rounded-["]) {
+    border-radius: 1rem;
+  }
+
+  .dashboard-ui [data-slot="input"]:not(.rounded-full):not(.rounded-xl):not(.rounded-2xl):not([class*="rounded-["]),
+  .dashboard-ui [data-slot="textarea"]:not(.rounded-full):not(.rounded-xl):not(.rounded-2xl):not([class*="rounded-["]) {
+    border-radius: 0.875rem;
+  }
+
+  .dashboard-ui [data-slot="dialog-content"]:not(.rounded-full):not(.rounded-xl):not(.rounded-2xl):not([class*="rounded-["]),
+  .dashboard-ui [data-slot="alert-dialog-content"]:not(.rounded-full):not(.rounded-xl):not(.rounded-2xl):not([class*="rounded-["]) {
+    border-radius: 1rem;
+  }
+}
+
 @layer utilities {
   .animate-shimmer {
     animation: shimmer 2s linear infinite;

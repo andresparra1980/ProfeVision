@@ -75,7 +75,7 @@ export function StudentsTable({
 
     return (
       <div
-        className={`p-2 rounded-lg space-y-1.5 ${isEven ? 'bg-muted/30' : 'bg-background'
+        className={`space-y-1.5 rounded-2xl p-2 ${isEven ? 'bg-muted/30' : 'bg-background'
           } border`}
       >
         <div className="space-y-1">

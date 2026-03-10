@@ -9,6 +9,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Pencil,
   Trash2,
@@ -65,7 +66,7 @@ function ExamCardHeader({ exam, t, onTitleSave }: ExamCardHeaderProps) {
           {exam.examen_grupo.map((asignacion: Exam["examen_grupo"][number]) => (
             <span
               key={asignacion.grupo.id}
-              className="inline-flex items-center justify-center rounded-full bg-secondary text-white px-2 py-0.5 text-[10px] font-medium shadow-sm"
+            className="inline-flex items-center justify-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-white shadow-sm"
             >
               {asignacion.grupo.nombre}
             </span>
@@ -557,12 +558,11 @@ export default function ExamsTableMobile({
 
       {/* Checkbox for showing exams from archived groups */}
       <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
+        <Checkbox
           id="show-archived-groups"
           checked={showArchivedGroups}
-          onChange={(e) => setShowArchivedGroups(e.target.checked)}
-          className="rounded border-gray-300 text-primary focus:ring-primary"
+          onCheckedChange={(checked) => setShowArchivedGroups(Boolean(checked))}
+          className="rounded-md border-border"
         />
         <label htmlFor="show-archived-groups" className="text-sm text-muted-foreground">
           {t('filters.showArchivedGroups')}
@@ -598,7 +598,7 @@ export default function ExamsTableMobile({
           {filteredExams.map((exam) => (
             <div
               key={exam.id}
-              className="border-2 rounded-md shadow-sm bg-card h-fit"
+              className="h-fit rounded-2xl border-2 bg-card shadow-sm"
               style={getStatusBorderStyle(exam.estado)}
             >
               <div className="p-4">
@@ -624,7 +624,7 @@ export default function ExamsTableMobile({
             <AccordionItem
               value={exam.id}
               key={exam.id}
-              className="border rounded-md shadow-sm bg-card h-fit"
+              className="h-fit rounded-2xl border bg-card shadow-sm"
               style={getStatusBorderStyle(exam.estado)}
             >
               <AccordionTrigger className="p-4 hover:no-underline">

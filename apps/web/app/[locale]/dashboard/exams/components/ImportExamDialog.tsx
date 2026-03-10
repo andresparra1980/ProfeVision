@@ -342,7 +342,7 @@ export default function ImportExamDialog({
             </DialogTitle>
             <button
               onClick={() => setShowFormatExample(!showFormatExample)}
-              className="flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+              className="flex items-center gap-1.5 rounded-xl px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               title={t('formatExample.toggle')}
             >
               <HelpCircle className="h-4 w-4" />
@@ -356,7 +356,7 @@ export default function ImportExamDialog({
 
         {/* Format Example Panel */}
         {showFormatExample && (
-          <div className="border rounded-lg p-4 bg-muted/30 space-y-3">
+          <div className="space-y-3 rounded-2xl border bg-muted/30 p-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">{t('formatExample.title')}</h4>
               <button
@@ -366,7 +366,7 @@ export default function ImportExamDialog({
                 {t('formatExample.close')}
               </button>
             </div>
-            <div className="relative w-full max-h-64 overflow-auto rounded border bg-white">
+            <div className="relative max-h-64 w-full overflow-auto rounded-xl border bg-white">
               <Image
                 src="/images/onboarding/import-example.png"
                 alt={t('formatExample.imageAlt')}
@@ -395,7 +395,7 @@ export default function ImportExamDialog({
           {!processedData && !isUploading && (
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+              className={`cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${
                 isDragActive 
                   ? 'border-primary bg-primary/10' 
                   : 'border-gray-300 hover:border-primary hover:bg-primary/5'
@@ -453,7 +453,7 @@ export default function ImportExamDialog({
               </div>
               
               {/* Consejos rotativos */}
-              <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-md">
+              <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50 p-3">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
                     <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -513,7 +513,7 @@ export default function ImportExamDialog({
                 </div>
                 <div className="max-h-40 overflow-y-auto space-y-2">
                   {processedData.preguntas.slice(0, 3).map((pregunta, index) => (
-                    <div key={index} className="border rounded p-3 text-sm">
+                    <div key={index} className="rounded-xl border p-3 text-sm">
                       <div className="font-medium">
                         {pregunta.numero}. {pregunta.pregunta}
                       </div>

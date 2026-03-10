@@ -215,7 +215,7 @@ export default function SimilarExamModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md rounded-2xl">
         <DialogHeader>
           <DialogTitle>{tJobs("jobs.similarExam.title")}</DialogTitle>
           <DialogDescription>
@@ -231,7 +231,7 @@ export default function SimilarExamModal({
             return (
               <div
                 key={k}
-                className={`flex items-center justify-between p-2 border rounded-md bg-muted/30 transition-colors ${
+                className={`flex items-center justify-between rounded-xl border bg-muted/30 p-2 transition-colors ${
                   st === "started" ? "border-primary/50 bg-primary/5" : ""
                 }`}
                 aria-current={st === "started" ? "step" : undefined}

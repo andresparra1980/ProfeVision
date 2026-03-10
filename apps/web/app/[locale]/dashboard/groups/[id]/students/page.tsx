@@ -336,10 +336,10 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
                   ) : searchResults.length > 0 ? (
                     <div className="space-y-2">
                       {searchResults.map((student) => (
-                        <div
-                          key={student.id}
-                          className="flex items-center justify-between p-2 border rounded"
-                        >
+                         <div
+                           key={student.id}
+                           className="flex items-center justify-between rounded-xl border p-2"
+                         >
                           <div>
                             <p className="font-medium">{getStudentDisplayName(student)}</p>
                             <p className="text-sm text-muted-foreground">
@@ -368,7 +368,7 @@ function GroupStudentsContent({ groupId }: { groupId: string }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="border rounded-lg">
+            <div className="rounded-2xl border">
               <Table>
                 <TableHeader>
                   <TableRow>
