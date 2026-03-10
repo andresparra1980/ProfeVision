@@ -98,6 +98,7 @@ export default function ExamResultsPage() {
     resultados,
     todosEstudiantes,
     totalPreguntas,
+    enabledQuestionOrders,
     availableGroups,
     selectedGroupId,
     setResultados,
@@ -389,7 +390,7 @@ export default function ExamResultsPage() {
           <ResultsPageActions
             examDetails={examDetails}
             resultados={resultados}
-            totalPreguntas={totalPreguntas}
+            enabledQuestionOrders={enabledQuestionOrders}
             selectedGroupId={selectedGroupId}
             onExportExcel={handleExportToExcel}
           />

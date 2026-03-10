@@ -92,7 +92,7 @@ interface PDFExportButtonProps {
   groupId?: string | null;
   fileName: string;
   buttonText?: string;
-  totalPreguntas?: number;
+  enabledQuestionOrders: number[];
   resultados: ResultadoExamen[];
   examDetails: ExamDetails | null;
 }
@@ -107,7 +107,7 @@ export function PDFExportButton({
   groupId,
   fileName,
   buttonText = 'Reporte en PDF',
-  totalPreguntas = 0,
+  enabledQuestionOrders,
   resultados,
   examDetails
 }: PDFExportButtonProps) {
@@ -124,6 +124,10 @@ export function PDFExportButton({
   const [institucionNombre, setInstitucionNombre] = useState('INSTITUCIÓN ACADÉMICA');
   const [pdfLib, setPdfLib] = useState<null | typeof import('@react-pdf/renderer')>(null);
   const t = useTranslations('dashboard.exams.results.pdfExport');
+
+  const visibleQuestionNumbers = useMemo(() => {
+    return Array.from(new Set(enabledQuestionOrders)).sort((a, b) => a - b);
+  }, [enabledQuestionOrders]);
 
   const styles = useMemo(() => {
     if (!pdfLib) return null as unknown as Record<string, never>;
@@ -317,10 +321,10 @@ export function PDFExportButton({
 
           <Text style={styles.answersHeader}>{t('content.detectedAnswers')}</Text>
           <View style={styles.answersGrid}>
-            {Array.from({
-              length: Math.max(totalPreguntas, ...(resultado.respuestas_estudiante || []).map((r) => r?.pregunta?.orden || 0))
-            }, (_, i) => i + 1).map((ordenPregunta) => {
-              const respuesta = (resultado.respuestas_estudiante || []).find((r) => r?.pregunta?.orden === ordenPregunta);
+            {visibleQuestionNumbers.map((ordenPregunta) => {
+              const respuesta = (resultado.respuestas_estudiante || []).find(
+                (r) => r?.pregunta?.orden === ordenPregunta && r.pregunta.habilitada
+              );
 
               if (respuesta && respuesta.opcion_respuesta) {
                 return (

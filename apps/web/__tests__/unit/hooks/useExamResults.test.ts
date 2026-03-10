@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { useExamResults } from '@/components/exam-results/hooks/use-exam-results'
+import { toast } from 'sonner'
 
 // Mock dependencies
 const mockT = (key: string) => key
@@ -47,7 +48,7 @@ describe('useExamResults', () => {
     },
   }
 
-  const mockPreguntasData = [{ orden: 10 }]
+  const mockPreguntasData = [{ orden: 10, habilitada: true }]
 
   const mockExamenGruposData = [
     { id: 'eg-1', grupo_id: 'grupo-1', grupos: { id: 'grupo-1', nombre: 'Grupo A' } },
@@ -135,8 +136,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -170,6 +170,53 @@ describe('useExamResults', () => {
 
       expect(result.current.examDetails).toEqual(mockExamData)
       expect(result.current.totalPreguntas).toBe(10)
+      expect(result.current.enabledQuestionOrders).toEqual([10])
+    })
+
+    it('filters disabled questions from enabledQuestionOrders', async () => {
+      const examChain = createChainableMock({ data: mockExamData, error: null })
+      const mixedPreguntasData = [
+        { orden: 1, habilitada: true },
+        { orden: 2, habilitada: false },
+        { orden: 3, habilitada: true },
+      ]
+      const preguntasChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: mixedPreguntasData, error: null }),
+      }
+      const examenGruposChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+      }
+      const resultadosChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+      }
+
+      mockFrom.mockImplementation((table: string) => {
+        switch (table) {
+          case 'examenes':
+            return examChain
+          case 'preguntas':
+            return preguntasChain
+          case 'examen_grupo':
+            return examenGruposChain
+          case 'resultados_examen':
+            return resultadosChain
+          default:
+            return createChainableMock({ data: null, error: null })
+        }
+      })
+
+      const { result } = renderHook(() => useExamResults(mockExamId))
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(result.current.totalPreguntas).toBe(3)
+      expect(result.current.enabledQuestionOrders).toEqual([1, 3])
     })
 
     it('handles exam fetch error', async () => {
@@ -185,6 +232,36 @@ describe('useExamResults', () => {
       // Should handle error gracefully
       expect(result.current.examDetails).toBeNull()
     })
+
+    it('handles question metadata fetch error and surfaces it', async () => {
+      const examChain = createChainableMock({ data: mockExamData, error: null })
+      const preguntasChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: null, error: new Error('Preguntas failed') }),
+      }
+
+      mockFrom.mockImplementation((table: string) => {
+        switch (table) {
+          case 'examenes':
+            return examChain
+          case 'preguntas':
+            return preguntasChain
+          default:
+            return createChainableMock({ data: null, error: null })
+        }
+      })
+
+      const { result } = renderHook(() => useExamResults(mockExamId))
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(result.current.totalPreguntas).toBe(0)
+      expect(result.current.enabledQuestionOrders).toEqual([])
+      expect(toast.error).toHaveBeenCalled()
+    })
   })
 
   describe('group handling', () => {
@@ -193,8 +270,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -250,8 +326,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -306,8 +381,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -350,8 +424,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -393,8 +466,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
+        order: vi.fn().mockResolvedValue({ data: mockPreguntasData, error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -456,8 +528,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
@@ -513,8 +584,7 @@ describe('useExamResults', () => {
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
       }
       const examenGruposChain = {
         select: vi.fn().mockReturnThis(),
