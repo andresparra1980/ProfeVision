@@ -166,6 +166,9 @@
     "assistant": "Asistente",
     "system": "Sistema",
     "progress": {
+      "ariaLabel": "Actualizaciones de progreso",
+      "processingLabel": "Procesando",
+      "nowLabel": "ahora",
       "step": "Procesando...",
       "planning": "Planificando examen",
       "generating": "Generando preguntas",

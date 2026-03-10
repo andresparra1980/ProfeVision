@@ -166,6 +166,9 @@
     "assistant": "Assistant",
     "system": "System",
     "progress": {
+      "ariaLabel": "Progress updates",
+      "processingLabel": "Processing",
+      "nowLabel": "now",
       "step": "Processing...",
       "planning": "Planning exam",
       "generating": "Generating questions",

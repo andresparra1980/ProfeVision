@@ -33,6 +33,7 @@ export interface StepProgressListProps {
   llmResponse?: string; // Final text from LLM
   successMessage?: string; // Success message after completion
   className?: string;
+  progressAriaLabel: string;
 }
 
 /**
@@ -57,6 +58,7 @@ export function StepProgressList({
   llmResponse,
   successMessage,
   className = '',
+  progressAriaLabel,
 }: StepProgressListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -80,7 +82,7 @@ export function StepProgressList({
       className={cn('space-y-3 py-4 max-h-64 overflow-y-auto', className)}
       role="status"
       aria-live="polite"
-      aria-label="Progress updates"
+      aria-label={progressAriaLabel}
     >
       {/* Steps list */}
       {steps.map((step, index) => (

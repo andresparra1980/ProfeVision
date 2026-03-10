@@ -329,9 +329,15 @@ export default function ChatPanel({ onOpenSaveDraft }: ChatPanelProps) {
                         steps={progressState.steps}
                         llmResponse={progressState.llmResponse}
                         successMessage={progressState.successMessage}
+                        progressAriaLabel={t('chat.progress.ariaLabel', { fallback: 'Progress updates' })}
                       />
                     ) : progressMessages.length > 0 ? (
-                      <ProgressMessages messages={progressMessages} />
+                      <ProgressMessages
+                        messages={progressMessages}
+                        progressAriaLabel={t('chat.progress.ariaLabel', { fallback: 'Progress updates' })}
+                        processingAriaLabel={t('chat.progress.processingLabel', { fallback: 'Processing' })}
+                        nowLabel={t('chat.progress.nowLabel', { fallback: 'now' })}
+                      />
                     ) : (
                       <ConversationTyping className="pl-2" />
                     )}
