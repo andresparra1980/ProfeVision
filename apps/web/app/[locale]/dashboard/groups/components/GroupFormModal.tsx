@@ -274,7 +274,7 @@ export function GroupFormModal({
             modal={true}
           >
             <DialogContent
-              className="sm:max-w-[525px] bg-[#FAFAF4] dark:bg-[#171717]"
+              className="sm:max-w-[525px] rounded-2xl bg-[#FAFAF4] dark:bg-[#171717]"
               onCloseAutoFocus={(e) => {
                 // Prevent focus trap issues
                 e.preventDefault();
