@@ -27,7 +27,7 @@ export function SubjectCard({ materia, onEdit, onDelete }: SubjectCardProps) {
   const t = useTranslations('dashboard.common');
 
   return (
-    <Card>
+    <Card className="overflow-hidden border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80">
       <CardHeader className="pb-2">
         <div className="flex justify-between">
           <CardTitle className="text-xl">{materia.nombre}</CardTitle>
@@ -38,6 +38,7 @@ export function SubjectCard({ materia, onEdit, onDelete }: SubjectCardProps) {
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="rounded-xl"
                     onClick={() => onEdit(materia)}
                   >
                     <Pencil className="h-4 w-4" />
@@ -55,6 +56,7 @@ export function SubjectCard({ materia, onEdit, onDelete }: SubjectCardProps) {
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="rounded-xl"
                     onClick={() => onDelete(materia)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -75,7 +77,7 @@ export function SubjectCard({ materia, onEdit, onDelete }: SubjectCardProps) {
           </div>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="border-t border-border/35 bg-muted/25 pt-4 dark:border-border/45 dark:bg-muted/15">
         {materia.descripcion && (
           <p className="text-sm text-muted-foreground">{materia.descripcion}</p>
         )}

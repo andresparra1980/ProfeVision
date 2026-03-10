@@ -43,8 +43,8 @@ export function TierUsageStats() {
                       usage.tier.name === 'admin';
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader>
+    <Card className="overflow-hidden border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80">
+      <CardHeader className="pb-4">
         <CardTitle className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-purple-600 shrink-0" />
@@ -55,7 +55,7 @@ export function TierUsageStats() {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* AI Generations */}
-        <div>
+        <div className="rounded-2xl border border-border/35 bg-background/70 p-4 dark:border-border/45 dark:bg-zinc-900/75">
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
             <Zap className="h-4 w-4 text-amber-600" />
             {t('features.ai_generations')}
@@ -80,7 +80,7 @@ export function TierUsageStats() {
         </div>
 
         {/* Exam Scans */}
-        <div>
+        <div className="rounded-2xl border border-border/35 bg-background/70 p-4 dark:border-border/45 dark:bg-zinc-900/75">
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
             <ScanLine className="h-4 w-4 text-blue-600" />
             {t('features.scans')}
@@ -105,7 +105,7 @@ export function TierUsageStats() {
         </div>
 
         {/* Cycle Reset */}
-        <div className="pt-4 border-t">
+        <div className="rounded-2xl border border-border/35 bg-background/70 p-4 dark:border-border/45 dark:bg-zinc-900/75">
           <div className="flex items-center justify-between text-xs text-muted-foreground gap-2">
             <span className="flex items-center gap-1 shrink-0">
               <Calendar className="h-3 w-3" />

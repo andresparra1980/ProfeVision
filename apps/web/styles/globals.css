@@ -110,6 +110,22 @@
     border-radius: 1rem;
   }
 
+  .dashboard-ui [data-slot="card"] {
+    border-color: color-mix(in srgb, hsl(var(--foreground)) 7%, transparent);
+    background-image: linear-gradient(145deg, color-mix(in srgb, hsl(var(--card)) 92%, hsl(var(--background))) 0%, color-mix(in srgb, hsl(var(--muted)) 48%, hsl(var(--card))) 100%);
+    box-shadow: 0 26px 58px -36px rgba(15, 23, 42, 0.42);
+  }
+
+  .dark .dashboard-ui [data-slot="card"] {
+    border-color: color-mix(in srgb, hsl(var(--foreground)) 8%, transparent);
+    background-image: linear-gradient(145deg, color-mix(in srgb, hsl(var(--card)) 86%, hsl(var(--background))) 0%, color-mix(in srgb, hsl(var(--muted)) 56%, hsl(var(--card))) 100%);
+    box-shadow: 0 28px 62px -38px rgba(2, 6, 23, 0.68);
+  }
+
+  .dashboard-ui [data-slot="card-title"] {
+    letter-spacing: -0.01em;
+  }
+
   .dashboard-ui [data-slot="input"]:not(.rounded-full):not(.rounded-xl):not(.rounded-2xl):not([class*="rounded-["]),
   .dashboard-ui [data-slot="textarea"]:not(.rounded-full):not(.rounded-xl):not(.rounded-2xl):not([class*="rounded-["]) {
     border-radius: 0.875rem;

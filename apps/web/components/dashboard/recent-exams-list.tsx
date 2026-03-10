@@ -66,72 +66,30 @@ export function RecentExamsList() {
 
   // Función para obtener el badge con estilo rotado (copiado de ExamsTableMobile)
   const getStatusBadge = (status: string) => {
-    const baseStyle: React.CSSProperties = {
-      padding: "3px 8px",
-      fontSize: "12px",
-      fontWeight: "800",
-      letterSpacing: "0.025em",
-      transform: "rotate(-5deg)",
-      display: "inline-block",
-      position: "relative",
-      borderRadius: "3px",
-      textTransform: "uppercase" as const,
-    };
+    const baseClass = "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em]";
 
     switch (status) {
       case "borrador":
         return (
-          <span
-            style={{
-              ...baseStyle,
-              background: "color-mix(in srgb, var(--accent) 80%, transparent)",
-              color: "black",
-              boxShadow:
-                "inset 0 -2px 0 color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-            }}
-          >
+          <span className={`${baseClass} border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-900/30 dark:text-amber-300`}>
             {t('examStatus.borrador')}
           </span>
         );
       case "publicado":
         return (
-          <span
-            style={{
-              ...baseStyle,
-              background: "color-mix(in srgb, var(--primary) 80%, transparent)",
-              color: "black",
-              boxShadow:
-                "inset 0 -2px 0 color-mix(in srgb, var(--primary) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-            }}
-          >
+          <span className={`${baseClass} border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-900/30 dark:text-emerald-300`}>
             {t('examStatus.publicado')}
           </span>
         );
       case "archivado":
         return (
-          <span
-            style={{
-              ...baseStyle,
-              background: "color-mix(in srgb, var(--muted) 80%, transparent)",
-              color: "black",
-              boxShadow:
-                "inset 0 -2px 0 color-mix(in srgb, var(--muted) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-            }}
-          >
+          <span className={`${baseClass} border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200`}>
             {t('examStatus.archivado')}
           </span>
         );
       default:
         return (
-          <span
-            style={{
-              ...baseStyle,
-              background: "color-mix(in srgb, var(--muted) 80%, transparent)",
-              color: "black",
-              boxShadow:
-                "inset 0 -2px 0 color-mix(in srgb, var(--muted) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-            }}
-          >
+          <span className={`${baseClass} border-border bg-muted text-muted-foreground`}>
             {status}
           </span>
         );
@@ -219,7 +177,7 @@ export function RecentExamsList() {
         variant="outline"
         size="sm"
         onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/edit`)}
-        className="w-full justify-start"
+        className="w-full justify-start rounded-xl"
       >
         <Edit className="h-3.5 w-3.5 mr-2" />
         {t('actions.edit')}
@@ -230,7 +188,7 @@ export function RecentExamsList() {
             variant="outline"
             size="sm"
             onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/export`)}
-            className="w-full justify-start"
+            className="w-full justify-start rounded-xl"
           >
             <Printer className="h-3.5 w-3.5 mr-2" />
             {t('actions.exportAndPrint')}
@@ -239,7 +197,7 @@ export function RecentExamsList() {
             variant="outline"
             size="sm"
             onClick={() => router.push(`/${locale}/dashboard/exams/${examen.id}/results`)}
-            className="w-full justify-start"
+            className="w-full justify-start rounded-xl"
           >
             <BarChart3 className="h-3.5 w-3.5 mr-2" />
             {t('actions.viewResults')}
@@ -253,9 +211,9 @@ export function RecentExamsList() {
   const recentExams = stats.examenesRecientes.slice(0, 5);
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80">
       <CardHeader>
-        <CardTitle className="break-words">{t('recentExams')}</CardTitle>
+        <CardTitle className="break-words text-xl font-semibold tracking-tight">{t('recentExams')}</CardTitle>
       </CardHeader>
       <CardContent className="overflow-hidden">
         {/* Siempre mostrar en formato acordeón */}
@@ -264,12 +222,12 @@ export function RecentExamsList() {
             <AccordionItem
               value={examen.id}
               key={examen.id}
-              className="border rounded-md shadow-sm bg-card overflow-hidden"
+              className="overflow-hidden rounded-2xl border border-border/35 bg-background/75 shadow-sm dark:border-border/45 dark:bg-zinc-900/80"
             >
               <AccordionTrigger className="p-3 hover:no-underline [&>svg]:shrink-0">
                 <ExamHeader examen={examen} />
               </AccordionTrigger>
-              <AccordionContent className="p-3 border-t bg-muted/20 overflow-hidden">
+              <AccordionContent className="overflow-hidden border-t border-border/35 bg-muted/25 p-3 dark:border-border/45 dark:bg-muted/15">
                 <ExamActions examen={examen} />
               </AccordionContent>
             </AccordionItem>

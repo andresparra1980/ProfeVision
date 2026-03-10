@@ -120,7 +120,7 @@ function ExamCardContent({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
+              className="h-auto w-full justify-start rounded-xl px-2 py-2"
               onClick={() => {
                 router.push({
                   pathname: '/dashboard/exams/[id]/edit',
@@ -143,7 +143,7 @@ function ExamCardContent({
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start h-auto py-2 px-2 text-primary"
+                className="h-auto w-full justify-start rounded-xl px-2 py-2 text-primary"
                 onClick={() => onPublish(exam.id)}
               >
                 <Send className="mr-2 h-4 w-4" /> {t('actions.publish')}
@@ -161,7 +161,7 @@ function ExamCardContent({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-auto py-2 px-2 text-purple-600 dark:text-purple-400"
+              className="h-auto w-full justify-start rounded-xl px-2 py-2 text-purple-600 dark:text-purple-400"
               onClick={() => onStartSimilar(exam.id)}
             >
               <WandSparkles className="mr-2 h-4 w-4" /> {t('actions.createSimilarExam', { defaultValue: 'Create similar exam' })}
@@ -179,7 +179,7 @@ function ExamCardContent({
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start h-auto py-2 px-2"
+                className="h-auto w-full justify-start rounded-xl px-2 py-2"
                 disabled={exam.estado !== 'publicado' || !exam.examen_grupo || exam.examen_grupo.length === 0}
                 onClick={() => {
                   router.push({
@@ -205,7 +205,7 @@ function ExamCardContent({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
+              className="h-auto w-full justify-start rounded-xl px-2 py-2"
               onClick={() => {
                 router.push({
                   pathname: '/dashboard/exams/[id]/assign',
@@ -227,7 +227,7 @@ function ExamCardContent({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start h-auto py-2 px-2"
+              className="h-auto w-full justify-start rounded-xl px-2 py-2"
               onClick={() => {
                 router.push({
                   pathname: '/dashboard/exams/[id]/link-grade-component',
@@ -247,7 +247,7 @@ function ExamCardContent({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start h-auto py-2 px-2 text-red-500 dark:text-red-400"
+          className="h-auto w-full justify-start rounded-xl px-2 py-2 text-red-500 dark:text-red-400"
           onClick={() => onOpenDeleteDialog(exam.id)}
         >
           <Trash2 className="mr-2 h-4 w-4" /> {t('actions.delete')}
@@ -261,7 +261,7 @@ function ExamCardContent({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start h-auto py-2 px-2 text-primary font-semibold"
+                  className="h-auto w-full justify-start rounded-xl px-2 py-2 font-semibold text-primary"
                   disabled={!examsWithGrades.has(exam.id)}
                   onClick={() => {
                     router.push({
@@ -327,29 +327,12 @@ const isExamArchived = (exam: Exam): boolean => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getStatusBadge = (status: string, t: any, archived?: boolean) => {
-  const baseStyle: React.CSSProperties = {
-    padding: "3px 8px",
-    fontSize: "12px",
-    fontWeight: "800",
-    letterSpacing: "0.025em",
-    transform: "rotate(-5deg)",
-    display: "inline-block",
-    position: "relative",
-    borderRadius: "3px",
-    textTransform: "uppercase" as const,
-  };
+  const baseClass = "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em]";
 
   // If archived, show archived badge regardless of status
   if (archived) {
     return (
-      <span
-        style={{
-          ...baseStyle,
-          background: "var(--foreground)",
-          color: "var(--background)",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-        }}
-      >
+      <span className={`${baseClass} border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200`}>
         {t('status.archived')}
       </span>
     );
@@ -358,58 +341,25 @@ const getStatusBadge = (status: string, t: any, archived?: boolean) => {
   switch (status) {
     case "borrador":
       return (
-        <span
-          style={{
-            ...baseStyle,
-            background: "color-mix(in srgb, var(--accent) 80%, transparent)",
-            color: "black",
-            boxShadow:
-              "inset 0 -2px 0 color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
+        <span className={`${baseClass} border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-900/30 dark:text-amber-300`}>
           {t('status.draft')}
         </span>
       );
     case "publicado":
       return (
-        <span
-          style={{
-            ...baseStyle,
-            background: "color-mix(in srgb, var(--primary) 80%, transparent)",
-            color: "black",
-            boxShadow:
-              "inset 0 -2px 0 color-mix(in srgb, var(--primary) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
+        <span className={`${baseClass} border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-900/30 dark:text-emerald-300`}>
           {t('status.published')}
         </span>
       );
     case "cerrado":
       return (
-        <span
-          style={{
-            ...baseStyle,
-            background:
-              "color-mix(in srgb, var(--destructive) 80%, transparent)",
-            color: "black",
-            boxShadow:
-              "inset 0 -2px 0 color-mix(in srgb, var(--destructive) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
+        <span className={`${baseClass} border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/70 dark:bg-rose-900/30 dark:text-rose-300`}>
           {t('status.completed')}
         </span>
       );
     default:
       return (
-        <span
-          style={{
-            ...baseStyle,
-            background: "color-mix(in srgb, var(--muted) 80%, transparent)",
-            color: "black",
-            boxShadow:
-              "inset 0 -2px 0 color-mix(in srgb, var(--muted) 40%, transparent), 0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
+        <span className={`${baseClass} border-border bg-muted text-muted-foreground`}>
           {status}
         </span>
       );
@@ -553,7 +503,7 @@ export default function ExamsTableMobile({
         placeholder={t('table.search')}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full bg-card dark:bg-card placeholder:text-muted-foreground max-w-sm"
+        className="w-full max-w-sm bg-card dark:bg-card placeholder:text-muted-foreground"
       />
 
       {/* Checkbox for showing exams from archived groups */}
@@ -598,13 +548,13 @@ export default function ExamsTableMobile({
           {filteredExams.map((exam) => (
             <div
               key={exam.id}
-              className="h-fit overflow-hidden rounded-2xl border-2 bg-card shadow-sm"
+              className="h-fit overflow-hidden rounded-2xl border-2 border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80"
               style={getStatusBorderStyle(exam.estado)}
             >
               <div className="p-4">
                 <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </div>
-              <div className="p-4 border-t bg-muted/20">
+              <div className="border-t border-border/35 bg-muted/25 p-4 dark:border-border/45 dark:bg-muted/15">
                 <ExamCardContent
                   exam={exam}
                   router={router}
@@ -624,13 +574,13 @@ export default function ExamsTableMobile({
             <AccordionItem
               value={exam.id}
               key={exam.id}
-              className="h-fit overflow-hidden rounded-2xl border bg-card shadow-sm"
+              className="h-fit overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-card via-card to-muted/35 shadow-[0_26px_58px_-36px_rgba(15,23,42,0.42)] dark:border-border/50 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80"
               style={getStatusBorderStyle(exam.estado)}
             >
               <AccordionTrigger className="p-4 hover:no-underline">
                 <ExamCardHeader exam={exam} t={t} onTitleSave={handleTitleSave} />
               </AccordionTrigger>
-              <AccordionContent className="p-4 border-t bg-muted/20">
+              <AccordionContent className="border-t border-border/35 bg-muted/25 p-4 dark:border-border/45 dark:bg-muted/15">
                 <ExamCardContent
                   exam={exam}
                   router={router}
