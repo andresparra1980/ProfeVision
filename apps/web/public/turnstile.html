@@ -19,11 +19,38 @@
     <script>
       const params = new URLSearchParams(window.location.search);
       const siteKey = params.get('siteKey');
+      const locale = params.get('locale');
+      const theme = params.get('theme');
+
+      const localeMap = {
+        es: 'es',
+        en: 'en',
+        fr: 'fr',
+        'pt-BR': 'pt-BR'
+      };
+
+      function resolveLanguage(value) {
+        if (!value) {
+          return 'auto';
+        }
+
+        return localeMap[value] || 'auto';
+      }
+
+      function resolveTheme(value) {
+        if (value === 'light' || value === 'dark' || value === 'auto') {
+          return value;
+        }
+
+        return 'auto';
+      }
       
       function initTurnstile() {
         if (siteKey && typeof turnstile !== 'undefined') {
           turnstile.render('#turnstile-container', {
             sitekey: siteKey,
+            language: resolveLanguage(locale),
+            theme: resolveTheme(theme),
             callback: function(token) {
               if (window.ReactNativeWebView) {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'success', token: token }));
@@ -36,6 +63,13 @@
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'error', error: String(error) }));
               } else {
                 console.error('Error:', error);
+              }
+            },
+            'expired-callback': function() {
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'expired' }));
+              } else {
+                console.warn('Turnstile token expired');
               }
             }
           });
