@@ -48,7 +48,16 @@ describe('useExamResults', () => {
     },
   }
 
-  const mockPreguntasData = [{ orden: 10, habilitada: true }]
+  const mockPreguntasData = [{
+    id: 'preg-10',
+    orden: 10,
+    puntaje: '1',
+    habilitada: true,
+    opciones_respuesta: [
+      { id: 'opt-10-a', orden: 1, pregunta_id: 'preg-10', es_correcta: true },
+      { id: 'opt-10-b', orden: 2, pregunta_id: 'preg-10', es_correcta: false },
+    ],
+  }]
 
   const mockExamenGruposData = [
     { id: 'eg-1', grupo_id: 'grupo-1', grupos: { id: 'grupo-1', nombre: 'Grupo A' } },
@@ -171,14 +180,24 @@ describe('useExamResults', () => {
       expect(result.current.examDetails).toEqual(mockExamData)
       expect(result.current.totalPreguntas).toBe(10)
       expect(result.current.enabledQuestionOrders).toEqual([10])
+      expect(result.current.preguntasExamen).toEqual([
+        {
+          id: 'preg-10',
+          orden: 10,
+          puntaje: 1,
+          num_opciones: 2,
+          habilitada: true,
+          opciones_respuesta: mockPreguntasData[0].opciones_respuesta,
+        },
+      ])
     })
 
     it('filters disabled questions from enabledQuestionOrders', async () => {
       const examChain = createChainableMock({ data: mockExamData, error: null })
       const mixedPreguntasData = [
-        { orden: 1, habilitada: true },
-        { orden: 2, habilitada: false },
-        { orden: 3, habilitada: true },
+        { id: 'preg-1', orden: 1, puntaje: '1', habilitada: true, opciones_respuesta: [] },
+        { id: 'preg-2', orden: 2, puntaje: '1', habilitada: false, opciones_respuesta: [] },
+        { id: 'preg-3', orden: 3, puntaje: '1', habilitada: true, opciones_respuesta: [] },
       ]
       const preguntasChain = {
         select: vi.fn().mockReturnThis(),

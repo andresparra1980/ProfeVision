@@ -18,7 +18,8 @@ export function AnswerBubble({
   className
 }: AnswerBubbleProps) {
   return (
-    <div
+    <button
+      type="button"
       className={cn(
         'w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold',
         isSelected ? getAnswerBubbleStyle(letter) : 'bg-gray-200',
@@ -26,9 +27,11 @@ export function AnswerBubble({
         isDisabled && 'cursor-not-allowed',
         className
       )}
+      aria-label={letter ? `Option ${letter}` : 'Unselected option'}
+      disabled={isDisabled}
       onClick={!isDisabled ? onClick : undefined}
     >
       {isSelected ? letter : ''}
-    </div>
+    </button>
   );
 }

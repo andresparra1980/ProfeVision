@@ -4,14 +4,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslations } from 'next-intl';
 import { AnswerBubblesGrid } from '../shared/answer-bubbles-grid';
 import { ImageWithSignedUrl } from '../shared/image-with-signed-url';
-import type { ResultadoExamen, RespuestaEstudiante } from '../utils/types';
+import type { AnswerBubbleClickData, PreguntaExamen, ResultadoExamen } from '../utils/types';
 
 interface StudentDetailsDialogProps {
   open: boolean;
   onOpenChange: (_open: boolean) => void;
   resultado: ResultadoExamen | null;
   totalPreguntas: number;
-  onBubbleClick: (_respuesta: RespuestaEstudiante, _opcionOrden: number, _resultadoId: string, _opcionId: string) => void;
+  preguntas: PreguntaExamen[];
+  onBubbleClick: (_data: AnswerBubbleClickData) => void;
 }
 
 export function StudentDetailsDialog({
@@ -19,6 +20,7 @@ export function StudentDetailsDialog({
   onOpenChange,
   resultado,
   totalPreguntas,
+  preguntas,
   onBubbleClick
 }: StudentDetailsDialogProps) {
   const t = useTranslations('dashboard.exams.results');
@@ -55,13 +57,14 @@ export function StudentDetailsDialog({
                 </div>
 
                 <div className="flex items-center justify-center">
-                  <AnswerBubblesGrid
-                  respuestas={resultado.respuestas_estudiante}
-                  totalPreguntas={totalPreguntas}
-                  resultadoId={resultado.id}
-                  onBubbleClick={onBubbleClick}
-                  readonly={false}
-                  />
+                   <AnswerBubblesGrid
+                     respuestas={resultado.respuestas_estudiante}
+                     preguntas={preguntas}
+                     totalPreguntas={totalPreguntas}
+                     resultadoId={resultado.id}
+                     onBubbleClick={onBubbleClick}
+                     readonly={false}
+                   />
                 </div>
               </div>
             </TabsContent>

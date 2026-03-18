@@ -1,25 +1,43 @@
 import { cn } from '@/lib/utils';
 import { AnswerBubble } from './answer-bubble';
 import { getLetterFromNumber } from '../utils/answer-helpers';
-import type { RespuestaEstudiante } from '../utils/types';
+import type { AnswerBubbleClickData, PreguntaExamen, RespuestaEstudiante } from '../utils/types';
 
 interface AnswerBubblesGridProps {
   respuestas: RespuestaEstudiante[];
+  preguntas?: PreguntaExamen[];
   totalPreguntas: number;
   resultadoId?: string;
-  onBubbleClick?: (_respuesta: RespuestaEstudiante, _opcionOrden: number, _resultadoId: string, _opcionId: string) => void;
+  onBubbleClick?: (_data: AnswerBubbleClickData) => void;
   readonly?: boolean;
 }
 
 export function AnswerBubblesGrid({
   respuestas,
+  preguntas = [],
   totalPreguntas,
   resultadoId,
   onBubbleClick,
   readonly = false
 }: AnswerBubblesGridProps) {
-  const renderQuestion = (orden: number) => {
+  const questionDefinitions = preguntas.length > 0
+    ? preguntas
+    : Array.from({ length: totalPreguntas }, (_, i) => ({
+        id: `question-${i + 1}`,
+        orden: i + 1,
+        puntaje: 0,
+        num_opciones: 4,
+        habilitada: true,
+        opciones_respuesta: [],
+      } satisfies PreguntaExamen));
+
+  const firstColumnQuestions = questionDefinitions.slice(0, 20);
+  const secondColumnQuestions = questionDefinitions.slice(20);
+
+  const renderQuestion = (pregunta: PreguntaExamen) => {
+    const orden = pregunta.orden;
     const respuesta = respuestas.find(r => r.pregunta.orden === orden);
+    const questionData = respuesta?.pregunta ?? pregunta;
 
     if (respuesta) {
       return (
@@ -29,28 +47,34 @@ export function AnswerBubblesGrid({
         >
           <span className={cn(
             'text-xs font-medium font-mono min-w-[30px]',
-            !respuesta.pregunta.habilitada && 'line-through opacity-40'
+            !questionData.habilitada && 'line-through opacity-40'
           )}>
-            {respuesta.pregunta.orden}. 
+            {questionData.orden}.
           </span>
           <div className={cn(
             'flex items-center gap-1.5',
-            !respuesta.pregunta.habilitada && 'opacity-30'
+            !questionData.habilitada && 'opacity-30'
           )}>
-            {Array.from({ length: respuesta.pregunta.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
+            {Array.from({ length: questionData.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
               const letter = getLetterFromNumber(num);
               const isSelected = respuesta.opcion_respuesta.orden === num;
-              const opcion = respuesta.pregunta.opciones_respuesta.find(o => o.orden === num);
+              const opcion = questionData.opciones_respuesta.find(o => o.orden === num);
 
               return (
                 <AnswerBubble
                   key={`bubble-${respuesta.id}-${num}`}
                   letter={letter}
                   isSelected={isSelected}
-                  isDisabled={readonly || !respuesta.pregunta.habilitada}
+                  isDisabled={readonly || !questionData.habilitada || !opcion}
                   onClick={() => {
-                    if (!readonly && respuesta.pregunta.habilitada && opcion && resultadoId) {
-                      onBubbleClick?.(respuesta, num, resultadoId, opcion.id);
+                    if (!readonly && questionData.habilitada && opcion && resultadoId) {
+                      onBubbleClick?.({
+                        respuesta,
+                        pregunta: questionData,
+                        opcionId: opcion.id,
+                        opcionOrden: num,
+                        resultadoId,
+                      });
                     }
                   }}
                 />
@@ -60,7 +84,7 @@ export function AnswerBubblesGrid({
           <span className={cn(
             'text-xs',
             respuesta.es_correcta ? 'text-green-600' : 'text-red-600',
-            !respuesta.pregunta.habilitada && 'opacity-30'
+            !questionData.habilitada && 'opacity-30'
           )}>
             {respuesta.es_correcta ? '✓' : '✗'}
           </span>
@@ -70,22 +94,39 @@ export function AnswerBubblesGrid({
 
     // Question without answer
     return (
-      <div
-        key={`pregunta-sin-respuesta-${orden}`}
-        className="flex items-center"
-      >
-        <span className="text-xs font-medium font-mono min-w-[30px]">{orden}. </span>
-        <div className="flex items-center gap-1.5">
-          {[1, 2, 3, 4].map((num) => (
+      <div key={`pregunta-sin-respuesta-${orden}`} className="flex items-center">
+        <span className={cn(
+          'text-xs font-medium font-mono min-w-[30px]',
+          !questionData.habilitada && 'line-through opacity-40'
+        )}>
+          {orden}.
+        </span>
+        <div className={cn('flex items-center gap-1.5', !questionData.habilitada && 'opacity-30')}>
+          {Array.from({ length: questionData.num_opciones || 4 }, (_, i) => i + 1).map((num) => {
+            const letter = getLetterFromNumber(num);
+            const opcion = questionData.opciones_respuesta.find(o => o.orden === num);
+
+            return (
             <AnswerBubble
               key={`bubble-sin-respuesta-${orden}-${num}`}
-              letter=""
+              letter={letter}
               isSelected={false}
-              isDisabled={true}
+              isDisabled={readonly || !questionData.habilitada || !opcion}
+              onClick={() => {
+                if (!readonly && questionData.habilitada && opcion && resultadoId) {
+                  onBubbleClick?.({
+                    pregunta: questionData,
+                    opcionId: opcion.id,
+                    opcionOrden: num,
+                    resultadoId,
+                  });
+                }
+              }}
             />
-          ))}
+            );
+          })}
         </div>
-        <span className="text-xs text-red-600">✗</span>
+        <span className={cn('text-xs text-red-600', !questionData.habilitada && 'opacity-30')}>✗</span>
       </div>
     );
   };
@@ -95,7 +136,7 @@ export function AnswerBubblesGrid({
       <div className="flex gap-3 md:gap-6 items-start">
         <div className="space-y-1.5 flex-1 flex flex-col items-end">
           {/* First column: questions 1-20 */}
-          {Array.from({ length: Math.min(20, totalPreguntas) }, (_, i) => i + 1).map(renderQuestion)}
+          {firstColumnQuestions.map(renderQuestion)}
         </div>
         
         {/* Vertical separator */}
@@ -103,9 +144,7 @@ export function AnswerBubblesGrid({
         
         <div className="space-y-1.5 flex-1 flex flex-col items-start">
           {/* Second column: questions 21+ */}
-          {totalPreguntas > 20 &&
-            Array.from({ length: totalPreguntas - 20 }, (_, i) => i + 21).map(renderQuestion)
-          }
+          {secondColumnQuestions.map(renderQuestion)}
         </div>
       </div>
     </div>
