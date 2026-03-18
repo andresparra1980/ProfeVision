@@ -100,6 +100,7 @@ export default function ExamResultsPage() {
     todosEstudiantes,
     totalPreguntas,
     enabledQuestionOrders,
+    preguntasExamen,
     availableGroups,
     selectedGroupId,
     setResultados,
@@ -443,13 +444,14 @@ export default function ExamResultsPage() {
         onConfirm={handleConfirmUpdate}
       />
 
-      <StudentDetailsDialog
-        open={showDetailsDialog}
-        onOpenChange={setShowDetailsDialog}
-        resultado={selectedResultado}
-        totalPreguntas={totalPreguntas}
-        onBubbleClick={handleBubbleClick}
-      />
+        <StudentDetailsDialog
+          open={showDetailsDialog}
+          onOpenChange={setShowDetailsDialog}
+          resultado={selectedResultado}
+          totalPreguntas={totalPreguntas}
+          preguntas={preguntasExamen}
+          onBubbleClick={handleBubbleClick}
+        />
 
       <ManualGradeDialog
         open={showManualGradeDialog}

@@ -12,19 +12,22 @@ export interface OpcionRespuesta {
   es_correcta: boolean;
 }
 
+export interface PreguntaExamen {
+  id: string;
+  orden: number;
+  puntaje: number;
+  num_opciones: number;
+  habilitada: boolean;
+  opciones_respuesta: OpcionRespuesta[];
+}
+
 export interface RespuestaEstudiante {
   id: string;
   pregunta_id: string;
   opcion_id: string;
   es_correcta: boolean;
   puntaje_obtenido: number;
-  pregunta: {
-    id: string;
-    orden: number;
-    num_opciones: number;
-    habilitada: boolean;
-    opciones_respuesta: OpcionRespuesta[];
-  };
+  pregunta: PreguntaExamen;
   opcion_respuesta: {
     id: string;
     orden: number;
@@ -76,9 +79,20 @@ export interface ExamDetails {
 }
 
 export interface PendingUpdate {
-  respuestaId: string;
+  respuestaId?: string;
+  preguntaId: string;
   opcionId: string;
+  opcionOrden: number;
   resultadoId: string;
   preguntaOrden: number;
   nuevaLetra: string;
+  pregunta: PreguntaExamen;
+}
+
+export interface AnswerBubbleClickData {
+  respuesta?: RespuestaEstudiante;
+  pregunta: PreguntaExamen;
+  opcionId: string;
+  opcionOrden: number;
+  resultadoId: string;
 }

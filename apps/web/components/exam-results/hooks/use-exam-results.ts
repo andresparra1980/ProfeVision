@@ -9,7 +9,8 @@ import type {
   Estudiante,
   GrupoExamen,
   RespuestaEstudiante,
-  OpcionRespuesta
+  OpcionRespuesta,
+  PreguntaExamen
 } from '../utils/types';
 import { DEBUG } from '../utils/constants';
 
@@ -42,6 +43,7 @@ export function useExamResults(examId: string | string[]) {
   const [todosEstudiantes, setTodosEstudiantes] = useState<Estudiante[]>([]);
   const [totalPreguntas, setTotalPreguntas] = useState<number>(0);
   const [enabledQuestionOrders, setEnabledQuestionOrders] = useState<number[]>([]);
+  const [preguntasExamen, setPreguntasExamen] = useState<PreguntaExamen[]>([]);
   const [availableGroups, setAvailableGroups] = useState<GrupoExamen[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
@@ -80,13 +82,25 @@ export function useExamResults(examId: string | string[]) {
       // Obtener metadata de preguntas para numeración canónica
       const { data: preguntasData, error: preguntasError } = await supabase
         .from('preguntas')
-        .select('orden, habilitada')
+        .select(`
+          id,
+          orden,
+          puntaje,
+          habilitada,
+          opciones_respuesta(
+            id,
+            orden,
+            pregunta_id,
+            es_correcta
+          )
+        `)
         .eq('examen_id', examIdString)
         .order('orden', { ascending: true });
 
       if (preguntasError) {
         setTotalPreguntas(0);
         setEnabledQuestionOrders([]);
+        setPreguntasExamen([]);
 
         if (DEBUG) {
           logger.error('Error loading question metadata:', preguntasError);
@@ -96,7 +110,26 @@ export function useExamResults(examId: string | string[]) {
           description: t('loadingError'),
         });
       } else if (preguntasData && preguntasData.length > 0) {
-        const preguntas = preguntasData as Array<{ orden: number; habilitada: boolean }>;
+        const preguntas = (preguntasData as Array<{
+          id: string;
+          orden: number;
+          puntaje?: number | string;
+          habilitada: boolean;
+          opciones_respuesta?: OpcionRespuesta[];
+        }>).map((pregunta) => {
+          const opcionesRespuesta = (pregunta.opciones_respuesta as OpcionRespuesta[] | undefined) || [];
+
+          return {
+            id: pregunta.id,
+            orden: pregunta.orden,
+            puntaje: Number(pregunta.puntaje || 0),
+            num_opciones: opcionesRespuesta.length || 4,
+            habilitada: pregunta.habilitada,
+            opciones_respuesta: opcionesRespuesta,
+          } satisfies PreguntaExamen;
+        });
+
+        setPreguntasExamen(preguntas);
         const highestQuestionOrder = Math.max(...preguntas.map((pregunta) => pregunta.orden));
         setTotalPreguntas(highestQuestionOrder);
 
@@ -108,6 +141,7 @@ export function useExamResults(examId: string | string[]) {
       } else {
         setTotalPreguntas(0);
         setEnabledQuestionOrders([]);
+        setPreguntasExamen([]);
       }
 
       // Obtener todas las relaciones con grupos a través de examen_grupo
@@ -247,10 +281,12 @@ export function useExamResults(examId: string | string[]) {
             pregunta:preguntas!inner(
               id,
               orden,
+              puntaje,
               habilitada,
               opciones_respuesta(
                 id,
                 orden,
+                pregunta_id,
                 es_correcta
               )
             ),
@@ -326,6 +362,7 @@ export function useExamResults(examId: string | string[]) {
                       id: pregunta.id as string,
                       orden: pregunta.orden as number,
                       num_opciones: opcionesRespuesta?.length || 4,
+                      puntaje: Number(pregunta.puntaje || 0),
                       habilitada: pregunta.habilitada as boolean,
                       opciones_respuesta: opcionesRespuesta || []
                     },
@@ -387,6 +424,7 @@ export function useExamResults(examId: string | string[]) {
     todosEstudiantes,
     totalPreguntas,
     enabledQuestionOrders,
+    preguntasExamen,
     availableGroups,
     selectedGroupId,
     setResultados,

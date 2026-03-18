@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import type { RespuestaEstudiante, ResultadoExamen, PendingUpdate } from '../utils/types';
-import { OPTION_LETTERS } from '../utils/constants';
+import type { AnswerBubbleClickData, RespuestaEstudiante, ResultadoExamen, PendingUpdate } from '../utils/types';
 import { getLetterFromNumber } from '../utils/answer-helpers';
 
 interface UseAnswerUpdateProps {
@@ -17,25 +16,23 @@ export function useAnswerUpdate({ examId, setResultados, setSelectedResultado }:
   const [updatingAnswer, setUpdatingAnswer] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const handleBubbleClick = async (
-    respuesta: RespuestaEstudiante,
-    opcionOrden: number,
-    resultadoId: string,
-    opcionId: string
-  ) => {
+  const handleBubbleClick = ({ respuesta, pregunta, opcionOrden, resultadoId, opcionId }: AnswerBubbleClickData) => {
     // No permitir cambios si la pregunta está deshabilitada
-    if (!respuesta.pregunta.habilitada) return;
+    if (!pregunta.habilitada) return;
 
     // No permitir seleccionar la misma opción
-    if (respuesta.opcion_respuesta.orden === opcionOrden) return;
+    if (respuesta?.opcion_respuesta.orden === opcionOrden) return;
 
     // Preparar datos para el modal de confirmación
     setPendingUpdate({
-      respuestaId: respuesta.id,
+      respuestaId: respuesta?.id,
+      preguntaId: pregunta.id,
       opcionId,
+      opcionOrden,
       resultadoId,
-      preguntaOrden: respuesta.pregunta.orden,
-      nuevaLetra: getLetterFromNumber(opcionOrden)
+      preguntaOrden: pregunta.orden,
+      nuevaLetra: getLetterFromNumber(opcionOrden),
+      pregunta,
     });
 
     // Mostrar el modal de confirmación
@@ -57,6 +54,8 @@ export function useAnswerUpdate({ examId, setResultados, setSelectedResultado }:
         },
         body: JSON.stringify({
           respuestaId: pendingUpdate.respuestaId,
+          resultadoId: pendingUpdate.resultadoId,
+          preguntaId: pendingUpdate.preguntaId,
           opcionId: pendingUpdate.opcionId,
         }),
       });
@@ -67,29 +66,57 @@ export function useAnswerUpdate({ examId, setResultados, setSelectedResultado }:
       }
 
       const result = await response.json();
+      const selectedOption = pendingUpdate.pregunta.opciones_respuesta.find(
+        opcion => opcion.id === pendingUpdate.opcionId
+      );
 
       // Actualizar el estado local con la nueva información
       setResultados(prevResultados => {
         const updatedResultados = prevResultados.map(resultado => {
           if (resultado.id === pendingUpdate.resultadoId) {
+            const existingResponseIndex = resultado.respuestas_estudiante.findIndex(
+              respuesta => respuesta.pregunta_id === pendingUpdate.preguntaId
+            );
+
+            const nextResponse: RespuestaEstudiante = existingResponseIndex >= 0
+              ? {
+                  ...resultado.respuestas_estudiante[existingResponseIndex],
+                  id: result.respuestaId,
+                  opcion_id: pendingUpdate.opcionId,
+                  es_correcta: result.es_correcta,
+                  puntaje_obtenido: result.puntajeRespuesta,
+                  pregunta: pendingUpdate.pregunta,
+                  opcion_respuesta: {
+                    id: pendingUpdate.opcionId,
+                    orden: selectedOption?.orden || pendingUpdate.opcionOrden,
+                  },
+                }
+              : {
+                  id: result.respuestaId,
+                  pregunta_id: pendingUpdate.preguntaId,
+                  opcion_id: pendingUpdate.opcionId,
+                  es_correcta: result.es_correcta,
+                  puntaje_obtenido: result.puntajeRespuesta,
+                  pregunta: pendingUpdate.pregunta,
+                  opcion_respuesta: {
+                    id: pendingUpdate.opcionId,
+                    orden: selectedOption?.orden || pendingUpdate.opcionOrden,
+                  },
+                };
+
+            const respuestasEstudiante = existingResponseIndex >= 0
+              ? resultado.respuestas_estudiante.map((respuesta, index) =>
+                  index === existingResponseIndex ? nextResponse : respuesta
+                )
+              : [...resultado.respuestas_estudiante, nextResponse].sort(
+                  (a, b) => a.pregunta.orden - b.pregunta.orden
+                );
+
             const updatedResultado = {
               ...resultado,
               puntaje_obtenido: result.puntajeObtenido,
               porcentaje: result.porcentaje,
-              respuestas_estudiante: resultado.respuestas_estudiante.map(respuesta => {
-                if (respuesta.id === pendingUpdate.respuestaId) {
-                  return {
-                    ...respuesta,
-                    opcion_id: pendingUpdate.opcionId,
-                    es_correcta: result.es_correcta,
-                    opcion_respuesta: {
-                      ...respuesta.opcion_respuesta,
-                      orden: OPTION_LETTERS.indexOf(pendingUpdate.nuevaLetra) + 1
-                    }
-                  };
-                }
-                return respuesta;
-              })
+              respuestas_estudiante: respuestasEstudiante,
             };
 
             // Si este resultado es el que está seleccionado actualmente en el modal, actualizarlo también

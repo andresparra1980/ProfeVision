@@ -44,7 +44,7 @@ describe('QuestionAnalysisCard', () => {
           opcion_id: 'o1',
           es_correcta: true, // Q1: Correct
           puntaje_obtenido: 10,
-          pregunta: { id: 'p1', orden: 1, habilitada: true, num_opciones: 4, opciones_respuesta: [] },
+          pregunta: { id: 'p1', orden: 1, puntaje: 1, habilitada: true, num_opciones: 4, opciones_respuesta: [] },
           opcion_respuesta: { id: 'o1', orden: 1 }
         },
         {
@@ -53,7 +53,7 @@ describe('QuestionAnalysisCard', () => {
           opcion_id: 'o2',
           es_correcta: false, // Q2: Incorrect
           puntaje_obtenido: 0,
-          pregunta: { id: 'p2', orden: 2, habilitada: true, num_opciones: 4, opciones_respuesta: [] },
+          pregunta: { id: 'p2', orden: 2, puntaje: 1, habilitada: true, num_opciones: 4, opciones_respuesta: [] },
           opcion_respuesta: { id: 'o2', orden: 2 }
         }
       ]
@@ -76,7 +76,7 @@ describe('QuestionAnalysisCard', () => {
           opcion_id: 'o1',
           es_correcta: true, // Q1: Correct (100% total)
           puntaje_obtenido: 10,
-          pregunta: { id: 'p1', orden: 1, habilitada: true, num_opciones: 4, opciones_respuesta: [] },
+          pregunta: { id: 'p1', orden: 1, puntaje: 1, habilitada: true, num_opciones: 4, opciones_respuesta: [] },
           opcion_respuesta: { id: 'o1', orden: 1 }
         },
         {
@@ -85,7 +85,7 @@ describe('QuestionAnalysisCard', () => {
           opcion_id: 'o2',
           es_correcta: true, // Q2: Correct (50% total)
           puntaje_obtenido: 10,
-          pregunta: { id: 'p2', orden: 2, habilitada: true, num_opciones: 4, opciones_respuesta: [] },
+          pregunta: { id: 'p2', orden: 2, puntaje: 1, habilitada: true, num_opciones: 4, opciones_respuesta: [] },
           opcion_respuesta: { id: 'o2', orden: 2 }
         }
       ]
