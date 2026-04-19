@@ -266,7 +266,6 @@ function ExamCardContent({
                   variant="ghost"
                   size="sm"
                   className="h-auto w-full justify-start rounded-xl px-2 py-2 font-semibold text-primary"
-                  disabled={!examsWithGrades.has(exam.id)}
                   onClick={() => {
                     router.push({
                       pathname: '/dashboard/exams/[id]/results',
@@ -279,7 +278,7 @@ function ExamCardContent({
               </span>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs">
-              <p>{examsWithGrades.has(exam.id) ? t('tooltips.viewResults') : t('tooltips.noResults', { defaultValue: 'No hay resultados disponibles para este examen aún.' })}</p>
+              <p>{t('tooltips.viewResults')}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
